@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题库系统 (Tiku) 核心决策与边界法典 (The Codex)</title>
+    <style>
+        :root {
+            /* 烟草标准色调 */
+            --brand-main: #00904A;      /* YC/T 309-2009 标准绿 */
+            --brand-dark: #14532D;
+            --brand-light: #ECFDF5;
+            --brand-accent: #10B981;    /* 鲜艳辅助绿 */
+            --gold-accent: #F5A623;     /* 辅助黄 */
+            
+            /* 界面色彩 */
+            --bg-body: #F3F4F6;
+            --bg-surface: #FFFFFF;
+            --bg-sidebar: #111827;      /* 深色侧边栏 */
+            
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #9CA3AF;
+            --text-sidebar: #D1D5DB;
+            --text-sidebar-hover: #FFFFFF;
+            
+            --border-color: #E5E7EB;
+            --border-sidebar: #374151;
+            
+            --font-family: 'Noto Sans SC', 'Inter', -apple-system, sans-serif;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-sidebar);
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-sidebar);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px;
+            border-bottom: 1px solid var(--border-sidebar);
+        }
+
+        .sidebar-header h1 {
+            color: #FFFFFF;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .sidebar-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            display: block;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: var(--text-sidebar);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-sidebar-hover);
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--brand-main);
+        }
+
+        .nav-link span.num {
+            display: inline-block;
+            width: 24px;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            font-family: monospace;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 60px 80px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            margin-bottom: 60px;
+            max-width: 900px;
+        }
+
+        .content-header h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .content-header p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+        }
+
+        /* Section Layout */
+        .section-block {
+            max-width: 900px;
+            margin-bottom: 60px;
+            scroll-margin-top: 60px;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title .badge {
+            background: var(--brand-light);
+            color: var(--brand-main);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        /* Rule Cards */
+        .rule-card {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            display: flex;
+            gap: 20px;
+        }
+
+        .rule-card:hover {
+            box-shadow: 0 8px 16px -4px rgba(0, 144, 74, 0.1);
+            border-color: #A7F3D0; /* green-200 */
+        }
+
+        .rule-icon {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--brand-light);
+            color: var(--brand-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rule-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .rule-content {
+            flex: 1;
+        }
+
+        .rule-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rule-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .rule-desc strong {
+            color: var(--text-primary);
+        }
+
+        /* Tags */
+        .tag-critical {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #FEE2E2;
+            color: #DC2626;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-core {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #FEF3C7;
+            color: #D97706;
+            font-weight: 600;
+        }
+        
+        .tag-limit {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #E0E7FF;
+            color: #4338CA;
+            font-weight: 600;
+        }
+
+        /* Callout */
+        .callout {
+            background: var(--brand-light);
+            border-left: 4px solid var(--brand-main);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: var(--brand-dark);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border-sidebar); }
+            .nav-list { display: flex; overflow-x: auto; padding: 12px 24px; white-space: nowrap; }
+            .main-content { padding: 40px 24px; }
+            .content-header h2 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>规则法典</h1>
+            <p>Tiku SSOT Boundaries & Rules</p>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item"><a href="#auth" class="nav-link"><span class="num">01</span> 账号体系与会话基线</a></li>
+            <li class="nav-item"><a href="#org" class="nav-link"><span class="num">02</span> 授权流转与企业组织</a></li>
+            <li class="nav-item"><a href="#snapshot" class="nav-link"><span class="num">03</span> 内容快照与隔离机制</a></li>
+            <li class="nav-item"><a href="#paper" class="nav-link"><span class="num">04</span> 试卷发布与生命周期</a></li>
+            <li class="nav-item"><a href="#scoring" class="nav-link"><span class="num">05</span> 答题、结构与计分</a></li>
+            <li class="nav-item"><a href="#student" class="nav-link"><span class="num">06</span> 学员体验与交互流转</a></li>
+            <li class="nav-item"><a href="#ai" class="nav-link"><span class="num">07</span> AI 算力与模型规则</a></li>
+            <li class="nav-item"><a href="#rag" class="nav-link"><span class="num">08</span> 知识生态与 RAG 穿透</a></li>
+            <li class="nav-item"><a href="#admin" class="nav-link"><span class="num">09</span> 日志审计与后台红线</a></li>
+            <li class="nav-item"><a href="#limits" class="nav-link"><span class="num">10</span> 全局硬阈值与配额约束</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-header">
+            <h2>题库系统边界规则法典</h2>
+            <p>作为架构设计和业务实现的 <strong>Single Source of Truth (SSOT)</strong>。当遇到状态机流转、数据快照、或边缘异常引发的模糊判定时，必须严格遵守以下法则进行裁决，保证多端多态的数据强一致性。</p>
+        </div>
+
+        <!-- 01 账号体系与会话基线 -->
+        <section id="auth" class="section-block">
+            <h3 class="section-title"><span class="badge">01</span> 账号体系与会话基线</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">唯一标识与安全锁定机制 <span class="tag-core">Core</span></div>
+                    <div class="rule-desc">
+                        手机号是唯一登录标识，首期<strong>不可修改</strong>且不支持自助找回密码。全局仅允许<strong>单一活跃会话</strong>，新设备登录瞬间旧设备会话立即失效。<br><br>
+                        <strong>防爆破锁定边界</strong>：学员连续登录失败 3 次锁定 5 分钟；后台账号连续登录失败 5 次锁定 15 分钟。锁定期满自动解除，锁定行为仅阻断新登录，不影响已在线的活跃会话。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">员工账户批量入库机制</div>
+                    <div class="rule-desc">
+                        批量导入员工（Excel）采用“逐行处理”原则：遇到不存在的手机号即新建并绑定企业；遇到已存在且未绑定企业的，直接绑定企业（绝不覆盖原有密码和历史成绩）；遇到已绑定其他企业的则跳过并报出异常。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 02 授权流转与企业组织 -->
+        <section id="org" class="section-block">
+            <h3 class="section-title"><span class="badge">02</span> 授权流转与企业组织</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">多授权源并集原则</div>
+                    <div class="rule-desc">
+                        个人卡密授权和企业授权<strong>取并集</strong>。卡密一旦兑换不可撤销、不可换绑。企业授权首期不允许同专业/等级范围重叠，以规避额度占用冲突。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">授权失效硬阻断 <span class="tag-critical">Critical</span></div>
+                    <div class="rule-desc">
+                        授权自然到期、主动取消、或企业节点被停用时，立刻阻断相关内容访问。<strong>若学员正在进行该专业/等级相关的模拟考试，系统将立刻切断会话并保存终止状态（terminated）</strong>；练习则自动终止。账号被停用的处理机制同理。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">历史成绩企业快照法则 <span class="tag-core">Core</span></div>
+                    <div class="rule-desc">
+                        员工的作答记录永远属于个人，但有企业授权覆盖时记录当时的<strong>企业快照</strong>。员工调动或离职解绑企业后，历史记录的归属快照绝不篡改。
+                    </div>
+                    <div class="callout">
+                        离职限制：员工离职解绑后，如果没有对应的个人卡密授权，将无权查看在过去企业期间产生的所有报告。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03 内容快照与隔离机制 -->
+        <section id="snapshot" class="section-block">
+            <h3 class="section-title"><span class="badge">03</span> 内容快照与隔离机制</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">独立快照，互不干涉 <span class="tag-core">Core</span></div>
+                    <div class="rule-desc">
+                        题目加入草稿试卷时复制当时的母题快照。后续母题如果在题库中发生修改，<strong>草稿试卷内的版本绝不自动同步</strong>。同一母题可同时被多套草稿引用，各试卷的快照完全独立。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">试卷内局域修改权</div>
+                    <div class="rule-desc">
+                        草稿试卷内<strong>不允许修改</strong>题干、选项、客观题答案和解析（有误必须去修改母题然后重拉入卷）；但<strong>允许修改</strong>主观题的评分点及各点分值，此类调整仅对本试卷生效，绝不反向污染题库母题。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-content" style="padding-left: 52px; padding-top: 4px;">
+                    <div class="rule-title" style="font-size: 0.95rem;">特例：三维绑定与纯度约束 <span class="tag-critical">Critical</span></div>
+                    <div class="rule-desc" style="font-size: 0.9rem;">
+                        试卷存在极强的血统约束，单套试卷必须强制隶属于唯一的 <code>专业 + 等级 + 科目</code>（例如：专卖-中级-技能）。在组卷的全生命周期内，<strong>系统严禁出现理论题与技能题混装、跨级别跨专业混搭</strong>的越界行为。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 04 试卷发布与生命周期 -->
+        <section id="paper" class="section-block">
+            <h3 class="section-title"><span class="badge">04</span> 试卷发布与生命周期</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">母题与材料的级联锁定 <span class="tag-critical">Critical</span></div>
+                    <div class="rule-desc">
+                        一旦试卷发布，不仅整卷锁定不可修改（只能下架或复制为副本），其内部引用的所有题库母题、材料资源也会被即刻“<strong>级联锁定</strong>”。锁定后的母题/材料禁止编辑和删除，如有勘误只能停用旧题并创建新题。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">发布强校验屏障</div>
+                    <div class="rule-desc">
+                        发布动作必须通过严苛校验：所有计分题分值总和必须精确等于试卷总分；主观题各评分点分值累加必须等于该题满分；试卷结构中不得存在没有任何子题的空大题或空材料模块。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">数据粉碎禁区</div>
+                    <div class="rule-desc">
+                        已经发布或存在任何学生作答记录的试卷与题目，<strong>严禁物理删除</strong>，仅能停用或下架。原文件挂载附件（如用于对齐录入的原始 PDF/Word）不向学员展示，随试卷生命周期保留。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 05 答题、结构与计分 -->
+        <section id="scoring" class="section-block">
+            <h3 class="section-title"><span class="badge">05</span> 答题、结构与计分</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">题型与评分精度底线</div>
+                    <div class="rule-desc">
+                        系统首期支持的题型被严丝合缝地限定在 <strong>5 类标准题型</strong>（单选、多选、判断、填空、简答）。<br>
+                        全链路（试卷总分、单题满分、评分点分值、AI 打分反馈）必须精确支持到 <strong>0.5 分</strong>。主观题按评分点给分，各点可得部分分数，但合计绝不可超过该题满分。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">容器无分法则</div>
+                    <div class="rule-desc">
+                        大题/模块以及“材料题组”本身仅作为结构化展示容器，<strong>绝不允许单独设置分值</strong>，其显示分值完全由所挂载的底层子题目分值动态累加得出。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-content" style="padding-left: 52px; padding-top: 4px;">
+                    <div class="rule-title" style="font-size: 0.95rem;">特例：填空题双规模型</div>
+                    <div class="rule-desc" style="font-size: 0.9rem;">
+                        填空题计分方式（自动精确匹配 / AI语义评分）为母题固有属性，入卷后彻底固化不可篡改，确保同一题目在不同试卷中的评分口径不分裂。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 06 学员体验与交互流转 -->
+        <section id="student" class="section-block">
+            <h3 class="section-title"><span class="badge">06</span> 学员体验与交互流转</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">双模式流转闭环 <span class="tag-core">Core</span></div>
+                    <div class="rule-desc">
+                        <strong>练习模式</strong>：采用“逐题提交、即时揭晓对错与解析”交互机制。允许进度暂停，服务器最长保留 15 天进度。<br>
+                        <strong>模考模式</strong>：采用“全卷闭卷沉浸、交卷后统一判分揭晓”机制。考试期间无解析无提示，计时完全信任服务端无视前端篡改。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">弱网与断网韧性闭环</div>
+                    <div class="rule-desc">
+                        考试期间发生断网，前端做本地离线缓存；网络恢复一旦发现考试已超时被服务端自动交卷，本地暂存必须发起<strong>补交入账</strong>流程，若总分已结出则触发报告重算。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">下架连坐拦截机制</div>
+                    <div class="rule-desc">
+                        运营一旦在后台将试卷执行“下架”，所有目前正基于该卷进行中的练习与模拟考试将被立刻“<strong>就地终止</strong>”，进度封存后台不进成绩单，前端强行踢出考试界面。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-content" style="padding-left: 52px; padding-top: 4px;">
+                    <div class="rule-title" style="font-size: 0.95rem;">特例：错题本的客观孤岛</div>
+                    <div class="rule-desc" style="font-size: 0.9rem;">
+                        错题本规则极其明确：仅收录客观题（含精确匹配类填空题），主观题绝不入库。错题按题目 ID 维度绝对去重，无论错几次只保留最后一次答错记录。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 07 AI 算力与模型规则 -->
+        <section id="ai" class="section-block">
+            <h3 class="section-title"><span class="badge">07</span> AI 算力与模型规则</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">AI 提示不可剧透天条 <span class="tag-critical">Critical</span></div>
+                    <div class="rule-desc">
+                        练习模式下的主观题，用户点击 AI 提示时，大模型必须仅给出“<strong>改进方向和思路</strong>”，任何情况下不得直接吐露标准答案。主观题练习允许最多重答 1 次。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">评分固化与防恶意消耗幂等</div>
+                    <div class="rule-desc">
+                        交卷后，主观题 AI 评分只需成功调通一次，<strong>结果即刻持久化保存且不可复评</strong>。如果单题评分网络超时（首期限定 60秒），标记失败，允许学员手动点击重试，上限 3 次，超过上限锁定该题防止资源被恶意消耗。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">模型 Fallback 分流处理</div>
+                    <div class="rule-desc">
+                        客观题讲解及提示若主模型宕机，可<strong>自动平滑回退（Fallback）</strong>至备用模型；但主观题评分因必须保证全卷评分口径逻辑高度一致，主模型若挂掉<strong>绝不自动 Fallback 异构模型</strong>，直接阻断报出失败。
+                    </div>
+                </div>
+            </div>
+
+            <div class="rule-card">
+                <div class="rule-content" style="padding-left: 52px; padding-top: 4px;">
+                    <div class="rule-title" style="font-size: 0.95rem;">特例：综合学习建议生成时机</div>
+                    <div class="rule-desc" style="font-size: 0.9rem;">
+                        模拟考试分析报告中的“AI学习建议”只有在<strong>全卷所有主观题和客观题均评分成功完成后</strong>才会触发生成。如果主观题存在任何评分失败项，学习建议将挂起等待用户重试补齐。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 08 知识生态与 RAG 穿透 -->
+        <section id="rag" class="section-block">
+            <h3 class="section-title"><span class="badge">08</span> 知识生态与 RAG 穿透</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">RAG 数据穿透防火墙 <span class="tag-core">Core</span></div>
+                    <div class="rule-desc">
+                        向量检索深度绑定用户当前的有效专业/等级授权。即使用户刻意提问，若无该资料对应授权，RAG 返回零数据，<strong>彻底断绝借 AI 越权白嫖内部教材的可能</strong>。固定取 Top 3 切片投喂给大模型。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">诚实溯源不可欺骗 <span class="tag-critical">Critical</span></div>
+                    <div class="rule-desc">
+                        每次 RAG 检索必须返回 <code>evidence_status</code>（sufficient/weak/none）。在依据孱弱或无命中时，前端必须显式声明“依据不足”，<strong>AI 在此场景下绝对不允许自造伪造引用书名或章节路径</strong>。知识树节点只可停用与迁移，不可删除。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">Markdown 强制转码与异步重建</div>
+                    <div class="rule-desc">
+                        文档入库强制要求服务器从原档解析转为 Markdown 中间层供人工校对，不允许无本之木随意乱粘。Markdown发布后并非实时生效，必须经<strong>运营手动触发“重建向量”按钮</strong>方可编织入索引，重建期间旧向量不脱机持续服务。
+                    </div>
+                </div>
+            </div>
+
+            <div class="rule-card">
+                <div class="rule-content" style="padding-left: 52px; padding-top: 4px;">
+                    <div class="rule-title" style="font-size: 0.95rem;">特例：知识点自动推断并发异步处理</div>
+                    <div class="rule-desc" style="font-size: 0.9rem;">
+                        题目保存时后台触发 RAG 知识点推荐为<strong>异步任务，绝不阻塞题目的保存与发布流程</strong>。若在推荐完成前题目发生并发编辑，则丢弃旧推荐，以最新保存触发的推荐结果为准。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 09 日志审计与后台红线 -->
+        <section id="admin" class="section-block">
+            <h3 class="section-title"><span class="badge">09</span> 日志审计与后台红线</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">产品视窗双轨制隔离</div>
+                    <div class="rule-desc">
+                        尽管底层权限共库，但前端产品必须物理辟分为面向老师的“<strong>内容后台</strong>”与面向管理员的“<strong>运营后台</strong>”。后台账号和学员前端注册账号完全独立，手机号即便相同也互不相认互不相通。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">大模型配置权限绝对收口</div>
+                    <div class="rule-desc">
+                        AI 模型供应商（无绑特定厂商）的配置、切换与 API Key 凭证录入，全系统唯独“<strong>超级管理员</strong>”这一角色方有权限染指，运营管理员严禁触碰，密钥一律采用不可逆掩码遮蔽。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">关键写操作防抖互斥与永久日志</div>
+                    <div class="rule-desc">
+                        针对发布试卷、生成卡密、调整组织等核心操作，强制启用<strong>乐观锁/原子事务拦截高并发冲突</strong>。任何越权变更及所有的模型算力开销，全量连同（操作人、动作、目标、时间、IP、变动前后状态）刻入审计调用库，永不可擦除。
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 10 全局硬阈值与配额约束 -->
+        <section id="limits" class="section-block">
+            <h3 class="section-title"><span class="badge">10</span> 全局硬阈值与配额约束</h3>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">业务实体硬极限 <span class="tag-limit">Limit</span></div>
+                    <div class="rule-desc">
+                        <strong>员工导入</strong>：Excel单次批量导入硬上限为 500 条。<br>
+                        <strong>卡密生成</strong>：单次批处理硬上限为 100 张（默认8位大写数字字母组合）。<br>
+                        <strong>组织树深</strong>：系统支持的企业行政组织树最大允许 4 级（省-市-县-基层）。<br>
+                        <strong>知识树深</strong>：知识点树层级建议且最大允许为 5 级。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">时间与周期配额 <span class="tag-limit">Limit</span></div>
+                    <div class="rule-desc">
+                        <strong>考试时长</strong>：可配置范围严格框定为 10 分钟 至 300 分钟内（仅支持整数分钟）。<br>
+                        <strong>会话过期</strong>：学员端 Token 有效期默认 7 天；后台端安全策略收紧至 8 小时。
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rule-card">
+                <div class="rule-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg></div>
+                <div class="rule-content">
+                    <div class="rule-title">物理存储载荷底线 <span class="tag-limit">Limit</span></div>
+                    <div class="rule-desc">
+                        <strong>图片素材</strong>：单张最高 5MB（支持 JPG/PNG/GIF/WebP），单个富文本组件内建议不超过10张。<br>
+                        <strong>知识库文件</strong>：上传供转换的原始文件（DOCX/PPTX/PDF）体积上限死扣 50MB。<br>
+                        <strong>RAG向量切片</strong>：单块切片长度硬阈值框定在 500 Tokens（约800字符）以内以防召回污染。<br>
+                        <strong>字符上限</strong>：题干最高容纳 1万字；解析最高 1万字；材料正文可达最高 3万字（均含HTML标签）。
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Simple active nav state logic
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

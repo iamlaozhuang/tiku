@@ -1,0 +1,531 @@
+# 题库系统术语与枚举注册表
+# ============================
+# 本文件是项目命名的唯一机器可读数据源 (Single Source of Truth)。
+#
+# 用途：
+#   1. AI 上下文注入（AGENTS.md 引用本文件）
+#   2. 工程初始化时生成 TypeScript / Python 枚举常量
+#   3. 数据库迁移脚本校验
+#   4. API Schema 校验
+#   5. 人类可读文档（naming-conventions.md）的枚举部分可从本文件生成
+#
+# 维护规则：
+#   - 新增业务概念时，先在此文件注册，再写代码
+#   - 修改术语时，同步更新 AGENTS.md 和 naming-conventions.md
+#   - 禁止在代码中硬编码本文件未注册的枚举值
+
+# ============================================================
+# 一、术语表 (Glossary)
+# ============================================================
+# 每条术语包含：
+#   key:        代码中使用的英文标识（snake_case）
+#   chinese:    中文名称
+#   abbr:       允许的缩写（null 表示不允许缩写）
+#   scope:      适用层（db / api / code / all）
+#   notes:      冲突提示或使用说明
+
+glossary:
+
+  # --- 核心业务 ---
+  profession:
+    chinese: 专业
+    abbr: prof
+    scope: all
+    notes: 枚举值见 enums.profession
+
+  level:
+    chinese: 等级
+    abbr: null
+    scope: all
+    notes: 一级至五级，数值 1-5
+
+  subject:
+    chinese: 科目
+    abbr: subj
+    scope: all
+    notes: 前端类型建议用 ExamSubject 避免与通用 Subject 冲突
+
+  question:
+    chinese: 题目
+    abbr: q
+    scope: all
+    notes: 题库中的单道题
+
+  paper:
+    chinese: 试卷
+    abbr: null
+    scope: all
+
+  paper_asset:
+    chinese: 试卷原始文件
+    abbr: pa
+    scope: all
+    notes: 绑定在试卷上的原始 PDF/Word 附件
+
+  material:
+    chinese: 材料
+    abbr: mat
+    scope: all
+
+  paper_section:
+    chinese: 大题/模块
+    abbr: ps
+    scope: all
+    notes: 必须带 paper_ 前缀，避免与 HTML <section> 冲突。禁止用 section
+
+  question_group:
+    chinese: 材料题组
+    abbr: qg
+    scope: all
+
+  question_option:
+    chinese: 选项
+    abbr: qo
+    scope: all
+    notes: 必须带 question_ 前缀，避免与 UI 组件 Option 冲突。禁止用 option
+
+  scoring_point:
+    chinese: 评分点
+    abbr: sp
+    scope: all
+
+  knowledge_node:
+    chinese: 知识点
+    abbr: kn
+    scope: all
+
+  tag:
+    chinese: 标签
+    abbr: null
+    scope: all
+
+  analysis:
+    chinese: 解析（老师解析）
+    abbr: null
+    scope: all
+    notes: 区别于 ai_explanation（AI 讲解）
+
+  standard_answer:
+    chinese: 标准答案
+    abbr: sa
+    scope: all
+
+  # --- 用户与授权 ---
+  user:
+    chinese: 用户/账号
+    abbr: null
+    scope: all
+    notes: 统一账号实体，手机号为唯一标识
+
+  student:
+    chinese: 学员
+    abbr: null
+    scope: all
+
+  admin:
+    chinese: 管理员
+    abbr: null
+    scope: all
+
+  organization:
+    chinese: 企业/组织
+    abbr: org
+    scope: all
+
+  org_tier:
+    chinese: 企业层级
+    abbr: null
+    scope: all
+    notes: 枚举值见 enums.org_tier（province/city/district）
+
+  employee:
+    chinese: 员工
+    abbr: emp
+    scope: all
+
+  redeem_code:
+    chinese: 卡密
+    abbr: rc
+    scope: all
+
+  authorization:
+    chinese: 授权
+    abbr: auth
+    scope: all
+    notes: 禁止用 license，避免与软件许可证混淆
+
+  personal_auth:
+    chinese: 个人授权
+    abbr: null
+    scope: all
+
+  org_auth:
+    chinese: 企业授权
+    abbr: null
+    scope: all
+
+  contact_config:
+    chinese: 购买联系方式
+    abbr: null
+    scope: all
+
+  # --- 答题与考试 ---
+  practice:
+    chinese: 练习
+    abbr: prac
+    scope: all
+
+  mock_exam:
+    chinese: 模拟考试
+    abbr: mock
+    scope: all
+    notes: 缩写用 mock 而非 exam，为后续正式考试预留
+
+  answer_record:
+    chinese: 作答记录
+    abbr: ar
+    scope: all
+
+  exam_report:
+    chinese: 考试报告
+    abbr: null
+    scope: all
+
+  mistake_book:
+    chinese: 错题本
+    abbr: mb
+    scope: all
+
+  submit:
+    chinese: 交卷
+    abbr: null
+    scope: all
+    notes: 提交试卷动作
+
+  # --- AI 与知识库 ---
+  ai_scoring:
+    chinese: AI 评分
+    abbr: null
+    scope: all
+
+  ai_explanation:
+    chinese: AI 讲解
+    abbr: null
+    scope: all
+    notes: 区别于 analysis（老师解析）
+
+  ai_hint:
+    chinese: AI 提示
+    abbr: null
+    scope: all
+
+  kn_recommendation:
+    chinese: 知识点推荐
+    abbr: null
+    scope: all
+
+  model_provider:
+    chinese: 模型供应商
+    abbr: mp
+    scope: all
+
+  model_config:
+    chinese: 模型配置
+    abbr: mc
+    scope: all
+
+  prompt_template:
+    chinese: Prompt 模板
+    abbr: pt
+    scope: all
+
+  resource:
+    chinese: 资源
+    abbr: res
+    scope: all
+
+  knowledge_base:
+    chinese: 知识库
+    abbr: kb
+    scope: all
+
+  embedding:
+    chinese: 向量
+    abbr: emb
+    scope: all
+
+  chunk:
+    chinese: 检索片段
+    abbr: null
+    scope: all
+
+  citation:
+    chinese: 引用来源
+    abbr: null
+    scope: all
+
+  evidence_status:
+    chinese: 命中状态
+    abbr: null
+    scope: all
+
+  learning_suggestion:
+    chinese: 学习建议
+    abbr: null
+    scope: all
+
+  # --- 系统 ---
+  audit_log:
+    chinese: 审计日志
+    abbr: null
+    scope: all
+
+  ai_call_log:
+    chinese: AI 调用日志
+    abbr: null
+    scope: all
+
+  snapshot:
+    chinese: 快照
+    abbr: snap
+    scope: all
+
+  session:
+    chinese: 会话
+    abbr: null
+    scope: all
+
+  paper_type:
+    chinese: 试卷类型
+    abbr: null
+    scope: all
+
+  user_type:
+    chinese: 用户类型
+    abbr: null
+    scope: all
+
+  auth_scope_type:
+    chinese: 授权范围类型
+    abbr: null
+    scope: all
+
+  paper_attachment_usage:
+    chinese: 试卷附件用途
+    abbr: null
+    scope: all
+
+  exam_mode:
+    chinese: 作答模式
+    abbr: null
+    scope: all
+
+  ai_call_status:
+    chinese: AI 调用状态
+    abbr: null
+    scope: all
+
+
+# ============================================================
+# 二、枚举注册表 (Enums)
+# ============================================================
+# 每个枚举包含：
+#   db_column:  数据库字段名
+#   values:     允许的枚举值列表，每个值包含 key 和 chinese
+
+enums:
+
+  profession:
+    db_column: profession
+    values:
+      - { key: monopoly,   chinese: 专卖 }
+      - { key: marketing,  chinese: 营销 }
+      - { key: logistics,  chinese: 物流 }
+
+  subject:
+    db_column: subject
+    values:
+      - { key: theory, chinese: 理论 }
+      - { key: skill,  chinese: 技能 }
+
+  question_type:
+    db_column: question_type
+    values:
+      - { key: single_choice,  chinese: 单选题 }
+      - { key: multi_choice,   chinese: 多选题 }
+      - { key: true_false,     chinese: 判断题 }
+      - { key: fill_blank,     chinese: 填空题 }
+      - { key: short_answer,   chinese: 简答题 }
+      # 二期规划范围
+      # - { key: case_analysis,  chinese: 案例分析题 }
+      # - { key: calculation,    chinese: 计算题 }
+
+  paper_status:
+    db_column: paper_status
+    values:
+      - { key: draft,     chinese: 草稿 }
+      - { key: published, chinese: 已发布 }
+      - { key: archived,  chinese: 已下架 }
+
+  question_status:
+    db_column: question_status
+    values:
+      - { key: available, chinese: 可用 }
+      - { key: disabled,  chinese: 停用 }
+
+  material_status:
+    db_column: material_status
+    values:
+      - { key: available, chinese: 可用 }
+      - { key: disabled,  chinese: 停用 }
+
+  multi_choice_rule:
+    db_column: multi_choice_rule
+    values:
+      - { key: all_correct_only, chinese: 全对得分 }
+      - { key: partial_credit,   chinese: 漏选部分得分 }
+
+  scoring_method:
+    db_column: scoring_method
+    values:
+      - { key: auto_match,  chinese: 自动精确匹配 }
+      - { key: ai_scoring,  chinese: AI 评分 }
+
+  auth_source:
+    db_column: auth_source
+    values:
+      - { key: personal,     chinese: 个人卡密 }
+      - { key: organization, chinese: 企业授权 }
+
+  auth_status:
+    db_column: auth_status
+    values:
+      - { key: active,    chinese: 有效 }
+      - { key: expired,   chinese: 已过期 }
+      - { key: cancelled, chinese: 已取消 }
+
+  redeem_code_status:
+    db_column: redeem_code_status
+    values:
+      - { key: unused,  chinese: 未使用 }
+      - { key: used,    chinese: 已使用 }
+      - { key: expired, chinese: 已过期 }
+
+  exam_status:
+    db_column: exam_status
+    values:
+      - { key: in_progress,      chinese: 进行中 }
+      - { key: scoring,          chinese: 评分中 }
+      - { key: scoring_partial_failed, chinese: 评分部分/全部失败 }
+      - { key: completed,        chinese: 已完成 }
+      - { key: terminated,       chinese: 已终止 }
+
+  resource_type:
+    db_column: resource_type
+    values:
+      - { key: textbook,      chinese: 教材 }
+      - { key: courseware,     chinese: 课件 }
+      - { key: knowledge_doc,  chinese: 知识点文档 }
+      - { key: lecture_note,   chinese: 讲稿 }
+      - { key: other,          chinese: 其他 }
+
+  resource_status:
+    db_column: resource_status
+    values:
+      - { key: uploaded,          chinese: 已上传 }
+      - { key: converting,        chinese: 转换中 }
+      - { key: conversion_failed, chinese: 转换失败 }
+      - { key: draft,             chinese: 草稿 }
+      - { key: published,         chinese: 已发布 }
+      - { key: indexing,          chinese: 索引中 }
+      - { key: index_failed,      chinese: 索引失败 }
+      - { key: rag_ready,         chinese: RAG 可用 }
+      - { key: disabled,          chinese: 已停用 }
+
+  kn_status:
+    db_column: kn_status
+    values:
+      - { key: active,   chinese: 启用 }
+      - { key: disabled, chinese: 停用 }
+
+  org_status:
+    db_column: org_status
+    values:
+      - { key: active,   chinese: 启用 }
+      - { key: disabled, chinese: 停用 }
+
+  org_tier:
+    db_column: org_tier
+    values:
+      - { key: province, chinese: 省级 }
+      - { key: city,     chinese: 地市 }
+      - { key: district, chinese: 区县 }
+      - { key: station,  chinese: 基层 }
+
+  user_status:
+    db_column: user_status
+    values:
+      - { key: active,   chinese: 正常 }
+      - { key: disabled, chinese: 停用 }
+
+  admin_role:
+    db_column: admin_role
+    values:
+      - { key: super_admin,   chinese: 超级管理员 }
+      - { key: ops_admin,     chinese: 运营管理员 }
+      - { key: content_admin, chinese: 内容老师 }
+
+  evidence_status:
+    db_column: evidence_status
+    values:
+      - { key: sufficient, chinese: 依据充足 }
+      - { key: weak,       chinese: 依据薄弱 }
+      - { key: none,       chinese: 无依据 }
+
+  ai_func_type:
+    db_column: ai_func_type
+    values:
+      - { key: scoring,           chinese: 主观题评分 }
+      - { key: explanation,       chinese: 客观题讲解 }
+      - { key: hint,              chinese: 主观题提示 }
+      - { key: kn_recommendation, chinese: 知识点推荐 }
+      - { key: learning_suggestion, chinese: 综合学习建议 }
+
+  paper_type:
+    db_column: paper_type
+    values:
+      - { key: past_paper, chinese: 真题 }
+      - { key: mock_paper, chinese: 模拟题 }
+
+  user_type:
+    db_column: user_type
+    values:
+      - { key: personal, chinese: 个人 }
+      - { key: employee, chinese: 企业员工 }
+
+  auth_scope_type:
+    db_column: auth_scope_type
+    values:
+      - { key: current_and_descendants, chinese: 本企业及下级 }
+      - { key: specified_nodes,         chinese: 指定企业列表 }
+
+  paper_attachment_usage:
+    db_column: usage_type
+    values:
+      - { key: paper_source,    chinese: 试卷原档 }
+      - { key: answer_analysis, chinese: 答案解析 }
+      - { key: answer_sheet,    chinese: 答题卡 }
+      - { key: other,           chinese: 其他 }
+
+  exam_mode:
+    db_column: exam_mode
+    values:
+      - { key: practice,  chinese: 练习模式 }
+      - { key: mock_exam, chinese: 模拟考试模式 }
+
+  ai_call_status:
+    db_column: call_status
+    values:
+      - { key: success, chinese: 成功 }
+      - { key: failed,  chinese: 失败 }
+

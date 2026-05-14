@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题库系统 (Tiku) MVP 需求与设计总览</title>
+    <style>
+        :root {
+            /* 烟草绿色系 - 品牌与语义 */
+            --green-50: #ECFDF5;
+            --green-100: #D1FAE5;
+            --green-500: #10B981; /* 语义成功色 */
+            --green-700: #00904A; /* 品牌主色 */
+            --green-800: #166534;
+            --green-900: #14532D;
+            
+            /* 辅助与状态色 */
+            --gold-500: #F5A623; /* 烟草辅助黄 */
+            --gold-600: #D97706;
+            --red-500: #EF4444;
+            --blue-500: #3B82F6;
+            
+            /* 中性色基调 */
+            --surface: #FFFFFF;
+            --background: #F9FAFB;
+            --border: #E5E7EB;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #9CA3AF;
+            
+            /* 字体栈 */
+            --font-main: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+            
+            /* 动效 */
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Hero Header */
+        .hero {
+            background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 100%);
+            color: white;
+            padding: 80px 20px 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1.5" fill="rgba(255,255,255,0.06)"/></svg>') repeat;
+            opacity: 0.8;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: -50px auto 60px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 20;
+        }
+
+        /* Section Styling */
+        .section-header {
+            margin: 60px 0 30px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .section-header .line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Grid & Cards */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 24px -8px rgba(0, 144, 74, 0.12);
+            border-color: var(--green-100);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--green-50);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--green-700);
+        }
+        
+        .card-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 1.5;
+        }
+
+        .card h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .feature-list li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: var(--green-500);
+            font-weight: bold;
+        }
+
+        /* Emphasis Box */
+        .emphasis-box {
+            background: var(--green-50);
+            border: 1px solid var(--green-100);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: var(--green-900);
+        }
+
+        .emphasis-box strong {
+            color: var(--green-700);
+        }
+
+        /* Rule List Layout (SSOT) */
+        .rules-wrapper {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .rule-row {
+            display: flex;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+            transition: background-color 0.2s;
+        }
+
+        .rule-row:hover {
+            background-color: var(--green-50);
+        }
+
+        .rule-row:last-child {
+            border-bottom: none;
+        }
+
+        .rule-number {
+            width: 32px;
+            height: 32px;
+            background: var(--green-100);
+            color: var(--green-700);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .rule-content {
+            flex: 1;
+            padding-top: 4px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .rule-content strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Tags for Out of Scope */
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 24px;
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px dashed var(--border);
+        }
+
+        .tag {
+            padding: 8px 16px;
+            background: #F3F4F6;
+            color: var(--text-secondary);
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { padding: 60px 20px; }
+            .hero h1 { font-size: 2rem; }
+            .container { margin-top: -30px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .rule-row { flex-direction: column; }
+            .rule-number { margin-bottom: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">PHASE 1 : MVP</div>
+            <h1>题库系统 (Tiku) MVP 需求与设计总览</h1>
+            <p>面向烟草行业职业技能鉴定、竞赛备考与培训训练。首期不构建大平台，优先跑通"内容管理、授权访问、练习考试、AI/RAG"的可用核心闭环。</p>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- 核心业务模块 -->
+        <div class="section-header">
+            <h2>核心业务域</h2>
+            <div class="line"></div>
+        </div>
+
+        <div class="grid-2">
+            <!-- 用户体系与授权 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <h3>01. 用户体系与授权</h3>
+                </div>
+                <ul class="feature-list">
+                    <li><strong>唯一账号</strong>：手机号为唯一标识，首期不支持自助修改手机号或密码。</li>
+                    <li><strong>企业与个人融合</strong>：个人卡密（兑换即绑定不可撤销）与企业授权（通过所在组织树推导）取并集。</li>
+                    <li><strong>组织解耦</strong>：企业树（物理行政层级）与授权记录（购买/分配权益）分离。</li>
+                    <li><strong>授权失效即断</strong>：授权到期/取消或企业停用时，进行中的考试和练习会话会立刻终止并阻断。</li>
+                </ul>
+            </div>
+
+            <!-- 内容管理 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <h3>02. 题库、试卷与内容</h3>
+                </div>
+                <ul class="feature-list">
+                    <li><strong>题库优先策略</strong>：先维护母题，再组装成试卷。材料资源作为独立实体。</li>
+                    <li><strong>发布即锁定</strong>：母题或材料一旦被已发布试卷引用即被锁定不可修改。试卷发布后不可修改，仅能下架。</li>
+                    <li><strong>草稿快照隔离</strong>：草稿试卷内的题目快照不随母题修改而自动更新。</li>
+                    <li><strong>评分机制</strong>：主观题评分点分值允许试卷级局部调整；填空题分精确匹配与 AI 评分两种模式。</li>
+                </ul>
+            </div>
+
+            <!-- 学员端体验 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3>03. 学员端答题与体验</h3>
+                </div>
+                <ul class="feature-list">
+                    <li><strong>Mobile-first 设计</strong>：响应式设计，完美适配移动设备（含表格横向滚动），预留微信小程序兼容性。</li>
+                    <li><strong>练习模式</strong>：单题反馈，支持进度保存（保留15天），主观题提交后可触发 AI 提示重答（限1次）。</li>
+                    <li><strong>模拟考试模式</strong>：全程无提示，后端掌控倒计时。弱网/断网自动缓存补交；交卷后异步评分并生成全景分析报告。</li>
+                    <li><strong>错题本</strong>：客观题答错自动归档，主观题不进错题本。</li>
+                </ul>
+            </div>
+
+            <!-- AI 评分与讲解 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3>04. AI 评分与讲解</h3>
+                </div>
+                <ul class="feature-list">
+                    <li><strong>主观题评分</strong>：自动按 0.5 分精度评分。交卷后异步进行，失败支持用户手动重试。成功结果持久化不复评。</li>
+                    <li><strong>AI 提示约束</strong>：练习模式下 AI 仅提供改进方向和思路，绝不直接剧透标准答案。</li>
+                    <li><strong>多模型 Fallback</strong>：客观题讲解/提示支持主备模型回退。主观题评分为了分数一致性，不支持自动 fallback，由用户重试。</li>
+                    <li><strong>综合学习建议</strong>：模拟考试评分完成后，AI 基于错题与知识点薄弱项自动生成总结建议。</li>
+                </ul>
+            </div>
+
+            <!-- RAG 与知识库 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    </div>
+                    <h3>05. RAG 与知识点库</h3>
+                </div>
+                <ul class="feature-list">
+                    <li><strong>权限隔离</strong>：RAG 检索严格校验用户的有效专业/等级授权，无授权无法命中对应的私域文档。</li>
+                    <li><strong>Markdown 转码机制</strong>：支持 DOCX/PPTX 等上传后强制转换为标准 Markdown 后发布，再手动触发向量重建。</li>
+                    <li><strong>诚实溯源</strong>：引入 <code>evidence_status</code>，如未命中（weak/none），AI 绝不伪造出处，并在前端明示“依据不足”。</li>
+                    <li><strong>AI 知识点推荐</strong>：录题时自动进行异步知识点打标推荐，辅助老师构建体系。</li>
+                </ul>
+            </div>
+
+            <!-- 后台运营 -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3>06. 后台管理与全链路日志</h3>
+                </div>
+                <ul class="feature-list">
+                    <li><strong>Desktop-first 区分</strong>：按业务场景物理划分为“内容后台”与“运营后台”，共用账号但菜单隔离。</li>
+                    <li><strong>核心日志全记录</strong>：强制启用审计日志（追踪数据增删改及授权变动）和 AI 调用日志（追踪 Tokens 消耗、耗时与 RAG 质量）。</li>
+                    <li><strong>模型供应商配置</strong>：大模型配置高度收口，仅超级管理员可动态修改 Endpoint 与 API Keys。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 核心业务规则 SSOT -->
+        <div class="section-header">
+            <h2>关键数据一致性规则 (SSOT)</h2>
+            <div class="line"></div>
+        </div>
+        <div class="rules-wrapper">
+            <div class="rule-row">
+                <div class="rule-number">01</div>
+                <div class="rule-content">
+                    <strong>授权并集与实时熔断</strong>
+                    学员拥有多条个人与企业授权时，访问权限取并集。企业节点一旦被后台停用，对应员工正进行的该企业授权相关的模拟考试与练习会被立即终止，进度封存。
+                </div>
+            </div>
+            <div class="rule-row">
+                <div class="rule-number">02</div>
+                <div class="rule-content">
+                    <strong>发布内容绝对锁定机制</strong>
+                    已发布的试卷不可修改、不可删除，只允许下架。试卷引用的题库母题、关联的材料，只要被任意一篇“已发布试卷”引用，即同步锁定。如有勘误，只能通过复制新题或下架原卷的方式处理。
+                </div>
+            </div>
+            <div class="rule-row">
+                <div class="rule-content">
+                    <div style="display: flex; gap: 20px;">
+                        <div class="rule-number">03</div>
+                        <div style="flex:1">
+                            <strong>员工调动的历史快照隔离</strong>
+                            员工在企业间的调动或解绑不影响其自身账号有效性。新的考试成绩归属新企业，但历史报告保留作答当时的“企业快照”。离职解绑后，员工若无对应的个人卡密，将无权查看过去企业授权期间的考试报告。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="rule-row">
+                <div class="rule-number">04</div>
+                <div class="rule-content">
+                    <strong>报告快照永久固化</strong>
+                    交卷生成的考试报告必须采用“深拷贝快照”方式存储。后续题库试卷中的题干、选项、解析甚至知识点发生修改，决不影响既有历史成绩单的展示结果，确保考试严肃性。
+                </div>
+            </div>
+        </div>
+
+        <!-- MVP 明确不做范围 -->
+        <div class="section-header">
+            <h2>首期明确排除范围 (Out of Scope)</h2>
+            <div class="line"></div>
+        </div>
+        <div class="tag-cloud">
+            <span class="tag">在线支付通道 (首期仅卡密)</span>
+            <span class="tag">企业管理员端 SaaS 后台</span>
+            <span class="tag">找回密码与自主换绑手机号</span>
+            <span class="tag">PDF/Word AI 一键导入试卷</span>
+            <span class="tag">复杂审核流控制</span>
+            <span class="tag">在线视频/课程播放进度管理</span>
+            <span class="tag">全自动生成整套试卷 (AI 组卷)</span>
+            <span class="tag">专项分类/智能刷题入口</span>
+            <span class="tag">排行榜/正式通过线认证</span>
+            <span class="tag">BI 数据看板</span>
+            <span class="tag">多模型计费与学员 Token 余额限制</span>
+            <span class="tag">管理后台的移动端适配</span>
+        </div>
+
+    </main>
+
+    <footer style="text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem; margin-top: 40px;">
+        <p>&copy; 2026 Tiku MVP Project. Designed under YC/T 309-2009 Standards.</p>
+    </footer>
+
+</body>
+</html>

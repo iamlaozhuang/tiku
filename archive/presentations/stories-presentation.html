@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题库系统 (Tiku) 用户故事全景蓝图 (User Stories)</title>
+    <style>
+        :root {
+            --brand-main: #00904A;
+            --brand-dark: #14532D;
+            --brand-light: #ECFDF5;
+            --brand-accent: #10B981;
+            --bg-body: #F3F4F6;
+            --bg-surface: #FFFFFF;
+            --bg-sidebar: #111827;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --text-muted: #9CA3AF;
+            --text-sidebar: #D1D5DB;
+            --text-sidebar-hover: #FFFFFF;
+            --border-color: #E5E7EB;
+            --border-sidebar: #374151;
+            --p0-bg: #FEE2E2; --p0-text: #DC2626;
+            --p1-bg: #FEF3C7; --p1-text: #D97706;
+            --p2-bg: #E0E7FF; --p2-text: #4338CA;
+            --font-family: 'Noto Sans SC', 'Inter', -apple-system, sans-serif;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+        body { font-family: var(--font-family); background-color: var(--bg-body); color: var(--text-primary); line-height: 1.6; display: flex; min-height: 100vh; }
+        .sidebar { width: 300px; background-color: var(--bg-sidebar); flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid var(--border-sidebar); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 32px 24px; border-bottom: 1px solid var(--border-sidebar); }
+        .sidebar-header h1 { color: #FFFFFF; font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+        .sidebar-header p { color: var(--text-muted); font-size: 0.85rem; }
+        .nav-list { list-style: none; padding: 24px 0; }
+        .nav-link { display: flex; align-items: center; padding: 12px 24px; color: var(--text-sidebar); text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: var(--transition); border-left: 4px solid transparent; }
+        .nav-link:hover, .nav-link.active { color: var(--text-sidebar-hover); background-color: rgba(255, 255, 255, 0.05); border-left-color: var(--brand-main); }
+        .nav-link span.num { display: inline-block; width: 36px; font-size: 0.8rem; opacity: 0.6; font-family: monospace; font-weight: 700; }
+        .main-content { flex: 1; padding: 60px 80px; overflow-y: auto; }
+        .content-header { margin-bottom: 50px; max-width: 1000px; }
+        .content-header h2 { font-size: 2.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; letter-spacing: -0.02em; }
+        .content-header p { font-size: 1.1rem; color: var(--text-secondary); }
+        .epic-section { max-width: 1000px; margin-bottom: 60px; scroll-margin-top: 60px; }
+        .epic-title { font-size: 1.8rem; font-weight: 800; color: var(--brand-dark); padding-bottom: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .us-card { background: var(--bg-surface); border-radius: 12px; padding: 24px 32px; margin-bottom: 24px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03); transition: var(--transition); position: relative; overflow: hidden; }
+        .us-card:hover { box-shadow: 0 10px 25px -5px rgba(0, 144, 74, 0.1); border-color: #A7F3D0; }
+        .us-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background-color: var(--brand-main); opacity: 0; transition: var(--transition); }
+        .us-card:hover::before { opacity: 1; }
+        .us-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .us-title-group { display: flex; align-items: center; gap: 12px; }
+        .us-id { font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--text-muted); background: var(--bg-body); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .us-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+        .us-priority { font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.5px; }
+        .priority-p0 { background-color: var(--p0-bg); color: var(--p0-text); }
+        .priority-p1 { background-color: var(--p1-bg); color: var(--p1-text); }
+        .priority-p2 { background-color: var(--p2-bg); color: var(--p2-text); }
+        .us-persona { font-size: 1.05rem; color: var(--text-primary); background: var(--brand-light); padding: 16px 20px; border-radius: 8px; margin-bottom: 24px; border-left: 3px solid var(--brand-accent); line-height: 1.6; }
+        .us-persona strong { color: var(--brand-dark); }
+        .us-section-title { font-size: 0.95rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 20px; display: flex; align-items: center; gap: 8px; }
+        .ac-list, .ec-list, .br-list, .dep-list { list-style: none; padding-left: 0; }
+        .ac-list li, .ec-list li, .br-list li, .dep-list li { position: relative; padding-left: 28px; margin-bottom: 8px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; }
+        .ac-list li::before { content: ''; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2310B981'%3E%3Cpath fill-rule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clip-rule='evenodd'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
+        .ec-list li::before { content: ''; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23F5A623'%3E%3Cpath fill-rule='evenodd' d='M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z' clip-rule='evenodd'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
+        .br-list li::before, .dep-list li::before { content: ''; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%233B82F6'%3E%3Cpath fill-rule='evenodd' d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z' clip-rule='evenodd'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
+        @media (max-width: 1024px) { body { flex-direction: column; } .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border-sidebar); } .nav-list { display: flex; overflow-x: auto; padding: 12px 24px; white-space: nowrap; } .main-content { padding: 40px 24px; } .us-card { padding: 20px; } .us-header { flex-direction: column; gap: 12px; } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1>用户故事蓝图</h1>
+            <p>Tiku MVP User Stories (All 64)</p>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item"><a href="#epic-01" class="nav-link"><span class="num">EP01</span> 用户体系与授权</a></li>
+            <li class="nav-item"><a href="#epic-02" class="nav-link"><span class="num">EP02</span> 题库与内容管理</a></li>
+            <li class="nav-item"><a href="#epic-03" class="nav-link"><span class="num">EP03</span> 学员端答题与体验</a></li>
+            <li class="nav-item"><a href="#epic-04" class="nav-link"><span class="num">EP04</span> AI评分与讲解</a></li>
+            <li class="nav-item"><a href="#epic-05" class="nav-link"><span class="num">EP05</span> RAG与知识库</a></li>
+            <li class="nav-item"><a href="#epic-06" class="nav-link"><span class="num">EP06</span> 后台运营与日志</a></li>
+
+        </ul>
+    </aside>
+    <main class="main-content">
+        <div class="content-header">
+            <h2>敏捷开发用户故事全集 (64个完整用例)</h2>
+            <p>包含全部6大业务域、64个验收标准齐全的颗粒化User Story，作为开发与测试人员的首选准则。</p>
+        </div>
+        <section id="epic-01" class="epic-section">
+            <h3 class="epic-title">Epic 01: 用户体系与授权</h3>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-01</span>
+                        <h4 class="us-title">个人用户注册</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>个人用户，<strong>我想要</strong>使用手机号注册账号，<strong>以便</strong>后续兑换卡密并使用系统。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>提供手机号、密码、姓名完成注册。</li>
+                    <li>密码最少 8 位，须包含字母和数字。</li>
+                    <li>同一手机号不能重复注册。</li>
+                    <li>注册成功后进入卡密兑换页。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-02</span>
+                        <h4 class="us-title">用户登录与会话管理</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>用户，<strong>我想要</strong>使用手机号和密码登录，<strong>以便</strong>访问我的授权内容。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>手机号 + 密码登录成功后签发 Token，有效期 7 天（后端可配置）。</li>
+                    <li>同一账号仅允许一个活跃会话，新设备登录时旧设备会话立即失效。</li>
+                    <li>旧设备下次请求时返回登录失效提示。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>连续登录失败 3 次后账号锁定 5 分钟，锁定期满自动解除。</li>
+                    <li>锁定不影响已有授权和数据。锁定只阻止新登录，不影响已有活跃会话。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-03</span>
+                        <h4 class="us-title">企业员工账号创建（单个）</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>在运营后台创建企业员工账号，<strong>以便</strong>员工可以使用企业授权。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>输入手机号、姓名、初始密码，绑定企业组织节点。</li>
+                    <li>同一时间一个员工只能绑定一个企业。</li>
+                    <li>手机号已存在且未绑定企业时，将现有账号绑定当前企业。</li>
+                    <li>手机号已绑定其他企业时，拒绝创建并提示。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-04</span>
+                        <h4 class="us-title">企业员工批量导入</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>通过 Excel 批量导入员工账号，<strong>以便</strong>快速完成大量员工入库。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>支持 .xlsx 上传。必填：手机号、姓名。可选：初始密码。</li>
+                    <li>未填密码时系统生成默认密码（手机号后 6 位 + 固定后缀）。</li>
+                    <li>单次上限 500 条。</li>
+                    <li>按行逐条处理：不存在→新建；已存在未绑定→绑定；已绑定其他企业→跳过；格式错误→跳过。</li>
+                    <li>导入完成后显示结果摘要（新建 N / 绑定 N / 跳过 N + 原因）。</li>
+                    <li>导入记录审计日志。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-05</span>
+                        <h4 class="us-title">密码重置</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>在后台重置用户密码，<strong>以便</strong>帮助忘记密码的用户恢复登录。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>运营后台可选择用户并重置密码。</li>
+                    <li>重置后不强制首次登录修改密码。</li>
+                    <li>重置操作记录审计日志。</li>
+                </ul>
+                <div class="us-section-title">业务规则 (Business Rules)</div>
+                <ul class="br-list">
+                    <li>用户自助修改密码、找回密码首期不做。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-06</span>
+                        <h4 class="us-title">停用/启用用户账号</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>停用/启用学员账号，<strong>以便</strong>管控用户登录权限。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>停用后用户不能登录。</li>
+                    <li>停用时该账号所有活跃会话立即失效。</li>
+                    <li>数据、授权、作答记录、报告、AI 日志保留。</li>
+                    <li>可重新启用。</li>
+                    <li>停用/启用记录审计日志。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>停用时用户正在模拟考试中，系统自动保存作答并终止，记录状态为 `terminated`。</li>
+                    <li>用户刷新时提示"账号已被停用，请联系管理员"。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-07</span>
+                        <h4 class="us-title">卡密兑换</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>个人用户，<strong>我想要</strong>输入卡密兑换授权，<strong>以便</strong>获得对应专业/等级的内容访问权。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>输入卡密后兑换成功，授权从当天开始计算。</li>
+                    <li>兑换不区分大小写，自动去除前后空格。</li>
+                    <li>兑换成功后卡密状态变为已使用，不可撤销。</li>
+                    <li>错误提示区分：卡密不存在 / 已使用 / 已过兑换截止日。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>允许同一用户兑换多张同专业/等级卡密，多条授权独立存在，有效期取并集（最晚到期日为准）。</li>
+                    <li>企业员工也可兑换个人卡密，获得个人授权。个人授权和企业授权并存。</li>
+                    <li>卡密兑换在数据库层做原子操作，防止并发兑换同一张卡密。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-08</span>
+                        <h4 class="us-title">卡密批量生成</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>批量生成卡密，<strong>以便</strong>分发给个人用户。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>同批次指定专业、等级、授权时长、可选兑换截止日。</li>
+                    <li>一次最多 100 张。</li>
+                    <li>卡密 8 位大写字母数字，避免易混淆字符。</li>
+                    <li>后台列表可查看明文卡密，支持搜索和按状态筛选。</li>
+                    <li>卡密状态：`unused` / `used` / `expired`（未使用且兑换截止日已过）。截止日判定以服务器时间（UTC+8）为准。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-09</span>
+                        <h4 class="us-title">卡密购买引导页</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>无授权用户，<strong>我想要</strong>在登录后看到卡密兑换页和购买联系方式，<strong>以便</strong>获取卡密。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>卡密输入框 + 兑换按钮 + 已兑换授权列表。</li>
+                    <li>显示运营配置的联系电话、微信号、二维码、文案。</li>
+                    <li>购买联系方式由运营后台配置，修改记录审计日志。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-10</span>
+                        <h4 class="us-title">企业组织树管理</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>维护企业组织树，<strong>以便</strong>按真实组织结构管理企业客户。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>支持新增、编辑、停用/启用企业节点。</li>
+                    <li>组织树最多 4 级（省-地市-县区-基层）。</li>
+                    <li>禁止循环引用，保存时校验。</li>
+                    <li>停用时可选择是否级联下级。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>企业停用时，如有员工正在考试/练习，系统自动保存并终止，状态为 `terminated`。即使员工同时拥有个人卡密授权覆盖同一专业/等级，基于企业授权的考试/练习仍立即终止。终止后员工可基于个人授权重新开始。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-11</span>
+                        <h4 class="us-title">企业授权管理</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>创建和管理企业授权记录，<strong>以便</strong>控制企业员工的内容访问权。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>指定购买主体、授权范围（本企业及下级 / 指定企业列表）、专业、等级、账号额度、有效期。</li>
+                    <li>不允许同专业/等级的授权范围重叠到同一企业节点。</li>
+                    <li>授权状态：有效 / 已过期 / 已取消。</li>
+                    <li>支持取消企业授权。取消后受影响员工立即失去访问权。</li>
+                    <li>额度校验在数据库层做原子操作，防止并发超额。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-01-10</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-12</span>
+                        <h4 class="us-title">员工调动与离职</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>变更员工企业归属或解绑，<strong>以便</strong>处理员工调动和离职。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>员工企业可变更，历史学习记录保持作答时企业快照。</li>
+                    <li>解绑后不再继承企业授权，不默认停用账号。</li>
+                    <li>有个人卡密授权的用户解绑后仍可作为个人用户登录。</li>
+                    <li>额度释放和占用在同一事务中原子执行，防止并发超额。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-13</span>
+                        <h4 class="us-title">授权访问与展示</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>看到所有有效授权对应的内容，<strong>以便</strong>进行学习和练习。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>个人授权和企业授权取并集，任一有效即可访问。</li>
+                    <li>我的授权列表分别显示来源、专业/等级、有效期、状态。</li>
+                    <li>授权失效后前端隐藏对应内容，后台数据保留。</li>
+                    <li>重新获得授权后恢复可见。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>授权失效时（自然到期、主动取消、企业停用），如用户正在对应专业/等级的练习或模拟考试中，立即终止（详见 US-03-04 EC-1 和 US-03-05 EC-2）。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-01-14</span>
+                        <h4 class="us-title">授权到期站内提示</h4>
+                    </div>
+                    <span class="us-priority priority-p2">P2</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>在授权即将到期时收到站内提示，<strong>以便</strong>及时续费。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>授权到期前 15 天开始提示。</li>
+                    <li>首页顶部通知条展示。</li>
+                    <li>同一条授权每天最多展示一次，关闭后当天不再重复。</li>
+                    <li>个人授权引导兑换新卡密，企业授权引导联系企业/客服。</li>
+                </ul>
+            </div>
+        </section>
+        <section id="epic-02" class="epic-section">
+            <h3 class="epic-title">Epic 02: 题库、试卷与内容管理</h3>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-01</span>
+                        <h4 class="us-title">题目新建与编辑</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>通过结构化表单创建和编辑题目，<strong>以便</strong>建设题库。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>按题型引导表单，包含完整基础字段（题干、选项、答案、解析、评分点等共 16 项，见 02 §2.5）。</li>
+                    <li>富文本编辑题干、解析、标准答案，支持插入图片（≤5MB，JPG/PNG/GIF/WebP）和基础表格。</li>
+                    <li>题干/解析上限 10000 字符，超出时编辑器提示。</li>
+                    <li>可关联材料、知识点、标签。</li>
+                    <li>未被已发布试卷引用的题目可编辑；已锁定题目不能编辑只能复制新题。</li>
+                    <li>判断题内部存储为正确/错误，学员端显示为 A.正确 / B.错误。后台录入 A/B 时系统自动转换。</li>
+                    <li>主观题评分点含"描述"和"分值"两个字段。评分点分值允许 0.5 粒度。首期不做关键词、可接受表述、扣分规则。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-02</span>
+                        <h4 class="us-title">题目停用与复制</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>停用不再使用的题目或复制已锁定题目，<strong>以便</strong>管控题库质量。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>停用后不能被新试卷选择，已发布试卷中的题目不受影响。</li>
+                    <li>已锁定题目可停用。</li>
+                    <li>可复制题目为新题（独立编辑）。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-03</span>
+                        <h4 class="us-title">题库搜索与筛选</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>按多维度搜索筛选题目，<strong>以便</strong>快速定位和组卷。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>支持按专业、等级、科目、题型、状态筛选。</li>
+                    <li>支持按关键字搜索题干文本。</li>
+                    <li>支持按标签和知识点筛选。</li>
+                    <li>组卷选题时默认按当前试卷专业/等级/科目预筛选。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-04</span>
+                        <h4 class="us-title">多选题评分规则配置</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>为多选题配置评分规则，<strong>以便</strong>灵活控制评分策略。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>支持"全对得分"和"漏选部分得分，错选不得分"两种规则。</li>
+                    <li>默认为"全对得分"。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-05</span>
+                        <h4 class="us-title">填空题评分方式配置</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>选择填空题的评分方式，<strong>以便</strong>区分自动匹配和 AI 评分。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>支持"自动匹配"和"AI 评分"两种方式。</li>
+                    <li>切换时保留已录入答案，不自动清除。</li>
+                    <li>切换为 AI 评分时需补充评分点；切换为自动匹配时需确认标准答案。</li>
+                    <li>报告中标明评分方式。</li>
+                    <li>填空题评分方式是母题固有属性，题目加入试卷后不允许在试卷中切换。如需变更，回题库修改母题或复制新题。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-06</span>
+                        <h4 class="us-title">材料库管理</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>独立维护材料库，<strong>以便</strong>材料可跨题目和试卷复用。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>材料含标题、正文（富文本，上限 30000 字符）、表格、图片、专业/等级/科目、状态。</li>
+                    <li>材料仅在被已发布试卷引用后才锁定。锁定后需复制新材料编辑。</li>
+                    <li>可停用旧材料。停用后已发布试卷中引用该材料的题目不受影响（使用快照），学员端正常展示。</li>
+                    <li>可查看材料被引用的题目和试卷列表。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-07</span>
+                        <h4 class="us-title">草稿试卷组卷</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>从题库选题组卷，<strong>以便</strong>构建完整试卷。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>题目加入草稿时复制当时快照（含关联材料）。</li>
+                    <li>草稿内可调整题目顺序、设置分值、调整大题/题组归属。</li>
+                    <li>不允许编辑题干、选项、客观题答案和解析。</li>
+                    <li>主观题评分点可按试卷调整（增删改），不反向修改母题。</li>
+                    <li>大题分值由子题自动累加。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-02-01, US-02-06</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-08</span>
+                        <h4 class="us-title">试卷发布与强校验</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>发布试卷时系统自动校验完整性，<strong>以便</strong>确保试卷质量。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>每道题必须设置分值。</li>
+                    <li>总分 = 所有计分子题分值合计。</li>
+                    <li>主观题评分点分值合计 = 该题满分。</li>
+                    <li>多空填空每空分值合计 = 题目总分。</li>
+                    <li>至少 1 道计分题目。不额外限制最少主观题/客观题数量，也不设置最少总分限制。</li>
+                    <li>不允许空大题/模块。</li>
+                    <li>校验不通过不能发布。</li>
+                    <li>发布后内容锁定，被引用的母题锁定。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-09</span>
+                        <h4 class="us-title">试卷下架与删除</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>下架或删除不再使用的试卷，<strong>以便</strong>管控内容。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>下架后学员不能新开始练习/考试。</li>
+                    <li>未完成的练习/考试立即终止。</li>
+                    <li>已完成的历史报告保留可查看。</li>
+                    <li>草稿且无引用可删除；已发布/有记录的试卷不可删除。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-10</span>
+                        <h4 class="us-title">复制试卷</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>复制已发布/已下架试卷为新草稿，<strong>以便</strong>快速创建相似试卷。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>复制时题干、选项、客观题答案和解析从母题重新取当前版本快照；主观题评分点从源试卷中复制（保留源试卷中调整过的评分点描述和分值），而非从母题重新取默认评分点。</li>
+                    <li>名称追加"（副本）"后缀，状态为草稿。</li>
+                    <li>源试卷中已停用母题仍纳入，标记提示"该题目已停用"。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-02-11</span>
+                        <h4 class="us-title">试卷元数据与原始文件</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>维护试卷元数据并绑定原始文件，<strong>以便</strong>追溯和管理。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>基础字段（名称、专业、等级、科目、总分）必填，时长可选（10~300 分钟）。</li>
+                    <li>扩展元数据（类型、年份、来源等）可选。</li>
+                    <li>可绑定多个原始文件（试卷/材料/答案/解析等），标记用途。</li>
+                    <li>学员端不展示原始文件。</li>
+                </ul>
+            </div>
+        </section>
+        <section id="epic-03" class="epic-section">
+            <h3 class="epic-title">Epic 03: 学员端答题与体验</h3>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-01</span>
+                        <h4 class="us-title">学员首页</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>登录后看到授权范围内的试卷列表，<strong>以便</strong>选择学习内容。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>展示有效授权范围内的专业/等级。</li>
+                    <li>多个授权时记住上次选择，首次引导选择。</li>
+                    <li>当前专业/等级下按科目（理论/技能）分组显示试卷。</li>
+                    <li>每套试卷提供"练习"和"模拟考试"两个入口。</li>
+                    <li>试卷列表按发布时间倒序。</li>
+                    <li>无授权用户直接进入卡密兑换页。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-02</span>
+                        <h4 class="us-title">理论卷练习</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>逐题练习理论卷并获得即时反馈，<strong>以便</strong>巩固知识。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>一题一页，答完即显示对错、正确答案、解析。</li>
+                    <li>答错自动进入错题本 + 自动生成 AI 讲解。</li>
+                    <li>答对时显示答案/解析 + "需要讲解"按钮。</li>
+                    <li>客观题不允许再答一次。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-04-04（AI 讲解）</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-03</span>
+                        <h4 class="us-title">技能卷练习</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>按材料题组练习技能卷，<strong>以便</strong>提升实操能力。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>按材料题组/大题一组一页，材料置顶可折叠/展开。</li>
+                    <li>主观题提交后可选"AI 提示并重答一次"或"直接查看评分"。</li>
+                    <li>最多 1 次重答，第二次后给出最终评分。</li>
+                    <li>主观题不进入错题本。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-04-01（AI 评分），US-04-04（AI 提示）</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-04</span>
+                        <h4 class="us-title">练习暂停与继续</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>离开后再继续上次练习进度，<strong>以便</strong>灵活安排学习时间。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>离开后已保存进度保留 15 天。</li>
+                    <li>再次进入同一试卷练习时提示"继续/重新开始"。</li>
+                    <li>超过 15 天进度自动清除。</li>
+                    <li>同一试卷同一用户只能有一个活跃练习进度。多设备场景下，后打开的设备加载服务端已有进度。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>练习中授权到期时立即终止，系统自动保存已完成的作答到后台（用于 AI 日志追溯），学员端不可查看。提示“授权已失效”。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-05</span>
+                        <h4 class="us-title">模拟考试答题</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>进行整卷模拟考试，<strong>以便</strong>模拟真实考试场景。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>作答中不显示对错、答案、解析。</li>
+                    <li>有时长时服务器倒计时，超时自动交卷。</li>
+                    <li>无时长时用户手动交卷。</li>
+                    <li>退出后可回到同一场考试，剩余时间按服务器计算。</li>
+                    <li>允许对同一试卷多次模拟考试。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>交卷时弹窗提示未答题数量。</li>
+                    <li>模拟考试中授权失效时（自然到期、主动取消、企业停用），系统自动保存当前作答并立即终止，记录状态为 `terminated`。已终止考试不触发评分、不生成报告。</li>
+                    <li>断网时前端本地暂存，恢复后自动提交。首期不设补提交时间窗口，恢复网络后立即补提交。</li>
+                    <li>考试会话绑定用户而非设备，切换设备登录后新设备可继续同一场考试。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-06</span>
+                        <h4 class="us-title">模拟考试作答保存</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>切题时自动保存作答，<strong>以便</strong>避免数据丢失。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>切题时自动保存当前题作答到服务器。</li>
+                    <li>主观题提供"保存答案"按钮。</li>
+                    <li>保存失败时提示"保存失败，请检查网络"并自动重试。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-07</span>
+                        <h4 class="us-title">模拟考试报告</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>查看模拟考试的分析报告，<strong>以便</strong>了解薄弱点。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>报告含总分、客观题/主观题得分、用时、每题详情。</li>
+                    <li>按题型、大题/模块、知识点统计得分率。</li>
+                    <li>AI 学习建议作为报告一部分保存在快照中。生成失败时标记“学习建议生成失败”，不影响报告分数。用户可手动点击“重新生成学习建议”。</li>
+                    <li>报告快照保存，后续内容变化不影响历史报告。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-04-01</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-08</span>
+                        <h4 class="us-title">模拟考试记录列表</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>查看历史模拟考试记录，<strong>以便</strong>回顾和跟踪。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>状态：`scoring` / `scoring_partial_failed` / `completed` / `terminated`（试卷下架、授权失效、账号停用等原因中断）。已终止考试不触发评分、不生成报告。</li>
+                    <li>默认按考试开始时间倒序。</li>
+                    <li>支持按试卷名称搜索、按状态筛选。</li>
+                    <li>列表显示试卷名称、科目、考试时间、得分（已完成时）、状态。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-03-09</span>
+                        <h4 class="us-title">客观题错题本</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>通过错题本回顾答错的客观题，<strong>以便</strong>针对性复习。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>答错自动加入（单选/多选/判断/自动匹配填空）。</li>
+                    <li>支持手动收藏、移除、标记已掌握。</li>
+                    <li>按题目维度去重，记录答错次数。</li>
+                    <li>"已掌握"后再次答错自动恢复为"未掌握"。</li>
+                    <li>支持按题型、来源、掌握状态筛选。</li>
+                    <li>支持从错题本触发 AI 讲解。</li>
+                    <li>授权失效后隐藏，重新授权后恢复。</li>
+                    <li>错题本首期不设容量上限，列表分页展示。</li>
+                    <li>错题本中的题目如母题被停用，仍保留显示并标记“该题目已停用”，仍可查看和触发 AI 讲解。</li>
+                </ul>
+            </div>
+        </section>
+        <section id="epic-04" class="epic-section">
+            <h3 class="epic-title">Epic 04: AI 评分与讲解</h3>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-01</span>
+                        <h4 class="us-title">主观题 AI 评分（模拟考试）</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>交卷后系统自动评分主观题，<strong>以便</strong>获得完整考试成绩。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>整卷交卷后统一异步评分所有主观题。</li>
+                    <li>评分结果保存：总分、每个评分点（是否命中 + 实得分 + AI 原因）、总评语、改进建议、引用来源、模型信息、Prompt 版本。</li>
+                    <li>同一次作答只触发一次评分，成功结果固定不重复调用。</li>
+                    <li>界面标识"AI 自动评分"。</li>
+                    <li>未作答主观题直接 0 分，不调用 AI。</li>
+                </ul>
+                <div class="us-section-title">业务规则 (Business Rules)</div>
+                <ul class="br-list">
+                    <li>首期不支持人工改分、申诉、复核。</li>
+                    <li>评分点部分得分粒度 0.5 分，总分不超题目满分。AI 返回不符合 0.5 倍数的，四舍五入到最近的 0.5；后端校验确保总分不超满分。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-02</span>
+                        <h4 class="us-title">评分失败与重试</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>在评分失败后重试，<strong>以便</strong>获得完整报告。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>失败后标记评分失败，用户可稍后点击重新评分。</li>
+                    <li>重试只针对失败的提交，不对已成功结果重评。</li>
+                    <li>首期最多重试 3 次。超限后标记"评分失败（已达重试上限）"。</li>
+                    <li>部分/全部失败时报告状态为 `scoring_partial_failed`。</li>
+                    <li>全部失败时客观题部分可展示但标记"主观题部分未评分"。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>单题超时 60 秒视为评分失败。</li>
+                    <li>评分任务使用异步队列，按 FIFO 处理。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-03</span>
+                        <h4 class="us-title">模拟考试评分中页面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>交卷后看到评分进度，<strong>以便</strong>知道何时可以查看报告。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>进入"评分中"页面，不先展示客观题半成品分数。</li>
+                    <li>提供"刷新结果"按钮（首期不自动轮询）。</li>
+                    <li>评分完成→进入报告；仍在进行→继续等待；失败→显示失败数量 + "重试评分"。</li>
+                    <li>可离开页面，稍后从记录列表进入。</li>
+                    <li>评分中页面提示“评分可能需要几分钟，请耐心等待或稍后查看”。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-04</span>
+                        <h4 class="us-title">客观题 AI 讲解</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>在练习中获得 AI 讲解，<strong>以便</strong>理解题目考点。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>答错后自动生成 AI 讲解。</li>
+                    <li>答对后提供"需要讲解"按钮手动触发。</li>
+                    <li>讲解基于题目 + 答案 + 解析 + RAG 命中资料。</li>
+                    <li>展示参考来源（资料名称 + 章节路径）。</li>
+                    <li>RAG 命中不足时显示依据不足提示。</li>
+                    <li>首期不做缓存，每次触发均调用 AI。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>主模型和备用模型均失败时，提示“AI 讲解暂时不可用，请稍后重试”。用户可手动重试或跳过继续答下一题。</li>
+                    <li>AI 讲解失败不阻塞答题流程。失败记录进入 AI 调用日志。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-05</span>
+                        <h4 class="us-title">主观题 AI 提示与重答</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>在主观题练习中获得改进提示并重答，<strong>以便</strong>提升答题质量。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>第一次提交→AI 评分→显示结果。</li>
+                    <li>可选"AI 提示"→获得改进方向（不直接给答案）。</li>
+                    <li>可重新作答（最多一次）→AI 评分→显示最终结果。</li>
+                    <li>两次作答和评分均保存，报告显示最终（第二次）结果。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-06</span>
+                        <h4 class="us-title">AI 知识点推荐</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>保存题目时系统自动推荐知识点，<strong>以便</strong>高效建立题目与知识体系的关联。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>首次保存时异步触发，或手动点击"AI 推荐"。</li>
+                    <li>推荐 1~5 个知识点，标记置信度（高/中/低）。</li>
+                    <li>展示为候选列表，老师可勾选确认/修改/忽略。</li>
+                    <li>未确认的推荐仍参与报告分析，标注"AI 推荐，待确认"。</li>
+                    <li>发布试卷时不强制逐题确认知识点。</li>
+                    <li>推荐失败不阻塞题目保存/发布。</li>
+                </ul>
+                <div class="us-section-title">边缘场景 (Edge Cases)</div>
+                <ul class="ec-list">
+                    <li>AI 知识点推荐为异步任务，不阻塞题目保存。</li>
+                    <li>推荐过程中题目被再次编辑保存，以最新一次保存触发的推荐为准，旧推荐结果丢弃。</li>
+                    <li>推荐过程中题目被停用，推荐结果丢弃，不写入。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-07</span>
+                        <h4 class="us-title">模型供应商配置</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>超级管理员，<strong>我想要</strong>配置 AI 模型供应商，<strong>以便</strong>灵活切换模型。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>配置模型供应商、名称、API Key、启用状态、功能用途映射。</li>
+                    <li>API Key 密文展示（只显示后 4 位）。</li>
+                    <li>配置变更记录审计日志。</li>
+                    <li>只允许超级管理员操作。</li>
+                </ul>
+                <div class="us-section-title">业务规则 (Business Rules)</div>
+                <ul class="br-list">
+                    <li>客观题讲解/提示可配置 fallback 备用模型。</li>
+                    <li>主观题评分不自动 fallback，避免评分口径变化。</li>
+                    <li>模型切换不影响已开始的评分任务（启动时锁定配置）。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-04-08</span>
+                        <h4 class="us-title">Prompt 模板管理</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>开发团队，<strong>我想要</strong>通过配置文件管理 Prompt 模板，<strong>以便</strong>独立迭代 Prompt。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>评分、讲解、提示、知识点推荐分别独立 Prompt 模板。</li>
+                    <li>每个模板有版本号。</li>
+                    <li>每次 AI 调用记录 Prompt 版本。</li>
+                    <li>首期不做后台编辑界面。</li>
+                </ul>
+            </div>
+        </section>
+        <section id="epic-05" class="epic-section">
+            <h3 class="epic-title">Epic 05: RAG 与知识库</h3>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-01</span>
+                        <h4 class="us-title">混合检索与 rerank</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>系统，<strong>我想要</strong>通过混合检索为 AI 提供相关资料片段，<strong>以便</strong>AI 评分和讲解有据可依。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>检索前按专业、等级、资源状态过滤。</li>
+                    <li>关键词 + 向量语义检索初召回，合并去重后 rerank。</li>
+                    <li>取 Top 3 片段给 AI。</li>
+                    <li>rerank 不可用时降级到融合排序，日志标记。</li>
+                    <li>按等级相关性排序：精确匹配 > 多等级通用 > 等级为空。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-02</span>
+                        <h4 class="us-title">RAG 命中状态与权限过滤</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>系统，<strong>我想要</strong>标记命中状态并过滤权限，<strong>以便</strong>保证引用质量和数据安全。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>返回 `evidence_status`：`sufficient` / `weak` / `none`。</li>
+                    <li>命中不足时 AI 不伪造引用，显示依据不足提示。</li>
+                    <li>学员端只检索当前有效授权范围内的资料。</li>
+                    <li>授权失效后不允许调用对应内容 AI。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-03</span>
+                        <h4 class="us-title">资源上传与转换</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>上传教材文件并转换为 Markdown，<strong>以便</strong>建设 AI 知识库。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>支持 DOCX / Markdown / PPTX / 可抽取文本 PDF。</li>
+                    <li>单文件上限 50MB。</li>
+                    <li>转换失败时记录原因，运营可查看。</li>
+                    <li>转换失败的资源不允许发布、不参与 RAG。</li>
+                    <li>资源必须绑定专业（必填），等级可选。</li>
+                    <li>PPTX 转换效果依赖原始文件质量，建议优先上传 DOCX 或 Markdown 格式。PPTX 仅作为兼容选项。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-04</span>
+                        <h4 class="us-title">Markdown 校对与发布</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>在线校对 Markdown 并发布，<strong>以便</strong>确保知识库内容质量。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>查看/编辑 Markdown 源文（标题、正文、列表、表格）。</li>
+                    <li>调整章节层级。</li>
+                    <li>保存草稿 + 人工确认发布。</li>
+                    <li>未发布资源不参与 RAG。</li>
+                    <li>发布后不自动重建向量，状态为"已发布，待建向量"。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-05</span>
+                        <h4 class="us-title">资源状态机</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>系统，<strong>我想要</strong>按状态机管理资源生命周期，<strong>以便</strong>保证流程严谨。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>9 种状态：`uploaded` → `converting` → `draft` / `conversion_failed` → `published` → `indexing` → `rag_ready` / `index_failed` → `disabled`。</li>
+                    <li>只允许合法状态转换（见 05 §6.6）。</li>
+                    <li>支持停用/启用，停用后不参与 RAG，启用后如向量存在立即恢复。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-06</span>
+                        <h4 class="us-title">向量重建</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>手动触发向量重建，<strong>以便</strong>更新 RAG 检索内容。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>异步切分 chunk → 写入向量库 → 状态变为 `rag_ready`。</li>
+                    <li>重建期间 RAG 继续使用旧向量。</li>
+                    <li>首次构建期间该资源不参与检索。</li>
+                    <li>重建成功后原子切换到新向量。</li>
+                    <li>失败时继续使用旧向量，显示失败原因。</li>
+                    <li>停用后 chunk 不删除，恢复时快速可用。恢复时系统检查 chunk 是否仍存在，如已不存在（如向量库重建或清理），资源状态恢复到“已发布，待建向量”，需手动触发重建。</li>
+                    <li>内容已更新但向量未重建时，AI 引用该资源的结果增加标记“引用内容可能非最新版本”。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-07</span>
+                        <h4 class="us-title">Chunk 切分</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>系统，<strong>我想要</strong>自动按 Markdown 结构切分 chunk，<strong>以便</strong>生成高质量检索片段。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>按标题层级保留章节路径。</li>
+                    <li>过长段落自动拆分，过短段落可合并。</li>
+                    <li>每个 chunk 保存：资料名称、章节路径、专业、等级、资源 ID、chunk 序号。</li>
+                    <li>切分参数为系统配置项，运营不可调整。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-08</span>
+                        <h4 class="us-title">知识点树管理</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>维护知识点树，<strong>以便</strong>建立题目和知识体系的关联。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>按专业维护，节点可标记适用等级。</li>
+                    <li>支持新增、编辑、排序、停用。不允许删除。</li>
+                    <li>支持移动（修改父节点）和重命名，操作记录审计日志。</li>
+                    <li>最多 5 级，建议单专业不超 2000 个。</li>
+                    <li>停用后不推荐给新题，已绑定题目不受影响。</li>
+                    <li>历史报告使用快照，不受移动/停用影响。</li>
+                    <li>如某专业尚未维护知识点树（空树），AI 知识点推荐返回空结果，不报错。知识点移动后，AI 推荐基于当前最新路径检索。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-05-09</span>
+                        <h4 class="us-title">知识点薄弱分析</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>学员，<strong>我想要</strong>在模拟考试报告中看到知识点薄弱分析，<strong>以便</strong>针对性学习。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>按知识点统计正确率/得分率。</li>
+                    <li>AI 推荐的知识点也参与统计（标注"仅供参考"）。</li>
+                    <li>无知识点题目仍纳入总分和题型统计。</li>
+                    <li>历史报告不重算，使用快照。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-04-06, US-03-07</li>
+                </ul>
+            </div>
+        </section>
+        <section id="epic-06" class="epic-section">
+            <h3 class="epic-title">Epic 06: 后台运营与日志</h3>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-01</span>
+                        <h4 class="us-title">后台通用交互</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>后台用户，<strong>我想要</strong>一致的列表、筛选和操作体验，<strong>以便</strong>高效工作。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表默认分页 20 条，支持 50 / 100。</li>
+                    <li>表头点击切换升序/降序。</li>
+                    <li>筛选条件变化后自动刷新。</li>
+                    <li>批量操作需二次确认弹窗。</li>
+                    <li>危险操作红色按钮 + 二次确认。</li>
+                    <li>操作成功/失败 Toast 提示。</li>
+                    <li>关键写操作（授权创建/调整、员工批量导入、卡密生成）使用乐观锁或数据库原子操作防止并发冲突。冲突时提示“数据已被其他操作更新，请刷新后重试”。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-02</span>
+                        <h4 class="us-title">用户管理</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>管理用户账号，<strong>以便</strong>维护用户数据。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表显示手机号、姓名、注册时间、状态、绑定企业、授权状态。</li>
+                    <li>支持按手机号/姓名搜索，按状态和用户类型筛选。</li>
+                    <li>可查看用户详情（基本信息 + 授权列表 + 企业绑定）。</li>
+                    <li>可停用/启用账号、重置密码。</li>
+                    <li>首期不做用户删除。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-01-05, US-01-06</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-03</span>
+                        <h4 class="us-title">企业组织管理界面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>可视化管理企业组织树，<strong>以便</strong>直观维护组织结构。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>树形结构展示企业组织。</li>
+                    <li>支持新增、编辑、停用/启用节点（停用可选级联）。</li>
+                    <li>企业节点下查看/管理员工列表（搜索、筛选、创建、批量导入、解绑）。</li>
+                    <li>查看企业节点的授权情况。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-01-10</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-04</span>
+                        <h4 class="us-title">企业授权管理界面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>创建和管理企业授权，<strong>以便</strong>控制企业内容访问。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表显示购买主体、授权范围、专业/等级、额度/已占用、有效期、状态。</li>
+                    <li>支持新建授权，新建时校验范围重叠。</li>
+                    <li>支持取消授权。</li>
+                    <li>查看授权详情：覆盖企业列表 + 员工占用明细。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-01-11</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-05</span>
+                        <h4 class="us-title">卡密管理界面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>在后台管理卡密，<strong>以便</strong>生成和追踪卡密。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>批量生成（同批次同专业/等级/时长/截止日）。</li>
+                    <li>列表按状态筛选、按卡密号搜索。</li>
+                    <li>查看详情（生成信息 + 兑换信息）。</li>
+                    <li>明文可见，便于复制分发。</li>
+                    <li>首期不做导出和作废。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-01-08</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-06</span>
+                        <h4 class="us-title">资源与知识库管理界面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>管理知识库资源，<strong>以便</strong>维护 RAG 内容。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表显示资源名称、专业、等级、类型、状态、上传时间。</li>
+                    <li>支持上传、查看详情（原始文件下载 + Markdown 预览 + 状态记录）。</li>
+                    <li>Markdown 校对发布界面。</li>
+                    <li>手动触发向量重建。</li>
+                    <li>停用/启用资源。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-05-03, US-05-04, US-05-06</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-07</span>
+                        <h4 class="us-title">超级管理员 AI 配置</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>超级管理员，<strong>我想要</strong>配置 AI 模型供应商和用途映射，<strong>以便</strong>管理 AI 服务。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>模型供应商配置（新增、编辑、启用/停用）。</li>
+                    <li>功能用途映射（评分/讲解/提示/推荐分别指定模型）。</li>
+                    <li>备用模型配置（fallback）。</li>
+                    <li>API Key 密文展示（后 4 位），修改时完整输入。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-04-07</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-08</span>
+                        <h4 class="us-title">题库管理界面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>在内容后台管理题目，<strong>以便</strong>建设和维护题库。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表显示题干摘要、题型、专业/等级/科目、状态、知识点、标签。</li>
+                    <li>支持多维度筛选和关键字搜索。</li>
+                    <li>新建、编辑（未锁定）、停用、复制题目。</li>
+                    <li>查看题目被引用的试卷列表。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-02-01, US-02-02, US-02-03</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-09</span>
+                        <h4 class="us-title">试卷管理界面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>在内容后台管理试卷，<strong>以便</strong>完成组卷和发布。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表显示名称、专业/等级/科目、状态、类型、年份、总分、题目数。</li>
+                    <li>支持多维度筛选，默认按更新时间倒序。</li>
+                    <li>新建草稿、组卷、发布（强校验）、下架、复制。</li>
+                    <li>绑定/下载原始文件。</li>
+                    <li>查看模拟考试记录数量（只读）。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-02-07, US-02-08, US-02-09, US-02-10</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-10</span>
+                        <h4 class="us-title">知识点树维护界面</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>内容老师，<strong>我想要</strong>在内容后台维护知识点树，<strong>以便</strong>管理知识体系。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>按专业展示树形结构。</li>
+                    <li>支持新增、编辑、排序、停用、移动、重命名。</li>
+                    <li>查看节点绑定的题目数量。</li>
+                    <li>AI 推荐结果查看和修正（在题目编辑页内）。</li>
+                </ul>
+                <div class="us-section-title">依赖项 (Dependencies)</div>
+                <ul class="dep-list">
+                    <li>US-05-08</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-11</span>
+                        <h4 class="us-title">审计日志查看</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>查看后台操作审计日志，<strong>以便</strong>追溯关键操作。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表支持按操作类型、操作人、时间范围筛选。</li>
+                    <li>支持按关键字搜索操作对象。</li>
+                    <li>日志只读，不可修改或删除。</li>
+                    <li>首期不做导出。</li>
+                    <li>首期不设日志保留期限，数据永久保留。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-12</span>
+                        <h4 class="us-title">AI 调用日志查看</h4>
+                    </div>
+                    <span class="us-priority priority-p1">P1</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>运营管理员，<strong>我想要</strong>查看 AI 调用日志和成本汇总，<strong>以便</strong>监控 AI 使用和成本。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>列表支持按功能类型、用户、企业、专业、等级、状态、时间范围筛选。</li>
+                    <li>查看单条详情（含输入输出摘要）。</li>
+                    <li>简易成本汇总：按日/月、功能类型、模型统计调用次数和估算成本。</li>
+                    <li>日志只读。</li>
+                </ul>
+            </div>
+            <div class="us-card">
+                <div class="us-header">
+                    <div class="us-title-group">
+                        <span class="us-id">US-06-13</span>
+                        <h4 class="us-title">后台角色与权限</h4>
+                    </div>
+                    <span class="us-priority priority-p0">P0</span>
+                </div>
+                <div class="us-persona"><strong>作为</strong>超级管理员，<strong>我想要</strong>管理后台用户和角色，<strong>以便</strong>控制后台访问权限。</div>
+                <div class="us-section-title">验收标准 (Acceptance Criteria)</div>
+                <ul class="ac-list">
+                    <li>三种角色：超级管理员（全局）、运营管理员（运营后台）、内容老师（内容后台）。</li>
+                    <li>一个用户可拥有多个角色。</li>
+                    <li>内容老师首期不做专业/等级权限隔离。</li>
+                    <li>后台用户由超级管理员创建，不使用学员注册流程。</li>
+                    <li>可新建、编辑角色、停用后台用户。</li>
+                    <li>后台用户会话安全：Token 有效期 8 小时；允许同一账号多设备登录；连续登录失败 5 次锁定 15 分钟，锁定只阻止新登录，不影响已有活跃会话。</li>
+                    <li>后台账号与学员账号是两套独立体系。同一自然人如需同时使用学员端和后台端，需分别持有两个账号。</li>
+                </ul>
+                <div class="us-section-title">业务规则 (Business Rules)</div>
+                <ul class="br-list">
+                    <li>首个超级管理员通过系统初始化脚本或种子数据创建，不通过后台界面。</li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+    <script>
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 150) { current = section.getAttribute('id'); }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) { link.classList.add('active'); }
+            });
+        });
+    </script>
+</body>
+</html>
