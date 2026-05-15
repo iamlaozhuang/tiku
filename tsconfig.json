@@ -30,5 +30,12 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    ".agent",
+    ".omx",
+    "archive",
+    "docs/05-execution-logs",
+    "docs/06-issue-tracking"
+  ]
 }
