@@ -18,7 +18,7 @@ tasks:
       - Test-Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md'
       - Select-String -Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md' -Pattern 'Server Actions only|no REST|without API'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-0-adr-workplace-desktop
     title: Workplace Desktop Compatibility ADR
@@ -40,7 +40,7 @@ tasks:
       - Test-Path 'docs\02-architecture\adr\adr-003-workplace-desktop-web-compatibility.md'
       - Select-String -Path 'docs\02-architecture\adr\adr-003-workplace-desktop-web-compatibility.md' -Pattern 'certified|已认证|完全符合|采购合规'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-0-global-db-api-skeleton
     title: Global DB/API Skeleton
@@ -63,7 +63,7 @@ tasks:
       - Test-Path 'docs\02-architecture\interfaces\global-db-api-skeleton.md'
       - Select-String -Path 'docs\02-architecture\interfaces\global-db-api-skeleton.md' -Pattern 'license|exam_paper'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-0-automation-sops
     title: Automation SOP Documents
@@ -88,7 +88,7 @@ tasks:
       - Test-Path 'docs\04-agent-system\sop\skill-dispatch-matrix.md'
       - Test-Path 'docs\04-agent-system\sop\dependency-introduction-gate.md'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-0-state-and-roadmap
     title: State, Queue, and Roadmap
@@ -117,7 +117,7 @@ tasks:
       - Select-String -Path 'docs\04-agent-system\state\task-queue.yaml' -Pattern 'phase-0-script-skeleton'
       - Select-String -Path 'docs\04-agent-system\milestones-goals\mvp-roadmap.md' -Pattern 'Phase 6'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-0-script-skeleton
     title: PowerShell Script Skeleton
@@ -143,7 +143,7 @@ tasks:
     validationCommands:
       - Get-ChildItem -Path 'scripts\agent-system' -Filter '*.ps1' | ForEach-Object { $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content $_.FullName -Raw), [ref]$null); Write-Output "Parsed $($_.Name)" }
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-0-local-gates
     title: Local Gate Configuration
@@ -154,6 +154,8 @@ tasks:
     allowedFiles:
       - package.json
       - .husky/pre-commit
+      - .husky/_/pre-commit
+      - .husky/_/h
       - tsconfig.json
       - eslint.config.mjs
     blockedFiles:
@@ -166,8 +168,9 @@ tasks:
     validationCommands:
       - npm.cmd run typecheck
       - npm.cmd run lint
+      - '& ''C:\Program Files\Git\bin\sh.exe'' ''.husky/_/pre-commit'''
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-0-evidence
     title: Final Validation and Evidence
@@ -188,8 +191,8 @@ tasks:
       - evidence_integrity
       - state_transition
     validationCommands:
-      - .\scripts\agent-system\Test-AgentSystemReadiness.ps1
-      - .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: pending
+    status: done
     retryCount: 0

@@ -1,10 +1,10 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-0-architecture-freeze
-  updatedAt: "2026-05-15T23:25:00+08:00"
+  currentPhase: phase-1-foundation
+  updatedAt: "2026-05-15T23:59:00+08:00"
 architecture:
-  status: in_progress
+  status: complete
   requiredBeforeAutomation:
     - id: adr-002-runtime-architecture-and-multi-client-contract
       path: docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
@@ -54,7 +54,14 @@ qualityGates:
     - build_when_relevant
   available:
     - lint
-  lastRun: {}
+    - typecheck
+  lastRun:
+    date: "2026-05-15"
+    readiness: pass_with_missing_test_script
+    lint: pass
+    typecheck: pass
+    test: missing
+    preCommitHook: pass
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -69,5 +76,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: complete_phase_0_architecture_freeze
-  lastSummaryPath: null
+  nextRecommendedAction: start_phase_1_foundation
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
