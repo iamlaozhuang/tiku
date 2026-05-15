@@ -1,0 +1,73 @@
+schemaVersion: 1
+project:
+  name: tiku
+  currentPhase: phase-0-architecture-freeze
+  updatedAt: "2026-05-15T23:25:00+08:00"
+architecture:
+  status: in_progress
+  requiredBeforeAutomation:
+    - id: adr-002-runtime-architecture-and-multi-client-contract
+      path: docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
+      status: complete
+    - id: adr-003-workplace-desktop-web-compatibility
+      path: docs/02-architecture/adr/adr-003-workplace-desktop-web-compatibility.md
+      status: complete
+    - id: global-db-api-skeleton
+      path: docs/02-architecture/interfaces/global-db-api-skeleton.md
+      status: complete
+automation:
+  mode: semi_auto
+  gitBoundary: draft_pr
+  approvalPolicy: high_risk_only
+  maxRetryPerTask: 3
+  branchPolicy:
+    protectedBranches:
+      - main
+      - master
+    allowedPrefixes:
+      - feat/
+      - fix/
+      - codex/
+    draftPrOnly: true
+    autoMerge: false
+taskSource:
+  requirementsPath: docs/01-requirements/stories
+  queueStrategy: story_to_verifiable_units
+taskRegistry:
+  path: docs/04-agent-system/state/task-queue.yaml
+currentTask:
+  id: null
+  status: idle
+  sourceStory: null
+  planPath: null
+  evidencePath: null
+  branch: null
+  commitSha: null
+  prUrl: null
+  retryCount: 0
+  lastFailurePath: null
+qualityGates:
+  desired:
+    - lint
+    - typecheck
+    - test
+    - build_when_relevant
+  available:
+    - lint
+  lastRun: {}
+riskGates:
+  requireHumanApproval:
+    - add_dependency
+    - database_migration
+    - auth_permission_model
+    - secret_or_env_change
+    - external_service_config
+    - destructive_data_operation
+    - delete_or_move_file
+    - deploy
+    - merge_pr
+skills:
+  dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
+handoff:
+  nextRecommendedAction: complete_phase_0_architecture_freeze
+  lastSummaryPath: null

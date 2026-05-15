@@ -1,0 +1,195 @@
+schemaVersion: 1
+tasks:
+  - id: phase-0-adr-runtime-architecture
+    title: Runtime Architecture ADR
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-1-runtime-architecture-adr
+    dependencies: []
+    allowedFiles:
+      - docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - architecture_decision
+    validationCommands:
+      - Test-Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md'
+      - Select-String -Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md' -Pattern 'Server Actions only|no REST|without API'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
+  - id: phase-0-adr-workplace-desktop
+    title: Workplace Desktop Compatibility ADR
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-2-workplace-desktop-compatibility-adr
+    dependencies:
+      - phase-0-adr-runtime-architecture
+    allowedFiles:
+      - docs/02-architecture/adr/adr-003-workplace-desktop-web-compatibility.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - architecture_decision
+      - compliance_claim
+    validationCommands:
+      - Test-Path 'docs\02-architecture\adr\adr-003-workplace-desktop-web-compatibility.md'
+      - Select-String -Path 'docs\02-architecture\adr\adr-003-workplace-desktop-web-compatibility.md' -Pattern 'certified|已认证|完全符合|采购合规'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
+  - id: phase-0-global-db-api-skeleton
+    title: Global DB/API Skeleton
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-3-global-dbapi-skeleton
+    dependencies:
+      - phase-0-adr-runtime-architecture
+      - phase-0-adr-workplace-desktop
+    allowedFiles:
+      - docs/02-architecture/interfaces/global-db-api-skeleton.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - data_contract
+      - api_contract
+    validationCommands:
+      - Test-Path 'docs\02-architecture\interfaces\global-db-api-skeleton.md'
+      - Select-String -Path 'docs\02-architecture\interfaces\global-db-api-skeleton.md' -Pattern 'license|exam_paper'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
+  - id: phase-0-automation-sops
+    title: Automation SOP Documents
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-4-automation-sop-documents
+    dependencies:
+      - phase-0-global-db-api-skeleton
+    allowedFiles:
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/sop/skill-dispatch-matrix.md
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - automation_policy
+      - dependency_policy
+    validationCommands:
+      - Test-Path 'docs\04-agent-system\sop\automation-loop.md'
+      - Test-Path 'docs\04-agent-system\sop\skill-dispatch-matrix.md'
+      - Test-Path 'docs\04-agent-system\sop\dependency-introduction-gate.md'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
+  - id: phase-0-state-and-roadmap
+    title: State, Queue, and Roadmap
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-5-state-queue-and-roadmap
+    dependencies:
+      - phase-0-automation-sops
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+    validationCommands:
+      - Test-Path 'docs\04-agent-system\state\project-state.yaml'
+      - Test-Path 'docs\04-agent-system\state\task-queue.yaml'
+      - Test-Path 'docs\04-agent-system\milestones-goals\mvp-roadmap.md'
+      - Select-String -Path 'docs\04-agent-system\state\project-state.yaml' -Pattern 'phase-0-architecture-freeze'
+      - Select-String -Path 'docs\04-agent-system\state\project-state.yaml' -Pattern 'maxRetryPerTask'
+      - Select-String -Path 'docs\04-agent-system\state\task-queue.yaml' -Pattern 'phase-0-script-skeleton'
+      - Select-String -Path 'docs\04-agent-system\milestones-goals\mvp-roadmap.md' -Pattern 'Phase 6'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
+  - id: phase-0-script-skeleton
+    title: PowerShell Script Skeleton
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-6-powershell-script-skeleton
+    dependencies:
+      - phase-0-state-and-roadmap
+    allowedFiles:
+      - scripts/agent-system/Read-ProjectState.ps1
+      - scripts/agent-system/Test-AgentSystemReadiness.ps1
+      - scripts/agent-system/New-TaskPlan.ps1
+      - scripts/agent-system/Update-TaskStatus.ps1
+      - scripts/agent-system/New-FailureReport.ps1
+      - scripts/agent-system/Invoke-QualityGate.ps1
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - local_tooling
+      - powershell_script
+    validationCommands:
+      - Get-ChildItem -Path 'scripts\agent-system' -Filter '*.ps1' | ForEach-Object { $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content $_.FullName -Raw), [ref]$null); Write-Output "Parsed $($_.Name)" }
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
+  - id: phase-0-local-gates
+    title: Local Gate Configuration
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-7-local-gate-configuration
+    dependencies:
+      - phase-0-script-skeleton
+    allowedFiles:
+      - package.json
+      - .husky/pre-commit
+      - tsconfig.json
+      - eslint.config.mjs
+    blockedFiles:
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - quality_gate
+      - package_script_change
+    validationCommands:
+      - npm.cmd run typecheck
+      - npm.cmd run lint
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
+  - id: phase-0-evidence
+    title: Final Validation and Evidence
+    phase: phase-0-architecture-freeze
+    sourceStory: docs/superpowers/plans/2026-05-15-agent-system-automation.md#task-8-final-validation-and-evidence
+    dependencies:
+      - phase-0-local-gates
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - evidence_integrity
+      - state_transition
+    validationCommands:
+      - .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+    status: pending
+    retryCount: 0
