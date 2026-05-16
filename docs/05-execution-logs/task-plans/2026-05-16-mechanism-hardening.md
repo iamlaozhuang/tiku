@@ -23,6 +23,7 @@
 - Modify: `docs/04-agent-system/state/task-queue.yaml`
 - Modify: `docs/02-architecture/system-design/frontend/01-style-tone.md`
 - Modify: `docs/02-architecture/system-design/frontend/02-design-tokens.json`
+- Modify: `eslint.config.mjs`
 - Modify: `next.config.ts`
 - Modify: `src/app/layout.tsx`
 - Modify: `src/app/globals.css`
@@ -50,6 +51,7 @@
 - [x] Map Tailwind font variables to project-owned CSS variables.
 - [x] Align shadcn-compatible CSS variables with Tiku brand tokens rather than default neutral primary values.
 - [x] Pin Next.js Turbopack root to the active project directory so nested worktrees do not infer the parent repository as the build root.
+- [x] Ignore isolated worktree build artifacts in ESLint so quality gates are not polluted by `.worktrees/**`.
 
 ## Task 4: State And Queue
 

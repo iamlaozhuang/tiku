@@ -21,6 +21,7 @@ Repair governance and automation gaps found in the semi-automation review withou
 - `docs/04-agent-system/state/task-queue.yaml`
 - `docs/02-architecture/system-design/frontend/01-style-tone.md`
 - `docs/02-architecture/system-design/frontend/02-design-tokens.json`
+- `eslint.config.mjs`
 - `docs/06-issue-tracking/README.md`
 - `docs/06-issue-tracking/bug-reports/README.md`
 - `next.config.ts`
@@ -36,6 +37,7 @@ Repair governance and automation gaps found in the semi-automation review withou
 - Remote repository setup remains unconfigured and must be handled by a separate task after a real remote target is provided.
 - UI font policy now uses Noto Sans SC and JetBrains Mono; default Inter is not part of the active design baseline.
 - Next.js Turbopack root is pinned to `process.cwd()` to keep nested worktree builds from inferring the parent repository as the workspace root.
+- ESLint now ignores `.worktrees/**` and nested build/dependency outputs so isolated worktrees cannot pollute root quality gates.
 
 ## Validation
 
@@ -131,6 +133,26 @@ Compiled successfully.
 Finished TypeScript.
 Generated static pages using 7 workers (8/8).
 Routes generated: /, /_not-found, /content/papers, /design-system, /home, /login, /ops/users.
+```
+
+Merge-gate finding:
+
+```text
+Fast-forward merge succeeded, but the post-merge quality gate initially failed because ESLint scanned .worktrees/codex-mechanism-hardening/.next build artifacts.
+```
+
+Remediation:
+
+```text
+Added ESLint global ignores for .worktrees/** and nested build/dependency outputs, then re-ran the local gates.
+```
+
+Post-remediation validation:
+
+```text
+Readiness: passed; missing test script remains explicitly reported.
+Quality gate: lint passed; typecheck passed; missing test script remains explicitly reported.
+Build: passed with escalated execution because the non-escalated sandbox previously returned spawn EPERM during the Next.js TypeScript stage.
 ```
 
 Residual gap:
