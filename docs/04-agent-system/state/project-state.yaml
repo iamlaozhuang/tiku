@@ -56,11 +56,11 @@ qualityGates:
     - lint
     - typecheck
   lastRun:
-    date: "2026-05-15"
-    readiness: pass_with_missing_test_script
+    date: "2026-05-16"
+    readiness: pass
     lint: pass
     typecheck: pass
-    test: missing
+    test: pass
     preCommitHook: pass
 riskGates:
   requireHumanApproval:
@@ -76,5 +76,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim_phase_1_test_tooling_decision
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-16-mechanism-hardening.md
+  nextRecommendedAction: claim_phase_1_formatting_gate_decision_or_phase_1_server_boundary_skeleton
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-16-phase-1-test-tooling-decision.md

@@ -24,6 +24,8 @@ docs/05-execution-logs/audits-reviews/temp*
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
