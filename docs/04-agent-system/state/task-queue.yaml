@@ -222,12 +222,53 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-planning.md
     status: done
     retryCount: 0
+  - id: phase-1-mechanism-hardening
+    title: Semi-Automation Mechanism Hardening
+    phase: phase-1-foundation
+    sourceStory: docs/05-execution-logs/task-plans/2026-05-16-mechanism-hardening.md
+    dependencies:
+      - phase-1-foundation-planning
+    allowedFiles:
+      - AGENTS.md
+      - docs/03-standards/coding-style.md
+      - docs/03-standards/git-workflow.md
+      - docs/03-standards/local-ci.md
+      - docs/03-standards/testing-tdd.md
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/sop/skill-dispatch-matrix.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/02-architecture/system-design/frontend/01-style-tone.md
+      - docs/02-architecture/system-design/frontend/02-design-tokens.json
+      - docs/06-issue-tracking/**
+      - docs/05-execution-logs/task-plans/2026-05-16-mechanism-hardening.md
+      - docs/05-execution-logs/evidence/2026-05-16-mechanism-hardening.md
+      - next.config.ts
+      - src/app/layout.tsx
+      - src/app/globals.css
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/server/**
+      - src/db/schema/**
+    riskTypes:
+      - automation_policy
+      - standards_hardening
+      - frontend_foundation
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-mechanism-hardening.md
+    status: done
+    retryCount: 0
   - id: phase-1-test-tooling-decision
     title: Test Tooling Decision
     phase: phase-1-foundation
     sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-1-foundation
     dependencies:
-      - phase-1-foundation-planning
+      - phase-1-mechanism-hardening
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-16-phase-1-test-tooling-decision.md
       - docs/05-execution-logs/evidence/2026-05-16-phase-1-test-tooling-decision.md

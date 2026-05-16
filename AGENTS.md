@@ -156,3 +156,12 @@
 2. **强制方案编制**：在开始实际编写业务逻辑前，必须在 `docs/05-execution-logs/task-plans/` 目录下创建执行方案（以 `YYYY-MM-DD-任务描述.md` 命名），明确记录已读取的规范、实现思路及风险防御。
 3. **本地验证门禁**：必须在终端本地执行测试并验证通过，方可通过 Git Hooks 允许代码提交。
 4. **工作区隔离门禁**：任何由 Agent 引入的工具目录（如 `.agent`）、临时缓存或日志生成目录，必须在项目初始化及引入时第一时间加入项目 `.gitignore` 以及相关打包工具（如 Next.js/Tailwind）的扫描黑名单中，严防 AI 产物污染并导致构建体系崩溃。
+
+## 半自动化推进硬性流程
+
+1. **禁止直接在 `master` / `main` 上开发**：除非用户明确要求只做只读审查，否则所有修改必须先创建短生命周期分支或 worktree，分支名使用 `codex/`、`feat/`、`fix/` 前缀。
+2. **任务领取以队列为准**：优先读取 `docs/04-agent-system/state/project-state.yaml` 和 `docs/04-agent-system/state/task-queue.yaml`，只处理 `pending` 且依赖已完成的任务；高风险任务必须先取得明确人工批准。
+3. **依赖变更先审批后落地**：新增、删除、升级 npm 包、CLI、外部 SDK、测试框架、云服务配置、数据库迁移工具时，必须先按 `docs/04-agent-system/sop/dependency-introduction-gate.md` 写明理由和 `human approval` 证据，未经批准不得改 `package.json` 或 lockfile。
+4. **证据先于结论**：任务完成前必须运行任务声明的验证命令，并把输出写入 `docs/05-execution-logs/evidence/`。如果 `test` script 缺失，只能声明“lint/typecheck 通过，测试门禁缺失”，禁止声称完整测试通过。
+5. **合入后清理隔离资源**：短生命周期分支合入 `master` 后，必须删除对应 worktree 和已合入分支；残留 `node_modules` 等本地产物只允许在确认路径位于 `.worktrees/` 内后删除。
+6. **跨会话恢复要求**：会话中断或上下文不足时，从 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan 恢复，不得凭记忆继续实现。

@@ -50,6 +50,7 @@ The following local skills may exist under `C:\Users\laozhuang\.codex\skills`, b
 
 ## Dispatch Rules
 
+- Session startup and task recovery uses `superpowers:verification-before-completion` for evidence discipline and the local project state files for context restoration.
 - Architecture planning uses `superpowers:brainstorming`, `superpowers:writing-plans`, `ralplan`, and `design` when those skills are active.
 - Written implementation plans use `superpowers:executing-plans`.
 - Test-first implementation uses `superpowers:test-driven-development`, `tdd-orchestrator`, or `tdd-workflow` when active.
@@ -63,6 +64,14 @@ The following local skills may exist under `C:\Users\laozhuang\.codex\skills`, b
 - Cleanup uses `code-simplifier` followed by the available local gates.
 - Code review uses `superpowers:requesting-code-review` or `code-review` when active.
 - Autonomous loop work uses `ralplan -> ralph -> code-review` after those local skills are verified active.
+
+## Lifecycle Requirements
+
+- Before writing code: use planning skills and create a task plan.
+- While writing code: use the domain skill for the changed surface, such as database, auth, UI, AI/RAG, or testing.
+- After writing code: use verification before completion, then request code review for risky or shared changes.
+- Before dependency changes: use the dependency introduction gate and record human approval.
+- Before UI handoff: use UI and browser validation skills when available.
 
 ## Reserved Skills
 

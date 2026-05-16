@@ -86,7 +86,7 @@
 
 | 角色 | 字体 | 权重 | 说明 |
 |---|---|---|---|
-| 标题（H1-H3） | Inter | 600-700 | 几何感强，专业简洁 |
+| 标题（H1-H3） | Noto Sans SC | 600-700 | 简体中文首选，避免默认 Inter，保持稳重清晰 |
 | 中文正文 | Noto Sans SC | 400-500 | 简体中文首选，Google 维护，信创友好 |
 | 数据/等宽 | JetBrains Mono | 400 | AI 评分详情、评分点展示 |
 | Fallback | `system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif` | — | 覆盖 macOS/Windows/国产 Linux |
@@ -139,5 +139,5 @@ xs: 12px / sm: 14px / base: 16px / lg: 18px / xl: 20px / 2xl: 24px / 3xl: 30px /
 |---|---|---|
 | 1 | 品牌绿 `#00904A` 为锚点的色彩体系 | ✅ 确认 |
 | 2 | 品牌绿 vs 语义成功色明度差区分 | ✅ 确认 |
-| 3 | 字体搭配 Inter + Noto Sans SC + JetBrains Mono | ✅ 确认 |
+| 3 | 字体搭配 Noto Sans SC + JetBrains Mono，禁止默认 Inter | ✅ 确认 |
 | 4 | 调性"稳重·可信·专业·高效·克制" | ✅ 确认 |

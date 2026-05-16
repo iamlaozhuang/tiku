@@ -15,9 +15,11 @@ Every automation session starts by reading these sources in order:
 1. `AGENTS.md`
 2. `docs/03-standards/doc-management.md`
 3. `docs/03-standards/code-taste-ten-commandments.md`
-4. `docs/02-architecture/adr/`
-5. `docs/04-agent-system/state/project-state.yaml`
-6. `docs/04-agent-system/state/task-queue.yaml`
+4. `docs/03-standards/local-ci.md`
+5. `docs/03-standards/testing-tdd.md`
+6. `docs/02-architecture/adr/`
+7. `docs/04-agent-system/state/project-state.yaml`
+8. `docs/04-agent-system/state/task-queue.yaml`
 
 If any required source is missing, stop the loop and record the blocker before changing project files.
 
@@ -57,6 +59,24 @@ For each claimed task:
 7. Update the queue and project state only when those files are in the allowed scope.
 
 Each step should leave enough evidence for another agent to resume without guessing.
+
+## Context Management
+
+Keep session context small and durable:
+
+- Load only the requirements, ADRs, standards, and source files needed for the active task.
+- Prefer `project-state.yaml`, `task-queue.yaml`, the task plan, and evidence files as the cross-session memory source.
+- Do not rely on chat memory when a durable state file contradicts it.
+- If a session resumes after interruption, read the latest evidence before continuing.
+
+## Git And Remote Repository Handling
+
+- Do not work directly on `master` or `main` unless the user explicitly requests a read-only inspection.
+- Use one short-lived branch or worktree per task.
+- After a fast-forward merge into `master`, remove the task worktree and delete the merged branch.
+- If no remote is configured, do not invent a repository URL.
+- When a remote exists, use draft PRs by default and do not enable auto-merge.
+- Push, PR creation, deployment, and production environment changes require explicit user approval.
 
 ## Failure Fuse
 

@@ -1,28 +1,17 @@
 import type { Metadata } from "next";
-import { Inter, Noto_Sans_SC, JetBrains_Mono, Geist } from "next/font/google";
+import { Noto_Sans_SC, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-
-// --- Phase 3: 字体引入 (next/font/google) ---
-// 遵循 ui-code.md §2.1 命名：--font-heading, --font-body, --font-mono
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  display: "swap",
-});
-
 const notoSansSC = Noto_Sans_SC({
   subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-tiku-sans",
   display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-tiku-mono",
   display: "swap",
 });
 
@@ -39,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={cn(inter.variable, notoSansSC.variable, jetbrainsMono.variable, "font-sans", geist.variable)}
+      className={cn(notoSansSC.variable, jetbrainsMono.variable, "font-sans")}
     >
       <body className="font-body antialiased">{children}</body>
     </html>

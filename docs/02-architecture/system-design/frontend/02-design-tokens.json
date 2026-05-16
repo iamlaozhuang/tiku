@@ -80,7 +80,7 @@
   },
   "global": {
     "fontFamily": {
-      "heading": { "value": "Inter, system-ui, sans-serif", "type": "typography" },
+      "heading": { "value": "'Noto Sans SC', system-ui, sans-serif", "type": "typography" },
       "body": { "value": "'Noto Sans SC', system-ui, sans-serif", "type": "typography" },
       "mono": { "value": "'JetBrains Mono', monospace", "type": "typography" }
     },
