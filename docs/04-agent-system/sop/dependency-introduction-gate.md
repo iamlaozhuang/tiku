@@ -8,6 +8,8 @@ Draft for Phase 0
 
 Define the approval and documentation gate for dependency changes. Tiku keeps dependency changes deliberate because each package affects security, bundle size, operations, and long-term maintenance.
 
+This gate is complemented by `docs/03-standards/open-source-introduction.md`, which also covers starter repositories, copied components, source references, timing, and ownership boundaries.
+
 ## Approval Requirement
 
 Adding, removing, or upgrading a dependency requires human approval before the package file or lockfile is changed.
@@ -29,10 +31,12 @@ Every dependency plan must record:
 - Change type: add, remove, or upgrade.
 - Purpose.
 - Import boundary.
+- License compatibility.
 - Alternative considered.
 - Reason the alternative was rejected.
 - Abandonment risk.
 - Security or maintenance risk.
+- Windows, Codex desktop, Docker, Tencent Cloud, or browser compatibility impact when relevant.
 - Bundle or runtime impact when relevant.
 - Validation command.
 - Human approval evidence.

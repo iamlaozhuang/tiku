@@ -19,10 +19,10 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="bg-background flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-30 flex h-14 items-center border-b border-border bg-surface px-4 shadow-sm">
-        <h1 className="font-heading text-lg font-semibold text-brand-primary">
+      <header className="border-border bg-surface sticky top-0 z-30 flex h-14 items-center border-b px-4 shadow-sm">
+        <h1 className="font-heading text-brand-primary text-lg font-semibold">
           题库系统
         </h1>
       </header>
@@ -32,7 +32,7 @@ export function StudentAppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Bottom Tab Bar */}
       <nav
-        className="sticky bottom-0 z-30 flex h-14 items-center justify-around border-t border-border bg-surface"
+        className="border-border bg-surface sticky bottom-0 z-30 flex h-14 items-center justify-around border-t"
         role="tablist"
         aria-label="主导航"
       >

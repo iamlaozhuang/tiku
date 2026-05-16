@@ -305,11 +305,15 @@ tasks:
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-16-phase-1-formatting-gate-decision.md
       - docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md
+      - package.json
+      - pnpm-lock.yaml
+      - .prettierrc.json
+      - .prettierignore
+      - .husky/pre-commit
+      - .husky/_/h
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
     blockedFiles:
-      - package.json
-      - pnpm-lock.yaml
       - package-lock.json
       - src/**
     riskTypes:
@@ -320,7 +324,38 @@ tasks:
       - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-16-phase-1-formatting-gate-decision.md' -Pattern 'lint-staged|prettier-plugin-tailwindcss|human approval'
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md
-    status: pending
+    status: done
+    retryCount: 0
+  - id: phase-1-foundation-review-closeout
+    title: Foundation Review Closeout
+    phase: phase-1-foundation
+    sourceStory: docs/05-execution-logs/task-plans/2026-05-17-foundation-review-closeout.md
+    dependencies:
+      - phase-1-formatting-gate-decision
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-foundation-review-closeout.md
+      - docs/05-execution-logs/audits-reviews/2026-05-17-foundation-review-closeout.md
+      - docs/05-execution-logs/evidence/2026-05-17-foundation-review-closeout.md
+      - docs/03-standards/open-source-introduction.md
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - automation_state
+      - standards_hardening
+      - roadmap_scope
+    validationCommands:
+      - Test-Path 'docs\05-execution-logs\audits-reviews\2026-05-17-foundation-review-closeout.md'
+      - Test-Path 'docs\03-standards\open-source-introduction.md'
+      - Select-String -Path 'docs\04-agent-system\state\task-queue.yaml' -Pattern 'phase-1-foundation-review-closeout'
+      - Select-String -Path 'docs\04-agent-system\state\project-state.yaml' -Pattern '2026-05-17-foundation-review-closeout'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-foundation-review-closeout.md
+    status: done
     retryCount: 0
   - id: phase-1-server-boundary-skeleton
     title: Server Boundary Skeleton
@@ -328,6 +363,7 @@ tasks:
     sourceStory: docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md#decision
     dependencies:
       - phase-1-test-tooling-decision
+      - phase-1-foundation-review-closeout
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-16-phase-1-server-boundary-skeleton.md
       - docs/05-execution-logs/evidence/2026-05-16-phase-1-server-boundary-skeleton.md
@@ -352,7 +388,35 @@ tasks:
       - npm.cmd run typecheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-server-boundary-skeleton.md
-    status: pending
+    status: done
+    retryCount: 0
+  - id: phase-1-dependency-format-baseline
+    title: Dependency and Format Baseline
+    phase: phase-1-foundation
+    sourceStory: user-request-2026-05-17-dependency-and-format-cleanup
+    dependencies:
+      - phase-1-server-boundary-skeleton
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-dependency-format-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-dependency-format-baseline.md
+      - package.json
+      - pnpm-lock.yaml
+      - .prettierignore
+      - "**/*"
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package-lock.json
+    riskTypes:
+      - add_dependency
+      - quality_gate
+      - formatting_baseline
+    validationCommands:
+      - npm.cmd run format:check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-dependency-format-baseline.md
+    status: done
     retryCount: 0
   - id: phase-1-api-contract-baseline
     title: API Contract Baseline
@@ -360,6 +424,7 @@ tasks:
     sourceStory: docs/02-architecture/interfaces/global-db-api-skeleton.md#api-contract
     dependencies:
       - phase-1-server-boundary-skeleton
+      - phase-1-dependency-format-baseline
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-16-phase-1-api-contract-baseline.md
       - docs/05-execution-logs/evidence/2026-05-16-phase-1-api-contract-baseline.md

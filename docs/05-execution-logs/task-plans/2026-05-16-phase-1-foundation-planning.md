@@ -39,6 +39,7 @@ Decision:
 ### Task 1: Record Phase 1 Planning Scope
 
 **Files:**
+
 - Create: `docs/05-execution-logs/task-plans/2026-05-16-phase-1-foundation-planning.md`
 - Modify: `docs/04-agent-system/state/task-queue.yaml`
 - Modify: `docs/04-agent-system/state/project-state.yaml`
@@ -83,6 +84,7 @@ Set handoff to the next claimable Phase 1 task and point `lastSummaryPath` to th
 ### Task 2: Verify Planning Changes
 
 **Files:**
+
 - Create: `docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-planning.md`
 
 - [x] **Step 1: Run readiness**

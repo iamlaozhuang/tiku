@@ -86,15 +86,15 @@
 
 > 当前记录为审批材料。`human approval: approve phase-1-test-tooling-decision devDependencies`。依赖安装已获用户明确授权。
 
-| Package name | Version range | Change type | Purpose | Import boundary | Alternative considered | Rejection reason | Abandonment risk | Security or maintenance risk | Bundle or runtime impact | Validation command | Human approval evidence |
-|---|---:|---|---|---|---|---|---|---|---|---|---|
-| `vitest` | `^4.1.6` | add devDependency | 单元测试 runner 和 assertion | 仅测试文件、`vitest.config.mts`、测试 setup | Jest | Jest 可用但配置更重；Phase 1 更需要快速覆盖 TS 纯逻辑 | 低，生态活跃 | 仅开发依赖，关注 runner 配置和 snapshot 滥用 | 不进入生产 bundle | `npm.cmd run test:unit` | human approval: approve phase-1-test-tooling-decision devDependencies |
-| `@vitejs/plugin-react` | `^6.0.2` | add devDependency | Vitest 下转换 React/TSX | 仅 `vitest.config.mts` | 仅依赖 Next/SWC | Next 官方 Vitest 手动配置要求该插件 | 低 | 仅开发依赖 | 不进入生产 bundle | `npm.cmd run test:unit` | human approval: approve phase-1-test-tooling-decision devDependencies |
-| `jsdom` | `^29.1.1` | add devDependency | DOM 测试环境 | 仅 Vitest test environment | `happy-dom` | Next 官方示例使用 `jsdom`；兼容行为更接近浏览器 DOM | 低到中，依赖面较大 | 仅开发依赖，需关注 transitive CVE | 不进入生产 bundle；本地测试较慢 | `npm.cmd run test:unit` | human approval: approve phase-1-test-tooling-decision devDependencies |
-| `@testing-library/react` | `^16.3.2` | add devDependency | React 组件行为测试 | 仅组件测试文件 | Enzyme | Enzyme 与现代 React 生态不匹配 | 低 | 仅开发依赖 | 不进入生产 bundle | `npm.cmd run test:unit` | human approval: approve phase-1-test-tooling-decision devDependencies |
-| `@testing-library/dom` | `^10.4.1` | add devDependency | DOM query 基础能力 | 仅测试文件和 Testing Library 间接边界 | 直接 DOM selector | 直接 selector 容易锁死实现细节 | 低 | 仅开发依赖 | 不进入生产 bundle | `npm.cmd run test:unit` | human approval: approve phase-1-test-tooling-decision devDependencies |
-| `@testing-library/jest-dom` | `^6.9.1` | add devDependency | DOM matcher | 仅 `vitest.setup.ts` | 手写 DOM assertion | 可读性和失败信息较差 | 低 | 仅开发依赖 | 不进入生产 bundle | `npm.cmd run test:unit` | human approval: approve phase-1-test-tooling-decision devDependencies |
-| `@playwright/test` | `^1.60.0` | add devDependency | E2E runner、browser assertions、reporter | 仅 `playwright.config.ts` 和 `e2e/**/*.spec.ts` | Cypress | Cypress 也可行，但本项目优先桌面浏览器真实路径和 Playwright 官方 Next.js 指南 | 低 | 浏览器二进制下载和 CI 缓存需控制 | 不进入生产 bundle；增加本地/CI 下载体积 | `npm.cmd run test:e2e -- --project=chromium` | human approval: approve phase-1-test-tooling-decision devDependencies |
+| Package name                | Version range | Change type       | Purpose                                  | Import boundary                                 | Alternative considered | Rejection reason                                                              | Abandonment risk   | Security or maintenance risk                 | Bundle or runtime impact                | Validation command                           | Human approval evidence                                               |
+| --------------------------- | ------------: | ----------------- | ---------------------------------------- | ----------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------- | ------------------ | -------------------------------------------- | --------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------- |
+| `vitest`                    |      `^4.1.6` | add devDependency | 单元测试 runner 和 assertion             | 仅测试文件、`vitest.config.mts`、测试 setup     | Jest                   | Jest 可用但配置更重；Phase 1 更需要快速覆盖 TS 纯逻辑                         | 低，生态活跃       | 仅开发依赖，关注 runner 配置和 snapshot 滥用 | 不进入生产 bundle                       | `npm.cmd run test:unit`                      | human approval: approve phase-1-test-tooling-decision devDependencies |
+| `@vitejs/plugin-react`      |      `^6.0.2` | add devDependency | Vitest 下转换 React/TSX                  | 仅 `vitest.config.mts`                          | 仅依赖 Next/SWC        | Next 官方 Vitest 手动配置要求该插件                                           | 低                 | 仅开发依赖                                   | 不进入生产 bundle                       | `npm.cmd run test:unit`                      | human approval: approve phase-1-test-tooling-decision devDependencies |
+| `jsdom`                     |     `^29.1.1` | add devDependency | DOM 测试环境                             | 仅 Vitest test environment                      | `happy-dom`            | Next 官方示例使用 `jsdom`；兼容行为更接近浏览器 DOM                           | 低到中，依赖面较大 | 仅开发依赖，需关注 transitive CVE            | 不进入生产 bundle；本地测试较慢         | `npm.cmd run test:unit`                      | human approval: approve phase-1-test-tooling-decision devDependencies |
+| `@testing-library/react`    |     `^16.3.2` | add devDependency | React 组件行为测试                       | 仅组件测试文件                                  | Enzyme                 | Enzyme 与现代 React 生态不匹配                                                | 低                 | 仅开发依赖                                   | 不进入生产 bundle                       | `npm.cmd run test:unit`                      | human approval: approve phase-1-test-tooling-decision devDependencies |
+| `@testing-library/dom`      |     `^10.4.1` | add devDependency | DOM query 基础能力                       | 仅测试文件和 Testing Library 间接边界           | 直接 DOM selector      | 直接 selector 容易锁死实现细节                                                | 低                 | 仅开发依赖                                   | 不进入生产 bundle                       | `npm.cmd run test:unit`                      | human approval: approve phase-1-test-tooling-decision devDependencies |
+| `@testing-library/jest-dom` |      `^6.9.1` | add devDependency | DOM matcher                              | 仅 `vitest.setup.ts`                            | 手写 DOM assertion     | 可读性和失败信息较差                                                          | 低                 | 仅开发依赖                                   | 不进入生产 bundle                       | `npm.cmd run test:unit`                      | human approval: approve phase-1-test-tooling-decision devDependencies |
+| `@playwright/test`          |     `^1.60.0` | add devDependency | E2E runner、browser assertions、reporter | 仅 `playwright.config.ts` 和 `e2e/**/*.spec.ts` | Cypress                | Cypress 也可行，但本项目优先桌面浏览器真实路径和 Playwright 官方 Next.js 指南 | 低                 | 浏览器二进制下载和 CI 缓存需控制             | 不进入生产 bundle；增加本地/CI 下载体积 | `npm.cmd run test:e2e -- --project=chromium` | human approval: approve phase-1-test-tooling-decision devDependencies |
 
 ## 后续落地文件边界
 
@@ -133,6 +133,7 @@
 ### Task 1: 审批确认
 
 **Files:**
+
 - Modify: `docs/05-execution-logs/task-plans/2026-05-16-phase-1-test-tooling-decision.md`
 - Modify: `docs/05-execution-logs/evidence/2026-05-16-phase-1-test-tooling-decision.md`
 
@@ -147,6 +148,7 @@
 ### Task 2: 依赖与配置落地
 
 **Files:**
+
 - Modify: `package.json`
 - Modify: `pnpm-lock.yaml`
 - Create: `vitest.config.mts`
@@ -179,7 +181,11 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     exclude: ["e2e/**", "node_modules/**"],
-    include: ["tests/unit/**/*.test.ts", "src/**/*.test.ts", "src/**/*.test.tsx"],
+    include: [
+      "tests/unit/**/*.test.ts",
+      "src/**/*.test.ts",
+      "src/**/*.test.tsx",
+    ],
     setupFiles: ["./vitest.setup.ts"],
   },
 });
@@ -225,6 +231,7 @@ export default defineConfig({
 ### Task 3: 冒烟测试与门禁
 
 **Files:**
+
 - Create: `src/server/contracts/api-response.test.ts`
 - Create: `e2e/home.spec.ts`
 - Modify: `docs/05-execution-logs/evidence/2026-05-16-phase-1-test-tooling-decision.md`

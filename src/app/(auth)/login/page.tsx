@@ -1,10 +1,10 @@
 export default function LoginPage() {
   return (
     <div className="text-center">
-      <h1 className="font-heading text-2xl font-semibold text-text-primary">
+      <h1 className="font-heading text-text-primary text-2xl font-semibold">
         登录
       </h1>
-      <p className="mt-2 text-text-secondary">占位页面 — Phase 2</p>
+      <p className="text-text-secondary mt-2">占位页面 — Phase 2</p>
     </div>
   );
 }
