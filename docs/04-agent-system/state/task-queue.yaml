@@ -320,7 +320,7 @@ tasks:
       - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-16-phase-1-formatting-gate-decision.md' -Pattern 'lint-staged|prettier-plugin-tailwindcss|human approval'
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md
-    status: pending
+    status: in_progress
     retryCount: 0
   - id: phase-1-server-boundary-skeleton
     title: Server Boundary Skeleton
