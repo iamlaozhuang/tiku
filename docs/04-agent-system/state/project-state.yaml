@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-1-foundation
-  updatedAt: "2026-05-15T23:59:00+08:00"
+  updatedAt: "2026-05-16T00:00:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -76,5 +76,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: start_phase_1_foundation
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
+  nextRecommendedAction: claim_phase_1_test_tooling_decision
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-planning.md

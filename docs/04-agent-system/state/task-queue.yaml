@@ -196,3 +196,224 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
     status: done
     retryCount: 0
+  - id: phase-1-foundation-planning
+    title: Phase 1 Foundation Task Breakdown
+    phase: phase-1-foundation
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-1-foundation
+    dependencies:
+      - phase-0-evidence
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-16-phase-1-foundation-planning.md
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-planning.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - stash_review
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-planning.md
+    status: done
+    retryCount: 0
+  - id: phase-1-test-tooling-decision
+    title: Test Tooling Decision
+    phase: phase-1-foundation
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-1-foundation
+    dependencies:
+      - phase-1-foundation-planning
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-16-phase-1-test-tooling-decision.md
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-test-tooling-decision.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - test_strategy
+      - add_dependency
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-16-phase-1-test-tooling-decision.md' -Pattern 'human approval'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-test-tooling-decision.md
+    status: pending
+    retryCount: 0
+  - id: phase-1-formatting-gate-decision
+    title: Formatting Gate Decision
+    phase: phase-1-foundation
+    sourceStory: docs/03-standards/code-taste-ten-commandments.md#frontend--ui-taste
+    dependencies:
+      - phase-1-test-tooling-decision
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-16-phase-1-formatting-gate-decision.md
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - quality_gate
+      - add_dependency
+      - stash_review
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-16-phase-1-formatting-gate-decision.md' -Pattern 'lint-staged|prettier-plugin-tailwindcss|human approval'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md
+    status: pending
+    retryCount: 0
+  - id: phase-1-server-boundary-skeleton
+    title: Server Boundary Skeleton
+    phase: phase-1-foundation
+    sourceStory: docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md#decision
+    dependencies:
+      - phase-1-test-tooling-decision
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-16-phase-1-server-boundary-skeleton.md
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-server-boundary-skeleton.md
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/models/**
+      - src/server/validators/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/db/schema/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+    riskTypes:
+      - architecture_boundary
+      - server_foundation
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-server-boundary-skeleton.md
+    status: pending
+    retryCount: 0
+  - id: phase-1-api-contract-baseline
+    title: API Contract Baseline
+    phase: phase-1-foundation
+    sourceStory: docs/02-architecture/interfaces/global-db-api-skeleton.md#api-contract
+    dependencies:
+      - phase-1-server-boundary-skeleton
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-16-phase-1-api-contract-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-api-contract-baseline.md
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - api_contract
+      - data_mapping
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - Select-String -Path 'src\server\contracts\*.ts' -Pattern 'code|message|data'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-api-contract-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-1-design-token-baseline
+    title: Design Token Baseline
+    phase: phase-1-foundation
+    sourceStory: docs/03-standards/code-taste-ten-commandments.md#frontend--ui-taste
+    dependencies:
+      - phase-1-formatting-gate-decision
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-16-phase-1-design-token-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-design-token-baseline.md
+      - src/app/globals.css
+      - docs/02-architecture/system-design/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+    riskTypes:
+      - design_token
+      - frontend_foundation
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - Select-String -Path 'src\app\globals.css' -Pattern '#000000|Inter|linear-gradient'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-design-token-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-1-env-logging-baseline
+    title: Environment and Logging Baseline
+    phase: phase-1-foundation
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-1-foundation
+    dependencies:
+      - phase-1-api-contract-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-16-phase-1-env-logging-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-env-logging-baseline.md
+      - src/server/**
+      - src/lib/**
+      - .env.example
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+    riskTypes:
+      - environment_config
+      - logging
+      - secret_or_env_change
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - Select-String -Path '.env.example' -Pattern 'DATABASE_URL|BETTER_AUTH_SECRET'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-env-logging-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-1-foundation-readiness-evidence
+    title: Foundation Readiness Evidence
+    phase: phase-1-foundation
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-1-foundation
+    dependencies:
+      - phase-1-api-contract-baseline
+      - phase-1-design-token-baseline
+      - phase-1-env-logging-baseline
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - evidence_integrity
+      - state_transition
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+    evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-readiness.md
+    status: pending
+    retryCount: 0
