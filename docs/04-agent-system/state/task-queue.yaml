@@ -446,7 +446,7 @@ tasks:
       - npm.cmd run typecheck
       - Select-String -Path 'src\server\contracts\*.ts' -Pattern 'code|message|data'
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-api-contract-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-1-design-token-baseline
     title: Design Token Baseline
@@ -473,7 +473,7 @@ tasks:
       - npm.cmd run typecheck
       - Select-String -Path 'src\app\globals.css' -Pattern '#000000|Inter|linear-gradient'
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-design-token-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-1-env-logging-baseline
     title: Environment and Logging Baseline
@@ -502,7 +502,7 @@ tasks:
       - npm.cmd run typecheck
       - Select-String -Path '.env.example' -Pattern 'DATABASE_URL|BETTER_AUTH_SECRET'
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-env-logging-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-1-foundation-readiness-evidence
     title: Foundation Readiness Evidence
@@ -529,5 +529,416 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
       - npm.cmd run build
     evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-readiness.md
+    status: done
+    retryCount: 0
+  - id: phase-2-user-auth-planning
+    title: Phase 2 User Auth Task Breakdown
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md
+    dependencies:
+      - phase-1-foundation-readiness-evidence
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-user-auth-planning.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-planning.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - auth_permission_model
+    validationCommands:
+      - Select-String -Path 'docs\04-agent-system\state\task-queue.yaml' -Pattern 'phase-2-auth-dependency-approval|phase-2-user-auth-readiness-evidence'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - npm.cmd run format:check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-planning.md
+    status: done
+    retryCount: 0
+  - id: phase-2-auth-dependency-approval
+    title: Auth Dependency Approval
+    phase: phase-2-user-auth
+    sourceStory: docs/02-architecture/adr/adr-001-tech-stack-selection.md#32-认证授权-better-auth
+    dependencies:
+      - phase-2-user-auth-planning
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-dependency-approval.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-approval.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - add_dependency
+      - auth_permission_model
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-17-phase-2-auth-dependency-approval.md' -Pattern 'better-auth|@better-auth/drizzle-adapter|human approval'
+      - npm.cmd run format:check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-approval.md
+    status: done
+    retryCount: 0
+  - id: phase-2-auth-dependency-install
+    title: Auth Dependency Install
+    phase: phase-2-user-auth
+    sourceStory: docs/02-architecture/adr/adr-001-tech-stack-selection.md#32-认证授权-better-auth
+    dependencies:
+      - phase-2-auth-dependency-approval
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-dependency-install.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-install.md
+      - package.json
+      - pnpm-lock.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - add_dependency
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-17-phase-2-auth-dependency-install.md' -Pattern 'human approval'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-install.md
+    status: done
+    retryCount: 0
+  - id: phase-2-auth-schema-and-permission-model-approval
+    title: Auth Schema and Permission Model Approval
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md
+    dependencies:
+      - phase-2-auth-dependency-install
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-schema-and-permission-model-approval.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-and-permission-model-approval.md
+      - docs/02-architecture/interfaces/user-auth-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - database_migration
+      - auth_permission_model
+      - secret_or_env_change
+    validationCommands:
+      - Test-Path 'docs\02-architecture\interfaces\user-auth-contract.md'
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-17-phase-2-auth-schema-and-permission-model-approval.md' -Pattern 'human approval'
+      - npm.cmd run format:check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-and-permission-model-approval.md
+    status: done
+    retryCount: 0
+  - id: phase-2-auth-schema-baseline
+    title: Auth Schema Baseline
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#1-统一账号
+    dependencies:
+      - phase-2-auth-schema-and-permission-model-approval
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-schema-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-baseline.md
+      - src/db/schema/**
+      - src/server/models/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/app/**
+    riskTypes:
+      - database_migration
+      - auth_permission_model
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - Select-String -Path 'src\db\schema\*.ts' -Pattern 'user|student|admin|organization|employee|session'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-baseline.md
+    status: done
+    retryCount: 0
+  - id: phase-2-auth-adapter-boundary
+    title: Auth Adapter Boundary
+    phase: phase-2-user-auth
+    sourceStory: docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md#decision
+    dependencies:
+      - phase-2-auth-schema-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-adapter-boundary.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-adapter-boundary.md
+      - src/server/auth/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/lib/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - auth_permission_model
+      - architecture_boundary
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-adapter-boundary.md
+    status: pending
+    retryCount: 0
+  - id: phase-2-session-login-baseline
+    title: Session and Login Baseline
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#us-01-02-用户登录与会话管理
+    dependencies:
+      - phase-2-auth-adapter-boundary
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-session-login-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-session-login-baseline.md
+      - src/app/api/v1/sessions/**
+      - src/server/auth/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - auth_permission_model
+      - api_contract
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\sessions\**\*.ts' -Pattern 'code|message|data'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-session-login-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-2-user-registration-baseline
+    title: User Registration Baseline
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#us-01-01-个人用户注册
+    dependencies:
+      - phase-2-session-login-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-user-registration-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-user-registration-baseline.md
+      - src/app/api/v1/users/**
+      - src/server/auth/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - auth_permission_model
+      - api_contract
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\server\validators\*.ts' -Pattern 'phone|password'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-user-registration-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-2-admin-employee-account-baseline
+    title: Admin Employee Account Baseline
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#us-01-03-企业员工账号创建单个
+    dependencies:
+      - phase-2-user-registration-baseline
+      - phase-2-organization-auth-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-admin-employee-account-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-admin-employee-account-baseline.md
+      - src/app/api/v1/employees/**
+      - src/server/auth/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - auth_permission_model
+      - api_contract
+      - audit_log
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'employee|organization'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-admin-employee-account-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-2-redeem-code-auth-baseline
+    title: Redeem Code Authorization Baseline
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#3-个人卡密授权
+    dependencies:
+      - phase-2-user-registration-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-redeem-code-auth-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-redeem-code-auth-baseline.md
+      - src/app/api/v1/redeem-codes/**
+      - src/app/api/v1/personal-auths/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'redeem_code|personal_auth|authorization'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-redeem-code-auth-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-2-organization-auth-baseline
+    title: Organization Auth Baseline
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#4-企业组织与授权
+    dependencies:
+      - phase-2-auth-schema-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-organization-auth-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-organization-auth-baseline.md
+      - src/app/api/v1/organizations/**
+      - src/app/api/v1/org-auths/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - authorization
+      - auth_permission_model
+      - api_contract
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'organization|org_auth|auth_scope_type'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-organization-auth-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-2-effective-authorization-baseline
+    title: Effective Authorization Baseline
+    phase: phase-2-user-auth
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#5-授权访问统一规则
+    dependencies:
+      - phase-2-redeem-code-auth-baseline
+      - phase-2-organization-auth-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-17-phase-2-effective-authorization-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-effective-authorization-baseline.md
+      - src/app/api/v1/authorizations/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'personal_auth|org_auth|authorization'
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-effective-authorization-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-2-user-auth-readiness-evidence
+    title: User Auth Readiness Evidence
+    phase: phase-2-user-auth
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-2-user-auth
+    dependencies:
+      - phase-2-admin-employee-account-baseline
+      - phase-2-effective-authorization-baseline
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+    riskTypes:
+      - evidence_integrity
+      - state_transition
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-readiness.md
     status: pending
     retryCount: 0
