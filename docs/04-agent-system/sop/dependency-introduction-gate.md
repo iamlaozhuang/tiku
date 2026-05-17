@@ -71,3 +71,10 @@ Rules:
 - Use aliases at the adapter boundary when external packages use conflicting names.
 
 No dependency change may bypass this gate to save implementation time.
+
+## Commit Isolation
+
+- Dependency add, remove, or upgrade work must close as its own task-scoped commit whenever the repository state is committed.
+- Dependency commits must not include feature implementation, route handlers, schema changes, generated migrations, or unrelated formatting churn.
+- Feature tasks that depend on a newly approved dependency must start from a clean branch or worktree after the dependency commit has been merged or explicitly chosen as the branch base.
+- If a dependency change cannot be committed independently, stop and record the blocker in evidence before continuing feature work.

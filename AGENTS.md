@@ -168,7 +168,10 @@
 2. **任务领取以队列为准**：优先读取 `docs/04-agent-system/state/project-state.yaml` 和 `docs/04-agent-system/state/task-queue.yaml`，只处理 `pending` 且依赖已完成的任务；高风险任务必须先取得明确人工批准。
 3. **依赖变更先审批后落地**：新增、删除、升级 npm 包、CLI、外部 SDK、测试框架、云服务配置、数据库迁移工具时，必须先按 `docs/04-agent-system/sop/dependency-introduction-gate.md` 写明理由和 `human approval` 证据，未经批准不得改 `package.json` 或 lockfile。
 4. **证据先于结论**：任务完成前必须运行任务声明的验证命令，并把输出写入 `docs/05-execution-logs/evidence/`。如果 `test` script 缺失，只能声明“lint/typecheck 通过，测试门禁缺失”，禁止声称完整测试通过。
-5. **合入后清理隔离资源**：短生命周期分支合入 `master` 后，必须删除对应 worktree 和已合入分支；残留 `node_modules` 等本地产物只允许在确认路径位于 `.worktrees/` 内后删除。
-6. **跨会话恢复要求**：会话中断或上下文不足时，从 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan 恢复，不得凭记忆继续实现。
-7. **PR 基线健康要求**：Stacked PR 必须声明临时 base；前置分支合入 `master` 后，必须将后续 PR 重新对准 `master`，并验证 compare 只包含当前任务文件。若需要重建短生命周期分支，只允许使用 `--force-with-lease`，禁止无保护 force push。
-8. **Fresh checkout 门禁**：格式化、行尾、质量门禁类修正必须在基于目标分支的新 worktree 中验证。仓库行尾策略由 `.gitattributes` 的 `* text=auto eol=lf` 固化，禁止依赖某个本地 Git 配置或旧 worktree 状态声称 `format:check` 健康。
+5. **任务提交屏障**：一个任务默认对应一个可审查提交。任务完成、验证与 evidence 写入后，必须先评估是否适合提交；若继续领取下一任务前仍有未提交改动，必须说明原因并确认这些改动只属于当前任务。严禁把已完成任务的代码、依赖、格式化噪声混入后续任务提交。
+6. **依赖提交隔离**：任何允许的 `package.json` / lockfile 变更必须独立于业务实现提交，提交信息和 evidence 中都必须包含 `human approval` 证据；未经任务队列和人工审批允许，不得把依赖变更顺手带入功能提交。
+7. **Push 决策门禁**：本地合并或提交不等于允许 push。推送 `master`、创建/更新 PR、`--force-with-lease`、部署等远端动作必须有明确用户批准，并在 evidence 或交付说明中记录推送目标、分支和结果。
+8. **合入后清理隔离资源**：短生命周期分支合入 `master` 后，必须先在 `master` 运行必要门禁并写 evidence，再删除对应 worktree 和已合入分支；残留 `node_modules` 等本地产物只允许在确认路径位于 `.worktrees/` 内后删除。
+9. **跨会话恢复要求**：会话中断或上下文不足时，从 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan 恢复，不得凭记忆继续实现。
+10. **PR 基线健康要求**：Stacked PR 必须声明临时 base；前置分支合入 `master` 后，必须将后续 PR 重新对准 `master`，并验证 compare 只包含当前任务文件。若需要重建短生命周期分支，只允许使用 `--force-with-lease`，禁止无保护 force push。
+11. **Fresh checkout 门禁**：格式化、行尾、质量门禁类修正必须在基于目标分支的新 worktree 中验证。仓库行尾策略由 `.gitattributes` 的 `* text=auto eol=lf` 固化，禁止依赖某个本地 Git 配置或旧 worktree 状态声称 `format:check` 健康。

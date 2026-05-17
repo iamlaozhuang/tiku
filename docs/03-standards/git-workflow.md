@@ -30,14 +30,64 @@ Active.
   - `feat(paper): add publish validation`
   - `fix(auth): validate redeem code expiry`
 - Do not commit unrelated local artifacts, temporary files, generated caches, `.env` files, or worktree contents.
+- One completed queue task should normally produce one focused commit after validation and evidence are written.
+- Before starting the next task, run a completion inventory:
+
+```powershell
+git status --short --branch
+git diff --name-only
+git diff --cached --name-only
+git ls-files --others --exclude-standard
+```
+
+- If any tracked, staged, or untracked file remains after a task is declared complete, record whether it is intentionally uncommitted evidence, generated local residue, or a blocker.
+- Do not bundle dependency changes, lockfile changes, formatting-only cleanup, and feature implementation in one commit unless a task explicitly allows that combined scope.
+- If a task is completed but not committed, the handoff must state the reason and the exact files left in the worktree.
+
+## Dependency Commit Rules
+
+- Approved dependency add, remove, or upgrade work must be isolated from business implementation.
+- A dependency commit must include the dependency gate record and `human approval` evidence in the task plan or evidence file.
+- Do not carry package or lockfile changes into later feature commits unless the later task explicitly allows those files.
 
 ## Merge Rules
 
 - Prefer fast-forward merges for task branches.
 - Run the task validation commands before merge.
 - Run readiness and quality gates on `master` after merge.
+- Local merge completion requires fresh evidence on `master` before cleanup.
 - Do not auto-merge pull requests.
 - Production, deployment, database migration, secret, or external service changes require explicit human approval.
+
+## Push Decision Rules
+
+- A local commit or local merge does not imply remote push approval.
+- Push to `master`, PR creation/update, `--force-with-lease`, deployment, and production environment changes require explicit human approval.
+- Before pushing a task branch, verify the compare against its base contains only task-scoped files:
+
+```powershell
+git diff --name-only origin/master..HEAD
+```
+
+- Before pushing `master`, verify it is ahead of `origin/master` by the expected commits and not behind:
+
+```powershell
+git fetch origin
+git rev-list --left-right --count origin/master...master
+```
+
+- Evidence or the final handoff must record the pushed branch, remote target, and resulting commit range.
+
+## Closeout Evidence Rules
+
+- Every task closeout evidence must include the task id, branch or worktree, validation commands, commit SHA when committed, PR URL when created, merge result when merged, and push result when pushed.
+- After a merge into `master`, run:
+
+```powershell
+.\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+- Only remove the worktree and delete the merged branch after the closeout evidence confirms the target branch gates and Git state.
 
 ## Stacked PR Rules
 

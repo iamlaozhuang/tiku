@@ -26,6 +26,7 @@ Do not claim full end-to-end coverage unless `test:e2e` or `test` was run succes
 Run:
 
 ```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
 ```
@@ -77,4 +78,16 @@ test:unit: pass/fail
 format:check: pass/fail
 build: skipped, reason
 test:e2e: skipped, reason
+```
+
+Git closeout evidence must also record:
+
+```text
+branch: current task branch
+base: intended merge or compare base
+changed files: tracked/staged/untracked inventory
+commit: sha or skipped, reason
+merge: target branch and result, or skipped, reason
+push: remote branch and result, or skipped, reason
+cleanup: worktree/branch cleanup result, or skipped, reason
 ```

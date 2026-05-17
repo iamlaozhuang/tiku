@@ -771,6 +771,43 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-session-login-baseline.md
     status: done
     retryCount: 0
+  - id: phase-2-git-submit-push-hardening
+    title: Git Submit and Push Mechanism Hardening
+    phase: phase-2-user-auth
+    sourceStory: user-request-2026-05-17-git-submit-push-hardening
+    dependencies:
+      - phase-2-session-login-baseline
+    allowedFiles:
+      - AGENTS.md
+      - docs/03-standards/git-workflow.md
+      - docs/03-standards/local-ci.md
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - scripts/agent-system/Test-GitCompletionReadiness.ps1
+      - scripts/agent-system/Test-AgentSystemReadiness.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-05-17-git-submit-push-hardening.md
+      - docs/05-execution-logs/evidence/2026-05-17-git-submit-push-hardening.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - automation_policy
+      - git_workflow
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run format:check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-git-submit-push-hardening.md
+    status: done
+    retryCount: 0
   - id: phase-2-user-registration-baseline
     title: User Registration Baseline
     phase: phase-2-user-auth

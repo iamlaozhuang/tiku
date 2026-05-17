@@ -13,6 +13,7 @@ $requiredFilePaths = @(
     "docs\04-agent-system\state\project-state.yaml",
     "docs\04-agent-system\state\task-queue.yaml",
     "docs\04-agent-system\milestones-goals\mvp-roadmap.md",
+    "scripts\agent-system\Test-GitCompletionReadiness.ps1",
     "package.json"
 )
 

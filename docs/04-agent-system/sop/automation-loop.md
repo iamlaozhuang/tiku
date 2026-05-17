@@ -55,10 +55,19 @@ For each claimed task:
 3. Perform only the scoped edit required by the task.
 4. Run available gates, starting with task-specific validation commands.
 5. Write evidence for command outputs, missing gates, and any accepted residual risk.
-6. Commit successful work only when the task instruction allows commits.
-7. Update the queue and project state only when those files are in the allowed scope.
+6. Run a Git completion inventory with `Test-GitCompletionReadiness.ps1` or equivalent commands.
+7. Commit successful work only when the task instruction allows commits; otherwise record why the work remains uncommitted.
+8. Do not claim the next task while completed-task changes are still mixed with the current worktree, unless the handoff explicitly names the remaining files and reason.
+9. Update the queue and project state only when those files are in the allowed scope.
 
 Each step should leave enough evidence for another agent to resume without guessing.
+
+## Commit Barrier
+
+- A task is not ready for handoff until its validation output, evidence file, and Git inventory all agree on the changed file set.
+- One task should normally close with one focused commit. Split commits only when the task has clearly separate approved scopes, such as dependency approval, dependency install, and business implementation.
+- Never bundle an allowed dependency or lockfile change into a later feature commit. Dependency work must carry its own approval evidence.
+- If the user asks to continue the queue after a task is complete, first decide whether the completed task should be committed and merged before starting the next task.
 
 ## Context Management
 
@@ -77,6 +86,21 @@ Keep session context small and durable:
 - If no remote is configured, do not invent a repository URL.
 - When a remote exists, use draft PRs by default and do not enable auto-merge.
 - Push, PR creation, deployment, and production environment changes require explicit user approval.
+- Local commit, local merge, remote push, PR creation, and cleanup are separate decisions. Approval for one does not automatically approve the next.
+- Before pushing `master`, fetch the remote and verify the branch is not behind `origin/master`.
+- Evidence must record every approved remote action and its result.
+
+## Closeout Sequence
+
+After a task branch is locally merged:
+
+1. Switch to the merge target branch.
+2. Run task-relevant validation plus readiness and quality gates.
+3. Write closeout evidence with commit, merge, push, and cleanup status.
+4. Push only when explicitly approved.
+5. Remove the task worktree and delete the merged branch only after target-branch validation and evidence are complete.
+
+If Windows leaves a worktree directory behind because of `node_modules` or other generated residue, resolve the absolute path and confirm it is under `.worktrees/` before deleting anything.
 
 ## PR Baseline Hygiene
 
