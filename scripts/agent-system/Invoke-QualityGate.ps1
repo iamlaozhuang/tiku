@@ -9,7 +9,7 @@ if (-not (Test-Path $packageJsonPath)) {
 $packageJson = Get-Content -Path $packageJsonPath -Raw | ConvertFrom-Json
 $scriptNames = $packageJson.scripts.PSObject.Properties.Name
 
-foreach ($qualityScriptName in @("lint", "typecheck", "test")) {
+foreach ($qualityScriptName in @("lint", "typecheck", "test:unit", "format:check")) {
     if ($scriptNames -contains $qualityScriptName) {
         Write-Output "RUN npm script: $qualityScriptName"
         & npm.cmd run $qualityScriptName
