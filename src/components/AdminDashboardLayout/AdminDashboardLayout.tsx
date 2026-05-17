@@ -42,19 +42,19 @@ export function AdminDashboardLayout({
   const portalName = isOps ? "运营后台" : "内容后台";
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="bg-background flex min-h-screen">
       {/* Sidebar */}
       <aside
-        className="hidden w-60 flex-shrink-0 border-r border-border bg-surface lg:flex lg:flex-col"
+        className="border-border bg-surface hidden w-60 flex-shrink-0 border-r lg:flex lg:flex-col"
         role="navigation"
         aria-label="侧边栏导航"
       >
         {/* Brand */}
-        <div className="flex h-14 items-center border-b border-border px-4">
-          <h1 className="font-heading text-base font-semibold text-brand-primary">
+        <div className="border-border flex h-14 items-center border-b px-4">
+          <h1 className="font-heading text-brand-primary text-base font-semibold">
             题库系统
           </h1>
-          <span className="ml-2 rounded-radius-sm bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+          <span className="rounded-radius-sm ml-2 bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
             {portalName}
           </span>
         </div>
@@ -69,10 +69,10 @@ export function AdminDashboardLayout({
                   <Link
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`flex items-center gap-3 rounded-radius-md px-3 py-2 text-sm transition-colors ${
+                    className={`rounded-radius-md flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
                       isActive
-                        ? "bg-green-50 text-brand-primary font-medium"
-                        : "text-text-secondary hover:bg-green-50/50 hover:text-text-primary"
+                        ? "text-brand-primary bg-green-50 font-medium"
+                        : "text-text-secondary hover:text-text-primary hover:bg-green-50/50"
                     }`}
                   >
                     <span>{item.icon}</span>
@@ -88,8 +88,8 @@ export function AdminDashboardLayout({
       {/* Main Area */}
       <div className="flex flex-1 flex-col">
         {/* TopBar */}
-        <header className="sticky top-0 z-30 flex h-14 items-center border-b border-border bg-surface px-6 shadow-sm">
-          <span className="text-sm text-text-muted">{portalName}</span>
+        <header className="border-border bg-surface sticky top-0 z-30 flex h-14 items-center border-b px-6 shadow-sm">
+          <span className="text-text-muted text-sm">{portalName}</span>
         </header>
 
         {/* Content */}

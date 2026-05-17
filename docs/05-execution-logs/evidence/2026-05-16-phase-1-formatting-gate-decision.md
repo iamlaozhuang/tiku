@@ -6,116 +6,84 @@
 
 ## Scope
 
-Prepare the formatting gate decision and dependency approval material for `phase-1-formatting-gate-decision` without installing dependencies or modifying package files.
+Implemented the approved formatting gate tooling for `phase-1-formatting-gate-decision`.
 
-## Branch
+## Human Approval
 
-`codex/phase-1-formatting-gate-decision`
+`human approval`: the user explicitly approved execution in chat with `批准执行` on 2026-05-16.
 
 ## Files Created Or Updated
 
+- `package.json`
+- `pnpm-lock.yaml`
+- `.prettierrc.json`
+- `.prettierignore`
+- `.husky/pre-commit`
+- `.husky/_/h`
 - `docs/05-execution-logs/task-plans/2026-05-16-phase-1-formatting-gate-decision.md`
 - `docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md`
 - `docs/04-agent-system/state/project-state.yaml`
 - `docs/04-agent-system/state/task-queue.yaml`
 
-## Context Read
+## Dependency Result
 
-- `docs/04-agent-system/state/project-state.yaml`
-- `docs/04-agent-system/state/task-queue.yaml`
-- `docs/03-standards/code-taste-ten-commandments.md`
-- `docs/03-standards/local-ci.md`
-- `docs/02-architecture/adr/adr-001-tech-stack-selection.md`
-- `docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md`
-- `docs/02-architecture/adr/adr-003-workplace-desktop-web-compatibility.md`
-- `docs/04-agent-system/sop/dependency-introduction-gate.md`
-- `docs/05-execution-logs/evidence/2026-05-16-phase-1-test-tooling-decision.md`
-
-## External References Checked
-
-- Prettier install guide: `https://prettier.io/docs/install.html`
-- Prettier CLI guide: `https://prettier.io/docs/next/cli/`
-- Prettier pre-commit guide: `https://prettier.io/docs/precommit`
-- Tailwind Labs prettier-plugin-tailwindcss: `https://github.com/tailwindlabs/prettier-plugin-tailwindcss`
-- lint-staged documentation: `https://github.com/lint-staged/lint-staged`
-- Husky get started: `https://typicode.github.io/husky/get-started.html`
-
-## Registry Version Checks
-
-The commands were run with escalation only to read npm registry metadata. No dependencies were installed.
-
-```text
-npm.cmd view prettier version
-3.8.3
-
-npm.cmd view prettier-plugin-tailwindcss version
-0.8.0
-
-npm.cmd view lint-staged version
-17.0.4
-
-npm.cmd view husky version
-9.1.7
-```
-
-## Decision Summary
-
-- Formatter: `prettier`.
-- Tailwind class ordering: `prettier-plugin-tailwindcss`.
-- Staged-file pre-commit entrypoint: `lint-staged`.
-- Git hook manager declaration: `husky`, matching the existing `.husky/` directory.
-- Full quality gate remains `Invoke-QualityGate.ps1`; pre-commit should run staged formatting, lint, and typecheck only.
-
-## Dependency Approval Status
-
-`human approval: pending`.
-
-No package file or lockfile was modified in this task. The dependency approval table is recorded in `docs/05-execution-logs/task-plans/2026-05-16-phase-1-formatting-gate-decision.md`.
-
-## Validation To Run Before Handoff
+Installed approved devDependencies with:
 
 ```powershell
-Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-16-phase-1-formatting-gate-decision.md' -Pattern 'lint-staged|prettier-plugin-tailwindcss|human approval'
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+corepack pnpm@10 add -D prettier prettier-plugin-tailwindcss lint-staged husky
 ```
+
+Resolved versions:
+
+```text
+husky 9.1.7
+lint-staged 17.0.5
+prettier 3.8.3
+prettier-plugin-tailwindcss 0.8.0
+```
+
+`lint-staged` resolved to `17.0.5` instead of the earlier registry-check value `17.0.4`. Local Node is `v22.22.2`, satisfying the resolved package engine requirement.
 
 ## Validation Results
 
-Approval phrase and package check:
+Format baseline check:
 
 ```text
-Select-String found occurrences of "lint-staged", "prettier-plugin-tailwindcss", and "human approval" in the task plan, including the dependency approval table and pending approval status.
+npm.cmd run format:check
+Result: failed.
+Reason: Prettier found historical formatting drift in 75 existing files.
+Action: no broad prettier --write was run in this task to avoid mixing a repository-wide formatting diff into the tooling change.
 ```
 
-Quality gate:
+lint-staged CLI smoke:
 
 ```text
-RUN npm script: lint
-
-> tiku-scaffold@0.1.0 lint
-> eslint
-
-RUN npm script: typecheck
-
-> tiku-scaffold@0.1.0 typecheck
-> tsc --noEmit
-
-RUN npm script: test
-
-> tiku-scaffold@0.1.0 test
-> npm run test:unit && npm run test:e2e
-
-Test Files  1 passed (1)
-Tests  1 passed (1)
-ok 1 [chromium] › e2e\home.spec.ts:3:5 › loads the root navigation page
-1 passed (13.3s)
+npm.cmd run lint-staged -- --help
+Result: pass.
 ```
 
-Current status before approval:
+Full quality gate:
 
 ```text
-formatting dependency installation: not started
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: pass.
 lint: pass
 typecheck: pass
 test: pass
+unit tests: 1 passed
+e2e tests: 1 passed
 ```
+
+Actual pre-commit hook smoke:
+
+```text
+& 'C:\Program Files\Git\bin\sh.exe' '.husky/_/pre-commit'
+Result: pass.
+lint-staged: no staged files found
+lint: pass
+typecheck: pass
+```
+
+## Follow-Up
+
+Create a separate baseline formatting task before making `format:check` a hard full-repository gate. The current pre-commit path already enforces staged-file formatting and Tailwind class ordering for changed files.

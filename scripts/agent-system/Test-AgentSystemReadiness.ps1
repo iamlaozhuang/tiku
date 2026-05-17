@@ -36,11 +36,64 @@ foreach ($qualityScriptName in @("lint", "typecheck", "test")) {
     }
 }
 
+$codexConfigPath = "C:\Users\laozhuang\.codex\config.toml"
+if (Test-Path $codexConfigPath) {
+    $codexConfig = Get-Content -Path $codexConfigPath -Raw
+    if ($codexConfig -match '\[plugins\."superpowers@openai-curated"\]' -and $codexConfig -match '\[plugins\."superpowers@openai-curated"\]\s*enabled\s*=\s*true') {
+        Write-Output "OK plugin enabled: superpowers@openai-curated"
+    } else {
+        Write-Output "MISSING plugin enabled: superpowers@openai-curated"
+    }
+} else {
+    Write-Output "MISSING Codex config: $codexConfigPath"
+}
+
+$superpowersPluginRootPath = "C:\Users\laozhuang\.codex\plugins\cache\openai-curated\superpowers"
+$superpowersSkillNames = @(
+    "brainstorming",
+    "dispatching-parallel-agents",
+    "executing-plans",
+    "finishing-a-development-branch",
+    "receiving-code-review",
+    "requesting-code-review",
+    "subagent-driven-development",
+    "systematic-debugging",
+    "test-driven-development",
+    "using-git-worktrees",
+    "using-superpowers",
+    "verification-before-completion",
+    "writing-plans",
+    "writing-skills"
+)
+
+if (Test-Path $superpowersPluginRootPath) {
+    $superpowersPluginSkillRoots = Get-ChildItem -Path $superpowersPluginRootPath -Directory -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -eq "skills" }
+
+    foreach ($skillName in $superpowersSkillNames) {
+        $skillFound = $false
+        foreach ($skillRoot in $superpowersPluginSkillRoots) {
+            $skillPath = Join-Path -Path $skillRoot.FullName -ChildPath $skillName
+            if (Test-Path $skillPath) {
+                $skillFound = $true
+                break
+            }
+        }
+
+        if ($skillFound) {
+            Write-Output "OK superpowers skill path: $skillName"
+        } else {
+            Write-Output "MISSING superpowers skill path: $skillName"
+        }
+    }
+} else {
+    Write-Output "MISSING plugin cache: superpowers@openai-curated"
+}
+
 $skillRootPath = "C:\Users\laozhuang\.codex\skills"
 $skillNames = @(
     "ralplan",
     "ralph",
-    "autopilot",
     "code-review",
     "code-simplifier",
     "drizzle-orm-expert",
@@ -55,9 +108,11 @@ $skillNames = @(
     "vercel-ai-sdk-expert",
     "rag-engineer",
     "rag-implementation",
-    "playwright-skill",
+    "playwright",
     "webapp-testing",
     "e2e-testing",
+    "security-best-practices",
+    "security-threat-model",
     "tdd-orchestrator",
     "tdd-workflow",
     "testing-patterns"
@@ -69,6 +124,16 @@ foreach ($skillName in $skillNames) {
         Write-Output "OK skill path: $skillName"
     } else {
         Write-Output "MISSING skill path: $skillName"
+    }
+}
+
+$reservedSkillNames = @("autopilot")
+foreach ($skillName in $reservedSkillNames) {
+    $skillPath = Join-Path -Path $skillRootPath -ChildPath $skillName
+    if (Test-Path $skillPath) {
+        Write-Output "RESERVED skill path present but inactive unless explicitly enabled: $skillName"
+    } else {
+        Write-Output "RESERVED skill path not installed: $skillName"
     }
 }
 

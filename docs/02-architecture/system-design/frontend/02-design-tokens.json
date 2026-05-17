@@ -6,8 +6,16 @@
     "light": {
       "color": {
         "brand": {
-          "primary": { "value": "#00904A", "type": "color", "description": "中国烟草标准绿，品牌主色" },
-          "secondary": { "value": "#F5A623", "type": "color", "description": "中国烟草标准黄，辅助色" }
+          "primary": {
+            "value": "#00904A",
+            "type": "color",
+            "description": "中国烟草标准绿，品牌主色"
+          },
+          "secondary": {
+            "value": "#F5A623",
+            "type": "color",
+            "description": "中国烟草标准黄，辅助色"
+          }
         },
         "green": {
           "50": { "value": "#ECFDF5", "type": "color" },
@@ -15,9 +23,17 @@
           "200": { "value": "#A7F3D0", "type": "color" },
           "300": { "value": "#6EE7B7", "type": "color" },
           "400": { "value": "#34D399", "type": "color" },
-          "500": { "value": "#10B981", "type": "color", "description": "语义成功色" },
+          "500": {
+            "value": "#10B981",
+            "type": "color",
+            "description": "语义成功色"
+          },
           "600": { "value": "#059669", "type": "color" },
-          "700": { "value": "#00904A", "type": "color", "description": "同 brand.primary" },
+          "700": {
+            "value": "#00904A",
+            "type": "color",
+            "description": "同 brand.primary"
+          },
           "800": { "value": "#166534", "type": "color" },
           "900": { "value": "#14532D", "type": "color" }
         },
@@ -28,8 +44,16 @@
           "info": { "value": "#3B82F6", "type": "color" }
         },
         "neutral": {
-          "surface": { "value": "#FFFFFF", "type": "color", "description": "卡片、内容区底色" },
-          "background": { "value": "#F9FAFB", "type": "color", "description": "页面整体背景" },
+          "surface": {
+            "value": "#FFFFFF",
+            "type": "color",
+            "description": "卡片、内容区底色"
+          },
+          "background": {
+            "value": "#F9FAFB",
+            "type": "color",
+            "description": "页面整体背景"
+          },
           "border": { "value": "#E5E7EB", "type": "color" },
           "border-hover": { "value": "#D1D5DB", "type": "color" }
         },
@@ -37,19 +61,33 @@
           "primary": { "value": "#111827", "type": "color" },
           "secondary": { "value": "#6B7280", "type": "color" },
           "muted": { "value": "#9CA3AF", "type": "color" },
-          "inverse": { "value": "#FFFFFF", "type": "color", "description": "深色背景上的文字" }
+          "inverse": {
+            "value": "#FFFFFF",
+            "type": "color",
+            "description": "深色背景上的文字"
+          }
         }
       },
       "shadow": {
         "sm": { "value": "0 1px 2px 0 rgba(0, 0, 0, 0.05)", "type": "shadow" },
-        "md": { "value": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", "type": "shadow" },
-        "lg": { "value": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)", "type": "shadow" }
+        "md": {
+          "value": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+          "type": "shadow"
+        },
+        "lg": {
+          "value": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+          "type": "shadow"
+        }
       }
     },
     "dark": {
       "color": {
         "brand": {
-          "primary": { "value": "#4ADE80", "type": "color", "description": "暗黑模式下的品牌绿，提升明度保证对比度" },
+          "primary": {
+            "value": "#4ADE80",
+            "type": "color",
+            "description": "暗黑模式下的品牌绿，提升明度保证对比度"
+          },
           "secondary": { "value": "#FBBF24", "type": "color" }
         },
         "semantic": {
@@ -73,15 +111,27 @@
       },
       "shadow": {
         "sm": { "value": "0 1px 2px 0 rgba(0, 0, 0, 0.5)", "type": "shadow" },
-        "md": { "value": "0 4px 6px -1px rgba(0, 0, 0, 0.5)", "type": "shadow" },
-        "lg": { "value": "0 10px 15px -3px rgba(0, 0, 0, 0.5)", "type": "shadow" }
+        "md": {
+          "value": "0 4px 6px -1px rgba(0, 0, 0, 0.5)",
+          "type": "shadow"
+        },
+        "lg": {
+          "value": "0 10px 15px -3px rgba(0, 0, 0, 0.5)",
+          "type": "shadow"
+        }
       }
     }
   },
   "global": {
     "fontFamily": {
-      "heading": { "value": "'Noto Sans SC', system-ui, sans-serif", "type": "typography" },
-      "body": { "value": "'Noto Sans SC', system-ui, sans-serif", "type": "typography" },
+      "heading": {
+        "value": "'Noto Sans SC', system-ui, sans-serif",
+        "type": "typography"
+      },
+      "body": {
+        "value": "'Noto Sans SC', system-ui, sans-serif",
+        "type": "typography"
+      },
       "mono": { "value": "'JetBrains Mono', monospace", "type": "typography" }
     },
     "fontSize": {
@@ -113,10 +163,26 @@
     },
     "radius": {
       "none": { "value": "0px", "type": "borderRadius" },
-      "sm": { "value": "4px", "type": "borderRadius", "description": "后台端小组件" },
-      "md": { "value": "8px", "type": "borderRadius", "description": "后台端卡片 / 学员端小组件" },
-      "lg": { "value": "12px", "type": "borderRadius", "description": "学员端卡片" },
-      "xl": { "value": "16px", "type": "borderRadius", "description": "学员端大面板" },
+      "sm": {
+        "value": "4px",
+        "type": "borderRadius",
+        "description": "后台端小组件"
+      },
+      "md": {
+        "value": "8px",
+        "type": "borderRadius",
+        "description": "后台端卡片 / 学员端小组件"
+      },
+      "lg": {
+        "value": "12px",
+        "type": "borderRadius",
+        "description": "学员端卡片"
+      },
+      "xl": {
+        "value": "16px",
+        "type": "borderRadius",
+        "description": "学员端大面板"
+      },
       "full": { "value": "9999px", "type": "borderRadius" }
     }
   }

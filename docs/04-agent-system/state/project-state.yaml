@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-1-foundation
-  updatedAt: "2026-05-16T12:00:00+08:00"
+  updatedAt: "2026-05-17T01:37:16+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-1-formatting-gate-decision
-  status: in_progress
-  sourceStory: docs/03-standards/code-taste-ten-commandments.md#frontend--ui-taste
-  planPath: docs/05-execution-logs/task-plans/2026-05-16-phase-1-formatting-gate-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md
-  branch: codex/phase-1-formatting-gate-decision
+  id: null
+  status: idle
+  sourceStory: null
+  planPath: null
+  evidencePath: null
+  branch: null
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -56,7 +56,7 @@ qualityGates:
     - lint
     - typecheck
   lastRun:
-    date: "2026-05-16"
+    date: "2026-05-17"
     readiness: pass
     lint: pass
     typecheck: pass
@@ -76,5 +76,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: complete_phase_1_formatting_gate_decision_after_human_approval
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-16-phase-1-formatting-gate-decision.md
+  nextRecommendedAction: claim_phase_1_api_contract_baseline
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-17-dependency-format-baseline.md

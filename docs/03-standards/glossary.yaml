@@ -25,7 +25,6 @@
 #   notes:      冲突提示或使用说明
 
 glossary:
-
   # --- 核心业务 ---
   profession:
     chinese: 专业
@@ -325,7 +324,6 @@ glossary:
     abbr: null
     scope: all
 
-
 # ============================================================
 # 二、枚举注册表 (Enums)
 # ============================================================
@@ -334,28 +332,27 @@ glossary:
 #   values:     允许的枚举值列表，每个值包含 key 和 chinese
 
 enums:
-
   profession:
     db_column: profession
     values:
-      - { key: monopoly,   chinese: 专卖 }
-      - { key: marketing,  chinese: 营销 }
-      - { key: logistics,  chinese: 物流 }
+      - { key: monopoly, chinese: 专卖 }
+      - { key: marketing, chinese: 营销 }
+      - { key: logistics, chinese: 物流 }
 
   subject:
     db_column: subject
     values:
       - { key: theory, chinese: 理论 }
-      - { key: skill,  chinese: 技能 }
+      - { key: skill, chinese: 技能 }
 
   question_type:
     db_column: question_type
     values:
-      - { key: single_choice,  chinese: 单选题 }
-      - { key: multi_choice,   chinese: 多选题 }
-      - { key: true_false,     chinese: 判断题 }
-      - { key: fill_blank,     chinese: 填空题 }
-      - { key: short_answer,   chinese: 简答题 }
+      - { key: single_choice, chinese: 单选题 }
+      - { key: multi_choice, chinese: 多选题 }
+      - { key: true_false, chinese: 判断题 }
+      - { key: fill_blank, chinese: 填空题 }
+      - { key: short_answer, chinese: 简答题 }
       # 二期规划范围
       # - { key: case_analysis,  chinese: 案例分析题 }
       # - { key: calculation,    chinese: 计算题 }
@@ -363,131 +360,131 @@ enums:
   paper_status:
     db_column: paper_status
     values:
-      - { key: draft,     chinese: 草稿 }
+      - { key: draft, chinese: 草稿 }
       - { key: published, chinese: 已发布 }
-      - { key: archived,  chinese: 已下架 }
+      - { key: archived, chinese: 已下架 }
 
   question_status:
     db_column: question_status
     values:
       - { key: available, chinese: 可用 }
-      - { key: disabled,  chinese: 停用 }
+      - { key: disabled, chinese: 停用 }
 
   material_status:
     db_column: material_status
     values:
       - { key: available, chinese: 可用 }
-      - { key: disabled,  chinese: 停用 }
+      - { key: disabled, chinese: 停用 }
 
   multi_choice_rule:
     db_column: multi_choice_rule
     values:
       - { key: all_correct_only, chinese: 全对得分 }
-      - { key: partial_credit,   chinese: 漏选部分得分 }
+      - { key: partial_credit, chinese: 漏选部分得分 }
 
   scoring_method:
     db_column: scoring_method
     values:
-      - { key: auto_match,  chinese: 自动精确匹配 }
-      - { key: ai_scoring,  chinese: AI 评分 }
+      - { key: auto_match, chinese: 自动精确匹配 }
+      - { key: ai_scoring, chinese: AI 评分 }
 
   auth_source:
     db_column: auth_source
     values:
-      - { key: personal,     chinese: 个人卡密 }
+      - { key: personal, chinese: 个人卡密 }
       - { key: organization, chinese: 企业授权 }
 
   auth_status:
     db_column: auth_status
     values:
-      - { key: active,    chinese: 有效 }
-      - { key: expired,   chinese: 已过期 }
+      - { key: active, chinese: 有效 }
+      - { key: expired, chinese: 已过期 }
       - { key: cancelled, chinese: 已取消 }
 
   redeem_code_status:
     db_column: redeem_code_status
     values:
-      - { key: unused,  chinese: 未使用 }
-      - { key: used,    chinese: 已使用 }
+      - { key: unused, chinese: 未使用 }
+      - { key: used, chinese: 已使用 }
       - { key: expired, chinese: 已过期 }
 
   exam_status:
     db_column: exam_status
     values:
-      - { key: in_progress,      chinese: 进行中 }
-      - { key: scoring,          chinese: 评分中 }
+      - { key: in_progress, chinese: 进行中 }
+      - { key: scoring, chinese: 评分中 }
       - { key: scoring_partial_failed, chinese: 评分部分/全部失败 }
-      - { key: completed,        chinese: 已完成 }
-      - { key: terminated,       chinese: 已终止 }
+      - { key: completed, chinese: 已完成 }
+      - { key: terminated, chinese: 已终止 }
 
   resource_type:
     db_column: resource_type
     values:
-      - { key: textbook,      chinese: 教材 }
-      - { key: courseware,     chinese: 课件 }
-      - { key: knowledge_doc,  chinese: 知识点文档 }
-      - { key: lecture_note,   chinese: 讲稿 }
-      - { key: other,          chinese: 其他 }
+      - { key: textbook, chinese: 教材 }
+      - { key: courseware, chinese: 课件 }
+      - { key: knowledge_doc, chinese: 知识点文档 }
+      - { key: lecture_note, chinese: 讲稿 }
+      - { key: other, chinese: 其他 }
 
   resource_status:
     db_column: resource_status
     values:
-      - { key: uploaded,          chinese: 已上传 }
-      - { key: converting,        chinese: 转换中 }
+      - { key: uploaded, chinese: 已上传 }
+      - { key: converting, chinese: 转换中 }
       - { key: conversion_failed, chinese: 转换失败 }
-      - { key: draft,             chinese: 草稿 }
-      - { key: published,         chinese: 已发布 }
-      - { key: indexing,          chinese: 索引中 }
-      - { key: index_failed,      chinese: 索引失败 }
-      - { key: rag_ready,         chinese: RAG 可用 }
-      - { key: disabled,          chinese: 已停用 }
+      - { key: draft, chinese: 草稿 }
+      - { key: published, chinese: 已发布 }
+      - { key: indexing, chinese: 索引中 }
+      - { key: index_failed, chinese: 索引失败 }
+      - { key: rag_ready, chinese: RAG 可用 }
+      - { key: disabled, chinese: 已停用 }
 
   kn_status:
     db_column: kn_status
     values:
-      - { key: active,   chinese: 启用 }
+      - { key: active, chinese: 启用 }
       - { key: disabled, chinese: 停用 }
 
   org_status:
     db_column: org_status
     values:
-      - { key: active,   chinese: 启用 }
+      - { key: active, chinese: 启用 }
       - { key: disabled, chinese: 停用 }
 
   org_tier:
     db_column: org_tier
     values:
       - { key: province, chinese: 省级 }
-      - { key: city,     chinese: 地市 }
+      - { key: city, chinese: 地市 }
       - { key: district, chinese: 区县 }
-      - { key: station,  chinese: 基层 }
+      - { key: station, chinese: 基层 }
 
   user_status:
     db_column: user_status
     values:
-      - { key: active,   chinese: 正常 }
+      - { key: active, chinese: 正常 }
       - { key: disabled, chinese: 停用 }
 
   admin_role:
     db_column: admin_role
     values:
-      - { key: super_admin,   chinese: 超级管理员 }
-      - { key: ops_admin,     chinese: 运营管理员 }
+      - { key: super_admin, chinese: 超级管理员 }
+      - { key: ops_admin, chinese: 运营管理员 }
       - { key: content_admin, chinese: 内容老师 }
 
   evidence_status:
     db_column: evidence_status
     values:
       - { key: sufficient, chinese: 依据充足 }
-      - { key: weak,       chinese: 依据薄弱 }
-      - { key: none,       chinese: 无依据 }
+      - { key: weak, chinese: 依据薄弱 }
+      - { key: none, chinese: 无依据 }
 
   ai_func_type:
     db_column: ai_func_type
     values:
-      - { key: scoring,           chinese: 主观题评分 }
-      - { key: explanation,       chinese: 客观题讲解 }
-      - { key: hint,              chinese: 主观题提示 }
+      - { key: scoring, chinese: 主观题评分 }
+      - { key: explanation, chinese: 客观题讲解 }
+      - { key: hint, chinese: 主观题提示 }
       - { key: kn_recommendation, chinese: 知识点推荐 }
       - { key: learning_suggestion, chinese: 综合学习建议 }
 
@@ -507,25 +504,24 @@ enums:
     db_column: auth_scope_type
     values:
       - { key: current_and_descendants, chinese: 本企业及下级 }
-      - { key: specified_nodes,         chinese: 指定企业列表 }
+      - { key: specified_nodes, chinese: 指定企业列表 }
 
   paper_attachment_usage:
     db_column: usage_type
     values:
-      - { key: paper_source,    chinese: 试卷原档 }
+      - { key: paper_source, chinese: 试卷原档 }
       - { key: answer_analysis, chinese: 答案解析 }
-      - { key: answer_sheet,    chinese: 答题卡 }
-      - { key: other,           chinese: 其他 }
+      - { key: answer_sheet, chinese: 答题卡 }
+      - { key: other, chinese: 其他 }
 
   exam_mode:
     db_column: exam_mode
     values:
-      - { key: practice,  chinese: 练习模式 }
+      - { key: practice, chinese: 练习模式 }
       - { key: mock_exam, chinese: 模拟考试模式 }
 
   ai_call_status:
     db_column: call_status
     values:
       - { key: success, chinese: 成功 }
-      - { key: failed,  chinese: 失败 }
-
+      - { key: failed, chinese: 失败 }

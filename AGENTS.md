@@ -13,6 +13,7 @@
 ## 术语表（严格使用以下英文标识，禁止自行翻译）
 
 ### 核心业务
+
 - 专业 `profession`（monopoly/marketing/logistics）
 - 等级 `level`
 - 科目 `subject`（theory/skill）
@@ -32,6 +33,7 @@
 - 试卷附件用途 `paper_attachment_usage`
 
 ### 用户与授权
+
 - 用户/账号 `user`
 - 学员 `student`
 - 管理员 `admin`
@@ -47,6 +49,7 @@
 - 授权范围类型 `auth_scope_type`
 
 ### 答题与考试
+
 - 练习 `practice`
 - 模拟考试 `mock_exam`（缩写 `mock`，不要用 exam）
 - 作答记录 `answer_record`
@@ -55,6 +58,7 @@
 - 作答模式 `exam_mode`
 
 ### AI 与知识库
+
 - AI 评分 `ai_scoring`
 - AI 讲解 `ai_explanation`
 - AI 提示 `ai_hint`
@@ -71,6 +75,7 @@
 - 学习建议 `learning_suggestion`
 
 ### 系统
+
 - 审计日志 `audit_log`
 - AI 调用日志 `ai_call_log`
 - 快照 `snapshot`（缩写 snap）
