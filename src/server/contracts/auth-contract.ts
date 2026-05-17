@@ -23,3 +23,10 @@ export type AuthContextDto = {
 export type SessionLoginDto = AuthContextDto & {
   token: string;
 };
+
+export type UserRegistrationNextAction = "redeem_code";
+
+export type UserRegistrationDto = {
+  user: AuthenticatedUserDto;
+  nextAction: UserRegistrationNextAction;
+};

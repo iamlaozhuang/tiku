@@ -1,5 +1,9 @@
 import type { AuthSessionSnapshot } from "../auth/auth-boundary";
-import type { AuthContextDto } from "../contracts/auth-contract";
+import type {
+  AuthContextDto,
+  AuthenticatedUserDto,
+  UserRegistrationDto,
+} from "../contracts/auth-contract";
 import type { AuthUserAccessRow } from "../repositories/auth-repository";
 
 export type ResolvedAuthContext = {
@@ -15,18 +19,33 @@ export function mapAuthContextToApi(
   authContext: ResolvedAuthContext,
 ): AuthContextDto {
   return {
-    user: {
-      publicId: authContext.user.public_id,
-      phone: authContext.user.phone,
-      name: authContext.user.name,
-      userType: authContext.user.user_type,
-      status: authContext.user.status,
-      lockedUntilAt: formatNullableTimestamp(authContext.user.locked_until_at),
-      employeePublicId: authContext.user.employee_public_id,
-      organizationPublicId: authContext.user.organization_public_id,
-    },
+    user: mapAuthenticatedUserToApi(authContext.user),
     session: {
       expiresAt: authContext.session.expires_at.toISOString(),
     },
+  };
+}
+
+export function mapAuthenticatedUserToApi(
+  authUser: AuthUserAccessRow,
+): AuthenticatedUserDto {
+  return {
+    publicId: authUser.public_id,
+    phone: authUser.phone,
+    name: authUser.name,
+    userType: authUser.user_type,
+    status: authUser.status,
+    lockedUntilAt: formatNullableTimestamp(authUser.locked_until_at),
+    employeePublicId: authUser.employee_public_id,
+    organizationPublicId: authUser.organization_public_id,
+  };
+}
+
+export function mapUserRegistrationToApi(
+  authUser: AuthUserAccessRow,
+): UserRegistrationDto {
+  return {
+    user: mapAuthenticatedUserToApi(authUser),
+    nextAction: "redeem_code",
   };
 }
