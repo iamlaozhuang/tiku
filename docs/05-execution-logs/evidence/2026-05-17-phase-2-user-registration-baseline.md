@@ -8,6 +8,7 @@
 - Worktree: `F:\tiku\.worktrees\phase-2-user-registration-baseline`
 - Base: `master`
 - Evidence recorded at: `2026-05-17T23:34:00+08:00`
+- Closeout updated at: `2026-05-18T00:05:00+08:00`
 
 ## Scope
 
@@ -224,9 +225,70 @@ Updated:
 ## Git Closeout
 
 - commit: local task commit created with message `feat(auth): add user registration baseline`; final HEAD SHA is reported in handoff because amending evidence changes the commit SHA
-- merge: skipped, requires explicit user approval
+- merge: fast-forward merged into local `master` at `2026-05-18T00:02:00+08:00`
+- mergedHead: `26eea42`
 - push: skipped, requires explicit user approval
-- cleanup: skipped until merge/push decision is made
+- cleanup: branch `codex/phase-2-user-registration-baseline` deleted; residual worktree directory `F:\tiku\.worktrees\phase-2-user-registration-baseline` removed after confirming it was under `.worktrees/`
+
+## Post-Merge Validation on Master
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included required file checks, npm script checks, agent-system script checks, and installed skill path checks.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `npm script: lint`
+  - `npm script: typecheck`
+  - `npm script: test:unit`
+  - `Test Files 15 passed (15)`
+  - `Tests 33 passed (33)`
+  - `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Compiled successfully`
+  - `ƒ /api/v1/users`
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - branch: `master`
+  - head: `26eea42`
+  - status: `master...origin/master [ahead 1]`
+  - upstream: `origin/master`
+  - leftRightCount: `0 1`
+  - result: `git completion readiness inventory completed`
 
 ## Boundary Notes
 
