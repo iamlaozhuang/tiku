@@ -10,20 +10,16 @@ The current repository has these scripts:
 
 - `npm run lint`
 - `npm run typecheck`
+- `npm run test:unit`
+- `npm run format:check`
 
-The desired but not yet available gate is:
+For frontend behavior, routing, browser compatibility, or build-system changes, also run the relevant broader gate:
 
+- `npm run build`
+- `npm run test:e2e`
 - `npm run test`
 
-Until the test tooling decision is approved and implemented, agents must report the status as:
-
-```text
-lint: pass/fail
-typecheck: pass/fail
-test: missing
-```
-
-Do not claim full test coverage or full local CI completion while `test` is missing.
+Do not claim full end-to-end coverage unless `test:e2e` or `test` was run successfully.
 
 ## Required Commands Before Handoff
 
@@ -45,24 +41,40 @@ npm.cmd run build
 The current pre-commit hook runs:
 
 ```powershell
-npm run lint
-npm run typecheck
+npm.cmd run lint-staged
+npm.cmd run lint
+npm.cmd run typecheck
 ```
 
 If a new worktree does not have `node_modules`, install dependencies with the existing lockfile:
 
 ```powershell
-& 'C:\Program Files\Git\bin\sh.exe' -lc 'pnpm install --frozen-lockfile'
+corepack pnpm@10 install --frozen-lockfile
 ```
 
 This must not change `package.json` or `pnpm-lock.yaml`.
 
-## Future Gate Requirements
+## Line Ending And Format Stability
 
-Phase 1 must select and approve test tooling before adding a `test` script. The decision must specify:
+The repository enforces LF line endings through `.gitattributes`:
 
-- Unit test tool.
-- Component or route-handler test approach.
-- Browser or end-to-end test approach.
-- Commands to run locally and in CI.
-- Human approval evidence for added dependencies.
+```text
+* text=auto eol=lf
+```
+
+This rule is part of the formatting gate. It prevents Windows `core.autocrlf=true` checkouts from making `prettier --check .` fail on a fresh worktree.
+
+Before declaring a formatting baseline healthy, verify it in a freshly created worktree based on the target branch. A pass in an old local worktree is not enough evidence.
+
+## Evidence Requirements
+
+Evidence must record each command that was run and whether it passed, failed, or was intentionally skipped. Use this wording when a gate is not run:
+
+```text
+lint: pass/fail
+typecheck: pass/fail
+test:unit: pass/fail
+format:check: pass/fail
+build: skipped, reason
+test:e2e: skipped, reason
+```

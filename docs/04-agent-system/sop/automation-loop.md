@@ -73,10 +73,25 @@ Keep session context small and durable:
 
 - Do not work directly on `master` or `main` unless the user explicitly requests a read-only inspection.
 - Use one short-lived branch or worktree per task.
-- After a fast-forward merge into `master`, remove the task worktree and delete the merged branch.
+- After any approved merge into `master`, remove the task worktree and delete the merged branch when it no longer backs an open PR.
 - If no remote is configured, do not invent a repository URL.
 - When a remote exists, use draft PRs by default and do not enable auto-merge.
 - Push, PR creation, deployment, and production environment changes require explicit user approval.
+
+## PR Baseline Hygiene
+
+- Prefer one PR per task. If a task depends on an unmerged prerequisite branch, mark the PR as stacked in its body.
+- When the prerequisite branch lands in `master`, retarget dependent PRs to `master`.
+- Rebuild dependent task branches on latest `origin/master` when the compare includes stale prerequisite files or formatting-only noise.
+- Use `--force-with-lease` for rebuilt short-lived task branches; never use an unguarded force push.
+- Confirm the final compare is ahead of `master`, not behind it, and contains only task-scoped files.
+
+## Fresh Worktree Verification
+
+- Validate mechanism and formatting changes in a freshly created worktree from the intended base branch.
+- Treat line-ending drift as a repository policy problem. The required repository policy is `.gitattributes` with `* text=auto eol=lf`.
+- Do not declare `format:check` healthy based only on an existing worktree that may have local line-ending state.
+- If a temporary worktree leaves dependency residue after `git worktree remove`, delete it only after resolving and confirming the target path is under `.worktrees/`.
 
 ## Failure Fuse
 

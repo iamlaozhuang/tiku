@@ -28,11 +28,13 @@ foreach ($requiredFilePath in $requiredFilePaths) {
 
 $packageJson = Get-Content -Path "package.json" -Raw | ConvertFrom-Json
 $scriptNames = $packageJson.scripts.PSObject.Properties.Name
-foreach ($qualityScriptName in @("lint", "typecheck", "test")) {
+$missingQualityScriptCount = 0
+foreach ($qualityScriptName in @("lint", "typecheck", "test", "test:unit", "format:check")) {
     if ($scriptNames -contains $qualityScriptName) {
         Write-Output "OK npm script: $qualityScriptName"
     } else {
         Write-Output "MISSING npm script: $qualityScriptName"
+        $missingQualityScriptCount++
     }
 }
 
@@ -141,4 +143,8 @@ Write-Output "NOTE: Newly installed local skills require restarting Codex before
 
 if ($missingRequiredFileCount -gt 0) {
     throw "Agent system readiness failed because required files are missing."
+}
+
+if ($missingQualityScriptCount -gt 0) {
+    throw "Agent system readiness failed because quality scripts are missing."
 }

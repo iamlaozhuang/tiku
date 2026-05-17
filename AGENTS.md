@@ -170,3 +170,5 @@
 4. **证据先于结论**：任务完成前必须运行任务声明的验证命令，并把输出写入 `docs/05-execution-logs/evidence/`。如果 `test` script 缺失，只能声明“lint/typecheck 通过，测试门禁缺失”，禁止声称完整测试通过。
 5. **合入后清理隔离资源**：短生命周期分支合入 `master` 后，必须删除对应 worktree 和已合入分支；残留 `node_modules` 等本地产物只允许在确认路径位于 `.worktrees/` 内后删除。
 6. **跨会话恢复要求**：会话中断或上下文不足时，从 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan 恢复，不得凭记忆继续实现。
+7. **PR 基线健康要求**：Stacked PR 必须声明临时 base；前置分支合入 `master` 后，必须将后续 PR 重新对准 `master`，并验证 compare 只包含当前任务文件。若需要重建短生命周期分支，只允许使用 `--force-with-lease`，禁止无保护 force push。
+8. **Fresh checkout 门禁**：格式化、行尾、质量门禁类修正必须在基于目标分支的新 worktree 中验证。仓库行尾策略由 `.gitattributes` 的 `* text=auto eol=lf` 固化，禁止依赖某个本地 Git 配置或旧 worktree 状态声称 `format:check` 健康。
