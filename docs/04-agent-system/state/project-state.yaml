@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-2-user-auth
-  updatedAt: "2026-05-17T17:29:25+08:00"
+  updatedAt: "2026-05-17T21:59:10+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim_phase_2_auth_adapter_boundary
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-baseline.md
+  nextRecommendedAction: claim_phase_2_user_registration_baseline
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-17-phase-2-session-login-baseline.md
