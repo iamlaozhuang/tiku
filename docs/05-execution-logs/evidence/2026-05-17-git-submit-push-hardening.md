@@ -139,9 +139,12 @@ Output highlight:
 ## Git Closeout
 
 - commit: local task commit created with message `docs(agent): harden git submit push workflow`; final HEAD SHA is reported in handoff because amending evidence changes the commit SHA
-- merge: skipped, requires explicit approval
-- push: skipped, requires explicit approval
-- cleanup: skipped, branch is still active for review/merge
+- merge: fast-forward merged into `master` at `2026-05-17T23:08:10+08:00`
+- mergedHead: `a738544`
+- postMergeValidation: pass
+- postMergeGitStatus: `master...origin/master [ahead 1]`, clean working tree before this closeout evidence update
+- push: pending, user approved push after merge; result recorded in final handoff
+- cleanup: pending until push succeeds
 
 ## Residual Risk
 
