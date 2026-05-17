@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-1-foundation
-  updatedAt: "2026-05-17T01:37:16+08:00"
+  currentPhase: phase-2-user-auth
+  updatedAt: "2026-05-17T17:29:25+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -61,6 +61,7 @@ qualityGates:
     lint: pass
     typecheck: pass
     test: pass
+    build: pass
     preCommitHook: pass
 riskGates:
   requireHumanApproval:
@@ -76,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim_phase_1_api_contract_baseline
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-17-dependency-format-baseline.md
+  nextRecommendedAction: claim_phase_2_auth_adapter_boundary
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-baseline.md
