@@ -115,7 +115,125 @@ Final build result:
 
 ## Git Closeout
 
-- commit: pending validation and commit evaluation.
-- merge: skipped pending local completion.
-- push: skipped pending local completion.
-- cleanup: skipped pending merge.
+- commit: local task commit created with message `docs(agent): record phase 2 auth readiness`
+- taskCommit: `974cce5`
+- merge: fast-forward merged into local `master` at `2026-05-18T23:54:00+08:00`
+- mergedHead: `974cce5`
+- push: pending post-merge evidence commit and push validation.
+- cleanup: skipped until master push succeeds.
+
+## Commit And Merge Evaluation
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - branch: `codex/phase-2-user-auth-readiness-evidence`
+  - tracked changes: project state and task queue
+  - untracked files: readiness evidence
+  - result: `git completion readiness inventory completed`
+
+Command:
+
+```powershell
+git commit -m "docs(agent): record phase 2 auth readiness"
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[codex/phase-2-user-auth-readiness-evidence 974cce5] docs(agent): record phase 2 auth readiness`
+  - `3 files changed`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...HEAD
+```
+
+Pre-merge branch result:
+
+- Exit code: `0`
+- Output: `0 1`
+
+Command:
+
+```powershell
+git diff --name-only origin/master..HEAD
+```
+
+Pre-merge branch result:
+
+- Exit code: `0`
+- Output contained only readiness task-scoped files from the allowed queue boundary.
+
+Command:
+
+```powershell
+git merge --ff-only codex/phase-2-user-auth-readiness-evidence
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Updating 08ffc02..974cce5`
+  - `Fast-forward`
+  - `3 files changed`
+
+## Post-Merge Validation on Master
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included required file checks, npm script checks, agent-system script checks, and installed skill path checks.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `npm script: lint`
+  - `npm script: typecheck`
+  - `npm script: test:unit`
+  - `Test Files 29 passed (29)`
+  - `Tests 64 passed (64)`
+  - `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Compiled successfully`
+  - `ƒ /api/v1/authorizations`
+  - `ƒ /api/v1/employees`
+  - `ƒ /api/v1/org-auths`
+  - `ƒ /api/v1/organizations`
+  - `ƒ /api/v1/personal-auths`
+  - `ƒ /api/v1/redeem-codes/redeem`
+  - `ƒ /api/v1/sessions`
+  - `ƒ /api/v1/users`
