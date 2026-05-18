@@ -1076,7 +1076,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - npm.cmd run format:check
     evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-contract-approval.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-3-question-paper-schema-baseline
     title: Question Paper Schema Baseline
