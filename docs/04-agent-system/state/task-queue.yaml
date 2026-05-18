@@ -946,7 +946,7 @@ tasks:
       - npm.cmd run test:unit
       - Select-String -Path 'src\server\services\*.ts' -Pattern 'organization|org_auth|auth_scope_type'
     evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-organization-auth-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-2-effective-authorization-baseline
     title: Effective Authorization Baseline
