@@ -9,6 +9,7 @@
 - Base: `master`
 - Evidence recorded at: `2026-05-18T22:38:53+08:00`
 - Commit evidence updated at: `2026-05-18T22:42:16+08:00`
+- Push evidence updated at: `2026-05-18T22:50:38+08:00`
 
 ## Scope
 
@@ -228,7 +229,7 @@ Updated:
 - commit: local task commit created with message `feat(auth): add admin employee account baseline`
 - taskCommit: `444bba8`
 - merge: skipped, no explicit merge approval in this turn.
-- push: skipped, no explicit push approval in this turn.
+- push: user approved push to `origin/codex/phase-2-admin-employee-account-baseline`; pushed new branch successfully.
 - cleanup: skipped, task branch/worktree kept for review until commit/merge/push decision.
 
 ## Commit Evaluation
@@ -273,6 +274,53 @@ Result:
 - Exit code: `0`
 - Output included:
   - `[codex/phase-2-admin-employee-account-baseline 444bba8] feat(auth): add admin employee account baseline`
+
+## Push Validation
+
+Command:
+
+```powershell
+git fetch origin
+```
+
+Result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...HEAD
+```
+
+Pre-push result:
+
+- Exit code: `0`
+- Output: `0 2`
+
+Command:
+
+```powershell
+git diff --name-only origin/master..HEAD
+```
+
+Pre-push result:
+
+- Exit code: `0`
+- Output contained only task-scoped files from the allowed queue boundary.
+
+Command:
+
+```powershell
+git push origin codex/phase-2-admin-employee-account-baseline
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[new branch] codex/phase-2-admin-employee-account-baseline -> codex/phase-2-admin-employee-account-baseline`
+  - `https://github.com/iamlaozhuang/tiku/pull/new/codex/phase-2-admin-employee-account-baseline`
 
 ## Boundary Notes
 
