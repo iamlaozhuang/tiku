@@ -9,6 +9,7 @@
 - Base: `master`
 - Evidence recorded at: `2026-05-18T13:39:49+08:00`
 - Closeout updated at: `2026-05-18T13:47:00+08:00`
+- Push evidence updated at: `2026-05-18T13:53:00+08:00`
 
 ## Scope
 
@@ -240,8 +241,8 @@ Updated:
 - taskCommit: `a4af2b7`
 - merge: user approved merge; fast-forward merged into local `master` at `2026-05-18T13:42:00+08:00`
 - mergedHead: `a4af2b7`
-- push: user approved push to `origin/master`; pending final push command after this closeout record
-- cleanup: pending push completion
+- push: user approved push to `origin/master`; pushed `96735ad..9e2d9cd` with result `master -> master`; final push evidence commit will be pushed immediately after this record
+- cleanup: branch `codex/phase-2-organization-auth-baseline` deleted; residual worktree directory `F:\tiku\.worktrees\phase-2-organization-auth-baseline` removed after confirming it was under `.worktrees/`
 
 ## Commit Evaluation
 
@@ -330,6 +331,84 @@ Result:
   - upstream: `origin/master`
   - leftRightCount: `0 1`
   - result: `git completion readiness inventory completed`
+
+## Push And Cleanup Validation
+
+Command:
+
+```powershell
+git fetch origin
+```
+
+Result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...master
+```
+
+Pre-push result:
+
+- Exit code: `0`
+- Output: `0 2`
+
+Command:
+
+```powershell
+git push origin master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included: `96735ad..9e2d9cd  master -> master`
+
+Command:
+
+```powershell
+git worktree remove .worktrees\phase-2-organization-auth-baseline
+```
+
+Result:
+
+- Exit code: `1`
+- Cause: Git deregistered the worktree but Windows left the directory non-empty because of local dependency residue.
+- Recovery: resolved and confirmed the path was under `F:\tiku\.worktrees`, then removed the residual directory with PowerShell long-path cleanup.
+
+Command:
+
+```powershell
+Test-Path 'F:\tiku\.worktrees\phase-2-organization-auth-baseline'
+```
+
+Result:
+
+- Exit code: `0`
+- Output: `False`
+
+Command:
+
+```powershell
+git branch -d codex/phase-2-organization-auth-baseline
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `Deleted branch codex/phase-2-organization-auth-baseline`.
+
+Command:
+
+```powershell
+git worktree prune
+```
+
+Result:
+
+- Exit code: `0`
 
 ## Boundary Notes
 
