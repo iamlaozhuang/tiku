@@ -209,8 +209,9 @@ Updated:
 
 - commit: local task commit created with message `feat(auth): add effective authorization baseline`
 - taskCommit: `b09dc98`
-- merge: skipped pending explicit user approval.
-- push: skipped pending explicit user approval.
+- merge: user approved local merge; fast-forward merged into local `master` at `2026-05-18T23:38:00+08:00`
+- mergedHead: `7dc9ee9`
+- push: pending post-merge evidence commit and push validation.
 - cleanup: skipped until branch is merged or otherwise closed.
 
 ## Commit Evaluation
@@ -266,6 +267,120 @@ Result:
 - Exit code: `0`
 - Output included:
   - `[codex/phase-2-effective-authorization-baseline b09dc98] feat(auth): add effective authorization baseline`
+
+Command:
+
+```powershell
+git commit -m "docs(agent): record effective authorization evidence"
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[codex/phase-2-effective-authorization-baseline 7dc9ee9] docs(agent): record effective authorization evidence`
+
+## Master Merge Validation
+
+Command:
+
+```powershell
+git fetch origin
+```
+
+Result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...HEAD
+```
+
+Pre-merge branch result:
+
+- Exit code: `0`
+- Output: `0 2`
+
+Command:
+
+```powershell
+git diff --name-only origin/master..HEAD
+```
+
+Pre-merge branch result:
+
+- Exit code: `0`
+- Output contained only task-scoped files from the allowed queue boundary.
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...master
+```
+
+Pre-merge master result:
+
+- Exit code: `0`
+- Output: `0 0`
+
+Command:
+
+```powershell
+git merge --ff-only codex/phase-2-effective-authorization-baseline
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Updating 2fb18b4..7dc9ee9`
+  - `Fast-forward`
+  - `13 files changed`
+
+## Post-Merge Validation on Master
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included required file checks, npm script checks, agent-system script checks, and installed skill path checks.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `npm script: lint`
+  - `npm script: typecheck`
+  - `npm script: test:unit`
+  - `Test Files 29 passed (29)`
+  - `Tests 64 passed (64)`
+  - `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Compiled successfully`
+  - `ƒ /api/v1/authorizations`
 
 ## Boundary Notes
 
