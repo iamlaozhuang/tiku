@@ -981,7 +981,7 @@ tasks:
       - npm.cmd run test:unit
       - Select-String -Path 'src\server\services\*.ts' -Pattern 'personal_auth|org_auth|authorization'
     evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-effective-authorization-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-2-user-auth-readiness-evidence
     title: User Auth Readiness Evidence

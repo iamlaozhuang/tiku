@@ -1,0 +1,263 @@
+# Phase 2 Effective Authorization Baseline Evidence
+
+## Task
+
+- Task id: `phase-2-effective-authorization-baseline`
+- Phase: `phase-2-user-auth`
+- Branch: `codex/phase-2-effective-authorization-baseline`
+- Worktree: `F:\tiku\.worktrees\phase-2-effective-authorization-baseline`
+- Base: `master`
+- Evidence recorded at: `2026-05-18T23:31:00+08:00`
+
+## Scope
+
+Implemented the Phase 2 effective authorization baseline within the task queue boundary.
+
+Created:
+
+- `src/server/contracts/effective-authorization-contract.ts`
+- `src/server/mappers/effective-authorization-mapper.ts`
+- `src/server/mappers/effective-authorization-mapper.test.ts`
+- `src/server/repositories/effective-authorization-repository.ts`
+- `src/server/services/effective-authorization-service.ts`
+- `src/server/services/effective-authorization-service.test.ts`
+- `src/server/services/effective-authorization-route.ts`
+- `src/server/services/effective-authorization-route.test.ts`
+- `src/app/api/v1/authorizations/route.ts`
+- `docs/05-execution-logs/task-plans/2026-05-17-phase-2-effective-authorization-baseline.md`
+
+Modified:
+
+- `docs/04-agent-system/state/project-state.yaml`
+- `docs/04-agent-system/state/task-queue.yaml`
+
+Not changed by this task:
+
+- `package.json`
+- `pnpm-lock.yaml`
+- `package-lock.yaml`
+- `package-lock.json`
+- `src/db/schema/**`
+- `drizzle/**`
+
+## Implementation Summary
+
+- Added effective authorization DTO contracts using camelCase API fields and public identifiers only.
+- Added repository boundary types for current-user `personal_auth` and `org_auth` visibility rows.
+- Added mapper behavior that preserves separate source authorization entries and computes effective access as a profession/level union.
+- Added service behavior that excludes expired, cancelled, disabled-organization, and not-yet-started authorization sources from effective access.
+- Added route handler factory and placeholder runtime route for `GET /api/v1/authorizations`.
+
+## TDD Evidence
+
+Command:
+
+```powershell
+npm.cmd run test:unit -- src/server/mappers/effective-authorization-mapper.test.ts src/server/services/effective-authorization-service.test.ts src/server/services/effective-authorization-route.test.ts
+```
+
+Initial sandbox result:
+
+- Exit code: `1`
+- Cause: sandbox blocked Vitest startup with `spawn EPERM`.
+- Follow-up: reran the same command with approved escalation.
+
+RED result:
+
+- Exit code: `1`
+- Expected failures:
+  - `Failed to resolve import "./effective-authorization-mapper"`
+  - `Failed to resolve import "./effective-authorization-service"`
+  - `Failed to resolve import "./effective-authorization-route"`
+
+GREEN result after implementation:
+
+- Exit code: `0`
+- Output included:
+  - `Test Files 3 passed (3)`
+  - `Tests 5 passed (5)`
+
+## Required Validation
+
+Command:
+
+```powershell
+npm.cmd run lint
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `eslint`.
+
+Command:
+
+```powershell
+npm.cmd run typecheck
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `tsc --noEmit`.
+
+Command:
+
+```powershell
+npm.cmd run test:unit
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Test Files 29 passed (29)`
+  - `Tests 64 passed (64)`
+
+Command:
+
+```powershell
+Select-String -Path 'src\server\services\*.ts' -Pattern 'personal_auth|org_auth|authorization'
+```
+
+Result:
+
+- Exit code: `0`
+- Output matched effective authorization service and route coverage, including `personal_auth`, `org_auth`, and `authorization` terms.
+
+## Additional Validation
+
+Command:
+
+```powershell
+npm.cmd run format:check
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included required file checks, npm script checks, agent-system script checks, and installed skill path checks.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `npm script: lint`
+  - `npm script: typecheck`
+  - `npm script: test:unit`
+  - `Test Files 29 passed (29)`
+  - `Tests 64 passed (64)`
+  - `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Compiled successfully`
+  - `ƒ /api/v1/authorizations`
+
+## Dependency Install Note
+
+Command:
+
+```powershell
+corepack pnpm@10 install --frozen-lockfile
+```
+
+Result:
+
+- First attempt timed out before completion.
+- Second attempt completed successfully.
+- Output included `Lockfile is up to date, resolution step is skipped`.
+- `package.json` and lockfiles remained unchanged.
+
+## State Update
+
+Updated:
+
+- `docs/04-agent-system/state/task-queue.yaml`
+  - `phase-2-effective-authorization-baseline` marked `done`.
+- `docs/04-agent-system/state/project-state.yaml`
+  - `currentTask` reset to idle.
+  - `handoff.nextRecommendedAction` set to `claim_phase_2_user_auth_readiness_evidence`.
+  - `handoff.lastSummaryPath` set to this evidence file.
+
+## Git Closeout
+
+- commit: local task commit created with message `feat(auth): add effective authorization baseline`
+- taskCommit: `b7a92b2`
+- merge: skipped pending explicit user approval.
+- push: skipped pending explicit user approval.
+- cleanup: skipped until branch is merged or otherwise closed.
+
+## Commit Evaluation
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - branch: `codex/phase-2-effective-authorization-baseline`
+  - tracked changes: project state and task queue
+  - untracked files: task plan, evidence, effective authorization route, contracts, mapper, repository, service, and tests
+  - result: `git completion readiness inventory completed`
+
+Command:
+
+```powershell
+git commit -m "feat(auth): add effective authorization baseline"
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[codex/phase-2-effective-authorization-baseline 60b7755] feat(auth): add effective authorization baseline`
+  - `13 files changed`
+
+Command:
+
+```powershell
+git commit --amend --no-edit
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[codex/phase-2-effective-authorization-baseline b7a92b2] feat(auth): add effective authorization baseline`
+
+## Boundary Notes
+
+- No schema or migration files were generated.
+- No dependencies were added, removed, or upgraded.
+- No external URL exposes numeric database `id`.
+- Runtime route currently returns an unauthenticated standard response until concrete session/DB wiring is added behind approved boundaries.

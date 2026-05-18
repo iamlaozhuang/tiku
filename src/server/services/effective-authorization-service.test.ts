@@ -1,0 +1,195 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  createEffectiveAuthorizationService,
+  type EffectiveAuthorizationClock,
+} from "./effective-authorization-service";
+import type {
+  EffectiveAuthorizationRepository,
+  EffectiveOrgAuthRow,
+  EffectivePersonalAuthRow,
+} from "../repositories/effective-authorization-repository";
+
+const now = new Date("2026-05-18T04:00:00.000Z");
+const startsAt = new Date("2026-05-01T04:00:00.000Z");
+const futureStartsAt = new Date("2026-05-19T04:00:00.000Z");
+const expiredAt = new Date("2026-05-17T04:00:00.000Z");
+const personalExpiresAt = new Date("2026-06-18T04:00:00.000Z");
+const orgExpiresAt = new Date("2026-07-18T04:00:00.000Z");
+
+const clock: EffectiveAuthorizationClock = {
+  now() {
+    return now;
+  },
+};
+
+function createPersonalAuth(
+  overrides: Partial<EffectivePersonalAuthRow> = {},
+): EffectivePersonalAuthRow {
+  return {
+    id: 301,
+    public_id: "personal_auth_public_123",
+    profession: "monopoly",
+    level: 3,
+    starts_at: startsAt,
+    expires_at: personalExpiresAt,
+    status: "active",
+    ...overrides,
+  };
+}
+
+function createOrgAuth(
+  overrides: Partial<EffectiveOrgAuthRow> = {},
+): EffectiveOrgAuthRow {
+  return {
+    id: 401,
+    public_id: "org_auth_public_456",
+    organization_public_id: "org_city_123",
+    organization_name: "杭州烟草",
+    organization_status: "active",
+    profession: "monopoly",
+    level: 3,
+    starts_at: startsAt,
+    expires_at: orgExpiresAt,
+    status: "active",
+    ...overrides,
+  };
+}
+
+function createRepository(
+  overrides: Partial<EffectiveAuthorizationRepository> = {},
+): EffectiveAuthorizationRepository {
+  return {
+    async listPersonalAuthsByUserPublicId() {
+      return [createPersonalAuth()];
+    },
+    async listOrgAuthsByUserPublicId() {
+      return [createOrgAuth()];
+    },
+    ...overrides,
+  };
+}
+
+describe("effective authorization service", () => {
+  it("returns the union of active personal and org authorizations", async () => {
+    const authorizationService = createEffectiveAuthorizationService(
+      createRepository(),
+      clock,
+    );
+
+    await expect(
+      authorizationService.listEffectiveAuthorizations({
+        userPublicId: "user_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        authorizations: [
+          {
+            publicId: "personal_auth_public_123",
+            authorizationType: "personal_auth",
+            profession: "monopoly",
+            level: 3,
+            startsAt: "2026-05-01T04:00:00.000Z",
+            expiresAt: "2026-06-18T04:00:00.000Z",
+            status: "active",
+            organizationPublicId: null,
+            organizationName: null,
+          },
+          {
+            publicId: "org_auth_public_456",
+            authorizationType: "org_auth",
+            profession: "monopoly",
+            level: 3,
+            startsAt: "2026-05-01T04:00:00.000Z",
+            expiresAt: "2026-07-18T04:00:00.000Z",
+            status: "active",
+            organizationPublicId: "org_city_123",
+            organizationName: "杭州烟草",
+          },
+        ],
+        effectiveAuthorizations: [
+          {
+            profession: "monopoly",
+            level: 3,
+            authorizationTypes: ["personal_auth", "org_auth"],
+            expiresAt: "2026-07-18T04:00:00.000Z",
+            status: "active",
+          },
+        ],
+      },
+    });
+  });
+
+  it("excludes expired, cancelled, disabled, and not-yet-started authorization sources", async () => {
+    const authorizationService = createEffectiveAuthorizationService(
+      createRepository({
+        async listPersonalAuthsByUserPublicId() {
+          return [
+            createPersonalAuth(),
+            createPersonalAuth({
+              public_id: "personal_auth_expired",
+              expires_at: expiredAt,
+            }),
+            createPersonalAuth({
+              public_id: "personal_auth_cancelled",
+              status: "cancelled",
+            }),
+            createPersonalAuth({
+              public_id: "personal_auth_future",
+              starts_at: futureStartsAt,
+            }),
+          ];
+        },
+        async listOrgAuthsByUserPublicId() {
+          return [
+            createOrgAuth({
+              organization_status: "disabled",
+            }),
+            createOrgAuth({
+              public_id: "org_auth_active_marketing",
+              organization_public_id: "org_marketing_123",
+              organization_name: "营销烟草",
+              profession: "marketing",
+              level: 2,
+            }),
+          ];
+        },
+      }),
+      clock,
+    );
+
+    await expect(
+      authorizationService.listEffectiveAuthorizations({
+        userPublicId: "user_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        authorizations: [
+          {
+            publicId: "personal_auth_public_123",
+            authorizationType: "personal_auth",
+          },
+          {
+            publicId: "org_auth_active_marketing",
+            authorizationType: "org_auth",
+          },
+        ],
+        effectiveAuthorizations: [
+          {
+            profession: "monopoly",
+            level: 3,
+            authorizationTypes: ["personal_auth"],
+          },
+          {
+            profession: "marketing",
+            level: 2,
+            authorizationTypes: ["org_auth"],
+          },
+        ],
+      },
+    });
+  });
+});
