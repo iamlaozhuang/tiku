@@ -1,10 +1,84 @@
-export type Profession = "monopoly" | "marketing" | "logistics";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
-export type ExamSubject = "theory" | "skill";
+import { professionValues } from "@/db/schema/auth";
+import {
+  material,
+  materialStatusValues,
+  multiChoiceRuleValues,
+  paper,
+  paperAsset,
+  paperAttachmentUsageValues,
+  paperQuestion,
+  paperScoringPoint,
+  paperSection,
+  paperStatusValues,
+  paperTypeValues,
+  question,
+  questionGroup,
+  questionOption,
+  questionStatusValues,
+  questionTypeValues,
+  scoringMethodValues,
+  scoringPoint,
+  subjectValues,
+} from "@/db/schema/paper";
 
-export type PaperType = "past_paper" | "mock_paper";
+export {
+  materialStatusValues,
+  multiChoiceRuleValues,
+  paperAttachmentUsageValues,
+  paperStatusValues,
+  paperTypeValues,
+  professionValues,
+  questionStatusValues,
+  questionTypeValues,
+  scoringMethodValues,
+  subjectValues,
+};
 
-export type PaperStatus = "draft" | "published" | "archived";
+export type Profession = (typeof professionValues)[number];
+export type Subject = (typeof subjectValues)[number];
+export type ExamSubject = Subject;
+export type QuestionType = (typeof questionTypeValues)[number];
+export type QuestionStatus = (typeof questionStatusValues)[number];
+export type MaterialStatus = (typeof materialStatusValues)[number];
+export type PaperType = (typeof paperTypeValues)[number];
+export type PaperStatus = (typeof paperStatusValues)[number];
+export type MultiChoiceRule = (typeof multiChoiceRuleValues)[number];
+export type ScoringMethod = (typeof scoringMethodValues)[number];
+export type PaperAttachmentUsage = (typeof paperAttachmentUsageValues)[number];
+
+export type MaterialRow = InferSelectModel<typeof material>;
+export type NewMaterialRow = InferInsertModel<typeof material>;
+
+export type QuestionRow = InferSelectModel<typeof question>;
+export type NewQuestionRow = InferInsertModel<typeof question>;
+
+export type QuestionOptionRow = InferSelectModel<typeof questionOption>;
+export type NewQuestionOptionRow = InferInsertModel<typeof questionOption>;
+
+export type ScoringPointRow = InferSelectModel<typeof scoringPoint>;
+export type NewScoringPointRow = InferInsertModel<typeof scoringPoint>;
+
+export type PaperDbRow = InferSelectModel<typeof paper>;
+export type NewPaperRow = InferInsertModel<typeof paper>;
+
+export type PaperSectionRow = InferSelectModel<typeof paperSection>;
+export type NewPaperSectionRow = InferInsertModel<typeof paperSection>;
+
+export type QuestionGroupRow = InferSelectModel<typeof questionGroup>;
+export type NewQuestionGroupRow = InferInsertModel<typeof questionGroup>;
+
+export type PaperQuestionRow = InferSelectModel<typeof paperQuestion>;
+export type NewPaperQuestionRow = InferInsertModel<typeof paperQuestion>;
+
+export type PaperScoringPointRow = InferSelectModel<typeof paperScoringPoint>;
+export type NewPaperScoringPointRow = InferInsertModel<
+  typeof paperScoringPoint
+>;
+
+export type PaperAssetRow = InferSelectModel<typeof paperAsset>;
+export type NewPaperAssetRow = InferInsertModel<typeof paperAsset>;
 
 export type PaperRow = {
   id: number;
