@@ -18,8 +18,9 @@ Every automation session starts by reading these sources in order:
 4. `docs/03-standards/local-ci.md`
 5. `docs/03-standards/testing-tdd.md`
 6. `docs/02-architecture/adr/`
-7. `docs/04-agent-system/state/project-state.yaml`
-8. `docs/04-agent-system/state/task-queue.yaml`
+7. `docs/04-agent-system/sop/security-review-gate.md`
+8. `docs/04-agent-system/state/project-state.yaml`
+9. `docs/04-agent-system/state/task-queue.yaml`
 
 If any required source is missing, stop the loop and record the blocker before changing project files.
 
@@ -40,6 +41,7 @@ An agent may claim a task only when all of these conditions are true:
 - The task status is `pending`.
 - Every dependency listed by the task is `done`.
 - High-risk items have explicit human approval before execution.
+- High-risk security tasks have `securityReviewRequired: true` or an equivalent evidence plan.
 - The current branch is not `main` or `master`.
 - The allowed file scope is clear and does not overlap with another active agent's scope.
 - Dependency add, remove, or upgrade work has passed `docs/04-agent-system/sop/dependency-introduction-gate.md`.
@@ -54,11 +56,13 @@ For each claimed task:
 2. Reconfirm the allowed file list and current Git branch.
 3. Perform only the scoped edit required by the task.
 4. Run available gates, starting with task-specific validation commands.
-5. Write evidence for command outputs, missing gates, and any accepted residual risk.
-6. Run a Git completion inventory with `Test-GitCompletionReadiness.ps1` or equivalent commands.
-7. Commit successful work only when the task instruction allows commits; otherwise record why the work remains uncommitted.
-8. Do not claim the next task while completed-task changes are still mixed with the current worktree, unless the handoff explicitly names the remaining files and reason.
-9. Update the queue and project state only when those files are in the allowed scope.
+5. Run `Test-NamingConventions.ps1` for API, service, contract, or route changes.
+6. Write evidence for command outputs, missing gates, and any accepted residual risk. Use `New-TaskEvidence.ps1` when a new evidence skeleton is useful.
+7. For high-risk tasks, complete the security review gate in `docs/04-agent-system/sop/security-review-gate.md` before merge.
+8. Run a Git completion inventory with `Test-GitCompletionReadiness.ps1` or equivalent commands.
+9. Commit successful work only when the task instruction allows commits; otherwise record why the work remains uncommitted.
+10. Do not claim the next task while completed-task changes are still mixed with the current worktree, unless the handoff explicitly names the remaining files and reason.
+11. Update the queue and project state only when those files are in the allowed scope.
 
 Each step should leave enough evidence for another agent to resume without guessing.
 
@@ -66,6 +70,7 @@ Each step should leave enough evidence for another agent to resume without guess
 
 - A task is not ready for handoff until its validation output, evidence file, and Git inventory all agree on the changed file set.
 - One task should normally close with one focused commit. Split commits only when the task has clearly separate approved scopes, such as dependency approval, dependency install, and business implementation.
+- If final merge, push, or cleanup evidence would churn the implementation commit SHA, record `implementationCommit` and `closeoutEvidenceCommit` separately instead of repeatedly amending the same commit.
 - Never bundle an allowed dependency or lockfile change into a later feature commit. Dependency work must carry its own approval evidence.
 - If the user asks to continue the queue after a task is complete, first decide whether the completed task should be committed and merged before starting the next task.
 

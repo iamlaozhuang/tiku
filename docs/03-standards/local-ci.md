@@ -13,6 +13,12 @@ The current repository has these scripts:
 - `npm run test:unit`
 - `npm run format:check`
 
+The current repository also has read-only agent checks:
+
+- `.\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+- `.\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+- `.\scripts\agent-system\Test-NamingConventions.ps1`
+
 For frontend behavior, routing, browser compatibility, or build-system changes, also run the relevant broader gate:
 
 - `npm run build`
@@ -28,6 +34,7 @@ Run:
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
 ```
 
@@ -76,6 +83,7 @@ lint: pass/fail
 typecheck: pass/fail
 test:unit: pass/fail
 format:check: pass/fail
+naming: pass/fail
 build: skipped, reason
 test:e2e: skipped, reason
 ```

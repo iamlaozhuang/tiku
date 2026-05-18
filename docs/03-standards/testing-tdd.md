@@ -2,19 +2,27 @@
 
 ## Status
 
-Active policy, pending tooling implementation.
+Active policy with Vitest and Playwright tooling.
 
 ## Current State
 
-The repository has not selected or installed a test framework yet. Therefore:
+The repository has selected and installed the baseline test tools:
 
-- Do not add `test` script placeholders that do not run real tests.
-- Do not claim tests pass until a real test command exists and has been run.
-- Any test framework dependency must pass the dependency introduction gate.
+- Unit tests: `vitest`
+- Component-oriented DOM tests: `@testing-library/react`, `@testing-library/dom`, `@testing-library/jest-dom`, and `jsdom`
+- End-to-end tests: `@playwright/test`
+
+The current npm scripts are:
+
+- `npm run test`
+- `npm run test:unit`
+- `npm run test:e2e`
+
+Do not claim a gate passed until the exact command was run and the output was recorded in evidence.
 
 ## Testing Layers
 
-Tiku should use layered tests once tooling is approved:
+Tiku uses layered tests:
 
 1. **Unit tests**
    - Target pure functions, mappers, contracts, validators, and service logic without browser dependencies.
@@ -49,6 +57,8 @@ For bug fixes:
 
 If a bug cannot be automated yet, record why in `docs/06-issue-tracking/bug-reports/`.
 
-## Tooling Decision Gate
+## Tooling Change Gate
 
-The first Phase 1 task for testing is `phase-1-test-tooling-decision`. It must decide tooling before package changes. The decision must include `human approval` evidence before modifying package files.
+The initial tooling decision was completed in `phase-1-test-tooling-decision`.
+
+Any future test framework add, remove, upgrade, browser install policy change, or major test runner configuration change is a dependency/tooling change. It must pass `docs/04-agent-system/sop/dependency-introduction-gate.md` and include `human approval` evidence before modifying package files or lockfiles.

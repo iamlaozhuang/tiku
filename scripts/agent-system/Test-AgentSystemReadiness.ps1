@@ -10,10 +10,13 @@ $requiredFilePaths = @(
     "docs\04-agent-system\sop\automation-loop.md",
     "docs\04-agent-system\sop\skill-dispatch-matrix.md",
     "docs\04-agent-system\sop\dependency-introduction-gate.md",
+    "docs\04-agent-system\sop\security-review-gate.md",
     "docs\04-agent-system\state\project-state.yaml",
     "docs\04-agent-system\state\task-queue.yaml",
     "docs\04-agent-system\milestones-goals\mvp-roadmap.md",
     "scripts\agent-system\Test-GitCompletionReadiness.ps1",
+    "scripts\agent-system\Test-NamingConventions.ps1",
+    "scripts\agent-system\New-TaskEvidence.ps1",
     "package.json"
 )
 
