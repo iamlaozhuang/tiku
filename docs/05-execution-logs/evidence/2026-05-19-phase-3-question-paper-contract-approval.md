@@ -177,10 +177,20 @@ Result:
 ## Git Closeout
 
 - implementationCommit: `92d8d56` (`docs(paper): approve question paper contract`).
-- closeoutEvidenceCommit: pending.
-- merge: skipped, reason pending user decision and stacked branch cleanup.
-- push: skipped, reason explicit push approval has not been requested or granted.
-- cleanup: skipped, reason branch remains active until commit/merge decision.
+- closeoutEvidenceCommit: pending after this evidence update.
+- merge: fast-forward merged into local `master` through `codex/phase-3-question-paper-contract-approval`, updating `4adbbd6..dc22d12`.
+- postMergeValidation:
+  - readiness: pass on `master`.
+  - naming: pass on `master`, output included `naming convention scan completed`.
+  - quality gate: pass on `master`; lint, typecheck, unit tests (`29 passed`, `64 passed`), and format check passed.
+  - format:check: pass on `master`.
+  - git completion readiness: pass on `master`; clean working tree, `master...origin/master [ahead 4]` before closeout evidence commit.
+- push: pending after closeout evidence commit.
+- cleanup:
+  - `git branch -d codex/phase-3-question-paper-contract-approval codex/phase-3-question-paper-planning`: exit code `0`.
+  - `git worktree prune`: exit code `0`.
+  - remaining local branch list: `master` only.
+  - worktree list: `F:/tiku` only.
 
 ## Taste Compliance Self-Check
 
