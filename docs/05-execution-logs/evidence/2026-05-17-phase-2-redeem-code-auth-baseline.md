@@ -8,6 +8,7 @@
 - Worktree: `F:\tiku\.worktrees\phase-2-redeem-code-auth-baseline`
 - Base: `master`
 - Evidence recorded at: `2026-05-18T12:23:28+08:00`
+- Closeout updated at: `2026-05-18T12:47:00+08:00`
 
 ## Scope
 
@@ -227,10 +228,12 @@ Updated:
 
 ## Git Closeout
 
-- commit: local task commit created with message `feat(auth): add redeem code authorization baseline`; final HEAD SHA is reported in handoff because amending evidence changes the commit SHA
-- merge: skipped, no user approval requested yet
-- push: skipped, no user approval requested yet
-- cleanup: skipped, worktree retained for review until commit/merge decision
+- commit: local task commit created with message `feat(auth): add redeem code authorization baseline`
+- taskCommit: `65d003b`
+- merge: user approved merge; fast-forward merged into local `master` at `2026-05-18T12:43:00+08:00`
+- mergedHead: `65d003b`
+- push: user approved push to `origin/master`; pending final push command after this closeout record
+- cleanup: pending push completion
 
 ## Commit Evaluation
 
@@ -255,6 +258,67 @@ Result:
 
 - Exit code: `0`
 - Output contained only task-scoped files from the allowed queue boundary.
+
+## Post-Merge Validation on Master
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included required file checks, npm script checks, agent-system script checks, and installed skill path checks.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `npm script: lint`
+  - `npm script: typecheck`
+  - `npm script: test:unit`
+  - `Test Files 18 passed (18)`
+  - `Tests 42 passed (42)`
+  - `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Compiled successfully`
+  - `ƒ /api/v1/personal-auths`
+  - `ƒ /api/v1/redeem-codes/redeem`
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - branch: `master`
+  - head: `65d003b`
+  - status: `master...origin/master [ahead 1]`
+  - upstream: `origin/master`
+  - leftRightCount: `0 1`
+  - result: `git completion readiness inventory completed`
 
 ## Boundary Notes
 
