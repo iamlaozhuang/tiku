@@ -151,11 +151,17 @@ Accepted residual risk:
 
 ## Git Closeout
 
-- implementationCommit: pending before commit.
-- closeoutEvidenceCommit: pending after merge, push, and cleanup.
-- merge: pending.
+- implementationCommit: `b921d4c` (`docs(agent): harden semi automation gates`).
+- reviewCommit: `a547200` (`docs(agent): review phase 0-2 mechanism`).
+- merge: fast-forward merged `codex/phase-0-2-mechanism-review` into local `master`, updating `34de935..b921d4c`.
+- postMergeValidation:
+  - naming: pass on `master`, output included `naming convention scan completed`.
+  - readiness: pass on `master`, output included the new security SOP and agent-system scripts.
+  - quality gate: pass on `master`; lint, typecheck, unit tests, and format check passed.
+  - git completion readiness: pass on `master`; status clean, `master...origin/master [ahead 2]`.
+- closeoutEvidenceCommit: pending after this evidence update.
 - push: pending.
-- cleanup: pending.
+- cleanup: pending after push.
 
 ## Taste Compliance Self-Check
 
