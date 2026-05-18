@@ -159,9 +159,13 @@ Accepted residual risk:
   - readiness: pass on `master`, output included the new security SOP and agent-system scripts.
   - quality gate: pass on `master`; lint, typecheck, unit tests, and format check passed.
   - git completion readiness: pass on `master`; status clean, `master...origin/master [ahead 2]`.
-- closeoutEvidenceCommit: pending after this evidence update.
-- push: pending.
-- cleanup: pending after push.
+- mergeEvidenceCommit: `a044dc2` (`docs(agent): record mechanism hardening merge`).
+- firstPush: pushed `34de935..a044dc2` to `origin/master`.
+- cleanup:
+  - `git worktree remove .worktrees\phase-0-2-mechanism-review`: exit code `0`.
+  - `git branch -d codex/phase-0-2-mechanism-review`: exit code `0`, deleted branch at `b921d4c`.
+  - `git worktree prune`: exit code `0`.
+- finalCleanupEvidenceCommit: pending after this evidence update.
 
 ## Taste Compliance Self-Check
 
