@@ -9,6 +9,7 @@
 - Base: `master`
 - Evidence recorded at: `2026-05-17T23:34:00+08:00`
 - Closeout updated at: `2026-05-18T00:05:00+08:00`
+- Push evidence updated at: `2026-05-18T00:18:00+08:00`
 
 ## Scope
 
@@ -227,7 +228,7 @@ Updated:
 - commit: local task commit created with message `feat(auth): add user registration baseline`; final HEAD SHA is reported in handoff because amending evidence changes the commit SHA
 - merge: fast-forward merged into local `master` at `2026-05-18T00:02:00+08:00`
 - mergedHead: `26eea42`
-- push: skipped, requires explicit user approval
+- push: user approved push to `origin/master`; pushed `73d3baf..f868c69` with result `master -> master`; push evidence commit will be pushed immediately after this record
 - cleanup: branch `codex/phase-2-user-registration-baseline` deleted; residual worktree directory `F:\tiku\.worktrees\phase-2-user-registration-baseline` removed after confirming it was under `.worktrees/`
 
 ## Post-Merge Validation on Master
@@ -289,6 +290,40 @@ Result:
   - upstream: `origin/master`
   - leftRightCount: `0 1`
   - result: `git completion readiness inventory completed`
+
+## Push Validation
+
+Command:
+
+```powershell
+git fetch origin
+```
+
+Result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...master
+```
+
+Pre-push result:
+
+- Exit code: `0`
+- Output: `0 2`
+
+Command:
+
+```powershell
+git push origin master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included: `73d3baf..f868c69  master -> master`
 
 ## Boundary Notes
 
