@@ -10,6 +10,7 @@
 - Evidence recorded at: `2026-05-18T22:38:53+08:00`
 - Commit evidence updated at: `2026-05-18T22:42:16+08:00`
 - Push evidence updated at: `2026-05-18T22:50:38+08:00`
+- Master merge evidence updated at: `2026-05-18T22:57:23+08:00`
 
 ## Scope
 
@@ -228,9 +229,11 @@ Updated:
 
 - commit: local task commit created with message `feat(auth): add admin employee account baseline`
 - taskCommit: `444bba8`
-- merge: skipped, no explicit merge approval in this turn.
+- merge: user approved local merge; fast-forward merged into local `master` at `2026-05-18T22:55:00+08:00`
+- mergedHead: `99746bc`
 - push: user approved push to `origin/codex/phase-2-admin-employee-account-baseline`; pushed new branch successfully.
-- cleanup: skipped, task branch/worktree kept for review until commit/merge/push decision.
+- masterPush: pending master closeout evidence commit.
+- cleanup: pending after master push and closeout evidence.
 
 ## Commit Evaluation
 
@@ -321,6 +324,114 @@ Result:
 - Output included:
   - `[new branch] codex/phase-2-admin-employee-account-baseline -> codex/phase-2-admin-employee-account-baseline`
   - `https://github.com/iamlaozhuang/tiku/pull/new/codex/phase-2-admin-employee-account-baseline`
+
+## Master Merge Validation
+
+Command:
+
+```powershell
+git status --short --branch
+```
+
+Pre-merge result on `F:\tiku`:
+
+- Exit code: `0`
+- Output: `## master...origin/master`
+
+Command:
+
+```powershell
+git fetch origin
+```
+
+Result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...master
+```
+
+Pre-merge result:
+
+- Exit code: `0`
+- Output: `0 0`
+
+Command:
+
+```powershell
+git merge --ff-only codex/phase-2-admin-employee-account-baseline
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Updating 7539df9..99746bc`
+  - `Fast-forward`
+  - `15 files changed`
+
+## Post-Merge Validation on Master
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included required file checks, npm script checks, agent-system script checks, and installed skill path checks.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `npm script: lint`
+  - `npm script: typecheck`
+  - `npm script: test:unit`
+  - `Test Files 26 passed (26)`
+  - `Tests 59 passed (59)`
+  - `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Compiled successfully`
+  - `ƒ /api/v1/employees`
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - branch: `master`
+  - head: `99746bc`
+  - status: `master...origin/master [ahead 3]`
+  - upstream: `origin/master`
+  - leftRightCount: `0 3`
+  - result: `git completion readiness inventory completed`
 
 ## Boundary Notes
 
