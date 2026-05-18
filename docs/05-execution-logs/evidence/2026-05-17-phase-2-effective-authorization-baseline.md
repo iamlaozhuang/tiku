@@ -211,8 +211,8 @@ Updated:
 - taskCommit: `b09dc98`
 - merge: user approved local merge; fast-forward merged into local `master` at `2026-05-18T23:38:00+08:00`
 - mergedHead: `7dc9ee9`
-- push: pending post-merge evidence commit and push validation.
-- cleanup: skipped until branch is merged or otherwise closed.
+- push: user approved push to `origin/master`; pushed `2fb18b4..b1c4171`; final cleanup evidence commit will be pushed immediately after this record.
+- cleanup: worktree deregistered; residual worktree directory under `.worktrees` removed; local task branch deleted.
 
 ## Commit Evaluation
 
@@ -381,6 +381,122 @@ Result:
 - Output included:
   - `Compiled successfully`
   - `ƒ /api/v1/authorizations`
+
+Command:
+
+```powershell
+git commit -m "docs(agent): record effective authorization merge"
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[master b1c4171] docs(agent): record effective authorization merge`
+
+## Master Push And Cleanup Validation
+
+Command:
+
+```powershell
+git fetch origin
+```
+
+Result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...master
+```
+
+Pre-push result:
+
+- Exit code: `0`
+- Output: `0 3`
+
+Command:
+
+```powershell
+git push origin master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `2fb18b4..b1c4171  master -> master`
+
+Command:
+
+```powershell
+git worktree remove .worktrees\phase-2-effective-authorization-baseline
+```
+
+Result:
+
+- Exit code: `1`
+- Cause: Git deregistered the worktree but Windows left the directory non-empty because of local dependency residue.
+
+Command:
+
+```powershell
+Resolve-Path .worktrees\phase-2-effective-authorization-baseline
+Resolve-Path .worktrees
+```
+
+Result:
+
+- Exit code: `0`
+- Output confirmed the residual path was under `F:\tiku\.worktrees`.
+
+Recovery command:
+
+```powershell
+Remove-Item -LiteralPath '\\?\F:\tiku\.worktrees\phase-2-effective-authorization-baseline' -Recurse -Force
+```
+
+Recovery result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+Test-Path 'F:\tiku\.worktrees\phase-2-effective-authorization-baseline'
+```
+
+Result:
+
+- Exit code: `0`
+- Output: `False`
+
+Command:
+
+```powershell
+git branch -d codex/phase-2-effective-authorization-baseline
+```
+
+First result:
+
+- Exit code: `1`
+- Cause: Git ref lock creation was denied by the sandbox.
+
+Recovery result with approved escalation:
+
+- Exit code: `0`
+- Output included `Deleted branch codex/phase-2-effective-authorization-baseline`.
+
+Command:
+
+```powershell
+git worktree prune
+```
+
+Result:
+
+- Exit code: `0`
 
 ## Boundary Notes
 
