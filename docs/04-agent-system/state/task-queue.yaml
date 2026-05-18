@@ -1009,3 +1009,439 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-readiness.md
     status: done
     retryCount: 0
+  - id: phase-3-question-paper-planning
+    title: Phase 3 Question Paper Task Breakdown
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md
+    dependencies:
+      - phase-2-user-auth-readiness-evidence
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-paper-planning.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-planning.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - data_contract
+      - api_contract
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - npm.cmd run format:check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-planning.md
+    status: done
+    retryCount: 0
+  - id: phase-3-question-paper-contract-approval
+    title: Question Paper Contract And Approval
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md
+    dependencies:
+      - phase-3-question-paper-planning
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-paper-contract-approval.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-contract-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-question-paper-contract-approval-security-review.md
+      - docs/02-architecture/interfaces/question-paper-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - schema
+      - migration
+      - authorization
+      - api_contract
+      - data_contract
+      - admin
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-question-paper-contract-approval-security-review.md
+    validationCommands:
+      - Test-Path 'docs\02-architecture\interfaces\question-paper-contract.md'
+      - Select-String -Path 'docs\02-architecture\interfaces\question-paper-contract.md' -Pattern 'question|paper|material|paper_section|question_group|question_option|scoring_point|paper_asset|authorization'
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-19-phase-3-question-paper-contract-approval.md' -Pattern 'human approval|security review'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - npm.cmd run format:check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-contract-approval.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-question-paper-schema-baseline
+    title: Question Paper Schema Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#1-题库管理
+    dependencies:
+      - phase-3-question-paper-contract-approval
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-paper-schema-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-schema-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-question-paper-schema-baseline-security-review.md
+      - src/db/schema/**
+      - src/server/models/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - src/app/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+    riskTypes:
+      - schema
+      - migration
+      - data_contract
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-question-paper-schema-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\db\schema\*.ts' -Pattern 'question|paper|material|paper_section|question_group|question_option|scoring_point|paper_asset'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-schema-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-material-library-baseline
+    title: Material Library Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#2-材料管理
+    dependencies:
+      - phase-3-question-paper-schema-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-material-library-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-material-library-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-material-library-baseline-security-review.md
+      - src/app/api/v1/materials/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - admin
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-material-library-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\materials\**\*.ts' -Pattern 'code|message|data'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-material-library-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-question-library-baseline
+    title: Question Library Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#1-题库管理
+    dependencies:
+      - phase-3-question-paper-schema-baseline
+      - phase-3-material-library-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-library-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-question-library-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-question-library-baseline-security-review.md
+      - src/app/api/v1/questions/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - admin
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-question-library-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\questions\**\*.ts' -Pattern 'code|message|data'
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'question|question_option|scoring_point|analysis|standard_answer'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-library-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-paper-draft-composition-baseline
+    title: Paper Draft Composition Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#us-02-07-草稿试卷组卷
+    dependencies:
+      - phase-3-question-library-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-paper-draft-composition-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-draft-composition-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-paper-draft-composition-baseline-security-review.md
+      - src/app/api/v1/papers/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - admin
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-paper-draft-composition-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\papers\**\*.ts' -Pattern 'code|message|data'
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'paper_section|question_group|sort_order'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-draft-composition-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-paper-publish-snapshot-baseline
+    title: Paper Publish Snapshot Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#us-02-08-试卷发布与强校验
+    dependencies:
+      - phase-3-paper-draft-composition-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-paper-publish-snapshot-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-publish-snapshot-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-paper-publish-snapshot-baseline-security-review.md
+      - src/app/api/v1/papers/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - admin
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-paper-publish-snapshot-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'publish|snapshot|scoring_point|standard_answer'
+      - Select-String -Path 'src\app\api\v1\papers\**\*.ts' -Pattern 'publish|code|message|data'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-publish-snapshot-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-paper-lifecycle-asset-baseline
+    title: Paper Lifecycle And Asset Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#us-02-09-试卷下架与删除
+    dependencies:
+      - phase-3-paper-publish-snapshot-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-paper-lifecycle-asset-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-lifecycle-asset-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-paper-lifecycle-asset-baseline-security-review.md
+      - src/app/api/v1/papers/**
+      - src/app/api/v1/paper-assets/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - admin
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-paper-lifecycle-asset-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'paper_asset|paper_attachment_usage|copy|disable'
+      - Select-String -Path 'src\app\api\v1\paper-assets\**\*.ts' -Pattern 'code|message|data'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-lifecycle-asset-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-admin-question-material-ui-baseline
+    title: Admin Question And Material UI Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-08-题库管理界面
+    dependencies:
+      - phase-3-question-library-baseline
+      - phase-3-material-library-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-admin-question-material-ui-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-admin-question-material-ui-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-admin-question-material-ui-baseline-security-review.md
+      - src/app/(admin)/**
+      - src/components/admin/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - admin
+      - authorization
+      - api_contract
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-admin-question-material-ui-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-admin-question-material-ui-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-admin-paper-ui-baseline
+    title: Admin Paper UI Baseline
+    phase: phase-3-question-paper
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-09-试卷管理界面
+    dependencies:
+      - phase-3-paper-lifecycle-asset-baseline
+      - phase-3-admin-question-material-ui-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-3-admin-paper-ui-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-admin-paper-ui-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-admin-paper-ui-baseline-security-review.md
+      - src/app/(admin)/**
+      - src/components/admin/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - admin
+      - authorization
+      - api_contract
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-3-admin-paper-ui-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-admin-paper-ui-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-3-question-paper-readiness-evidence
+    title: Question Paper Readiness Evidence
+    phase: phase-3-question-paper
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-3-question-paper
+    dependencies:
+      - phase-3-admin-paper-ui-baseline
+      - phase-3-paper-publish-snapshot-baseline
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - evidence_integrity
+      - state_transition
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-readiness.md
+    status: pending
+    retryCount: 0

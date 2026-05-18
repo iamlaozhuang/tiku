@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-3-question-paper
-  updatedAt: "2026-05-18T23:54:00+08:00"
+  updatedAt: "2026-05-19T00:59:54+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: plan_phase_3_question_paper
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-readiness.md
+  nextRecommendedAction: claim_phase_3_question_paper_contract_approval
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-planning.md
