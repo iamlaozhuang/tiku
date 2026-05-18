@@ -11,6 +11,8 @@
 - Commit evidence updated at: `2026-05-18T22:42:16+08:00`
 - Push evidence updated at: `2026-05-18T22:50:38+08:00`
 - Master merge evidence updated at: `2026-05-18T22:57:23+08:00`
+- Master push evidence updated at: `2026-05-18T22:59:16+08:00`
+- Cleanup evidence updated at: `2026-05-18T23:02:49+08:00`
 
 ## Scope
 
@@ -232,8 +234,8 @@ Updated:
 - merge: user approved local merge; fast-forward merged into local `master` at `2026-05-18T22:55:00+08:00`
 - mergedHead: `99746bc`
 - push: user approved push to `origin/codex/phase-2-admin-employee-account-baseline`; pushed new branch successfully.
-- masterPush: pending master closeout evidence commit.
-- cleanup: pending after master push and closeout evidence.
+- masterPush: user approved push to `origin/master`; pushed `7539df9..6df4ca3`.
+- cleanup: branch `codex/phase-2-admin-employee-account-baseline` deleted; residual worktree directory `F:\tiku\.worktrees\phase-2-admin-employee-account-baseline` removed after confirming it was under `.worktrees/`; `git worktree prune` completed.
 
 ## Commit Evaluation
 
@@ -432,6 +434,108 @@ Result:
   - upstream: `origin/master`
   - leftRightCount: `0 3`
   - result: `git completion readiness inventory completed`
+
+## Master Push Validation
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...master
+```
+
+Pre-push result:
+
+- Exit code: `0`
+- Output: `0 4`
+
+Command:
+
+```powershell
+git push origin master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included: `7539df9..6df4ca3  master -> master`
+
+## Cleanup Validation
+
+Command:
+
+```powershell
+git worktree remove .worktrees\phase-2-admin-employee-account-baseline
+```
+
+Result:
+
+- Exit code: `1`
+- Cause: Git deregistered the worktree but Windows left the directory non-empty because of local dependency residue.
+
+Command:
+
+```powershell
+Resolve-Path .worktrees\phase-2-admin-employee-account-baseline
+Resolve-Path .worktrees
+```
+
+Result:
+
+- Exit code: `0`
+- Output confirmed the residual path was under `F:\tiku\.worktrees`.
+
+Command:
+
+```powershell
+Remove-Item -LiteralPath 'F:\tiku\.worktrees\phase-2-admin-employee-account-baseline' -Recurse -Force
+```
+
+Result:
+
+- Exit code: `1`
+- Cause: Windows long-path dependency residue under `node_modules`.
+
+Recovery command:
+
+```powershell
+Remove-Item -LiteralPath '\\?\F:\tiku\.worktrees\phase-2-admin-employee-account-baseline' -Recurse -Force
+```
+
+Recovery result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+Test-Path 'F:\tiku\.worktrees\phase-2-admin-employee-account-baseline'
+```
+
+Result:
+
+- Exit code: `0`
+- Output: `False`
+
+Command:
+
+```powershell
+git branch -d codex/phase-2-admin-employee-account-baseline
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `Deleted branch codex/phase-2-admin-employee-account-baseline`.
+
+Command:
+
+```powershell
+git worktree prune
+```
+
+Result:
+
+- Exit code: `0`
 
 ## Boundary Notes
 
