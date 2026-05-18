@@ -208,7 +208,7 @@ Updated:
 ## Git Closeout
 
 - commit: local task commit created with message `feat(auth): add effective authorization baseline`
-- taskCommit: `b7a92b2`
+- taskCommit: `b09dc98`
 - merge: skipped pending explicit user approval.
 - push: skipped pending explicit user approval.
 - cleanup: skipped until branch is merged or otherwise closed.
@@ -254,6 +254,18 @@ Result:
 - Exit code: `0`
 - Output included:
   - `[codex/phase-2-effective-authorization-baseline b7a92b2] feat(auth): add effective authorization baseline`
+
+Command:
+
+```powershell
+git commit --amend --no-edit
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[codex/phase-2-effective-authorization-baseline b09dc98] feat(auth): add effective authorization baseline`
 
 ## Boundary Notes
 
