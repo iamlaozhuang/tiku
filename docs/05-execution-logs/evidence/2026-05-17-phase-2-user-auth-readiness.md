@@ -119,8 +119,8 @@ Final build result:
 - taskCommit: `974cce5`
 - merge: fast-forward merged into local `master` at `2026-05-18T23:54:00+08:00`
 - mergedHead: `974cce5`
-- push: pending post-merge evidence commit and push validation.
-- cleanup: skipped until master push succeeds.
+- push: user approved push to `origin/master`; pushed `08ffc02..8616595`; final cleanup evidence commit will be pushed immediately after this record.
+- cleanup: worktree deregistered; residual worktree directory under `.worktrees` removed; local task branch deleted.
 
 ## Commit And Merge Evaluation
 
@@ -237,3 +237,114 @@ Result:
   - `ƒ /api/v1/redeem-codes/redeem`
   - `ƒ /api/v1/sessions`
   - `ƒ /api/v1/users`
+
+Command:
+
+```powershell
+git commit -m "docs(agent): record phase 2 readiness merge"
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[master 8616595] docs(agent): record phase 2 readiness merge`
+
+## Master Push And Cleanup Validation
+
+Command:
+
+```powershell
+git fetch origin
+```
+
+Result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+git rev-list --left-right --count origin/master...master
+```
+
+Pre-push result:
+
+- Exit code: `0`
+- Output: `0 2`
+
+Command:
+
+```powershell
+git push origin master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `08ffc02..8616595  master -> master`
+
+Command:
+
+```powershell
+git worktree remove .worktrees\phase-2-user-auth-readiness-evidence
+```
+
+Result:
+
+- Exit code: `1`
+- Cause: Git deregistered the worktree but Windows left the directory non-empty because of local dependency residue.
+
+Command:
+
+```powershell
+Resolve-Path .worktrees\phase-2-user-auth-readiness-evidence
+Resolve-Path .worktrees
+```
+
+Result:
+
+- Exit code: `0`
+- Output confirmed the residual path was under `F:\tiku\.worktrees`.
+
+Recovery command:
+
+```powershell
+Remove-Item -LiteralPath '\\?\F:\tiku\.worktrees\phase-2-user-auth-readiness-evidence' -Recurse -Force
+```
+
+Recovery result:
+
+- Exit code: `0`
+
+Command:
+
+```powershell
+Test-Path 'F:\tiku\.worktrees\phase-2-user-auth-readiness-evidence'
+```
+
+Result:
+
+- Exit code: `0`
+- Output: `False`
+
+Command:
+
+```powershell
+git branch -d codex/phase-2-user-auth-readiness-evidence
+```
+
+Result:
+
+- Exit code: `0`
+- Output included `Deleted branch codex/phase-2-user-auth-readiness-evidence`.
+
+Command:
+
+```powershell
+git worktree prune
+```
+
+Result:
+
+- Exit code: `0`
