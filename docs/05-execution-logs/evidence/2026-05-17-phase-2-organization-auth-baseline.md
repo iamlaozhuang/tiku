@@ -8,6 +8,7 @@
 - Worktree: `F:\tiku\.worktrees\phase-2-organization-auth-baseline`
 - Base: `master`
 - Evidence recorded at: `2026-05-18T13:39:49+08:00`
+- Closeout updated at: `2026-05-18T13:47:00+08:00`
 
 ## Scope
 
@@ -235,10 +236,12 @@ Updated:
 
 ## Git Closeout
 
-- commit: local task commit created with message `feat(auth): add organization auth baseline`; final HEAD SHA is reported in handoff because amending evidence changes the commit SHA
-- merge: pending post-commit readiness
-- push: pending merge validation
-- cleanup: skipped until merge/push decision
+- commit: local task commit created with message `feat(auth): add organization auth baseline`
+- taskCommit: `a4af2b7`
+- merge: user approved merge; fast-forward merged into local `master` at `2026-05-18T13:42:00+08:00`
+- mergedHead: `a4af2b7`
+- push: user approved push to `origin/master`; pending final push command after this closeout record
+- cleanup: pending push completion
 
 ## Commit Evaluation
 
@@ -263,6 +266,70 @@ Result:
 
 - Exit code: `0`
 - Output contained only task-scoped files from the allowed queue boundary.
+
+## Post-Merge Validation on Master
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included required file checks, npm script checks, agent-system script checks, and installed skill path checks.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `npm script: lint`
+  - `npm script: typecheck`
+  - `npm script: test:unit`
+  - `Test Files 22 passed (22)`
+  - `Tests 52 passed (52)`
+  - `All matched files use Prettier code style!`
+
+Command:
+
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `Compiled successfully`
+  - `ƒ /api/v1/org-auths`
+  - `ƒ /api/v1/org-auths/[publicId]/cancel`
+  - `ƒ /api/v1/organizations`
+  - `ƒ /api/v1/organizations/[publicId]`
+  - `ƒ /api/v1/organizations/[publicId]/disable`
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - branch: `master`
+  - head: `a4af2b7`
+  - status: `master...origin/master [ahead 1]`
+  - upstream: `origin/master`
+  - leftRightCount: `0 1`
+  - result: `git completion readiness inventory completed`
 
 ## Boundary Notes
 
