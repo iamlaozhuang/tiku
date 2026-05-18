@@ -226,7 +226,7 @@ Updated:
 ## Git Closeout
 
 - commit: local task commit created with message `feat(auth): add admin employee account baseline`
-- taskCommit: `c6f3b9b`
+- taskCommit: `444bba8`
 - merge: skipped, no explicit merge approval in this turn.
 - push: skipped, no explicit push approval in this turn.
 - cleanup: skipped, task branch/worktree kept for review until commit/merge/push decision.
@@ -261,6 +261,18 @@ Result:
 - Output included:
   - `[codex/phase-2-admin-employee-account-baseline c6f3b9b] feat(auth): add admin employee account baseline`
   - `15 files changed`
+
+Command:
+
+```powershell
+git commit --amend --no-edit
+```
+
+Result:
+
+- Exit code: `0`
+- Output included:
+  - `[codex/phase-2-admin-employee-account-baseline 444bba8] feat(auth): add admin employee account baseline`
 
 ## Boundary Notes
 
