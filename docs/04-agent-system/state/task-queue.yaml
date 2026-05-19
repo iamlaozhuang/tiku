@@ -1157,7 +1157,7 @@ tasks:
       - Select-String -Path 'src\app\api\v1\materials\**\*.ts' -Pattern 'code|message|data'
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-material-library-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-3-question-library-baseline
     title: Question Library Baseline
