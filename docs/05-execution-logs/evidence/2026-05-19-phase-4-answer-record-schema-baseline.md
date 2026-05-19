@@ -213,3 +213,15 @@ Accepted gaps:
 - No `drizzle/**` migration generated.
 - No `.env.example` change.
 - No `src/app/**`, service, repository, contract, mapper, or validator change.
+
+## Post-Merge Master Closeout
+
+- Merge target: `master`
+- Merge result: fast-forward from `e318baa` to `b65d9a3`
+- `npm.cmd run lint`: pass.
+- `npm.cmd run typecheck`: pass.
+- `npm.cmd run test:unit`: pass, 41 files and 108 tests.
+- `npm.cmd run format:check`: pass.
+- `Select-String -Path 'src\db\schema\*.ts' -Pattern 'practice|mock_exam|answer_record|exam_report|mistake_book'`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass, master ahead by the task commit before closeout evidence commit.
