@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-4-student-experience
-  updatedAt: "2026-05-19T22:45:00+08:00"
+  updatedAt: "2026-05-19T23:17:48+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim_phase_4_mistake_book_baseline
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-19-phase-4-exam-report-baseline.md
+  nextRecommendedAction: claim_phase_4_student_home_ui_baseline
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-19-phase-4-mistake-book-baseline.md
