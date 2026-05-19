@@ -234,7 +234,7 @@ describe("paper draft route handlers", () => {
     };
 
     await expect(
-      handlers
+      handlers.collection
         .GET(
           new Request(
             "http://localhost/api/v1/papers?page=1&pageSize=20&paperStatus=draft",
@@ -257,7 +257,7 @@ describe("paper draft route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.collection
         .POST(
           new Request("http://localhost/api/v1/papers", {
             method: "POST",
@@ -281,7 +281,7 @@ describe("paper draft route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.detail
         .GET(
           new Request("http://localhost/api/v1/papers/paper_public_123"),
           context,
@@ -297,7 +297,7 @@ describe("paper draft route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.detail
         .PATCH(
           new Request("http://localhost/api/v1/papers/paper_public_123", {
             method: "PATCH",
@@ -489,7 +489,7 @@ describe("paper draft route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.detail
         .DELETE(
           new Request("http://localhost/api/v1/papers/paper_public_123", {
             method: "DELETE",

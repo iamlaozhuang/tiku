@@ -13,6 +13,6 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = paperRouteHandlers.GET;
-export const PATCH = paperRouteHandlers.PATCH;
-export const DELETE = paperRouteHandlers.DELETE;
+export const GET = paperRouteHandlers.detail.GET;
+export const PATCH = paperRouteHandlers.detail.PATCH;
+export const DELETE = paperRouteHandlers.detail.DELETE;

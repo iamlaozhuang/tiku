@@ -13,5 +13,5 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = materialRouteHandlers.GET;
-export const POST = materialRouteHandlers.POST;
+export const GET = materialRouteHandlers.collection.GET;
+export const POST = materialRouteHandlers.collection.POST;

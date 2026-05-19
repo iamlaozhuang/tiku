@@ -13,5 +13,5 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = questionRouteHandlers.GET;
-export const POST = questionRouteHandlers.POST;
+export const GET = questionRouteHandlers.collection.GET;
+export const POST = questionRouteHandlers.collection.POST;

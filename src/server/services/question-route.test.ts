@@ -122,7 +122,7 @@ describe("question route handlers", () => {
     const handlers = createQuestionRouteHandlers(createService());
 
     await expect(
-      handlers
+      handlers.collection
         .GET(
           new Request(
             "http://localhost/api/v1/questions?page=1&pageSize=20&questionType=single_choice",
@@ -146,7 +146,7 @@ describe("question route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.collection
         .POST(
           new Request("http://localhost/api/v1/questions", {
             method: "POST",
@@ -186,7 +186,7 @@ describe("question route handlers", () => {
     };
 
     await expect(
-      handlers
+      handlers.detail
         .GET(
           new Request("http://localhost/api/v1/questions/question_public_123"),
           context,
@@ -202,7 +202,7 @@ describe("question route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.detail
         .PATCH(
           new Request("http://localhost/api/v1/questions/question_public_123", {
             method: "PATCH",

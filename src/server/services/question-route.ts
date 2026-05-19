@@ -38,29 +38,32 @@ function readQuestionQuery(request: Request): Record<string, unknown> {
 
 export function createQuestionRouteHandlers(questionService: QuestionService) {
   return {
-    async GET(request: Request, context?: RouteContext): Promise<Response> {
-      if (context !== undefined) {
+    collection: {
+      async GET(request: Request): Promise<Response> {
+        return createJsonResponse(
+          await questionService.listQuestions(readQuestionQuery(request)),
+        );
+      },
+      async POST(request: Request): Promise<Response> {
+        const input = await readRequestJson(request);
+
+        return createJsonResponse(await questionService.createQuestion(input));
+      },
+    },
+    detail: {
+      async GET(_request: Request, context: RouteContext): Promise<Response> {
         const { publicId } = await context.params;
 
         return createJsonResponse(await questionService.getQuestion(publicId));
-      }
+      },
+      async PATCH(request: Request, context: RouteContext): Promise<Response> {
+        const input = await readRequestJson(request);
+        const { publicId } = await context.params;
 
-      return createJsonResponse(
-        await questionService.listQuestions(readQuestionQuery(request)),
-      );
-    },
-    async POST(request: Request): Promise<Response> {
-      const input = await readRequestJson(request);
-
-      return createJsonResponse(await questionService.createQuestion(input));
-    },
-    async PATCH(request: Request, context: RouteContext): Promise<Response> {
-      const input = await readRequestJson(request);
-      const { publicId } = await context.params;
-
-      return createJsonResponse(
-        await questionService.updateQuestion(publicId, input),
-      );
+        return createJsonResponse(
+          await questionService.updateQuestion(publicId, input),
+        );
+      },
     },
     disable: {
       async POST(_request: Request, context: RouteContext): Promise<Response> {

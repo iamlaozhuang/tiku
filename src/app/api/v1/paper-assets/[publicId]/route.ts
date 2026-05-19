@@ -13,5 +13,5 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = paperAssetRouteHandlers.GET;
-export const DELETE = paperAssetRouteHandlers.DELETE;
+export const GET = paperAssetRouteHandlers.detail.GET;
+export const DELETE = paperAssetRouteHandlers.detail.DELETE;

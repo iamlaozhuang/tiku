@@ -43,43 +43,46 @@ function readPaperQuery(request: Request): Record<string, unknown> {
 
 export function createPaperDraftRouteHandlers(paperService: PaperDraftService) {
   return {
-    async GET(
-      request: Request,
-      context?: PaperRouteContext,
-    ): Promise<Response> {
-      if (context !== undefined) {
+    collection: {
+      async GET(request: Request): Promise<Response> {
+        return createJsonResponse(
+          await paperService.listPapers(readPaperQuery(request)),
+        );
+      },
+      async POST(request: Request): Promise<Response> {
+        const input = await readRequestJson(request);
+
+        return createJsonResponse(await paperService.createPaper(input));
+      },
+    },
+    detail: {
+      async GET(
+        _request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
         const { publicId } = await context.params;
 
         return createJsonResponse(await paperService.getPaper(publicId));
-      }
+      },
+      async PATCH(
+        request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const input = await readRequestJson(request);
+        const { publicId } = await context.params;
 
-      return createJsonResponse(
-        await paperService.listPapers(readPaperQuery(request)),
-      );
-    },
-    async POST(request: Request): Promise<Response> {
-      const input = await readRequestJson(request);
+        return createJsonResponse(
+          await paperService.updatePaper(publicId, input),
+        );
+      },
+      async DELETE(
+        _request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
 
-      return createJsonResponse(await paperService.createPaper(input));
-    },
-    async PATCH(
-      request: Request,
-      context: PaperRouteContext,
-    ): Promise<Response> {
-      const input = await readRequestJson(request);
-      const { publicId } = await context.params;
-
-      return createJsonResponse(
-        await paperService.updatePaper(publicId, input),
-      );
-    },
-    async DELETE(
-      _request: Request,
-      context: PaperRouteContext,
-    ): Promise<Response> {
-      const { publicId } = await context.params;
-
-      return createJsonResponse(await paperService.deletePaper(publicId));
+        return createJsonResponse(await paperService.deletePaper(publicId));
+      },
     },
     questions: {
       async POST(

@@ -99,7 +99,7 @@ describe("material route handlers", () => {
     const handlers = createMaterialRouteHandlers(createService());
 
     await expect(
-      handlers
+      handlers.collection
         .GET(
           new Request(
             "http://localhost/api/v1/materials?page=1&pageSize=20&profession=logistics",
@@ -117,7 +117,7 @@ describe("material route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.collection
         .POST(
           new Request("http://localhost/api/v1/materials", {
             method: "POST",
@@ -150,7 +150,7 @@ describe("material route handlers", () => {
     };
 
     await expect(
-      handlers
+      handlers.detail
         .GET(
           new Request("http://localhost/api/v1/materials/material_public_123"),
           context,
@@ -166,7 +166,7 @@ describe("material route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.detail
         .PATCH(
           new Request("http://localhost/api/v1/materials/material_public_123", {
             method: "PATCH",

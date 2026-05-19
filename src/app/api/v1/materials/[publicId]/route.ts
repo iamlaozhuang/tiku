@@ -13,5 +13,5 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = materialRouteHandlers.GET;
-export const PATCH = materialRouteHandlers.PATCH;
+export const GET = materialRouteHandlers.detail.GET;
+export const PATCH = materialRouteHandlers.detail.PATCH;

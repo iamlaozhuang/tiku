@@ -74,7 +74,7 @@ describe("paper asset route handlers", () => {
     };
 
     await expect(
-      handlers
+      handlers.collection
         .GET(
           new Request(
             "http://localhost/api/v1/paper-assets?page=1&pageSize=20&paperAttachmentUsage=paper_source",
@@ -95,7 +95,7 @@ describe("paper asset route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.collection
         .POST(
           new Request("http://localhost/api/v1/paper-assets", {
             method: "POST",
@@ -121,7 +121,7 @@ describe("paper asset route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.detail
         .GET(
           new Request(
             "http://localhost/api/v1/paper-assets/paper_asset_public_123",
@@ -138,7 +138,7 @@ describe("paper asset route handlers", () => {
     });
 
     await expect(
-      handlers
+      handlers.detail
         .DELETE(
           new Request(
             "http://localhost/api/v1/paper-assets/paper_asset_public_123",

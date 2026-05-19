@@ -13,5 +13,5 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = paperAssetRouteHandlers.GET;
-export const POST = paperAssetRouteHandlers.POST;
+export const GET = paperAssetRouteHandlers.collection.GET;
+export const POST = paperAssetRouteHandlers.collection.POST;

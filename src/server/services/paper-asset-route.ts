@@ -36,32 +36,38 @@ export function createPaperAssetRouteHandlers(
   paperAssetService: PaperAssetService,
 ) {
   return {
-    async GET(request: Request, context?: RouteContext): Promise<Response> {
-      if (context !== undefined) {
+    collection: {
+      async GET(request: Request): Promise<Response> {
+        return createJsonResponse(
+          await paperAssetService.listPaperAssets(readPaperAssetQuery(request)),
+        );
+      },
+      async POST(request: Request): Promise<Response> {
+        const input = await readRequestJson(request);
+
+        return createJsonResponse(
+          await paperAssetService.createPaperAsset(input),
+        );
+      },
+    },
+    detail: {
+      async GET(_request: Request, context: RouteContext): Promise<Response> {
         const { publicId } = await context.params;
 
         return createJsonResponse(
           await paperAssetService.getPaperAsset(publicId),
         );
-      }
+      },
+      async DELETE(
+        _request: Request,
+        context: RouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
 
-      return createJsonResponse(
-        await paperAssetService.listPaperAssets(readPaperAssetQuery(request)),
-      );
-    },
-    async POST(request: Request): Promise<Response> {
-      const input = await readRequestJson(request);
-
-      return createJsonResponse(
-        await paperAssetService.createPaperAsset(input),
-      );
-    },
-    async DELETE(_request: Request, context: RouteContext): Promise<Response> {
-      const { publicId } = await context.params;
-
-      return createJsonResponse(
-        await paperAssetService.deletePaperAsset(publicId),
-      );
+        return createJsonResponse(
+          await paperAssetService.deletePaperAsset(publicId),
+        );
+      },
     },
   };
 }

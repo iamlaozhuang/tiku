@@ -36,29 +36,32 @@ function readMaterialQuery(request: Request): Record<string, unknown> {
 
 export function createMaterialRouteHandlers(materialService: MaterialService) {
   return {
-    async GET(request: Request, context?: RouteContext): Promise<Response> {
-      if (context !== undefined) {
+    collection: {
+      async GET(request: Request): Promise<Response> {
+        return createJsonResponse(
+          await materialService.listMaterials(readMaterialQuery(request)),
+        );
+      },
+      async POST(request: Request): Promise<Response> {
+        const input = await readRequestJson(request);
+
+        return createJsonResponse(await materialService.createMaterial(input));
+      },
+    },
+    detail: {
+      async GET(_request: Request, context: RouteContext): Promise<Response> {
         const { publicId } = await context.params;
 
         return createJsonResponse(await materialService.getMaterial(publicId));
-      }
+      },
+      async PATCH(request: Request, context: RouteContext): Promise<Response> {
+        const input = await readRequestJson(request);
+        const { publicId } = await context.params;
 
-      return createJsonResponse(
-        await materialService.listMaterials(readMaterialQuery(request)),
-      );
-    },
-    async POST(request: Request): Promise<Response> {
-      const input = await readRequestJson(request);
-
-      return createJsonResponse(await materialService.createMaterial(input));
-    },
-    async PATCH(request: Request, context: RouteContext): Promise<Response> {
-      const input = await readRequestJson(request);
-      const { publicId } = await context.params;
-
-      return createJsonResponse(
-        await materialService.updateMaterial(publicId, input),
-      );
+        return createJsonResponse(
+          await materialService.updateMaterial(publicId, input),
+        );
+      },
     },
     disable: {
       async POST(_request: Request, context: RouteContext): Promise<Response> {
