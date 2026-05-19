@@ -122,6 +122,31 @@ If Windows leaves a worktree directory behind because of `node_modules` or other
 - Do not declare `format:check` healthy based only on an existing worktree that may have local line-ending state.
 - If a temporary worktree leaves dependency residue after `git worktree remove`, delete it only after resolving and confirming the target path is under `.worktrees/`.
 
+## Browser Verification Tool Discovery
+
+When a task needs local UI, browser, or rendered frontend verification, do not declare the built-in browser unavailable until the project evidence shows the discovery path below.
+
+1. Use the Browser skill and the `iab` backend for ordinary local targets such as `localhost`, `127.0.0.1`, `::1`, or `file://` unless the user asks for Chrome-specific state.
+2. Use the Chrome skill and the `extension` backend when the user asks for Chrome, an existing Chrome tab, cookies, logged-in session state, extensions, or another profile-backed browser condition.
+3. If tool discovery does not expose an obvious browser-specific tool, search for the generic Node REPL execution tool in this order: `node_repl js`, `mcp__node_repl__js`, `js`, then `node_repl js JavaScript execution`.
+4. Bootstrap browser control by importing the plugin's absolute `scripts/browser-client.mjs` path. Browser verification uses `agent.browsers.get("iab")`; Chrome verification uses `agent.browsers.get("extension")`.
+5. Run a lightweight connection check such as listing tabs before navigation. For Chrome extension failures, wait briefly, retry once, then run the Chrome plugin checks for running Chrome, installed browsers, extension installation, and native host manifest.
+6. Ask for human approval before launching Chrome, opening the Chrome extension manager, or opening the Chrome Web Store. Do not install or repair the native host from the agent.
+7. Use standalone Playwright, CLI browser tools, or another fallback only after the Browser or Chrome skill workflow has been attempted and the failure is recorded in evidence.
+8. Do not use Figma capture, static screenshots, or a non-browser rendering surface as a substitute for browser verification.
+9. Finish browser work by recording tab cleanup or finalization status. Chrome-backed work must call the Chrome tab finalization step unless no Chrome session was established.
+
+Browser verification evidence must record:
+
+- selected backend: `iab`, `extension`, or fallback with reason;
+- discovery path attempted, including `node_repl js` search when relevant;
+- URL or route verified;
+- visible state checks and interaction checks performed;
+- console or browser log result when available;
+- screenshot status when visual verification matters;
+- fallback decision and residual risk, if any;
+- tab cleanup or finalization result.
+
 ## Failure Fuse
 
 The loop has a hard failure fuse:
