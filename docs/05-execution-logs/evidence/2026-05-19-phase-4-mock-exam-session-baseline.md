@@ -261,3 +261,17 @@ Accepted gaps:
 - No frontend code changes.
 - API responses keep `{ code, message, data }`.
 - Student-facing routes use `publicId`, not numeric database ids.
+
+## Post-Merge Master Closeout
+
+- Merge target: `master`
+- Merge result: fast-forward from `4e45057` to `487b06a`
+- Implementation commit: `487b06a feat(student): add mock exam session baseline`
+- `npm.cmd run lint`: pass.
+- `npm.cmd run typecheck`: pass.
+- `npm.cmd run test:unit`: pass, 53 files and 156 tests.
+- `npm.cmd run format:check`: pass.
+- `Select-String -Path 'src\app\api\v1\mock-exams\**\*.ts' -Pattern 'submit|code|message|data'`: pass.
+- `Select-String -Path 'src\server\services\*.ts' -Pattern 'mock_exam|server|terminated'`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass, `master` ahead of `origin/master` by one implementation commit before closeout evidence commit.
