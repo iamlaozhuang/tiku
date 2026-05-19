@@ -254,3 +254,15 @@ Accepted gaps:
 - No frontend code changes.
 - API responses keep `{ code, message, data }`.
 - Student-facing routes use `publicId`, not numeric database ids.
+
+## Post-Merge Master Closeout
+
+- Merge target: `master`
+- Merge result: fast-forward from `c1bed18` to `f431b6b`
+- Implementation commit: `f431b6b feat(student): add exam report baseline`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass on `master`.
+- Post-merge quality key output: `Test Files 57 passed (57)`, `Tests 170 passed (170)`, and `All matched files use Prettier code style!`
+- Initial direct `Test-GitCompletionReadiness.ps1` invocation on `master`: failed because the shell tried to dot-source the script under a different PowerShell language mode.
+- Explicit external PowerShell rerun: pass.
+- `& powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass.
+- Git readiness key output before closeout evidence commit: `master...origin/master [ahead 1]`, no tracked changes, no staged changes, no untracked files, and only `f431b6b` ahead of `origin/master`.
