@@ -163,7 +163,11 @@ Future frontend/browser evidence must record:
 
 ## Closeout
 
-- commit: pending
-- merge: pending
-- push: pending
-- cleanup: pending
+- implementationCommit: `9b0a5a0 docs(agent): harden browser verification workflow`
+- merge: fast-forward into `master`, `fc25b62..9b0a5a0`
+- postMergeReadiness: pass
+- postMergeNaming: pass
+- postMergeQualityGate: pass (`lint`, `typecheck`, `test:unit` 39 files / 100 tests, `format:check`)
+- postMergeGitCompletion: pass, `master...origin/master` = `0 1` before push
+- push: pending final handoff command
+- cleanup: pending after push
