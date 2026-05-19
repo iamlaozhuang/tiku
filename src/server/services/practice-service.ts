@@ -1,0 +1,575 @@
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  type ApiResponse,
+} from "../contracts/api-response";
+import type {
+  PracticeAnswerFeedbackResultDto,
+  PracticeAnswerSnapshotDto,
+  PracticeResultDto,
+} from "../contracts/practice-contract";
+import {
+  mapPracticeAnswerFeedbackToApi,
+  mapPracticeToApi,
+} from "../mappers/practice-mapper";
+import type {
+  PracticeAuthorizationScopeRow,
+  PracticePaperRow,
+  PracticeRepository,
+  PracticeRow,
+} from "../repositories/practice-repository";
+import {
+  normalizePracticeAnswerInput,
+  normalizeStartPracticeInput,
+} from "../validators/practice";
+import type { NormalizedPracticeAnswerInput } from "../validators/practice";
+
+export type PracticeUserContext = {
+  userPublicId: string;
+};
+
+export type PracticeClock = {
+  now(): Date;
+};
+
+export type PracticePublicIdFactory = {
+  createPublicId(prefix: "practice" | "answer_record" | "mistake_book"): string;
+};
+
+export type PracticeService = {
+  startPractice(
+    userContext: PracticeUserContext,
+    input: unknown,
+  ): Promise<ApiResponse<PracticeResultDto | null>>;
+  getPractice(
+    userContext: PracticeUserContext,
+    publicId: string,
+  ): Promise<ApiResponse<PracticeResultDto | null>>;
+  submitPracticeAnswer(
+    userContext: PracticeUserContext,
+    publicId: string,
+    input: unknown,
+  ): Promise<ApiResponse<PracticeAnswerFeedbackResultDto | null>>;
+  restartPractice(
+    userContext: PracticeUserContext,
+    publicId: string,
+  ): Promise<ApiResponse<PracticeResultDto | null>>;
+  terminatePractice(
+    userContext: PracticeUserContext,
+    publicId: string,
+  ): Promise<ApiResponse<PracticeResultDto | null>>;
+};
+
+type PracticeQuestionSnapshot = {
+  paperQuestionPublicId: string;
+  questionPublicId: string;
+  questionType: string | null;
+  standardAnswerLabels: string[];
+  standardAnswerRichText: string | null;
+  analysisRichText: string | null;
+  score: string;
+  snapshot: Record<string, unknown>;
+};
+
+const practiceContractTerm = "practice";
+const answerRecordContractTerm = "answer_record";
+const mistakeBookContractTerm = "mistake_book";
+
+void [practiceContractTerm, answerRecordContractTerm, mistakeBookContractTerm];
+
+const systemClock: PracticeClock = {
+  now() {
+    return new Date();
+  },
+};
+
+const systemPublicIdFactory: PracticePublicIdFactory = {
+  createPublicId(prefix) {
+    return `${prefix}_${crypto.randomUUID()}`;
+  },
+};
+
+function addPracticeRetentionWindow(startedAt: Date): Date {
+  const expiresAt = new Date(startedAt);
+  expiresAt.setUTCDate(expiresAt.getUTCDate() + 15);
+
+  return expiresAt;
+}
+
+function isSameScope(
+  scope: PracticeAuthorizationScopeRow,
+  profession: PracticePaperRow["profession"],
+  level: number,
+): boolean {
+  return scope.profession === profession && scope.level === level;
+}
+
+function hasEffectiveAuthorization(
+  scopes: PracticeAuthorizationScopeRow[],
+  profession: PracticePaperRow["profession"],
+  level: number,
+): boolean {
+  return scopes.some((scope) => isSameScope(scope, profession, level));
+}
+
+function isPracticeExpired(practice: PracticeRow, now: Date): boolean {
+  return practice.expires_at <= now;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function getStringField(
+  value: Record<string, unknown>,
+  key: string,
+): string | null {
+  return typeof value[key] === "string" ? value[key] : null;
+}
+
+function getScore(value: Record<string, unknown>): string {
+  const score = value.score;
+
+  if (typeof score === "number") {
+    return score.toFixed(1);
+  }
+
+  return typeof score === "string" && score.length > 0 ? score : "0.0";
+}
+
+function getStandardAnswerLabels(value: Record<string, unknown>): string[] {
+  const standardAnswerLabels = value.standardAnswerLabels;
+
+  if (!Array.isArray(standardAnswerLabels)) {
+    return [];
+  }
+
+  return standardAnswerLabels.filter(
+    (label): label is string => typeof label === "string" && label.length > 0,
+  );
+}
+
+function findPracticeQuestion(
+  paperSnapshot: Record<string, unknown>,
+  paperQuestionPublicId: string,
+): PracticeQuestionSnapshot | null {
+  const paperSections = Array.isArray(paperSnapshot.paperSections)
+    ? paperSnapshot.paperSections
+    : [];
+
+  for (const paperSection of paperSections) {
+    if (
+      !isRecord(paperSection) ||
+      !Array.isArray(paperSection.paperQuestions)
+    ) {
+      continue;
+    }
+
+    for (const paperQuestion of paperSection.paperQuestions) {
+      if (!isRecord(paperQuestion)) {
+        continue;
+      }
+
+      const candidatePaperQuestionPublicId = getStringField(
+        paperQuestion,
+        "paperQuestionPublicId",
+      );
+
+      if (candidatePaperQuestionPublicId !== paperQuestionPublicId) {
+        continue;
+      }
+
+      const questionPublicId = getStringField(
+        paperQuestion,
+        "questionPublicId",
+      );
+
+      if (questionPublicId === null) {
+        return null;
+      }
+
+      return {
+        paperQuestionPublicId,
+        questionPublicId,
+        questionType: getStringField(paperQuestion, "questionType"),
+        standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
+        standardAnswerRichText: getStringField(
+          paperQuestion,
+          "standardAnswerRichText",
+        ),
+        analysisRichText: getStringField(paperQuestion, "analysisRichText"),
+        score: getScore(paperQuestion),
+        snapshot: paperQuestion,
+      };
+    }
+  }
+
+  return null;
+}
+
+function normalizeLabels(labels: string[]): string[] {
+  return [...labels].sort((left, right) => left.localeCompare(right));
+}
+
+function isObjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
+  return question.standardAnswerLabels.length > 0;
+}
+
+function isCorrectObjectiveAnswer(
+  question: PracticeQuestionSnapshot,
+  input: NormalizedPracticeAnswerInput,
+): boolean | null {
+  if (!isObjectiveQuestion(question)) {
+    return null;
+  }
+
+  return (
+    normalizeLabels(question.standardAnswerLabels).join("|") ===
+    normalizeLabels(input.selectedLabels).join("|")
+  );
+}
+
+function buildAnswerSnapshot(
+  input: NormalizedPracticeAnswerInput,
+): PracticeAnswerSnapshotDto {
+  return {
+    selectedLabels: input.selectedLabels,
+    textAnswer: input.textAnswer,
+    savedFromClientAt: input.savedFromClientAt,
+  };
+}
+
+function createPracticeNotFoundResponse(): ApiResponse<null> {
+  return createErrorResponse(404302, "Practice does not exist.");
+}
+
+async function getReadablePractice(
+  repository: PracticeRepository,
+  userContext: PracticeUserContext,
+  publicId: string,
+  now: Date,
+): Promise<PracticeRow | ApiResponse<null>> {
+  const practice = await repository.findPracticeByPublicId({
+    userPublicId: userContext.userPublicId,
+    publicId,
+  });
+
+  if (practice === null || practice.practice_status !== "in_progress") {
+    return createPracticeNotFoundResponse();
+  }
+
+  if (isPracticeExpired(practice, now)) {
+    await repository.expirePractice({
+      publicId: practice.public_id,
+      expiredAt: now,
+    });
+
+    return createPracticeNotFoundResponse();
+  }
+
+  const scopes = await repository.listEffectiveAuthorizationScopes({
+    userPublicId: userContext.userPublicId,
+  });
+
+  if (!hasEffectiveAuthorization(scopes, practice.profession, practice.level)) {
+    return createPracticeNotFoundResponse();
+  }
+
+  return practice;
+}
+
+function isPracticeRow(
+  value: PracticeRow | ApiResponse<null>,
+): value is PracticeRow {
+  return "public_id" in value;
+}
+
+async function createFreshPractice(
+  repository: PracticeRepository,
+  publicIdFactory: PracticePublicIdFactory,
+  userContext: PracticeUserContext,
+  paper: PracticePaperRow,
+  startedAt: Date,
+): Promise<PracticeRow> {
+  return repository.createPractice({
+    publicId: publicIdFactory.createPublicId("practice"),
+    userPublicId: userContext.userPublicId,
+    paperPublicId: paper.public_id,
+    paperSnapshot: paper.paper_snapshot,
+    profession: paper.profession,
+    level: paper.level,
+    subject: paper.subject,
+    startedAt,
+    expiresAt: addPracticeRetentionWindow(startedAt),
+  });
+}
+
+export function createPracticeService(
+  repository: PracticeRepository,
+  clock: PracticeClock = systemClock,
+  publicIdFactory: PracticePublicIdFactory = systemPublicIdFactory,
+): PracticeService {
+  return {
+    async startPractice(userContext, input) {
+      const normalizedInput = normalizeStartPracticeInput(input);
+
+      if (normalizedInput === null) {
+        return createErrorResponse(422301, "Practice input is invalid.");
+      }
+
+      const paper = await repository.findPublishedPaperByPublicId({
+        userPublicId: userContext.userPublicId,
+        paperPublicId: normalizedInput.paperPublicId,
+      });
+
+      if (paper === null) {
+        return createErrorResponse(404301, "Practice paper does not exist.");
+      }
+
+      const scopes = await repository.listEffectiveAuthorizationScopes({
+        userPublicId: userContext.userPublicId,
+      });
+
+      if (!hasEffectiveAuthorization(scopes, paper.profession, paper.level)) {
+        return createErrorResponse(
+          403301,
+          "Student authorization is not valid for this practice.",
+        );
+      }
+
+      const now = clock.now();
+      const activePractice = await repository.findActivePracticeByPaper({
+        userPublicId: userContext.userPublicId,
+        paperPublicId: normalizedInput.paperPublicId,
+      });
+
+      if (activePractice !== null && !isPracticeExpired(activePractice, now)) {
+        return createSuccessResponse({
+          practice: mapPracticeToApi(activePractice),
+        });
+      }
+
+      if (activePractice !== null) {
+        await repository.expirePractice({
+          publicId: activePractice.public_id,
+          expiredAt: now,
+        });
+      }
+
+      const practice = await createFreshPractice(
+        repository,
+        publicIdFactory,
+        userContext,
+        paper,
+        now,
+      );
+
+      return createSuccessResponse({
+        practice: mapPracticeToApi(practice),
+      });
+    },
+
+    async getPractice(userContext, publicId) {
+      const now = clock.now();
+      const practice = await getReadablePractice(
+        repository,
+        userContext,
+        publicId,
+        now,
+      );
+
+      if (!isPracticeRow(practice)) {
+        return practice;
+      }
+
+      return createSuccessResponse({
+        practice: mapPracticeToApi(practice),
+      });
+    },
+
+    async submitPracticeAnswer(userContext, publicId, input) {
+      const normalizedInput = normalizePracticeAnswerInput(input);
+
+      if (normalizedInput === null) {
+        return createErrorResponse(422302, "Practice answer input is invalid.");
+      }
+
+      const now = clock.now();
+      const practice = await getReadablePractice(
+        repository,
+        userContext,
+        publicId,
+        now,
+      );
+
+      if (!isPracticeRow(practice)) {
+        return practice;
+      }
+
+      const question = findPracticeQuestion(
+        practice.paper_snapshot,
+        normalizedInput.paperQuestionPublicId,
+      );
+
+      if (question === null) {
+        return createErrorResponse(422303, "Practice question is invalid.");
+      }
+
+      const existingAnswer =
+        await repository.findAnswerRecordByPracticeAndQuestion({
+          userPublicId: userContext.userPublicId,
+          practicePublicId: publicId,
+          paperQuestionPublicId: normalizedInput.paperQuestionPublicId,
+        });
+
+      if (existingAnswer !== null && isObjectiveQuestion(question)) {
+        return createErrorResponse(
+          409301,
+          "Practice objective question has already been answered.",
+        );
+      }
+
+      const isCorrect = isCorrectObjectiveAnswer(question, normalizedInput);
+      const score =
+        isCorrect === null ? null : isCorrect ? question.score : "0.0";
+      const answerSnapshot = buildAnswerSnapshot(normalizedInput);
+      const answerRecord = await repository.createPracticeAnswerRecord({
+        publicId: publicIdFactory.createPublicId("answer_record"),
+        userPublicId: userContext.userPublicId,
+        practicePublicId: practice.public_id,
+        paperQuestionPublicId: question.paperQuestionPublicId,
+        questionPublicId: question.questionPublicId,
+        questionSnapshot: question.snapshot,
+        answerSnapshot,
+        answerRecordStatus: isCorrect === null ? "submitted" : "scored",
+        isCorrect,
+        score,
+        maxScore: question.score,
+        answeredAt: now,
+        submittedAt: now,
+      });
+
+      await repository.updatePracticeLastAnsweredAt({
+        publicId: practice.public_id,
+        lastAnsweredAt: now,
+      });
+
+      const mistakeBook =
+        isCorrect === false
+          ? await repository.upsertMistakeBookFromWrongAnswer({
+              publicId: publicIdFactory.createPublicId("mistake_book"),
+              userPublicId: userContext.userPublicId,
+              questionPublicId: question.questionPublicId,
+              paperQuestionPublicId: question.paperQuestionPublicId,
+              profession: practice.profession,
+              level: practice.level,
+              subject: practice.subject,
+              questionSnapshot: question.snapshot,
+              latestAnswerSnapshot: answerSnapshot,
+              latestWrongAt: now,
+            })
+          : null;
+
+      return createSuccessResponse({
+        feedback: mapPracticeAnswerFeedbackToApi({
+          answer_record_public_id: answerRecord.public_id,
+          is_correct: answerRecord.is_correct,
+          score: answerRecord.score,
+          max_score: answerRecord.max_score,
+          standard_answer_rich_text: question.standardAnswerRichText,
+          analysis_rich_text: question.analysisRichText,
+          mistake_book_public_id: mistakeBook?.public_id ?? null,
+          ai_explanation_status: null,
+          ai_hint_status: null,
+          answered_at: answerRecord.answered_at,
+        }),
+      });
+    },
+
+    async restartPractice(userContext, publicId) {
+      const now = clock.now();
+      const practice = await getReadablePractice(
+        repository,
+        userContext,
+        publicId,
+        now,
+      );
+
+      if (!isPracticeRow(practice)) {
+        return practice;
+      }
+
+      await repository.terminatePractice({
+        publicId: practice.public_id,
+        terminatedAt: now,
+        terminationReason: "restart",
+      });
+
+      const freshPractice = await createFreshPractice(
+        repository,
+        publicIdFactory,
+        userContext,
+        {
+          public_id: practice.paper_public_id,
+          profession: practice.profession,
+          level: practice.level,
+          subject: practice.subject,
+          paper_snapshot: practice.paper_snapshot,
+        },
+        now,
+      );
+
+      return createSuccessResponse({
+        practice: mapPracticeToApi(freshPractice),
+      });
+    },
+
+    async terminatePractice(userContext, publicId) {
+      const now = clock.now();
+      const practice = await getReadablePractice(
+        repository,
+        userContext,
+        publicId,
+        now,
+      );
+
+      if (!isPracticeRow(practice)) {
+        return practice;
+      }
+
+      const terminatedPractice = await repository.terminatePractice({
+        publicId: practice.public_id,
+        terminatedAt: now,
+        terminationReason: "student_request",
+      });
+
+      if (terminatedPractice === null) {
+        return createPracticeNotFoundResponse();
+      }
+
+      return createSuccessResponse({
+        practice: mapPracticeToApi(terminatedPractice),
+      });
+    },
+  };
+}
+
+export function createUnavailablePracticeService(): PracticeService {
+  return {
+    async startPractice() {
+      return createErrorResponse(503302, "Practice runtime is not configured.");
+    },
+    async getPractice() {
+      return createErrorResponse(503302, "Practice runtime is not configured.");
+    },
+    async submitPracticeAnswer() {
+      return createErrorResponse(503302, "Practice runtime is not configured.");
+    },
+    async restartPractice() {
+      return createErrorResponse(503302, "Practice runtime is not configured.");
+    },
+    async terminatePractice() {
+      return createErrorResponse(503302, "Practice runtime is not configured.");
+    },
+  };
+}
