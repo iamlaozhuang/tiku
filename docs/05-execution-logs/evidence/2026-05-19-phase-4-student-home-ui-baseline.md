@@ -333,3 +333,27 @@ src/app/(student)/home/page.tsx
 src/features/student/home/StudentHomePage.tsx
 tests/unit/student-home-ui.test.ts
 ```
+
+## Push And Cleanup Evidence
+
+- Push target: `origin master`
+- Push result: pass; `master` advanced on origin from `faf9c5c` to `f157185`.
+- Browser tab cleanup: Browser/IAB tab closed.
+- Dev server cleanup: stopped process listening on port `3006`; final `netstat -ano | findstr :3006` returned no listener.
+- Worktree cleanup: `git worktree remove .worktrees\phase-4-student-home-ui-baseline` unregistered the worktree; Windows left local dependency residue, so the verified path `F:\tiku\.worktrees\phase-4-student-home-ui-baseline` was removed with the long-path prefix.
+- Branch cleanup: deleted merged local branch `codex/phase-4-student-home-ui-baseline`.
+- Final local inventory after cleanup:
+
+```text
+git worktree list
+F:/tiku  f157185 [master]
+
+git branch --list
+* master
+
+git status --short --branch
+## master...origin/master
+
+Test-Path .worktrees\phase-4-student-home-ui-baseline
+False
+```
