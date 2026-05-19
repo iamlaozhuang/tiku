@@ -117,3 +117,12 @@ export type PaperPublishResultDto = {
   lockedQuestionPublicIds: string[];
   lockedMaterialPublicIds: string[];
 };
+
+export type PaperDeleteResultDto = {
+  deletedPaperPublicId: string;
+};
+
+export type PaperCopyResultDto = {
+  copiedFromPaperPublicId: string;
+  paper: PaperDraftDto;
+};

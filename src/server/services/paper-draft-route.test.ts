@@ -184,6 +184,43 @@ function createService(): PaperDraftService {
         },
       };
     },
+    async archivePaper(publicId) {
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          paper: {
+            ...paperDto,
+            publicId,
+            paperStatus: "archived",
+            archivedAt: "2026-05-19T09:00:00.000Z",
+          },
+        },
+      };
+    },
+    async deletePaper(publicId) {
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          deletedPaperPublicId: publicId,
+        },
+      };
+    },
+    async copyPaper(publicId) {
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          copiedFromPaperPublicId: publicId,
+          paper: {
+            ...paperDto,
+            publicId: "paper_public_copy_123",
+            name: "物流技能草稿卷（副本）",
+          },
+        },
+      };
+    },
   };
 }
 
@@ -416,6 +453,75 @@ describe("paper draft route handlers", () => {
         },
         lockedQuestionPublicIds: ["question_public_123"],
         lockedMaterialPublicIds: ["material_public_123"],
+      },
+    });
+  });
+
+  it("uses public identifiers for paper archive, delete, and copy action routes", async () => {
+    const handlers = createPaperDraftRouteHandlers(createService());
+    const context = {
+      params: Promise.resolve({
+        publicId: "paper_public_123",
+      }),
+    };
+
+    await expect(
+      handlers.archive
+        .POST(
+          new Request(
+            "http://localhost/api/v1/papers/paper_public_123/archive",
+            {
+              method: "POST",
+            },
+          ),
+          context,
+        )
+        .then((response) => response.json()),
+    ).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        paper: {
+          publicId: "paper_public_123",
+          paperStatus: "archived",
+        },
+      },
+    });
+
+    await expect(
+      handlers
+        .DELETE(
+          new Request("http://localhost/api/v1/papers/paper_public_123", {
+            method: "DELETE",
+          }),
+          context,
+        )
+        .then((response) => response.json()),
+    ).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        deletedPaperPublicId: "paper_public_123",
+      },
+    });
+
+    await expect(
+      handlers.copy
+        .POST(
+          new Request("http://localhost/api/v1/papers/paper_public_123/copy", {
+            method: "POST",
+          }),
+          context,
+        )
+        .then((response) => response.json()),
+    ).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        copiedFromPaperPublicId: "paper_public_123",
+        paper: {
+          publicId: "paper_public_copy_123",
+        },
       },
     });
   });

@@ -7,6 +7,8 @@ import {
 import type {
   PaperDraftDto,
   PaperDraftResultDto,
+  PaperCopyResultDto,
+  PaperDeleteResultDto,
   PaperPublishResultDto,
   PaperPublishValidationIssueDto,
   PaperQuestionResultDto,
@@ -56,6 +58,13 @@ export type PaperDraftService = {
   publishPaper(
     publicId: string,
   ): Promise<ApiResponse<PaperPublishResultDto | null>>;
+  archivePaper(
+    publicId: string,
+  ): Promise<ApiResponse<PaperDraftResultDto | null>>;
+  deletePaper(
+    publicId: string,
+  ): Promise<ApiResponse<PaperDeleteResultDto | null>>;
+  copyPaper(publicId: string): Promise<ApiResponse<PaperCopyResultDto | null>>;
 };
 
 const INVALID_PAPER_INPUT_CODE = 422203;
@@ -63,12 +72,15 @@ const PAPER_NOT_FOUND_CODE = 404203;
 const PAPER_COMPOSITION_CONFLICT_CODE = 409203;
 const PAPER_PUBLISH_CONFLICT_CODE = 409204;
 const PAPER_PUBLISH_VALIDATION_CODE = 422204;
+const PAPER_DELETE_CONFLICT_CODE = 409205;
+const PAPER_COPY_CONFLICT_CODE = 409206;
 const PAPER_RUNTIME_UNAVAILABLE_CODE = 503203;
 const PAPER_SECTION_CONTRACT_TERM = "paper_section";
 const QUESTION_GROUP_CONTRACT_TERM = "question_group";
 const SORT_ORDER_CONTRACT_TERM = "sort_order";
 const SCORING_POINT_CONTRACT_TERM = "scoring_point";
 const STANDARD_ANSWER_CONTRACT_TERM = "standard_answer";
+const DISABLE_CONTRACT_TERM = "disable";
 
 void [
   PAPER_SECTION_CONTRACT_TERM,
@@ -76,6 +88,7 @@ void [
   SORT_ORDER_CONTRACT_TERM,
   SCORING_POINT_CONTRACT_TERM,
   STANDARD_ANSWER_CONTRACT_TERM,
+  DISABLE_CONTRACT_TERM,
 ];
 
 function createInvalidPaperInputResponse(): ApiResponse<null> {
@@ -104,6 +117,27 @@ function createPaperPublishValidationResponse(): ApiResponse<null> {
   return createErrorResponse(
     PAPER_PUBLISH_VALIDATION_CODE,
     "Paper publish validation failed.",
+  );
+}
+
+function createNonPublishedArchiveResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_PUBLISH_CONFLICT_CODE,
+    "Only published paper can be archived.",
+  );
+}
+
+function createPaperDeleteConflictResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_DELETE_CONFLICT_CODE,
+    "Only unreferenced draft paper can be deleted.",
+  );
+}
+
+function createPaperCopyConflictResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_COPY_CONFLICT_CODE,
+    "Only published or archived paper can be copied.",
   );
 }
 
@@ -443,6 +477,80 @@ export function createPaperDraftService(
         lockedMaterialPublicIds: publishValidation.materialPublicIds,
       });
     },
+
+    async archivePaper(publicId) {
+      const paper = await paperRepository.findPaperByPublicId(publicId);
+
+      if (paper === null) {
+        return createPaperNotFoundResponse();
+      }
+
+      if (paper.paper_status !== "published") {
+        return createNonPublishedArchiveResponse();
+      }
+
+      const archivedPaper = await paperRepository.archivePaper({
+        paperPublicId: publicId,
+      });
+
+      if (archivedPaper === null) {
+        return createPaperDeleteConflictResponse();
+      }
+
+      return createSuccessResponse(mapPaperDraftResultToApi(archivedPaper));
+    },
+
+    async deletePaper(publicId) {
+      const paper = await paperRepository.findPaperByPublicId(publicId);
+
+      if (paper === null) {
+        return createPaperNotFoundResponse();
+      }
+
+      if (paper.paper_status !== "draft") {
+        return createPaperDeleteConflictResponse();
+      }
+
+      const deleted = await paperRepository.deletePaper({
+        paperPublicId: publicId,
+      });
+
+      if (!deleted) {
+        return createPaperDeleteConflictResponse();
+      }
+
+      return createSuccessResponse({
+        deletedPaperPublicId: publicId,
+      });
+    },
+
+    async copyPaper(publicId) {
+      const paper = await paperRepository.findPaperByPublicId(publicId);
+
+      if (paper === null) {
+        return createPaperNotFoundResponse();
+      }
+
+      if (
+        paper.paper_status !== "published" &&
+        paper.paper_status !== "archived"
+      ) {
+        return createPaperCopyConflictResponse();
+      }
+
+      const copiedPaper = await paperRepository.copyPaper({
+        sourcePaper: paper,
+      });
+
+      if (copiedPaper === null) {
+        return createPaperCopyConflictResponse();
+      }
+
+      return createSuccessResponse({
+        copiedFromPaperPublicId: publicId,
+        paper: mapPaperDraftToApi(copiedPaper),
+      });
+    },
   };
 }
 
@@ -491,6 +599,24 @@ export function createUnavailablePaperDraftService(): PaperDraftService {
       );
     },
     async publishPaper() {
+      return createErrorResponse(
+        PAPER_RUNTIME_UNAVAILABLE_CODE,
+        "Paper runtime is not configured.",
+      );
+    },
+    async archivePaper() {
+      return createErrorResponse(
+        PAPER_RUNTIME_UNAVAILABLE_CODE,
+        "Paper runtime is not configured.",
+      );
+    },
+    async deletePaper() {
+      return createErrorResponse(
+        PAPER_RUNTIME_UNAVAILABLE_CODE,
+        "Paper runtime is not configured.",
+      );
+    },
+    async copyPaper() {
       return createErrorResponse(
         PAPER_RUNTIME_UNAVAILABLE_CODE,
         "Paper runtime is not configured.",

@@ -73,6 +73,14 @@ export function createPaperDraftRouteHandlers(paperService: PaperDraftService) {
         await paperService.updatePaper(publicId, input),
       );
     },
+    async DELETE(
+      _request: Request,
+      context: PaperRouteContext,
+    ): Promise<Response> {
+      const { publicId } = await context.params;
+
+      return createJsonResponse(await paperService.deletePaper(publicId));
+    },
     questions: {
       async POST(
         request: Request,
@@ -122,6 +130,26 @@ export function createPaperDraftRouteHandlers(paperService: PaperDraftService) {
         const { publicId } = await context.params;
 
         return createJsonResponse(await paperService.publishPaper(publicId));
+      },
+    },
+    archive: {
+      async POST(
+        _request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+
+        return createJsonResponse(await paperService.archivePaper(publicId));
+      },
+    },
+    copy: {
+      async POST(
+        _request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+
+        return createJsonResponse(await paperService.copyPaper(publicId));
       },
     },
   };

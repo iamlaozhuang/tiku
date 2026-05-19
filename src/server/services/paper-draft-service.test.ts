@@ -192,6 +192,28 @@ function createRepository(
         published_at: new Date("2026-05-19T08:00:00.000Z"),
       });
     },
+    async archivePaper(input) {
+      return createPaper({
+        public_id: input.paperPublicId,
+        paper_status: "archived",
+        published_at: new Date("2026-05-19T08:00:00.000Z"),
+        archived_at: new Date("2026-05-19T09:00:00.000Z"),
+      });
+    },
+    async deletePaper() {
+      return true;
+    },
+    async copyPaper(input) {
+      return createPaper({
+        public_id: "paper_public_copy_123",
+        name: "物流技能草稿卷（副本）",
+        paper_status: "draft",
+        published_at: null,
+        archived_at: null,
+        paper_sections: input.sourcePaper.paper_sections,
+        question_groups: input.sourcePaper.question_groups,
+      });
+    },
     ...overrides,
   };
 }
@@ -791,5 +813,190 @@ describe("paper draft service", () => {
       multiChoiceRule: "all_correct_only",
       scoringMethod: "ai_scoring",
     });
+  });
+
+  it("archives published paper without deleting historical snapshots", async () => {
+    const archivedInputs: unknown[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            paper_status: "published",
+            published_at: new Date("2026-05-19T08:00:00.000Z"),
+          });
+        },
+        async archivePaper(input) {
+          archivedInputs.push(input);
+
+          return createPaper({
+            public_id: input.paperPublicId,
+            paper_status: "archived",
+            published_at: new Date("2026-05-19T08:00:00.000Z"),
+            archived_at: new Date("2026-05-19T09:00:00.000Z"),
+          });
+        },
+      }),
+    );
+
+    await expect(
+      service.archivePaper("paper_public_123"),
+    ).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        paper: {
+          publicId: "paper_public_123",
+          paperStatus: "archived",
+          publishedAt: "2026-05-19T08:00:00.000Z",
+          archivedAt: "2026-05-19T09:00:00.000Z",
+          questionCount: 1,
+        },
+      },
+    });
+    expect(archivedInputs).toEqual([
+      {
+        paperPublicId: "paper_public_123",
+      },
+    ]);
+  });
+
+  it("deletes only unreferenced draft paper by public identifier", async () => {
+    const deletedPaperPublicIds: string[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          if (publicId === "published_paper") {
+            return createPaper({
+              public_id: publicId,
+              paper_status: "published",
+            });
+          }
+
+          return createPaper({
+            public_id: publicId,
+            paper_status: "draft",
+          });
+        },
+        async deletePaper(input) {
+          deletedPaperPublicIds.push(input.paperPublicId);
+
+          return input.paperPublicId !== "referenced_draft";
+        },
+      }),
+    );
+
+    await expect(service.deletePaper("paper_public_123")).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        deletedPaperPublicId: "paper_public_123",
+      },
+    });
+    await expect(service.deletePaper("published_paper")).resolves.toEqual({
+      code: 409205,
+      message: "Only unreferenced draft paper can be deleted.",
+      data: null,
+    });
+    await expect(service.deletePaper("referenced_draft")).resolves.toEqual({
+      code: 409205,
+      message: "Only unreferenced draft paper can be deleted.",
+      data: null,
+    });
+    expect(deletedPaperPublicIds).toEqual([
+      "paper_public_123",
+      "referenced_draft",
+    ]);
+  });
+
+  it("copies published or archived paper as a new draft while preserving paper scoring points", async () => {
+    const copiedInputs: unknown[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            paper_status: publicId === "draft_paper" ? "draft" : "archived",
+          });
+        },
+        async copyPaper(input) {
+          copiedInputs.push({
+            sourcePaperPublicId: input.sourcePaper.public_id,
+            scoringPoints:
+              input.sourcePaper.paper_sections[0]?.paper_questions[0]
+                ?.scoring_points,
+          });
+
+          return createPaper({
+            public_id: "paper_public_copy_123",
+            name: "物流技能草稿卷（副本）",
+            paper_status: "draft",
+            published_at: null,
+            archived_at: null,
+            paper_sections: input.sourcePaper.paper_sections,
+            question_groups: input.sourcePaper.question_groups,
+          });
+        },
+      }),
+    );
+
+    await expect(service.copyPaper("paper_public_123")).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        copiedFromPaperPublicId: "paper_public_123",
+        paper: {
+          publicId: "paper_public_copy_123",
+          name: "物流技能草稿卷（副本）",
+          paperStatus: "draft",
+          publishedAt: null,
+          archivedAt: null,
+          paperSections: [
+            {
+              paperQuestions: [
+                {
+                  scoringPoints: [
+                    {
+                      description: "说明单据核对",
+                      score: "2.5",
+                      sortOrder: 1,
+                    },
+                    {
+                      description: "说明实物验收",
+                      score: "2.5",
+                      sortOrder: 2,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+    await expect(service.copyPaper("draft_paper")).resolves.toEqual({
+      code: 409206,
+      message: "Only published or archived paper can be copied.",
+      data: null,
+    });
+    expect(copiedInputs).toEqual([
+      {
+        sourcePaperPublicId: "paper_public_123",
+        scoringPoints: [
+          {
+            source_scoring_point_id: 501,
+            description: "说明单据核对",
+            score: "2.5",
+            sort_order: 1,
+          },
+          {
+            source_scoring_point_id: 502,
+            description: "说明实物验收",
+            score: "2.5",
+            sort_order: 2,
+          },
+        ],
+      },
+    ]);
   });
 });

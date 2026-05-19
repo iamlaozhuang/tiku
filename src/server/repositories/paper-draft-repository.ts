@@ -108,6 +108,18 @@ export type PublishPaperInput = {
   materialPublicIds: string[];
 };
 
+export type ArchivePaperInput = {
+  paperPublicId: string;
+};
+
+export type DeletePaperInput = {
+  paperPublicId: string;
+};
+
+export type CopyPaperInput = {
+  sourcePaper: PaperDraftAccessRow;
+};
+
 export type PaperDraftRepository = {
   listPapers(query: NormalizedPaperListInput): Promise<PaperDraftListResult>;
   createPaper(input: NormalizedCreatePaperInput): Promise<PaperDraftAccessRow>;
@@ -123,4 +135,7 @@ export type PaperDraftRepository = {
     input: RemovePaperQuestionInput,
   ): Promise<PaperDraftAccessRow | null>;
   publishPaper(input: PublishPaperInput): Promise<PaperDraftAccessRow | null>;
+  archivePaper(input: ArchivePaperInput): Promise<PaperDraftAccessRow | null>;
+  deletePaper(input: DeletePaperInput): Promise<boolean>;
+  copyPaper(input: CopyPaperInput): Promise<PaperDraftAccessRow | null>;
 };

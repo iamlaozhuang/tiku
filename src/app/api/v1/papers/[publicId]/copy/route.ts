@@ -13,6 +13,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = paperRouteHandlers.GET;
-export const PATCH = paperRouteHandlers.PATCH;
-export const DELETE = paperRouteHandlers.DELETE;
+export const POST = paperRouteHandlers.copy.POST;
