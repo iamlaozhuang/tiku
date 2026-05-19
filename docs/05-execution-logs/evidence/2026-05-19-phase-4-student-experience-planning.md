@@ -282,4 +282,42 @@ git completion readiness inventory completed
 
 ## Git Closeout
 
-Pending commit for the Phase 4 planning state changes.
+Phase 4 planning was committed on `codex/phase-4-student-experience-planning` and fast-forward merged into `master`.
+
+Commits merged:
+
+```text
+8eb8ee6 docs(agent): record rawfiles recovery inventory
+07b6cd7 docs(agent): plan phase 4 student experience
+```
+
+Post-merge `master` validation:
+
+```text
+PASS powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+PASS powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+PASS npm.cmd run format:check
+PASS powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+```
+
+Note: the first non-elevated `Test-GitCompletionReadiness.ps1` run in the main worktree failed due to PowerShell language-mode/profile interference, then the same command was rerun with elevated execution and passed.
+
+Post-merge readiness output:
+
+```text
+branch: master
+head: 07b6cd7
+upstream: origin/master
+leftRightCount(origin/master...HEAD): 0 2
+commitsAhead:
+07b6cd7 docs(agent): plan phase 4 student experience
+8eb8ee6 docs(agent): record rawfiles recovery inventory
+== Result ==
+git completion readiness inventory completed
+```
+
+Next recommended action:
+
+```text
+claim_phase_4_student_experience_contract_approval
+```
