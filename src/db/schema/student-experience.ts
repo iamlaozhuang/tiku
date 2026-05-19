@@ -1,0 +1,353 @@
+import { relations } from "drizzle-orm";
+import {
+  bigint,
+  boolean,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
+
+import { professionEnum, user } from "./auth";
+import { paper, paperQuestion, subjectEnum } from "./paper";
+
+const idColumn = () =>
+  bigint("id", { mode: "number" }).generatedAlwaysAsIdentity().primaryKey();
+
+const timestampColumn = (name: string) =>
+  timestamp(name, { withTimezone: true }).notNull();
+
+const nullableTimestampColumn = (name: string) =>
+  timestamp(name, { withTimezone: true });
+
+const createdAtColumn = () => timestampColumn("created_at").defaultNow();
+
+const updatedAtColumn = () => timestampColumn("updated_at").defaultNow();
+
+const userIdColumn = (name: string) =>
+  bigint(name, { mode: "number" })
+    .notNull()
+    .references(() => user.id, { onDelete: "restrict" });
+
+const paperIdColumn = (name: string) =>
+  bigint(name, { mode: "number" })
+    .notNull()
+    .references(() => paper.id, { onDelete: "restrict" });
+
+const paperQuestionIdColumn = (name: string) =>
+  bigint(name, { mode: "number" })
+    .notNull()
+    .references(() => paperQuestion.id, { onDelete: "restrict" });
+
+const scoreColumn = (name: string) => numeric(name, { precision: 8, scale: 1 });
+
+export const examModeValues = ["practice", "mock_exam"] as const;
+export const examStatusValues = [
+  "in_progress",
+  "scoring",
+  "scoring_partial_failed",
+  "completed",
+  "terminated",
+] as const;
+export const practiceStatusValues = [
+  "in_progress",
+  "completed",
+  "expired",
+  "terminated",
+] as const;
+export const answerRecordStatusValues = [
+  "draft",
+  "saved",
+  "submitted",
+  "scored",
+  "scoring_failed",
+] as const;
+export const mistakeBookSourceValues = ["wrong_answer", "favorite"] as const;
+export const mistakeBookStatusValues = [
+  "unmastered",
+  "mastered",
+  "removed",
+] as const;
+
+export const examModeEnum = pgEnum("exam_mode", examModeValues);
+export const examStatusEnum = pgEnum("exam_status", examStatusValues);
+export const practiceStatusEnum = pgEnum(
+  "practice_status",
+  practiceStatusValues,
+);
+export const answerRecordStatusEnum = pgEnum(
+  "answer_record_status",
+  answerRecordStatusValues,
+);
+export const mistakeBookSourceEnum = pgEnum(
+  "mistake_book_source",
+  mistakeBookSourceValues,
+);
+export const mistakeBookStatusEnum = pgEnum(
+  "mistake_book_status",
+  mistakeBookStatusValues,
+);
+
+export const practice = pgTable(
+  "practice",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    user_id: userIdColumn("user_id"),
+    paper_id: paperIdColumn("paper_id"),
+    paper_public_id: text("paper_public_id").notNull(),
+    paper_snapshot: jsonb("paper_snapshot").notNull(),
+    profession: professionEnum("profession").notNull(),
+    level: integer("level").notNull(),
+    subject: subjectEnum("subject").notNull(),
+    practice_status: practiceStatusEnum("practice_status")
+      .default("in_progress")
+      .notNull(),
+    started_at: timestampColumn("started_at"),
+    last_answered_at: nullableTimestampColumn("last_answered_at"),
+    expires_at: timestampColumn("expires_at"),
+    terminated_at: nullableTimestampColumn("terminated_at"),
+    termination_reason: text("termination_reason"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_practice_public_id").on(table.public_id),
+    index("idx_practice_user_id").on(table.user_id),
+    index("idx_practice_paper_id").on(table.paper_id),
+    index("idx_practice_user_id_paper_id_practice_status").on(
+      table.user_id,
+      table.paper_id,
+      table.practice_status,
+    ),
+    index("idx_practice_expires_at").on(table.expires_at),
+  ],
+);
+
+export const mockExam = pgTable(
+  "mock_exam",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    user_id: userIdColumn("user_id"),
+    paper_id: paperIdColumn("paper_id"),
+    paper_public_id: text("paper_public_id").notNull(),
+    paper_snapshot: jsonb("paper_snapshot").notNull(),
+    profession: professionEnum("profession").notNull(),
+    level: integer("level").notNull(),
+    subject: subjectEnum("subject").notNull(),
+    exam_status: examStatusEnum("exam_status").default("in_progress").notNull(),
+    started_at: timestampColumn("started_at"),
+    submitted_at: nullableTimestampColumn("submitted_at"),
+    server_deadline_at: nullableTimestampColumn("server_deadline_at"),
+    duration_minute: integer("duration_minute"),
+    terminated_at: nullableTimestampColumn("terminated_at"),
+    termination_reason: text("termination_reason"),
+    objective_score: scoreColumn("objective_score"),
+    subjective_score: scoreColumn("subjective_score"),
+    total_score: scoreColumn("total_score"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_mock_exam_public_id").on(table.public_id),
+    index("idx_mock_exam_user_id").on(table.user_id),
+    index("idx_mock_exam_paper_id").on(table.paper_id),
+    index("idx_mock_exam_exam_status").on(table.exam_status),
+    index("idx_mock_exam_started_at").on(table.started_at),
+    index("idx_mock_exam_server_deadline_at").on(table.server_deadline_at),
+  ],
+);
+
+export const answerRecord = pgTable(
+  "answer_record",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    user_id: userIdColumn("user_id"),
+    exam_mode: examModeEnum("exam_mode").notNull(),
+    practice_id: bigint("practice_id", { mode: "number" }).references(
+      () => practice.id,
+      { onDelete: "cascade" },
+    ),
+    mock_exam_id: bigint("mock_exam_id", { mode: "number" }).references(
+      () => mockExam.id,
+      { onDelete: "cascade" },
+    ),
+    paper_id: paperIdColumn("paper_id"),
+    paper_question_id: paperQuestionIdColumn("paper_question_id"),
+    paper_question_public_id: text("paper_question_public_id").notNull(),
+    question_public_id: text("question_public_id").notNull(),
+    question_snapshot: jsonb("question_snapshot").notNull(),
+    answer_snapshot: jsonb("answer_snapshot").notNull(),
+    answer_record_status: answerRecordStatusEnum("answer_record_status")
+      .default("draft")
+      .notNull(),
+    is_correct: boolean("is_correct"),
+    score: scoreColumn("score"),
+    max_score: scoreColumn("max_score").notNull(),
+    answered_at: nullableTimestampColumn("answered_at"),
+    submitted_at: nullableTimestampColumn("submitted_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_answer_record_public_id").on(table.public_id),
+    index("idx_answer_record_user_id").on(table.user_id),
+    index("idx_answer_record_practice_id").on(table.practice_id),
+    index("idx_answer_record_mock_exam_id").on(table.mock_exam_id),
+    index("idx_answer_record_paper_question_id").on(table.paper_question_id),
+    index("idx_answer_record_exam_mode").on(table.exam_mode),
+  ],
+);
+
+export const examReport = pgTable(
+  "exam_report",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    user_id: userIdColumn("user_id"),
+    mock_exam_id: bigint("mock_exam_id", { mode: "number" })
+      .notNull()
+      .references(() => mockExam.id, { onDelete: "restrict" }),
+    paper_id: paperIdColumn("paper_id"),
+    paper_public_id: text("paper_public_id").notNull(),
+    report_snapshot: jsonb("report_snapshot").notNull(),
+    exam_status: examStatusEnum("exam_status").notNull(),
+    profession: professionEnum("profession").notNull(),
+    level: integer("level").notNull(),
+    subject: subjectEnum("subject").notNull(),
+    objective_score: scoreColumn("objective_score"),
+    subjective_score: scoreColumn("subjective_score"),
+    total_score: scoreColumn("total_score"),
+    duration_second: integer("duration_second").notNull(),
+    learning_suggestion_snapshot: jsonb("learning_suggestion_snapshot"),
+    generated_at: timestampColumn("generated_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_exam_report_public_id").on(table.public_id),
+    uniqueIndex("udx_exam_report_mock_exam_id").on(table.mock_exam_id),
+    index("idx_exam_report_user_id").on(table.user_id),
+    index("idx_exam_report_paper_id").on(table.paper_id),
+    index("idx_exam_report_generated_at").on(table.generated_at),
+    index("idx_exam_report_exam_status").on(table.exam_status),
+  ],
+);
+
+export const mistakeBook = pgTable(
+  "mistake_book",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    user_id: userIdColumn("user_id"),
+    question_public_id: text("question_public_id").notNull(),
+    paper_question_public_id: text("paper_question_public_id").notNull(),
+    profession: professionEnum("profession").notNull(),
+    level: integer("level").notNull(),
+    subject: subjectEnum("subject").notNull(),
+    question_snapshot: jsonb("question_snapshot").notNull(),
+    latest_answer_snapshot: jsonb("latest_answer_snapshot").notNull(),
+    mistake_book_source: mistakeBookSourceEnum("mistake_book_source")
+      .default("wrong_answer")
+      .notNull(),
+    mistake_book_status: mistakeBookStatusEnum("mistake_book_status")
+      .default("unmastered")
+      .notNull(),
+    wrong_count: integer("wrong_count").default(1).notNull(),
+    is_favorite: boolean("is_favorite").default(false).notNull(),
+    is_removed: boolean("is_removed").default(false).notNull(),
+    mastered_at: nullableTimestampColumn("mastered_at"),
+    latest_wrong_at: nullableTimestampColumn("latest_wrong_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_mistake_book_public_id").on(table.public_id),
+    index("idx_mistake_book_user_id").on(table.user_id),
+    index("idx_mistake_book_question_public_id").on(table.question_public_id),
+    index("idx_mistake_book_profession_level_subject").on(
+      table.profession,
+      table.level,
+      table.subject,
+    ),
+    index("idx_mistake_book_latest_wrong_at").on(table.latest_wrong_at),
+    index("idx_mistake_book_mistake_book_status").on(table.mistake_book_status),
+  ],
+);
+
+export const practiceRelations = relations(practice, ({ many, one }) => ({
+  answerRecords: many(answerRecord),
+  paper: one(paper, {
+    fields: [practice.paper_id],
+    references: [paper.id],
+  }),
+  user: one(user, {
+    fields: [practice.user_id],
+    references: [user.id],
+  }),
+}));
+
+export const mockExamRelations = relations(mockExam, ({ many, one }) => ({
+  answerRecords: many(answerRecord),
+  examReport: one(examReport),
+  paper: one(paper, {
+    fields: [mockExam.paper_id],
+    references: [paper.id],
+  }),
+  user: one(user, {
+    fields: [mockExam.user_id],
+    references: [user.id],
+  }),
+}));
+
+export const answerRecordRelations = relations(answerRecord, ({ one }) => ({
+  mockExam: one(mockExam, {
+    fields: [answerRecord.mock_exam_id],
+    references: [mockExam.id],
+  }),
+  paper: one(paper, {
+    fields: [answerRecord.paper_id],
+    references: [paper.id],
+  }),
+  paperQuestion: one(paperQuestion, {
+    fields: [answerRecord.paper_question_id],
+    references: [paperQuestion.id],
+  }),
+  practice: one(practice, {
+    fields: [answerRecord.practice_id],
+    references: [practice.id],
+  }),
+  user: one(user, {
+    fields: [answerRecord.user_id],
+    references: [user.id],
+  }),
+}));
+
+export const examReportRelations = relations(examReport, ({ one }) => ({
+  mockExam: one(mockExam, {
+    fields: [examReport.mock_exam_id],
+    references: [mockExam.id],
+  }),
+  paper: one(paper, {
+    fields: [examReport.paper_id],
+    references: [paper.id],
+  }),
+  user: one(user, {
+    fields: [examReport.user_id],
+    references: [user.id],
+  }),
+}));
+
+export const mistakeBookRelations = relations(mistakeBook, ({ one }) => ({
+  user: one(user, {
+    fields: [mistakeBook.user_id],
+    references: [user.id],
+  }),
+}));
