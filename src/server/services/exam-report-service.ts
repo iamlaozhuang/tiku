@@ -1,0 +1,384 @@
+import {
+  createErrorResponse,
+  createPaginatedResponse,
+  createSuccessResponse,
+  type ApiResponse,
+} from "../contracts/api-response";
+import type {
+  ExamReportListResultDto,
+  ExamReportResultDto,
+  ExamReportSnapshotDto,
+} from "../contracts/exam-report-contract";
+import {
+  mapExamReportDetailToApi,
+  mapExamReportSummaryToApi,
+} from "../mappers/exam-report-mapper";
+import type {
+  ExamReportAnswerRecordRow,
+  ExamReportAuthorizationScopeRow,
+  ExamReportMockExamRow,
+  ExamReportRepository,
+  ExamReportRow,
+} from "../repositories/exam-report-repository";
+import {
+  normalizeExamReportListQuery,
+  normalizeGenerateExamReportInput,
+  normalizeRetryLearningSuggestionInput,
+} from "../validators/exam-report";
+
+export type ExamReportUserContext = {
+  userPublicId: string;
+};
+
+export type ExamReportClock = {
+  now(): Date;
+};
+
+export type ExamReportPublicIdFactory = {
+  createPublicId(prefix: "exam_report"): string;
+};
+
+export type ExamReportService = {
+  listExamReports(
+    userContext: ExamReportUserContext,
+    query: unknown,
+  ): Promise<ApiResponse<ExamReportListResultDto>>;
+  getExamReport(
+    userContext: ExamReportUserContext,
+    publicId: string,
+  ): Promise<ApiResponse<ExamReportResultDto | null>>;
+  generateExamReport(
+    userContext: ExamReportUserContext,
+    input: unknown,
+  ): Promise<ApiResponse<ExamReportResultDto | null>>;
+  retryLearningSuggestion(
+    userContext: ExamReportUserContext,
+    publicId: string,
+    input: unknown,
+  ): Promise<ApiResponse<null>>;
+};
+
+const examReportContractTerm = "exam_report";
+const snapshotContractTerm = "snapshot";
+const scoringContractTerm = "scoring";
+
+void [examReportContractTerm, snapshotContractTerm, scoringContractTerm];
+
+const systemClock: ExamReportClock = {
+  now() {
+    return new Date();
+  },
+};
+
+const systemPublicIdFactory: ExamReportPublicIdFactory = {
+  createPublicId(prefix) {
+    return `${prefix}_${crypto.randomUUID()}`;
+  },
+};
+
+function hasEffectiveAuthorization(
+  scopes: ExamReportAuthorizationScopeRow[],
+  reportScope: { profession: ExamReportRow["profession"]; level: number },
+): boolean {
+  return scopes.some(
+    (scope) =>
+      scope.profession === reportScope.profession &&
+      scope.level === reportScope.level,
+  );
+}
+
+function createExamReportNotFoundResponse(): ApiResponse<null> {
+  return createErrorResponse(404321, "Exam report does not exist.");
+}
+
+function createMockExamNotFoundResponse(): ApiResponse<null> {
+  return createErrorResponse(404322, "Mock exam does not exist.");
+}
+
+function getStringField(
+  value: Record<string, unknown>,
+  key: string,
+): string | null {
+  return typeof value[key] === "string" ? value[key] : null;
+}
+
+function getPaperName(paperSnapshot: Record<string, unknown>): string {
+  return getStringField(paperSnapshot, "name") ?? "Untitled paper";
+}
+
+function calculateDurationSecond(mockExam: ExamReportMockExamRow): number {
+  if (mockExam.submitted_at === null) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Math.floor(
+      (mockExam.submitted_at.getTime() - mockExam.started_at.getTime()) / 1000,
+    ),
+  );
+}
+
+function buildQuestionDetails(answerRecords: ExamReportAnswerRecordRow[]) {
+  return answerRecords.map((answerRecord) => ({
+    answerRecordPublicId: answerRecord.public_id,
+    paperQuestionPublicId: answerRecord.paper_question_public_id,
+    questionPublicId: answerRecord.question_public_id,
+    questionSnapshot: answerRecord.question_snapshot,
+    answerSnapshot: answerRecord.answer_snapshot,
+    answerRecordStatus: answerRecord.answer_record_status,
+    isCorrect: answerRecord.is_correct,
+    score: answerRecord.score,
+    maxScore: answerRecord.max_score,
+    answeredAt: answerRecord.answered_at?.toISOString() ?? null,
+    submittedAt: answerRecord.submitted_at?.toISOString() ?? null,
+  }));
+}
+
+function buildReportSnapshot(
+  mockExam: ExamReportMockExamRow,
+  answerRecords: ExamReportAnswerRecordRow[],
+): ExamReportSnapshotDto {
+  return {
+    paperPublicId: mockExam.paper_public_id,
+    paperName: getPaperName(mockExam.paper_snapshot),
+    profession: mockExam.profession,
+    level: mockExam.level,
+    subject: mockExam.subject,
+    examStatus: mockExam.exam_status,
+    scoreSummary: {
+      objectiveScore: mockExam.objective_score,
+      subjectiveScore: mockExam.subjective_score,
+      totalScore: mockExam.total_score,
+    },
+    paperSnapshot: mockExam.paper_snapshot,
+    questionDetails: buildQuestionDetails(answerRecords),
+    learningSuggestionStatus: null,
+  };
+}
+
+function canGenerateReport(mockExam: ExamReportMockExamRow): boolean {
+  return ["completed", "scoring_partial_failed"].includes(mockExam.exam_status);
+}
+
+async function listScopes(
+  repository: ExamReportRepository,
+  userContext: ExamReportUserContext,
+): Promise<ExamReportAuthorizationScopeRow[]> {
+  return repository.listEffectiveAuthorizationScopes({
+    userPublicId: userContext.userPublicId,
+  });
+}
+
+async function getAuthorizedReport(
+  repository: ExamReportRepository,
+  userContext: ExamReportUserContext,
+  publicId: string,
+): Promise<ExamReportRow | ApiResponse<null>> {
+  const report = await repository.findExamReportByPublicId({
+    userPublicId: userContext.userPublicId,
+    publicId,
+  });
+
+  if (report === null) {
+    return createExamReportNotFoundResponse();
+  }
+
+  const scopes = await listScopes(repository, userContext);
+
+  if (!hasEffectiveAuthorization(scopes, report)) {
+    return createExamReportNotFoundResponse();
+  }
+
+  return report;
+}
+
+function isExamReportRow(
+  value: ExamReportRow | ApiResponse<null>,
+): value is ExamReportRow {
+  return "public_id" in value;
+}
+
+export function createExamReportService(
+  repository: ExamReportRepository,
+  clock: ExamReportClock = systemClock,
+  publicIdFactory: ExamReportPublicIdFactory = systemPublicIdFactory,
+): ExamReportService {
+  return {
+    async listExamReports(userContext, query) {
+      const normalizedQuery = normalizeExamReportListQuery(query);
+      const [scopes, reportPage] = await Promise.all([
+        listScopes(repository, userContext),
+        repository.listExamReports({
+          userPublicId: userContext.userPublicId,
+          ...normalizedQuery,
+        }),
+      ]);
+      const authorizedReports = reportPage.rows.filter((report) =>
+        hasEffectiveAuthorization(scopes, report),
+      );
+
+      return createPaginatedResponse(
+        {
+          examReports: authorizedReports.map(mapExamReportSummaryToApi),
+        },
+        {
+          page: normalizedQuery.page,
+          pageSize: normalizedQuery.pageSize,
+          total: authorizedReports.length,
+          sortBy: normalizedQuery.sortBy,
+          sortOrder: normalizedQuery.sortOrder,
+        },
+      );
+    },
+
+    async getExamReport(userContext, publicId) {
+      const report = await getAuthorizedReport(
+        repository,
+        userContext,
+        publicId,
+      );
+
+      if (!isExamReportRow(report)) {
+        return report;
+      }
+
+      return createSuccessResponse({
+        examReport: mapExamReportDetailToApi(report),
+      });
+    },
+
+    async generateExamReport(userContext, input) {
+      const normalizedInput = normalizeGenerateExamReportInput(input);
+
+      if (normalizedInput === null) {
+        return createErrorResponse(422322, "Exam report input is invalid.");
+      }
+
+      const existingReport = await repository.findExamReportByMockExamPublicId({
+        userPublicId: userContext.userPublicId,
+        mockExamPublicId: normalizedInput.mockExamPublicId,
+      });
+
+      if (existingReport !== null) {
+        return createSuccessResponse({
+          examReport: mapExamReportDetailToApi(existingReport),
+        });
+      }
+
+      const mockExam = await repository.findSubmittedMockExamByPublicId({
+        userPublicId: userContext.userPublicId,
+        mockExamPublicId: normalizedInput.mockExamPublicId,
+      });
+
+      if (mockExam === null) {
+        return createMockExamNotFoundResponse();
+      }
+
+      if (mockExam.exam_status === "terminated") {
+        return createErrorResponse(
+          409321,
+          "Terminated mock exam cannot generate exam report.",
+        );
+      }
+
+      if (!canGenerateReport(mockExam)) {
+        return createErrorResponse(
+          409322,
+          "Mock exam scoring is not ready for exam report.",
+        );
+      }
+
+      const scopes = await listScopes(repository, userContext);
+
+      if (!hasEffectiveAuthorization(scopes, mockExam)) {
+        return createMockExamNotFoundResponse();
+      }
+
+      const answerRecords = await repository.listMockExamAnswerRecords({
+        userPublicId: userContext.userPublicId,
+        mockExamPublicId: normalizedInput.mockExamPublicId,
+      });
+      const generatedAt = clock.now();
+      const report = await repository.createExamReport({
+        publicId: publicIdFactory.createPublicId("exam_report"),
+        userPublicId: userContext.userPublicId,
+        mockExamPublicId: mockExam.public_id,
+        paperPublicId: mockExam.paper_public_id,
+        paperName: getPaperName(mockExam.paper_snapshot),
+        profession: mockExam.profession,
+        level: mockExam.level,
+        subject: mockExam.subject,
+        examStatus: mockExam.exam_status,
+        objectiveScore: mockExam.objective_score,
+        subjectiveScore: mockExam.subjective_score,
+        totalScore: mockExam.total_score,
+        durationSecond: calculateDurationSecond(mockExam),
+        reportSnapshot: buildReportSnapshot(mockExam, answerRecords),
+        learningSuggestionSnapshot: null,
+        generatedAt,
+      });
+
+      return createSuccessResponse({
+        examReport: mapExamReportDetailToApi(report),
+      });
+    },
+
+    async retryLearningSuggestion(userContext, publicId, input) {
+      normalizeRetryLearningSuggestionInput(input);
+
+      const report = await getAuthorizedReport(
+        repository,
+        userContext,
+        publicId,
+      );
+
+      if (!isExamReportRow(report)) {
+        return report;
+      }
+
+      return createErrorResponse(
+        422321,
+        "Learning suggestion retry is not available in Phase 4.",
+      );
+    },
+  };
+}
+
+export function createUnavailableExamReportService(): ExamReportService {
+  return {
+    async listExamReports() {
+      return createPaginatedResponse(
+        {
+          examReports: [],
+        },
+        {
+          page: 1,
+          pageSize: 20,
+          total: 0,
+          sortBy: "generatedAt",
+          sortOrder: "desc",
+        },
+        "Exam report runtime is not configured.",
+      );
+    },
+    async getExamReport() {
+      return createErrorResponse(
+        503321,
+        "Exam report runtime is not configured.",
+      );
+    },
+    async generateExamReport() {
+      return createErrorResponse(
+        503321,
+        "Exam report runtime is not configured.",
+      );
+    },
+    async retryLearningSuggestion() {
+      return createErrorResponse(
+        503321,
+        "Exam report runtime is not configured.",
+      );
+    },
+  };
+}
