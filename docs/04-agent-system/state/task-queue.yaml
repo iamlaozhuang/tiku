@@ -1244,7 +1244,7 @@ tasks:
       - Select-String -Path 'src\server\services\*.ts' -Pattern 'paper_section|question_group|sort_order'
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-draft-composition-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-3-paper-publish-snapshot-baseline
     title: Paper Publish Snapshot Baseline
