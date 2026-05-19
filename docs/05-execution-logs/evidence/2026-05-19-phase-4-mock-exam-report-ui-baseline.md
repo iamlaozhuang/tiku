@@ -321,7 +321,54 @@ Accepted gaps:
 - No numeric database ids are exposed in mock exam or exam report routes/DOM.
 - Mock exam mode does not render `standardAnswerRichText` or `analysisRichText` before submit.
 - Learning suggestion is represented as `学习建议：生成中` when the DTO snapshot is `null`.
-- Local commit: pending at evidence-write time; final SHA will be recorded after commit.
-- Merge: skipped, requires separate explicit approval.
-- Push: skipped, requires separate explicit approval.
-- Cleanup: skipped before merge/closeout approval.
+- Implementation commit: `26d7528 feat(student): add mock exam report UI baseline`.
+
+## Post-Merge Master Closeout
+
+- Merge target: `master`
+- Merge result: fast-forward from `5557099` to `26d7528`
+- Implementation commit: `26d7528 feat(student): add mock exam report UI baseline`
+
+Post-merge validation on `master`:
+
+- `npm.cmd run lint`: pass.
+- `npm.cmd run typecheck`: pass.
+- `npm.cmd run test:unit`: pass, 64 files and 199 tests.
+- `npm.cmd run build`: pass, `/mock-exam` and `/exam-report` included in the route output.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+- `npm.cmd run format:check`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass.
+
+Git readiness key output before closeout evidence commit:
+
+```text
+branch: master
+head: 26d7528
+## master...origin/master [ahead 1]
+Tracked Changes: none
+Staged Changes: none
+Untracked Files: none
+leftRightCount(origin/master...HEAD): 0 1
+```
+
+Files changed against `origin/master`:
+
+```text
+docs/04-agent-system/state/project-state.yaml
+docs/04-agent-system/state/task-queue.yaml
+docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-mock-exam-report-ui-baseline-security-review.md
+docs/05-execution-logs/evidence/2026-05-19-phase-4-mock-exam-report-ui-baseline.md
+docs/05-execution-logs/task-plans/2026-05-20-phase-4-mock-exam-report-ui-baseline.md
+src/app/(student)/exam-report/page.tsx
+src/app/(student)/mock-exam/page.tsx
+src/features/student/mock-exam/StudentMockExamReportPage.tsx
+tests/unit/student-mock-exam-report-ui.test.ts
+```
+
+Crash-risk avoidance:
+
+- Avoided recursive `.codex` log scanning after recovery.
+- Avoided additional Browser/IAB operations after the interruption.
+- Used targeted sandbox log tailing, repository status checks, and local project gates for recovery verification.
