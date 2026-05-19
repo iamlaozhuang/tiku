@@ -1,10 +1,17 @@
-export default function StudentHomePage() {
+import {
+  StudentHomePage,
+  studentHomeFixture,
+} from "@/features/student/home/StudentHomePage";
+
+export default function StudentHomeRoutePage() {
   return (
-    <div className="p-4">
-      <h1 className="font-heading text-text-primary text-2xl font-semibold">
-        首页
-      </h1>
-      <p className="text-text-secondary mt-2">占位页面 — Phase 2</p>
-    </div>
+    <StudentHomePage
+      scopes={studentHomeFixture.scopes}
+      papers={studentHomeFixture.papers}
+      rememberedScope={{
+        profession: "marketing",
+        level: 3,
+      }}
+    />
   );
 }
