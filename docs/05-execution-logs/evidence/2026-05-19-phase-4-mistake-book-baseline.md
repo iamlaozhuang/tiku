@@ -265,3 +265,13 @@ Accepted gaps:
 - No frontend code changes.
 - API responses keep `{ code, message, data }`.
 - Student-facing routes use `publicId`, not numeric database ids.
+
+## Post-Merge Master Closeout
+
+- Merge target: `master`
+- Merge result: fast-forward from `ec105a9` to `61917e2`
+- Implementation commit: `61917e2 feat(student): add mistake book baseline`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass on `master`.
+- Post-merge quality key output: `Test Files 61 passed (61)`, `Tests 184 passed (184)`, and `All matched files use Prettier code style!`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass.
+- Git readiness key output before closeout evidence commit: `master...origin/master [ahead 1]`, no tracked changes, no staged changes, no untracked files, and only `61917e2` ahead of `origin/master`.
