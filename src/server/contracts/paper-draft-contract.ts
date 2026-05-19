@@ -99,3 +99,21 @@ export type PaperDraftResultDto = {
 export type PaperQuestionResultDto = {
   paperQuestion: PaperQuestionDto;
 };
+
+export type PaperPublishValidationIssueDto = {
+  code:
+    | "paper_question_score_missing"
+    | "paper_total_score_missing"
+    | "paper_total_score_mismatch"
+    | "paper_has_no_counting_question"
+    | "empty_paper_section"
+    | "scoring_point_total_mismatch"
+    | "source_reference_unresolved";
+  message: string;
+};
+
+export type PaperPublishResultDto = {
+  paper: PaperDraftDto;
+  lockedQuestionPublicIds: string[];
+  lockedMaterialPublicIds: string[];
+};

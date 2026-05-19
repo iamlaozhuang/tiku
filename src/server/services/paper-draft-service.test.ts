@@ -186,6 +186,12 @@ function createRepository(
         total_score: "0.0",
       });
     },
+    async publishPaper() {
+      return createPaper({
+        paper_status: "published",
+        published_at: new Date("2026-05-19T08:00:00.000Z"),
+      });
+    },
     ...overrides,
   };
 }
@@ -482,6 +488,308 @@ describe("paper draft service", () => {
       code: 409203,
       message: "Only draft paper can be composed.",
       data: null,
+    });
+  });
+
+  it("publishes a valid draft paper and locks source question and material public identifiers", async () => {
+    const publishedInputs: unknown[] = [];
+    const draftPaper = createPaper();
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+          });
+        },
+        async publishPaper(input) {
+          publishedInputs.push(input);
+
+          return createPaper({
+            public_id: input.paperPublicId,
+            paper_status: "published",
+            published_at: new Date("2026-05-19T08:00:00.000Z"),
+          });
+        },
+      }),
+    );
+
+    await expect(service.publishPaper(draftPaper.public_id)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        paper: {
+          publicId: "paper_public_123",
+          name: "物流技能草稿卷",
+          profession: "logistics",
+          level: 4,
+          subject: "skill",
+          paperStatus: "published",
+          paperType: "mock_paper",
+          year: 2026,
+          source: "phase-3 baseline",
+          durationMinute: 90,
+          totalScore: "5.0",
+          publishedAt: "2026-05-19T08:00:00.000Z",
+          archivedAt: null,
+          questionCount: 1,
+          paperSections: [
+            {
+              title: "案例分析",
+              description: "技能题",
+              sortOrder: 1,
+              totalScore: "5.0",
+              paperQuestions: [
+                {
+                  publicId: "paper_question_public_123",
+                  sourceQuestionPublicId: "question_public_123",
+                  paperSectionSortOrder: 1,
+                  questionGroupSortOrder: 1,
+                  score: "5.0",
+                  sortOrder: 1,
+                  questionSnapshot: {
+                    questionPublicId: "question_public_123",
+                    questionType: "short_answer",
+                    profession: "logistics",
+                    level: 4,
+                    subject: "skill",
+                    stemRichText: "<p>说明入库验收步骤</p>",
+                    questionOptions: [],
+                    standardAnswerRichText: "<p>核对单据并验收货物</p>",
+                    analysisRichText: "<p>按流程验收</p>",
+                    multiChoiceRule: "all_correct_only",
+                    scoringMethod: "ai_scoring",
+                  },
+                  materialSnapshot: {
+                    materialPublicId: "material_public_123",
+                    title: "入库案例材料",
+                    contentRichText: "<p>某仓库入库案例</p>",
+                    profession: "logistics",
+                    level: 4,
+                    subject: "skill",
+                  },
+                  scoringPoints: [
+                    {
+                      description: "说明单据核对",
+                      score: "2.5",
+                      sortOrder: 1,
+                    },
+                    {
+                      description: "说明实物验收",
+                      score: "2.5",
+                      sortOrder: 2,
+                    },
+                  ],
+                  createdAt: "2026-05-19T06:00:00.000Z",
+                  updatedAt: "2026-05-19T07:00:00.000Z",
+                },
+              ],
+            },
+          ],
+          questionGroups: [
+            {
+              title: "入库案例题组",
+              materialPublicId: "material_public_123",
+              materialSnapshot: {
+                materialPublicId: "material_public_123",
+                title: "入库案例材料",
+                contentRichText: "<p>某仓库入库案例</p>",
+                profession: "logistics",
+                level: 4,
+                subject: "skill",
+              },
+              sortOrder: 1,
+            },
+          ],
+          createdAt: "2026-05-19T06:00:00.000Z",
+          updatedAt: "2026-05-19T07:00:00.000Z",
+        },
+        lockedQuestionPublicIds: ["question_public_123"],
+        lockedMaterialPublicIds: ["material_public_123"],
+      },
+    });
+
+    expect(publishedInputs).toEqual([
+      {
+        paperPublicId: "paper_public_123",
+        sourceQuestionPublicIds: ["question_public_123"],
+        materialPublicIds: ["material_public_123"],
+      },
+    ]);
+  });
+
+  it("rejects publishing missing, non-draft, incomplete, and source-lock-invalid papers", async () => {
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          if (publicId === "missing_paper") {
+            return null;
+          }
+
+          if (publicId === "published_paper") {
+            return createPaper({
+              public_id: publicId,
+              paper_status: "published",
+            });
+          }
+
+          if (publicId === "empty_paper") {
+            return createPaper({
+              public_id: publicId,
+              total_score: "0.0",
+              paper_sections: [
+                {
+                  id: 201,
+                  title: "空大题",
+                  description: null,
+                  sort_order: 1,
+                  total_score: "0.0",
+                  paper_questions: [],
+                },
+              ],
+              question_groups: [],
+            });
+          }
+
+          if (publicId === "invalid_score_paper") {
+            return createPaper({
+              public_id: publicId,
+              total_score: "6.0",
+              paper_sections: [
+                {
+                  id: 201,
+                  title: "案例分析",
+                  description: "技能题",
+                  sort_order: 1,
+                  total_score: "5.0",
+                  paper_questions: [
+                    createPaperQuestion({
+                      score: "5.0",
+                      scoring_points: [
+                        {
+                          source_scoring_point_id: 501,
+                          description: "说明单据核对",
+                          score: "2.0",
+                          sort_order: 1,
+                        },
+                      ],
+                    }),
+                  ],
+                },
+              ],
+            });
+          }
+
+          if (publicId === "missing_question_score_paper") {
+            return createPaper({
+              public_id: publicId,
+              total_score: "5.0",
+              paper_sections: [
+                {
+                  id: 201,
+                  title: "案例分析",
+                  description: "技能题",
+                  sort_order: 1,
+                  total_score: "0.0",
+                  paper_questions: [
+                    createPaperQuestion({
+                      score: null,
+                    }),
+                  ],
+                },
+              ],
+            });
+          }
+
+          return createPaper({
+            public_id: publicId,
+          });
+        },
+        async publishPaper() {
+          return null;
+        },
+      }),
+    );
+
+    await expect(service.publishPaper("missing_paper")).resolves.toEqual({
+      code: 404203,
+      message: "Paper does not exist.",
+      data: null,
+    });
+
+    await expect(service.publishPaper("published_paper")).resolves.toEqual({
+      code: 409204,
+      message: "Only draft paper can be published.",
+      data: null,
+    });
+
+    await expect(service.publishPaper("empty_paper")).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+
+    await expect(service.publishPaper("invalid_score_paper")).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+
+    await expect(
+      service.publishPaper("missing_question_score_paper"),
+    ).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+
+    await expect(service.publishPaper("lock_failure_paper")).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+  });
+
+  it("keeps existing paper question snapshots immutable while publishing", async () => {
+    const sourcePaperQuestion = createPaperQuestion();
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId() {
+          return createPaper({
+            paper_sections: [
+              {
+                id: 201,
+                title: "案例分析",
+                description: "技能题",
+                sort_order: 1,
+                total_score: "5.0",
+                paper_questions: [sourcePaperQuestion],
+              },
+            ],
+          });
+        },
+        async publishPaper() {
+          return createPaper({
+            paper_status: "published",
+            published_at: new Date("2026-05-19T08:00:00.000Z"),
+          });
+        },
+      }),
+    );
+
+    await service.publishPaper("paper_public_123");
+
+    expect(sourcePaperQuestion.question_snapshot).toEqual({
+      questionPublicId: "question_public_123",
+      questionType: "short_answer",
+      profession: "logistics",
+      level: 4,
+      subject: "skill",
+      stemRichText: "<p>说明入库验收步骤</p>",
+      questionOptions: [],
+      standardAnswerRichText: "<p>核对单据并验收货物</p>",
+      analysisRichText: "<p>按流程验收</p>",
+      multiChoiceRule: "all_correct_only",
+      scoringMethod: "ai_scoring",
     });
   });
 });

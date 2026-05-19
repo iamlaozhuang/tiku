@@ -168,6 +168,22 @@ function createService(): PaperDraftService {
         },
       };
     },
+    async publishPaper(publicId) {
+      return {
+        code: 0,
+        message: "ok",
+        data: {
+          paper: {
+            ...paperDto,
+            publicId,
+            paperStatus: "published",
+            publishedAt: "2026-05-19T08:00:00.000Z",
+          },
+          lockedQuestionPublicIds: ["question_public_123"],
+          lockedMaterialPublicIds: ["material_public_123"],
+        },
+      };
+    },
   };
 }
 
@@ -365,6 +381,41 @@ describe("paper draft route handlers", () => {
           publicId: "paper_public_123",
           questionCount: 0,
         },
+      },
+    });
+  });
+
+  it("uses public identifiers for the paper publish action route", async () => {
+    const handlers = createPaperDraftRouteHandlers(createService());
+    const context = {
+      params: Promise.resolve({
+        publicId: "paper_public_123",
+      }),
+    };
+
+    await expect(
+      handlers.publish
+        .POST(
+          new Request(
+            "http://localhost/api/v1/papers/paper_public_123/publish",
+            {
+              method: "POST",
+            },
+          ),
+          context,
+        )
+        .then((response) => response.json()),
+    ).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        paper: {
+          ...paperDto,
+          paperStatus: "published",
+          publishedAt: "2026-05-19T08:00:00.000Z",
+        },
+        lockedQuestionPublicIds: ["question_public_123"],
+        lockedMaterialPublicIds: ["material_public_123"],
       },
     });
   });

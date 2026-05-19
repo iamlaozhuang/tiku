@@ -7,6 +7,8 @@ import {
 import type {
   PaperDraftDto,
   PaperDraftResultDto,
+  PaperPublishResultDto,
+  PaperPublishValidationIssueDto,
   PaperQuestionResultDto,
 } from "../contracts/paper-draft-contract";
 import {
@@ -15,6 +17,11 @@ import {
   mapPaperQuestionResultToApi,
 } from "../mappers/paper-draft-mapper";
 import type { PaperDraftRepository } from "../repositories/paper-draft-repository";
+import type {
+  PaperDraftAccessRow,
+  PaperQuestionAccessRow,
+  PaperSectionAccessRow,
+} from "../repositories/paper-draft-repository";
 import {
   normalizeAddPaperQuestionInput,
   normalizeCreatePaperInput,
@@ -46,20 +53,29 @@ export type PaperDraftService = {
     paperPublicId: string,
     paperQuestionPublicId: string,
   ): Promise<ApiResponse<PaperDraftResultDto | null>>;
+  publishPaper(
+    publicId: string,
+  ): Promise<ApiResponse<PaperPublishResultDto | null>>;
 };
 
 const INVALID_PAPER_INPUT_CODE = 422203;
 const PAPER_NOT_FOUND_CODE = 404203;
 const PAPER_COMPOSITION_CONFLICT_CODE = 409203;
+const PAPER_PUBLISH_CONFLICT_CODE = 409204;
+const PAPER_PUBLISH_VALIDATION_CODE = 422204;
 const PAPER_RUNTIME_UNAVAILABLE_CODE = 503203;
 const PAPER_SECTION_CONTRACT_TERM = "paper_section";
 const QUESTION_GROUP_CONTRACT_TERM = "question_group";
 const SORT_ORDER_CONTRACT_TERM = "sort_order";
+const SCORING_POINT_CONTRACT_TERM = "scoring_point";
+const STANDARD_ANSWER_CONTRACT_TERM = "standard_answer";
 
 void [
   PAPER_SECTION_CONTRACT_TERM,
   QUESTION_GROUP_CONTRACT_TERM,
   SORT_ORDER_CONTRACT_TERM,
+  SCORING_POINT_CONTRACT_TERM,
+  STANDARD_ANSWER_CONTRACT_TERM,
 ];
 
 function createInvalidPaperInputResponse(): ApiResponse<null> {
@@ -75,6 +91,174 @@ function createNonDraftPaperResponse(): ApiResponse<null> {
     PAPER_COMPOSITION_CONFLICT_CODE,
     "Only draft paper can be composed.",
   );
+}
+
+function createNonDraftPublishResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_PUBLISH_CONFLICT_CODE,
+    "Only draft paper can be published.",
+  );
+}
+
+function createPaperPublishValidationResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    PAPER_PUBLISH_VALIDATION_CODE,
+    "Paper publish validation failed.",
+  );
+}
+
+function convertScoreToHalfPoints(score: string | null): number | null {
+  if (score === null) {
+    return null;
+  }
+
+  const parsedScore = Number(score);
+
+  if (!Number.isFinite(parsedScore)) {
+    return null;
+  }
+
+  return Math.round(parsedScore * 2);
+}
+
+function isSubjectivePaperQuestion(
+  paperQuestion: PaperQuestionAccessRow,
+): boolean {
+  return (
+    paperQuestion.question_snapshot.questionType === "short_answer" ||
+    paperQuestion.question_snapshot.scoringMethod === "ai_scoring"
+  );
+}
+
+function listPaperQuestions(
+  paperSections: PaperSectionAccessRow[],
+): PaperQuestionAccessRow[] {
+  return paperSections.flatMap((paperSection) => paperSection.paper_questions);
+}
+
+function listSourceQuestionPublicIds(
+  paperQuestions: PaperQuestionAccessRow[],
+): string[] {
+  return Array.from(
+    new Set(
+      paperQuestions.map(
+        (paperQuestion) => paperQuestion.source_question_public_id,
+      ),
+    ),
+  );
+}
+
+function listMaterialPublicIds(
+  paperQuestions: PaperQuestionAccessRow[],
+): string[] {
+  return Array.from(
+    new Set(
+      paperQuestions.flatMap((paperQuestion) =>
+        paperQuestion.material_snapshot === null
+          ? []
+          : [paperQuestion.material_snapshot.materialPublicId],
+      ),
+    ),
+  );
+}
+
+function sumHalfPoints(values: number[]): number {
+  return values.reduce((totalScore, score) => totalScore + score, 0);
+}
+
+function validatePaperForPublish(paper: PaperDraftAccessRow): {
+  issues: PaperPublishValidationIssueDto[];
+  sourceQuestionPublicIds: string[];
+  materialPublicIds: string[];
+} {
+  const paperQuestions = listPaperQuestions(paper.paper_sections);
+  const paperQuestionScores = paperQuestions.map((paperQuestion) =>
+    convertScoreToHalfPoints(paperQuestion.score),
+  );
+  const validQuestionScores = paperQuestionScores.filter(
+    (score): score is number => score !== null,
+  );
+  const missingQuestionScore = paperQuestionScores.some(
+    (score) => score === null,
+  );
+  const paperTotalScore = convertScoreToHalfPoints(paper.total_score);
+  const hasCountingQuestion = validQuestionScores.some((score) => score > 0);
+  const emptyPaperSection = paper.paper_sections.some(
+    (paperSection) => paperSection.paper_questions.length === 0,
+  );
+  const scoringPointMismatch = paperQuestions.some((paperQuestion) => {
+    const questionScore = convertScoreToHalfPoints(paperQuestion.score);
+
+    if (questionScore === null || !isSubjectivePaperQuestion(paperQuestion)) {
+      return false;
+    }
+
+    const scoringPointScores = paperQuestion.scoring_points.map(
+      (scoringPoint) => convertScoreToHalfPoints(scoringPoint.score) ?? 0,
+    );
+
+    return sumHalfPoints(scoringPointScores) !== questionScore;
+  });
+  const questionScoreTotal = sumHalfPoints(validQuestionScores);
+  const issues: PaperPublishValidationIssueDto[] = [
+    ...(missingQuestionScore
+      ? [
+          {
+            code: "paper_question_score_missing" as const,
+            message: "Every paper question must have score before publish.",
+          },
+        ]
+      : []),
+    ...(paperTotalScore === null
+      ? [
+          {
+            code: "paper_total_score_missing" as const,
+            message: "Paper total score must be set before publish.",
+          },
+        ]
+      : []),
+    ...(!missingQuestionScore &&
+    paperTotalScore !== null &&
+    paperTotalScore !== questionScoreTotal
+      ? [
+          {
+            code: "paper_total_score_mismatch" as const,
+            message: "Paper total score must equal paper question score sum.",
+          },
+        ]
+      : []),
+    ...(!hasCountingQuestion
+      ? [
+          {
+            code: "paper_has_no_counting_question" as const,
+            message: "Paper must contain at least one counting question.",
+          },
+        ]
+      : []),
+    ...(emptyPaperSection
+      ? [
+          {
+            code: "empty_paper_section" as const,
+            message: "Published paper cannot contain empty paper_section.",
+          },
+        ]
+      : []),
+    ...(scoringPointMismatch
+      ? [
+          {
+            code: "scoring_point_total_mismatch" as const,
+            message:
+              "Subjective scoring_point total must equal paper question score.",
+          },
+        ]
+      : []),
+  ];
+
+  return {
+    issues,
+    sourceQuestionPublicIds: listSourceQuestionPublicIds(paperQuestions),
+    materialPublicIds: listMaterialPublicIds(paperQuestions),
+  };
 }
 
 export function createPaperDraftService(
@@ -225,6 +409,40 @@ export function createPaperDraftService(
 
       return createSuccessResponse(mapPaperDraftResultToApi(updatedPaper));
     },
+
+    async publishPaper(publicId) {
+      const paper = await paperRepository.findPaperByPublicId(publicId);
+
+      if (paper === null) {
+        return createPaperNotFoundResponse();
+      }
+
+      if (paper.paper_status !== "draft") {
+        return createNonDraftPublishResponse();
+      }
+
+      const publishValidation = validatePaperForPublish(paper);
+
+      if (publishValidation.issues.length > 0) {
+        return createPaperPublishValidationResponse();
+      }
+
+      const publishedPaper = await paperRepository.publishPaper({
+        paperPublicId: publicId,
+        sourceQuestionPublicIds: publishValidation.sourceQuestionPublicIds,
+        materialPublicIds: publishValidation.materialPublicIds,
+      });
+
+      if (publishedPaper === null) {
+        return createPaperPublishValidationResponse();
+      }
+
+      return createSuccessResponse({
+        paper: mapPaperDraftToApi(publishedPaper),
+        lockedQuestionPublicIds: publishValidation.sourceQuestionPublicIds,
+        lockedMaterialPublicIds: publishValidation.materialPublicIds,
+      });
+    },
   };
 }
 
@@ -267,6 +485,12 @@ export function createUnavailablePaperDraftService(): PaperDraftService {
       );
     },
     async removePaperQuestion() {
+      return createErrorResponse(
+        PAPER_RUNTIME_UNAVAILABLE_CODE,
+        "Paper runtime is not configured.",
+      );
+    },
+    async publishPaper() {
       return createErrorResponse(
         PAPER_RUNTIME_UNAVAILABLE_CODE,
         "Paper runtime is not configured.",

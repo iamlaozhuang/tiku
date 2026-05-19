@@ -102,6 +102,12 @@ export type RemovePaperQuestionInput = {
   paperQuestionPublicId: string;
 };
 
+export type PublishPaperInput = {
+  paperPublicId: string;
+  sourceQuestionPublicIds: string[];
+  materialPublicIds: string[];
+};
+
 export type PaperDraftRepository = {
   listPapers(query: NormalizedPaperListInput): Promise<PaperDraftListResult>;
   createPaper(input: NormalizedCreatePaperInput): Promise<PaperDraftAccessRow>;
@@ -116,4 +122,5 @@ export type PaperDraftRepository = {
   removePaperQuestion(
     input: RemovePaperQuestionInput,
   ): Promise<PaperDraftAccessRow | null>;
+  publishPaper(input: PublishPaperInput): Promise<PaperDraftAccessRow | null>;
 };

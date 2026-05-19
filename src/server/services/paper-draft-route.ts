@@ -114,5 +114,15 @@ export function createPaperDraftRouteHandlers(paperService: PaperDraftService) {
         );
       },
     },
+    publish: {
+      async POST(
+        _request: Request,
+        context: PaperRouteContext,
+      ): Promise<Response> {
+        const { publicId } = await context.params;
+
+        return createJsonResponse(await paperService.publishPaper(publicId));
+      },
+    },
   };
 }

@@ -1287,7 +1287,7 @@ tasks:
       - Select-String -Path 'src\app\api\v1\papers\**\*.ts' -Pattern 'publish|code|message|data'
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-paper-publish-snapshot-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-3-paper-lifecycle-asset-baseline
     title: Paper Lifecycle And Asset Baseline
