@@ -290,3 +290,46 @@ Accepted gaps:
 - No numeric database ids are exposed in student UI cards or action URLs.
 - Loading, empty, and error states are explicit.
 - The student home UI remains within Phase 4 frontend scope and consumes the existing student paper DTO contract.
+
+## Post-Merge Master Closeout
+
+- Merge target: `master`
+- Merge result: fast-forward from `faf9c5c` to `938a122`
+- Implementation commit: `938a122 feat(student): add student home UI baseline`
+
+Post-merge validation on `master`:
+
+- `npm.cmd run lint`: pass.
+- `npm.cmd run typecheck`: initial parallel run observed stale/concurrent `.next/types` errors while `next build` was regenerating route types; standalone rerun after build completed passed.
+- `npm.cmd run test:unit`: pass, 62 files and 188 tests.
+- `npm.cmd run build`: pass, `/home` included in the app route output.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+- `npm.cmd run format:check`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass on `master`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass on `master`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass after rerun outside the constrained shell language mode.
+
+Git readiness key output before closeout evidence commit:
+
+```text
+branch: master
+head: 938a122
+## master...origin/master [ahead 1]
+Tracked Changes: none
+Staged Changes: none
+Untracked Files: none
+leftRightCount(origin/master...HEAD): 0 1
+```
+
+Files changed against `origin/master`:
+
+```text
+docs/04-agent-system/state/project-state.yaml
+docs/04-agent-system/state/task-queue.yaml
+docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-student-home-ui-baseline-security-review.md
+docs/05-execution-logs/evidence/2026-05-19-phase-4-student-home-ui-baseline.md
+docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-home-ui-baseline.md
+src/app/(student)/home/page.tsx
+src/features/student/home/StudentHomePage.tsx
+tests/unit/student-home-ui.test.ts
+```
