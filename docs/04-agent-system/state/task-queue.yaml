@@ -1445,3 +1445,509 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-3-question-paper-readiness.md
     status: done
     retryCount: 0
+  - id: phase-4-rawfiles-recovery-inventory
+    title: Rawfiles Recovery Inventory
+    phase: phase-4-student-experience
+    sourceStory: user-request-2026-05-19-rawfiles-recovery
+    dependencies:
+      - phase-3-question-paper-readiness-evidence
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-rawfiles-recovery-and-inventory.md
+      - docs/05-execution-logs/evidence/2026-05-19-rawfiles-recovery-and-inventory.md
+      - rawfiles/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - evidence_integrity
+      - local_source_material
+    validationCommands:
+      - npm.cmd run format:check
+      - git status --short --ignored rawfiles
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-rawfiles-recovery-and-inventory.md
+    status: done
+    retryCount: 0
+  - id: phase-4-student-experience-planning
+    title: Phase 4 Student Experience Planning
+    phase: phase-4-student-experience
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-4-student-experience
+    dependencies:
+      - phase-4-rawfiles-recovery-inventory
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-experience-planning.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-student-experience-planning.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - data_contract
+      - api_contract
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - npm.cmd run format:check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-student-experience-planning.md
+    status: done
+    retryCount: 0
+  - id: phase-4-student-experience-contract-approval
+    title: Student Experience Contract And Approval
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md
+    dependencies:
+      - phase-4-student-experience-planning
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-experience-contract-approval.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-student-experience-contract-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-student-experience-contract-approval-security-review.md
+      - docs/02-architecture/interfaces/student-experience-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - data_contract
+      - api_contract
+      - authorization
+      - student
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-student-experience-contract-approval-security-review.md
+    validationCommands:
+      - Test-Path 'docs\02-architecture\interfaces\student-experience-contract.md'
+      - Select-String -Path 'docs\02-architecture\interfaces\student-experience-contract.md' -Pattern 'practice|mock_exam|answer_record|exam_report|mistake_book|authorization|paper_snapshot'
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-19-phase-4-student-experience-contract-approval.md' -Pattern 'security review'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - npm.cmd run format:check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-student-experience-contract-approval.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-answer-record-schema-baseline
+    title: Answer Record Schema Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#练习模式
+    dependencies:
+      - phase-4-student-experience-contract-approval
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-answer-record-schema-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-answer-record-schema-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-answer-record-schema-baseline-security-review.md
+      - src/db/schema/**
+      - src/server/models/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - src/app/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - .env.example
+    riskTypes:
+      - schema
+      - data_contract
+      - authorization
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-answer-record-schema-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\db\schema\*.ts' -Pattern 'practice|mock_exam|answer_record|exam_report|mistake_book'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-answer-record-schema-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-student-paper-access-baseline
+    title: Student Paper Access Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#us-03-01-学员首页
+    dependencies:
+      - phase-4-answer-record-schema-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-paper-access-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-student-paper-access-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-student-paper-access-baseline-security-review.md
+      - src/app/api/v1/student-papers/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - student
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-student-paper-access-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\student-papers\**\*.ts' -Pattern 'code|message|data'
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'authorization|paper_snapshot|published'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-student-paper-access-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-practice-session-baseline
+    title: Practice Session Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#2-练习模式
+    dependencies:
+      - phase-4-student-paper-access-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-practice-session-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-practice-session-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-practice-session-baseline-security-review.md
+      - src/app/api/v1/practices/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - student
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-practice-session-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\practices\**\*.ts' -Pattern 'code|message|data'
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'practice|answer_record|mistake_book'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-practice-session-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-mock-exam-session-baseline
+    title: Mock Exam Session Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#3-模拟考试
+    dependencies:
+      - phase-4-practice-session-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-mock-exam-session-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-mock-exam-session-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-mock-exam-session-baseline-security-review.md
+      - src/app/api/v1/mock-exams/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - student
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-mock-exam-session-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\mock-exams\**\*.ts' -Pattern 'submit|code|message|data'
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'mock_exam|server|terminated'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-mock-exam-session-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-exam-report-baseline
+    title: Exam Report Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#us-03-07-模拟考试报告
+    dependencies:
+      - phase-4-mock-exam-session-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-exam-report-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-exam-report-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-exam-report-baseline-security-review.md
+      - src/app/api/v1/exam-reports/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - student
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-exam-report-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\exam-reports\**\*.ts' -Pattern 'code|message|data'
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'exam_report|snapshot|scoring'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-exam-report-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-mistake-book-baseline
+    title: Mistake Book Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#us-03-09-客观题错题本
+    dependencies:
+      - phase-4-practice-session-baseline
+      - phase-4-exam-report-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-mistake-book-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-mistake-book-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-mistake-book-baseline-security-review.md
+      - src/app/api/v1/mistake-books/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - data_contract
+      - student
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-mistake-book-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - Select-String -Path 'src\app\api\v1\mistake-books\**\*.ts' -Pattern 'code|message|data'
+      - Select-String -Path 'src\server\services\*.ts' -Pattern 'mistake_book|mastered|authorization'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-mistake-book-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-student-home-ui-baseline
+    title: Student Home UI Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#us-03-01-学员首页
+    dependencies:
+      - phase-4-student-paper-access-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-home-ui-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-student-home-ui-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-student-home-ui-baseline-security-review.md
+      - src/app/(student)/**
+      - src/components/student/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - student
+      - authorization
+      - frontend
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-student-home-ui-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-student-home-ui-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-practice-ui-baseline
+    title: Practice UI Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#2-练习模式
+    dependencies:
+      - phase-4-practice-session-baseline
+      - phase-4-student-home-ui-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-practice-ui-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-practice-ui-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-practice-ui-baseline-security-review.md
+      - src/app/(student)/**
+      - src/components/student/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - student
+      - authorization
+      - frontend
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-practice-ui-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-practice-ui-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-mock-exam-report-ui-baseline
+    title: Mock Exam Report UI Baseline
+    phase: phase-4-student-experience
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#3-模拟考试
+    dependencies:
+      - phase-4-mock-exam-session-baseline
+      - phase-4-exam-report-baseline
+      - phase-4-mistake-book-baseline
+      - phase-4-practice-ui-baseline
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-19-phase-4-mock-exam-report-ui-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-mock-exam-report-ui-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-mock-exam-report-ui-baseline-security-review.md
+      - src/app/(student)/**
+      - src/components/student/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - student
+      - authorization
+      - frontend
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-19-phase-4-mock-exam-report-ui-baseline-security-review.md
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-mock-exam-report-ui-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-4-student-experience-readiness-evidence
+    title: Student Experience Readiness Evidence
+    phase: phase-4-student-experience
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-4-student-experience
+    dependencies:
+      - phase-4-mock-exam-report-ui-baseline
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-19-phase-4-student-experience-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - evidence_integrity
+      - state_transition
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-student-experience-readiness.md
+    status: pending
+    retryCount: 0
