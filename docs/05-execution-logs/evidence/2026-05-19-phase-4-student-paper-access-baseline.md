@@ -304,3 +304,16 @@ Accepted gaps:
 - No frontend code changes.
 - API responses keep `{ code, message, data, pagination? }`.
 - Student-facing routes use `publicId`, not numeric database ids.
+
+## Post-Merge Master Closeout
+
+- Merge target: `master`
+- Merge result: fast-forward from `a028260` to `50acf3d`
+- `npm.cmd run lint`: pass.
+- `npm.cmd run typecheck`: pass.
+- `npm.cmd run test:unit`: pass, 45 files and 123 tests.
+- `npm.cmd run format:check`: pass.
+- `Select-String -Path 'src\app\api\v1\student-papers\**\*.ts' -Pattern 'code|message|data'`: pass.
+- `Select-String -Path 'src\server\services\*.ts' -Pattern 'authorization|paper_snapshot|published'`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass, master ahead by the task commit before closeout evidence commit.
