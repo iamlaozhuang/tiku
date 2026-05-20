@@ -1994,3 +1994,447 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-mechanism-hardening-readiness.md
     status: done
     retryCount: 0
+  - id: phase-5-ai-rag-entry-gate-and-task-queue-seeding
+    title: Phase 5 AI/RAG Entry Gate And Task Queue Seeding
+    phase: phase-5-ai-rag
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-5-ai-rag
+    dependencies:
+      - phase-5-mechanism-hardening-readiness
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-rag-entry-gate-and-task-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-entry-gate-and-task-queue-seeding.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - ai_rag_entry_gate
+      - evidence_integrity
+      - state_transition
+      - task_queue_design
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-ai-rag-entry-gate-and-task-queue-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-entry-gate-and-task-queue-seeding.md
+    status: validated
+    retryCount: 0
+  - id: phase-5-ai-rag-contract-and-threat-model-baseline
+    title: AI/RAG Contract And Threat Model Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md; docs/01-requirements/stories/epic-05-rag-knowledge.md
+    dependencies:
+      - phase-5-ai-rag-entry-gate-and-task-queue-seeding
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline-security-review.md
+      - docs/02-architecture/interfaces/ai-rag-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - ai_rag_contract
+      - threat_model
+      - security_review_gate
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-ai-rag-contract-and-threat-model-baseline
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-model-config-and-prompt-template-baseline
+    title: Model Config And Prompt Template Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-07-模型供应商配置; docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-08-prompt-模板管理
+    dependencies:
+      - phase-5-ai-rag-contract-and-threat-model-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-model-config-and-prompt-template-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-model-config-and-prompt-template-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-model-config-and-prompt-template-baseline-security-review.md
+      - src/ai/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - src/server/validators/**
+      - src/db/schema/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - schema
+      - secret
+      - external_service_config
+      - prompt_template
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-model-config-and-prompt-template-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-model-config-and-prompt-template-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-model-config-and-prompt-template-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-ai-call-log-and-redaction-baseline
+    title: AI Call Log And Redaction Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md
+    dependencies:
+      - phase-5-model-config-and-prompt-template-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-call-log-and-redaction-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-call-log-and-redaction-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-call-log-and-redaction-baseline-security-review.md
+      - src/ai/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/db/schema/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - schema
+      - data_contract
+      - secret
+      - ai_call_log_redaction
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-call-log-and-redaction-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-ai-call-log-and-redaction-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-call-log-and-redaction-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-rag-resource-and-knowledge-schema-baseline
+    title: RAG Resource And Knowledge Schema Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-05-rag-knowledge.md#2-资源管理; docs/01-requirements/stories/epic-05-rag-knowledge.md#3-知识点体系
+    dependencies:
+      - phase-5-ai-rag-contract-and-threat-model-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline-security-review.md
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/db/schema/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - schema
+      - data_contract
+      - migration_boundary
+      - pgvector_boundary
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-rag-resource-and-knowledge-schema-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-rag-chunking-baseline
+    title: RAG Chunking Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-05-rag-knowledge.md#us-05-07-chunk-切分
+    dependencies:
+      - phase-5-rag-resource-and-knowledge-schema-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-rag-chunking-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-rag-chunking-baseline.md
+      - src/rag/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - src/server/services/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - rag_chunking
+      - data_contract
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-rag-chunking-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-rag-chunking-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-rag-evidence-status-retrieval-baseline
+    title: RAG Evidence Status Retrieval Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-05-rag-knowledge.md#us-05-01-混合检索与-rerank; docs/01-requirements/stories/epic-05-rag-knowledge.md#us-05-02-rag-命中状态与权限过滤
+    dependencies:
+      - phase-5-ai-call-log-and-redaction-baseline
+      - phase-5-rag-chunking-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline-security-review.md
+      - src/rag/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - evidence_status
+      - pgvector_boundary
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-rag-evidence-status-retrieval-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-ai-scoring-service-baseline
+    title: AI Scoring Service Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-01-主观题-ai-评分模拟考试; docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-02-评分失败与重试
+    dependencies:
+      - phase-5-model-config-and-prompt-template-baseline
+      - phase-5-ai-call-log-and-redaction-baseline
+      - phase-5-rag-evidence-status-retrieval-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-scoring-service-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-scoring-service-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-scoring-service-baseline-security-review.md
+      - src/ai/**
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - api_contract
+      - ai_scoring
+      - external_service
+      - answer_record
+      - exam_report
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-scoring-service-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-ai-scoring-service-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-scoring-service-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-ai-explanation-and-hint-baseline
+    title: AI Explanation And Hint Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md#2-ai-讲解与提示
+    dependencies:
+      - phase-5-model-config-and-prompt-template-baseline
+      - phase-5-ai-call-log-and-redaction-baseline
+      - phase-5-rag-evidence-status-retrieval-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-explanation-and-hint-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-explanation-and-hint-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-explanation-and-hint-baseline-security-review.md
+      - src/ai/**
+      - src/app/api/v1/mistake-books/**
+      - src/app/api/v1/practices/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - api_contract
+      - ai_explanation
+      - ai_hint
+      - external_service
+      - evidence_status
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-explanation-and-hint-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-ai-explanation-and-hint-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-explanation-and-hint-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-knowledge-recommendation-baseline
+    title: Knowledge Recommendation Baseline
+    phase: phase-5-ai-rag
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-06-ai-知识点推荐; docs/01-requirements/stories/epic-05-rag-knowledge.md#us-05-08-知识点树管理
+    dependencies:
+      - phase-5-model-config-and-prompt-template-baseline
+      - phase-5-ai-call-log-and-redaction-baseline
+      - phase-5-rag-resource-and-knowledge-schema-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-knowledge-recommendation-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-knowledge-recommendation-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-knowledge-recommendation-baseline-security-review.md
+      - src/ai/**
+      - src/app/api/v1/questions/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - api_contract
+      - kn_recommendation
+      - external_service
+      - knowledge_node
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-knowledge-recommendation-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-knowledge-recommendation-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-knowledge-recommendation-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-5-ai-rag-readiness-evidence
+    title: AI/RAG Readiness Evidence
+    phase: phase-5-ai-rag
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-5-ai-rag
+    dependencies:
+      - phase-5-ai-scoring-service-baseline
+      - phase-5-ai-explanation-and-hint-baseline
+      - phase-5-knowledge-recommendation-baseline
+    taskPlanPolicy: evidence_only
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - evidence_integrity
+      - state_transition
+      - readiness_closeout
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-readiness.md
+    status: pending
+    retryCount: 0
