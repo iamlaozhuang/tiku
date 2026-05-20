@@ -71,7 +71,7 @@ Blocked files:
 - [x] Update project state and task queue only inside allowed files.
 - [x] Run all task validation commands and record results in evidence.
 - [x] Verify changed files are limited to allowed files and blocked dependency paths are unchanged.
-- [ ] Commit, fast-forward merge to `master`, rerun master gates, update closeout evidence, push `origin master`, and clean the merged worktree/branch only after gates pass and evidence is updated.
+- [x] Commit, fast-forward merge to `master`, rerun master gates, update closeout evidence, push `origin master`, and clean the merged worktree/branch only after gates pass and evidence is updated.
 
 ## Risk Defense
 

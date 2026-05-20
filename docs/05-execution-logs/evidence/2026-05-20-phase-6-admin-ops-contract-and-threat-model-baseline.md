@@ -142,9 +142,37 @@
 
 ## Git Closeout
 
-- Implementation commit: pending.
-- Fast-forward merge: pending.
-- Master validation: pending.
+- Implementation commit: `ea76ac4 docs(admin): define phase 6 admin ops contract`
+- Fast-forward merge:
+  - Command: `git merge --ff-only codex/phase-6-admin-ops-contract-and-threat-model-baseline`
+  - Result: passed.
+  - Summary: `master` moved from `0ccf945` to `ea76ac4`.
+- Master agent readiness:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: passed.
+- Master quality gate:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed.
+  - Summary: `lint`, `typecheck`, `test:unit`, and `format:check` passed. Unit test summary during gate: 76 files passed, 254 tests passed.
+  - Final closeout rerun result: passed after closeout evidence and state updates.
+  - Final closeout rerun summary: `lint`, `typecheck`, `test:unit`, and `format:check` passed. Unit test summary during gate: 76 files passed, 254 tests passed.
+- Master build:
+  - Command: `npm.cmd run build`
+  - Result: skipped.
+  - Summary: task changed only documentation, state, queue, and evidence files; no frontend or build-system file changed.
+- Master git completion readiness:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: `master` was ahead of `origin/master` by `ea76ac4`; changed files against base were the admin ops contract, security review, evidence, task plan, and state files.
+  - Final closeout rerun result: passed after closeout evidence and state updates.
+  - Final closeout rerun summary: `master` was ahead of `origin/master` by `ea76ac4` and had closeout evidence, task plan, project state, and task queue tracked changes pending for the closeout evidence commit.
+- Closeout state:
+  - `phase-6-admin-ops-contract-and-threat-model-baseline`: `done`
+  - next pending Phase 6 task: `phase-6-admin-shell-common-interaction-baseline`
+  - `project.currentPhase`: `phase-6-admin-ops`
+  - `project.currentTask`: idle/null
+  - `handoff.nextRecommendedAction`: `phase-6-admin-ops / phase-6-admin-shell-common-interaction-baseline`
+  - `handoff.lastSummaryPath`: `docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md`
 - Closeout evidence commit: pending.
 - Push: pending.
 - Cleanup: pending.

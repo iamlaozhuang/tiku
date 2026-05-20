@@ -2507,7 +2507,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md
-    status: validated
+    status: done
     retryCount: 0
   - id: phase-6-admin-shell-common-interaction-baseline
     title: Admin Shell Common Interaction Baseline
