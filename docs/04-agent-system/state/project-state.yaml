@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-6-admin-ops
-  updatedAt: "2026-05-20T23:08:39+08:00"
+  updatedAt: "2026-05-20T23:23:26+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase-6-admin-ops / task-queue-seeding-required
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-readiness.md
+  nextRecommendedAction: phase-6-admin-ops / phase-6-admin-ops-contract-and-threat-model-baseline
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-queue-seeding.md

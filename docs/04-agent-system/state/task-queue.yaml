@@ -2438,3 +2438,296 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-readiness.md
     status: done
     retryCount: 0
+  - id: phase-6-admin-ops-queue-seeding
+    title: Phase 6 Admin Ops Queue Seeding
+    phase: phase-6-admin-ops
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-6-admin-ops; docs/01-requirements/stories/epic-06-admin-ops.md
+    dependencies:
+      - phase-5-ai-rag-readiness-evidence
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-6-admin-ops-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-queue-seeding.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-6-admin-ops-contract-and-threat-model-baseline
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-queue-seeding.md
+    status: done
+    retryCount: 0
+  - id: phase-6-admin-ops-contract-and-threat-model-baseline
+    title: Admin Ops Contract And Threat Model Baseline
+    phase: phase-6-admin-ops
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-6-admin-ops; docs/01-requirements/stories/epic-06-admin-ops.md
+    dependencies:
+      - phase-6-admin-ops-queue-seeding
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline-security-review.md
+      - docs/02-architecture/interfaces/admin-ops-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - api_contract
+      - admin
+      - audit_log
+      - ai_call_log
+      - threat_model
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-6-admin-ops-contract-and-threat-model-baseline
+      - Test-Path 'docs\02-architecture\interfaces\admin-ops-contract.md'
+      - Select-String -Path 'docs\02-architecture\interfaces\admin-ops-contract.md' -Pattern 'audit_log|ai_call_log|model_config|organization|authorization|redeem_code'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-6-admin-shell-common-interaction-baseline
+    title: Admin Shell Common Interaction Baseline
+    phase: phase-6-admin-ops
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-01-后台通用交互
+    dependencies:
+      - phase-6-admin-ops-contract-and-threat-model-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-6-admin-shell-common-interaction-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-shell-common-interaction-baseline.md
+      - src/app/(admin)/**
+      - src/components/admin/**
+      - src/hooks/**
+      - src/server/contracts/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - frontend_foundation
+      - admin
+      - api_contract
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-6-admin-shell-common-interaction-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-shell-common-interaction-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-6-user-org-auth-ops-baseline
+    title: User Organization Authorization Ops Baseline
+    phase: phase-6-admin-ops
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-02-用户管理; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-03-企业组织管理界面; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-04-企业授权管理界面; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-05-卡密管理界面; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-13-后台角色与权限
+    dependencies:
+      - phase-6-admin-shell-common-interaction-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-6-user-org-auth-ops-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-6-user-org-auth-ops-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-user-org-auth-ops-baseline-security-review.md
+      - src/app/(admin)/**
+      - src/app/api/v1/users/**
+      - src/app/api/v1/organizations/**
+      - src/app/api/v1/authorizations/**
+      - src/app/api/v1/redeem-codes/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - auth
+      - admin
+      - api_contract
+      - redeem_code
+      - organization
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-user-org-auth-ops-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-6-user-org-auth-ops-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-user-org-auth-ops-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-6-content-and-knowledge-ops-baseline
+    title: Content And Knowledge Ops Baseline
+    phase: phase-6-admin-ops
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-06-资源与知识库管理界面; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-08-题库管理界面; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-09-试卷管理界面; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-10-知识点树维护界面
+    dependencies:
+      - phase-6-admin-shell-common-interaction-baseline
+      - phase-6-admin-ops-contract-and-threat-model-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-6-content-and-knowledge-ops-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-6-content-and-knowledge-ops-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-content-and-knowledge-ops-baseline-security-review.md
+      - src/app/(admin)/**
+      - src/app/api/v1/questions/**
+      - src/app/api/v1/papers/**
+      - src/app/api/v1/resources/**
+      - src/app/api/v1/knowledge-nodes/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - admin
+      - api_contract
+      - paper
+      - question
+      - resource
+      - knowledge_node
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-content-and-knowledge-ops-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-6-content-and-knowledge-ops-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-content-and-knowledge-ops-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-6-ai-and-audit-log-ops-baseline
+    title: AI And Audit Log Ops Baseline
+    phase: phase-6-admin-ops
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-07-超级管理员-ai-配置; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-11-审计日志查看; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-12-ai-调用日志查看
+    dependencies:
+      - phase-6-admin-shell-common-interaction-baseline
+      - phase-6-admin-ops-contract-and-threat-model-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-ai-and-audit-log-ops-baseline-security-review.md
+      - src/app/(admin)/**
+      - src/app/api/v1/audit-logs/**
+      - src/app/api/v1/ai-call-logs/**
+      - src/app/api/v1/model-configs/**
+      - src/ai/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - admin
+      - api_contract
+      - audit_log
+      - ai_call_log
+      - model_config
+      - secret
+      - external_service_config
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-20-phase-6-ai-and-audit-log-ops-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-6-ai-and-audit-log-ops-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-6-admin-ops-readiness-evidence
+    title: Admin Ops Readiness Evidence
+    phase: phase-6-admin-ops
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-6-admin-ops
+    dependencies:
+      - phase-6-user-org-auth-ops-baseline
+      - phase-6-content-and-knowledge-ops-baseline
+      - phase-6-ai-and-audit-log-ops-baseline
+    taskPlanPolicy: evidence_only
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - evidence_integrity
+      - state_transition
+      - readiness_closeout
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-readiness.md
+    status: pending
+    retryCount: 0
