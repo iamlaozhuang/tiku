@@ -178,5 +178,39 @@
 
 ## Handoff
 
-- Current task status: `validated`.
+- Current task status: `done`.
 - Next recommended action after closeout: `phase-5-ai-rag / phase-5-ai-scoring-service-baseline`.
+
+## Master Closeout
+
+- Implementation commit: `10c78f8 feat(ai-rag): add rag evidence retrieval baseline`
+- Fast-forward merge:
+  - Command: `git merge --ff-only codex/phase-5-rag-evidence-status-retrieval-baseline`
+  - Result: passed.
+  - Master moved from `afba036` to `10c78f8`.
+- Master agent readiness:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: passed.
+- Master unit tests:
+  - Command: `npm.cmd run test:unit`
+  - Result: passed.
+  - Summary: 73 files passed, 238 tests passed.
+- Master quality gate:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed.
+  - Summary: `lint`, `typecheck`, `test:unit`, and `format:check` passed. Unit test summary during gate: 73 files passed, 238 tests passed.
+- Master naming conventions:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`
+  - Result: passed.
+- Master build:
+  - Command: `npm.cmd run build`
+  - Result: passed.
+  - Summary: Next.js 16.2.6 compiled successfully.
+- Master git completion readiness:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: master was ahead of `origin/master` by implementation commit `10c78f8` before closeout evidence commit.
+- Closeout evidence quality gate:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed.
+  - Summary: after evidence/state updates, `lint`, `typecheck`, `test:unit`, and `format:check` passed. Unit test summary during gate: 73 files passed, 238 tests passed.
