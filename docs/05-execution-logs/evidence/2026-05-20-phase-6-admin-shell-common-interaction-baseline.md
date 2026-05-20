@@ -192,9 +192,21 @@
   - `project.currentTask`: idle/null
   - `handoff.nextRecommendedAction`: `phase-6-admin-ops / phase-6-user-org-auth-ops-baseline`
   - `handoff.lastSummaryPath`: `docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-shell-common-interaction-baseline.md`
-- Closeout evidence commit: pending.
-- Push: pending.
-- Cleanup: pending.
+- Closeout evidence commit: `eef13eb docs(agent): record admin shell interaction closeout`.
+- Push:
+  - Command: `git fetch origin`; `git rev-list --left-right --count origin/master...master`; `git push origin master`
+  - Result: passed.
+  - Summary: fetch completed; left/right count was `0 2`; pushed `master` from `a47ac34` to `eef13eb`.
+- Cleanup:
+  - Command: `git worktree remove .worktrees\phase-6-admin-shell-common-interaction-baseline`
+  - Result: partially passed.
+  - Summary: Git unregistered the worktree, but Windows left dependency residue because the directory was not empty.
+  - Command: verified `Resolve-Path .worktrees\phase-6-admin-shell-common-interaction-baseline` was under `F:\tiku\.worktrees`; attempted `Remove-Item -LiteralPath <target> -Recurse -Force`; then used guarded `.NET Directory.Delete` for long-path residue.
+  - Result: passed.
+  - Summary: leftover directory no longer exists; `git worktree list --porcelain` lists only `F:/tiku`.
+  - Command: `git branch -d codex/phase-6-admin-shell-common-interaction-baseline`
+  - Result: passed.
+  - Summary: deleted merged local task branch at `8bde31e`.
 
 ## Taste Compliance Self-Check
 
