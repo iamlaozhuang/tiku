@@ -277,4 +277,59 @@ Output: empty.
 
 ## Merge Closeout
 
-Implementation commit, merge, post-merge validation, push, and cleanup are approved for this run and will be recorded after execution.
+Implementation commit:
+
+```text
+c97b15f docs(ai-rag): define phase 5 contract baseline
+```
+
+Merge result:
+
+```text
+git merge --ff-only codex/phase-5-ai-rag-contract-and-threat-model-baseline
+Updating 705ca0e..c97b15f
+Fast-forward
+6 files changed, 810 insertions(+), 5 deletions(-)
+```
+
+Post-merge validation on `master`:
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: pass
+lint: pass
+typecheck: pass
+test:unit: pass (64 files, 199 tests)
+format:check: pass
+```
+
+```text
+npm.cmd run build
+Result: pass
+Next.js 16.2.6 compiled successfully; 31 static pages generated.
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: pass
+branch: master
+head: c97b15f
+status: ahead origin/master by 1 commit
+tracked changes: none
+staged changes: none
+untracked files: none
+filesChangedAgainstBase:
+docs/02-architecture/interfaces/ai-rag-contract.md
+docs/04-agent-system/state/project-state.yaml
+docs/04-agent-system/state/task-queue.yaml
+docs/05-execution-logs/audits-reviews/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline-security-review.md
+docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+```
+
+Closeout evidence commit, push, and cleanup are approved for this run and will be recorded in the final handoff after execution.
