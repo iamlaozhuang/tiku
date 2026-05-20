@@ -1,8 +1,12 @@
 import type {
   AiCallStatus,
   AiFuncType,
+  KnStatus,
   ModelConfigSnapshot,
+  Profession,
   RedactedJsonObject,
+  ResourceStatus,
+  ResourceType,
 } from "../models/ai-rag";
 
 export type ModelProviderDto = {
@@ -83,4 +87,65 @@ export type AiCallLogDto = {
 
 export type AiCallLogResultDto = {
   aiCallLog: AiCallLogDto;
+};
+
+export type KnowledgeBaseDto = {
+  publicId: string;
+  profession: Profession;
+  displayName: string;
+  description: string | null;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ResourceDto = {
+  publicId: string;
+  knowledgeBasePublicId: string;
+  resourceType: ResourceType;
+  resourceStatus: ResourceStatus;
+  title: string;
+  originalFileName: string | null;
+  objectStoragePath: string | null;
+  contentHash: string | null;
+  fileSizeByte: number | null;
+  profession: Profession;
+  level: number | null;
+  markdownContentHash: string | null;
+  conversionErrorMessage: string | null;
+  indexingErrorMessage: string | null;
+  isVectorStale: boolean;
+  publishedAt: string | null;
+  disabledAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type KnowledgeNodeDto = {
+  publicId: string;
+  knowledgeBasePublicId: string;
+  parentKnowledgeNodePublicId: string | null;
+  profession: Profession;
+  levelList: number[];
+  name: string;
+  pathName: string;
+  depth: number;
+  sortOrder: number;
+  knStatus: KnStatus;
+  isRecommendable: boolean;
+  createdAt: string;
+  updatedAt: string;
+  disabledAt: string | null;
+};
+
+export type KnowledgeBaseResultDto = {
+  knowledgeBase: KnowledgeBaseDto;
+};
+
+export type ResourceResultDto = {
+  resource: ResourceDto;
+};
+
+export type KnowledgeNodeResultDto = {
+  knowledgeNode: KnowledgeNodeDto;
 };

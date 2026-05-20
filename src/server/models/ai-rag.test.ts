@@ -3,12 +3,22 @@ import { describe, expect, it } from "vitest";
 import {
   aiCallStatusValues,
   aiFuncTypeValues,
+  assertKnowledgeNodeDepth,
+  canTransitionResourceStatus,
   createAiCallLogRedactedSnapshots,
+  createKnowledgeNodeSnapshot,
   createModelConfigSnapshot,
+  isResourceRagEligible,
+  knStatusValues,
+  resourceStatusValues,
+  resourceTypeValues,
   type AiCallLogRow,
+  type KnowledgeBaseRow,
+  type KnowledgeNodeRow,
   type ModelConfigRow,
   type ModelProviderRow,
   type PromptTemplateRow,
+  type ResourceRow,
 } from "./ai-rag";
 
 const createdAt = new Date("2026-05-20T08:00:00.000Z");
@@ -26,6 +36,28 @@ describe("AI/RAG domain models", () => {
 
   it("exports AI call statuses from the schema boundary", () => {
     expect(aiCallStatusValues).toEqual(["success", "failed"]);
+  });
+
+  it("exports RAG resource and knowledge enums from the schema boundary", () => {
+    expect(resourceTypeValues).toEqual([
+      "textbook",
+      "courseware",
+      "knowledge_doc",
+      "lecture_note",
+      "other",
+    ]);
+    expect(resourceStatusValues).toEqual([
+      "uploaded",
+      "converting",
+      "conversion_failed",
+      "draft",
+      "published",
+      "indexing",
+      "index_failed",
+      "rag_ready",
+      "disabled",
+    ]);
+    expect(knStatusValues).toEqual(["active", "disabled"]);
   });
 
   it("keeps provider, config, and template rows in snake_case storage shape", () => {
@@ -160,6 +192,117 @@ describe("AI/RAG domain models", () => {
     expect(callLogRow).not.toHaveProperty("publicId");
     expect(callLogRow).not.toHaveProperty("callStatus");
     expect(callLogRow).not.toHaveProperty("modelConfigSnapshot");
+  });
+
+  it("keeps RAG resource and knowledge rows in snake_case storage shape", () => {
+    const knowledgeBaseRow = {
+      id: 20,
+      public_id: "knowledge_base_public_id",
+      profession: "marketing",
+      display_name: "Marketing Knowledge Base",
+      description: null,
+      is_enabled: true,
+      created_at: createdAt,
+      updated_at: createdAt,
+    } satisfies KnowledgeBaseRow;
+
+    const resourceRow = {
+      id: 21,
+      public_id: "resource_public_id",
+      knowledge_base_id: 20,
+      resource_type: "textbook",
+      resource_status: "published",
+      title: "Marketing Basics",
+      original_file_name: "marketing-basics.docx",
+      object_storage_path: "dev/resource/marketing/202605/file-hash.docx",
+      content_hash: "content_hash",
+      file_size_byte: 1024,
+      profession: "marketing",
+      level: 3,
+      markdown_content: "# Marketing Basics",
+      markdown_content_hash: "markdown_hash",
+      conversion_error_message: null,
+      indexing_error_message: null,
+      is_vector_stale: false,
+      published_at: createdAt,
+      disabled_at: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+    } satisfies ResourceRow;
+
+    const knowledgeNodeRow = {
+      id: 22,
+      public_id: "knowledge_node_public_id",
+      knowledge_base_id: 20,
+      parent_knowledge_node_id: null,
+      profession: "marketing",
+      level_list: [3, 4],
+      name: "Market research",
+      path_name: "Marketing / Market research",
+      depth: 2,
+      sort_order: 10,
+      kn_status: "active",
+      is_recommendable: true,
+      created_at: createdAt,
+      updated_at: createdAt,
+      disabled_at: null,
+    } satisfies KnowledgeNodeRow;
+
+    expect(knowledgeBaseRow).not.toHaveProperty("publicId");
+    expect(resourceRow).not.toHaveProperty("resourceStatus");
+    expect(knowledgeNodeRow).not.toHaveProperty("parentKnowledgeNodeId");
+  });
+
+  it("guards resource status transitions and RAG eligibility", () => {
+    expect(canTransitionResourceStatus("uploaded", "converting")).toBe(true);
+    expect(canTransitionResourceStatus("converting", "draft")).toBe(true);
+    expect(canTransitionResourceStatus("published", "indexing")).toBe(true);
+    expect(canTransitionResourceStatus("indexing", "rag_ready")).toBe(true);
+    expect(canTransitionResourceStatus("rag_ready", "disabled")).toBe(true);
+    expect(canTransitionResourceStatus("disabled", "rag_ready")).toBe(true);
+    expect(canTransitionResourceStatus("conversion_failed", "published")).toBe(
+      false,
+    );
+    expect(canTransitionResourceStatus("draft", "rag_ready")).toBe(false);
+    expect(isResourceRagEligible("rag_ready")).toBe(true);
+    expect(isResourceRagEligible("published")).toBe(false);
+    expect(isResourceRagEligible("conversion_failed")).toBe(false);
+    expect(isResourceRagEligible("disabled")).toBe(false);
+  });
+
+  it("creates public knowledge node snapshots and enforces max depth five", () => {
+    assertKnowledgeNodeDepth(5);
+    expect(() => assertKnowledgeNodeDepth(6)).toThrow(
+      "knowledge_node depth must be between 1 and 5",
+    );
+
+    const snapshot = createKnowledgeNodeSnapshot({
+      public_id: "knowledge_node_public_id",
+      parent_knowledge_node_public_id: "parent_public_id",
+      profession: "marketing",
+      level_list: [3, 4],
+      name: "Market research",
+      path_name: "Marketing / Market research",
+      depth: 2,
+      sort_order: 10,
+      kn_status: "active",
+      is_recommendable: true,
+    });
+
+    expect(snapshot).toEqual({
+      publicId: "knowledge_node_public_id",
+      parentKnowledgeNodePublicId: "parent_public_id",
+      profession: "marketing",
+      levelList: [3, 4],
+      name: "Market research",
+      pathName: "Marketing / Market research",
+      depth: 2,
+      sortOrder: 10,
+      knStatus: "active",
+      isRecommendable: true,
+    });
+    expect(snapshot).not.toHaveProperty("id");
+    expect(snapshot).not.toHaveProperty("knowledgeBaseId");
   });
 
   it("redacts prompts, answers, model outputs, citations, and provider payload secrets", () => {

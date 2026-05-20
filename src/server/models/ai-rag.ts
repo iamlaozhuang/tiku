@@ -6,15 +6,33 @@ import {
   aiCallLog,
   aiCallStatusValues,
   aiFuncTypeValues,
+  knowledgeBase,
+  knowledgeNode,
+  knowledgeNodeResource,
+  knStatusValues,
   modelConfig,
   modelProvider,
   promptTemplate,
+  resource,
+  resourceStatusValues,
+  resourceTypeValues,
 } from "@/db/schema/ai-rag";
+import type { professionValues } from "@/db/schema/auth";
 
-export { aiCallStatusValues, aiFuncTypeValues };
+export {
+  aiCallStatusValues,
+  aiFuncTypeValues,
+  knStatusValues,
+  resourceStatusValues,
+  resourceTypeValues,
+};
 
 export type AiFuncType = (typeof aiFuncTypeValues)[number];
 export type AiCallStatus = (typeof aiCallStatusValues)[number];
+export type ResourceType = (typeof resourceTypeValues)[number];
+export type ResourceStatus = (typeof resourceStatusValues)[number];
+export type KnStatus = (typeof knStatusValues)[number];
+export type Profession = (typeof professionValues)[number];
 
 export type ModelProviderRow = InferSelectModel<typeof modelProvider>;
 export type NewModelProviderRow = InferInsertModel<typeof modelProvider>;
@@ -24,6 +42,30 @@ export type NewModelConfigRow = InferInsertModel<typeof modelConfig>;
 
 export type PromptTemplateRow = InferSelectModel<typeof promptTemplate>;
 export type NewPromptTemplateRow = InferInsertModel<typeof promptTemplate>;
+
+export type KnowledgeBaseRow = InferSelectModel<typeof knowledgeBase>;
+export type NewKnowledgeBaseRow = InferInsertModel<typeof knowledgeBase>;
+
+export type ResourceRow = InferSelectModel<typeof resource>;
+export type NewResourceRow = InferInsertModel<typeof resource>;
+
+type KnowledgeNodeSelectRow = InferSelectModel<typeof knowledgeNode>;
+type KnowledgeNodeInsertRow = InferInsertModel<typeof knowledgeNode>;
+
+export type KnowledgeNodeRow = Omit<KnowledgeNodeSelectRow, "level_list"> & {
+  level_list: number[];
+};
+
+export type NewKnowledgeNodeRow = Omit<KnowledgeNodeInsertRow, "level_list"> & {
+  level_list: number[];
+};
+
+export type KnowledgeNodeResourceRow = InferSelectModel<
+  typeof knowledgeNodeResource
+>;
+export type NewKnowledgeNodeResourceRow = InferInsertModel<
+  typeof knowledgeNodeResource
+>;
 
 type AiCallLogSelectRow = InferSelectModel<typeof aiCallLog>;
 type AiCallLogInsertRow = InferInsertModel<typeof aiCallLog>;
@@ -83,6 +125,32 @@ export type AiCallLogRedactedSnapshots = {
   providerErrorPayload: unknown;
 };
 
+export type KnowledgeNodeSnapshotInput = {
+  public_id: string;
+  parent_knowledge_node_public_id: string | null;
+  profession: Profession;
+  level_list: number[];
+  name: string;
+  path_name: string;
+  depth: number;
+  sort_order: number;
+  kn_status: KnStatus;
+  is_recommendable: boolean;
+};
+
+export type KnowledgeNodeSnapshot = {
+  publicId: string;
+  parentKnowledgeNodePublicId: string | null;
+  profession: Profession;
+  levelList: number[];
+  name: string;
+  pathName: string;
+  depth: number;
+  sortOrder: number;
+  knStatus: KnStatus;
+  isRecommendable: boolean;
+};
+
 export type AiCallLogRow = Omit<
   AiCallLogSelectRow,
   | "model_config_snapshot"
@@ -130,6 +198,59 @@ export function createModelConfigSnapshot(
     fallbackModelConfigPublicId: input.fallbackModelConfigPublicId,
     promptTemplateKey: input.promptTemplateKey,
     promptTemplateVersion: input.promptTemplateVersion,
+  };
+}
+
+export const maxKnowledgeNodeDepth = 5;
+
+const resourceStatusTransitions = {
+  uploaded: ["converting", "disabled"],
+  converting: ["draft", "conversion_failed", "disabled"],
+  conversion_failed: ["converting", "disabled"],
+  draft: ["published", "disabled"],
+  published: ["indexing", "disabled"],
+  indexing: ["rag_ready", "index_failed", "disabled"],
+  index_failed: ["indexing", "disabled"],
+  rag_ready: ["indexing", "disabled"],
+  disabled: ["published", "rag_ready"],
+} satisfies Record<ResourceStatus, ResourceStatus[]>;
+
+export function canTransitionResourceStatus(
+  currentStatus: ResourceStatus,
+  nextStatus: ResourceStatus,
+): boolean {
+  const allowedNextStatuses: readonly ResourceStatus[] =
+    resourceStatusTransitions[currentStatus];
+
+  return allowedNextStatuses.includes(nextStatus);
+}
+
+export function isResourceRagEligible(status: ResourceStatus): boolean {
+  return status === "rag_ready";
+}
+
+export function assertKnowledgeNodeDepth(depth: number): void {
+  if (!Number.isInteger(depth) || depth < 1 || depth > maxKnowledgeNodeDepth) {
+    throw new Error("knowledge_node depth must be between 1 and 5");
+  }
+}
+
+export function createKnowledgeNodeSnapshot(
+  input: KnowledgeNodeSnapshotInput,
+): KnowledgeNodeSnapshot {
+  assertKnowledgeNodeDepth(input.depth);
+
+  return {
+    publicId: input.public_id,
+    parentKnowledgeNodePublicId: input.parent_knowledge_node_public_id,
+    profession: input.profession,
+    levelList: input.level_list,
+    name: input.name,
+    pathName: input.path_name,
+    depth: input.depth,
+    sortOrder: input.sort_order,
+    knStatus: input.kn_status,
+    isRecommendable: input.is_recommendable,
   };
 }
 

@@ -1,5 +1,15 @@
-import type { AiCallLogDto } from "../contracts/ai-rag-contract";
-import type { AiCallLogRow } from "../models/ai-rag";
+import type {
+  AiCallLogDto,
+  KnowledgeBaseDto,
+  KnowledgeNodeDto,
+  ResourceDto,
+} from "../contracts/ai-rag-contract";
+import type {
+  AiCallLogRow,
+  KnowledgeBaseRow,
+  KnowledgeNodeRow,
+  ResourceRow,
+} from "../models/ai-rag";
 
 export function mapAiCallLogToApi(aiCallLog: AiCallLogRow): AiCallLogDto {
   return {
@@ -24,5 +34,71 @@ export function mapAiCallLogToApi(aiCallLog: AiCallLogRow): AiCallLogDto {
     startedAt: aiCallLog.started_at.toISOString(),
     completedAt: aiCallLog.completed_at?.toISOString() ?? null,
     createdAt: aiCallLog.created_at.toISOString(),
+  };
+}
+
+export function mapKnowledgeBaseToApi(
+  knowledgeBase: KnowledgeBaseRow,
+): KnowledgeBaseDto {
+  return {
+    publicId: knowledgeBase.public_id,
+    profession: knowledgeBase.profession,
+    displayName: knowledgeBase.display_name,
+    description: knowledgeBase.description,
+    isEnabled: knowledgeBase.is_enabled,
+    createdAt: knowledgeBase.created_at.toISOString(),
+    updatedAt: knowledgeBase.updated_at.toISOString(),
+  };
+}
+
+export function mapResourceToApi(
+  resource: ResourceRow,
+  relations: { knowledgeBasePublicId: string },
+): ResourceDto {
+  return {
+    publicId: resource.public_id,
+    knowledgeBasePublicId: relations.knowledgeBasePublicId,
+    resourceType: resource.resource_type,
+    resourceStatus: resource.resource_status,
+    title: resource.title,
+    originalFileName: resource.original_file_name,
+    objectStoragePath: resource.object_storage_path,
+    contentHash: resource.content_hash,
+    fileSizeByte: resource.file_size_byte,
+    profession: resource.profession,
+    level: resource.level,
+    markdownContentHash: resource.markdown_content_hash,
+    conversionErrorMessage: resource.conversion_error_message,
+    indexingErrorMessage: resource.indexing_error_message,
+    isVectorStale: resource.is_vector_stale,
+    publishedAt: resource.published_at?.toISOString() ?? null,
+    disabledAt: resource.disabled_at?.toISOString() ?? null,
+    createdAt: resource.created_at.toISOString(),
+    updatedAt: resource.updated_at.toISOString(),
+  };
+}
+
+export function mapKnowledgeNodeToApi(
+  knowledgeNode: KnowledgeNodeRow,
+  relations: {
+    knowledgeBasePublicId: string;
+    parentKnowledgeNodePublicId: string | null;
+  },
+): KnowledgeNodeDto {
+  return {
+    publicId: knowledgeNode.public_id,
+    knowledgeBasePublicId: relations.knowledgeBasePublicId,
+    parentKnowledgeNodePublicId: relations.parentKnowledgeNodePublicId,
+    profession: knowledgeNode.profession,
+    levelList: knowledgeNode.level_list,
+    name: knowledgeNode.name,
+    pathName: knowledgeNode.path_name,
+    depth: knowledgeNode.depth,
+    sortOrder: knowledgeNode.sort_order,
+    knStatus: knowledgeNode.kn_status,
+    isRecommendable: knowledgeNode.is_recommendable,
+    createdAt: knowledgeNode.created_at.toISOString(),
+    updatedAt: knowledgeNode.updated_at.toISOString(),
+    disabledAt: knowledgeNode.disabled_at?.toISOString() ?? null,
   };
 }

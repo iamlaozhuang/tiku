@@ -6,9 +6,16 @@ import {
   aiCallLog,
   aiCallStatusValues,
   aiFuncTypeValues,
+  knowledgeBase,
+  knowledgeNode,
+  knowledgeNodeResource,
+  knStatusValues,
   modelConfig,
   modelProvider,
   promptTemplate,
+  resource,
+  resourceStatusValues,
+  resourceTypeValues,
 } from "./ai-rag";
 
 function getColumnNames(table: Parameters<typeof getTableConfig>[0]): string[] {
@@ -28,16 +35,46 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       getTableName(modelConfig),
       getTableName(promptTemplate),
       getTableName(aiCallLog),
+      getTableName(knowledgeBase),
+      getTableName(resource),
+      getTableName(knowledgeNode),
+      getTableName(knowledgeNodeResource),
     ]).toEqual([
       "model_provider",
       "model_config",
       "prompt_template",
       "ai_call_log",
+      "knowledge_base",
+      "resource",
+      "knowledge_node",
+      "knowledge_node_resource",
     ]);
   });
 
   it("registers AI call status enum values from the glossary", () => {
     expect(aiCallStatusValues).toEqual(["success", "failed"]);
+  });
+
+  it("registers RAG resource and knowledge enum values from the glossary", () => {
+    expect(resourceTypeValues).toEqual([
+      "textbook",
+      "courseware",
+      "knowledge_doc",
+      "lecture_note",
+      "other",
+    ]);
+    expect(resourceStatusValues).toEqual([
+      "uploaded",
+      "converting",
+      "conversion_failed",
+      "draft",
+      "published",
+      "indexing",
+      "index_failed",
+      "rag_ready",
+      "disabled",
+    ]);
+    expect(knStatusValues).toEqual(["active", "disabled"]);
   });
 
   it("registers the AI function type enum values from the glossary", () => {
@@ -163,6 +200,118 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "idx_ai_call_log_model_config_id",
         "idx_ai_call_log_ai_func_type_call_status",
         "idx_ai_call_log_started_at",
+      ]),
+    );
+  });
+
+  it("stores knowledge base rows by public identifier and profession", () => {
+    expect(getColumnNames(knowledgeBase)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "profession",
+        "display_name",
+        "description",
+        "is_enabled",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getIndexNames(knowledgeBase)).toEqual(
+      expect.arrayContaining([
+        "udx_knowledge_base_public_id",
+        "udx_knowledge_base_profession",
+        "idx_knowledge_base_is_enabled",
+      ]),
+    );
+  });
+
+  it("stores RAG resources without vector columns or migration-only state", () => {
+    expect(getColumnNames(resource)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "knowledge_base_id",
+        "resource_type",
+        "resource_status",
+        "title",
+        "original_file_name",
+        "object_storage_path",
+        "content_hash",
+        "file_size_byte",
+        "profession",
+        "level",
+        "markdown_content",
+        "markdown_content_hash",
+        "conversion_error_message",
+        "indexing_error_message",
+        "is_vector_stale",
+        "published_at",
+        "disabled_at",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getColumnNames(resource)).not.toEqual(
+      expect.arrayContaining(["embedding", "vector"]),
+    );
+    expect(getIndexNames(resource)).toEqual(
+      expect.arrayContaining([
+        "udx_resource_public_id",
+        "idx_resource_knowledge_base_id",
+        "idx_resource_profession_level_resource_status",
+        "idx_resource_resource_status",
+        "idx_resource_content_hash",
+      ]),
+    );
+  });
+
+  it("stores knowledge nodes with hierarchy metadata and no delete-oriented flag", () => {
+    expect(getColumnNames(knowledgeNode)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "knowledge_base_id",
+        "parent_knowledge_node_id",
+        "profession",
+        "level_list",
+        "name",
+        "path_name",
+        "depth",
+        "sort_order",
+        "kn_status",
+        "is_recommendable",
+        "created_at",
+        "updated_at",
+        "disabled_at",
+      ]),
+    );
+    expect(getColumnNames(knowledgeNode)).not.toContain("deleted_at");
+    expect(getIndexNames(knowledgeNode)).toEqual(
+      expect.arrayContaining([
+        "udx_knowledge_node_public_id",
+        "idx_knowledge_node_knowledge_base_id",
+        "idx_knowledge_node_parent_knowledge_node_id",
+        "idx_knowledge_node_profession_kn_status",
+        "idx_knowledge_node_sort_order",
+      ]),
+    );
+  });
+
+  it("links resources to knowledge nodes with alphabetic association naming", () => {
+    expect(getColumnNames(knowledgeNodeResource)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "knowledge_node_id",
+        "resource_id",
+        "created_at",
+      ]),
+    );
+    expect(getIndexNames(knowledgeNodeResource)).toEqual(
+      expect.arrayContaining([
+        "udx_knowledge_node_resource_knowledge_node_id_resource_id",
+        "idx_knowledge_node_resource_knowledge_node_id",
+        "idx_knowledge_node_resource_resource_id",
       ]),
     );
   });

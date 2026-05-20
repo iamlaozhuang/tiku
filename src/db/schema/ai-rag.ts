@@ -12,6 +12,8 @@ import {
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
+import { professionEnum } from "./auth";
+
 const idColumn = () =>
   bigint("id", { mode: "number" }).generatedAlwaysAsIdentity().primaryKey();
 
@@ -38,6 +40,37 @@ export const aiFuncTypeEnum = pgEnum("ai_func_type", aiFuncTypeValues);
 export const aiCallStatusValues = ["success", "failed"] as const;
 
 export const aiCallStatusEnum = pgEnum("ai_call_status", aiCallStatusValues);
+
+export const resourceTypeValues = [
+  "textbook",
+  "courseware",
+  "knowledge_doc",
+  "lecture_note",
+  "other",
+] as const;
+
+export const resourceTypeEnum = pgEnum("resource_type", resourceTypeValues);
+
+export const resourceStatusValues = [
+  "uploaded",
+  "converting",
+  "conversion_failed",
+  "draft",
+  "published",
+  "indexing",
+  "index_failed",
+  "rag_ready",
+  "disabled",
+] as const;
+
+export const resourceStatusEnum = pgEnum(
+  "resource_status",
+  resourceStatusValues,
+);
+
+export const knStatusValues = ["active", "disabled"] as const;
+
+export const knStatusEnum = pgEnum("kn_status", knStatusValues);
 
 export const modelProvider = pgTable(
   "model_provider",
@@ -166,5 +199,129 @@ export const aiCallLog = pgTable(
       table.call_status,
     ),
     index("idx_ai_call_log_started_at").on(table.started_at),
+  ],
+);
+
+export const knowledgeBase = pgTable(
+  "knowledge_base",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    profession: professionEnum("profession").notNull(),
+    display_name: text("display_name").notNull(),
+    description: text("description"),
+    is_enabled: boolean("is_enabled").default(true).notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_knowledge_base_public_id").on(table.public_id),
+    uniqueIndex("udx_knowledge_base_profession").on(table.profession),
+    index("idx_knowledge_base_is_enabled").on(table.is_enabled),
+  ],
+);
+
+export const resource = pgTable(
+  "resource",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    knowledge_base_id: bigint("knowledge_base_id", { mode: "number" })
+      .notNull()
+      .references(() => knowledgeBase.id, { onDelete: "restrict" }),
+    resource_type: resourceTypeEnum("resource_type").notNull(),
+    resource_status: resourceStatusEnum("resource_status")
+      .default("uploaded")
+      .notNull(),
+    title: text("title").notNull(),
+    original_file_name: text("original_file_name"),
+    object_storage_path: text("object_storage_path"),
+    content_hash: text("content_hash"),
+    file_size_byte: integer("file_size_byte"),
+    profession: professionEnum("profession").notNull(),
+    level: integer("level"),
+    markdown_content: text("markdown_content"),
+    markdown_content_hash: text("markdown_content_hash"),
+    conversion_error_message: text("conversion_error_message"),
+    indexing_error_message: text("indexing_error_message"),
+    is_vector_stale: boolean("is_vector_stale").default(false).notNull(),
+    published_at: nullableTimestampColumn("published_at"),
+    disabled_at: nullableTimestampColumn("disabled_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_resource_public_id").on(table.public_id),
+    index("idx_resource_knowledge_base_id").on(table.knowledge_base_id),
+    index("idx_resource_profession_level_resource_status").on(
+      table.profession,
+      table.level,
+      table.resource_status,
+    ),
+    index("idx_resource_resource_status").on(table.resource_status),
+    index("idx_resource_content_hash").on(table.content_hash),
+  ],
+);
+
+export const knowledgeNode = pgTable(
+  "knowledge_node",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    knowledge_base_id: bigint("knowledge_base_id", { mode: "number" })
+      .notNull()
+      .references(() => knowledgeBase.id, { onDelete: "restrict" }),
+    parent_knowledge_node_id: bigint("parent_knowledge_node_id", {
+      mode: "number",
+    }).references((): AnyPgColumn => knowledgeNode.id, {
+      onDelete: "restrict",
+    }),
+    profession: professionEnum("profession").notNull(),
+    level_list: jsonb("level_list").notNull(),
+    name: text("name").notNull(),
+    path_name: text("path_name").notNull(),
+    depth: integer("depth").notNull(),
+    sort_order: integer("sort_order").notNull(),
+    kn_status: knStatusEnum("kn_status").default("active").notNull(),
+    is_recommendable: boolean("is_recommendable").default(true).notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+    disabled_at: nullableTimestampColumn("disabled_at"),
+  },
+  (table) => [
+    uniqueIndex("udx_knowledge_node_public_id").on(table.public_id),
+    index("idx_knowledge_node_knowledge_base_id").on(table.knowledge_base_id),
+    index("idx_knowledge_node_parent_knowledge_node_id").on(
+      table.parent_knowledge_node_id,
+    ),
+    index("idx_knowledge_node_profession_kn_status").on(
+      table.profession,
+      table.kn_status,
+    ),
+    index("idx_knowledge_node_sort_order").on(table.sort_order),
+  ],
+);
+
+export const knowledgeNodeResource = pgTable(
+  "knowledge_node_resource",
+  {
+    id: idColumn(),
+    knowledge_node_id: bigint("knowledge_node_id", { mode: "number" })
+      .notNull()
+      .references(() => knowledgeNode.id, { onDelete: "restrict" }),
+    resource_id: bigint("resource_id", { mode: "number" })
+      .notNull()
+      .references(() => resource.id, { onDelete: "restrict" }),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_knowledge_node_resource_knowledge_node_id_resource_id").on(
+      table.knowledge_node_id,
+      table.resource_id,
+    ),
+    index("idx_knowledge_node_resource_knowledge_node_id").on(
+      table.knowledge_node_id,
+    ),
+    index("idx_knowledge_node_resource_resource_id").on(table.resource_id),
   ],
 );
