@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 tasks:
   - id: phase-0-adr-runtime-architecture
     title: Runtime Architecture ADR
@@ -2308,7 +2308,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-scoring-service-baseline.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-5-ai-explanation-and-hint-baseline
     title: AI Explanation And Hint Baseline
