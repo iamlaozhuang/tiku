@@ -222,6 +222,21 @@
   - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
   - Result: passed.
   - Summary: `master` remained ahead of `origin/master` by 1 implementation commit, with closeout evidence, project state, and task queue tracked changes pending for the closeout evidence commit.
+- Closeout evidence commit: `c7c0287 docs(agent): record user org auth ops closeout`.
+- Push:
+  - Command: `git fetch origin`; `git rev-list --left-right --count origin/master...master`; `git push origin master`
+  - Result: passed.
+  - Summary: fetch completed; left/right count was `0 2`; pushed `master` from `0abe123` to `c7c0287`.
+- Cleanup:
+  - Command: `git worktree remove .worktrees\phase-6-user-org-auth-ops-baseline`
+  - Result: partially passed.
+  - Summary: Git unregistered the worktree, but Windows left dependency residue because the directory was not empty.
+  - Command: verified `Resolve-Path .worktrees\phase-6-user-org-auth-ops-baseline` was under `F:\tiku\.worktrees`; attempted `Remove-Item -LiteralPath <target> -Recurse -Force`; then used guarded `.NET Directory.Delete` for long-path residue.
+  - Result: passed.
+  - Summary: leftover directory no longer exists; `git worktree list --porcelain` lists only `F:/tiku`.
+  - Command: `git branch -d codex/phase-6-user-org-auth-ops-baseline`
+  - Result: passed.
+  - Summary: deleted merged local task branch at `c39943d`.
 
 ## Taste Compliance Self-Check
 
