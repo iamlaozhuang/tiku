@@ -1,16 +1,10 @@
 import { createAdminContentKnowledgeOpsRouteHandlers } from "@/server/services/admin-content-knowledge-ops-route";
 import { createUnavailableAdminContentKnowledgeOpsService } from "@/server/services/admin-content-knowledge-ops-service";
-import { createPaperDraftRouteHandlers } from "@/server/services/paper-draft-route";
-import { createUnavailablePaperDraftService } from "@/server/services/paper-draft-service";
 
 const adminContentKnowledgeOpsRouteHandlers =
   createAdminContentKnowledgeOpsRouteHandlers(
     createUnavailableAdminContentKnowledgeOpsService(),
   );
-
-const paperRouteHandlers = createPaperDraftRouteHandlers(
-  createUnavailablePaperDraftService(),
-);
 
 const responseContract = {
   code: 503621,
@@ -20,5 +14,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = adminContentKnowledgeOpsRouteHandlers.papers.GET;
-export const POST = paperRouteHandlers.collection.POST;
+export const GET = adminContentKnowledgeOpsRouteHandlers.resources.GET;
