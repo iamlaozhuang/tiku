@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-5-ai-rag
-  updatedAt: "2026-05-20T21:36:00+08:00"
+  updatedAt: "2026-05-20T21:46:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
