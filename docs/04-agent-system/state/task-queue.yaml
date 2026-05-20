@@ -18,7 +18,7 @@ tasks:
       - Test-Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md'
       - Select-String -Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md' -Pattern 'Server Actions only|no REST|without API'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: done
+    status: pending
     retryCount: 0
   - id: phase-0-adr-workplace-desktop
     title: Workplace Desktop Compatibility ADR
@@ -2060,7 +2060,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-5-model-config-and-prompt-template-baseline
     title: Model Config And Prompt Template Baseline
