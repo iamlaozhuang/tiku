@@ -16,6 +16,8 @@ $requiredFilePaths = @(
     "docs\04-agent-system\milestones-goals\mvp-roadmap.md",
     "scripts\agent-system\Test-GitCompletionReadiness.ps1",
     "scripts\agent-system\Test-NamingConventions.ps1",
+    "scripts\agent-system\Test-TaskClaimReadiness.ps1",
+    "scripts\agent-system\Add-TaskEvidenceResult.ps1",
     "scripts\agent-system\New-TaskEvidence.ps1",
     "package.json"
 )

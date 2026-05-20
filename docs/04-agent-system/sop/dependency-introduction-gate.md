@@ -72,6 +72,17 @@ Rules:
 
 No dependency change may bypass this gate to save implementation time.
 
+## Phase 5 AI/RAG Dependency Gate
+
+Before adding AI SDK, embedding, text splitting, document conversion, queue, storage, or vector-related dependencies, the task evidence must include `human approval` and:
+
+- Provider package names and version ranges.
+- Runtime import boundaries under project-owned AI/RAG adapters.
+- Secret handling and local validation strategy.
+- Bundle, server runtime, Windows, and deployment impact.
+- Fallback or non-fallback policy for each AI function type.
+- Reason the dependency is needed before a first-party or already-installed alternative.
+
 ## Commit Isolation
 
 - Dependency add, remove, or upgrade work must close as its own task-scoped commit whenever the repository state is committed.

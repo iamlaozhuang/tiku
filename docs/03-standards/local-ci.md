@@ -99,3 +99,11 @@ merge: target branch and result, or skipped, reason
 push: remote branch and result, or skipped, reason
 cleanup: worktree/branch cleanup result, or skipped, reason
 ```
+
+When possible, append repeated command results with:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Add-TaskEvidenceResult.ps1 -EvidencePath <evidence.md> -Command '<command>' -Result pass -Summary '<summary>'
+```
+
+Use manual sections for interpretation, risk acceptance, and security review verdicts. The helper is a consistency tool, not a replacement for engineering judgment.

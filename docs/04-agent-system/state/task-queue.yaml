@@ -1951,3 +1951,46 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-19-phase-4-student-experience-readiness.md
     status: done
     retryCount: 0
+  - id: phase-5-mechanism-hardening-readiness
+    title: Phase 5 Mechanism Hardening Readiness
+    phase: phase-5-ai-rag
+    sourceStory: user-approved-mechanism-hardening-2026-05-20
+    dependencies:
+      - phase-4-student-experience-readiness-evidence
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-20-phase-5-mechanism-hardening-readiness.md
+      - docs/05-execution-logs/evidence/2026-05-20-phase-5-mechanism-hardening-readiness.md
+      - docs/03-standards/git-workflow.md
+      - docs/03-standards/local-ci.md
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/sop/security-review-gate.md
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - scripts/agent-system/Test-TaskClaimReadiness.ps1
+      - scripts/agent-system/Add-TaskEvidenceResult.ps1
+      - scripts/agent-system/Test-AgentSystemReadiness.ps1
+      - scripts/agent-system/Update-TaskStatus.ps1
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - automation_policy
+      - local_tooling
+      - evidence_integrity
+      - state_transition
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-5-mechanism-hardening-readiness
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Add-TaskEvidenceResult.ps1 -EvidencePath docs\05-execution-logs\evidence\2026-05-20-phase-5-mechanism-hardening-readiness.md -Command 'dry-run' -Result pass -Summary 'append helper smoke test' -DryRun
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-mechanism-hardening-readiness.md
+    status: validated
+    retryCount: 0

@@ -64,6 +64,14 @@ securityReviewPath: docs/05-execution-logs/audits-reviews/YYYY-MM-DD-task-id-sec
 
 If a task is high-risk but does not require a separate artifact, the evidence must explain why. That exception should be rare and should not be used for authorization, session, credential, or admin work.
 
+Before Phase 5 AI/RAG work starts, security review planning must explicitly cover:
+
+- AI call log redaction for prompts, model outputs, citations, user answers, and provider error payloads.
+- Secret and environment variable handling for model providers.
+- RAG authorization filtering before retrieval results are used in AI prompts.
+- `evidence_status` behavior when citations are weak or absent.
+- Prompt template versioning and model configuration snapshotting for repeatability.
+
 ## Merge Rule
 
 Do not merge a triggered high-risk task until the security review verdict is `APPROVE` or the remaining issues are explicitly classified as non-blocking `COMMENT` items with accepted residual risk.

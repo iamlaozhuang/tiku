@@ -48,6 +48,22 @@ An agent may claim a task only when all of these conditions are true:
 
 If a task cannot be claimed cleanly, leave it unchanged and report why it is blocked.
 
+Before claiming a queued task, run the claim preflight when available:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId <task-id>
+```
+
+The preflight is evidence, not a substitute for reading the task. Resolve protected branch usage, incomplete dependencies, missing `taskPlanPolicy`, package or lockfile risk, and security review risk before editing project files.
+
+New queue tasks should use this status progression:
+
+```text
+pending -> claimed -> implemented -> validated -> committed -> merged -> pushed -> closed
+```
+
+`done` remains valid for legacy tasks and evidence-only tasks that predate this status model.
+
 ## Execution Sequence
 
 For each claimed task:
@@ -65,6 +81,20 @@ For each claimed task:
 11. Update the queue and project state only when those files are in the allowed scope.
 
 Each step should leave enough evidence for another agent to resume without guessing.
+
+Every new queue task should declare `taskPlanPolicy: required`, `taskPlanPolicy: evidence_only`, or `taskPlanPolicy: skipped_with_reason`.
+
+- Use `required` for normal implementation tasks.
+- Use `evidence_only` for readiness, closeout, and state-only tasks when the queue intentionally does not allow `docs/05-execution-logs/task-plans/**`.
+- Use `skipped_with_reason` only when a human instruction explicitly prevents a plan, and record the reason in evidence.
+
+When appending repetitive command evidence, prefer:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Add-TaskEvidenceResult.ps1 -EvidencePath <evidence.md> -Command '<command>' -Result pass -Summary '<summary>'
+```
+
+Manual evidence is still required for judgment, accepted gaps, security conclusions, and unusual failures.
 
 ## Commit Barrier
 
@@ -106,6 +136,10 @@ After a task branch is locally merged:
 5. Remove the task worktree and delete the merged branch only after target-branch validation and evidence are complete.
 
 If Windows leaves a worktree directory behind because of `node_modules` or other generated residue, resolve the absolute path and confirm it is under `.worktrees/` before deleting anything.
+
+Closeout evidence must name the implementation commit. It does not need to contain the SHA of the closeout evidence commit itself, because that SHA is created after the file is written. Record the closeout evidence commit in the final handoff or `project-state.yaml` when useful instead of creating repeated evidence-only commits.
+
+Before Phase 5 AI/RAG work starts, complete a Phase 5 entry gate. The gate must confirm dependency approval, secret and environment strategy, model configuration boundaries, prompt template versioning, AI call log redaction, RAG `evidence_status` behavior, pgvector or embedding verification strategy, and Browser/IAB usage rules.
 
 ## PR Baseline Hygiene
 

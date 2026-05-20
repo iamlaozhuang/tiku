@@ -34,6 +34,7 @@ Active.
 - When closeout evidence would otherwise require repeated amend cycles, use two explicit commit slots:
   - implementation commit: scoped code, task plan, and validation evidence.
   - closeout evidence commit: merge, push, cleanup, and final SHA evidence after target-branch validation.
+- A closeout evidence file does not need to record the SHA of the closeout evidence commit that contains it. Record that SHA in the final handoff or project state when useful, and avoid repeated commits that only update their own commit identity.
 - Before starting the next task, run a completion inventory:
 
 ```powershell
@@ -85,6 +86,7 @@ git rev-list --left-right --count origin/master...master
 
 - Every task closeout evidence must include the task id, branch or worktree, validation commands, commit SHA when committed, PR URL when created, merge result when merged, and push result when pushed.
 - Evidence should name `implementationCommit` and `closeoutEvidenceCommit` separately when both exist.
+- `closeoutEvidenceCommit` may be recorded outside the evidence file when recording it inside the file would require another evidence-only commit.
 - After a merge into `master`, run:
 
 ```powershell

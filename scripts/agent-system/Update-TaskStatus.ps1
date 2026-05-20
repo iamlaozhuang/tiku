@@ -4,7 +4,7 @@ param(
     [string]$TaskId,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet("pending", "in_progress", "blocked", "done")]
+    [ValidateSet("pending", "claimed", "implemented", "validated", "committed", "merged", "pushed", "closed", "blocked", "done", "in_progress")]
     [string]$Status
 )
 
