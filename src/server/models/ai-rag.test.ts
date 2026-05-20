@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  aiCallStatusValues,
   aiFuncTypeValues,
+  createAiCallLogRedactedSnapshots,
   createModelConfigSnapshot,
+  type AiCallLogRow,
   type ModelConfigRow,
   type ModelProviderRow,
   type PromptTemplateRow,
@@ -19,6 +22,10 @@ describe("AI/RAG domain models", () => {
       "kn_recommendation",
       "learning_suggestion",
     ]);
+  });
+
+  it("exports AI call statuses from the schema boundary", () => {
+    expect(aiCallStatusValues).toEqual(["success", "failed"]);
   });
 
   it("keeps provider, config, and template rows in snake_case storage shape", () => {
@@ -104,5 +111,105 @@ describe("AI/RAG domain models", () => {
     });
     expect(snapshot).not.toHaveProperty("apiKeySecretRef");
     expect(snapshot).not.toHaveProperty("apiKeyLastFour");
+  });
+
+  it("keeps AI call log rows in snake_case storage shape", () => {
+    const callLogRow = {
+      id: 10,
+      public_id: "ai_call_log_public_id",
+      user_public_id: "user_public_id",
+      answer_record_public_id: "answer_record_public_id",
+      mock_exam_public_id: "mock_exam_public_id",
+      question_public_id: "question_public_id",
+      ai_func_type: "scoring",
+      call_status: "success",
+      model_config_id: 2,
+      prompt_template_id: 3,
+      model_config_snapshot: createModelConfigSnapshot({
+        providerPublicId: "model_provider_public_id",
+        providerKey: "qwen",
+        providerDisplayName: "Qwen",
+        modelConfigPublicId: "model_config_public_id",
+        aiFuncType: "scoring",
+        modelName: "qwen-max",
+        displayName: "Qwen Max Scoring",
+        configVersion: 3,
+        timeoutSecond: 60,
+        maxRetryCount: 0,
+        fallbackModelConfigPublicId: null,
+        promptTemplateKey: "ai_scoring_v1",
+        promptTemplateVersion: 1,
+      }),
+      prompt_template_key: "ai_scoring_v1",
+      prompt_template_version: 1,
+      request_redacted_snapshot: { prompt: { redactionStatus: "redacted" } },
+      response_redacted_snapshot: {
+        modelOutput: { redactionStatus: "redacted" },
+      },
+      error_redacted_snapshot: null,
+      citation_redacted_snapshot: { citations: [] },
+      prompt_token_count: 100,
+      completion_token_count: 20,
+      total_token_count: 120,
+      latency_ms: 800,
+      started_at: createdAt,
+      completed_at: createdAt,
+      created_at: createdAt,
+    } satisfies AiCallLogRow;
+
+    expect(callLogRow).not.toHaveProperty("publicId");
+    expect(callLogRow).not.toHaveProperty("callStatus");
+    expect(callLogRow).not.toHaveProperty("modelConfigSnapshot");
+  });
+
+  it("redacts prompts, answers, model outputs, citations, and provider payload secrets", () => {
+    const snapshots = createAiCallLogRedactedSnapshots({
+      prompt: "prompt raw text 6e416b9a",
+      userAnswer: "student answer raw text 31d38488",
+      modelOutput: "model output raw text f831e674",
+      citations: [
+        {
+          resourceTitle: "internal training handbook",
+          chunkText: "citation raw text 2a2dc9a1",
+        },
+      ],
+      providerRequestPayload: {
+        headers: {
+          authorization: "Bearer provider-token-4f36183b",
+          "x-request-id": "request-safe-id",
+        },
+        body: {
+          model: "qwen-max",
+          messages: [{ content: "prompt raw text 6e416b9a" }],
+        },
+      },
+      providerResponsePayload: {
+        id: "provider-response-id",
+        output: "model output raw text f831e674",
+      },
+      providerErrorPayload: {
+        message: "provider failed after student answer raw text 31d38488",
+        apiKey: "sk-provider-secret-9f2c210d",
+      },
+    });
+
+    const serializedSnapshots = JSON.stringify(snapshots);
+
+    expect(serializedSnapshots).not.toContain("prompt raw text 6e416b9a");
+    expect(serializedSnapshots).not.toContain(
+      "student answer raw text 31d38488",
+    );
+    expect(serializedSnapshots).not.toContain("model output raw text f831e674");
+    expect(serializedSnapshots).not.toContain("citation raw text 2a2dc9a1");
+    expect(serializedSnapshots).not.toContain("provider-token-4f36183b");
+    expect(serializedSnapshots).not.toContain("sk-provider-secret-9f2c210d");
+    expect(serializedSnapshots).toContain("request-safe-id");
+    expect(snapshots.prompt.redactionStatus).toBe("redacted");
+    expect(snapshots.userAnswer.redactionStatus).toBe("redacted");
+    expect(snapshots.modelOutput.redactionStatus).toBe("redacted");
+    expect(snapshots.providerErrorPayload).toMatchObject({
+      message: { redactionStatus: "redacted" },
+      apiKey: { redactionStatus: "redacted" },
+    });
   });
 });

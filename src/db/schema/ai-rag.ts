@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -33,6 +34,10 @@ export const aiFuncTypeValues = [
 ] as const;
 
 export const aiFuncTypeEnum = pgEnum("ai_func_type", aiFuncTypeValues);
+
+export const aiCallStatusValues = ["success", "failed"] as const;
+
+export const aiCallStatusEnum = pgEnum("ai_call_status", aiCallStatusValues);
 
 export const modelProvider = pgTable(
   "model_provider",
@@ -114,5 +119,52 @@ export const promptTemplate = pgTable(
       table.ai_func_type,
       table.is_active,
     ),
+  ],
+);
+
+export const aiCallLog = pgTable(
+  "ai_call_log",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    user_public_id: text("user_public_id"),
+    answer_record_public_id: text("answer_record_public_id"),
+    mock_exam_public_id: text("mock_exam_public_id"),
+    question_public_id: text("question_public_id"),
+    ai_func_type: aiFuncTypeEnum("ai_func_type").notNull(),
+    call_status: aiCallStatusEnum("call_status").notNull(),
+    model_config_id: bigint("model_config_id", { mode: "number" })
+      .notNull()
+      .references(() => modelConfig.id, { onDelete: "restrict" }),
+    prompt_template_id: bigint("prompt_template_id", { mode: "number" })
+      .notNull()
+      .references(() => promptTemplate.id, { onDelete: "restrict" }),
+    model_config_snapshot: jsonb("model_config_snapshot").notNull(),
+    prompt_template_key: text("prompt_template_key").notNull(),
+    prompt_template_version: integer("prompt_template_version").notNull(),
+    request_redacted_snapshot: jsonb("request_redacted_snapshot").notNull(),
+    response_redacted_snapshot: jsonb("response_redacted_snapshot"),
+    error_redacted_snapshot: jsonb("error_redacted_snapshot"),
+    citation_redacted_snapshot: jsonb("citation_redacted_snapshot"),
+    prompt_token_count: integer("prompt_token_count"),
+    completion_token_count: integer("completion_token_count"),
+    total_token_count: integer("total_token_count"),
+    latency_ms: integer("latency_ms"),
+    started_at: timestampColumn("started_at"),
+    completed_at: nullableTimestampColumn("completed_at"),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_ai_call_log_public_id").on(table.public_id),
+    index("idx_ai_call_log_user_public_id").on(table.user_public_id),
+    index("idx_ai_call_log_answer_record_public_id").on(
+      table.answer_record_public_id,
+    ),
+    index("idx_ai_call_log_model_config_id").on(table.model_config_id),
+    index("idx_ai_call_log_ai_func_type_call_status").on(
+      table.ai_func_type,
+      table.call_status,
+    ),
+    index("idx_ai_call_log_started_at").on(table.started_at),
   ],
 );

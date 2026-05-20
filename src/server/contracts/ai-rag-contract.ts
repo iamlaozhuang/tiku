@@ -1,4 +1,9 @@
-import type { AiFuncType, ModelConfigSnapshot } from "../models/ai-rag";
+import type {
+  AiCallStatus,
+  AiFuncType,
+  ModelConfigSnapshot,
+  RedactedJsonObject,
+} from "../models/ai-rag";
 
 export type ModelProviderDto = {
   publicId: string;
@@ -51,3 +56,31 @@ export type PromptTemplateResultDto = {
 };
 
 export type ModelConfigSnapshotDto = ModelConfigSnapshot;
+
+export type AiCallLogDto = {
+  publicId: string;
+  userPublicId: string | null;
+  answerRecordPublicId: string | null;
+  mockExamPublicId: string | null;
+  questionPublicId: string | null;
+  aiFuncType: AiFuncType;
+  callStatus: AiCallStatus;
+  modelConfigSnapshot: ModelConfigSnapshotDto;
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+  requestRedactedSnapshot: RedactedJsonObject;
+  responseRedactedSnapshot: RedactedJsonObject | null;
+  errorRedactedSnapshot: RedactedJsonObject | null;
+  citationRedactedSnapshot: RedactedJsonObject | null;
+  promptTokenCount: number | null;
+  completionTokenCount: number | null;
+  totalTokenCount: number | null;
+  latencyMs: number | null;
+  startedAt: string;
+  completedAt: string | null;
+  createdAt: string;
+};
+
+export type AiCallLogResultDto = {
+  aiCallLog: AiCallLogDto;
+};

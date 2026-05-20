@@ -3,6 +3,8 @@ import { getTableConfig } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
+  aiCallLog,
+  aiCallStatusValues,
   aiFuncTypeValues,
   modelConfig,
   modelProvider,
@@ -25,7 +27,17 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       getTableName(modelProvider),
       getTableName(modelConfig),
       getTableName(promptTemplate),
-    ]).toEqual(["model_provider", "model_config", "prompt_template"]);
+      getTableName(aiCallLog),
+    ]).toEqual([
+      "model_provider",
+      "model_config",
+      "prompt_template",
+      "ai_call_log",
+    ]);
+  });
+
+  it("registers AI call status enum values from the glossary", () => {
+    expect(aiCallStatusValues).toEqual(["success", "failed"]);
   });
 
   it("registers the AI function type enum values from the glossary", () => {
@@ -110,6 +122,47 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "udx_prompt_template_public_id",
         "udx_prompt_template_key_version",
         "idx_prompt_template_ai_func_type_is_active",
+      ]),
+    );
+  });
+
+  it("stores AI call logs with redacted payload snapshots only", () => {
+    expect(getColumnNames(aiCallLog)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "user_public_id",
+        "answer_record_public_id",
+        "mock_exam_public_id",
+        "question_public_id",
+        "ai_func_type",
+        "call_status",
+        "model_config_id",
+        "prompt_template_id",
+        "model_config_snapshot",
+        "prompt_template_key",
+        "prompt_template_version",
+        "request_redacted_snapshot",
+        "response_redacted_snapshot",
+        "error_redacted_snapshot",
+        "citation_redacted_snapshot",
+        "prompt_token_count",
+        "completion_token_count",
+        "total_token_count",
+        "latency_ms",
+        "started_at",
+        "completed_at",
+        "created_at",
+      ]),
+    );
+    expect(getIndexNames(aiCallLog)).toEqual(
+      expect.arrayContaining([
+        "udx_ai_call_log_public_id",
+        "idx_ai_call_log_user_public_id",
+        "idx_ai_call_log_answer_record_public_id",
+        "idx_ai_call_log_model_config_id",
+        "idx_ai_call_log_ai_func_type_call_status",
+        "idx_ai_call_log_started_at",
       ]),
     );
   });

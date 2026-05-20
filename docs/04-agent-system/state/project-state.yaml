@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-5-ai-rag
-  updatedAt: "2026-05-20T16:10:43+08:00"
+  updatedAt: "2026-05-20T17:35:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase-5-ai-rag / phase-5-ai-call-log-and-redaction-baseline
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-5-model-config-and-prompt-template-baseline.md
+  nextRecommendedAction: phase-5-ai-rag / phase-5-rag-resource-and-knowledge-schema-baseline
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-call-log-and-redaction-baseline.md
