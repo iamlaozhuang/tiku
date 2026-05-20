@@ -1,6 +1,7 @@
 import type {
   AiCallStatus,
   AiFuncType,
+  EvidenceStatus,
   KnStatus,
   ModelConfigSnapshot,
   Profession,
@@ -148,4 +149,33 @@ export type ResourceResultDto = {
 
 export type KnowledgeNodeResultDto = {
   knowledgeNode: KnowledgeNodeDto;
+};
+
+export type RagCitationDto = {
+  chunkPublicId: string;
+  resourcePublicId: string;
+  resourceTitle: string;
+  headingPath: string[];
+  chunkIndex: number;
+  chunkText: string;
+  textHash: string;
+  score: number;
+};
+
+export type RagRetrievalEvidenceSummaryDto = {
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  resourcePublicIds: string[];
+  chunkPublicIds: string[];
+  chunkIndexes: number[];
+  textHashes: string[];
+  queryHash: string;
+  maxScore: number | null;
+  retrievalMode: "fusion_sort";
+};
+
+export type RagRetrievalResultDto = {
+  evidenceStatus: EvidenceStatus;
+  citations: RagCitationDto[];
+  evidenceSummary: RagRetrievalEvidenceSummaryDto;
 };

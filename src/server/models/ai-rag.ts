@@ -27,12 +27,15 @@ export {
   resourceTypeValues,
 };
 
+export const evidenceStatusValues = ["sufficient", "weak", "none"] as const;
+
 export type AiFuncType = (typeof aiFuncTypeValues)[number];
 export type AiCallStatus = (typeof aiCallStatusValues)[number];
 export type ResourceType = (typeof resourceTypeValues)[number];
 export type ResourceStatus = (typeof resourceStatusValues)[number];
 export type KnStatus = (typeof knStatusValues)[number];
 export type Profession = (typeof professionValues)[number];
+export type EvidenceStatus = (typeof evidenceStatusValues)[number];
 
 export type ModelProviderRow = InferSelectModel<typeof modelProvider>;
 export type NewModelProviderRow = InferInsertModel<typeof modelProvider>;
