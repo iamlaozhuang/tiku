@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-5-ai-rag
-  updatedAt: "2026-05-20T19:42:00+08:00"
+  updatedAt: "2026-05-20T20:02:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-5-rag-chunking-baseline
-  status: validated
-  sourceStory: docs/01-requirements/stories/epic-05-rag-knowledge.md#us-05-07-chunk-切分
-  planPath: docs/05-execution-logs/task-plans/2026-05-20-phase-5-rag-chunking-baseline.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-rag-chunking-baseline.md
-  branch: codex/phase-5-rag-chunking-baseline
+  id: null
+  status: idle
+  sourceStory: null
+  planPath: null
+  evidencePath: null
+  branch: null
   commitSha: null
   prUrl: null
   retryCount: 0
