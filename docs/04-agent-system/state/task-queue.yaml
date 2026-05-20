@@ -2025,7 +2025,7 @@ tasks:
       - npm.cmd run build
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-entry-gate-and-task-queue-seeding.md
-    status: validated
+    status: done
     retryCount: 0
   - id: phase-5-ai-rag-contract-and-threat-model-baseline
     title: AI/RAG Contract And Threat Model Baseline
