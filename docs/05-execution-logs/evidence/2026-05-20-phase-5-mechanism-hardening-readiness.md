@@ -287,6 +287,118 @@ git diff --name-only -- package.json pnpm-lock.yaml package-lock.json 'src/**' '
 
 Output: empty.
 
+## Merge Closeout
+
+Implementation commit:
+
+```text
+4588d5b docs(agent): harden phase 5 automation readiness
+```
+
+Merge result:
+
+```text
+git merge --ff-only codex/phase-5-mechanism-hardening-readiness
+Updating cde2e7b..4588d5b
+Fast-forward
+13 files changed, 994 insertions(+), 11 deletions(-)
+```
+
+Post-merge validation on `master`:
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: pass
+lint: pass
+typecheck: pass
+test:unit: pass (64 files, 199 tests)
+format:check: pass
+```
+
+```text
+npm.cmd run build
+Result: pass
+Next.js 16.2.6 compiled successfully; 31 static pages generated.
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: pass
+branch: master
+head: 4588d5b
+status: ahead origin/master by 1 commit
+tracked changes: none
+staged changes: none
+untracked files: none
+filesChangedAgainstBase:
+docs/03-standards/git-workflow.md
+docs/03-standards/local-ci.md
+docs/04-agent-system/sop/automation-loop.md
+docs/04-agent-system/sop/dependency-introduction-gate.md
+docs/04-agent-system/sop/security-review-gate.md
+docs/04-agent-system/state/project-state.yaml
+docs/04-agent-system/state/task-queue.yaml
+docs/05-execution-logs/evidence/2026-05-20-phase-5-mechanism-hardening-readiness.md
+docs/05-execution-logs/task-plans/2026-05-20-phase-5-mechanism-hardening-readiness.md
+scripts/agent-system/Add-TaskEvidenceResult.ps1
+scripts/agent-system/Test-AgentSystemReadiness.ps1
+scripts/agent-system/Test-TaskClaimReadiness.ps1
+scripts/agent-system/Update-TaskStatus.ps1
+```
+
+`Test-TaskClaimReadiness.ps1 -TaskId phase-5-mechanism-hardening-readiness`
+was not rerun on `master` after merge because the new guard intentionally rejects
+task claiming on protected branches. It passed on the task branch before merge,
+which is the intended validation point for claim readiness.
+
+Closeout evidence update:
+
+```text
+closeout evidence and state files updated on master before push
+project-state.currentTask: idle/null
+task-queue phase-5-mechanism-hardening-readiness: done
+handoff.nextRecommendedAction: phase-5-ai-rag / define next pending task
+```
+
+Post-closeout validation on `master` after evidence and state updates:
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: pass
+lint: pass
+typecheck: pass
+test:unit: pass (64 files, 199 tests)
+format:check: pass
+```
+
+```text
+npm.cmd run build
+Result: pass
+Next.js 16.2.6 compiled successfully; 31 static pages generated.
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: pass
+branch: master
+head: 4588d5b
+status: ahead origin/master by 1 commit, with closeout evidence/state files modified
+tracked changes:
+docs/04-agent-system/state/project-state.yaml
+docs/04-agent-system/state/task-queue.yaml
+docs/05-execution-logs/evidence/2026-05-20-phase-5-mechanism-hardening-readiness.md
+```
+
 ## Accepted Gaps
 
 - This mechanism task does not implement Phase 5 AI/RAG business behavior.
