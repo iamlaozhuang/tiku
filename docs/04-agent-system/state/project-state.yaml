@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-5-ai-rag
-  updatedAt: "2026-05-20T21:46:00+08:00"
+  updatedAt: "2026-05-20T22:38:22+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: null
-  status: idle
-  sourceStory: null
+  id: phase-5-ai-rag-readiness-evidence
+  status: validated
+  sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-5-ai-rag
   planPath: null
-  evidencePath: null
-  branch: null
+  evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-readiness.md
+  branch: codex/phase-5-ai-rag-readiness-evidence
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,4 +78,4 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: phase-5-ai-rag / phase-5-ai-rag-readiness-evidence
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-5-knowledge-recommendation-baseline.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-5-ai-rag-readiness.md
