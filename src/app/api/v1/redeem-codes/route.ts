@@ -1,21 +1,17 @@
 import { createAdminUserOrgAuthOpsRouteHandlers } from "@/server/services/admin-user-org-auth-ops-route";
 import { createUnavailableAdminUserOrgAuthOpsService } from "@/server/services/admin-user-org-auth-ops-service";
-import { createUnavailableUserRegistrationRouteHandlers } from "@/server/auth/user-registration-route";
 
 const adminUserOrgAuthOpsRouteHandlers = createAdminUserOrgAuthOpsRouteHandlers(
   createUnavailableAdminUserOrgAuthOpsService(),
 );
 
-const userRegistrationRouteHandlers =
-  createUnavailableUserRegistrationRouteHandlers();
-
 const responseContract = {
-  code: 503002,
-  message: "User registration runtime is not configured.",
+  code: 503601,
+  message: "Admin user organization authorization runtime is not configured.",
   data: null,
+  pagination: null,
 };
 
 void responseContract;
 
-export const GET = adminUserOrgAuthOpsRouteHandlers.users.GET;
-export const POST = userRegistrationRouteHandlers.POST;
+export const GET = adminUserOrgAuthOpsRouteHandlers.redeemCodes.GET;
