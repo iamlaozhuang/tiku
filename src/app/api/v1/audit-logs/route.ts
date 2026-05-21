@@ -1,16 +1,5 @@
-import { createAdminAiAuditLogOpsRouteHandlers } from "@/server/services/admin-ai-audit-log-ops-route";
-import { createUnavailableAdminAiAuditLogOpsService } from "@/server/services/admin-ai-audit-log-ops-service";
+import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flow-runtime";
 
-const adminAiAuditLogOpsRouteHandlers = createAdminAiAuditLogOpsRouteHandlers(
-  createUnavailableAdminAiAuditLogOpsService(),
-);
+const adminFlowRuntimeRouteHandlers = createAdminFlowRuntimeRouteHandlers();
 
-const responseContract = {
-  code: 503641,
-  message: "Admin AI and audit log runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const GET = adminAiAuditLogOpsRouteHandlers.auditLogs.GET;
+export const GET = adminFlowRuntimeRouteHandlers.auditLogs.collection.GET;
