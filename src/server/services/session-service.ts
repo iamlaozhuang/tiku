@@ -96,11 +96,13 @@ export function createSessionService(
             ? addMinutes(now, LOCK_DURATION_MINUTE)
             : null;
 
-        await sessionUserRepository.recordLoginFailure({
-          userId: loginUser.id,
-          loginFailedCount,
-          lockedUntilAt,
-        });
+        if (loginUser.login_failure_user_id !== null) {
+          await sessionUserRepository.recordLoginFailure({
+            userId: loginUser.login_failure_user_id,
+            loginFailedCount,
+            lockedUntilAt,
+          });
+        }
 
         return lockedUntilAt === null
           ? createInvalidCredentialResponse()
@@ -112,7 +114,11 @@ export function createSessionService(
         expiresAt: addDays(now, SESSION_DURATION_DAY),
       });
 
-      await sessionUserRepository.resetLoginFailures(loginUser.id);
+      if (loginUser.login_failure_user_id !== null) {
+        await sessionUserRepository.resetLoginFailures(
+          loginUser.login_failure_user_id,
+        );
+      }
 
       return createSuccessResponse({
         token: authSession.token,

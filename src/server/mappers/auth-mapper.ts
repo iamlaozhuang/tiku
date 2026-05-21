@@ -38,6 +38,8 @@ export function mapAuthenticatedUserToApi(
     lockedUntilAt: formatNullableTimestamp(authUser.locked_until_at),
     employeePublicId: authUser.employee_public_id,
     organizationPublicId: authUser.organization_public_id,
+    adminPublicId: authUser.admin_public_id ?? null,
+    adminRoles: authUser.admin_roles ?? [],
   };
 }
 

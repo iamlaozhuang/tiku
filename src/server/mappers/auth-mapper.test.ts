@@ -34,6 +34,8 @@ describe("mapAuthContextToApi", () => {
         lockedUntilAt: null,
         employeePublicId: "employee_public_123",
         organizationPublicId: "organization_public_123",
+        adminPublicId: null,
+        adminRoles: [],
       },
       session: {
         expiresAt: "2026-05-24T12:00:00.000Z",
