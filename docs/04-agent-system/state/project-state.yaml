@@ -37,13 +37,13 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-7-student-flow-runtime-smoke
-  status: validated
+  status: closed
   sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#mvp-vertical-slice
   planPath: docs/05-execution-logs/task-plans/2026-05-21-phase-7-student-flow-runtime-smoke.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-student-flow-runtime-smoke.md
   branch: codex/phase-7-student-flow-runtime-smoke
-  commitSha: null
-  prUrl: null
+  commitSha: 1f086be
+  prUrl: https://github.com/iamlaozhuang/tiku/pull/15
   retryCount: 0
   lastFailurePath: null
 qualityGates:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase-7-local-runtime-readiness / phase-7-student-flow-runtime-smoke
+  nextRecommendedAction: phase-7-local-runtime-readiness / phase-7-admin-flow-runtime-smoke
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-21-phase-7-student-flow-runtime-smoke.md
