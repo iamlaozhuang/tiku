@@ -1,13 +1,6 @@
-import { createUnavailableExamReportService } from "@/server/services/exam-report-service";
-import {
-  createExamReportRouteHandlers,
-  createUnavailableExamReportUserResolver,
-} from "@/server/services/exam-report-route";
+import { createStudentFlowRuntimeRouteHandlers } from "@/server/services/student-flow-runtime";
 
-const examReportRouteHandlers = createExamReportRouteHandlers(
-  createUnavailableExamReportService(),
-  createUnavailableExamReportUserResolver(),
-);
+const studentFlowRouteHandlers = createStudentFlowRuntimeRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -17,4 +10,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = examReportRouteHandlers.detail.GET;
+export const GET = studentFlowRouteHandlers.examReports.detail.GET;

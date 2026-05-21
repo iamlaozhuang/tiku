@@ -1,13 +1,6 @@
-import { createUnavailableMockExamService } from "@/server/services/mock-exam-service";
-import {
-  createMockExamRouteHandlers,
-  createUnavailableMockExamUserResolver,
-} from "@/server/services/mock-exam-route";
+import { createStudentFlowRuntimeRouteHandlers } from "@/server/services/student-flow-runtime";
 
-const mockExamRouteHandlers = createMockExamRouteHandlers(
-  createUnavailableMockExamService(),
-  createUnavailableMockExamUserResolver(),
-);
+const studentFlowRouteHandlers = createStudentFlowRuntimeRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -17,4 +10,4 @@ const responseContract = {
 
 void responseContract;
 
-export const POST = mockExamRouteHandlers.answers.POST;
+export const POST = studentFlowRouteHandlers.mockExams.answers.POST;
