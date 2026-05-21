@@ -1,13 +1,6 @@
-import { createUnavailableStudentPaperService } from "@/server/services/student-paper-service";
-import {
-  createStudentPaperRouteHandlers,
-  createUnavailableStudentPaperUserResolver,
-} from "@/server/services/student-paper-route";
+import { createStudentFlowRuntimeRouteHandlers } from "@/server/services/student-flow-runtime";
 
-const studentPaperRouteHandlers = createStudentPaperRouteHandlers(
-  createUnavailableStudentPaperService(),
-  createUnavailableStudentPaperUserResolver(),
-);
+const studentFlowRouteHandlers = createStudentFlowRuntimeRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -17,4 +10,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = studentPaperRouteHandlers.collection.GET;
+export const GET = studentFlowRouteHandlers.studentPapers.collection.GET;

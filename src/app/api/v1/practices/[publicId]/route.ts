@@ -1,13 +1,6 @@
-import { createUnavailablePracticeService } from "@/server/services/practice-service";
-import {
-  createPracticeRouteHandlers,
-  createUnavailablePracticeUserResolver,
-} from "@/server/services/practice-route";
+import { createStudentFlowRuntimeRouteHandlers } from "@/server/services/student-flow-runtime";
 
-const practiceRouteHandlers = createPracticeRouteHandlers(
-  createUnavailablePracticeService(),
-  createUnavailablePracticeUserResolver(),
-);
+const studentFlowRouteHandlers = createStudentFlowRuntimeRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -17,4 +10,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = practiceRouteHandlers.detail.GET;
+export const GET = studentFlowRouteHandlers.practices.detail.GET;
