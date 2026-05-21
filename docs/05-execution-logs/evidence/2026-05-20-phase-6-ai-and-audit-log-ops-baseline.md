@@ -170,8 +170,20 @@
 
 ## Git Closeout
 
-- Local commit: pending at evidence update time; final handoff records the commit SHA.
-- Push: skipped, awaiting explicit user approval.
-- PR: skipped, awaiting explicit user approval.
-- Merge: skipped, awaiting explicit user approval.
-- Cleanup: skipped, branch remains for user review.
+- Implementation commit: `5f3c412 feat(admin): add ai audit log ops baseline`.
+- Push:
+  - Command: `git push -u origin codex/phase-6-ai-and-audit-log-ops-baseline`
+  - Result: passed.
+  - Summary: pushed branch `codex/phase-6-ai-and-audit-log-ops-baseline` to `origin` and set upstream tracking.
+- Pull request:
+  - Tool: GitHub connector `_create_pull_request`
+  - Result: passed.
+  - Summary: created draft PR `#6` targeting `master`.
+  - URL: `https://github.com/iamlaozhuang/tiku/pull/6`
+- Post-PR quality gate:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed.
+  - Summary: `lint`, `typecheck`, `test:unit`, and `format:check` passed after push and PR evidence updates. Unit test summary during gate: 80 files passed, 273 tests passed.
+- Closeout evidence commit: pending at this evidence update time.
+- Merge: skipped for now because repository policy is `draftPrOnly: true`; PR remains open as draft for review.
+- Cleanup: skipped; branch remains for PR iteration.
