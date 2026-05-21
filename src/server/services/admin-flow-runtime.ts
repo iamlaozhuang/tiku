@@ -5,6 +5,7 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import {
+  ADMIN_AI_AUDIT_LOG_ERROR_CODES,
   createAdminAiAuditLogListQuery,
   type AdminAiAuditLogListQuery,
   type AdminAiAuditLogPageSize,
@@ -37,12 +38,16 @@ type AdminFlowRole = "super_admin" | "ops_admin" | "content_admin";
 
 type AdminFlowActor = {
   publicId: string;
-  roles: AdminFlowRole[];
+  roles: [AdminFlowRole, ...AdminFlowRole[]];
 };
 
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
   "Admin session is required.",
+);
+const adminPermissionDeniedResponse = createErrorResponse(
+  ADMIN_AI_AUDIT_LOG_ERROR_CODES.adminPermissionDenied,
+  "Admin permission denied.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -78,8 +83,24 @@ async function resolveAdminActor(
 
   return {
     publicId: adminPublicId,
-    roles: adminRoles,
+    roles: adminRoles as [AdminFlowRole, ...AdminFlowRole[]],
   };
+}
+
+function canReadAuditLogs(actor: AdminFlowActor): boolean {
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
+}
+
+function readRequestIp(request: Request): string | null {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor !== null) {
+    return forwardedFor.split(",")[0]?.trim() || null;
+  }
+
+  return request.headers.get("x-real-ip");
 }
 
 function readAdminAuthOperationListQuery(
@@ -230,7 +251,31 @@ export function createAdminFlowRuntimeRouteHandlers(
             return createJsonResponse(adminSessionRequiredResponse);
           }
 
-          void actor;
+          if (!canReadAuditLogs(actor)) {
+            await repositories.auditLogRepository.appendAuditLog({
+              actorPublicId: actor.publicId,
+              actorRole: actor.roles[0],
+              actionType: "audit_log.list",
+              targetResourceType: "audit_log",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted audit_log permission denial metadata",
+              requestIp: readRequestIp(request),
+            });
+
+            return createJsonResponse(adminPermissionDeniedResponse);
+          }
+
+          await repositories.auditLogRepository.appendAuditLog({
+            actorPublicId: actor.publicId,
+            actorRole: actor.roles[0],
+            actionType: "audit_log.list",
+            targetResourceType: "audit_log",
+            targetPublicId: null,
+            resultStatus: "success",
+            metadataSummary: "redacted audit_log list operation metadata",
+            requestIp: readRequestIp(request),
+          });
 
           const result = await repositories.auditLogRepository.listAuditLogs(
             readAdminAiAuditLogListQuery(request),

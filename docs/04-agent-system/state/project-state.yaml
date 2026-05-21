@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-7-local-runtime-readiness
-  updatedAt: "2026-05-21T19:28:00+08:00"
+  updatedAt: "2026-05-21T20:10:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,14 +36,14 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-7-admin-flow-runtime-smoke
-  status: closed
-  sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#mvp-vertical-slice
-  planPath: docs/05-execution-logs/task-plans/2026-05-21-phase-7-admin-flow-runtime-smoke.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-admin-flow-runtime-smoke.md
-  branch: codex/phase-7-admin-flow-runtime-smoke
-  commitSha: 56b2ab3
-  prUrl: https://github.com/iamlaozhuang/tiku/pull/17
+  id: phase-7-audit-log-runtime-baseline
+  status: committed
+  sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#audit-and-ai-log-boundary
+  planPath: docs/05-execution-logs/task-plans/2026-05-21-phase-7-audit-log-runtime-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-audit-log-runtime-baseline.md
+  branch: codex/phase-7-audit-log-runtime-baseline
+  commitSha: null
+  prUrl: null
   retryCount: 0
   lastFailurePath: null
 qualityGates:
