@@ -106,39 +106,98 @@ if (Test-Path $superpowersPluginRootPath) {
 }
 
 $skillRootPath = Join-Path -Path $codexHomePath -ChildPath "skills"
-$skillNames = @(
-    "ralplan",
-    "ralph",
-    "code-review",
-    "code-simplifier",
-    "drizzle-orm-expert",
-    "postgresql",
-    "postgres-best-practices",
-    "nextjs-app-router-patterns",
-    "nextjs-best-practices",
-    "react-nextjs-development",
-    "shadcn",
-    "tailwind-design-system",
-    "tailwind-patterns",
-    "vercel-ai-sdk-expert",
-    "rag-engineer",
-    "rag-implementation",
-    "playwright",
-    "webapp-testing",
-    "e2e-testing",
-    "security-best-practices",
-    "security-threat-model",
-    "tdd-orchestrator",
-    "tdd-workflow",
-    "testing-patterns"
+
+function Test-LocalSkillPath {
+    param([string]$SkillName)
+
+    $skillPath = Join-Path -Path $skillRootPath -ChildPath $SkillName
+    return Test-Path $skillPath
+}
+
+function Test-PluginSkillPath {
+    param(
+        [string]$PluginName,
+        [string]$SkillName
+    )
+
+    $pluginRootPath = Join-Path -Path $codexHomePath -ChildPath "plugins\cache\openai-curated\$PluginName"
+    if (-not (Test-Path $pluginRootPath)) {
+        return $false
+    }
+
+    $pluginSkillPath = Get-ChildItem -Path $pluginRootPath -Recurse -Filter "SKILL.md" -ErrorAction SilentlyContinue |
+        Where-Object { (Split-Path -Leaf (Split-Path -Parent $_.FullName)) -eq $SkillName } |
+        Select-Object -First 1
+
+    return $null -ne $pluginSkillPath
+}
+
+$capabilityChecks = @(
+    [PSCustomObject]@{ Name = "ralplan"; LocalSkills = @("ralplan"); PluginSkills = @(); Optional = $true; Notes = "No trusted local or plugin source configured." },
+    [PSCustomObject]@{ Name = "ralph"; LocalSkills = @("ralph"); PluginSkills = @(); Optional = $true; Notes = "No trusted local or plugin source configured." },
+    [PSCustomObject]@{ Name = "code-review"; LocalSkills = @("code-review"); PluginSkills = @(@("coderabbit", "coderabbit-review"), @("superpowers", "requesting-code-review")); Optional = $false; Notes = "Covered by CodeRabbit and Superpowers review workflows." },
+    [PSCustomObject]@{ Name = "code-simplifier"; LocalSkills = @("code-simplifier"); PluginSkills = @(); Optional = $true; Notes = "No trusted local or plugin source configured." },
+    [PSCustomObject]@{ Name = "drizzle-orm-expert"; LocalSkills = @("drizzle-orm-expert"); PluginSkills = @(); Optional = $true; Notes = "No exact trusted source configured; rely on project ADR and Drizzle docs when needed." },
+    [PSCustomObject]@{ Name = "postgresql"; LocalSkills = @("postgresql"); PluginSkills = @(@("build-web-apps", "supabase-best-practices")); Optional = $false; Notes = "Covered by Postgres best-practice plugin guidance." },
+    [PSCustomObject]@{ Name = "postgres-best-practices"; LocalSkills = @("postgres-best-practices"); PluginSkills = @(@("build-web-apps", "supabase-best-practices")); Optional = $false; Notes = "Covered by Postgres best-practice plugin guidance." },
+    [PSCustomObject]@{ Name = "nextjs-app-router-patterns"; LocalSkills = @("nextjs-app-router-patterns"); PluginSkills = @(@("vercel", "nextjs")); Optional = $false; Notes = "Covered by Vercel Next.js skill." },
+    [PSCustomObject]@{ Name = "nextjs-best-practices"; LocalSkills = @("nextjs-best-practices"); PluginSkills = @(@("vercel", "nextjs"), @("build-web-apps", "react-best-practices")); Optional = $false; Notes = "Covered by Vercel Next.js and React best-practice skills." },
+    [PSCustomObject]@{ Name = "react-nextjs-development"; LocalSkills = @("react-nextjs-development"); PluginSkills = @(@("build-web-apps", "react-best-practices"), @("vercel", "react-best-practices")); Optional = $false; Notes = "Covered by React and Next.js plugin guidance." },
+    [PSCustomObject]@{ Name = "shadcn"; LocalSkills = @("shadcn"); PluginSkills = @(@("build-web-apps", "shadcn-best-practices"), @("vercel", "shadcn")); Optional = $false; Notes = "Covered by shadcn plugin guidance." },
+    [PSCustomObject]@{ Name = "tailwind-design-system"; LocalSkills = @("tailwind-design-system"); PluginSkills = @(@("build-web-apps", "frontend-app-builder"), @("build-web-apps", "shadcn-best-practices")); Optional = $false; Notes = "Covered by frontend builder and shadcn guidance." },
+    [PSCustomObject]@{ Name = "tailwind-patterns"; LocalSkills = @("tailwind-patterns"); PluginSkills = @(@("build-web-apps", "frontend-app-builder")); Optional = $false; Notes = "Covered by frontend builder guidance." },
+    [PSCustomObject]@{ Name = "vercel-ai-sdk-expert"; LocalSkills = @("vercel-ai-sdk-expert"); PluginSkills = @(@("vercel", "ai-sdk")); Optional = $false; Notes = "Covered by Vercel AI SDK skill." },
+    [PSCustomObject]@{ Name = "rag-engineer"; LocalSkills = @("rag-engineer"); PluginSkills = @(); Optional = $true; Notes = "No exact trusted source configured; use AI SDK and Postgres skills plus project ADRs." },
+    [PSCustomObject]@{ Name = "rag-implementation"; LocalSkills = @("rag-implementation"); PluginSkills = @(); Optional = $true; Notes = "No exact trusted source configured; use AI SDK and Postgres skills plus project ADRs." },
+    [PSCustomObject]@{ Name = "playwright"; LocalSkills = @("playwright"); PluginSkills = @(); Optional = $false; Notes = "Installed as a local skill." },
+    [PSCustomObject]@{ Name = "playwright-interactive"; LocalSkills = @("playwright-interactive"); PluginSkills = @(); Optional = $false; Notes = "Installed as a local curated skill." },
+    [PSCustomObject]@{ Name = "webapp-testing"; LocalSkills = @("webapp-testing"); PluginSkills = @(@("build-web-apps", "frontend-testing-debugging"), @("vercel", "verification")); Optional = $false; Notes = "Covered by frontend testing and verification plugin guidance." },
+    [PSCustomObject]@{ Name = "e2e-testing"; LocalSkills = @("e2e-testing", "playwright"); PluginSkills = @(@("build-web-apps", "frontend-testing-debugging")); Optional = $false; Notes = "Covered by local Playwright plus frontend testing guidance." },
+    [PSCustomObject]@{ Name = "security-best-practices"; LocalSkills = @("security-best-practices"); PluginSkills = @(); Optional = $false; Notes = "Installed as a local skill." },
+    [PSCustomObject]@{ Name = "security-threat-model"; LocalSkills = @("security-threat-model"); PluginSkills = @(); Optional = $false; Notes = "Installed as a local skill." },
+    [PSCustomObject]@{ Name = "tdd-orchestrator"; LocalSkills = @("tdd-orchestrator"); PluginSkills = @(@("superpowers", "test-driven-development")); Optional = $false; Notes = "Covered by Superpowers TDD workflow." },
+    [PSCustomObject]@{ Name = "tdd-workflow"; LocalSkills = @("tdd-workflow"); PluginSkills = @(@("superpowers", "test-driven-development")); Optional = $false; Notes = "Covered by Superpowers TDD workflow." },
+    [PSCustomObject]@{ Name = "testing-patterns"; LocalSkills = @("testing-patterns"); PluginSkills = @(@("superpowers", "test-driven-development"), @("build-web-apps", "frontend-testing-debugging")); Optional = $false; Notes = "Covered by TDD and frontend testing guidance." },
+    [PSCustomObject]@{ Name = "github-publish"; LocalSkills = @("yeet"); PluginSkills = @(@("github", "yeet")); Optional = $false; Notes = "Installed locally and covered by GitHub plugin." },
+    [PSCustomObject]@{ Name = "github-pr-feedback"; LocalSkills = @("gh-address-comments"); PluginSkills = @(@("github", "gh-address-comments")); Optional = $false; Notes = "Installed locally and covered by GitHub plugin." },
+    [PSCustomObject]@{ Name = "github-ci-debug"; LocalSkills = @("gh-fix-ci"); PluginSkills = @(@("github", "gh-fix-ci")); Optional = $false; Notes = "Installed locally and covered by GitHub plugin." }
 )
 
-foreach ($skillName in $skillNames) {
-    $skillPath = Join-Path -Path $skillRootPath -ChildPath $skillName
-    if (Test-Path $skillPath) {
-        Write-Output "OK skill path: $skillName"
+foreach ($capabilityCheck in $capabilityChecks) {
+    $localMatches = @()
+    foreach ($localSkillName in $capabilityCheck.LocalSkills) {
+        if (Test-LocalSkillPath -SkillName $localSkillName) {
+            $localMatches += $localSkillName
+        }
+    }
+
+    $pluginMatches = @()
+    $pluginSkillItems = @()
+    foreach ($pluginSkillItem in @($capabilityCheck.PluginSkills)) {
+        if ($pluginSkillItem -is [array]) {
+            $pluginSkillItems += $pluginSkillItem[0]
+            $pluginSkillItems += $pluginSkillItem[1]
+        } else {
+            $pluginSkillItems += $pluginSkillItem
+        }
+    }
+
+    for ($pluginSkillIndex = 0; $pluginSkillIndex -lt $pluginSkillItems.Count; $pluginSkillIndex += 2) {
+        $pluginName = $pluginSkillItems[$pluginSkillIndex]
+        $pluginSkillName = $pluginSkillItems[$pluginSkillIndex + 1]
+        if (Test-PluginSkillPath -PluginName $pluginName -SkillName $pluginSkillName) {
+            $pluginMatches += "$($pluginName):$($pluginSkillName)"
+        }
+    }
+
+    if ($localMatches.Count -gt 0) {
+        Write-Output "OK local skill capability: $($capabilityCheck.Name) via $($localMatches -join ', ')"
+    } elseif ($pluginMatches.Count -gt 0) {
+        Write-Output "OK plugin-covered capability: $($capabilityCheck.Name) via $($pluginMatches -join ', ')"
+    } elseif ($capabilityCheck.Optional) {
+        Write-Output "OPTIONAL unresolved capability: $($capabilityCheck.Name) - $($capabilityCheck.Notes)"
     } else {
-        Write-Output "MISSING skill path: $skillName"
+        Write-Output "MISSING required capability: $($capabilityCheck.Name) - $($capabilityCheck.Notes)"
     }
 }
 
