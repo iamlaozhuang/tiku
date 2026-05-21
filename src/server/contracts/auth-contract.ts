@@ -1,14 +1,16 @@
-import type { UserStatus, UserType } from "../models/auth";
+import type { AdminRole, UserStatus, UserType } from "../models/auth";
 
 export type AuthenticatedUserDto = {
   publicId: string;
   phone: string;
   name: string;
-  userType: UserType;
+  userType: UserType | null;
   status: UserStatus;
   lockedUntilAt: string | null;
   employeePublicId: string | null;
   organizationPublicId: string | null;
+  adminPublicId?: string | null;
+  adminRoles?: AdminRole[];
 };
 
 export type AuthSessionDto = {

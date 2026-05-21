@@ -158,6 +158,8 @@ describe("user registration service", () => {
           lockedUntilAt: null,
           employeePublicId: null,
           organizationPublicId: null,
+          adminPublicId: null,
+          adminRoles: [],
         },
         nextAction: "redeem_code",
       },

@@ -21,6 +21,9 @@ function createRepository(
         locked_until_at: null,
         employee_public_id: null,
         organization_public_id: null,
+        admin_public_id: null,
+        admin_roles: [],
+        login_failure_user_id: 42,
       };
     },
     async recordLoginFailure() {},
@@ -125,6 +128,9 @@ describe("session service", () => {
             locked_until_at: null,
             employee_public_id: null,
             organization_public_id: null,
+            admin_public_id: null,
+            admin_roles: [],
+            login_failure_user_id: 42,
           };
         },
         async recordLoginFailure(failure) {
@@ -176,6 +182,9 @@ describe("session service", () => {
             locked_until_at: new Date("2026-05-17T12:04:00.000Z"),
             employee_public_id: null,
             organization_public_id: null,
+            admin_public_id: null,
+            admin_roles: [],
+            login_failure_user_id: 42,
           };
         },
       }),
@@ -240,6 +249,8 @@ describe("session service", () => {
           lockedUntilAt: null,
           employeePublicId: null,
           organizationPublicId: null,
+          adminPublicId: null,
+          adminRoles: [],
         },
         session: {
           expiresAt: "2026-05-24T12:00:00.000Z",

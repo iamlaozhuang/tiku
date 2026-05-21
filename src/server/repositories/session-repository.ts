@@ -2,6 +2,7 @@ import type { AuthUserAccessRow } from "./auth-repository";
 
 export type SessionLoginUserRow = AuthUserAccessRow & {
   login_failed_count: number;
+  login_failure_user_id: number | null;
 };
 
 export type LoginFailureInput = {
