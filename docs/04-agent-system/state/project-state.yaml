@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-6-admin-ops
-  updatedAt: "2026-05-21T02:13:19+08:00"
+  updatedAt: "2026-05-21T17:20:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,14 +36,14 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: null
-  status: idle
-  sourceStory: null
-  planPath: null
-  evidencePath: null
-  branch: null
-  commitSha: null
-  prUrl: null
+  id: phase-6-ai-and-audit-log-ops-baseline
+  status: pushed
+  sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-07-超级管理员-ai-配置; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-11-审计日志查看; docs/01-requirements/stories/epic-06-admin-ops.md#us-06-12-ai-调用日志查看
+  planPath: docs/05-execution-logs/task-plans/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+  branch: codex/phase-6-ai-and-audit-log-ops-baseline
+  commitSha: 5f3c412
+  prUrl: https://github.com/iamlaozhuang/tiku/pull/6
   retryCount: 0
   lastFailurePath: null
 qualityGates:
