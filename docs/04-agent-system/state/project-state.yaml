@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-7-local-runtime-readiness
-  updatedAt: "2026-05-21T18:47:41+08:00"
+  updatedAt: "2026-05-21T19:22:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,14 +36,14 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-7-local-runtime-readiness-planning
-  status: closed
-  sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-7-mvp-local-runtime-and-integration-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-05-21-phase-7-local-runtime-readiness-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-runtime-readiness-planning.md
-  branch: codex/phase-7-local-runtime-readiness-planning
-  commitSha: e607c35
-  prUrl: https://github.com/iamlaozhuang/tiku/pull/8
+  id: phase-7-runtime-inventory-and-slice-contract
+  status: validated
+  sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md
+  planPath: docs/05-execution-logs/task-plans/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+  branch: codex/phase-7-runtime-inventory-and-slice-contract
+  commitSha: null
+  prUrl: null
   retryCount: 0
   lastFailurePath: null
 qualityGates:
