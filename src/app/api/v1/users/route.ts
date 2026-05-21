@@ -1,21 +1,10 @@
-import { createAdminUserOrgAuthOpsRouteHandlers } from "@/server/services/admin-user-org-auth-ops-route";
-import { createUnavailableAdminUserOrgAuthOpsService } from "@/server/services/admin-user-org-auth-ops-service";
+import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flow-runtime";
 import { createUnavailableUserRegistrationRouteHandlers } from "@/server/auth/user-registration-route";
 
-const adminUserOrgAuthOpsRouteHandlers = createAdminUserOrgAuthOpsRouteHandlers(
-  createUnavailableAdminUserOrgAuthOpsService(),
-);
+const adminFlowRuntimeRouteHandlers = createAdminFlowRuntimeRouteHandlers();
 
 const userRegistrationRouteHandlers =
   createUnavailableUserRegistrationRouteHandlers();
 
-const responseContract = {
-  code: 503002,
-  message: "User registration runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const GET = adminUserOrgAuthOpsRouteHandlers.users.GET;
+export const GET = adminFlowRuntimeRouteHandlers.users.collection.GET;
 export const POST = userRegistrationRouteHandlers.POST;
