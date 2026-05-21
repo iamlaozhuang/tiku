@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-6-admin-ops
-  updatedAt: "2026-05-21T17:58:23+08:00"
+  updatedAt: "2026-05-21T18:05:09+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -37,13 +37,13 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-6-admin-ops-readiness-evidence
-  status: validated
+  status: closed
   sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-6-admin-ops
   planPath: null
   evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-readiness.md
   branch: codex/phase-6-admin-ops-readiness-evidence
-  commitSha: null
-  prUrl: null
+  commitSha: 306581a
+  prUrl: https://github.com/iamlaozhuang/tiku/pull/7
   retryCount: 0
   lastFailurePath: null
 qualityGates:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase-6-admin-ops / phase-6-admin-ops-readiness-evidence in progress
+  nextRecommendedAction: phase-6-admin-ops complete; seed next phase task queue when ready
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-readiness.md

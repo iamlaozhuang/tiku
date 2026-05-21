@@ -126,12 +126,79 @@ Blocked files:
 
 ## Git Closeout
 
-- Implementation commit: pending.
-- Push: pending.
-- Pull request: pending.
-- Merge: pending.
-- Master validation after merge: pending.
-- Cleanup: pending.
+- Implementation commit: `90801cb docs(admin): add ops readiness evidence`.
+- Branch push:
+  - Command: `git push -u origin codex/phase-6-admin-ops-readiness-evidence`
+  - Result: passed.
+  - Summary: pushed task branch to `origin` and set upstream tracking.
+- Pull request:
+  - Tool: GitHub connector `_create_pull_request`
+  - Result: passed.
+  - Summary: created draft PR `#7` targeting `master`.
+  - URL: `https://github.com/iamlaozhuang/tiku/pull/7`
+- PR ready transition:
+  - Tool: GitHub connector `_mark_pull_request_ready_for_review`
+  - Result: passed.
+  - Summary: PR `#7` was converted from draft to ready after explicit user authorization for this session.
+- PR merge:
+  - Tool: GitHub connector `_merge_pull_request`
+  - Result: passed.
+  - Summary: PR `#7` was squash-merged into `master`.
+  - Merge SHA: `306581ad0e5f99b349880b4e00185106170734f4`
+- Master sync:
+  - Command: `git fetch origin`
+  - Result: passed.
+  - Summary: fetched `origin/master` from `bfac247` to `306581a`.
+  - Command: `git switch master`
+  - Result: passed.
+  - Summary: switched to local `master` for closeout validation.
+  - Command: `git pull --ff-only origin master`
+  - Result: passed.
+  - Summary: local `master` fast-forwarded to `306581a`.
+- Master readiness:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: passed.
+  - Summary: required files, scripts, npm scripts, plugin-covered capabilities, and local skill capabilities were present on `master`.
+- Master quality gate:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed after approved escalation.
+  - Summary: `lint`, `typecheck`, `test:unit`, and `format:check` passed. Unit test summary: 80 files passed, 273 tests passed.
+- Master build:
+  - Command: `npm.cmd run build`
+  - Result: passed after approved escalation.
+  - Summary: Next.js production build compiled successfully, ran TypeScript, generated 40 static pages, and listed the Phase 6 admin operations routes.
+- Master git completion readiness:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: `master` matched `origin/master` at `306581a` before this closeout evidence update, with no tracked, staged, or untracked changes.
+- Cleanup:
+  - Command: `git push origin --delete codex/phase-6-admin-ops-readiness-evidence`
+  - Result: passed.
+  - Summary: deleted the remote task branch after PR merge and master validation.
+  - Command: `git branch -d codex/phase-6-admin-ops-readiness-evidence`
+  - Result: failed as expected.
+  - Summary: local Git rejected safe deletion because the branch was squash-merged and not ancestry-merged into `master`.
+  - Command: `git branch -D codex/phase-6-admin-ops-readiness-evidence`
+  - Result: passed.
+  - Summary: deleted the local task branch reference after confirming the PR was squash-merged.
+- Closeout state:
+  - `phase-6-admin-ops-readiness-evidence`: `closed`
+  - `project.currentTask.status`: `closed`
+  - Phase 6 admin ops readiness evidence is complete.
+- Final closeout inventory:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-6-admin-ops-readiness-evidence`
+  - Result: failed as expected on `master`.
+  - Summary: script protects `master` from task claiming; this check is not a master closeout gate.
+  - Command: `git diff --name-only -- package.json pnpm-lock.yaml package-lock.json "src/**" "drizzle/**" .env.example`
+  - Result: passed.
+  - Summary: no blocked files changed during closeout.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: inventory showed only the three allowed closeout files changed before the closeout evidence commit.
+- Final closeout quality gate:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed after approved escalation.
+  - Summary: final closeout rerun passed `lint`, `typecheck`, `test:unit`, and `format:check`. Unit test summary: 80 files passed, 273 tests passed.
 
 ## Taste Compliance Self-Check
 
