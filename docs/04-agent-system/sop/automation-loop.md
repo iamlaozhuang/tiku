@@ -113,6 +113,39 @@ Keep session context small and durable:
 - Do not rely on chat memory when a durable state file contradicts it.
 - If a session resumes after interruption, read the latest evidence before continuing.
 
+## Phase Transition Persistence Gate
+
+When a human-approved discussion changes the project phase or operating model, persist it before implementation work starts. The durable record must include these six layers:
+
+1. Roadmap update in `docs/04-agent-system/milestones-goals/mvp-roadmap.md`.
+2. Queue entries in `docs/04-agent-system/state/task-queue.yaml`.
+3. Project-state handoff in `docs/04-agent-system/state/project-state.yaml`.
+4. Task plan under `docs/05-execution-logs/task-plans/`.
+5. Evidence under `docs/05-execution-logs/evidence/`.
+6. A contract or interface document when the phase depends on runtime, API, schema, or integration scope.
+
+Evidence for the phase transition must include a self-check proving that all six layers exist, are searchable, and do not modify blocked files.
+
+## Phase 7 Runtime Readiness Gate
+
+Phase 7 is `MVP Local Runtime And Integration Readiness`. It is a runtime-hardening phase, not a horizontal feature expansion phase.
+
+Before replacing unavailable runtime services, agents must read:
+
+- `docs/02-architecture/interfaces/runtime-slice-contract.md`
+- `docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-7-mvp-local-runtime-and-integration-readiness`
+- the current Phase 7 task plan and evidence
+
+Phase 7 work must preserve these guardrails:
+
+- `no_horizontal_feature_expansion`
+- `mvp_vertical_slice`
+- `docker_pgvector_dev`
+- `seed_idempotent`
+- `mock_provider_first`
+
+The first runtime task after planning must inventory `createUnavailable...` surfaces and map each surface to required MVP runtime, mock runtime, deferred runtime, or blocked-by-dependency status. Do not replace broad route groups before that inventory is recorded.
+
 ## Git And Remote Repository Handling
 
 - Do not work directly on `master` or `main` unless the user explicitly requests a read-only inspection.

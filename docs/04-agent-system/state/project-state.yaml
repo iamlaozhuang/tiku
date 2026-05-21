@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-6-admin-ops
-  updatedAt: "2026-05-21T18:05:09+08:00"
+  currentPhase: phase-7-local-runtime-readiness
+  updatedAt: "2026-05-21T18:35:41+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,14 +36,14 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-6-admin-ops-readiness-evidence
-  status: closed
-  sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-6-admin-ops
-  planPath: null
-  evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-readiness.md
-  branch: codex/phase-6-admin-ops-readiness-evidence
-  commitSha: 306581a
-  prUrl: https://github.com/iamlaozhuang/tiku/pull/7
+  id: phase-7-local-runtime-readiness-planning
+  status: committed
+  sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-7-mvp-local-runtime-and-integration-readiness
+  planPath: docs/05-execution-logs/task-plans/2026-05-21-phase-7-local-runtime-readiness-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-runtime-readiness-planning.md
+  branch: codex/phase-7-local-runtime-readiness-planning
+  commitSha: null
+  prUrl: null
   retryCount: 0
   lastFailurePath: null
 qualityGates:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase-6-admin-ops complete; seed next phase task queue when ready
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-readiness.md
+  nextRecommendedAction: phase-7-local-runtime-readiness / phase-7-runtime-inventory-and-slice-contract after planning closeout
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-runtime-readiness-planning.md

@@ -101,3 +101,34 @@ Dependency order:
 
 - Depends on Phase 2 auth, Phase 3 content management, Phase 4 student activity, and Phase 5 AI/RAG telemetry.
 - Completes the MVP operational loop after core learning and AI workflows are stable.
+
+## Phase 7: MVP Local Runtime And Integration Readiness
+
+Primary deliverables:
+
+- `runtime_readiness` transition from baseline contracts to a locally runnable MVP vertical slice.
+- Docker PostgreSQL with pgvector as the local `dev` database baseline (`docker_pgvector_dev`).
+- Repeatable Drizzle migration and migrate workflow; `drizzle-kit push` remains forbidden.
+- Deterministic and `seed_idempotent` dev seed data for one `super_admin`, one `student`, one `organization`, one effective `authorization`, one published `paper`, and mock AI metadata.
+- Better Auth session runtime for real `student` and `admin` contexts.
+- `mvp_vertical_slice` covering student login, authorized paper access, practice or mock exam answer submission, report visibility, admin login, admin read views, one audited admin action, and mock AI call logging.
+- Runtime slice contract at `docs/02-architecture/interfaces/runtime-slice-contract.md`.
+- Local E2E readiness evidence that proves the student, admin, `audit_log`, and mock `ai_call_log` flows.
+
+Non-goals:
+
+- `no_horizontal_feature_expansion`: do not add broad new product features.
+- Do not replace every `createUnavailable...Service()` surface in one task.
+- Do not connect a real AI provider before the mock provider and log redaction chain pass validation (`mock_provider_first`).
+- Do not implement full RAG ingestion before the MVP runtime slice is stable.
+- Do not containerize the Next.js app before host-run local runtime passes.
+- Do not introduce dependencies without the dependency introduction gate and explicit `human approval`.
+- Do not deploy to production or modify production data.
+
+Dependency order:
+
+- Depends on Phase 6 admin ops readiness closeout.
+- Starts with documentation and runtime slice inventory before any runtime wiring.
+- Database migration and seed baseline must land before auth/session runtime.
+- Auth/session runtime must land before student and admin flow smoke tests.
+- Mock AI logging and audit logging must be validated before real provider or RAG work.
