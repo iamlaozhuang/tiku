@@ -177,9 +177,94 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 ## Closeout
 
 - State update: `phase-7-local-e2e-readiness-evidence` was marked `committed` in `task-queue.yaml`; `project-state.yaml` current task status was updated to `committed` before the local evidence commit.
-- Local commit: pending.
-- Branch push: pending.
-- Pull request: pending.
-- PR merge: pending.
-- Master validation: pending.
-- Cleanup: pending.
+- Local evidence commit: `e60be6a docs(agent): record phase 7 local e2e readiness`.
+- Post-commit inventory:
+  - Command: `git status --short --branch`
+  - Result: passed.
+  - Summary: task branch was clean after commit.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: task branch contained one commit ahead of `origin/master` with only task-scoped files.
+- Branch push:
+  - Command: `git push -u origin codex/phase-7-local-e2e-readiness-evidence`
+  - Result: failed in sandbox.
+  - Summary: sandbox network could not connect to `github.com:443`.
+  - Command: `git push -u origin codex/phase-7-local-e2e-readiness-evidence`
+  - Result: passed after approved escalation.
+  - Summary: pushed task branch to `origin` and set upstream tracking.
+- Pull request:
+  - Command: `gh pr create ...`
+  - Result: failed.
+  - Summary: GitHub CLI `gh` was not installed in this environment.
+  - Tool: GitHub connector `_create_pull_request`
+  - Result: passed.
+  - Summary: created ready PR `#23` targeting `master`.
+  - URL: `https://github.com/iamlaozhuang/tiku/pull/23`
+  - Head SHA: `e60be6ab22cbd951c28f7129b62befc2de743c2e`.
+- PR merge:
+  - Tool: GitHub connector `_merge_pull_request`
+  - Result: passed.
+  - Summary: PR `#23` was squash-merged into `master` with expected head SHA.
+  - Merge SHA: `1ff5d38cb32c18e1802c8480265f2b325ee0a374`.
+- Master sync:
+  - Command: `git fetch origin`
+  - Result: passed after approved escalation.
+  - Summary: fetched `origin/master`, moving from `ab9b2f2` to `1ff5d38`.
+  - Command: `git switch master`
+  - Result: passed after approved escalation.
+  - Summary: switched to local `master`, which was one commit behind `origin/master`.
+  - Command: `git pull --ff-only origin master`
+  - Result: passed after approved escalation.
+  - Summary: local `master` fast-forwarded to `1ff5d38`.
+- Master validation:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: passed.
+  - Summary: readiness passed on merged `master`.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed after approved escalation.
+  - Summary: closeout quality gate passed `lint`, `typecheck`, `test:unit`, and `format:check`. Unit summary: `86` files and `288` tests passed.
+  - Command: `npm.cmd run build`
+  - Result: passed after approved escalation.
+  - Summary: Next.js production build compiled successfully on `master` and generated `40` static pages.
+  - Command: `npm.cmd run test:e2e`
+  - Result: passed after approved escalation.
+  - Summary: Playwright ran `1` chromium test, `e2e\home.spec.ts` loaded the root navigation page, and `1` test passed in `9.0s`.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`
+  - Result: passed.
+  - Summary: naming convention scan completed with no banned terms or DTO/route naming issues.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: `master` matched `origin/master` at `1ff5d38` with no tracked, staged, or untracked changes.
+- Cleanup:
+  - Command: `git push origin --delete codex/phase-7-local-e2e-readiness-evidence`
+  - Result: failed in sandbox.
+  - Summary: sandbox network could not connect to `github.com:443`.
+  - Command: `git push origin --delete codex/phase-7-local-e2e-readiness-evidence`
+  - Result: passed after approved escalation.
+  - Summary: deleted the remote task branch after PR merge and master validation.
+  - Command: `git branch -d codex/phase-7-local-e2e-readiness-evidence`
+  - Result: failed as expected.
+  - Summary: local Git rejected safe deletion because the branch was squash-merged and not ancestry-merged into `master`.
+  - Command: `git branch -D codex/phase-7-local-e2e-readiness-evidence`
+  - Result: passed after approved escalation.
+  - Summary: deleted the local task branch reference after confirming PR `#23` was squash-merged.
+- Closeout state:
+  - `phase-7-local-e2e-readiness-evidence`: `closed`
+  - `project.currentTask.status`: `closed`
+  - Next recommended action: stop after this closeout; do not claim the next task.
+- Closeout persistence:
+  - Branch: `codex/phase-7-local-e2e-readiness-closeout`
+  - Purpose: persist closed state, merge evidence, master validation evidence, cleanup evidence, and final handoff without direct development on `master`.
+- Closeout branch validation:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: passed.
+  - Summary: readiness passed on the closeout branch.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed after approved escalation.
+  - Summary: closeout quality gate passed `lint`, `typecheck`, `test:unit`, and `format:check`. Unit summary: `86` files and `288` tests passed.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: closeout branch contained only allowed state/evidence changes before closeout commit.
+  - Command: `git diff --name-only -- package.json pnpm-lock.yaml package-lock.json .env.example drizzle src`
+  - Result: passed.
+  - Summary: no blocked package, lockfile, env example, drizzle, or src changes were present.

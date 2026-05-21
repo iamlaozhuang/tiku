@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-7-local-runtime-readiness
-  updatedAt: "2026-05-21T23:10:23+08:00"
+  updatedAt: "2026-05-21T23:17:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -37,13 +37,13 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-7-local-e2e-readiness-evidence
-  status: committed
+  status: closed
   sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#validation-expectations
   planPath: null
   evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-e2e-readiness.md
   branch: codex/phase-7-local-e2e-readiness-evidence
-  commitSha: null
-  prUrl: null
+  commitSha: 1ff5d38
+  prUrl: https://github.com/iamlaozhuang/tiku/pull/23
   retryCount: 0
   lastFailurePath: null
 qualityGates:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase-7-local-runtime-readiness / complete phase-7-local-e2e-readiness-evidence closeout
+  nextRecommendedAction: stop after phase-7-local-e2e-readiness-evidence closeout; do not claim the next task
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-e2e-readiness.md
