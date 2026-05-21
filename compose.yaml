@@ -1,0 +1,23 @@
+services:
+  tiku-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: tiku-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tiku
+      POSTGRES_USER: tiku
+      POSTGRES_PASSWORD: tiku-local-dev-password
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - tiku-postgres-data:/var/lib/postgresql/data
+      - ./scripts/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tiku -d tiku"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  tiku-postgres-data:
