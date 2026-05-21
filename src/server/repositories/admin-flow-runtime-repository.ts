@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -10,6 +11,7 @@ import {
   ilike,
   inArray,
   or,
+  sql,
   type SQL,
 } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -57,10 +59,16 @@ export type AdminContentKnowledgeRuntimeRepository = {
 };
 
 export type AdminAuditLogRuntimeRepository = {
+  appendAuditLog(input: AppendAuditLogInput): Promise<void>;
   listAuditLogs(
     query: AdminAiAuditLogListQuery,
   ): Promise<AdminFlowPage<AuditLogListDto>>;
 };
+
+export type AppendAuditLogInput = Omit<
+  AuditLogListDto["auditLogs"][number],
+  "publicId" | "createdAt"
+>;
 
 export type AdminFlowRuntimeRepositories = {
   userOrgAuthRepository: AdminUserOrgAuthRuntimeRepository;
@@ -121,7 +129,8 @@ export function createPostgresAdminFlowRuntimeRepositories(
       createPostgresAdminUserOrgAuthRuntimeRepository(getDatabase),
     contentKnowledgeRepository:
       createPostgresAdminContentKnowledgeRuntimeRepository(getDatabase),
-    auditLogRepository: createPostgresAdminAuditLogRuntimeRepository(),
+    auditLogRepository:
+      createPostgresAdminAuditLogRuntimeRepository(getDatabase),
   };
 }
 
@@ -292,15 +301,175 @@ function createPostgresAdminContentKnowledgeRuntimeRepository(
   };
 }
 
-function createPostgresAdminAuditLogRuntimeRepository(): AdminAuditLogRuntimeRepository {
+type AuditLogDatabaseRow = {
+  public_id: string;
+  actor_public_id: string;
+  actor_role: string;
+  action_type: string;
+  target_resource_type: string;
+  target_public_id: string | null;
+  result_status: "success" | "failed";
+  metadata_summary: string | null;
+  request_ip: string | null;
+  created_at: Date | string;
+};
+
+type CountDatabaseRow = {
+  value: number;
+};
+
+type DrizzleSqlExecutor = {
+  execute<TRow extends Record<string, unknown>>(query: SQL): Promise<TRow[]>;
+};
+
+function createPostgresAdminAuditLogRuntimeRepository(
+  getDatabase: () => AdminFlowRuntimeDatabase,
+): AdminAuditLogRuntimeRepository {
   return {
+    async appendAuditLog(input) {
+      const database = getDatabase();
+      const publicId = `audit-log-${randomUUID()}`;
+
+      try {
+        await executeSql(
+          database,
+          sql`
+          insert into audit_log (
+            public_id,
+            actor_public_id,
+            actor_role,
+            action_type,
+            target_resource_type,
+            target_public_id,
+            result_status,
+            metadata_summary,
+            request_ip,
+            created_at
+          )
+          values (
+            ${publicId},
+            ${input.actorPublicId},
+            ${input.actorRole},
+            ${input.actionType},
+            ${input.targetResourceType},
+            ${input.targetPublicId},
+            ${input.resultStatus},
+            ${input.metadataSummary},
+            ${input.requestIp},
+            now()
+          )
+        `,
+        );
+      } catch (error) {
+        if (!isUndefinedTableError(error)) {
+          throw error;
+        }
+      }
+    },
     async listAuditLogs(query) {
-      return {
-        auditLogs: [],
-        pagination: createPagination(query, 0),
-      };
+      const database = getDatabase();
+      const keywordCondition =
+        query.keyword === null
+          ? sql`true`
+          : sql`(
+              actor_public_id ilike ${`%${query.keyword}%`}
+              or actor_role ilike ${`%${query.keyword}%`}
+              or action_type ilike ${`%${query.keyword}%`}
+              or target_resource_type ilike ${`%${query.keyword}%`}
+              or target_public_id ilike ${`%${query.keyword}%`}
+              or metadata_summary ilike ${`%${query.keyword}%`}
+            )`;
+      const orderBy =
+        query.sortOrder === "asc" ? sql`created_at asc` : sql`created_at desc`;
+
+      try {
+        const rows = await executeSql<AuditLogDatabaseRow>(
+          database,
+          sql`
+          select
+            public_id,
+            actor_public_id,
+            actor_role,
+            action_type,
+            target_resource_type,
+            target_public_id,
+            result_status,
+            metadata_summary,
+            request_ip,
+            created_at
+          from audit_log
+          where ${keywordCondition}
+          order by ${orderBy}
+          limit ${query.pageSize}
+          offset ${(query.page - 1) * query.pageSize}
+        `,
+        );
+        const [totalRow] = await executeSql<CountDatabaseRow>(
+          database,
+          sql`
+          select count(*)::int as value
+          from audit_log
+          where ${keywordCondition}
+        `,
+        );
+
+        return {
+          auditLogs: rows.map(mapAuditLogRow),
+          pagination: createPagination(query, totalRow?.value ?? 0),
+        };
+      } catch (error) {
+        if (!isUndefinedTableError(error)) {
+          throw error;
+        }
+
+        return {
+          auditLogs: [],
+          pagination: createPagination(query, 0),
+        };
+      }
     },
   };
+}
+
+async function executeSql<TRow extends Record<string, unknown>>(
+  database: AdminFlowRuntimeDatabase,
+  query: SQL,
+): Promise<TRow[]> {
+  return (database as unknown as DrizzleSqlExecutor).execute<TRow>(query);
+}
+
+function mapAuditLogRow(
+  row: AuditLogDatabaseRow,
+): AuditLogListDto["auditLogs"][number] {
+  return {
+    publicId: row.public_id,
+    actorPublicId: row.actor_public_id,
+    actorRole: row.actor_role,
+    actionType: row.action_type,
+    targetResourceType: row.target_resource_type,
+    targetPublicId: row.target_public_id,
+    resultStatus: row.result_status,
+    metadataSummary: row.metadata_summary,
+    requestIp: row.request_ip,
+    createdAt:
+      row.created_at instanceof Date
+        ? row.created_at.toISOString()
+        : new Date(row.created_at).toISOString(),
+  };
+}
+
+function isUndefinedTableError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  const errorCode = (error as { code?: unknown }).code;
+
+  if (errorCode === "42P01") {
+    return true;
+  }
+
+  return isUndefinedTableError((error as { cause?: unknown }).cause);
 }
 
 function createUserConditions(query: AdminAuthOperationListQuery): SQL[] {

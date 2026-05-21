@@ -135,6 +135,9 @@ function createRepositories(): AdminFlowRuntimeRepositories {
       },
     },
     auditLogRepository: {
+      async appendAuditLog() {
+        return undefined;
+      },
       async listAuditLogs(query) {
         return {
           auditLogs: [],
