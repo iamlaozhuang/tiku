@@ -20,6 +20,11 @@ import type {
   ExamReportRepository,
   ExamReportRow,
 } from "../repositories/exam-report-repository";
+import type {
+  AiMockProviderPromptTemplateSnapshot,
+  LearningSuggestionMockContext,
+} from "./ai-mock-provider-runtime";
+import type { ModelConfigSnapshot } from "../models/ai-rag";
 import {
   normalizeExamReportListQuery,
   normalizeGenerateExamReportInput,
@@ -36,6 +41,19 @@ export type ExamReportClock = {
 
 export type ExamReportPublicIdFactory = {
   createPublicId(prefix: "exam_report"): string;
+};
+
+export type ExamReportLearningSuggestionRuntime = {
+  generateLearningSuggestion(context: LearningSuggestionMockContext): Promise<{
+    learningSuggestion: string;
+    aiCallLog: unknown;
+  }>;
+};
+
+export type ExamReportLearningSuggestionOptions = {
+  learningSuggestionRuntime: ExamReportLearningSuggestionRuntime;
+  modelConfigSnapshot: ModelConfigSnapshot;
+  promptTemplate: AiMockProviderPromptTemplateSnapshot;
 };
 
 export type ExamReportService = {
@@ -199,10 +217,53 @@ function isExamReportRow(
   return "public_id" in value;
 }
 
+function selectLearningSuggestionAnswerRecord(
+  answerRecords: ExamReportAnswerRecordRow[],
+): ExamReportAnswerRecordRow | null {
+  return (
+    answerRecords.find((answerRecord) => answerRecord.is_correct === false) ??
+    answerRecords[0] ??
+    null
+  );
+}
+
+function buildLearningSuggestionPrompt(
+  report: ExamReportRow,
+  answerRecord: ExamReportAnswerRecordRow | null,
+): string {
+  return JSON.stringify({
+    reportPublicId: report.public_id,
+    paperPublicId: report.paper_public_id,
+    mockExamPublicId: report.mock_exam_public_id,
+    totalScore: report.total_score,
+    selectedQuestionPublicId: answerRecord?.question_public_id ?? null,
+    selectedAnswerRecordPublicId: answerRecord?.public_id ?? null,
+    selectedAnswerScore: answerRecord?.score ?? null,
+    selectedAnswerMaxScore: answerRecord?.max_score ?? null,
+  });
+}
+
+function buildLearningSuggestionRawAnswer(
+  answerRecord: ExamReportAnswerRecordRow | null,
+): string {
+  if (answerRecord === null) {
+    return "no answer record";
+  }
+
+  return JSON.stringify({
+    answerSnapshot: answerRecord.answer_snapshot,
+    questionSnapshot: answerRecord.question_snapshot,
+    isCorrect: answerRecord.is_correct,
+    score: answerRecord.score,
+    maxScore: answerRecord.max_score,
+  });
+}
+
 export function createExamReportService(
   repository: ExamReportRepository,
   clock: ExamReportClock = systemClock,
   publicIdFactory: ExamReportPublicIdFactory = systemPublicIdFactory,
+  learningSuggestionOptions?: ExamReportLearningSuggestionOptions,
 ): ExamReportService {
   return {
     async listExamReports(userContext, query) {
@@ -337,10 +398,38 @@ export function createExamReportService(
         return report;
       }
 
-      return createErrorResponse(
-        422321,
-        "Learning suggestion retry is not available in Phase 4.",
+      if (learningSuggestionOptions === undefined) {
+        return createErrorResponse(
+          422321,
+          "Learning suggestion retry is not available in Phase 4.",
+        );
+      }
+
+      const answerRecords = await repository.listMockExamAnswerRecords({
+        userPublicId: userContext.userPublicId,
+        mockExamPublicId: report.mock_exam_public_id,
+      });
+      const selectedAnswerRecord =
+        selectLearningSuggestionAnswerRecord(answerRecords);
+
+      await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
+        {
+          userPublicId: userContext.userPublicId,
+          answerRecordPublicId: selectedAnswerRecord?.public_id ?? null,
+          mockExamPublicId: report.mock_exam_public_id,
+          questionPublicId: selectedAnswerRecord?.question_public_id ?? null,
+          rawPrompt: buildLearningSuggestionPrompt(
+            report,
+            selectedAnswerRecord,
+          ),
+          rawAnswer: buildLearningSuggestionRawAnswer(selectedAnswerRecord),
+          modelConfigSnapshot: learningSuggestionOptions.modelConfigSnapshot,
+          promptTemplate: learningSuggestionOptions.promptTemplate,
+          startedAt: clock.now(),
+        },
       );
+
+      return createSuccessResponse(null);
     },
   };
 }

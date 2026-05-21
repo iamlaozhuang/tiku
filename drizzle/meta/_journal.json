@@ -8,6 +8,13 @@
       "when": 1779347323411,
       "tag": "0000_nebulous_sugar_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779380681502,
+      "tag": "20260522002400_add_audit_log",
+      "breakpoints": true
     }
   ]
 }
