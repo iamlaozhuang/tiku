@@ -2769,7 +2769,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-runtime-readiness-planning.md
-    status: committed
+    status: closed
     retryCount: 0
   - id: phase-7-runtime-inventory-and-slice-contract
     title: Runtime Inventory And Slice Contract
