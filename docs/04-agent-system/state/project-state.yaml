@@ -37,13 +37,13 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-7-ai-mock-provider-and-log-runtime-smoke
-  status: committed
+  status: closed
   sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#audit-and-ai-log-boundary
   planPath: docs/05-execution-logs/task-plans/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
   branch: codex/phase-7-ai-mock-provider-and-log-runtime-smoke
-  commitSha: null
-  prUrl: null
+  commitSha: 4c00738
+  prUrl: https://github.com/iamlaozhuang/tiku/pull/21
   retryCount: 0
   lastFailurePath: null
 qualityGates:
@@ -77,5 +77,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase-7-local-runtime-readiness / phase-7-ai-mock-provider-and-log-runtime-smoke
+  nextRecommendedAction: phase-7-local-runtime-readiness / phase-7-local-e2e-readiness-evidence
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
