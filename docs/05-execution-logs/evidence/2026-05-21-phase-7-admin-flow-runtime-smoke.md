@@ -196,8 +196,110 @@
 
 ## Git Closeout
 
-Pending.
+- Local implementation commit: `122b71c feat(admin): add phase 7 flow runtime smoke`.
+- Post-commit inventory:
+  - Command: `git status --short --branch`
+  - Result: passed.
+  - Summary: task branch was clean after commit.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: task branch contained one commit ahead of `origin/master` with only task-scoped files.
+- Branch push:
+  - Command: `git push -u origin codex/phase-7-admin-flow-runtime-smoke`
+  - Result: failed in sandbox.
+  - Summary: sandbox network could not connect to `github.com:443`.
+  - Command: `git push -u origin codex/phase-7-admin-flow-runtime-smoke`
+  - Result: passed after approved escalation.
+  - Summary: pushed task branch to `origin` and set upstream tracking.
+- Pull request:
+  - Tool: GitHub connector `_create_pull_request`
+  - Result: passed.
+  - Summary: created ready PR `#17` targeting `master`.
+  - URL: `https://github.com/iamlaozhuang/tiku/pull/17`
+  - Head SHA: `122b71c6c984236ffcb8070b369e3815f4dd20eb`
+- PR merge:
+  - Tool: GitHub connector `_merge_pull_request`
+  - Result: passed.
+  - Summary: PR `#17` was squash-merged into `master` with expected head SHA.
+  - Merge SHA: `56b2ab3c519a732c4f929d8ffb87cfbbeba3396b`.
+- Master sync:
+  - Command: `git fetch origin`
+  - Result: failed in sandbox.
+  - Summary: sandbox could not write `.git/FETCH_HEAD`.
+  - Command: `git fetch origin`
+  - Result: passed after approved escalation.
+  - Summary: fetched `origin/master`, moving from `a7766c0` to `56b2ab3`.
+  - Command: `git switch master`
+  - Result: failed in sandbox.
+  - Summary: sandbox could not create `.git/index.lock`.
+  - Command: `git switch master`
+  - Result: passed after approved escalation.
+  - Summary: switched to local `master`.
+  - Command: `git pull --ff-only origin master`
+  - Result: failed in sandbox.
+  - Summary: sandbox could not write `.git/FETCH_HEAD`.
+  - Command: `git pull --ff-only origin master`
+  - Result: passed after approved escalation.
+  - Summary: local `master` fast-forwarded to `56b2ab3`.
+- Master validation:
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: passed.
+  - Summary: readiness passed on merged `master`.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed after approved escalation.
+  - Summary: post-merge quality gate passed `lint`, `typecheck`, `test:unit`, and `format:check`. Unit test summary: `84` files and `282` tests passed.
+  - Command: `npm.cmd run build`
+  - Result: passed after approved escalation.
+  - Summary: Next.js production build compiled successfully on `master`.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`
+  - Result: passed.
+  - Summary: naming convention scan completed with no banned terms or DTO/route naming issues.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: `master` matched `origin/master` at `56b2ab3` with no tracked, staged, or untracked changes.
+- Cleanup:
+  - Command: `git push origin --delete codex/phase-7-admin-flow-runtime-smoke`
+  - Result: failed in sandbox.
+  - Summary: sandbox network could not connect to `github.com:443`.
+  - Command: `git push origin --delete codex/phase-7-admin-flow-runtime-smoke`
+  - Result: passed after approved escalation.
+  - Summary: deleted the remote task branch after PR merge and master validation.
+  - Command: `git branch -d codex/phase-7-admin-flow-runtime-smoke`
+  - Result: failed as expected.
+  - Summary: local Git rejected safe deletion because the branch was squash-merged and not ancestry-merged into `master`.
+  - Command: `git branch -D codex/phase-7-admin-flow-runtime-smoke`
+  - Result: passed after approved escalation.
+  - Summary: deleted the local task branch reference after confirming PR `#17` was squash-merged.
+- Closeout persistence:
+  - Branch: `codex/phase-7-admin-flow-runtime-closeout`
+  - Purpose: persist merge, remote action, master validation, cleanup evidence, and final closed state without direct development on `master`.
+- Closeout state:
+  - `phase-7-admin-flow-runtime-smoke`: `closed`
+  - `project.currentTask.status`: `closed`
+  - Next recommended action: `phase-7-audit-log-runtime-baseline`
+- Closeout branch validation:
+  - Command: `npm.cmd exec -- prettier --write docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/project-state.yaml docs/05-execution-logs/evidence/2026-05-21-phase-7-admin-flow-runtime-smoke.md`
+  - Result: passed after approved escalation.
+  - Summary: formatted closeout state and evidence files.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: passed.
+  - Summary: readiness passed on the closeout branch.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Result: passed after approved escalation.
+  - Summary: closeout quality gate passed `lint`, `typecheck`, `test:unit`, and `format:check`. Unit test summary: `84` files and `282` tests passed.
+  - Command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: passed.
+  - Summary: closeout branch contains only allowed state/evidence changes before closeout commit.
 
 ## Taste Compliance Self-Check
 
-Pending final checklist.
+- Frontend/UI taste: no UI visual changes; no hardcoded color, spacing, font, or motion changes introduced.
+- Interaction states: no admin UI components changed, so loading/empty/error state coverage remains outside this runtime API task.
+- Tailwind ordering: no Tailwind class changes introduced.
+- Backend N+1 guard: repository code batches question, paper, and mock exam counts with grouped queries instead of query-in-loop patterns.
+- Schema discipline: no schema, migration, `drizzle/**`, or raw migration workflow changes introduced.
+- API response contract: runtime routes return standard `{ code, message, data, pagination? }` envelopes through existing helpers.
+- Naming: API route folders remain kebab-case, DTO fields remain camelCase, database-facing names remain snake_case.
+- Comments: no low-value explanatory comments added.
+- Meaningful naming: new runtime/service/repository names use registered project terms including `admin`, `user`, `question`, `paper`, and `audit_log`.
+- Immutability: tests and runtime mappings return new objects and arrays without mutating exported DTOs.
