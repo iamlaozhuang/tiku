@@ -2731,3 +2731,388 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-20-phase-6-admin-ops-readiness.md
     status: closed
     retryCount: 0
+  - id: phase-7-local-runtime-readiness-planning
+    title: Phase 7 Local Runtime Readiness Planning
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-7-mvp-local-runtime-and-integration-readiness
+    dependencies:
+      - phase-6-admin-ops-readiness-evidence
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-local-runtime-readiness-planning.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-local-runtime-readiness-planning.md
+      - docs/02-architecture/interfaces/runtime-slice-contract.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - scripts/agent-system/Test-AgentSystemReadiness.ps1
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - evidence_integrity
+      - readiness_closeout
+      - mechanism_hardening
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-local-runtime-readiness-planning
+      - Select-String -Path 'docs\04-agent-system\milestones-goals\mvp-roadmap.md' -Pattern 'Phase 7|runtime_readiness|mvp_vertical_slice|no_horizontal_feature_expansion'
+      - Select-String -Path 'docs\02-architecture\interfaces\runtime-slice-contract.md' -Pattern 'mock_provider_first|seed_idempotent|docker_pgvector_dev'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-runtime-readiness-planning.md
+    status: committed
+    retryCount: 0
+  - id: phase-7-runtime-inventory-and-slice-contract
+    title: Runtime Inventory And Slice Contract
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md
+    dependencies:
+      - phase-7-local-runtime-readiness-planning
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-runtime-inventory-and-slice-contract-security-review.md
+      - docs/02-architecture/interfaces/runtime-slice-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - runtime_readiness
+      - api_contract
+      - roadmap_scope
+      - evidence_integrity
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-runtime-inventory-and-slice-contract-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-runtime-inventory-and-slice-contract
+      - rg "createUnavailable" src/app src/server
+      - Select-String -Path 'docs\02-architecture\interfaces\runtime-slice-contract.md' -Pattern 'Required For MVP Slice|Deferred Runtime|Mock Runtime Allowed'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+    status: pending
+    retryCount: 0
+  - id: phase-7-dev-database-migration-and-seed-baseline
+    title: Dev Database Migration And Seed Baseline
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md#dev; docs/02-architecture/interfaces/runtime-slice-contract.md#mvp-vertical-slice
+    dependencies:
+      - phase-7-runtime-inventory-and-slice-contract
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-dev-database-migration-and-seed-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-dev-database-migration-and-seed-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-dev-database-migration-and-seed-baseline-security-review.md
+      - src/db/**
+      - drizzle/**
+      - scripts/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+    riskTypes:
+      - schema
+      - migration
+      - seed
+      - local_runtime
+      - evidence_integrity
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-dev-database-migration-and-seed-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-dev-database-migration-and-seed-baseline
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-dev-database-migration-and-seed-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-7-auth-session-runtime-baseline
+    title: Auth Session Runtime Baseline
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#auth-and-authorization-boundary
+    dependencies:
+      - phase-7-dev-database-migration-and-seed-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-auth-session-runtime-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-auth-session-runtime-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-auth-session-runtime-baseline-security-review.md
+      - src/app/api/v1/sessions/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - auth
+      - session
+      - authorization
+      - api_contract
+      - local_runtime
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-auth-session-runtime-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-auth-session-runtime-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-auth-session-runtime-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-7-student-flow-runtime-smoke
+    title: Student Flow Runtime Smoke
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#mvp-vertical-slice
+    dependencies:
+      - phase-7-auth-session-runtime-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-student-flow-runtime-smoke.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-student-flow-runtime-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-student-flow-runtime-smoke-security-review.md
+      - src/app/api/v1/student-papers/**
+      - src/app/api/v1/practices/**
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - authorization
+      - student
+      - practice
+      - mock_exam
+      - exam_report
+      - api_contract
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-student-flow-runtime-smoke-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-student-flow-runtime-smoke
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-student-flow-runtime-smoke.md
+    status: pending
+    retryCount: 0
+  - id: phase-7-admin-flow-runtime-smoke
+    title: Admin Flow Runtime Smoke
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#mvp-vertical-slice
+    dependencies:
+      - phase-7-auth-session-runtime-baseline
+      - phase-7-dev-database-migration-and-seed-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-admin-flow-runtime-smoke.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-admin-flow-runtime-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-admin-flow-runtime-smoke-security-review.md
+      - src/app/api/v1/users/**
+      - src/app/api/v1/questions/**
+      - src/app/api/v1/papers/**
+      - src/app/api/v1/audit-logs/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - admin
+      - authorization
+      - audit_log
+      - api_contract
+      - local_runtime
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-admin-flow-runtime-smoke-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-admin-flow-runtime-smoke
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-admin-flow-runtime-smoke.md
+    status: pending
+    retryCount: 0
+  - id: phase-7-audit-log-runtime-baseline
+    title: Audit Log Runtime Baseline
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#audit-and-ai-log-boundary
+    dependencies:
+      - phase-7-admin-flow-runtime-smoke
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-audit-log-runtime-baseline.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-audit-log-runtime-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-audit-log-runtime-baseline-security-review.md
+      - src/app/api/v1/audit-logs/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - audit_log
+      - admin
+      - authorization
+      - api_contract
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-audit-log-runtime-baseline-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-audit-log-runtime-baseline
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-audit-log-runtime-baseline.md
+    status: pending
+    retryCount: 0
+  - id: phase-7-ai-mock-provider-and-log-runtime-smoke
+    title: AI Mock Provider And Log Runtime Smoke
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#audit-and-ai-log-boundary
+    dependencies:
+      - phase-7-audit-log-runtime-baseline
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
+      - docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke-security-review.md
+      - src/ai/**
+      - src/app/api/v1/ai-call-logs/**
+      - src/app/api/v1/model-configs/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - ai_call_log
+      - model_config
+      - secret
+      - external_service_config
+      - api_contract
+      - local_runtime
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-7-ai-mock-provider-and-log-runtime-smoke
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
+    status: pending
+    retryCount: 0
+  - id: phase-7-local-e2e-readiness-evidence
+    title: Local E2E Readiness Evidence
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/02-architecture/interfaces/runtime-slice-contract.md#validation-expectations
+    dependencies:
+      - phase-7-student-flow-runtime-smoke
+      - phase-7-admin-flow-runtime-smoke
+      - phase-7-ai-mock-provider-and-log-runtime-smoke
+    taskPlanPolicy: evidence_only
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-21-phase-7-local-e2e-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - .env.example
+    riskTypes:
+      - evidence_integrity
+      - readiness_closeout
+      - local_runtime
+      - e2e
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-e2e-readiness.md
+    status: pending
+    retryCount: 0

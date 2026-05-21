@@ -7,6 +7,7 @@ $requiredFilePaths = @(
     "docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md",
     "docs\02-architecture\adr\adr-003-workplace-desktop-web-compatibility.md",
     "docs\02-architecture\interfaces\global-db-api-skeleton.md",
+    "docs\02-architecture\interfaces\runtime-slice-contract.md",
     "docs\04-agent-system\sop\automation-loop.md",
     "docs\04-agent-system\sop\skill-dispatch-matrix.md",
     "docs\04-agent-system\sop\dependency-introduction-gate.md",
@@ -219,4 +220,31 @@ if ($missingRequiredFileCount -gt 0) {
 
 if ($missingQualityScriptCount -gt 0) {
     throw "Agent system readiness failed because quality scripts are missing."
+}
+
+$requiredContentChecks = @(
+    [PSCustomObject]@{ Path = "docs\04-agent-system\milestones-goals\mvp-roadmap.md"; Pattern = "Phase 7|runtime_readiness|mvp_vertical_slice|no_horizontal_feature_expansion"; Label = "Phase 7 roadmap anchors" },
+    [PSCustomObject]@{ Path = "docs\02-architecture\interfaces\runtime-slice-contract.md"; Pattern = "mock_provider_first|seed_idempotent|docker_pgvector_dev|Required For MVP Slice"; Label = "Phase 7 runtime slice anchors" },
+    [PSCustomObject]@{ Path = "docs\04-agent-system\sop\automation-loop.md"; Pattern = "Phase Transition Persistence Gate|Phase 7 Runtime Readiness Gate"; Label = "phase transition mechanism gate" }
+)
+
+$missingContentCheckCount = 0
+foreach ($requiredContentCheck in $requiredContentChecks) {
+    if (-not (Test-Path $requiredContentCheck.Path)) {
+        Write-Output "MISSING content check file: $($requiredContentCheck.Path)"
+        $missingContentCheckCount++
+        continue
+    }
+
+    $requiredContent = Get-Content -Path $requiredContentCheck.Path -Raw
+    if ($requiredContent -match $requiredContentCheck.Pattern) {
+        Write-Output "OK content: $($requiredContentCheck.Label)"
+    } else {
+        Write-Output "MISSING content: $($requiredContentCheck.Label)"
+        $missingContentCheckCount++
+    }
+}
+
+if ($missingContentCheckCount -gt 0) {
+    throw "Agent system readiness failed because required phase content anchors are missing."
 }
