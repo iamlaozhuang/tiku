@@ -44,7 +44,14 @@ foreach ($qualityScriptName in @("lint", "typecheck", "test", "test:unit", "form
     }
 }
 
-$codexConfigPath = "C:\Users\laozhuang\.codex\config.toml"
+$codexHomePath = $env:CODEX_HOME
+if ([string]::IsNullOrWhiteSpace($codexHomePath)) {
+    $codexHomePath = Join-Path -Path $env:USERPROFILE -ChildPath ".codex"
+}
+
+Write-Output "Codex home: $codexHomePath"
+
+$codexConfigPath = Join-Path -Path $codexHomePath -ChildPath "config.toml"
 if (Test-Path $codexConfigPath) {
     $codexConfig = Get-Content -Path $codexConfigPath -Raw
     if ($codexConfig -match '\[plugins\."superpowers@openai-curated"\]' -and $codexConfig -match '\[plugins\."superpowers@openai-curated"\]\s*enabled\s*=\s*true') {
@@ -56,7 +63,7 @@ if (Test-Path $codexConfigPath) {
     Write-Output "MISSING Codex config: $codexConfigPath"
 }
 
-$superpowersPluginRootPath = "C:\Users\laozhuang\.codex\plugins\cache\openai-curated\superpowers"
+$superpowersPluginRootPath = Join-Path -Path $codexHomePath -ChildPath "plugins\cache\openai-curated\superpowers"
 $superpowersSkillNames = @(
     "brainstorming",
     "dispatching-parallel-agents",
@@ -98,7 +105,7 @@ if (Test-Path $superpowersPluginRootPath) {
     Write-Output "MISSING plugin cache: superpowers@openai-curated"
 }
 
-$skillRootPath = "C:\Users\laozhuang\.codex\skills"
+$skillRootPath = Join-Path -Path $codexHomePath -ChildPath "skills"
 $skillNames = @(
     "ralplan",
     "ralph",
