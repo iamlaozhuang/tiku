@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-8-product-surface-completion
-  updatedAt: "2026-05-22T15:05:00+08:00"
+  updatedAt: "2026-05-22T20:51:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-8-student-authorization-redeem-runtime
-  status: closed
+  id: phase-8-student-profile-redeem-ui
+  status: validated
   sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
-  planPath: docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-authorization-redeem-runtime.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-authorization-redeem-runtime.md
-  branch: codex/phase-8-student-authorization-redeem-runtime
-  commitSha: 5438956
+  planPath: docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-profile-redeem-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-profile-redeem-ui.md
+  branch: codex/phase-8-student-profile-redeem-ui
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -62,6 +62,7 @@ qualityGates:
     typecheck: pass
     test: pass
     build: pass
+    e2e: pass
     preCommitHook: pass
 riskGates:
   requireHumanApproval:
@@ -77,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-8-student-profile-redeem-ui after recovery checks
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-authorization-redeem-runtime.md
+  nextRecommendedAction: implement phase-8-student-profile-redeem-ui on task branch
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-profile-redeem-ui.md

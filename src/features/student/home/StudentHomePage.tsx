@@ -7,6 +7,8 @@ import {
   ClipboardList,
   Clock3,
   PlayCircle,
+  Ticket,
+  UserRound,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -357,14 +359,32 @@ export function StudentHomePage({
 
   return (
     <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
-      <div className="space-y-2">
-        <p className="text-brand-primary text-sm font-medium">继续学习</p>
-        <h1 className="font-heading text-text-primary text-2xl font-semibold">
-          学员首页
-        </h1>
-        <p className="text-text-secondary text-sm leading-6">
-          选择当前授权范围，按科目进入练习或模拟考试。
-        </p>
+      <div className="flex flex-col gap-3">
+        <div className="space-y-2">
+          <p className="text-brand-primary text-sm font-medium">继续学习</p>
+          <h1 className="font-heading text-text-primary text-2xl font-semibold">
+            学员首页
+          </h1>
+          <p className="text-text-secondary text-sm leading-6">
+            选择当前授权范围，按科目进入练习或模拟考试。
+          </p>
+        </div>
+        <nav className="grid grid-cols-2 gap-2" aria-label="学员导航">
+          <Link
+            href="/profile"
+            className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            <UserRound className="size-4" aria-hidden="true" />
+            个人中心
+          </Link>
+          <Link
+            href="/redeem-code"
+            className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            <Ticket className="size-4" aria-hidden="true" />
+            兑换卡密
+          </Link>
+        </nav>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1" aria-label="授权范围">
