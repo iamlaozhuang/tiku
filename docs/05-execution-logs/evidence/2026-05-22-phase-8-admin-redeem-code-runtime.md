@@ -127,10 +127,31 @@ Blocked files:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
+- implementationCommit: `4bc2037 feat(admin): add redeem code runtime`
+- merge: `664afd6 merge: phase 8 admin redeem code runtime`
+- closeoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
+
+## Master Closeout Validation
+
+- `git switch master`: pass; branch was up to date with `origin/master`.
+- `git fetch --prune`: pass before merge.
+- `git rev-list --left-right --count origin/master...HEAD`: `0 0` before merge.
+- `git merge --no-ff codex/phase-8-admin-redeem-code-runtime -m "merge: phase 8 admin redeem code runtime"`:
+  pass, merge commit `664afd6`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` on `master`:
+  pass.
+  - `lint`: pass.
+  - `typecheck`: pass.
+  - `test:unit`: pass, `95` files passed, `322` tests passed.
+  - `format:check`: pass.
+- `npm.cmd run build` on `master`:
+  pass; route output includes `/api/v1/redeem-codes`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` on `master`:
+  pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` on `master`:
+  pass inventory; `master` ahead of `origin/master` by `2` commits before closeout evidence commit.
 
 ## Residual Risk
 
