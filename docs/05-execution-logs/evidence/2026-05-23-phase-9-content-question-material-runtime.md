@@ -120,6 +120,18 @@ Final validation after evidence/security-review updates:
 - Final `Test-NamingConventions.ps1`: pass.
 - Final `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; branch has no upstream and only this task's allowed files are changed/untracked.
 
+Post-merge validation on `master`:
+
+- Merge commit: `a953bc6 merge: phase 9 content question material runtime`.
+- `Invoke-QualityGate.ps1`: pass.
+  - lint: pass.
+  - typecheck: pass.
+  - test:unit: pass, `98` files and `341` tests passed.
+  - format:check: pass.
+- `npm.cmd run build`: pass; Next.js build compiled successfully.
+- `Test-NamingConventions.ps1`: pass.
+- `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` is ahead of `origin/master` by the task implementation and merge commits, with no tracked, staged, or untracked changes.
+
 ## Security Review
 
 - Required: yes.
@@ -135,8 +147,8 @@ Final validation after evidence/security-review updates:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
+- implementationCommit: `f553eba feat(content): add question material runtime`.
+- merge: `a953bc6 merge: phase 9 content question material runtime`.
 - push: pending.
 - cleanup: pending.
 
