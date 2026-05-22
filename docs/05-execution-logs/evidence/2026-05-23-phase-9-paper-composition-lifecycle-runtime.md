@@ -127,8 +127,13 @@ Final validation:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
+- implementationCommit: `9e418ec feat(paper): add composition lifecycle runtime`.
+- merge: `1dd346e merge: phase 9 paper composition lifecycle runtime`.
+- postMergeValidation:
+  - `Invoke-QualityGate.ps1`: pass on `master`; lint, typecheck, unit tests, and format check passed.
+  - `npm.cmd run build`: pass on `master`; Next.js build completed and generated paper/paper_asset API routes.
+  - `Test-NamingConventions.ps1`: pass on `master`.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass on `master`; no untracked or unstaged files before closeout documentation update.
 - push: pending.
 - cleanup: pending.
 
