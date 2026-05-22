@@ -123,5 +123,5 @@ Results:
   - `npm.cmd run test:e2e`: pass on `master`, `2` Playwright tests passed.
   - `Test-NamingConventions.ps1`: pass on `master`.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory on `master`; branch ahead of `origin/master` by implementation and merge commits.
-- push: pending.
-- cleanup: pending.
+- push: `git push origin master` completed; `origin/master` advanced from `4550b22` to `9535b12`.
+- cleanup: local branch `codex/phase-9-student-practice-runtime-completion` deleted after merge and push. Initial sandbox delete failed with `.git` ref lock permission denied; escalated re-run succeeded.
