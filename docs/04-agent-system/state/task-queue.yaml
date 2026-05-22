@@ -3116,3 +3116,59 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-21-phase-7-local-e2e-readiness.md
     status: closed
     retryCount: 0
+  - id: phase-7-fix-local-business-flow-runtime
+    title: Fix Local Business Flow Runtime
+    phase: phase-7-local-runtime-readiness
+    sourceStory: docs/05-execution-logs/evidence/2026-05-21-local-business-flow-verification.md#follow-up
+    dependencies:
+      - phase-7-local-e2e-readiness-evidence
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-fix-local-business-flow-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-22-fix-local-business-flow-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-22-fix-local-business-flow-runtime-security-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - drizzle/**
+      - src/db/schema/**
+      - src/ai/**
+      - src/app/api/v1/exam-reports/**
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/practices/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+    riskTypes:
+      - database_migration
+      - audit_log
+      - ai_call_log
+      - auth_permission_model
+      - local_runtime
+      - e2e
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-22-fix-local-business-flow-runtime-security-review.md
+    validationCommands:
+      - docker compose ps
+      - npm.cmd exec -- drizzle-kit migrate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-fix-local-business-flow-runtime.md
+    status: validated
+    retryCount: 0

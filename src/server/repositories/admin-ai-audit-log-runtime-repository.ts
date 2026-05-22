@@ -272,8 +272,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               ${input.completionTokenCount},
               ${input.totalTokenCount},
               ${input.latencyMs},
-              ${input.startedAt},
-              ${input.completedAt},
+              ${input.startedAt.toISOString()},
+              ${input.completedAt?.toISOString() ?? null},
               now()
             from model_config mc
             inner join prompt_template pt

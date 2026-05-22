@@ -1,19 +1,24 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { createMockAiProvider } from "@/ai/mock-provider";
 import type { ApiResponse } from "../contracts/api-response";
+import { createModelConfigSnapshot } from "../models/ai-rag";
 import type { StudentPaperRepository } from "../repositories/student-paper-repository";
 import type { PracticeRepository } from "../repositories/practice-repository";
 import type { MockExamRepository } from "../repositories/mock-exam-repository";
 import type { ExamReportRepository } from "../repositories/exam-report-repository";
+import { createPostgresAdminAiAuditLogRuntimeRepositories } from "../repositories/admin-ai-audit-log-runtime-repository";
 import {
   createPostgresStudentFlowRepositories,
   type StudentFlowRuntimeRepositoryOptions,
 } from "../repositories/student-flow-runtime-repository";
+import { createAiMockProviderRuntime } from "./ai-mock-provider-runtime";
 import {
   createExamReportRouteHandlers,
   type ExamReportUserResolver,
 } from "./exam-report-route";
 import {
   createExamReportService,
+  type ExamReportLearningSuggestionOptions,
   type ExamReportPublicIdFactory,
 } from "./exam-report-service";
 import {
@@ -50,6 +55,7 @@ export type StudentFlowRuntimeOptions = StudentFlowRuntimeRepositoryOptions & {
   practiceRepository?: PracticeRepository;
   mockExamRepository?: MockExamRepository;
   examReportRepository?: ExamReportRepository;
+  examReportLearningSuggestionOptions?: ExamReportLearningSuggestionOptions;
   createPublicId?: (prefix: StudentFlowPublicIdPrefix) => string;
 };
 
@@ -60,6 +66,35 @@ type StudentFlowUserResolver = StudentPaperUserResolver &
 
 function createDefaultPublicId(prefix: StudentFlowPublicIdPrefix): string {
   return `${prefix}_${crypto.randomUUID()}`;
+}
+
+function createDefaultLearningSuggestionOptions(): ExamReportLearningSuggestionOptions {
+  return {
+    learningSuggestionRuntime: createAiMockProviderRuntime({
+      provider: createMockAiProvider(),
+      aiCallLogRepository: createPostgresAdminAiAuditLogRuntimeRepositories(),
+    }),
+    modelConfigSnapshot: createModelConfigSnapshot({
+      providerPublicId: "model-provider-dev-mock",
+      providerKey: "mock",
+      providerDisplayName: "Local Mock AI",
+      modelConfigPublicId: "model-config-dev-learning-suggestion",
+      aiFuncType: "learning_suggestion",
+      modelName: "mock-learning-suggestion",
+      displayName: "Local mock learning suggestion",
+      configVersion: 1,
+      timeoutSecond: 5,
+      maxRetryCount: 0,
+      fallbackModelConfigPublicId: null,
+      promptTemplateKey: "dev_learning_suggestion",
+      promptTemplateVersion: 1,
+    }),
+    promptTemplate: {
+      promptTemplateKey: "dev_learning_suggestion",
+      version: 1,
+      templateHash: "dev-learning-suggestion-template-v1",
+    },
+  };
 }
 
 function isSuccessfulSessionResponse(
@@ -130,9 +165,15 @@ export function createStudentFlowRuntimeRouteHandlers(
       resolveUserContext,
     ),
     examReports: createExamReportRouteHandlers(
-      createExamReportService(repositories.examReportRepository, clock, {
-        createPublicId: (prefix) => createPublicId(prefix),
-      }),
+      createExamReportService(
+        repositories.examReportRepository,
+        clock,
+        {
+          createPublicId: (prefix) => createPublicId(prefix),
+        },
+        options.examReportLearningSuggestionOptions ??
+          createDefaultLearningSuggestionOptions(),
+      ),
       resolveUserContext,
     ),
   };
