@@ -148,10 +148,16 @@ Results:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
-- push: pending.
-- cleanup: pending.
+- implementationCommit: `7b2d752 fix(auth): enforce authorization expiry termination`.
+- mergeCommit: `236b7d0 merge: phase 9 authorization expiry termination completion`.
+- postMergeValidation: pass on `master`.
+  - `Invoke-QualityGate.ps1`: pass.
+  - `npm.cmd run build`: pass.
+  - `npm.cmd run test:e2e`: pass, `2` tests passed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass; `master` is ahead of `origin/master` by the task implementation and merge commits only.
+- push: ready for `git push origin master` after this closeout status is committed.
+- cleanup: pending until push completes.
 
 ## Taste Compliance Self-Check
 
