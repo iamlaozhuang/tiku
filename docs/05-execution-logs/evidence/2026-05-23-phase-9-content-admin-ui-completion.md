@@ -132,11 +132,24 @@ Results:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
-- push: pending.
-- cleanup: pending.
-- gitCompletionReadiness: pass before commit; changed file set is limited to allowed files for this task.
+- implementationCommit: `617d58f feat(admin): complete content admin UI runtime`.
+- merge: `27d67be merge: phase 9 content admin UI completion`.
+- postMergeValidation:
+  - `Invoke-QualityGate.ps1`: pass on `master`.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `99` files and `349` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass on `master`.
+  - `npm.cmd run test:e2e`: pass on `master`, `2` tests passed.
+  - `Test-NamingConventions.ps1`: pass on `master`.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory on `master`; branch was ahead of `origin/master` by implementation and merge commits before closeout evidence update.
+- closeoutDocValidation:
+  - `Invoke-QualityGate.ps1`: pass after `project-state.yaml`, `task-queue.yaml`, and evidence closeout updates.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory after closeout updates; only allowed state/evidence files were modified.
+- push: pending until final `master` push.
+- cleanup: pending until merged branch deletion after push.
+- gitCompletionReadiness: pass before commit and pass after merge; changed file set is limited to allowed files for this task.
 
 ## Taste Compliance Self-Check
 
