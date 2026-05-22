@@ -1,23 +1,9 @@
-import { createAdminUserOrgAuthOpsRouteHandlers } from "@/server/services/admin-user-org-auth-ops-route";
-import { createUnavailableAdminUserOrgAuthOpsService } from "@/server/services/admin-user-org-auth-ops-service";
-import { createUnavailableOrganizationAuthService } from "@/server/services/organization-auth-service";
-import { createOrganizationRouteHandlers } from "@/server/services/organization-auth-route";
+import { createAdminOrganizationOrgAuthRuntimeRouteHandlers } from "@/server/services/admin-organization-org-auth-runtime";
 
-const adminUserOrgAuthOpsRouteHandlers = createAdminUserOrgAuthOpsRouteHandlers(
-  createUnavailableAdminUserOrgAuthOpsService(),
-);
+const adminOrganizationOrgAuthRuntimeRouteHandlers =
+  createAdminOrganizationOrgAuthRuntimeRouteHandlers();
 
-const organizationRouteHandlers = createOrganizationRouteHandlers(
-  createUnavailableOrganizationAuthService(),
-);
-
-const responseContract = {
-  code: 503005,
-  message: "Organization runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const GET = adminUserOrgAuthOpsRouteHandlers.organizations.GET;
-export const POST = organizationRouteHandlers.POST;
+export const GET =
+  adminOrganizationOrgAuthRuntimeRouteHandlers.organizations.collection.GET;
+export const POST =
+  adminOrganizationOrgAuthRuntimeRouteHandlers.organizations.collection.POST;

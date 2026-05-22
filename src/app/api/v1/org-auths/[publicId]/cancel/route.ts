@@ -1,16 +1,7 @@
-import { createUnavailableOrganizationAuthService } from "@/server/services/organization-auth-service";
-import { createOrgAuthRouteHandlers } from "@/server/services/organization-auth-route";
+import { createAdminOrganizationOrgAuthRuntimeRouteHandlers } from "@/server/services/admin-organization-org-auth-runtime";
 
-const orgAuthRouteHandlers = createOrgAuthRouteHandlers(
-  createUnavailableOrganizationAuthService(),
-);
+const adminOrganizationOrgAuthRuntimeRouteHandlers =
+  createAdminOrganizationOrgAuthRuntimeRouteHandlers();
 
-const responseContract = {
-  code: 503006,
-  message: "Org auth runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const POST = orgAuthRouteHandlers.cancel.POST;
+export const POST =
+  adminOrganizationOrgAuthRuntimeRouteHandlers.orgAuths.cancel.POST;

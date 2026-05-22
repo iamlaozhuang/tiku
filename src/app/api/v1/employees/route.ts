@@ -1,16 +1,10 @@
-import { createUnavailableEmployeeAccountService } from "@/server/services/employee-account-service";
-import { createEmployeeAccountRouteHandlers } from "@/server/services/employee-account-route";
+import { createAdminOrganizationOrgAuthRuntimeRouteHandlers } from "@/server/services/admin-organization-org-auth-runtime";
 
-const employeeAccountRouteHandlers = createEmployeeAccountRouteHandlers(
-  createUnavailableEmployeeAccountService(),
-);
+const adminOrganizationOrgAuthRuntimeRouteHandlers =
+  createAdminOrganizationOrgAuthRuntimeRouteHandlers();
 
-const responseContract = {
-  code: 503007,
-  message: "Employee account runtime is not configured.",
-  data: null,
-};
+export const GET =
+  adminOrganizationOrgAuthRuntimeRouteHandlers.employees.collection.GET;
 
-void responseContract;
-
-export const POST = employeeAccountRouteHandlers.POST;
+export const POST =
+  adminOrganizationOrgAuthRuntimeRouteHandlers.employees.collection.POST;
