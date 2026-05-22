@@ -1,5 +1,5 @@
-import { AdminContentKnowledgeOpsBaseline } from "../ContentKnowledgeOpsBaseline";
+import { AdminKnowledgeNodeManagement } from "@/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement";
 
 export default function KnowledgeNodesPage() {
-  return <AdminContentKnowledgeOpsBaseline />;
+  return <AdminKnowledgeNodeManagement />;
 }

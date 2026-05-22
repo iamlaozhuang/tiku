@@ -1,8 +1,15 @@
 import { createElement } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminContentKnowledgeOpsBaseline } from "@/app/(admin)/content/ContentKnowledgeOpsBaseline";
+import { AdminKnowledgeNodeManagement } from "@/features/admin/knowledge-node-management/AdminKnowledgeNodeManagement";
 import {
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES,
   ADMIN_CONTENT_KNOWLEDGE_PAGE_SIZE_OPTIONS,
@@ -17,7 +24,104 @@ import { createAdminContentKnowledgeOpsRouteHandlers } from "@/server/services/a
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
 });
+
+const adminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-admin-content",
+      phone: "13900000001",
+      name: "Content Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: null,
+      adminPublicId: "admin-content-public-001",
+      adminRoles: ["content_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
+const knowledgeNodePayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    knowledgeNodes: [
+      {
+        publicId: "knowledge-node-public-001",
+        parentKnowledgeNodePublicId: null,
+        profession: "marketing",
+        levelList: [3],
+        name: "市场调研",
+        pathName: "营销/市场调研",
+        sortOrder: 10,
+        knStatus: "active",
+        questionCount: 18,
+        isRecommendable: true,
+        updatedAt: "2026-05-20T12:00:00.000Z",
+        id: 501,
+      },
+      {
+        publicId: "knowledge-node-public-002",
+        parentKnowledgeNodePublicId: "knowledge-node-public-001",
+        profession: "logistics",
+        levelList: [2, 3],
+        name: "物流成本",
+        pathName: "物流/成本核算/物流成本",
+        sortOrder: 20,
+        knStatus: "disabled",
+        questionCount: 4,
+        isRecommendable: false,
+        updatedAt: "2026-05-20T13:00:00.000Z",
+        id: 502,
+      },
+    ],
+  },
+  pagination: {
+    page: 1,
+    pageSize: 20,
+    total: 2,
+    sortBy: "updatedAt",
+    sortOrder: "desc",
+  },
+};
+
+function createJsonResponse(payload: unknown) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => payload,
+  };
+}
+
+function mockKnowledgeNodeFetch(payload: unknown = knowledgeNodePayload) {
+  const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+    const path = String(url);
+
+    if (path === "/api/v1/sessions") {
+      return createJsonResponse(adminSessionPayload);
+    }
+
+    if (path.startsWith("/api/v1/knowledge-nodes?")) {
+      return createJsonResponse(payload);
+    }
+
+    return createJsonResponse({ code: 404001, message: "missing", data: null });
+  });
+
+  vi.stubGlobal("fetch", fetchMock);
+
+  return fetchMock;
+}
 
 describe("admin content and knowledge ops baseline", () => {
   it("defines content and knowledge list contracts with public identifiers only", () => {
@@ -233,5 +337,81 @@ describe("admin content and knowledge ops baseline", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "数据已被其他操作更新，请刷新后重试",
     );
+  });
+
+  it("loads knowledge_node management through the protected runtime without leaking internals", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockKnowledgeNodeFetch();
+
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    expect(screen.getByText("正在加载知识点树")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "知识点树维护" }),
+    ).toBeInTheDocument();
+
+    const firstNode = screen.getByTestId(
+      "knowledge-node-row-knowledge-node-public-001",
+    );
+
+    expect(firstNode).toHaveAttribute(
+      "data-public-id",
+      "knowledge-node-public-001",
+    );
+    expect(firstNode).not.toHaveAttribute("data-id");
+    expect(within(firstNode).getByText("营销/市场调研")).toBeInTheDocument();
+    expect(within(firstNode).getByText("绑定题目 18")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain('"id"');
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/knowledge-nodes?page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc",
+      expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-admin-token" },
+      }),
+    );
+  });
+
+  it("filters knowledge_node rows and renders empty, unauthorized, and error states", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    expect(screen.getByText("请先登录后台")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    cleanup();
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockKnowledgeNodeFetch();
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    expect(
+      await screen.findByText("物流/成本核算/物流成本"),
+    ).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("关键词"), {
+      target: { value: "物流成本" },
+    });
+    fireEvent.change(screen.getByLabelText("状态"), {
+      target: { value: "disabled" },
+    });
+
+    expect(screen.getByText("物流/成本核算/物流成本")).toBeInTheDocument();
+    expect(screen.queryByText("营销/市场调研")).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("关键词"), {
+      target: { value: "不存在的知识点" },
+    });
+    expect(screen.getByText("没有匹配的知识点")).toBeInTheDocument();
+
+    cleanup();
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockKnowledgeNodeFetch({
+      code: 503621,
+      message: "unavailable",
+      data: null,
+    });
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    expect(await screen.findByText("知识点树加载失败")).toBeInTheDocument();
   });
 });

@@ -281,15 +281,55 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   );
   expect(adminToken).toEqual(expect.any(String));
 
-  for (const route of [
-    "/ops/users",
-    "/content/questions",
-    "/content/papers",
-    "/ops/ai-audit-logs",
+  for (const contentRoute of [
+    {
+      path: "/content/questions",
+      emptyText: "没有匹配的题目",
+      heading: "题库与材料管理",
+      testIdPrefix: "question-row-",
+    },
+    {
+      path: "/content/materials",
+      emptyText: "没有匹配的材料",
+      heading: "题库与材料管理",
+      testIdPrefix: "material-row-",
+    },
+    {
+      path: "/content/papers",
+      emptyText: "没有匹配的试卷",
+      heading: "试卷管理",
+      testIdPrefix: "paper-row-",
+    },
+    {
+      path: "/content/knowledge-nodes",
+      emptyText: "没有匹配的知识点",
+      heading: "知识点树维护",
+      testIdPrefix: "knowledge-node-row-",
+    },
   ]) {
-    await page.goto(route);
-    await expect(page.locator("body")).not.toBeEmpty();
+    await page.goto(contentRoute.path);
+    await expect(
+      page.getByRole("heading", { name: contentRoute.heading }),
+    ).toBeVisible();
+    const contentRow = page
+      .locator(`[data-testid^="${contentRoute.testIdPrefix}"]`)
+      .first();
+
+    if ((await contentRow.count()) > 0) {
+      await expect(contentRow).toBeVisible();
+      await expect(contentRow).not.toHaveAttribute("data-id", /.*/);
+    } else {
+      await expect(page.locator("body")).toContainText(contentRoute.emptyText);
+    }
+
+    await expect(page.locator("body")).not.toContainText(adminToken ?? "");
   }
+
+  await page.goto("/ops/users");
+  await expect(page.locator("body")).not.toBeEmpty();
+
+  await page.goto("/ops/ai-audit-logs");
+  await expect(page.locator("body")).not.toBeEmpty();
 
   await page.goto("/ops/organizations");
   await expect(
