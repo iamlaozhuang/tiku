@@ -12,6 +12,9 @@ export type CreateSingleActiveSessionInput = {
 
 export type SessionCredentialAdapter = {
   verifyPasswordCredential(input: PasswordCredentialInput): Promise<boolean>;
+  createSession?(
+    input: CreateSingleActiveSessionInput,
+  ): Promise<AuthSessionSnapshot>;
   createSingleActiveSession(
     input: CreateSingleActiveSessionInput,
   ): Promise<AuthSessionSnapshot>;

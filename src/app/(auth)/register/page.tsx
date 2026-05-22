@@ -2,89 +2,72 @@
 
 import { type FormEvent, useState } from "react";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-type AdminRole = "super_admin" | "ops_admin" | "content_admin";
-
-type SessionLoginPayload = {
+type UserRegistrationPayload = {
   code: number;
   message: string;
   data: {
-    token: string;
-    user: {
-      userType: string | null;
-      adminPublicId?: string | null;
-      adminRoles?: AdminRole[];
-    };
+    nextAction: "redeem_code";
   } | null;
 };
 
-type SessionLoginUser = NonNullable<SessionLoginPayload["data"]>["user"];
-type LoginState = "idle" | "submitting" | "error";
+type RegisterState = "idle" | "submitting" | "error";
 
-const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 const PHONE_PATTERN = /^1[3-9]\d{9}$/;
-const MIN_PASSWORD_LENGTH = 8;
+const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
-function isAdminUser(user: SessionLoginUser): boolean {
-  return (
-    (user.adminPublicId !== null && user.adminPublicId !== undefined) ||
-    (user.adminRoles ?? []).some((role) =>
-      ["super_admin", "ops_admin", "content_admin"].includes(role),
-    )
-  );
-}
-
-function getLoginErrorMessage(payload: SessionLoginPayload, status: number) {
-  if (payload.code === 401002 || status === 401) {
-    return "手机号或密码不正确";
+function getRegistrationErrorMessage(
+  payload: UserRegistrationPayload,
+  status: number,
+) {
+  if (payload.code === 409001 || status === 409) {
+    return "该手机号已注册";
   }
 
-  if (payload.code === 423001 || status === 423) {
-    return "账号已锁定，请稍后再试";
-  }
-
-  if (payload.code === 403002 || status === 403) {
-    return "账号已被停用，请联系管理员";
+  if (payload.code === 400002 || status === 400) {
+    return "请输入有效手机号、姓名和至少 8 位字母数字组合密码";
   }
 
   if (payload.code === 503001 || status === 503) {
-    return "登录服务暂不可用，请稍后重试";
+    return "注册服务暂不可用，请稍后重试";
   }
 
-  return "登录失败，请稍后重试";
+  return "注册失败，请稍后重试";
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [loginState, setLoginState] = useState<LoginState>("idle");
+  const [name, setName] = useState("");
+  const [registerState, setRegisterState] = useState<RegisterState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const canSubmit =
     PHONE_PATTERN.test(phone.trim()) &&
-    password.trim().length >= MIN_PASSWORD_LENGTH &&
-    loginState !== "submitting";
+    PASSWORD_PATTERN.test(password.trim()) &&
+    name.trim().length > 0 &&
+    registerState !== "submitting";
 
-  async function handleSubmitLogin(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmitRegistration(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!canSubmit) {
-      setLoginState("error");
-      setErrorMessage("请输入有效手机号和至少 8 位密码");
+      setRegisterState("error");
+      setErrorMessage("请输入有效手机号、姓名和至少 8 位字母数字组合密码");
       return;
     }
 
-    setLoginState("submitting");
+    setRegisterState("submitting");
     setErrorMessage(null);
 
     try {
-      const response = await fetch("/api/v1/sessions", {
+      const response = await fetch("/api/v1/users", {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -92,25 +75,25 @@ export default function LoginPage() {
         body: JSON.stringify({
           phone: phone.trim(),
           password: password.trim(),
+          name: name.trim(),
         }),
       });
-      const payload = (await response.json()) as SessionLoginPayload;
+      const payload = (await response.json()) as UserRegistrationPayload;
 
       if (!response.ok || payload.code !== 0 || payload.data === null) {
-        setLoginState("error");
-        setErrorMessage(getLoginErrorMessage(payload, response.status));
+        setRegisterState("error");
+        setErrorMessage(getRegistrationErrorMessage(payload, response.status));
         return;
       }
 
-      localStorage.setItem(SESSION_TOKEN_STORAGE_KEY, payload.data.token);
-      router.replace(isAdminUser(payload.data.user) ? "/ops/users" : "/home");
+      router.replace("/redeem-code");
     } catch {
-      setLoginState("error");
-      setErrorMessage("登录服务暂不可用，请稍后重试");
+      setRegisterState("error");
+      setErrorMessage("注册服务暂不可用，请稍后重试");
     }
   }
 
-  const isSubmitting = loginState === "submitting";
+  const isSubmitting = registerState === "submitting";
 
   return (
     <main className="bg-background flex min-h-screen w-full items-center justify-center px-4 py-8">
@@ -118,11 +101,14 @@ export default function LoginPage() {
         <div className="flex flex-col gap-2">
           <p className="text-text-secondary text-sm">题库系统</p>
           <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            登录
+            注册账号
           </h1>
         </div>
 
-        <form className="flex flex-col gap-4" onSubmit={handleSubmitLogin}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmitRegistration}
+        >
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             <span className="text-text-primary">手机号</span>
             <Input
@@ -137,12 +123,24 @@ export default function LoginPage() {
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm font-medium">
+            <span className="text-text-primary">姓名</span>
+            <Input
+              aria-invalid={errorMessage !== null}
+              autoComplete="name"
+              name="name"
+              placeholder="请输入姓名"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </label>
+
+          <label className="flex flex-col gap-1.5 text-sm font-medium">
             <span className="text-text-primary">密码</span>
             <Input
               aria-invalid={errorMessage !== null}
-              autoComplete="current-password"
+              autoComplete="new-password"
               name="password"
-              placeholder="请输入密码"
+              placeholder="至少 8 位，包含字母和数字"
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -163,16 +161,16 @@ export default function LoginPage() {
             size="lg"
             type="submit"
           >
-            <LogIn aria-hidden="true" />
-            {isSubmitting ? "登录中" : "登录"}
+            <UserPlus aria-hidden="true" />
+            {isSubmitting ? "注册中" : "注册"}
           </Button>
         </form>
 
         <Link
           className="text-primary text-center text-sm underline-offset-4 transition-colors hover:underline"
-          href="/register"
+          href="/login"
         >
-          没有账号，去注册
+          已有账号，去登录
         </Link>
       </section>
     </main>

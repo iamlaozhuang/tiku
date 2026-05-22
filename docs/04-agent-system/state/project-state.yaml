@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-9-requirements-runtime-gap-inventory
-  status: closed
-  sourceStory: docs/02-architecture/interfaces/phase-9-mvp-acceptance-contract.md#acceptance-scope
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
-  branch: codex/phase-9-requirements-runtime-gap-inventory
-  commitSha: 431f271
+  id: phase-9-auth-session-account-completion
+  status: committed
+  sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#1-统一账号
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-auth-session-account-completion.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-auth-session-account-completion.md
+  branch: codex/phase-9-auth-session-account-completion
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-9-auth-session-account-completion
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+  nextRecommendedAction: merge and push phase-9-auth-session-account-completion
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-9-auth-session-account-completion.md

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { createLocalSessionRuntime } from "./local-session-runtime";
+import {
+  createLocalSessionRuntime,
+  createLocalUserRegistrationRuntime,
+} from "./local-session-runtime";
 import type { AuthUserRepository } from "../repositories/auth-repository";
 import type { SessionUserRepository } from "../repositories/session-repository";
 
@@ -97,6 +100,86 @@ describe("local session runtime", () => {
       },
     ]);
     expect(resetUserIds).toEqual([42]);
+  });
+
+  it("creates a personal user registration without exposing credential internals", async () => {
+    const createdCredentials: unknown[] = [];
+    const createdUsers: unknown[] = [];
+    const runtime = createLocalUserRegistrationRuntime({
+      credentialAdapter: {
+        async createPasswordCredential(input) {
+          createdCredentials.push(input);
+
+          return {
+            authUserId: "auth-user-registered-student",
+          };
+        },
+      },
+      userRegistrationRepository: {
+        async findRegisteredUserByPhone() {
+          return null;
+        },
+        async createPersonalUser(input) {
+          createdUsers.push(input);
+
+          return {
+            id: 99,
+            auth_user_id: input.authUserId,
+            public_id: "user-registered-student",
+            phone: input.phone,
+            name: input.name,
+            user_type: "personal",
+            status: "active",
+            locked_until_at: null,
+            employee_public_id: null,
+            organization_public_id: null,
+            admin_public_id: null,
+            admin_roles: [],
+          };
+        },
+      },
+    });
+
+    const response = await runtime.registerPersonalUser({
+      phone: "13900000003",
+      password: "abc12345",
+      name: "新学员",
+    });
+
+    expect(response).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        user: {
+          publicId: "user-registered-student",
+          phone: "13900000003",
+          name: "新学员",
+          userType: "personal",
+          status: "active",
+          lockedUntilAt: null,
+          employeePublicId: null,
+          organizationPublicId: null,
+          adminPublicId: null,
+          adminRoles: [],
+        },
+        nextAction: "redeem_code",
+      },
+    });
+    expect(createdCredentials).toEqual([
+      {
+        phone: "13900000003",
+        password: "abc12345",
+      },
+    ]);
+    expect(createdUsers).toEqual([
+      {
+        authUserId: "auth-user-registered-student",
+        phone: "13900000003",
+        name: "新学员",
+      },
+    ]);
+    expect(JSON.stringify(response)).not.toContain("abc12345");
+    expect(JSON.stringify(response)).not.toContain("auth-user-registered");
   });
 
   it("resolves a seeded admin session without returning the session token", async () => {

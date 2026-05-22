@@ -27,8 +27,10 @@ export type SessionService = {
 const INVALID_REQUEST_CODE = 400001;
 const INVALID_CREDENTIAL_CODE = 401002;
 const ACCOUNT_LOCKED_CODE = 423001;
+const ACCOUNT_DISABLED_CODE = 403002;
 const SESSION_UNAVAILABLE_CODE = 503001;
-const SESSION_DURATION_DAY = 7;
+const STUDENT_SESSION_DURATION_DAY = 7;
+const ADMIN_SESSION_DURATION_HOUR = 8;
 const MAX_LOGIN_FAILURE_COUNT = 3;
 const LOCK_DURATION_MINUTE = 5;
 
@@ -40,6 +42,10 @@ function addMinutes(value: Date, minuteCount: number): Date {
   return new Date(value.getTime() + minuteCount * 60 * 1000);
 }
 
+function addHours(value: Date, hourCount: number): Date {
+  return new Date(value.getTime() + hourCount * 60 * 60 * 1000);
+}
+
 function createInvalidCredentialResponse(): ApiResponse<null> {
   return createErrorResponse(
     INVALID_CREDENTIAL_CODE,
@@ -49,6 +55,20 @@ function createInvalidCredentialResponse(): ApiResponse<null> {
 
 function createAccountLockedResponse(): ApiResponse<null> {
   return createErrorResponse(ACCOUNT_LOCKED_CODE, "Account locked.");
+}
+
+function createAccountDisabledResponse(): ApiResponse<null> {
+  return createErrorResponse(ACCOUNT_DISABLED_CODE, "Account disabled.");
+}
+
+function isAdminLoginUser(
+  loginUser: Awaited<ReturnType<SessionUserRepository["findLoginUserByPhone"]>>,
+): boolean {
+  return (
+    loginUser !== null &&
+    loginUser.user_type === null &&
+    loginUser.admin_public_id !== null
+  );
 }
 
 export function createSessionService(
@@ -73,6 +93,10 @@ export function createSessionService(
 
       if (loginUser === null) {
         return createInvalidCredentialResponse();
+      }
+
+      if (loginUser.status !== "active") {
+        return createAccountDisabledResponse();
       }
 
       const now = getNow();
@@ -109,9 +133,16 @@ export function createSessionService(
           : createAccountLockedResponse();
       }
 
-      const authSession = await credentialAdapter.createSingleActiveSession({
+      const isAdminLogin = isAdminLoginUser(loginUser);
+      const createAuthSession =
+        isAdminLogin && credentialAdapter.createSession !== undefined
+          ? credentialAdapter.createSession
+          : credentialAdapter.createSingleActiveSession;
+      const authSession = await createAuthSession({
         authUserId: loginUser.auth_user_id,
-        expiresAt: addDays(now, SESSION_DURATION_DAY),
+        expiresAt: isAdminLogin
+          ? addHours(now, ADMIN_SESSION_DURATION_HOUR)
+          : addDays(now, STUDENT_SESSION_DURATION_DAY),
       });
 
       if (loginUser.login_failure_user_id !== null) {
