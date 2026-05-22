@@ -54,6 +54,7 @@ export type PracticeAnswerRecordDto = {
 
 export type PracticeResultDto = {
   practice: PracticeDto;
+  answerRecords: PracticeAnswerRecordDto[];
 };
 
 export type PracticeAnswerFeedbackResultDto = {

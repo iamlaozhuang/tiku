@@ -169,6 +169,9 @@ function createPracticeRepository(): PracticeRepository {
     async findAnswerRecordByPracticeAndQuestion() {
       return null;
     },
+    async listAnswerRecordsByPractice() {
+      return [];
+    },
     async createPracticeAnswerRecord(input) {
       return {
         public_id: input.publicId,

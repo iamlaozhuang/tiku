@@ -131,6 +131,10 @@ export type PracticeRepository = {
     practicePublicId: string;
     paperQuestionPublicId: string;
   }): Promise<PracticeAnswerRecordRow | null>;
+  listAnswerRecordsByPractice(input: {
+    userPublicId: string;
+    practicePublicId: string;
+  }): Promise<PracticeAnswerRecordRow[]>;
   createPracticeAnswerRecord(
     input: CreatePracticeAnswerInput,
   ): Promise<PracticeAnswerRecordRow>;

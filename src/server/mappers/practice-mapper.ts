@@ -32,7 +32,72 @@ function getQuestionCount(paperSnapshot: Record<string, unknown>): number {
   }, 0);
 }
 
-export function mapPracticeToApi(practice: PracticeRow): PracticeDto {
+function getOrderedPaperQuestionPublicIds(
+  paperSnapshot: Record<string, unknown>,
+): string[] {
+  const paperSections = Array.isArray(paperSnapshot.paperSections)
+    ? paperSnapshot.paperSections
+    : [];
+
+  return paperSections.flatMap((paperSection) => {
+    if (
+      typeof paperSection !== "object" ||
+      paperSection === null ||
+      !("paperQuestions" in paperSection) ||
+      !Array.isArray(paperSection.paperQuestions)
+    ) {
+      return [];
+    }
+
+    const paperQuestions: unknown[] = paperSection.paperQuestions;
+
+    return paperQuestions
+      .map((paperQuestion: unknown) => {
+        if (
+          typeof paperQuestion !== "object" ||
+          paperQuestion === null ||
+          !("paperQuestionPublicId" in paperQuestion)
+        ) {
+          return null;
+        }
+
+        return typeof paperQuestion.paperQuestionPublicId === "string"
+          ? paperQuestion.paperQuestionPublicId
+          : null;
+      })
+      .filter(
+        (publicId: string | null): publicId is string => publicId !== null,
+      );
+  });
+}
+
+function getCurrentQuestionIndex(
+  paperSnapshot: Record<string, unknown>,
+  answerRecords: PracticeAnswerRecordRow[],
+): number {
+  const paperQuestionPublicIds =
+    getOrderedPaperQuestionPublicIds(paperSnapshot);
+
+  if (paperQuestionPublicIds.length === 0) {
+    return 0;
+  }
+
+  const answeredPaperQuestionPublicIds = new Set(
+    answerRecords.map((answerRecord) => answerRecord.paper_question_public_id),
+  );
+  const nextQuestionIndex = paperQuestionPublicIds.findIndex(
+    (publicId) => !answeredPaperQuestionPublicIds.has(publicId),
+  );
+
+  return nextQuestionIndex === -1
+    ? paperQuestionPublicIds.length - 1
+    : nextQuestionIndex;
+}
+
+export function mapPracticeToApi(
+  practice: PracticeRow,
+  answerRecords: PracticeAnswerRecordRow[] = [],
+): PracticeDto {
   return {
     publicId: practice.public_id,
     paperPublicId: practice.paper_public_id,
@@ -43,7 +108,10 @@ export function mapPracticeToApi(practice: PracticeRow): PracticeDto {
     startedAt: practice.started_at.toISOString(),
     lastAnsweredAt: formatNullableTimestamp(practice.last_answered_at),
     expiresAt: practice.expires_at.toISOString(),
-    currentQuestionIndex: 0,
+    currentQuestionIndex: getCurrentQuestionIndex(
+      practice.paper_snapshot,
+      answerRecords,
+    ),
     questionCount: getQuestionCount(practice.paper_snapshot),
     paperSnapshot: practice.paper_snapshot,
   };
