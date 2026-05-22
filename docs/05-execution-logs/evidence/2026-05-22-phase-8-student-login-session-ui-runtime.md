@@ -110,3 +110,30 @@ Notes:
 - This task keeps the existing local session runtime and does not introduce cookie-based auth for student/admin pages.
 - The local token remains in browser local storage for the MVP dev flow; no UI, console, screenshot, or evidence output includes the token value.
 - Docker Desktop must be available for full local runtime and E2E validation.
+
+## Local Merge Closeout
+
+Date: 2026-05-22
+
+User approval:
+
+- Approved local merge of `codex/phase-8-student-login-session-ui-runtime` into `master`.
+- Approved pushing `master` to `origin`.
+
+Local merge:
+
+- Switched to `master`.
+- `git merge --no-ff codex/phase-8-student-login-session-ui-runtime -m "merge: phase 8 student login session ui runtime"`: pass after elevated retry for `.git/ORIG_HEAD.lock` permission.
+- Merge commit: `c1dcacb`.
+
+Validation on merged `master`:
+
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass.
+- `npm.cmd run build`: pass.
+- `npm.cmd run test:e2e`: pass, `2` tests passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory, `master` ahead of `origin/master` before push.
+
+Push:
+
+- Push is approved by the user and will be recorded in the final handoff after execution.
