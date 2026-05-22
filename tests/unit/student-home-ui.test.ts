@@ -37,6 +37,10 @@ describe("StudentHomePage", () => {
       "aria-pressed",
       "true",
     );
+    expect(screen.getByRole("link", { name: "错题本" })).toHaveAttribute(
+      "href",
+      "/mistake-book",
+    );
     expect(screen.getByRole("heading", { name: "理论" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "技能" })).toBeInTheDocument();
 

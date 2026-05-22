@@ -6,6 +6,7 @@ import {
   BookOpen,
   ClipboardList,
   Clock3,
+  ListChecks,
   PlayCircle,
   Ticket,
   UserRound,
@@ -369,7 +370,7 @@ export function StudentHomePage({
             选择当前授权范围，按科目进入练习或模拟考试。
           </p>
         </div>
-        <nav className="grid grid-cols-2 gap-2" aria-label="学员导航">
+        <nav className="grid grid-cols-3 gap-2" aria-label="学员导航">
           <Link
             href="/profile"
             className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
@@ -383,6 +384,13 @@ export function StudentHomePage({
           >
             <Ticket className="size-4" aria-hidden="true" />
             兑换卡密
+          </Link>
+          <Link
+            href="/mistake-book"
+            className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            <ListChecks className="size-4" aria-hidden="true" />
+            错题本
           </Link>
         </nav>
       </div>
