@@ -109,11 +109,19 @@ Notes:
 
 ## Git Closeout
 
-- implementationCommit: pending
-- merge: pending
-- master validation: pending
-- push: pending
-- cleanup: pending
+- implementationCommit: `5438956 feat(auth): add student authorization redeem runtime`
+- merge: `90bef1f merge: phase 8 student authorization redeem runtime`
+- master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass on `master`.
+  - `npm.cmd run build`: pass on `master`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass on `master`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass on `master`, ahead of `origin/master` by implementation and merge commits before push.
+- push:
+  - `git push origin master`: pass, `8b02b22..90bef1f master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-8-student-authorization-redeem-runtime`: first attempt failed due `.git/refs` lock permission; escalated retry passed.
+  - `git fetch --prune`: pass.
+- closeoutEvidenceCommit: pending.
 
 ## Residual Risk
 
