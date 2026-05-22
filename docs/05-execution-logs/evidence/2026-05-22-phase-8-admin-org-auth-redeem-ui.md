@@ -118,12 +118,39 @@ Blocked files:
 
 ## Git Closeout
 
-- Pending.
+- implementationCommit: `8605a6c feat(admin): add org auth redeem ui`
+- merge: `f2d9f60 merge: phase 8 admin org auth redeem ui`
+- closeoutEvidenceCommit: pending.
+- push: pending.
+- cleanup: pending.
 
 ## Master Closeout Validation
 
-- Pending.
+- `git switch master`:
+  pass; branch was up to date with `origin/master`.
+- `git fetch --prune` before merge:
+  pass.
+- `git rev-list --left-right --count origin/master...HEAD` before merge:
+  `0 0`.
+- `git merge --no-ff codex/phase-8-admin-org-auth-redeem-ui -m "merge: phase 8 admin org auth redeem ui"`:
+  pass, merge commit `f2d9f60`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` on `master`:
+  pass.
+  - `lint`: pass.
+  - `typecheck`: pass.
+  - `test:unit`: pass, `96` files passed, `327` tests passed.
+  - `format:check`: pass.
+- `npm.cmd run build` on `master`:
+  pass; route output includes `/ops/organizations` and `/ops/redeem-codes`.
+- `npm.cmd run test:e2e` on `master`:
+  pass, `2` tests passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` on `master`:
+  pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` on `master`:
+  pass inventory; `master` ahead of `origin/master` by `2` commits before closeout evidence commit.
 
 ## Residual Risk
 
-- Pending.
+- Admin UI is read-only. Organization disable, org_auth cancel, employee provisioning, redeem_code generation/export, and any mutation audit-log writes remain deferred to separately scoped runtime/security-review tasks.
+- Browser coverage is limited to the existing Chromium Playwright project and the local business-flow smoke path. The queued `phase-8-product-surface-browser-verification` task remains responsible for broader product-surface browser evidence.
+- `AdminDashboardLayout` already contained links to `/ops/organizations` and `/ops/redeem-codes`; this task did not modify the shared layout component because it is outside the task allowed file scope.
