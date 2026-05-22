@@ -129,9 +129,19 @@ Blocked files:
 
 - implementationCommit: `4bc2037 feat(admin): add redeem code runtime`
 - merge: `664afd6 merge: phase 8 admin redeem code runtime`
-- closeoutEvidenceCommit: pending.
-- push: pending.
-- cleanup: pending.
+- closeoutEvidenceCommit: `2649129 docs(agent): close admin redeem code runtime`
+- push:
+  - `git fetch --prune`: pass before push.
+  - `git status --short --branch`: `## master...origin/master [ahead 3]` before push.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 3` before push.
+  - `git push origin master`: pass, `5fe895e..2649129 master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-8-admin-redeem-code-runtime`: first sandbox run failed due `.git/refs` lock permission; escalated retry passed and deleted the merged branch.
+  - `git fetch --prune`: pass after cleanup.
+  - `git status --short --branch`: `## master...origin/master`.
+  - `git branch --list`: only `master`.
+  - `git branch -r`: `origin/HEAD -> origin/master`, `origin/master`.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 0`.
 
 ## Master Closeout Validation
 
