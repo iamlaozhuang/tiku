@@ -37,12 +37,12 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-9-student-practice-runtime-completion
-  status: validated
+  status: merged
   sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#2-练习模式
   planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-student-practice-runtime-completion.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-student-practice-runtime-completion.md
   branch: codex/phase-9-student-practice-runtime-completion
-  commitSha: null
+  commitSha: 67052e0
   prUrl: null
   retryCount: 0
   lastFailurePath: null
