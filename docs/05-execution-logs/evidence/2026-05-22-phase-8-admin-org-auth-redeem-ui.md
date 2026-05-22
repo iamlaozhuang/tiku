@@ -120,9 +120,19 @@ Blocked files:
 
 - implementationCommit: `8605a6c feat(admin): add org auth redeem ui`
 - merge: `f2d9f60 merge: phase 8 admin org auth redeem ui`
-- closeoutEvidenceCommit: pending.
-- push: pending.
-- cleanup: pending.
+- closeoutEvidenceCommit: `7e6a594 docs(agent): close admin org auth redeem ui`
+- push:
+  - `git fetch --prune`: pass before push.
+  - `git status --short --branch`: `## master...origin/master [ahead 3]` before push.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 3` before push.
+  - `git push origin master`: pass, `997be8c..7e6a594 master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-8-admin-org-auth-redeem-ui`: first sandbox run failed due `.git/refs` lock permission; escalated retry passed and deleted the merged branch.
+  - `git fetch --prune`: pass after cleanup.
+  - `git status --short --branch`: `## master...origin/master`.
+  - `git branch --list`: only `master`.
+  - `git branch -r`: `origin/HEAD -> origin/master`, `origin/master`.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 0`.
 
 ## Master Closeout Validation
 
