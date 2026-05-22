@@ -9,26 +9,18 @@ const adminCredential = {
   password: "TikuDevAdmin#2026",
 };
 
-async function loginViaBrowserFetch(
+async function loginViaUi(
   page: Page,
   credential: { phone: string; password: string },
 ) {
-  return page.evaluate(async (input) => {
-    const response = await fetch("/api/v1/sessions", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    const payload = await response.json();
+  await page.goto("/login");
+  await expect(page.getByLabel("手机号")).toBeVisible();
+  await expect(page.getByRole("button", { name: "登录" })).toBeDisabled();
 
-    return {
-      status: response.status,
-      code: payload.code,
-      token: payload.data?.token ?? null,
-      userType: payload.data?.user?.userType ?? null,
-      adminRoles: payload.data?.user?.adminRoles ?? [],
-    };
-  }, credential);
+  await page.getByLabel("手机号").fill(credential.phone);
+  await page.getByLabel("密码").fill(credential.password);
+  await expect(page.getByRole("button", { name: "登录" })).toBeEnabled();
+  await page.getByRole("button", { name: "登录" }).click();
 }
 
 test("runs the local student, admin, audit, and mock AI business flow", async ({
@@ -55,18 +47,13 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     contentType: "image/png",
   });
 
-  await page.goto("/login");
-  await expect(page.locator("body")).not.toBeEmpty();
+  await loginViaUi(page, studentCredential);
+  await expect(page).toHaveURL(/\/home$/);
+  const studentToken = await page.evaluate(() =>
+    localStorage.getItem("tiku.localSessionToken"),
+  );
+  expect(studentToken).toEqual(expect.any(String));
 
-  const studentLogin = await loginViaBrowserFetch(page, studentCredential);
-  expect(studentLogin).toMatchObject({
-    status: 200,
-    code: 0,
-    userType: "personal",
-  });
-  expect(studentLogin.token).toEqual(expect.any(String));
-
-  await page.goto("/home");
   await expect(
     page.locator('[data-testid^="paper-card-"]').first(),
   ).toBeVisible();
@@ -187,7 +174,7 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
       mockExamPublicId,
       reportPublicId,
     };
-  }, studentLogin.token);
+  }, studentToken);
 
   expect(studentFlow.papers.body.code).toBe(0);
   expect(studentFlow.paperDetail.body.code).toBe(0);
@@ -214,13 +201,12 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     contentType: "image/png",
   });
 
-  const adminLogin = await loginViaBrowserFetch(page, adminCredential);
-  expect(adminLogin).toMatchObject({
-    status: 200,
-    code: 0,
-    adminRoles: expect.arrayContaining(["super_admin"]),
-  });
-  expect(adminLogin.token).toEqual(expect.any(String));
+  await loginViaUi(page, adminCredential);
+  await expect(page).toHaveURL(/\/ops\/users$/);
+  const adminToken = await page.evaluate(() =>
+    localStorage.getItem("tiku.localSessionToken"),
+  );
+  expect(adminToken).toEqual(expect.any(String));
 
   for (const route of [
     "/ops/users",
@@ -247,7 +233,7 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
       aiCallLogs: await getJson("/api/v1/ai-call-logs?page=1&pageSize=20"),
       modelConfigs: await getJson("/api/v1/model-configs?page=1&pageSize=20"),
     };
-  }, adminLogin.token);
+  }, adminToken);
 
   expect(adminReads.users.body.code).toBe(0);
   expect(adminReads.questions.body.code).toBe(0);
@@ -265,8 +251,8 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   expect(serializedAdminReads).not.toContain("sk-real-secret");
   expect(serializedAdminReads).not.toContain("RAW_PROMPT");
   expect(serializedAdminReads).not.toContain("RAW_ANSWER");
-  expect(serializedAdminReads).not.toContain(studentLogin.token);
-  expect(serializedAdminReads).not.toContain(adminLogin.token);
+  expect(serializedAdminReads).not.toContain(studentToken);
+  expect(serializedAdminReads).not.toContain(adminToken);
   expect(consoleErrors).toEqual([]);
   expect(networkFailures).toEqual([]);
 });
