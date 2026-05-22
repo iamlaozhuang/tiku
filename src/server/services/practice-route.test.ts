@@ -35,6 +35,7 @@ function createService(): PracticeService {
               paperSections: [],
             },
           },
+          answerRecords: [],
         },
       };
     },
@@ -60,6 +61,7 @@ function createService(): PracticeService {
               paperSections: [],
             },
           },
+          answerRecords: [],
         },
       };
     },

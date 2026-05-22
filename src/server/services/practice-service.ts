@@ -9,6 +9,7 @@ import type {
   PracticeResultDto,
 } from "../contracts/practice-contract";
 import {
+  mapPracticeAnswerRecordToApi,
   mapPracticeAnswerFeedbackToApi,
   mapPracticeToApi,
 } from "../mappers/practice-mapper";
@@ -64,6 +65,7 @@ type PracticeQuestionSnapshot = {
   paperQuestionPublicId: string;
   questionPublicId: string;
   questionType: string | null;
+  multiChoiceRule: string | null;
   standardAnswerLabels: string[];
   standardAnswerRichText: string | null;
   analysisRichText: string | null;
@@ -195,6 +197,7 @@ function findPracticeQuestion(
         paperQuestionPublicId,
         questionPublicId,
         questionType: getStringField(paperQuestion, "questionType"),
+        multiChoiceRule: getStringField(paperQuestion, "multiChoiceRule"),
         standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
         standardAnswerRichText: getStringField(
           paperQuestion,
@@ -230,6 +233,68 @@ function isCorrectObjectiveAnswer(
     normalizeLabels(question.standardAnswerLabels).join("|") ===
     normalizeLabels(input.selectedLabels).join("|")
   );
+}
+
+function formatScore(score: number): string {
+  return (Math.round(score * 2) / 2).toFixed(1);
+}
+
+function calculateObjectiveScore(
+  question: PracticeQuestionSnapshot,
+  input: NormalizedPracticeAnswerInput,
+): { isCorrect: boolean | null; score: string | null } {
+  const isCorrect = isCorrectObjectiveAnswer(question, input);
+
+  if (isCorrect === null) {
+    return {
+      isCorrect,
+      score: null,
+    };
+  }
+
+  if (isCorrect) {
+    return {
+      isCorrect,
+      score: question.score,
+    };
+  }
+
+  if (
+    question.questionType !== "multiple_choice" ||
+    question.multiChoiceRule !== "partial_credit"
+  ) {
+    return {
+      isCorrect,
+      score: "0.0",
+    };
+  }
+
+  const correctLabels = new Set(question.standardAnswerLabels);
+  const selectedLabels = new Set(input.selectedLabels);
+  const hasWrongSelection = [...selectedLabels].some(
+    (label) => !correctLabels.has(label),
+  );
+
+  if (hasWrongSelection || selectedLabels.size === 0) {
+    return {
+      isCorrect,
+      score: "0.0",
+    };
+  }
+
+  const selectedCorrectCount = [...selectedLabels].filter((label) =>
+    correctLabels.has(label),
+  ).length;
+  const maxScore = Number.parseFloat(question.score);
+  const partialScore =
+    Number.isFinite(maxScore) && correctLabels.size > 0
+      ? (maxScore * selectedCorrectCount) / correctLabels.size
+      : 0;
+
+  return {
+    isCorrect,
+    score: formatScore(partialScore),
+  };
 }
 
 function buildAnswerSnapshot(
@@ -330,6 +395,22 @@ async function createFreshPractice(
   });
 }
 
+async function createPracticeResult(
+  repository: PracticeRepository,
+  userContext: PracticeUserContext,
+  practice: PracticeRow,
+) {
+  const answerRecords = await repository.listAnswerRecordsByPractice({
+    userPublicId: userContext.userPublicId,
+    practicePublicId: practice.public_id,
+  });
+
+  return {
+    practice: mapPracticeToApi(practice, answerRecords),
+    answerRecords: answerRecords.map(mapPracticeAnswerRecordToApi),
+  };
+}
+
 export function createPracticeService(
   repository: PracticeRepository,
   clock: PracticeClock = systemClock,
@@ -389,7 +470,11 @@ export function createPracticeService(
 
       if (activePractice !== null && !isPracticeExpired(activePractice, now)) {
         return createSuccessResponse({
-          practice: mapPracticeToApi(activePractice),
+          ...(await createPracticeResult(
+            repository,
+            userContext,
+            activePractice,
+          )),
         });
       }
 
@@ -410,6 +495,7 @@ export function createPracticeService(
 
       return createSuccessResponse({
         practice: mapPracticeToApi(practice),
+        answerRecords: [],
       });
     },
 
@@ -427,7 +513,7 @@ export function createPracticeService(
       }
 
       return createSuccessResponse({
-        practice: mapPracticeToApi(practice),
+        ...(await createPracticeResult(repository, userContext, practice)),
       });
     },
 
@@ -473,9 +559,10 @@ export function createPracticeService(
         );
       }
 
-      const isCorrect = isCorrectObjectiveAnswer(question, normalizedInput);
-      const score =
-        isCorrect === null ? null : isCorrect ? question.score : "0.0";
+      const { isCorrect, score } = calculateObjectiveScore(
+        question,
+        normalizedInput,
+      );
       const answerSnapshot = buildAnswerSnapshot(normalizedInput);
       const answerRecord = await repository.createPracticeAnswerRecord({
         publicId: publicIdFactory.createPublicId("answer_record"),
@@ -565,6 +652,7 @@ export function createPracticeService(
 
       return createSuccessResponse({
         practice: mapPracticeToApi(freshPractice),
+        answerRecords: [],
       });
     },
 
@@ -592,7 +680,11 @@ export function createPracticeService(
       }
 
       return createSuccessResponse({
-        practice: mapPracticeToApi(terminatedPractice),
+        ...(await createPracticeResult(
+          repository,
+          userContext,
+          terminatedPractice,
+        )),
       });
     },
   };

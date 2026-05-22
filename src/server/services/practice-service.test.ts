@@ -65,6 +65,41 @@ function createPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createTwoQuestionPaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "2024年专卖三级理论真题",
+    paperSections: [
+      {
+        paperSectionTitle: "一、选择题",
+        paperQuestions: [
+          {
+            paperQuestionPublicId: "paper_question_public_123",
+            questionPublicId: "question_public_123",
+            questionType: "single_choice",
+            standardAnswerLabels: ["A"],
+            standardAnswerRichText: "<p>A</p>",
+            analysisRichText: "<p>解析</p>",
+            score: "1.0",
+            scoringMethod: "auto_match",
+          },
+          {
+            paperQuestionPublicId: "paper_question_public_456",
+            questionPublicId: "question_public_456",
+            questionType: "multiple_choice",
+            standardAnswerLabels: ["A", "B"],
+            standardAnswerRichText: "<p>A、B</p>",
+            analysisRichText: "<p>解析</p>",
+            score: "3.0",
+            multiChoiceRule: "partial_credit",
+            scoringMethod: "auto_match",
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createScope(
   overrides: Partial<PracticeAuthorizationScopeRow> = {},
 ): PracticeAuthorizationScopeRow {
@@ -144,6 +179,9 @@ function createRepository(
     },
     async findAnswerRecordByPracticeAndQuestion() {
       return null;
+    },
+    async listAnswerRecordsByPractice() {
+      return [];
     },
     async createPracticeAnswerRecord(input) {
       return {
@@ -528,6 +566,115 @@ describe("practice service", () => {
         paperQuestionPublicId: "paper_question_public_123",
       }),
     ]);
+  });
+
+  it("returns saved answer records for practice resume progress", async () => {
+    const service = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            paper_snapshot: createTwoQuestionPaperSnapshot(),
+          });
+        },
+        async listAnswerRecordsByPractice() {
+          return [
+            {
+              public_id: "answer_record_public_existing",
+              exam_mode: "practice",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: null,
+              },
+              answer_record_status: "scored",
+              is_correct: true,
+              score: "1.0",
+              max_score: "1.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+          ];
+        },
+      } as Partial<PracticeRepository>),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.getPractice(userContext, "practice_public_existing"),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        practice: {
+          currentQuestionIndex: 1,
+          questionCount: 2,
+        },
+        answerRecords: [
+          {
+            publicId: "answer_record_public_existing",
+            paperQuestionPublicId: "paper_question_public_123",
+            isCorrect: true,
+          },
+        ],
+      },
+    });
+  });
+
+  it("applies partial credit to multiple-choice answers without marking them fully correct", async () => {
+    const mistakeBookInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            paper_snapshot: createTwoQuestionPaperSnapshot(),
+          });
+        },
+        async createPracticeAnswerRecord(input) {
+          return {
+            public_id: input.publicId,
+            exam_mode: "practice",
+            paper_question_public_id: input.paperQuestionPublicId,
+            question_public_id: input.questionPublicId,
+            answer_snapshot: input.answerSnapshot,
+            answer_record_status: input.answerRecordStatus,
+            is_correct: input.isCorrect,
+            score: input.score,
+            max_score: input.maxScore,
+            answered_at: input.answeredAt,
+            submitted_at: input.submittedAt,
+          };
+        },
+        async upsertMistakeBookFromWrongAnswer(input) {
+          mistakeBookInputs.push(input);
+
+          return {
+            public_id: input.publicId,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_public_456",
+        selectedLabels: ["A"],
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          isCorrect: false,
+          score: "1.5",
+          maxScore: "3.0",
+          mistakeBookPublicId: "mistake_book_public_2",
+        },
+      },
+    });
+    expect(mistakeBookInputs).toHaveLength(1);
   });
 
   it("restarts and terminates practice through explicit lifecycle transitions", async () => {

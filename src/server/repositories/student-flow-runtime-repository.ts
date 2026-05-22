@@ -351,6 +351,42 @@ function createPostgresPracticeRepository(
 
       return row === undefined ? null : mapPracticeAnswerRecordRow(row);
     },
+    async listAnswerRecordsByPractice(input) {
+      const database = getDatabase();
+      const userId = await findUserIdByPublicId(database, input.userPublicId);
+
+      if (userId === null) {
+        return [];
+      }
+
+      const [practiceRow] = await database
+        .select({ id: practice.id })
+        .from(practice)
+        .where(
+          and(
+            eq(practice.user_id, userId),
+            eq(practice.public_id, input.practicePublicId),
+          ),
+        )
+        .limit(1);
+
+      if (practiceRow === undefined) {
+        return [];
+      }
+
+      const rows = await database
+        .select()
+        .from(answerRecord)
+        .where(
+          and(
+            eq(answerRecord.user_id, userId),
+            eq(answerRecord.practice_id, practiceRow.id),
+          ),
+        )
+        .orderBy(asc(answerRecord.answered_at));
+
+      return rows.map(mapPracticeAnswerRecordRow);
+    },
     async createPracticeAnswerRecord(input) {
       const database = getDatabase();
       const userId = await getRequiredUserId(database, input.userPublicId);
