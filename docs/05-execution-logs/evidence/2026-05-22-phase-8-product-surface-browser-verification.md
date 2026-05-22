@@ -179,7 +179,7 @@ Blocked files respected:
   - `git branch -r`: `origin/HEAD -> origin/master`, `origin/master`.
   - `git rev-list --left-right --count origin/master...HEAD`: `0 0`.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass; no tracked, staged, untracked, or upstream differences.
-- finalPushCleanupEvidenceCommit: pending; this update records the already-completed push and cleanup result.
+- finalPushCleanupEvidenceCommit: recorded in final handoff; this evidence update intentionally does not self-reference its own commit SHA.
 
 ## Residual Risk
 
