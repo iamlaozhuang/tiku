@@ -174,6 +174,43 @@ describe("redeem code authorization service", () => {
     });
   });
 
+  it("rejects inconsistent redeem code rows that already have usage markers", async () => {
+    let redeemAttemptCount = 0;
+    const authorizationService = createRedeemCodeAuthorizationService(
+      createRepository({
+        async findRedeemCodeByCode() {
+          return createRedeemCode({
+            status: "unused",
+            used_by_user_id: 42,
+            used_at: now,
+          });
+        },
+        async redeemCodeForUser() {
+          redeemAttemptCount += 1;
+
+          return createPersonalAuth();
+        },
+      }),
+      clock,
+    );
+
+    await expect(
+      authorizationService.redeemCode(
+        {
+          code: "abcd2345",
+        },
+        {
+          userPublicId: "user_public_123",
+        },
+      ),
+    ).resolves.toEqual({
+      code: 409002,
+      message: "Redeem code already used.",
+      data: null,
+    });
+    expect(redeemAttemptCount).toBe(0);
+  });
+
   it("redeems an unused code with normalized input and returns personal authorization", async () => {
     let redeemedInputs: unknown[] = [];
     const authorizationService = createRedeemCodeAuthorizationService(
