@@ -8,7 +8,8 @@ Claim and implement `phase-8-student-login-session-ui-runtime`.
 
 `codex/phase-8-student-login-session-ui-runtime`
 
-This branch is stacked on `codex/phase-8-planning-and-queue-seeding` because the Phase 8 queue seed is not integrated into `master` yet.
+Phase 8 queue seed PR #27 is integrated into `master` at `54ce0e4`.
+This branch is rebased on the updated `master`.
 
 ## Required Reading
 
@@ -39,6 +40,14 @@ This branch is stacked on `codex/phase-8-planning-and-queue-seeding` because the
 - Add role-aware next-step navigation for student and admin users based on the returned user context.
 - Preserve standard API response handling and show explicit invalid credential/runtime unavailable states.
 - Add browser/E2E coverage for student and admin login through the UI, while keeping API/database checks as helper evidence only.
+
+## Implementation Result
+
+- Replaced the placeholder login page with a client-side form that posts to `/api/v1/sessions`.
+- Added loading, invalid credential, locked account, runtime unavailable, and disabled-submit states.
+- Redirected student users to `/home` and admin-role users to `/ops/users` based on returned user context.
+- Updated local business flow E2E to use visible form interaction for student and admin login.
+- Added unit tests for login UI state and role-aware redirect behavior.
 
 ## Allowed Files
 
