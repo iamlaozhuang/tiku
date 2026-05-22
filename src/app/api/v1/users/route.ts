@@ -1,10 +1,10 @@
 import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flow-runtime";
-import { createUnavailableUserRegistrationRouteHandlers } from "@/server/auth/user-registration-route";
+import { createLocalUserRegistrationRouteHandlers } from "@/server/auth/local-session-runtime";
 
 const adminFlowRuntimeRouteHandlers = createAdminFlowRuntimeRouteHandlers();
 
 const userRegistrationRouteHandlers =
-  createUnavailableUserRegistrationRouteHandlers();
+  createLocalUserRegistrationRouteHandlers();
 
 export const GET = adminFlowRuntimeRouteHandlers.users.collection.GET;
 export const POST = userRegistrationRouteHandlers.POST;

@@ -191,6 +191,32 @@ describe("LoginPage", () => {
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
+  it("shows disabled account feedback without redirecting", async () => {
+    mockSessionResponse(
+      {
+        code: 403002,
+        message: "Account disabled.",
+        data: null,
+      },
+      403,
+    );
+
+    render(createElement(LoginPage));
+
+    fireEvent.change(screen.getByLabelText("手机号"), {
+      target: { value: "13900000002" },
+    });
+    fireEvent.change(screen.getByLabelText("密码"), {
+      target: { value: "TikuDevStudent#2026" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
+
+    expect(
+      await screen.findByText("账号已被停用，请联系管理员"),
+    ).toBeInTheDocument();
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
   it("stores the local session token privately and sends students to home", async () => {
     const fetchMock = mockSessionResponse(studentLoginPayload);
 
