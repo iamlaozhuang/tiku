@@ -248,6 +248,25 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     await expect(page.locator("body")).not.toBeEmpty();
   }
 
+  await page.goto("/ops/organizations");
+  await expect(
+    page.getByRole("heading", { name: "企业授权运营" }),
+  ).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(adminToken ?? "");
+  await testInfo.attach("admin-organizations", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+
+  await page.goto("/ops/redeem-codes");
+  await expect(page.getByRole("heading", { name: "卡密管理" })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(adminToken ?? "");
+  await expect(page.locator("body")).not.toContainText("code_hash");
+  await testInfo.attach("admin-redeem-codes", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+
   const adminReads = await page.evaluate(async (token) => {
     const headers = { authorization: `Bearer ${token}` };
     const getJson = async (url: string) => {
@@ -257,6 +276,10 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
 
     return {
       users: await getJson("/api/v1/users?page=1&pageSize=20"),
+      organizations: await getJson("/api/v1/organizations?page=1&pageSize=20"),
+      orgAuths: await getJson("/api/v1/org-auths?page=1&pageSize=20"),
+      employees: await getJson("/api/v1/employees?page=1&pageSize=20"),
+      redeemCodes: await getJson("/api/v1/redeem-codes?page=1&pageSize=20"),
       questions: await getJson("/api/v1/questions?page=1&pageSize=20"),
       papers: await getJson("/api/v1/papers?page=1&pageSize=20"),
       auditLogs: await getJson("/api/v1/audit-logs?page=1&pageSize=20"),
@@ -266,6 +289,10 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   }, adminToken);
 
   expect(adminReads.users.body.code).toBe(0);
+  expect(adminReads.organizations.body.code).toBe(0);
+  expect(adminReads.orgAuths.body.code).toBe(0);
+  expect(adminReads.employees.body.code).toBe(0);
+  expect(adminReads.redeemCodes.body.code).toBe(0);
   expect(adminReads.questions.body.code).toBe(0);
   expect(adminReads.papers.body.code).toBe(0);
   expect(adminReads.auditLogs.body.data.auditLogs.length).toBeGreaterThan(0);
@@ -281,6 +308,8 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   expect(serializedAdminReads).not.toContain("sk-real-secret");
   expect(serializedAdminReads).not.toContain("RAW_PROMPT");
   expect(serializedAdminReads).not.toContain("RAW_ANSWER");
+  expect(serializedAdminReads).not.toContain("code_hash");
+  expect(serializedAdminReads).not.toContain("RC-2026-0001-PLAIN");
   expect(serializedAdminReads).not.toContain(studentToken);
   expect(serializedAdminReads).not.toContain(adminToken);
   expect(consoleErrors).toEqual([]);
