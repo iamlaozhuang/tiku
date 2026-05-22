@@ -3172,3 +3172,432 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-22-fix-local-business-flow-runtime.md
     status: closed
     retryCount: 0
+  - id: phase-8-planning-and-queue-seeding
+    title: Phase 8 Planning And Queue Seeding
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-8-product-surface-completion
+    dependencies:
+      - phase-7-fix-local-business-flow-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/02-architecture/interfaces/phase-8-product-surface-contract.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-planning-and-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-planning-and-queue-seeding.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-planning-and-queue-seeding.md
+    status: closed
+    retryCount: 0
+  - id: phase-8-student-login-session-ui-runtime
+    title: Student Login Session UI Runtime
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-planning-and-queue-seeding
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-login-session-ui-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-student-login-session-ui-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-student-login-session-ui-runtime-security-review.md
+      - src/app/(auth)/login/**
+      - src/app/api/v1/sessions/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - auth
+      - session
+      - authorization
+      - frontend_runtime
+      - e2e
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-student-login-session-ui-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-student-login-session-ui-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-login-session-ui-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-student-authorization-redeem-runtime
+    title: Student Authorization Redeem Runtime
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-student-login-session-ui-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-authorization-redeem-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-student-authorization-redeem-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-student-authorization-redeem-runtime-security-review.md
+      - src/app/api/v1/authorizations/**
+      - src/app/api/v1/personal-auths/**
+      - src/app/api/v1/redeem-codes/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - authorization
+      - personal_auth
+      - redeem_code
+      - audit_log
+      - api_contract
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-student-authorization-redeem-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-student-authorization-redeem-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-authorization-redeem-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-student-profile-redeem-ui
+    title: Student Profile And Redeem UI
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-student-authorization-redeem-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-profile-redeem-ui.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-student-profile-redeem-ui.md
+      - src/app/(student)/profile/**
+      - src/app/(student)/redeem-code/**
+      - src/app/(student)/home/**
+      - src/features/student/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - student
+      - authorization
+      - redeem_code
+      - frontend_runtime
+      - e2e
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-student-profile-redeem-ui
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-profile-redeem-ui.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-student-mistake-book-runtime
+    title: Student Mistake Book Runtime
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-student-login-session-ui-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-mistake-book-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-student-mistake-book-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-student-mistake-book-runtime-security-review.md
+      - src/app/api/v1/mistake-books/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - mistake_book
+      - authorization
+      - api_contract
+      - student
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-student-mistake-book-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-student-mistake-book-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-mistake-book-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-student-mistake-book-ui
+    title: Student Mistake Book UI
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-student-mistake-book-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-mistake-book-ui.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-student-mistake-book-ui.md
+      - src/app/(student)/mistake-book/**
+      - src/app/(student)/mistake-books/**
+      - src/app/(student)/home/**
+      - src/features/student/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - mistake_book
+      - frontend_runtime
+      - student
+      - e2e
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-student-mistake-book-ui
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-student-mistake-book-ui.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-admin-organization-org-auth-runtime
+    title: Admin Organization Org Auth Runtime
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-student-login-session-ui-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-admin-organization-org-auth-runtime-security-review.md
+      - src/app/api/v1/organizations/**
+      - src/app/api/v1/org-auths/**
+      - src/app/api/v1/employees/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - admin
+      - organization
+      - org_auth
+      - employee
+      - authorization
+      - audit_log
+      - api_contract
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-admin-organization-org-auth-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-admin-organization-org-auth-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-admin-redeem-code-runtime
+    title: Admin Redeem Code Runtime
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-admin-organization-org-auth-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-admin-redeem-code-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-redeem-code-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-admin-redeem-code-runtime-security-review.md
+      - src/app/api/v1/redeem-codes/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - admin
+      - redeem_code
+      - authorization
+      - audit_log
+      - api_contract
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-22-phase-8-admin-redeem-code-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-admin-redeem-code-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-redeem-code-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-admin-org-auth-redeem-ui
+    title: Admin Org Auth Redeem UI
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
+    dependencies:
+      - phase-8-admin-organization-org-auth-runtime
+      - phase-8-admin-redeem-code-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-22-phase-8-admin-org-auth-redeem-ui.md
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-org-auth-redeem-ui.md
+      - src/app/(admin)/**
+      - src/features/admin/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - admin
+      - organization
+      - org_auth
+      - redeem_code
+      - frontend_runtime
+      - e2e
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-admin-org-auth-redeem-ui
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-org-auth-redeem-ui.md
+    status: pending
+    retryCount: 0
+  - id: phase-8-product-surface-browser-verification
+    title: Product Surface Browser Verification
+    phase: phase-8-product-surface-completion
+    sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#validation-expectations
+    dependencies:
+      - phase-8-student-profile-redeem-ui
+      - phase-8-student-mistake-book-ui
+      - phase-8-admin-org-auth-redeem-ui
+    taskPlanPolicy: evidence_only
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-22-phase-8-product-surface-browser-verification.md
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - e2e
+      - browser_verification
+      - audit_log
+      - ai_call_log
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-8-product-surface-browser-verification
+      - docker compose ps
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-product-surface-browser-verification.md
+    status: pending
+    retryCount: 0
