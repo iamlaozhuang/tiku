@@ -138,9 +138,22 @@ Blocked files:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`:
     pass on `master`, ahead of `origin/master` by implementation and merge
     commits before closeout evidence commit.
-- push: pending until closeout evidence commit is created and remote freshness is
-  checked.
-- cleanup: pending until push succeeds.
+- closeoutEvidenceCommit: `0010899 docs(agent): close phase 8 mistake book runtime`
+- push:
+  - `git fetch --prune`: pass before push.
+  - `git status --short --branch`: `## master...origin/master [ahead 3]`
+    before push.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 3` before
+    push.
+  - `git push origin master`: pass, `28babc9..0010899 master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-8-student-mistake-book-runtime`: first attempt
+    failed due `.git/refs` lock permission; escalated retry passed and deleted
+    the merged branch.
+  - `git fetch --prune`: pass after cleanup.
+  - `git status --short --branch`: `## master...origin/master`.
+  - `git branch --list`: only `master`.
+  - `git branch -r`: `origin/HEAD -> origin/master`, `origin/master`.
 
 ## Residual Risk
 
