@@ -134,8 +134,8 @@ Final validation:
   - `npm.cmd run build`: pass on `master`; Next.js build completed and generated paper/paper_asset API routes.
   - `Test-NamingConventions.ps1`: pass on `master`.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass on `master`; no untracked or unstaged files before closeout documentation update.
-- push: pending.
-- cleanup: pending.
+- push: completed; `git push origin master` succeeded.
+- cleanup: completed; local branch `codex/phase-9-paper-composition-lifecycle-runtime` deleted after merge and push.
 
 ## Taste Compliance Self-Check
 
