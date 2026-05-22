@@ -165,9 +165,21 @@ Blocked files respected:
 - state closeout:
   - `docs/04-agent-system/state/project-state.yaml`: current task updated to `phase-8-product-surface-browser-verification`, status `closed`, plan path `null` because evidence-only.
   - `docs/04-agent-system/state/task-queue.yaml`: task status updated from `pending` to `closed`.
-- closeoutEvidenceCommit: pending; this file and state updates will be committed after this section is written.
-- push: pending.
-- cleanup: pending.
+- closeoutEvidenceCommit: `c27bd8f docs(agent): close phase 8 product surface verification`.
+- push:
+  - `git fetch --prune`: pass before push.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 3` before push.
+  - `git push origin master`: pass, `d93f3bd..c27bd8f master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-8-product-surface-browser-verification`: first sandbox run failed due `.git/refs` lock permission.
+  - escalated `git branch -d codex/phase-8-product-surface-browser-verification`: pass, deleted local merged task branch.
+  - `git fetch --prune`: pass after cleanup.
+  - `git status --short --branch`: `## master...origin/master`.
+  - `git branch --list`: only `master`.
+  - `git branch -r`: `origin/HEAD -> origin/master`, `origin/master`.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 0`.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass; no tracked, staged, untracked, or upstream differences.
+- finalPushCleanupEvidenceCommit: pending; this update records the already-completed push and cleanup result.
 
 ## Residual Risk
 
