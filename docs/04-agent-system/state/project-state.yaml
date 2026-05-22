@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-9-authorization-expiry-termination-completion
-  status: pushed
-  sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#5-授权访问统一规则
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-authorization-expiry-termination-completion.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-authorization-expiry-termination-completion.md
-  branch: codex/phase-9-authorization-expiry-termination-completion
+  id: phase-9-content-question-material-runtime
+  status: validated
+  sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#1-题库管理
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-content-question-material-runtime.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-content-question-material-runtime.md
+  branch: codex/phase-9-content-question-material-runtime
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-9-content-question-material-runtime
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-9-authorization-expiry-termination-completion.md
+  nextRecommendedAction: commit and merge phase-9-content-question-material-runtime
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-9-content-question-material-runtime.md

@@ -1,17 +1,9 @@
-import { createMaterialRouteHandlers } from "@/server/services/material-route";
-import { createUnavailableMaterialService } from "@/server/services/material-service";
+import { createContentQuestionMaterialRuntimeRouteHandlers } from "@/server/services/content-question-material-runtime";
 
-const materialRouteHandlers = createMaterialRouteHandlers(
-  createUnavailableMaterialService(),
-);
+const contentQuestionMaterialRuntimeRouteHandlers =
+  createContentQuestionMaterialRuntimeRouteHandlers();
 
-const responseContract = {
-  code: 503201,
-  message: "Material runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const GET = materialRouteHandlers.collection.GET;
-export const POST = materialRouteHandlers.collection.POST;
+export const GET =
+  contentQuestionMaterialRuntimeRouteHandlers.materials.collection.GET;
+export const POST =
+  contentQuestionMaterialRuntimeRouteHandlers.materials.collection.POST;
