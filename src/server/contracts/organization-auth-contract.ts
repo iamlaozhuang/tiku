@@ -48,3 +48,7 @@ export type OrgAuthDto = {
 export type OrgAuthResultDto = {
   orgAuth: OrgAuthDto;
 };
+
+export type OrgAuthListDto = {
+  orgAuths: OrgAuthDto[];
+};
