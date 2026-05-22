@@ -131,11 +131,31 @@ Blocked files:
 
 ## Git Closeout
 
-- implementationCommit: `77dbbe6 feat(admin): add organization org auth runtime`
-- merge: pending.
+- implementationCommit: `c790f1e feat(admin): add organization org auth runtime`
+- merge: `ae8f6fe merge: phase 8 admin organization org auth runtime`
 - closeoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
+
+## Master Closeout Validation
+
+- `git switch master`: pass; branch was up to date with `origin/master`.
+- `git fetch --prune`: pass before merge.
+- `git rev-list --left-right --count origin/master...HEAD`: `0 0` before merge.
+- `git merge --no-ff codex/phase-8-admin-organization-org-auth-runtime -m "merge: phase 8 admin organization org auth runtime"`:
+  pass, merge commit `ae8f6fe`.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` on `master`:
+  pass.
+  - `lint`: pass.
+  - `typecheck`: pass.
+  - `test:unit`: pass, `94` files passed, `319` tests passed.
+  - `format:check`: pass.
+- `npm.cmd run build` on `master`:
+  pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` on `master`:
+  pass.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` on `master`:
+  pass inventory; `master` ahead of `origin/master` by `2` commits before closeout evidence commit.
 
 ## Residual Risk
 
