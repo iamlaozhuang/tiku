@@ -1,13 +1,6 @@
-import { createUnavailableMistakeBookService } from "@/server/services/mistake-book-service";
-import {
-  createMistakeBookRouteHandlers,
-  createUnavailableMistakeBookUserResolver,
-} from "@/server/services/mistake-book-route";
+import { createStudentMistakeBookRuntimeRouteHandlers } from "@/server/services/student-mistake-book-runtime";
 
-const mistakeBookRouteHandlers = createMistakeBookRouteHandlers(
-  createUnavailableMistakeBookService(),
-  createUnavailableMistakeBookUserResolver(),
-);
+const mistakeBookRouteHandlers = createStudentMistakeBookRuntimeRouteHandlers();
 
 const responseContract = {
   code: 401001,
