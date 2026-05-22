@@ -14,6 +14,7 @@ import {
   mapPaperAssetToApi,
 } from "../mappers/paper-asset-mapper";
 import type { PaperAssetRepository } from "../repositories/paper-asset-repository";
+import type { ContentMutationContext } from "../repositories/question-repository";
 import {
   normalizeCreatePaperAssetInput,
   normalizePaperAssetListInput,
@@ -32,6 +33,10 @@ export type PaperAssetService = {
   deletePaperAsset(
     publicId: string,
   ): Promise<ApiResponse<PaperAssetDeleteResultDto | null>>;
+};
+
+export type PaperAssetServiceOptions = {
+  mutationContext?: ContentMutationContext;
 };
 
 const INVALID_PAPER_ASSET_INPUT_CODE = 422205;
@@ -58,6 +63,7 @@ function createPaperAssetNotFoundResponse(): ApiResponse<null> {
 
 export function createPaperAssetService(
   paperAssetRepository: PaperAssetRepository,
+  options: PaperAssetServiceOptions = {},
 ): PaperAssetService {
   return {
     async listPaperAssets(input = {}) {
@@ -86,7 +92,12 @@ export function createPaperAssetService(
 
       const paperAsset = await paperAssetRepository.createPaperAsset(
         paperAssetInput.value,
+        options.mutationContext,
       );
+
+      if (paperAsset === null) {
+        return createPaperAssetNotFoundResponse();
+      }
 
       return createSuccessResponse(mapPaperAssetResultToApi(paperAsset));
     },

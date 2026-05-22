@@ -1,17 +1,7 @@
-import { createPaperAssetRouteHandlers } from "@/server/services/paper-asset-route";
-import { createUnavailablePaperAssetService } from "@/server/services/paper-asset-service";
+import { createPaperCompositionLifecycleRuntimeRouteHandlers } from "@/server/services/paper-composition-lifecycle-runtime";
 
-const paperAssetRouteHandlers = createPaperAssetRouteHandlers(
-  createUnavailablePaperAssetService(),
-);
+const paperRuntimeRouteHandlers =
+  createPaperCompositionLifecycleRuntimeRouteHandlers();
 
-const responseContract = {
-  code: 503204,
-  message: "Paper asset runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const GET = paperAssetRouteHandlers.collection.GET;
-export const POST = paperAssetRouteHandlers.collection.POST;
+export const GET = paperRuntimeRouteHandlers.paperAssets.collection.GET;
+export const POST = paperRuntimeRouteHandlers.paperAssets.collection.POST;
