@@ -1,13 +1,7 @@
-import { createUnavailableRedeemCodeAuthorizationService } from "@/server/services/redeem-code-authorization-service";
-import {
-  createPersonalAuthRouteHandlers,
-  createUnavailableAuthorizationUserResolver,
-} from "@/server/services/redeem-code-route";
+import { createStudentAuthorizationRedeemRuntimeRouteHandlers } from "@/server/services/student-authorization-redeem-runtime";
 
-const personalAuthRouteHandlers = createPersonalAuthRouteHandlers(
-  createUnavailableRedeemCodeAuthorizationService(),
-  createUnavailableAuthorizationUserResolver(),
-);
+const authorizationRedeemRuntimeRouteHandlers =
+  createStudentAuthorizationRedeemRuntimeRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -17,4 +11,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = personalAuthRouteHandlers.GET;
+export const GET = authorizationRedeemRuntimeRouteHandlers.personalAuths.GET;

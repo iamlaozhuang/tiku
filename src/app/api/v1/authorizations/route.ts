@@ -1,14 +1,7 @@
-import { createUnavailableEffectiveAuthorizationService } from "@/server/services/effective-authorization-service";
-import {
-  createEffectiveAuthorizationRouteHandlers,
-  createUnavailableEffectiveAuthorizationUserResolver,
-} from "@/server/services/effective-authorization-route";
+import { createStudentAuthorizationRedeemRuntimeRouteHandlers } from "@/server/services/student-authorization-redeem-runtime";
 
-const effectiveAuthorizationRouteHandlers =
-  createEffectiveAuthorizationRouteHandlers(
-    createUnavailableEffectiveAuthorizationService(),
-    createUnavailableEffectiveAuthorizationUserResolver(),
-  );
+const authorizationRedeemRuntimeRouteHandlers =
+  createStudentAuthorizationRedeemRuntimeRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -18,4 +11,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = effectiveAuthorizationRouteHandlers.GET;
+export const GET = authorizationRedeemRuntimeRouteHandlers.authorizations.GET;

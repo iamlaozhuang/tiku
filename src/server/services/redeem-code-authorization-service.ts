@@ -70,7 +70,11 @@ export function createRedeemCodeAuthorizationService(
         );
       }
 
-      if (redeemCode.status === "used") {
+      if (
+        redeemCode.status === "used" ||
+        redeemCode.used_by_user_id !== null ||
+        redeemCode.used_at !== null
+      ) {
         return createErrorResponse(
           REDEEM_CODE_ALREADY_USED_CODE,
           "Redeem code already used.",
