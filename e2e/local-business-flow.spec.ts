@@ -65,6 +65,10 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     "href",
     "/redeem-code",
   );
+  await expect(page.getByRole("link", { name: "错题本" })).toHaveAttribute(
+    "href",
+    "/mistake-book",
+  );
   await testInfo.attach("student-home", {
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",
@@ -88,6 +92,45 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   await expect(page.locator("body")).not.toContainText("兑换成功");
   await expect(page.locator("body")).not.toContainText(studentToken ?? "");
   await testInfo.attach("student-redeem-code", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+
+  await page.goto("/mistake-book");
+  await expect(page.getByRole("heading", { name: "错题本" })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(studentToken ?? "");
+  await expect(page.locator("body")).not.toContainText("code_hash");
+  await expect(page.locator("body")).not.toContainText("raw answer");
+  await expect(page.locator("body")).not.toContainText("do-not-render");
+
+  const firstMistakeBookItem = page
+    .locator('[data-testid^="mistake-book-item-"]')
+    .first();
+
+  if ((await firstMistakeBookItem.count()) > 0) {
+    await expect(firstMistakeBookItem).toBeVisible();
+    await expect(firstMistakeBookItem).not.toHaveAttribute("data-id", /.*/);
+    await expect(
+      firstMistakeBookItem.getByRole("button", { name: "AI讲解暂不可用" }),
+    ).toBeDisabled();
+
+    const favoriteButton = firstMistakeBookItem.getByRole("button", {
+      name: /收藏/,
+    });
+    await favoriteButton.click();
+    await expect(
+      firstMistakeBookItem.getByRole("button", {
+        name: /收藏/,
+      }),
+    ).toBeVisible();
+  } else {
+    await expect(page.locator("body")).toContainText("暂无错题记录");
+    await expect(
+      page.getByRole("link", { name: "返回首页" }).first(),
+    ).toHaveAttribute("href", "/home");
+  }
+
+  await testInfo.attach("student-mistake-book", {
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",
   });
