@@ -37,7 +37,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-8-admin-organization-org-auth-runtime
-  status: merged
+  status: closed
   sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#task-ordering
   planPath: docs/05-execution-logs/task-plans/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: push and close phase-8-admin-organization-org-auth-runtime
+  nextRecommendedAction: claim phase-8-admin-redeem-code-runtime after recovery checks
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-22-phase-8-admin-organization-org-auth-runtime.md

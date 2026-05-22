@@ -133,9 +133,19 @@ Blocked files:
 
 - implementationCommit: `c790f1e feat(admin): add organization org auth runtime`
 - merge: `ae8f6fe merge: phase 8 admin organization org auth runtime`
-- closeoutEvidenceCommit: pending.
-- push: pending.
-- cleanup: pending.
+- closeoutEvidenceCommit: `cc31f7d docs(agent): close admin organization org auth runtime`; final push cleanup evidence is recorded by the follow-up evidence commit reported in final handoff.
+- push:
+  - `git fetch --prune`: pass before push.
+  - `git status --short --branch`: `## master...origin/master [ahead 3]` before push.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 3` before push.
+  - `git push origin master`: pass, `54bf71c..cc31f7d master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-8-admin-organization-org-auth-runtime`: first sandbox run failed due `.git/refs` lock permission; escalated retry passed and deleted the merged branch.
+  - `git fetch --prune`: pass after cleanup.
+  - `git status --short --branch`: `## master...origin/master`.
+  - `git branch --list`: only `master`.
+  - `git branch -r`: `origin/HEAD -> origin/master`, `origin/master`.
+  - `git rev-list --left-right --count origin/master...HEAD`: `0 0`.
 
 ## Master Closeout Validation
 
