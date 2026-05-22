@@ -132,3 +132,32 @@ Dependency order:
 - Database migration and seed baseline must land before auth/session runtime.
 - Auth/session runtime must land before student and admin flow smoke tests.
 - Mock AI logging and audit logging must be validated before real provider or RAG work.
+
+## Phase 8: Product Surface Completion
+
+Primary deliverables:
+
+- Phase 8 product surface contract at `docs/02-architecture/interfaces/phase-8-product-surface-contract.md`.
+- Student login/session UI runtime that replaces the placeholder login page for local MVP validation.
+- Student profile, authorization, redeem code, and `mistake_book` surfaces that no longer fail as 404 for MVP-visible navigation.
+- Admin organization, `org_auth`, employee, and `redeem_code` local runtime slices with security review and audit boundaries.
+- Admin UI pages for enterprise authorization and card code operations after runtime slices are available.
+- Browser-level verification evidence that separates UI coverage from API/database helper checks.
+
+Non-goals:
+
+- Do not add production deployment, staging deployment, or external resource operations.
+- Do not introduce dependencies without dependency gate approval.
+- Do not connect real AI providers; continue using the mock provider unless a separate approved task changes that boundary.
+- Do not implement full RAG ingestion or broad content CRUD in the same task family.
+- Do not weaken auth, authorization, audit, or redaction contracts to make browser checks pass.
+
+Dependency order:
+
+- Depends on Phase 7 local runtime readiness and closeout.
+- Starts with planning and queue seeding before any implementation.
+- Student login/session UI runtime is first because later browser verification depends on role switching.
+- Student authorization/redeem runtime precedes the student profile/redeem UI task.
+- Student `mistake_book` runtime precedes the student `mistake_book` UI task.
+- Admin organization and `org_auth` runtime precedes admin enterprise authorization UI.
+- Final browser verification runs after the student and admin product surfaces exist.
