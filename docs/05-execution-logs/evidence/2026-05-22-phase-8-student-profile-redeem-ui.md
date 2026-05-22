@@ -103,7 +103,21 @@ Blocked files:
 
 ## Git Closeout
 
-- Pending commit, merge, push, and cleanup.
+- implementationCommit: `c5d888f feat(student): add profile redeem ui`
+- merge: `711f9b6 merge: phase 8 student profile redeem ui`
+- master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass on `master`.
+    - `lint`: pass.
+    - `typecheck`: pass.
+    - `test:unit`: pass, `91` files passed, `306` tests passed.
+    - `format:check`: pass.
+  - `npm.cmd run build`: pass on `master`; route output includes `/profile` and `/redeem-code`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass on `master`.
+  - `npm.cmd run test:e2e`: pass on `master`, `2` Chromium tests passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass on `master`, ahead of `origin/master` by implementation and merge commits before closeout evidence commit.
+- push: pending.
+- cleanup: pending.
+- closeoutEvidenceCommit: pending.
 
 ## Residual Risk
 
