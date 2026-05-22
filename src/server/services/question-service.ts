@@ -12,7 +12,10 @@ import {
   mapQuestionResultToApi,
   mapQuestionToApi,
 } from "../mappers/question-mapper";
-import type { QuestionRepository } from "../repositories/question-repository";
+import type {
+  ContentMutationContext,
+  QuestionRepository,
+} from "../repositories/question-repository";
 import {
   normalizeCreateQuestionInput,
   normalizeQuestionListInput,
@@ -39,6 +42,10 @@ export type QuestionService = {
   ): Promise<ApiResponse<QuestionResultDto | null>>;
 };
 
+export type QuestionServiceOptions = {
+  mutationContext?: ContentMutationContext;
+};
+
 const INVALID_QUESTION_INPUT_CODE = 422202;
 const QUESTION_NOT_FOUND_CODE = 404202;
 const QUESTION_LOCKED_CODE = 409202;
@@ -60,6 +67,7 @@ function createQuestionNotFoundResponse(): ApiResponse<null> {
 
 export function createQuestionService(
   questionRepository: QuestionRepository,
+  options: QuestionServiceOptions = {},
 ): QuestionService {
   return {
     async listQuestions(input = {}) {
@@ -88,6 +96,7 @@ export function createQuestionService(
 
       const question = await questionRepository.createQuestion(
         questionInput.value,
+        options.mutationContext,
       );
 
       return createSuccessResponse(mapQuestionResultToApi(question));
@@ -125,16 +134,22 @@ export function createQuestionService(
         );
       }
 
-      const updatedQuestion = await questionRepository.updateQuestion({
-        publicId,
-        ...questionInput.value,
-      });
+      const updatedQuestion = await questionRepository.updateQuestion(
+        {
+          publicId,
+          ...questionInput.value,
+        },
+        options.mutationContext,
+      );
 
       return createSuccessResponse(mapQuestionResultToApi(updatedQuestion));
     },
 
     async disableQuestion(publicId) {
-      const question = await questionRepository.disableQuestion(publicId);
+      const question = await questionRepository.disableQuestion(
+        publicId,
+        options.mutationContext,
+      );
 
       if (question === null) {
         return createQuestionNotFoundResponse();
@@ -144,7 +159,10 @@ export function createQuestionService(
     },
 
     async copyQuestion(publicId) {
-      const question = await questionRepository.copyQuestion(publicId);
+      const question = await questionRepository.copyQuestion(
+        publicId,
+        options.mutationContext,
+      );
 
       if (question === null) {
         return createQuestionNotFoundResponse();

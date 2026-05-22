@@ -13,6 +13,7 @@ import {
   mapMaterialToApi,
 } from "../mappers/material-mapper";
 import type { MaterialRepository } from "../repositories/material-repository";
+import type { ContentMutationContext } from "../repositories/question-repository";
 import {
   normalizeCreateMaterialInput,
   normalizeMaterialListInput,
@@ -39,6 +40,10 @@ export type MaterialService = {
   ): Promise<ApiResponse<MaterialResultDto | null>>;
 };
 
+export type MaterialServiceOptions = {
+  mutationContext?: ContentMutationContext;
+};
+
 const INVALID_MATERIAL_INPUT_CODE = 422201;
 const MATERIAL_NOT_FOUND_CODE = 404201;
 const MATERIAL_LOCKED_CODE = 409201;
@@ -60,6 +65,7 @@ function createMaterialNotFoundResponse(): ApiResponse<null> {
 
 export function createMaterialService(
   materialRepository: MaterialRepository,
+  options: MaterialServiceOptions = {},
 ): MaterialService {
   return {
     async listMaterials(input = {}) {
@@ -88,6 +94,7 @@ export function createMaterialService(
 
       const material = await materialRepository.createMaterial(
         materialInput.value,
+        options.mutationContext,
       );
 
       return createSuccessResponse(mapMaterialResultToApi(material));
@@ -125,16 +132,22 @@ export function createMaterialService(
         );
       }
 
-      const updatedMaterial = await materialRepository.updateMaterial({
-        publicId,
-        ...materialInput.value,
-      });
+      const updatedMaterial = await materialRepository.updateMaterial(
+        {
+          publicId,
+          ...materialInput.value,
+        },
+        options.mutationContext,
+      );
 
       return createSuccessResponse(mapMaterialResultToApi(updatedMaterial));
     },
 
     async disableMaterial(publicId) {
-      const material = await materialRepository.disableMaterial(publicId);
+      const material = await materialRepository.disableMaterial(
+        publicId,
+        options.mutationContext,
+      );
 
       if (material === null) {
         return createMaterialNotFoundResponse();
@@ -144,7 +157,10 @@ export function createMaterialService(
     },
 
     async copyMaterial(publicId) {
-      const material = await materialRepository.copyMaterial(publicId);
+      const material = await materialRepository.copyMaterial(
+        publicId,
+        options.mutationContext,
+      );
 
       if (material === null) {
         return createMaterialNotFoundResponse();
