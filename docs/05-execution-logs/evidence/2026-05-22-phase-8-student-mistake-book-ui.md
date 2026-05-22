@@ -106,7 +106,26 @@ Blocked files:
 
 ## Git Closeout
 
-- Pending.
+- implementationCommit: `2382c98 feat(student): add mistake book ui`
+- merge: `31a3c8d merge: phase 8 student mistake book ui`
+- master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`:
+    pass on `master`.
+    - `lint`: pass.
+    - `typecheck`: pass.
+    - `test:unit`: pass, `93` files passed, `315` tests passed.
+    - `format:check`: pass.
+  - `npm.cmd run build`: pass on `master`; route output includes
+    `/mistake-book`.
+  - `npm.cmd run test:e2e`: pass on `master`, `2` Playwright tests passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`:
+    pass on `master`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`:
+    pass on `master`, ahead of `origin/master` by implementation and merge
+    commits before closeout evidence commit.
+- closeoutEvidenceCommit: pending.
+- push: pending.
+- cleanup: pending.
 
 ## Residual Risk
 
