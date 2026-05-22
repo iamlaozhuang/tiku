@@ -310,8 +310,8 @@ describe("practice service", () => {
     await expect(
       unauthorizedService.getPractice(userContext, "practice_public_123"),
     ).resolves.toEqual({
-      code: 404302,
-      message: "Practice does not exist.",
+      code: 403303,
+      message: "Practice authorization is invalid; progress terminated.",
       data: null,
     });
 
@@ -375,6 +375,83 @@ describe("practice service", () => {
       message: "Practice objective question has already been answered.",
       data: null,
     });
+  });
+
+  it("terminates in-progress practice when authorization is expired or no longer effective", async () => {
+    const startTerminationInputs: unknown[] = [];
+    const startService = createPracticeService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [createScope({ expires_at: now })];
+        },
+        async findActivePracticeByPaper() {
+          return createPractice({
+            public_id: "practice_public_scope_expired",
+          });
+        },
+        async terminatePractice(input) {
+          startTerminationInputs.push(input);
+
+          return createPractice({
+            public_id: input.publicId,
+            practice_status: "terminated",
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      startService.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 403301,
+      message: "Student authorization is not valid for this practice.",
+      data: null,
+    });
+    expect(startTerminationInputs).toEqual([
+      {
+        publicId: "practice_public_scope_expired",
+        terminatedAt: now,
+        terminationReason: "authorization_invalid",
+      },
+    ]);
+
+    const readTerminationInputs: unknown[] = [];
+    const readService = createPracticeService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [];
+        },
+        async terminatePractice(input) {
+          readTerminationInputs.push(input);
+
+          return createPractice({
+            public_id: input.publicId,
+            practice_status: "terminated",
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      readService.getPractice(userContext, "practice_public_existing"),
+    ).resolves.toEqual({
+      code: 403303,
+      message: "Practice authorization is invalid; progress terminated.",
+      data: null,
+    });
+    expect(readTerminationInputs).toEqual([
+      {
+        publicId: "practice_public_existing",
+        terminatedAt: now,
+        terminationReason: "authorization_invalid",
+      },
+    ]);
   });
 
   it("submits objective answer feedback and updates mistake book for wrong answers", async () => {

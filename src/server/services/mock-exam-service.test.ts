@@ -349,8 +349,8 @@ describe("mock exam service", () => {
     await expect(
       unauthorizedService.getMockExam(userContext, "mock_exam_public_123"),
     ).resolves.toEqual({
-      code: 404312,
-      message: "Mock exam does not exist.",
+      code: 403313,
+      message: "Mock exam authorization is invalid; session terminated.",
       data: null,
     });
 
@@ -516,6 +516,87 @@ describe("mock exam service", () => {
         totalScore: "1.0",
         unansweredCount: 1,
       }),
+    ]);
+  });
+
+  it("terminates in-progress mock_exam when authorization is expired or no longer effective", async () => {
+    const startTerminationInputs: unknown[] = [];
+    const startService = createMockExamService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [createScope({ expires_at: now })];
+        },
+        async findActiveMockExamByPaper() {
+          return createMockExam({
+            public_id: "mock_exam_public_scope_expired",
+          });
+        },
+        async terminateMockExam(input) {
+          startTerminationInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: "terminated",
+            terminated_at: input.terminatedAt,
+            termination_reason: input.terminationReason,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      startService.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 403311,
+      message: "Student authorization is not valid for this mock exam.",
+      data: null,
+    });
+    expect(startTerminationInputs).toEqual([
+      {
+        publicId: "mock_exam_public_scope_expired",
+        terminatedAt: now,
+        terminationReason: "authorization_invalid",
+      },
+    ]);
+
+    const readTerminationInputs: unknown[] = [];
+    const readService = createMockExamService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [];
+        },
+        async terminateMockExam(input) {
+          readTerminationInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: "terminated",
+            terminated_at: input.terminatedAt,
+            termination_reason: input.terminationReason,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      readService.getMockExam(userContext, "mock_exam_public_existing"),
+    ).resolves.toEqual({
+      code: 403313,
+      message: "Mock exam authorization is invalid; session terminated.",
+      data: null,
+    });
+    expect(readTerminationInputs).toEqual([
+      {
+        publicId: "mock_exam_public_existing",
+        terminatedAt: now,
+        terminationReason: "authorization_invalid",
+      },
     ]);
   });
 

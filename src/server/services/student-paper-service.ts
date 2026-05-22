@@ -79,6 +79,42 @@ function isSameScope(
   return scope.profession === profession && scope.level === level;
 }
 
+function createScopeKey(scope: StudentPaperAuthorizationScopeRow): string {
+  return `${scope.profession}:${scope.level}`;
+}
+
+function mergeAuthorizationScopes(
+  scopes: StudentPaperAuthorizationScopeRow[],
+): StudentPaperAuthorizationScopeRow[] {
+  const scopeByKey = new Map<string, StudentPaperAuthorizationScopeRow>();
+
+  for (const scope of scopes) {
+    const scopeKey = createScopeKey(scope);
+    const existingScope = scopeByKey.get(scopeKey);
+
+    if (existingScope === undefined) {
+      scopeByKey.set(scopeKey, scope);
+      continue;
+    }
+
+    scopeByKey.set(scopeKey, {
+      ...existingScope,
+      authorization_types: Array.from(
+        new Set([
+          ...existingScope.authorization_types,
+          ...scope.authorization_types,
+        ]),
+      ),
+      expires_at:
+        existingScope.expires_at > scope.expires_at
+          ? existingScope.expires_at
+          : scope.expires_at,
+    });
+  }
+
+  return Array.from(scopeByKey.values());
+}
+
 function selectStudentPaperScope(
   scopes: StudentPaperAuthorizationScopeRow[],
   input: NormalizedStudentPaperListInput,
@@ -136,9 +172,10 @@ export function createStudentPaperService(
         await studentPaperRepository.listEffectiveAuthorizationScopes({
           userPublicId: userContext.userPublicId,
         });
+      const mergedScopes = mergeAuthorizationScopes(scopes);
 
       return createSuccessResponse(
-        scopes.map((scope) => mapStudentPaperScopeToApi(scope)),
+        mergedScopes.map((scope) => mapStudentPaperScopeToApi(scope)),
       );
     },
 
@@ -148,7 +185,11 @@ export function createStudentPaperService(
         await studentPaperRepository.listEffectiveAuthorizationScopes({
           userPublicId: userContext.userPublicId,
         });
-      const selectedScope = selectStudentPaperScope(scopes, normalizedInput);
+      const mergedScopes = mergeAuthorizationScopes(scopes);
+      const selectedScope = selectStudentPaperScope(
+        mergedScopes,
+        normalizedInput,
+      );
 
       if (selectedScope.status === "empty") {
         return createPaginatedResponse([], {
@@ -192,8 +233,9 @@ export function createStudentPaperService(
         await studentPaperRepository.listEffectiveAuthorizationScopes({
           userPublicId: userContext.userPublicId,
         });
+      const mergedScopes = mergeAuthorizationScopes(scopes);
 
-      if (scopes.length === 0) {
+      if (mergedScopes.length === 0) {
         return createErrorResponse(404301, missingPaperMessage);
       }
 
@@ -202,7 +244,7 @@ export function createStudentPaperService(
         publicId,
       });
 
-      if (paper === null || !isPaperWithinScopes(paper, scopes)) {
+      if (paper === null || !isPaperWithinScopes(paper, mergedScopes)) {
         return createErrorResponse(404301, missingPaperMessage);
       }
 

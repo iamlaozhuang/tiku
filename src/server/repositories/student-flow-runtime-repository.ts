@@ -60,6 +60,10 @@ const {
   examReport,
   mistakeBook,
   mockExam,
+  employee,
+  organization,
+  orgAuth,
+  orgAuthOrganization,
   paper,
   paperQuestion,
   paperSection,
@@ -872,7 +876,7 @@ async function listEffectiveAuthorizationScopes(
   userPublicId: string,
   now: Date,
 ): Promise<StudentPaperAuthorizationScopeRow[]> {
-  const rows = await database
+  const personalAuthRows = await database
     .select({
       profession: personalAuth.profession,
       level: personalAuth.level,
@@ -891,12 +895,49 @@ async function listEffectiveAuthorizationScopes(
     )
     .orderBy(asc(personalAuth.expires_at));
 
-  return rows.map((row) => ({
-    profession: row.profession,
-    level: row.level,
-    authorization_types: ["personal_auth"] satisfies AuthorizationType[],
-    expires_at: row.expires_at,
-  }));
+  const orgAuthRows = await database
+    .select({
+      profession: orgAuth.profession,
+      level: orgAuth.level,
+      expires_at: orgAuth.expires_at,
+    })
+    .from(orgAuth)
+    .innerJoin(
+      orgAuthOrganization,
+      eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+    )
+    .innerJoin(
+      organization,
+      eq(organization.id, orgAuthOrganization.organization_id),
+    )
+    .innerJoin(employee, eq(employee.organization_id, organization.id))
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .where(
+      and(
+        eq(user.public_id, userPublicId),
+        eq(user.status, "active"),
+        eq(organization.status, "active"),
+        eq(orgAuth.status, "active"),
+        lte(orgAuth.starts_at, now),
+        gt(orgAuth.expires_at, now),
+      ),
+    )
+    .orderBy(asc(orgAuth.expires_at));
+
+  return [
+    ...personalAuthRows.map((row) => ({
+      profession: row.profession,
+      level: row.level,
+      authorization_types: ["personal_auth"] satisfies AuthorizationType[],
+      expires_at: row.expires_at,
+    })),
+    ...orgAuthRows.map((row) => ({
+      profession: row.profession,
+      level: row.level,
+      authorization_types: ["org_auth"] satisfies AuthorizationType[],
+      expires_at: row.expires_at,
+    })),
+  ];
 }
 
 async function findPublishedPaperByPublicId(
