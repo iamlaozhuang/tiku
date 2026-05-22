@@ -1,18 +1,8 @@
-import { createPaperDraftRouteHandlers } from "@/server/services/paper-draft-route";
-import { createUnavailablePaperDraftService } from "@/server/services/paper-draft-service";
+import { createPaperCompositionLifecycleRuntimeRouteHandlers } from "@/server/services/paper-composition-lifecycle-runtime";
 
-const paperRouteHandlers = createPaperDraftRouteHandlers(
-  createUnavailablePaperDraftService(),
-);
+const paperRuntimeRouteHandlers =
+  createPaperCompositionLifecycleRuntimeRouteHandlers();
 
-const responseContract = {
-  code: 503203,
-  message: "Paper runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const GET = paperRouteHandlers.detail.GET;
-export const PATCH = paperRouteHandlers.detail.PATCH;
-export const DELETE = paperRouteHandlers.detail.DELETE;
+export const GET = paperRuntimeRouteHandlers.papers.detail.GET;
+export const PATCH = paperRuntimeRouteHandlers.papers.detail.PATCH;
+export const DELETE = paperRuntimeRouteHandlers.papers.detail.DELETE;

@@ -24,6 +24,7 @@ import type {
   PaperQuestionAccessRow,
   PaperSectionAccessRow,
 } from "../repositories/paper-draft-repository";
+import type { ContentMutationContext } from "../repositories/question-repository";
 import {
   normalizeAddPaperQuestionInput,
   normalizeCreatePaperInput,
@@ -65,6 +66,10 @@ export type PaperDraftService = {
     publicId: string,
   ): Promise<ApiResponse<PaperDeleteResultDto | null>>;
   copyPaper(publicId: string): Promise<ApiResponse<PaperCopyResultDto | null>>;
+};
+
+export type PaperDraftServiceOptions = {
+  mutationContext?: ContentMutationContext;
 };
 
 const INVALID_PAPER_INPUT_CODE = 422203;
@@ -297,6 +302,7 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
 
 export function createPaperDraftService(
   paperRepository: PaperDraftRepository,
+  options: PaperDraftServiceOptions = {},
 ): PaperDraftService {
   return {
     async listPapers(input = {}) {
@@ -322,7 +328,10 @@ export function createPaperDraftService(
         return createInvalidPaperInputResponse();
       }
 
-      const paper = await paperRepository.createPaper(paperInput.value);
+      const paper = await paperRepository.createPaper(
+        paperInput.value,
+        options.mutationContext,
+      );
 
       return createSuccessResponse(mapPaperDraftResultToApi(paper));
     },
@@ -354,10 +363,13 @@ export function createPaperDraftService(
         return createNonDraftPaperResponse();
       }
 
-      const updatedPaper = await paperRepository.updatePaper({
-        publicId,
-        ...paperInput.value,
-      });
+      const updatedPaper = await paperRepository.updatePaper(
+        {
+          publicId,
+          ...paperInput.value,
+        },
+        options.mutationContext,
+      );
 
       return createSuccessResponse(mapPaperDraftResultToApi(updatedPaper));
     },
@@ -461,11 +473,14 @@ export function createPaperDraftService(
         return createPaperPublishValidationResponse();
       }
 
-      const publishedPaper = await paperRepository.publishPaper({
-        paperPublicId: publicId,
-        sourceQuestionPublicIds: publishValidation.sourceQuestionPublicIds,
-        materialPublicIds: publishValidation.materialPublicIds,
-      });
+      const publishedPaper = await paperRepository.publishPaper(
+        {
+          paperPublicId: publicId,
+          sourceQuestionPublicIds: publishValidation.sourceQuestionPublicIds,
+          materialPublicIds: publishValidation.materialPublicIds,
+        },
+        options.mutationContext,
+      );
 
       if (publishedPaper === null) {
         return createPaperPublishValidationResponse();
@@ -489,9 +504,12 @@ export function createPaperDraftService(
         return createNonPublishedArchiveResponse();
       }
 
-      const archivedPaper = await paperRepository.archivePaper({
-        paperPublicId: publicId,
-      });
+      const archivedPaper = await paperRepository.archivePaper(
+        {
+          paperPublicId: publicId,
+        },
+        options.mutationContext,
+      );
 
       if (archivedPaper === null) {
         return createPaperDeleteConflictResponse();
@@ -538,9 +556,12 @@ export function createPaperDraftService(
         return createPaperCopyConflictResponse();
       }
 
-      const copiedPaper = await paperRepository.copyPaper({
-        sourcePaper: paper,
-      });
+      const copiedPaper = await paperRepository.copyPaper(
+        {
+          sourcePaper: paper,
+        },
+        options.mutationContext,
+      );
 
       if (copiedPaper === null) {
         return createPaperCopyConflictResponse();
