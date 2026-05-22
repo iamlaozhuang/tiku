@@ -57,7 +57,37 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   await expect(
     page.locator('[data-testid^="paper-card-"]').first(),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "个人中心" })).toHaveAttribute(
+    "href",
+    "/profile",
+  );
+  await expect(page.getByRole("link", { name: "兑换卡密" })).toHaveAttribute(
+    "href",
+    "/redeem-code",
+  );
   await testInfo.attach("student-home", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+
+  await page.goto("/profile");
+  await expect(page.locator("body")).toContainText("有效授权");
+  await expect(page.locator("body")).toContainText("个人授权记录");
+  await expect(page.locator("body")).not.toContainText(studentToken ?? "");
+  await testInfo.attach("student-profile", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+
+  await page.goto("/redeem-code");
+  await expect(page.getByRole("heading", { name: "兑换码" })).toBeVisible();
+  await page.getByLabel("兑换码").fill("ABCD2345");
+  await expect(page.getByRole("button", { name: "兑换" })).toBeEnabled();
+  await page.getByRole("button", { name: "兑换" }).click();
+  await expect(page.locator("body")).toContainText("兑换码不存在");
+  await expect(page.locator("body")).not.toContainText("兑换成功");
+  await expect(page.locator("body")).not.toContainText(studentToken ?? "");
+  await testInfo.attach("student-redeem-code", {
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",
   });
