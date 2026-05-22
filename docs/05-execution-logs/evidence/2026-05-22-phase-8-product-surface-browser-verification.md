@@ -149,10 +149,23 @@ Blocked files respected:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
-- master validation: pending.
-- closeoutEvidenceCommit: pending.
+- implementationCommit: `286b5a5 test(e2e): verify phase 8 product surfaces`.
+- merge: `3726e34 merge: phase 8 product surface browser verification`.
+- master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass on `master`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass on `master`.
+    - `lint`: pass.
+    - `typecheck`: pass.
+    - `test:unit`: pass, `96` files passed, `327` tests passed.
+    - `format:check`: pass.
+  - `npm.cmd run build`: pass on `master`; route output includes `/mistake-book`, `/profile`, `/redeem-code`, `/ops/organizations`, and `/ops/redeem-codes`.
+  - `npm.cmd run test:e2e`: pass on `master`, `2` Chromium tests passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass on `master`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass on `master`, ahead of `origin/master` by implementation and merge commits before state/evidence closeout commit.
+- state closeout:
+  - `docs/04-agent-system/state/project-state.yaml`: current task updated to `phase-8-product-surface-browser-verification`, status `closed`, plan path `null` because evidence-only.
+  - `docs/04-agent-system/state/task-queue.yaml`: task status updated from `pending` to `closed`.
+- closeoutEvidenceCommit: pending; this file and state updates will be committed after this section is written.
 - push: pending.
 - cleanup: pending.
 
