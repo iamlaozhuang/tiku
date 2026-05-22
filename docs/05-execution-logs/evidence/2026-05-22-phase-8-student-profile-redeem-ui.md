@@ -115,9 +115,17 @@ Blocked files:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass on `master`.
   - `npm.cmd run test:e2e`: pass on `master`, `2` Chromium tests passed.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass on `master`, ahead of `origin/master` by implementation and merge commits before closeout evidence commit.
-- push: pending.
-- cleanup: pending.
-- closeoutEvidenceCommit: pending.
+- push:
+  - `git fetch --prune`: pass before push.
+  - `git status --short --branch`: `## master...origin/master [ahead 3]` before push.
+  - `git push origin master`: pass, `47a59e2..174920d master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-8-student-profile-redeem-ui`: first attempt failed due `.git/refs` lock permission; escalated retry passed and deleted the merged branch.
+  - `git fetch --prune`: pass after cleanup.
+  - `git branch --list`: only `master`.
+  - `git branch -r`: `origin/HEAD -> origin/master`, `origin/master`.
+  - `git status --short --branch`: `## master...origin/master`.
+- closeoutEvidenceCommit: `174920d docs(agent): close phase 8 student profile redeem ui`; final push/cleanup result recorded in a follow-up evidence-only commit.
 
 ## Residual Risk
 
