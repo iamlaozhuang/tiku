@@ -102,8 +102,11 @@ function hasEffectiveAuthorization(
   scopes: MockExamAuthorizationScopeRow[],
   profession: MockExamPaperRow["profession"],
   level: number,
+  now: Date,
 ): boolean {
-  return scopes.some((scope) => isSameScope(scope, profession, level));
+  return scopes.some(
+    (scope) => isSameScope(scope, profession, level) && scope.expires_at > now,
+  );
 }
 
 function addDurationMinute(
@@ -296,6 +299,25 @@ function createMockExamNotFoundResponse(): ApiResponse<null> {
   return createErrorResponse(404312, "Mock exam does not exist.");
 }
 
+function createMockExamAuthorizationTerminatedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    403313,
+    "Mock exam authorization is invalid; session terminated.",
+  );
+}
+
+async function terminateMockExamForInvalidAuthorization(
+  repository: MockExamRepository,
+  mockExam: MockExamRow,
+  terminatedAt: Date,
+): Promise<void> {
+  await repository.terminateMockExam({
+    publicId: mockExam.public_id,
+    terminatedAt,
+    terminationReason: "authorization_invalid",
+  });
+}
+
 function isMockExamRow(
   value: MockExamRow | ApiResponse<null>,
 ): value is MockExamRow {
@@ -363,6 +385,7 @@ async function getOwnedMockExam(
   repository: MockExamRepository,
   userContext: MockExamUserContext,
   publicId: string,
+  now: Date,
 ): Promise<MockExamRow | ApiResponse<null>> {
   const mockExam = await repository.findMockExamByPublicId({
     userPublicId: userContext.userPublicId,
@@ -377,7 +400,15 @@ async function getOwnedMockExam(
     userPublicId: userContext.userPublicId,
   });
 
-  if (!hasEffectiveAuthorization(scopes, mockExam.profession, mockExam.level)) {
+  if (
+    !hasEffectiveAuthorization(scopes, mockExam.profession, mockExam.level, now)
+  ) {
+    if (mockExam.exam_status === "in_progress") {
+      await terminateMockExamForInvalidAuthorization(repository, mockExam, now);
+
+      return createMockExamAuthorizationTerminatedResponse();
+    }
+
     return createMockExamNotFoundResponse();
   }
 
@@ -390,7 +421,12 @@ async function getReadableMockExam(
   publicId: string,
   now: Date,
 ): Promise<MockExamRow | ApiResponse<null>> {
-  const mockExam = await getOwnedMockExam(repository, userContext, publicId);
+  const mockExam = await getOwnedMockExam(
+    repository,
+    userContext,
+    publicId,
+    now,
+  );
 
   if (!isMockExamRow(mockExam)) {
     return mockExam;
@@ -481,18 +517,33 @@ export function createMockExamService(
         return createErrorResponse(404311, "Mock exam paper does not exist.");
       }
 
+      const now = clock.now();
       const scopes = await repository.listEffectiveAuthorizationScopes({
         userPublicId: userContext.userPublicId,
       });
 
-      if (!hasEffectiveAuthorization(scopes, paper.profession, paper.level)) {
+      if (
+        !hasEffectiveAuthorization(scopes, paper.profession, paper.level, now)
+      ) {
+        const activeMockExam = await repository.findActiveMockExamByPaper({
+          userPublicId: userContext.userPublicId,
+          paperPublicId: normalizedInput.paperPublicId,
+        });
+
+        if (activeMockExam !== null) {
+          await terminateMockExamForInvalidAuthorization(
+            repository,
+            activeMockExam,
+            now,
+          );
+        }
+
         return createErrorResponse(
           403311,
           "Student authorization is not valid for this mock exam.",
         );
       }
 
-      const now = clock.now();
       const activeMockExam = await repository.findActiveMockExamByPaper({
         userPublicId: userContext.userPublicId,
         paperPublicId: normalizedInput.paperPublicId,

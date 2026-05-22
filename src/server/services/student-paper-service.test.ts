@@ -198,6 +198,68 @@ describe("student paper service", () => {
     });
   });
 
+  it("treats personal and org authorization for the same scope as one selectable union", async () => {
+    const receivedQueries: unknown[] = [];
+    const service = createStudentPaperService(
+      createRepository({
+        async listEffectiveAuthorizationScopes() {
+          return [
+            createScope({
+              authorization_types: ["personal_auth"],
+              expires_at: new Date("2026-06-19T08:00:00.000Z"),
+            }),
+            createScope({
+              authorization_types: ["org_auth"],
+              expires_at: new Date("2026-07-19T08:00:00.000Z"),
+            }),
+          ];
+        },
+        async listPublishedPapers(query) {
+          receivedQueries.push(query);
+
+          return {
+            rows: [createPaper()],
+            total: 1,
+          };
+        },
+      }),
+    );
+
+    await expect(service.listStudentPapers(userContext, {})).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: [
+        {
+          publicId: "paper_public_123",
+          name: "2024年专卖三级理论真题",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          paperType: "past_paper",
+          durationMinute: 120,
+          totalScore: "100.0",
+          publishedAt: "2026-05-19T08:00:00.000Z",
+          questionCount: 80,
+          canPractice: true,
+          canMockExam: true,
+        },
+      ],
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        total: 1,
+        sortBy: "publishedAt",
+        sortOrder: "desc",
+      },
+    });
+    expect(receivedQueries).toEqual([
+      expect.objectContaining({
+        profession: "monopoly",
+        level: 3,
+      }),
+    ]);
+  });
+
   it("rejects ambiguous or out-of-scope paper list requests without leaking papers", async () => {
     const service = createStudentPaperService(
       createRepository({

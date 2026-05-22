@@ -108,8 +108,11 @@ function hasEffectiveAuthorization(
   scopes: PracticeAuthorizationScopeRow[],
   profession: PracticePaperRow["profession"],
   level: number,
+  now: Date,
 ): boolean {
-  return scopes.some((scope) => isSameScope(scope, profession, level));
+  return scopes.some(
+    (scope) => isSameScope(scope, profession, level) && scope.expires_at > now,
+  );
 }
 
 function isPracticeExpired(practice: PracticeRow, now: Date): boolean {
@@ -243,6 +246,25 @@ function createPracticeNotFoundResponse(): ApiResponse<null> {
   return createErrorResponse(404302, "Practice does not exist.");
 }
 
+function createPracticeAuthorizationTerminatedResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    403303,
+    "Practice authorization is invalid; progress terminated.",
+  );
+}
+
+async function terminatePracticeForInvalidAuthorization(
+  repository: PracticeRepository,
+  practice: PracticeRow,
+  terminatedAt: Date,
+): Promise<void> {
+  await repository.terminatePractice({
+    publicId: practice.public_id,
+    terminatedAt,
+    terminationReason: "authorization_invalid",
+  });
+}
+
 async function getReadablePractice(
   repository: PracticeRepository,
   userContext: PracticeUserContext,
@@ -271,8 +293,12 @@ async function getReadablePractice(
     userPublicId: userContext.userPublicId,
   });
 
-  if (!hasEffectiveAuthorization(scopes, practice.profession, practice.level)) {
-    return createPracticeNotFoundResponse();
+  if (
+    !hasEffectiveAuthorization(scopes, practice.profession, practice.level, now)
+  ) {
+    await terminatePracticeForInvalidAuthorization(repository, practice, now);
+
+    return createPracticeAuthorizationTerminatedResponse();
   }
 
   return practice;
@@ -326,18 +352,36 @@ export function createPracticeService(
         return createErrorResponse(404301, "Practice paper does not exist.");
       }
 
+      const now = clock.now();
       const scopes = await repository.listEffectiveAuthorizationScopes({
         userPublicId: userContext.userPublicId,
       });
 
-      if (!hasEffectiveAuthorization(scopes, paper.profession, paper.level)) {
+      if (
+        !hasEffectiveAuthorization(scopes, paper.profession, paper.level, now)
+      ) {
+        const activePractice = await repository.findActivePracticeByPaper({
+          userPublicId: userContext.userPublicId,
+          paperPublicId: normalizedInput.paperPublicId,
+        });
+
+        if (
+          activePractice !== null &&
+          !isPracticeExpired(activePractice, now)
+        ) {
+          await terminatePracticeForInvalidAuthorization(
+            repository,
+            activePractice,
+            now,
+          );
+        }
+
         return createErrorResponse(
           403301,
           "Student authorization is not valid for this practice.",
         );
       }
 
-      const now = clock.now();
       const activePractice = await repository.findActivePracticeByPaper({
         userPublicId: userContext.userPublicId,
         paperPublicId: normalizedInput.paperPublicId,
