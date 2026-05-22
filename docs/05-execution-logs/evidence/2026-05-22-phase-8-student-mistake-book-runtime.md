@@ -122,11 +122,25 @@ Blocked files:
 
 ## Git Closeout
 
-- implementationCommit: pending
-- merge: pending
-- master validation: pending
-- push: pending
-- cleanup: pending
+- implementationCommit: `6135f0b feat(student): add mistake book runtime`
+- merge: `338d33c merge: phase 8 student mistake book runtime`
+- master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`:
+    pass on `master`.
+    - `lint`: pass.
+    - `typecheck`: pass.
+    - `test:unit`: pass, `92` files passed, `311` tests passed.
+    - `format:check`: pass.
+  - `npm.cmd run build`: pass on `master`; route output includes all
+    `/api/v1/mistake-books/**` routes.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`:
+    pass on `master`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`:
+    pass on `master`, ahead of `origin/master` by implementation and merge
+    commits before closeout evidence commit.
+- push: pending until closeout evidence commit is created and remote freshness is
+  checked.
+- cleanup: pending until push succeeds.
 
 ## Residual Risk
 
