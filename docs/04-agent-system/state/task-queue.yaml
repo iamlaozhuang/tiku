@@ -3601,3 +3601,787 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-product-surface-browser-verification.md
     status: closed
     retryCount: 0
+  - id: phase-9-planning-and-queue-seeding
+    title: Phase 9 Planning And Queue Seeding
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-9-mvp-acceptance-completion
+    dependencies:
+      - phase-8-product-surface-browser-verification
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/02-architecture/interfaces/phase-9-mvp-acceptance-contract.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-planning-and-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-planning-and-queue-seeding.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-planning-and-queue-seeding.md
+    status: closed
+    retryCount: 0
+  - id: phase-9-requirements-runtime-gap-inventory
+    title: Requirements Runtime Gap Inventory
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/02-architecture/interfaces/phase-9-mvp-acceptance-contract.md#acceptance-scope
+    dependencies:
+      - phase-9-planning-and-queue-seeding
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - roadmap_scope
+      - evidence_integrity
+      - acceptance_matrix
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-requirements-runtime-gap-inventory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-auth-session-account-completion
+    title: Auth Session And Account Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#1-统一账号
+    dependencies:
+      - phase-9-requirements-runtime-gap-inventory
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-auth-session-account-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-auth-session-account-completion.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-auth-session-account-completion-security-review.md
+      - src/app/(auth)/**
+      - src/app/api/v1/sessions/**
+      - src/app/api/v1/users/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - auth
+      - session
+      - password
+      - account_lock
+      - audit_log
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-auth-session-account-completion-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-auth-session-account-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-auth-session-account-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-authorization-expiry-termination-completion
+    title: Authorization Expiry And Termination Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-01-user-auth.md#5-授权访问统一规则
+    dependencies:
+      - phase-9-auth-session-account-completion
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-authorization-expiry-termination-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-authorization-expiry-termination-completion.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-authorization-expiry-termination-completion-security-review.md
+      - src/app/(student)/**
+      - src/app/api/v1/authorizations/**
+      - src/app/api/v1/personal-auths/**
+      - src/app/api/v1/org-auths/**
+      - src/app/api/v1/practices/**
+      - src/app/api/v1/mock-exams/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - authorization
+      - session
+      - practice
+      - mock_exam
+      - audit_log
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-authorization-expiry-termination-completion-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-authorization-expiry-termination-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-authorization-expiry-termination-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-content-question-material-runtime
+    title: Content Question And Material Runtime
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#1-题库管理
+    dependencies:
+      - phase-9-requirements-runtime-gap-inventory
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-content-question-material-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-content-question-material-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-content-question-material-runtime-security-review.md
+      - src/app/api/v1/questions/**
+      - src/app/api/v1/materials/**
+      - src/app/api/v1/knowledge-nodes/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - content
+      - question
+      - material
+      - audit_log
+      - api_contract
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-content-question-material-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-content-question-material-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-content-question-material-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-paper-composition-lifecycle-runtime
+    title: Paper Composition Lifecycle Runtime
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#3-组卷与试卷管理
+    dependencies:
+      - phase-9-content-question-material-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-paper-composition-lifecycle-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-paper-composition-lifecycle-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-paper-composition-lifecycle-runtime-security-review.md
+      - src/app/api/v1/papers/**
+      - src/app/api/v1/paper-assets/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - paper
+      - paper_asset
+      - publish_lock
+      - audit_log
+      - api_contract
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-paper-composition-lifecycle-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-paper-composition-lifecycle-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-paper-composition-lifecycle-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-content-admin-ui-completion
+    title: Content Admin UI Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#3-内容后台
+    dependencies:
+      - phase-9-paper-composition-lifecycle-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-content-admin-ui-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-content-admin-ui-completion.md
+      - src/app/(admin)/content/**
+      - src/features/admin/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - content
+      - frontend_runtime
+      - e2e
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-content-admin-ui-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-content-admin-ui-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-student-practice-runtime-completion
+    title: Student Practice Runtime Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#2-练习模式
+    dependencies:
+      - phase-9-authorization-expiry-termination-completion
+      - phase-9-paper-composition-lifecycle-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-student-practice-runtime-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-student-practice-runtime-completion.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-student-practice-runtime-completion-security-review.md
+      - src/app/api/v1/practices/**
+      - src/app/api/v1/student-papers/**
+      - src/app/api/v1/mistake-books/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - practice
+      - student
+      - authorization
+      - mistake_book
+      - ai_call_log
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-student-practice-runtime-completion-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-student-practice-runtime-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-student-practice-runtime-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-student-mock-exam-report-runtime-completion
+    title: Student Mock Exam Report Runtime Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md#3-模拟考试
+    dependencies:
+      - phase-9-student-practice-runtime-completion
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-student-mock-exam-report-runtime-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-student-mock-exam-report-runtime-completion.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-student-mock-exam-report-runtime-completion-security-review.md
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - mock_exam
+      - exam_report
+      - student
+      - authorization
+      - ai_scoring
+      - ai_call_log
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-student-mock-exam-report-runtime-completion-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-student-mock-exam-report-runtime-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-student-mock-exam-report-runtime-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-student-experience-ui-completion
+    title: Student Experience UI Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-03-student-experience.md
+    dependencies:
+      - phase-9-student-mock-exam-report-runtime-completion
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-student-experience-ui-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-student-experience-ui-completion.md
+      - src/app/(student)/**
+      - src/features/student/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - student
+      - frontend_runtime
+      - e2e
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-student-experience-ui-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-student-experience-ui-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-ai-scoring-explanation-hint-runtime
+    title: AI Scoring Explanation Hint Runtime
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md#1-主观题-ai-评分
+    dependencies:
+      - phase-9-student-mock-exam-report-runtime-completion
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime-security-review.md
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/app/api/v1/mistake-books/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - ai_scoring
+      - ai_explanation
+      - ai_hint
+      - prompt_template
+      - ai_call_log
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-ai-scoring-explanation-hint-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-ai-knowledge-model-config-runtime
+    title: AI Knowledge And Model Config Runtime
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-04-ai-scoring.md#3-ai-知识点推荐
+    dependencies:
+      - phase-9-ai-scoring-explanation-hint-runtime
+      - phase-9-content-question-material-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-ai-knowledge-model-config-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-ai-knowledge-model-config-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-ai-knowledge-model-config-runtime-security-review.md
+      - src/app/api/v1/model-configs/**
+      - src/app/api/v1/questions/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - model_config
+      - knowledge_node
+      - kn_recommendation
+      - prompt_template
+      - audit_log
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-ai-knowledge-model-config-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-ai-knowledge-model-config-runtime
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-ai-knowledge-model-config-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-rag-resource-knowledge-runtime
+    title: RAG Resource Knowledge Runtime
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-05-rag-knowledge.md
+    dependencies:
+      - phase-9-ai-knowledge-model-config-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-rag-resource-knowledge-runtime-security-review.md
+      - src/app/api/v1/resources/**
+      - src/app/api/v1/knowledge-nodes/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/models/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - rag
+      - resource
+      - knowledge_base
+      - embedding
+      - citation
+      - add_dependency
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-rag-resource-knowledge-runtime-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-rag-resource-knowledge-runtime
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-23-phase-9-rag-resource-knowledge-runtime.md' -Pattern 'dependency introduction gate|human approval|no dependency change'
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-resource-knowledge-admin-ui-completion
+    title: Resource Knowledge Admin UI Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#2-运营后台
+    dependencies:
+      - phase-9-rag-resource-knowledge-runtime
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+      - src/app/(admin)/content/**
+      - src/app/(admin)/ops/**
+      - src/features/admin/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - resource
+      - knowledge_node
+      - frontend_runtime
+      - e2e
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-resource-knowledge-admin-ui-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-admin-ops-runtime-ui-completion
+    title: Admin Ops Runtime UI Completion
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md
+    dependencies:
+      - phase-9-resource-knowledge-admin-ui-completion
+      - phase-9-authorization-expiry-termination-completion
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-admin-ops-runtime-ui-completion.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-admin-ops-runtime-ui-completion.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-admin-ops-runtime-ui-completion-security-review.md
+      - src/app/(admin)/ops/**
+      - src/app/api/v1/audit-logs/**
+      - src/app/api/v1/ai-call-logs/**
+      - src/app/api/v1/employees/**
+      - src/app/api/v1/organizations/**
+      - src/app/api/v1/org-auths/**
+      - src/app/api/v1/redeem-codes/**
+      - src/app/api/v1/users/**
+      - src/server/auth/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/validators/**
+      - src/features/admin/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - drizzle/**
+    riskTypes:
+      - admin
+      - authorization
+      - organization
+      - employee
+      - audit_log
+      - ai_call_log
+      - frontend_runtime
+      - secret
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-23-phase-9-admin-ops-runtime-ui-completion-security-review.md
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-admin-ops-runtime-ui-completion
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-admin-ops-runtime-ui-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-multi-client-rest-contract-verification
+    title: Multi Client REST Contract Verification
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md#decision
+    dependencies:
+      - phase-9-student-experience-ui-completion
+      - phase-9-admin-ops-runtime-ui-completion
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-multi-client-rest-contract-verification.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-multi-client-rest-contract-verification.md
+      - e2e/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - api_contract
+      - multi_client
+      - e2e
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-multi-client-rest-contract-verification
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-multi-client-rest-contract-verification.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-mvp-acceptance-browser-api-verification
+    title: MVP Acceptance Browser API Verification
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/02-architecture/interfaces/phase-9-mvp-acceptance-contract.md#validation-expectations
+    dependencies:
+      - phase-9-multi-client-rest-contract-verification
+      - phase-9-ai-scoring-explanation-hint-runtime
+      - phase-9-rag-resource-knowledge-runtime
+    taskPlanPolicy: evidence_only
+    allowedFiles:
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-mvp-acceptance-browser-api-verification.md
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - e2e
+      - browser_verification
+      - api_contract
+      - audit_log
+      - ai_call_log
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-mvp-acceptance-browser-api-verification
+      - docker compose ps
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-mvp-acceptance-browser-api-verification.md
+    status: pending
+    retryCount: 0
+  - id: phase-9-closeout-release-readiness
+    title: Phase 9 Closeout Release Readiness
+    phase: phase-9-mvp-acceptance-completion
+    sourceStory: docs/02-architecture/interfaces/phase-9-mvp-acceptance-contract.md#acceptance-scope
+    dependencies:
+      - phase-9-mvp-acceptance-browser-api-verification
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-9-closeout-release-readiness.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-9-closeout-release-readiness.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - release_readiness
+      - roadmap_scope
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-9-closeout-release-readiness
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-closeout-release-readiness.md
+    status: pending
+    retryCount: 0

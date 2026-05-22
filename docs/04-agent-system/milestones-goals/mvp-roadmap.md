@@ -161,3 +161,31 @@ Dependency order:
 - Student `mistake_book` runtime precedes the student `mistake_book` UI task.
 - Admin organization and `org_auth` runtime precedes admin enterprise authorization UI.
 - Final browser verification runs after the student and admin product surfaces exist.
+
+## Phase 9: MVP Acceptance Completion
+
+Primary deliverables:
+
+- Phase 9 MVP acceptance contract at `docs/02-architecture/interfaces/phase-9-mvp-acceptance-contract.md`.
+- Requirements-to-runtime gap inventory that maps `epic-01` through `epic-06` to implemented routes, services, UI pages, tests, and known residual gaps.
+- Completed student mobile-first Web flows for registration/login, authorization, home, practice, mock exam, scoring status, exam report, profile, redeem code, and mistake book.
+- Completed admin PC Web flows for operations and content management, including users, organizations, employees, org auth, redeem codes, questions, materials, papers, resources, knowledge nodes, model configs, audit logs, and AI call logs.
+- Mock-provider-first AI and RAG runtime that supports scoring, explanation, hint, knowledge recommendation, resource lifecycle, chunking, `evidence_status`, citation display, and redacted `ai_call_log` evidence.
+- REST API contract verification for the future multi-client boundary without implementing a mini program client.
+- Final MVP browser/API acceptance evidence proving current in-scope requirements are runnable or explicitly deferred with product approval.
+
+Non-goals:
+
+- Do not deploy or modify production resources.
+- Do not connect real SMS, email, payment, production credentials, real AI providers, or public object storage without a separate approved task.
+- Do not implement WeChat mini program UI unless the queue is explicitly updated with human approval.
+- Do not introduce dependencies without the dependency introduction gate and human approval.
+- Do not bypass auth/session runtime, expose auto-increment IDs, or leak tokens, passwords, secrets, API keys, `code_hash`, raw prompts, raw answers, or raw model responses.
+
+Dependency order:
+
+- Depends on Phase 8 product surface completion and browser verification closeout.
+- Starts with planning and queue seeding, then a requirements-to-runtime gap inventory before any feature implementation.
+- Runtime tasks precede their corresponding UI completion tasks.
+- AI/RAG tasks must remain mock-provider-first until redaction, audit, and dependency gates are complete.
+- Final browser/API acceptance runs only after student, admin, AI/RAG, and REST contract verification tasks are closed.

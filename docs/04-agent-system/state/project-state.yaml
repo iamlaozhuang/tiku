@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-8-product-surface-completion
-  updatedAt: "2026-05-22T23:59:59+08:00"
+  currentPhase: phase-9-mvp-acceptance-completion
+  updatedAt: "2026-05-23T00:00:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-8-product-surface-browser-verification
+  id: phase-9-planning-and-queue-seeding
   status: closed
-  sourceStory: docs/02-architecture/interfaces/phase-8-product-surface-contract.md#validation-expectations
-  planPath: null
-  evidencePath: docs/05-execution-logs/evidence/2026-05-22-phase-8-product-surface-browser-verification.md
-  branch: codex/phase-8-product-surface-browser-verification
-  commitSha: 286b5a5
+  sourceStory: docs/04-agent-system/milestones-goals/mvp-roadmap.md#phase-9-mvp-acceptance-completion
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-planning-and-queue-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-planning-and-queue-seeding.md
+  branch: codex/phase-9-planning-and-queue-seeding
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -56,7 +56,7 @@ qualityGates:
     - lint
     - typecheck
   lastRun:
-    date: "2026-05-22"
+    date: "2026-05-23"
     readiness: pass
     lint: pass
     typecheck: pass
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: phase 8 product surface completion closed; await next human-approved phase or task
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-22-phase-8-product-surface-browser-verification.md
+  nextRecommendedAction: claim phase-9-requirements-runtime-gap-inventory before any Phase 9 runtime implementation
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-9-planning-and-queue-seeding.md
