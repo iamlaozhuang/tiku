@@ -10,10 +10,12 @@ import {
   eq,
   ilike,
   inArray,
+  isNotNull,
   or,
   sql,
   type SQL,
 } from "drizzle-orm";
+import { hashPassword } from "better-auth/crypto";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -47,6 +49,7 @@ export type AdminUserOrgAuthRuntimeRepository = {
   listUsers(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
+  resetUserPassword?(publicId: string): Promise<boolean>;
 };
 
 export type AdminContentKnowledgeRuntimeRepository = {
@@ -77,6 +80,7 @@ export type AdminFlowRuntimeRepositories = {
 };
 
 const {
+  authAccount,
   employee,
   mockExam,
   organization,
@@ -184,6 +188,37 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
+    },
+    async resetUserPassword(publicId) {
+      const database = getDatabase();
+      const [userRow] = await database
+        .select({
+          auth_user_id: user.auth_user_id,
+        })
+        .from(user)
+        .where(and(eq(user.public_id, publicId), isNotNull(user.auth_user_id)))
+        .limit(1);
+
+      if (
+        userRow?.auth_user_id === undefined ||
+        userRow.auth_user_id === null
+      ) {
+        return false;
+      }
+
+      const passwordHash = await hashPassword(`reset-${randomUUID()}`);
+      const rows = await database
+        .update(authAccount)
+        .set({
+          password: passwordHash,
+          updated_at: new Date(),
+        })
+        .where(eq(authAccount.user_id, userRow.auth_user_id))
+        .returning({
+          id: authAccount.id,
+        });
+
+      return rows.length > 0;
     },
   };
 }
