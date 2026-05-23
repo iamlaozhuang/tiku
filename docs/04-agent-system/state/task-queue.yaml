@@ -4778,3 +4778,45 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
     status: closed
     retryCount: 0
+  - id: phase-11-staging-release-planning
+    title: Phase 11 Staging Release Planning
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-23-phase-11-staging-release-planning
+    dependencies:
+      - phase-10-local-mvp-acceptance-rerun-closeout
+    taskPlanPolicy: required
+    humanApproval: User approved starting Phase 11 staging/release planning only; no staging/prod connection, deployment, cloud resource, or secret change is approved.
+    allowedFiles:
+      - docs/02-architecture/interfaces/phase-11-staging-release-planning-contract.md
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-11-staging-release-planning.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-11-staging-release-planning.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - architecture_decision
+      - release_readiness
+      - environment_boundary
+      - external_service_config
+      - secret_or_env_change
+      - deploy
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-release-planning
+      - Select-String -Path 'docs\02-architecture\interfaces\phase-11-staging-release-planning-contract.md' -Pattern 'no cloud resources|no deployment|human approval|staging|prod'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-11-staging-release-planning.md
+    status: closed
+    retryCount: 0
