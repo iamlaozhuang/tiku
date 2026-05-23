@@ -320,7 +320,7 @@ describe("phase 8 student mistake_book runtime", () => {
     ]);
   });
 
-  it("keeps ai_explanation unavailable without calling a real provider", async () => {
+  it("returns local deterministic ai_explanation without calling a real provider", async () => {
     const handlers = createHandlers();
     const response = await handlers.aiExplanation.POST(
       new Request(
@@ -342,10 +342,16 @@ describe("phase 8 student mistake_book runtime", () => {
       },
     );
 
-    await expect(readJson(response)).resolves.toEqual({
-      code: 422331,
-      message: "AI explanation is not available for mistake book in Phase 4.",
-      data: null,
+    await expect(readJson(response)).resolves.toMatchObject({
+      code: 0,
+      data: {
+        aiExplanation: {
+          explanationStatus: "explained",
+          promptTemplateKey: "dev_ai_explanation_v1",
+          promptTemplateVersion: 1,
+          citations: [],
+        },
+      },
     });
   });
 });

@@ -681,7 +681,7 @@ function createPostgresMockExamRepository(
       const [row] = await database
         .update(mockExam)
         .set({
-          exam_status: "completed",
+          exam_status: input.examStatus,
           submitted_at: input.submittedAt,
           objective_score: input.objectiveScore,
           subjective_score: input.subjectiveScore,
@@ -702,6 +702,48 @@ function createPostgresMockExamRepository(
                 score: answerRecordResult.score,
                 submitted_at: answerRecordResult.submittedAt,
                 updated_at: answerRecordResult.submittedAt,
+              })
+              .where(
+                and(
+                  eq(answerRecord.mock_exam_id, row.id),
+                  eq(
+                    answerRecord.paper_question_public_id,
+                    answerRecordResult.paperQuestionPublicId,
+                  ),
+                ),
+              ),
+          ),
+        );
+      }
+
+      return row === undefined
+        ? null
+        : mapMockExamRow(row, await countMockExamAnswers(database, row.id));
+    },
+    async applyMockExamScoringResults(input) {
+      const database = getDatabase();
+      const [row] = await database
+        .update(mockExam)
+        .set({
+          exam_status: input.examStatus,
+          objective_score: input.objectiveScore,
+          subjective_score: input.subjectiveScore,
+          total_score: input.totalScore,
+          updated_at: input.scoredAt,
+        })
+        .where(eq(mockExam.public_id, input.publicId))
+        .returning();
+
+      if (row !== undefined) {
+        await Promise.all(
+          input.answerRecordResults.map((answerRecordResult) =>
+            database
+              .update(answerRecord)
+              .set({
+                answer_record_status: answerRecordResult.answerRecordStatus,
+                is_correct: answerRecordResult.isCorrect,
+                score: answerRecordResult.score,
+                updated_at: input.scoredAt,
               })
               .where(
                 and(

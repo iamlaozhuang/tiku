@@ -48,6 +48,7 @@ export type MockExamAnswerRecordRow = {
   exam_mode: "mock_exam";
   paper_question_public_id: string;
   question_public_id: string;
+  question_snapshot?: Record<string, unknown>;
   answer_snapshot: MockExamAnswerSnapshotDto;
   answer_record_status: AnswerRecordStatus;
   is_correct: boolean | null;
@@ -87,6 +88,7 @@ export type SaveMockExamAnswerInput = {
 
 export type SubmitMockExamInput = {
   publicId: string;
+  examStatus: Extract<ExamStatus, "completed" | "scoring_partial_failed">;
   submittedAt: Date;
   objectiveScore: string;
   subjectiveScore: string | null;
@@ -98,6 +100,23 @@ export type SubmitMockExamInput = {
     isCorrect: boolean | null;
     score: string | null;
     submittedAt: Date;
+    aiScoringSnapshot?: Record<string, unknown> | null;
+  }[];
+};
+
+export type ApplyMockExamScoringResultsInput = {
+  publicId: string;
+  examStatus: Extract<ExamStatus, "completed" | "scoring_partial_failed">;
+  scoredAt: Date;
+  objectiveScore: string;
+  subjectiveScore: string | null;
+  totalScore: string;
+  answerRecordResults: {
+    paperQuestionPublicId: string;
+    answerRecordStatus: AnswerRecordStatus;
+    isCorrect: boolean | null;
+    score: string | null;
+    aiScoringSnapshot?: Record<string, unknown> | null;
   }[];
 };
 
@@ -132,5 +151,8 @@ export type MockExamRepository = {
     mockExamPublicId: string;
   }): Promise<MockExamAnswerRecordRow[]>;
   submitMockExam(input: SubmitMockExamInput): Promise<MockExamRow | null>;
+  applyMockExamScoringResults(
+    input: ApplyMockExamScoringResultsInput,
+  ): Promise<MockExamRow | null>;
   terminateMockExam(input: TerminateMockExamInput): Promise<MockExamRow | null>;
 };

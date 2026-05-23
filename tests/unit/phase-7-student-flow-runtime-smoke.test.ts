@@ -285,9 +285,20 @@ function createMockExamRepository(): MockExamRepository {
     async submitMockExam(input) {
       return {
         ...mockExam,
-        exam_status: "completed",
+        exam_status: input.examStatus,
         submitted_at: input.submittedAt,
         objective_score: input.objectiveScore,
+        subjective_score: input.subjectiveScore,
+        total_score: input.totalScore,
+        answered_count: 1,
+      };
+    },
+    async applyMockExamScoringResults(input) {
+      return {
+        ...mockExam,
+        exam_status: input.examStatus,
+        objective_score: input.objectiveScore,
+        subjective_score: input.subjectiveScore,
         total_score: input.totalScore,
         answered_count: 1,
       };

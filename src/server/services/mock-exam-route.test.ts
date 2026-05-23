@@ -70,6 +70,17 @@ function createService(): MockExamService {
         },
       };
     },
+    async retryMockExamScoring(receivedUserContext, publicId) {
+      return {
+        code: 0,
+        message: `${receivedUserContext.userPublicId}:${publicId}:retry-scoring`,
+        data: {
+          mockExam: createMockExamDto(publicId, "completed"),
+          retriedCount: 1,
+          failedCount: 0,
+        },
+      };
+    },
     async terminateMockExam(receivedUserContext, publicId) {
       return {
         code: 0,
@@ -129,11 +140,9 @@ describe("mock exam route handlers", () => {
     });
   });
 
-  it("passes public id to detail, submit, and terminate handlers", async () => {
-    const { detail, submit, terminate } = createMockExamRouteHandlers(
-      createService(),
-      async () => userContext,
-    );
+  it("passes public id to detail, submit, retry scoring, and terminate handlers", async () => {
+    const { detail, submit, retryScoring, terminate } =
+      createMockExamRouteHandlers(createService(), async () => userContext);
     const context = {
       params: Promise.resolve({
         publicId: "mock_exam_public_123",
@@ -177,6 +186,19 @@ describe("mock exam route handlers", () => {
       ).json(),
     ).resolves.toMatchObject({
       message: "user_public_123:mock_exam_public_123:terminate",
+    });
+    await expect(
+      (
+        await retryScoring.POST(
+          new Request(
+            "http://localhost/api/v1/mock-exams/mock_exam_public_123/retry-scoring",
+            { method: "POST" },
+          ),
+          context,
+        )
+      ).json(),
+    ).resolves.toMatchObject({
+      message: "user_public_123:mock_exam_public_123:retry-scoring",
     });
   });
 

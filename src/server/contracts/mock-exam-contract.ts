@@ -53,3 +53,9 @@ export type MockExamSubmitResultDto = {
   mockExam: MockExamDto;
   unansweredCount: number;
 };
+
+export type MockExamRetryScoringResultDto = {
+  mockExam: MockExamDto;
+  retriedCount: number;
+  failedCount: number;
+};

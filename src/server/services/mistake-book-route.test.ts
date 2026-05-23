@@ -102,11 +102,27 @@ function createService(): MistakeBookService {
         },
       };
     },
-    async requestAiExplanation(receivedUserContext, publicId) {
+    async requestAiExplanation(receivedUserContext, publicId, input) {
       return {
-        code: 422331,
-        message: `${receivedUserContext.userPublicId}:${publicId}:ai-explanation`,
-        data: null,
+        code: 0,
+        message: `${receivedUserContext.userPublicId}:${publicId}:ai-explanation:${
+          input && typeof input === "object" && "requestedFromClientAt" in input
+            ? input.requestedFromClientAt
+            : null
+        }`,
+        data: {
+          aiExplanation: {
+            explanationStatus: "explained",
+            explanationText: "本地 AI 讲解",
+            keyPoints: [],
+            learningSuggestion: null,
+            insufficientEvidenceMessage: null,
+            evidenceStatus: "none",
+            citations: [],
+            promptTemplateKey: "dev_ai_explanation_v1",
+            promptTemplateVersion: 1,
+          },
+        },
       };
     },
   };
@@ -227,9 +243,22 @@ describe("mistake book route handlers", () => {
         )
       ).json(),
     ).resolves.toEqual({
-      code: 422331,
-      message: "user_public_123:mistake_book_public_123:ai-explanation",
-      data: null,
+      code: 0,
+      message:
+        "user_public_123:mistake_book_public_123:ai-explanation:2026-05-19T09:05:00.000Z",
+      data: {
+        aiExplanation: {
+          explanationStatus: "explained",
+          explanationText: "本地 AI 讲解",
+          keyPoints: [],
+          learningSuggestion: null,
+          insufficientEvidenceMessage: null,
+          evidenceStatus: "none",
+          citations: [],
+          promptTemplateKey: "dev_ai_explanation_v1",
+          promptTemplateVersion: 1,
+        },
+      },
     });
   });
 
