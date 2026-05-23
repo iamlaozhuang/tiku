@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T00:51:00+08:00"
+  updatedAt: "2026-05-24T01:10:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-staging-entry-fix-scope
-  status: closed
-  sourceStory: docs/05-execution-logs/evidence/2026-05-23-phase-11-local-product-readiness-roleplay-run.md#staging-decision
-  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-fix-scope.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-fix-scope.md
-  branch: codex/phase-11-staging-entry-fix-scope
-  commitSha: 63965cf
+  id: phase-11-staging-entry-auth-route-guards
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#first-fix-package-recommendation
+  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+  branch: codex/phase-11-staging-entry-auth-route-guards
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: start approved phase-11-staging-entry-auth-route-guards on a short-lived branch
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-fix-scope.md
+  nextRecommendedAction: review and approve merge/push of phase-11-staging-entry-auth-route-guards, then continue P1 staging-entry fixes
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-auth-route-guards.md

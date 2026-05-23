@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ProtectedRouteGuard } from "@/components/ProtectedRouteGuard";
+
 /**
  * 后台管理端布局
  * Desktop-first: 左侧 Sidebar + 顶部 TopBar
@@ -42,59 +44,61 @@ export function AdminDashboardLayout({
   const portalName = isOps ? "运营后台" : "内容后台";
 
   return (
-    <div className="bg-background flex min-h-screen">
-      {/* Sidebar */}
-      <aside
-        className="border-border bg-surface hidden w-60 flex-shrink-0 border-r lg:flex lg:flex-col"
-        role="navigation"
-        aria-label="侧边栏导航"
-      >
-        {/* Brand */}
-        <div className="border-border flex h-14 items-center border-b px-4">
-          <h1 className="font-heading text-brand-primary text-base font-semibold">
-            题库系统
-          </h1>
-          <span className="rounded-radius-sm ml-2 bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-            {portalName}
-          </span>
+    <ProtectedRouteGuard requiredRole="admin">
+      <div className="bg-background flex min-h-screen">
+        {/* Sidebar */}
+        <aside
+          className="border-border bg-surface hidden w-60 flex-shrink-0 border-r lg:flex lg:flex-col"
+          role="navigation"
+          aria-label="侧边栏导航"
+        >
+          {/* Brand */}
+          <div className="border-border flex h-14 items-center border-b px-4">
+            <h1 className="font-heading text-brand-primary text-base font-semibold">
+              题库系统
+            </h1>
+            <span className="rounded-radius-sm ml-2 bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+              {portalName}
+            </span>
+          </div>
+
+          {/* Menu */}
+          <nav className="flex-1 overflow-y-auto p-3">
+            <ul className="space-y-1">
+              {menuItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`rounded-radius-md flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
+                        isActive
+                          ? "text-brand-primary bg-green-50 font-medium"
+                          : "text-text-secondary hover:text-text-primary hover:bg-green-50/50"
+                      }`}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </aside>
+
+        {/* Main Area */}
+        <div className="flex flex-1 flex-col">
+          {/* TopBar */}
+          <header className="border-border bg-surface sticky top-0 z-30 flex h-14 items-center border-b px-6 shadow-sm">
+            <span className="text-text-muted text-sm">{portalName}</span>
+          </header>
+
+          {/* Content */}
+          <main className="flex-1 overflow-y-auto p-6">{children}</main>
         </div>
-
-        {/* Menu */}
-        <nav className="flex-1 overflow-y-auto p-3">
-          <ul className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = pathname.startsWith(item.href);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`rounded-radius-md flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
-                      isActive
-                        ? "text-brand-primary bg-green-50 font-medium"
-                        : "text-text-secondary hover:text-text-primary hover:bg-green-50/50"
-                    }`}
-                  >
-                    <span>{item.icon}</span>
-                    <span>{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      </aside>
-
-      {/* Main Area */}
-      <div className="flex flex-1 flex-col">
-        {/* TopBar */}
-        <header className="border-border bg-surface sticky top-0 z-30 flex h-14 items-center border-b px-6 shadow-sm">
-          <span className="text-text-muted text-sm">{portalName}</span>
-        </header>
-
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
-    </div>
+    </ProtectedRouteGuard>
   );
 }
