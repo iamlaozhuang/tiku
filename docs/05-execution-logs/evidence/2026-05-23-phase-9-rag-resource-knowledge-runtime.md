@@ -104,6 +104,14 @@ Results:
 ## Git Closeout
 
 - implementationCommit: `e80a96e feat(rag): add resource knowledge runtime`.
-- merge: pending.
-- postMergeValidation: pending.
+- merge: `7c37420 merge: phase 9 rag resource knowledge runtime`.
+- postMergeValidation on `master`:
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `101` files and `369` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass on `master`; build output included `/api/v1/resources`, `/api/v1/resources/[publicId]/rebuild-vector`, `/api/v1/knowledge-nodes`, `/api/v1/knowledge-nodes/[publicId]`, and `/api/v1/knowledge-nodes/[publicId]/disable`.
+  - `Test-NamingConventions.ps1`: pass on `master`.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory on `master`; branch was ahead of `origin/master` by `3` commits before closeout docs/push.
 - push: pending.
