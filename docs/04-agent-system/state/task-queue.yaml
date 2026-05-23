@@ -4657,7 +4657,7 @@ tasks:
     phase: phase-10-local-release-candidate-hardening
     sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
     dependencies:
-      - phase-10-local-deepseek-provider-smoke-runtime
+      - phase-10-local-real-content-rag-smoke-runtime
     taskPlanPolicy: required
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
@@ -4691,7 +4691,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
-    status: blocked
+    status: pending
     retryCount: 0
   - id: phase-10-local-mvp-acceptance-rerun-closeout
     title: Local MVP Acceptance Rerun Closeout
@@ -4730,4 +4730,51 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
     status: blocked
+    retryCount: 0
+  - id: phase-10-local-real-content-rag-smoke-runtime
+    title: Local Real Content RAG Smoke Runtime
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
+    dependencies:
+      - phase-10-local-real-content-import-dry-run
+      - phase-10-local-deepseek-provider-smoke-runtime
+    taskPlanPolicy: required
+    humanApproval: User approved adding a local dev follow-up runtime task to unblock the Phase 10 real-content RAG smoke.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
+      - scripts/local/Invoke-RealContentRagSmoke.ps1
+      - tests/unit/phase-10-local-real-content-rag-smoke-runtime.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - rag
+      - resource
+      - knowledge_base
+      - embedding
+      - chunk
+      - citation
+      - evidence_status
+      - real_content
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-real-content-rag-smoke-runtime
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\local\Invoke-RealContentRagSmoke.ps1
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md' -Pattern 'no raw content|redacted|ignored_rawfiles|bounded sample'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
+    status: closed
     retryCount: 0
