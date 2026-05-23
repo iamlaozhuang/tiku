@@ -197,7 +197,7 @@ export function AdminPaperManagement() {
             publicId 与契约字段。
           </p>
         </div>
-        <ActionBar hasRows={filteredPapers.length > 0} />
+        <ActionBar />
       </header>
 
       <FilterPanel
@@ -224,33 +224,63 @@ export function AdminPaperManagement() {
   );
 }
 
-function ActionBar({ hasRows }: { hasRows: boolean }) {
+function ActionBar() {
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button>
-        <FilePlus2 aria-hidden="true" data-icon="inline-start" />
-        新建草稿
-      </Button>
-      <Button disabled={!hasRows} variant="outline">
-        <Layers3 aria-hidden="true" data-icon="inline-start" />
-        组卷
-      </Button>
-      <Button disabled={!hasRows} variant="outline">
-        <FileCheck aria-hidden="true" data-icon="inline-start" />
-        发布
-      </Button>
-      <Button disabled={!hasRows} variant="outline">
-        <Archive aria-hidden="true" data-icon="inline-start" />
-        下架
-      </Button>
-      <Button disabled={!hasRows} variant="secondary">
-        <Copy aria-hidden="true" data-icon="inline-start" />
-        复制
-      </Button>
-      <Button disabled={!hasRows} variant="secondary">
-        <Upload aria-hidden="true" data-icon="inline-start" />
-        绑定原始文件
-      </Button>
+    <div className="max-w-xl space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <Button disabled aria-describedby="paper-action-unavailable">
+          <FilePlus2 aria-hidden="true" data-icon="inline-start" />
+          新建草稿
+        </Button>
+        <Button
+          disabled
+          aria-describedby="paper-action-unavailable"
+          variant="outline"
+        >
+          <Layers3 aria-hidden="true" data-icon="inline-start" />
+          组卷
+        </Button>
+        <Button
+          disabled
+          aria-describedby="paper-action-unavailable"
+          variant="outline"
+        >
+          <FileCheck aria-hidden="true" data-icon="inline-start" />
+          发布
+        </Button>
+        <Button
+          disabled
+          aria-describedby="paper-action-unavailable"
+          variant="outline"
+        >
+          <Archive aria-hidden="true" data-icon="inline-start" />
+          下架
+        </Button>
+        <Button
+          disabled
+          aria-describedby="paper-action-unavailable"
+          variant="secondary"
+        >
+          <Copy aria-hidden="true" data-icon="inline-start" />
+          复制
+        </Button>
+        <Button
+          disabled
+          aria-describedby="paper-action-unavailable"
+          variant="secondary"
+        >
+          <Upload aria-hidden="true" data-icon="inline-start" />
+          绑定原始文件
+        </Button>
+      </div>
+      <p
+        className="text-text-secondary text-xs leading-5"
+        data-testid="paper-action-unavailable"
+        id="paper-action-unavailable"
+        role="status"
+      >
+        草稿、组卷、发布、下架、复制和附件绑定暂未接入本地运行时；当前仅开放列表查看与筛选。
+      </p>
     </div>
   );
 }
