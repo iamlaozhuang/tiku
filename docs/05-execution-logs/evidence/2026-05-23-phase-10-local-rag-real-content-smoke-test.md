@@ -131,6 +131,23 @@ Required validation results after state files were updated:
 - Provider calls were intentionally not run for this RAG task.
 - Future sanitized fixtures or persistent import flows still require a separate task and allowed files.
 
+## Git Closeout
+
+- implementationCommit: `b0f32fe docs(agent): record phase 10 rag real content smoke pass`.
+- merge: `32af9d6 merge: phase 10 rag real content smoke pass`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `105` files and `381` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js build completed successfully with `.env.local` loaded and no secret values printed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` was ahead of `origin/master` by the implementation and merge commits, and changed files remained limited to this task.
+- Push target: pending evidence update commit and push to `origin/master`.
+- Cleanup: pending after push.
+
 ## Taste Compliance Self-Check
 
 - Frontend visual taste: no UI, Tailwind, color, font, layout, or interaction change.
