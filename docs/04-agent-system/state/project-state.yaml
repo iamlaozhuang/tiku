@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T02:06:18+08:00"
+  updatedAt: "2026-05-24T02:10:31+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -37,12 +37,12 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-11-staging-entry-content-action-closures
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#first-fix-package-recommendation
   planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-content-action-closures.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-content-action-closures.md
   branch: codex/phase-11-staging-entry-content-action-closures
-  commitSha: null
+  commitSha: 2cd1498
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: commit and merge phase-11-staging-entry-content-action-closures
+  nextRecommendedAction: claim phase-11-staging-entry-known-limitations and register or resolve student error-state follow-up
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-content-action-closures.md
