@@ -91,7 +91,7 @@ Results:
 
 ## Git Closeout
 
-- implementationCommit: `9cf5927 feat(admin): complete resource knowledge admin ui`.
+- implementationCommit: `c1db947 feat(admin): complete resource knowledge admin ui`.
 - merge: pending.
 - postMergeValidation: pending.
 - push: pending.
