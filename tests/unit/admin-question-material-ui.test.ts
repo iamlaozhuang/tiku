@@ -182,12 +182,13 @@ describe("AdminQuestionMaterialManagement", () => {
       "aria-selected",
       "true",
     );
+    expect(screen.getByRole("button", { name: "新建题目" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "编辑题目" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "停用题目" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "复制题目" })).toBeDisabled();
     expect(
-      screen.getByRole("button", { name: "新建题目" }),
+      screen.getByTestId("content-action-unavailable"),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "编辑题目" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "停用题目" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "复制题目" })).toBeEnabled();
 
     expect(
       screen.getByTestId("question-row-question-marketing-001"),
@@ -246,8 +247,9 @@ describe("AdminQuestionMaterialManagement", () => {
       "aria-selected",
       "true",
     );
+    expect(screen.getByRole("button", { name: "新建材料" })).toBeDisabled();
     expect(
-      screen.getByRole("button", { name: "新建材料" }),
+      screen.getByTestId("content-action-unavailable"),
     ).toBeInTheDocument();
 
     const materialRow = screen.getByTestId(

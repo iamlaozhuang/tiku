@@ -209,11 +209,6 @@ export function AdminQuestionMaterialManagement({
       }),
     [keyword, materials, profession, status, subject],
   );
-  const visibleCount =
-    activeView === "questions"
-      ? filteredQuestions.length
-      : filteredMaterials.length;
-
   if (loadState === "loading") {
     return (
       <AdminLoadingState
@@ -252,7 +247,7 @@ export function AdminQuestionMaterialManagement({
             中的 publicId，不暴露内部自增 id。
           </p>
         </div>
-        <ActionBar activeView={activeView} hasRows={visibleCount > 0} />
+        <ActionBar activeView={activeView} />
       </header>
 
       <FilterPanel
@@ -302,33 +297,49 @@ export function AdminQuestionMaterialManagement({
   );
 }
 
-function ActionBar({
-  activeView,
-  hasRows,
-}: {
-  activeView: ViewMode;
-  hasRows: boolean;
-}) {
+function ActionBar({ activeView }: { activeView: ViewMode }) {
   const noun = activeView === "questions" ? "题目" : "材料";
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button>
-        <Plus aria-hidden="true" data-icon="inline-start" />
-        新建{noun}
-      </Button>
-      <Button disabled={!hasRows} variant="outline">
-        <Pencil aria-hidden="true" data-icon="inline-start" />
-        编辑{noun}
-      </Button>
-      <Button disabled={!hasRows} variant="outline">
-        <ShieldOff aria-hidden="true" data-icon="inline-start" />
-        停用{noun}
-      </Button>
-      <Button disabled={!hasRows} variant="secondary">
-        <Copy aria-hidden="true" data-icon="inline-start" />
-        复制{noun}
-      </Button>
+    <div className="max-w-xl space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <Button disabled aria-describedby="content-action-unavailable">
+          <Plus aria-hidden="true" data-icon="inline-start" />
+          新建{noun}
+        </Button>
+        <Button
+          disabled
+          aria-describedby="content-action-unavailable"
+          variant="outline"
+        >
+          <Pencil aria-hidden="true" data-icon="inline-start" />
+          编辑{noun}
+        </Button>
+        <Button
+          disabled
+          aria-describedby="content-action-unavailable"
+          variant="outline"
+        >
+          <ShieldOff aria-hidden="true" data-icon="inline-start" />
+          停用{noun}
+        </Button>
+        <Button
+          disabled
+          aria-describedby="content-action-unavailable"
+          variant="secondary"
+        >
+          <Copy aria-hidden="true" data-icon="inline-start" />
+          复制{noun}
+        </Button>
+      </div>
+      <p
+        className="text-text-secondary text-xs leading-5"
+        data-testid="content-action-unavailable"
+        id="content-action-unavailable"
+        role="status"
+      >
+        新建、编辑、停用和复制暂未接入本地运行时；当前仅开放列表查看与筛选。
+      </p>
     </div>
   );
 }
