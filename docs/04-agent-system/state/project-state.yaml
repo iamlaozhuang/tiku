@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-10-local-release-candidate-hardening
-  updatedAt: "2026-05-23T22:23:01+08:00"
+  updatedAt: "2026-05-23T22:27:09+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -42,7 +42,7 @@ currentTask:
   planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
   branch: codex/phase-10-local-real-content-rag-smoke-runtime
-  commitSha: null
+  commitSha: c655647
   prUrl: null
   retryCount: 0
   lastFailurePath: null

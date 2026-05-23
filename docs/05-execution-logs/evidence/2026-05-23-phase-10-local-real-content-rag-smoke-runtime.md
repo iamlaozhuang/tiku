@@ -149,6 +149,23 @@ Required validation after evidence write:
 - The script does not perform semantic quality evaluation.
 - Real source content remains local and ignored; future sanitized fixtures require a separate approved task.
 
+## Git Closeout
+
+- implementationCommit: `c655647 feat(rag): add local real content smoke runtime`.
+- merge: `8dad5b7 merge: phase 10 real content rag smoke runtime`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `105` files and `381` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js build completed successfully with `.env.local` loaded and no secret values printed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` was ahead of `origin/master` by the implementation and merge commits, and changed files remained limited to this task.
+- Local real-content RAG smoke rerun after merge: not run; the branch run already recorded one bounded local sample, and extra real-content reads are unnecessary for this merge evidence.
+- Push target: pending evidence update commit and push to `origin/master`.
+
 ## Taste Compliance Self-Check
 
 - Frontend visual taste: no UI, Tailwind, color, font, layout, or interaction change.
