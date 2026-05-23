@@ -93,3 +93,18 @@ Results so far:
 ## Residual Risk
 
 - Async queue behavior, first-save automatic trigger, and persisted question knowledge-node recommendation/binding state require a later task with approved schema and queue scope.
+
+## Git Closeout
+
+- implementationCommit: `1cfff75 feat(ai): add knowledge recommendation model config runtime`.
+- merge: `7995211 merge: phase 9 ai knowledge model config runtime`.
+- postMergeValidation on `master`:
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `100` files and `366` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass on `master`; build output included `/api/v1/questions/[publicId]/recommend-knowledge-nodes`.
+  - `Test-NamingConventions.ps1`: pass on `master`.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory on `master`; branch was ahead of `origin/master` by implementation and merge commits before closeout docs/push.
+- push: pending closeout docs commit.
