@@ -99,7 +99,7 @@ Results on `codex/phase-10-local-real-ai-provider-safety-plan`:
 
 - implementationCommit: `30272ad docs(agent): record phase 10 real provider safety plan`.
 - merge: `1f80754 merge: phase 10 real provider safety plan`.
-- masterCloseoutEvidenceCommit: pending until this post-merge evidence update is committed.
+- masterCloseoutEvidenceCommit: `127d222 docs(agent): record phase 10 provider safety closeout`.
 - postMergeValidation on `master`:
   - `Test-AgentSystemReadiness.ps1`: pass.
   - `Invoke-QualityGate.ps1`: pass.
@@ -110,8 +110,8 @@ Results on `codex/phase-10-local-real-ai-provider-safety-plan`:
   - `Test-NamingConventions.ps1`: pass.
   - Post-evidence `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; ahead commits and changed files remained limited to this task.
   - Post-evidence `npm.cmd run format:check`: first sandbox run failed with local `EPERM` while opening the installed Prettier executable under `node_modules`; rerun outside the sandbox passed and reported all matched files use Prettier style.
-- push: pending.
-- cleanup: pending.
+- push: completed to `origin/master`; first push advanced `master` from `c44bf19` to `127d222`.
+- cleanup: deleted local branch `codex/phase-10-local-real-ai-provider-safety-plan` after merge and first push. No remote short-lived branch was created. The first local deletion attempt hit a `.git` ref lock permission error; rerunning the same safe `git branch -d` outside the sandbox succeeded.
 
 ## Taste Compliance Self-Check
 
