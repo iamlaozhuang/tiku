@@ -223,3 +223,10 @@ Dependency order:
 - Fresh checkout and database rebuild rehearsal precede real content and real provider tests.
 - Real provider smoke testing requires a safety plan and explicit human approval before any credential is used.
 - Final local MVP acceptance rerun happens only after real-content and approved provider smoke tests are recorded.
+
+Closeout status:
+
+- Phase 10 is blocked, not closed, by `docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md`.
+- Local release candidate hardening is validated through planning, fresh checkout, database rebuild, redacted real-content metadata dry run, provider safety planning, and one bounded local DeepSeek smoke.
+- Final local MVP acceptance rerun is deferred because `phase-10-local-rag-real-content-smoke-test` is blocked by missing allowed runtime/import scope for real-content RAG validation.
+- Next required action is an explicit follow-up task with allowed runtime/import files or an approved pre-seeded local dev fixture/data set for real-content RAG smoke.
