@@ -104,11 +104,21 @@ Status handling note:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
-- postMergeValidation: pending.
-- Push target: pending.
-- Cleanup: pending.
+- implementationCommit: `204119a docs(agent): add phase 11 staging architecture adr`.
+- merge: `17bf9db merge: phase 11 staging architecture adr`.
+- postMergeValidation on `master`:
+  - `Select-String` ADR boundary check: pass.
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `105` files and `381` tests passed.
+    - format:check: pass.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` is ahead of `origin/master` by the implementation and merge commits, and changed files remain limited to ADR-005, task plan, evidence, and state/queue files.
+- Build and E2E: not run after merge because this was planning-only documentation/state work with no runtime, API, UI, dependency, schema, migration, script, or deployment change.
+- Push target: pending evidence update commit and push to `origin/master`.
+- Cleanup: pending after push.
 
 ## Taste Compliance Self-Check
 
