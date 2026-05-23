@@ -213,6 +213,40 @@ function findPracticeQuestion(
   return null;
 }
 
+function countPaperSnapshotQuestions(
+  paperSnapshot: Record<string, unknown>,
+): number {
+  const paperSections = Array.isArray(paperSnapshot.paperSections)
+    ? paperSnapshot.paperSections
+    : [];
+
+  return paperSections.reduce((questionCount, paperSection) => {
+    if (
+      !isRecord(paperSection) ||
+      !Array.isArray(paperSection.paperQuestions)
+    ) {
+      return questionCount;
+    }
+
+    return (
+      questionCount +
+      paperSection.paperQuestions.filter((paperQuestion) =>
+        isRecord(paperQuestion),
+      ).length
+    );
+  }, 0);
+}
+
+function shouldReplacePracticeSnapshot(
+  activePractice: PracticeRow,
+  paper: PracticePaperRow,
+): boolean {
+  return (
+    countPaperSnapshotQuestions(activePractice.paper_snapshot) === 0 &&
+    countPaperSnapshotQuestions(paper.paper_snapshot) > 0
+  );
+}
+
 function normalizeLabels(labels: string[]): string[] {
   return [...labels].sort((left, right) => left.localeCompare(right));
 }
@@ -469,6 +503,26 @@ export function createPracticeService(
       });
 
       if (activePractice !== null && !isPracticeExpired(activePractice, now)) {
+        if (shouldReplacePracticeSnapshot(activePractice, paper)) {
+          await repository.expirePractice({
+            publicId: activePractice.public_id,
+            expiredAt: now,
+          });
+
+          const practice = await createFreshPractice(
+            repository,
+            publicIdFactory,
+            userContext,
+            paper,
+            now,
+          );
+
+          return createSuccessResponse({
+            practice: mapPracticeToApi(practice),
+            answerRecords: [],
+          });
+        }
+
         return createSuccessResponse({
           ...(await createPracticeResult(
             repository,

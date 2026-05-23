@@ -78,6 +78,15 @@ function createPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createEmptyPaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "empty_snapshot",
+    durationMinute: 120,
+    paperSections: [],
+  };
+}
+
 function createScope(
   overrides: Partial<MockExamAuthorizationScopeRow> = {},
 ): MockExamAuthorizationScopeRow {
@@ -320,6 +329,67 @@ describe("mock exam service", () => {
       expect.objectContaining({
         publicId: "mock_exam_public_existing",
         submittedAt: now,
+      }),
+    ]);
+  });
+
+  it("terminates an active mock_exam with an empty snapshot before creating a fresh mock_exam", async () => {
+    const terminatedInputs: unknown[] = [];
+    const createdInputs: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async findActiveMockExamByPaper() {
+          return createMockExam({
+            public_id: "mock_exam_public_empty_snapshot",
+            paper_snapshot: createEmptyPaperSnapshot(),
+          });
+        },
+        async terminateMockExam(input) {
+          terminatedInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: "terminated",
+            terminated_at: input.terminatedAt,
+            termination_reason: input.terminationReason,
+          });
+        },
+        async createMockExam(input) {
+          createdInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            paper_snapshot: input.paperSnapshot,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startMockExam(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          publicId: "mock_exam_public_1",
+          questionCount: 2,
+        },
+      },
+    });
+    expect(terminatedInputs).toEqual([
+      {
+        publicId: "mock_exam_public_empty_snapshot",
+        terminatedAt: now,
+        terminationReason: "stale_empty_snapshot",
+      },
+    ]);
+    expect(createdInputs).toEqual([
+      expect.objectContaining({
+        paperSnapshot: createPaperSnapshot(),
       }),
     ]);
   });

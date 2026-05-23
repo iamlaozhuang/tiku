@@ -100,6 +100,14 @@ function createTwoQuestionPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createEmptyPaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "empty_snapshot",
+    paperSections: [],
+  };
+}
+
 function createScope(
   overrides: Partial<PracticeAuthorizationScopeRow> = {},
 ): PracticeAuthorizationScopeRow {
@@ -311,6 +319,59 @@ describe("practice service", () => {
         publicId: "practice_public_expired",
         expiredAt: now,
       },
+    ]);
+  });
+
+  it("expires an active practice with an empty snapshot before creating a fresh practice", async () => {
+    const expiredInputs: unknown[] = [];
+    const createdInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findActivePracticeByPaper() {
+          return createPractice({
+            public_id: "practice_public_empty_snapshot",
+            paper_snapshot: createEmptyPaperSnapshot(),
+          });
+        },
+        async expirePractice(input) {
+          expiredInputs.push(input);
+        },
+        async createPractice(input) {
+          createdInputs.push(input);
+
+          return createPractice({
+            public_id: input.publicId,
+            paper_snapshot: input.paperSnapshot,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.startPractice(userContext, {
+        paperPublicId: "paper_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        practice: {
+          publicId: "practice_public_1",
+          questionCount: 1,
+        },
+      },
+    });
+    expect(expiredInputs).toEqual([
+      {
+        publicId: "practice_public_empty_snapshot",
+        expiredAt: now,
+      },
+    ]);
+    expect(createdInputs).toEqual([
+      expect.objectContaining({
+        paperSnapshot: createPaperSnapshot(),
+      }),
     ]);
   });
 

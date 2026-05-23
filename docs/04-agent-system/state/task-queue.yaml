@@ -2876,6 +2876,7 @@ tasks:
     dependencies:
       - phase-11-staging-entry-fix-scope
     taskPlanPolicy: required
+    humanApproval: User explicitly approved continuing to fix all local role-play findings on 2026-05-24 after auth route guards and admin audit navigation were merged and pushed.
     humanApprovalRequired: true
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
@@ -2902,9 +2903,17 @@ tasks:
       - browser_verification
       - evidence_integrity
     validationCommands:
-      - human approval evidence required before task claim
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-entry-student-practice-mock-entry
+      - npm.cmd run test:unit -- --run tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts
+      - npm.cmd run test:e2e -- --grep "student practice mock entry"
+      - docker compose ps
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
-    status: blocked
+    status: validated
     retryCount: 0
   - id: phase-11-staging-entry-content-action-closures
     title: Phase 11 Staging Entry Content Action Closures
