@@ -2924,6 +2924,8 @@ tasks:
     dependencies:
       - phase-11-staging-entry-fix-scope
     taskPlanPolicy: required
+    humanApproval: User explicitly approved continuing to fix or close all local role-play findings on 2026-05-24 after previous Phase 11 staging-entry fixes were merged and pushed.
+    humanApprovalRequired: true
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-content-action-closures.md
       - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-content-action-closures.md
@@ -2986,9 +2988,12 @@ tasks:
       - known_limitation
       - evidence_integrity
     validationCommands:
-      - task-specific validation to be defined when claimed
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-entry-known-limitations
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-known-limitations.md
-    status: blocked
+    status: validated
     retryCount: 0
   - id: phase-6-admin-ops-readiness-evidence
     title: Admin Ops Readiness Evidence
