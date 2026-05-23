@@ -189,3 +189,8 @@ Dependency order:
 - Runtime tasks precede their corresponding UI completion tasks.
 - AI/RAG tasks must remain mock-provider-first until redaction, audit, and dependency gates are complete.
 - Final browser/API acceptance runs only after student, admin, AI/RAG, and REST contract verification tasks are closed.
+
+Closeout status:
+
+- Phase 9 local MVP acceptance is closed by `docs/05-execution-logs/evidence/2026-05-23-phase-9-closeout-release-readiness.md`.
+- Release readiness is limited to local `dev` MVP acceptance and owner review. Production, staging, real provider, deployment, and customer-network acceptance require separate approved tasks.
