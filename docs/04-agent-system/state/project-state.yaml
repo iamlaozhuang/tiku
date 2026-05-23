@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-10-local-release-candidate-hardening
-  updatedAt: "2026-05-23T18:41:18+08:00"
+  updatedAt: "2026-05-23T19:10:30+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-10-local-real-content-import-dry-run
+  id: phase-10-local-real-ai-provider-safety-plan
   status: closed
-  sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-content-import-dry-run.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-import-dry-run.md
-  branch: codex/phase-10-local-real-content-import-dry-run
-  commitSha: 6156bc5
+  sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-provider-rules
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+  branch: codex/phase-10-local-real-ai-provider-safety-plan
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-10-local-real-ai-provider-safety-plan after phase-10-local-real-content-import-dry-run closes
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-import-dry-run.md
+  nextRecommendedAction: claim phase-10-local-real-ai-provider-smoke-test after phase-10-local-real-ai-provider-safety-plan closes
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
