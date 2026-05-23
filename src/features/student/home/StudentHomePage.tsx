@@ -6,15 +6,23 @@ import {
   BookOpen,
   ClipboardList,
   Clock3,
+  History,
   ListChecks,
   PlayCircle,
   Ticket,
   UserRound,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import {
+  fetchStudentApi,
+  getStoredStudentSessionToken,
+  isStudentUnauthorizedResponse,
+} from "@/features/student/studentRuntimeApi";
 import type {
+  StudentPaperListDto,
   StudentPaperScopeDto,
+  StudentPaperScopesDto,
   StudentPaperSummaryDto,
 } from "@/server/contracts/student-paper-contract";
 import type { Profession, Subject } from "@/server/models/paper";
@@ -24,7 +32,7 @@ type StudentHomeScopeSelection = {
   level: number;
 };
 
-type StudentHomePageState = "ready" | "loading" | "error";
+type StudentHomePageState = "ready" | "loading" | "error" | "unauthorized";
 
 type StudentHomePageProps = {
   state?: StudentHomePageState;
@@ -37,6 +45,9 @@ type SubjectGroup = {
   subject: Subject;
   papers: StudentPaperSummaryDto[];
 };
+
+type StudentPaperScopePayload = StudentPaperScopesDto | StudentPaperScopeDto[];
+type StudentPaperListPayload = StudentPaperListDto | StudentPaperSummaryDto[];
 
 const professionLabels: Record<Profession, string> = {
   logistics: "物流",
@@ -196,6 +207,29 @@ function selectSubjectGroups(
   }));
 }
 
+function createStudentPaperListPath(scope: StudentHomeScopeSelection): string {
+  const searchParams = new URLSearchParams({
+    profession: scope.profession,
+    level: String(scope.level),
+    page: "1",
+    pageSize: "20",
+  });
+
+  return `/api/v1/student-papers?${searchParams.toString()}`;
+}
+
+function readStudentPaperScopes(
+  payload: StudentPaperScopePayload,
+): StudentPaperScopeDto[] {
+  return Array.isArray(payload) ? payload : payload.scopes;
+}
+
+function readStudentPapers(
+  payload: StudentPaperListPayload,
+): StudentPaperSummaryDto[] {
+  return Array.isArray(payload) ? payload : payload.papers;
+}
+
 function StudentHomeStatusMessage({
   title,
   description,
@@ -301,31 +335,180 @@ function StudentPaperCard({ paper }: { paper: StudentPaperSummaryDto }) {
 
 export function StudentHomePage({
   state = "ready",
-  scopes = studentHomeFixture.scopes,
-  papers = studentHomeFixture.papers,
+  scopes,
+  papers,
   rememberedScope,
 }: StudentHomePageProps) {
-  const initialScope = findInitialScope(scopes, rememberedScope);
+  const isRuntimeMode = scopes === undefined || papers === undefined;
+  const [runtimeState, setRuntimeState] =
+    useState<StudentHomePageState>("loading");
+  const [runtimeScopes, setRuntimeScopes] = useState<StudentPaperScopeDto[]>(
+    [],
+  );
+  const [runtimePapers, setRuntimePapers] = useState<StudentPaperSummaryDto[]>(
+    [],
+  );
+  const displayState =
+    isRuntimeMode && state === "ready" ? runtimeState : state;
+  const displayScopes = scopes ?? runtimeScopes;
+  const displayPapers = papers ?? runtimePapers;
+  const initialScope = findInitialScope(displayScopes, rememberedScope);
   const [selectedScopeKey, setSelectedScopeKey] = useState(
     initialScope === null ? "" : createScopeKey(initialScope),
   );
   const selectedScope =
-    scopes.find((scope) => createScopeKey(scope) === selectedScopeKey) ??
+    displayScopes.find((scope) => createScopeKey(scope) === selectedScopeKey) ??
     initialScope;
   const subjectGroups = useMemo(
-    () => selectSubjectGroups(papers, selectedScope),
-    [papers, selectedScope],
+    () => selectSubjectGroups(displayPapers, selectedScope),
+    [displayPapers, selectedScope],
   );
   const visiblePaperCount = subjectGroups.reduce(
     (paperCount, group) => paperCount + group.papers.length,
     0,
   );
 
-  if (state === "loading") {
+  useEffect(() => {
+    if (!isRuntimeMode || state !== "ready") {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadStudentHome() {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        if (isActive) {
+          setRuntimeState("unauthorized");
+        }
+        return;
+      }
+
+      try {
+        const scopePayload = await fetchStudentApi<StudentPaperScopePayload>(
+          "/api/v1/student-papers/scopes",
+          token,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(scopePayload)) {
+          setRuntimeState("unauthorized");
+          return;
+        }
+
+        if (scopePayload.code !== 0 || scopePayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        const nextScopes = readStudentPaperScopes(scopePayload.data);
+        const nextScope = findInitialScope(nextScopes, rememberedScope);
+
+        setRuntimeScopes(nextScopes);
+        setSelectedScopeKey(
+          nextScope === null ? "" : createScopeKey(nextScope),
+        );
+
+        if (nextScope === null) {
+          setRuntimePapers([]);
+          setRuntimeState("ready");
+          return;
+        }
+
+        const paperPayload = await fetchStudentApi<StudentPaperListPayload>(
+          createStudentPaperListPath(nextScope),
+          token,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(paperPayload)) {
+          setRuntimeState("unauthorized");
+          return;
+        }
+
+        if (paperPayload.code !== 0 || paperPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        setRuntimePapers(readStudentPapers(paperPayload.data));
+        setRuntimeState("ready");
+      } catch {
+        if (isActive) {
+          setRuntimeState("error");
+        }
+      }
+    }
+
+    void loadStudentHome();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isRuntimeMode, rememberedScope, state]);
+
+  async function handleSelectScope(scope: StudentPaperScopeDto) {
+    const scopeKey = createScopeKey(scope);
+
+    setSelectedScopeKey(scopeKey);
+
+    if (!isRuntimeMode) {
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("unauthorized");
+      return;
+    }
+
+    setRuntimeState("loading");
+
+    try {
+      const paperPayload = await fetchStudentApi<StudentPaperListPayload>(
+        createStudentPaperListPath(scope),
+        token,
+      );
+
+      if (isStudentUnauthorizedResponse(paperPayload)) {
+        setRuntimeState("unauthorized");
+        return;
+      }
+
+      if (paperPayload.code !== 0 || paperPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      setRuntimePapers(readStudentPapers(paperPayload.data));
+      setRuntimeState("ready");
+    } catch {
+      setRuntimeState("error");
+    }
+  }
+
+  if (displayState === "loading") {
     return <StudentHomeLoading />;
   }
 
-  if (state === "error") {
+  if (displayState === "unauthorized") {
+    return (
+      <StudentHomeStatusMessage
+        title="请先登录"
+        description="学员首页需要有效的学员会话，请登录后再查看授权范围。"
+      />
+    );
+  }
+
+  if (displayState === "error") {
     return (
       <StudentHomeStatusMessage
         title="学员首页加载失败"
@@ -334,7 +517,7 @@ export function StudentHomePage({
     );
   }
 
-  if (scopes.length === 0) {
+  if (displayScopes.length === 0) {
     return (
       <section className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-full">
@@ -370,7 +553,10 @@ export function StudentHomePage({
             选择当前授权范围，按科目进入练习或模拟考试。
           </p>
         </div>
-        <nav className="grid grid-cols-3 gap-2" aria-label="学员导航">
+        <nav
+          className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+          aria-label="学员导航"
+        >
           <Link
             href="/profile"
             className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
@@ -392,11 +578,18 @@ export function StudentHomePage({
             <ListChecks className="size-4" aria-hidden="true" />
             错题本
           </Link>
+          <Link
+            href="/exam-report"
+            className="border-border bg-surface text-text-primary hover:bg-muted flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            <History className="size-4" aria-hidden="true" />
+            考试记录
+          </Link>
         </nav>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1" aria-label="授权范围">
-        {scopes.map((scope) => {
+        {displayScopes.map((scope) => {
           const scopeKey = createScopeKey(scope);
           const isSelected = scopeKey === selectedScopeKey;
 
@@ -405,7 +598,7 @@ export function StudentHomePage({
               key={scopeKey}
               type="button"
               aria-pressed={isSelected}
-              onClick={() => setSelectedScopeKey(scopeKey)}
+              onClick={() => void handleSelectScope(scope)}
               className={`h-9 shrink-0 rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98] ${
                 isSelected
                   ? "bg-primary text-primary-foreground"

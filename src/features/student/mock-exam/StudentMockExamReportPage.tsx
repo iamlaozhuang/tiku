@@ -11,19 +11,33 @@ import {
   FileText,
   ListChecks,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import {
+  fetchStudentApi,
+  getStoredStudentSessionToken,
+  isStudentUnauthorizedResponse,
+} from "@/features/student/studentRuntimeApi";
 import type {
   ExamReportDetailDto,
+  ExamReportListResultDto,
+  ExamReportResultDto,
+  ExamReportSummaryDto,
   ExamReportSnapshotDto,
 } from "@/server/contracts/exam-report-contract";
-import type { MockExamDto } from "@/server/contracts/mock-exam-contract";
+import type {
+  MockExamAnswerRecordResultDto,
+  MockExamDto,
+  MockExamResultDto,
+  MockExamSubmitResultDto,
+} from "@/server/contracts/mock-exam-contract";
 import type { ExamStatus } from "@/server/models/student-experience";
 
 type StudentPageState = "ready" | "loading" | "error" | "authorization_expired";
 
 type StudentMockExamPageProps = {
   state?: StudentPageState;
+  paperPublicId?: string;
   mockExamPublicId?: string;
   mockExams?: StudentMockExamFixture[];
 };
@@ -32,6 +46,11 @@ type StudentExamReportPageProps = {
   state?: StudentPageState;
   examReportPublicId?: string;
   examReports?: ExamReportDetailDto[];
+};
+
+type StudentExamReportListPageProps = {
+  state?: StudentPageState;
+  examReports?: ExamReportSummaryDto[];
 };
 
 type StudentMockExamFixture = {
@@ -363,6 +382,10 @@ function getRemainingMinute(mockExam: MockExamDto): number | null {
   return Math.max(Math.ceil(remainingMillisecond / 60000), 0);
 }
 
+function formatDate(value: string | null): string {
+  return value === null ? "未记录" : value.slice(0, 10);
+}
+
 function includesLabel(selectedLabels: string[], label: string): boolean {
   return selectedLabels.includes(label);
 }
@@ -531,13 +554,26 @@ function parseReportSnapshot(
 
 export function StudentMockExamPage({
   state = "ready",
+  paperPublicId,
   mockExamPublicId = "mock-exam-marketing-theory-001",
-  mockExams = studentMockExamFixture.mockExams,
+  mockExams,
 }: StudentMockExamPageProps) {
+  const isRuntimeMode = mockExams === undefined;
+  const [runtimeState, setRuntimeState] = useState<StudentPageState>("loading");
+  const [runtimeMockExams, setRuntimeMockExams] = useState<
+    StudentMockExamFixture[]
+  >([]);
+  const displayState =
+    isRuntimeMode && state === "ready" ? runtimeState : state;
+  const displayMockExams = mockExams ?? runtimeMockExams;
+  const selectedMockExamPublicId =
+    isRuntimeMode && runtimeMockExams.length > 0
+      ? runtimeMockExams[0].mockExam.publicId
+      : mockExamPublicId;
   const selectedMockExamFixture =
-    mockExams.find(
+    displayMockExams.find(
       (mockExamFixture) =>
-        mockExamFixture.mockExam.publicId === mockExamPublicId,
+        mockExamFixture.mockExam.publicId === selectedMockExamPublicId,
     ) ?? null;
   const mockExam = selectedMockExamFixture?.mockExam ?? null;
   const questions = useMemo(
@@ -556,11 +592,79 @@ export function StudentMockExamPage({
     useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  if (state === "loading") {
+  useEffect(() => {
+    if (!isRuntimeMode || state !== "ready") {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadMockExam() {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        if (isActive) {
+          setRuntimeState("authorization_expired");
+        }
+        return;
+      }
+
+      try {
+        const mockExamPayload =
+          paperPublicId === undefined
+            ? await fetchStudentApi<MockExamResultDto>(
+                `/api/v1/mock-exams/${mockExamPublicId}`,
+                token,
+              )
+            : await fetchStudentApi<MockExamResultDto>(
+                "/api/v1/mock-exams",
+                token,
+                {
+                  method: "POST",
+                  body: JSON.stringify({ paperPublicId }),
+                },
+              );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(mockExamPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (mockExamPayload.code !== 0 || mockExamPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        setRuntimeMockExams([
+          {
+            mockExam: mockExamPayload.data.mockExam,
+            examReportPublicId: "",
+          },
+        ]);
+        setRuntimeState("ready");
+      } catch {
+        if (isActive) {
+          setRuntimeState("error");
+        }
+      }
+    }
+
+    void loadMockExam();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isRuntimeMode, mockExamPublicId, paperPublicId, state]);
+
+  if (displayState === "loading") {
     return <StudentMockExamLoading />;
   }
 
-  if (state === "error") {
+  if (displayState === "error") {
     return (
       <StudentStatusMessage
         title="模拟考试加载失败"
@@ -569,7 +673,7 @@ export function StudentMockExamPage({
     );
   }
 
-  if (state === "authorization_expired") {
+  if (displayState === "authorization_expired") {
     return (
       <StudentStatusMessage
         title="授权已失效"
@@ -628,11 +732,92 @@ export function StudentMockExamPage({
     });
   }
 
-  function handleSaveAnswer() {
+  async function handleSaveAnswer() {
+    if (mockExam === null) {
+      return;
+    }
+
+    if (isRuntimeMode) {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      try {
+        const answerPayload =
+          await fetchStudentApi<MockExamAnswerRecordResultDto>(
+            `/api/v1/mock-exams/${mockExam.publicId}/answers`,
+            token,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
+                selectedLabels,
+                textAnswer: null,
+                savedFromClientAt: new Date().toISOString(),
+              }),
+            },
+          );
+
+        if (isStudentUnauthorizedResponse(answerPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (answerPayload.code !== 0 || answerPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+      } catch {
+        setRuntimeState("error");
+        return;
+      }
+    }
+
     setSavedAnswerByQuestion({
       ...savedAnswerByQuestion,
       [currentQuestion.paperQuestionPublicId]: selectedLabels,
     });
+  }
+
+  async function handleSubmitMockExam() {
+    if (mockExam === null) {
+      return;
+    }
+
+    if (isRuntimeMode) {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      try {
+        const submitPayload = await fetchStudentApi<MockExamSubmitResultDto>(
+          `/api/v1/mock-exams/${mockExam.publicId}/submit`,
+          token,
+          { method: "POST" },
+        );
+
+        if (isStudentUnauthorizedResponse(submitPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (submitPayload.code !== 0 || submitPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+      } catch {
+        setRuntimeState("error");
+        return;
+      }
+    }
+
+    setIsSubmitted(true);
   }
 
   if (isSubmitted) {
@@ -650,10 +835,16 @@ export function StudentMockExamPage({
           </p>
         </div>
         <Link
-          href={`/exam-report?examReportPublicId=${selectedMockExamFixture.examReportPublicId}`}
+          href={
+            selectedMockExamFixture.examReportPublicId === ""
+              ? "/exam-report"
+              : `/exam-report?examReportPublicId=${selectedMockExamFixture.examReportPublicId}`
+          }
           className="bg-primary text-primary-foreground flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
         >
-          查看考试报告
+          {selectedMockExamFixture.examReportPublicId === ""
+            ? "查看模拟考试记录"
+            : "查看考试报告"}
         </Link>
       </section>
     );
@@ -727,7 +918,7 @@ export function StudentMockExamPage({
           selectedLabels={selectedLabels}
           isSaved={isCurrentQuestionSaved}
           onToggleLabel={handleToggleLabel}
-          onSaveAnswer={handleSaveAnswer}
+          onSaveAnswer={() => void handleSaveAnswer()}
         />
       </article>
 
@@ -806,7 +997,7 @@ export function StudentMockExamPage({
           </p>
           <button
             type="button"
-            onClick={() => setIsSubmitted(true)}
+            onClick={() => void handleSubmitMockExam()}
             className="bg-primary text-primary-foreground flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
           >
             确认交卷
@@ -820,13 +1011,75 @@ export function StudentMockExamPage({
 export function StudentExamReportPage({
   state = "ready",
   examReportPublicId = "exam-report-marketing-theory-001",
-  examReports = studentExamReportFixture.examReports,
+  examReports,
 }: StudentExamReportPageProps) {
-  if (state === "loading") {
+  const isRuntimeMode = examReports === undefined;
+  const [runtimeState, setRuntimeState] = useState<StudentPageState>("loading");
+  const [runtimeExamReports, setRuntimeExamReports] = useState<
+    ExamReportDetailDto[]
+  >([]);
+  const displayState =
+    isRuntimeMode && state === "ready" ? runtimeState : state;
+  const displayExamReports = examReports ?? runtimeExamReports;
+
+  useEffect(() => {
+    if (!isRuntimeMode || state !== "ready") {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadExamReport() {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        if (isActive) {
+          setRuntimeState("authorization_expired");
+        }
+        return;
+      }
+
+      try {
+        const reportPayload = await fetchStudentApi<ExamReportResultDto>(
+          `/api/v1/exam-reports/${examReportPublicId}`,
+          token,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(reportPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (reportPayload.code !== 0 || reportPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        setRuntimeExamReports([reportPayload.data.examReport]);
+        setRuntimeState("ready");
+      } catch {
+        if (isActive) {
+          setRuntimeState("error");
+        }
+      }
+    }
+
+    void loadExamReport();
+
+    return () => {
+      isActive = false;
+    };
+  }, [examReportPublicId, isRuntimeMode, state]);
+
+  if (displayState === "loading") {
     return <StudentExamReportLoading />;
   }
 
-  if (state === "error") {
+  if (displayState === "error") {
     return (
       <StudentStatusMessage
         title="考试报告加载失败"
@@ -835,7 +1088,7 @@ export function StudentExamReportPage({
     );
   }
 
-  if (state === "authorization_expired") {
+  if (displayState === "authorization_expired") {
     return (
       <StudentStatusMessage
         title="授权已失效"
@@ -853,8 +1106,9 @@ export function StudentExamReportPage({
   }
 
   const examReport =
-    examReports.find((report) => report.publicId === examReportPublicId) ??
-    null;
+    displayExamReports.find(
+      (report) => report.publicId === examReportPublicId,
+    ) ?? null;
 
   if (examReport === null) {
     return (
@@ -982,6 +1236,231 @@ export function StudentExamReportPage({
             : "学习建议：已生成"}
         </p>
       </div>
+    </section>
+  );
+}
+
+export function StudentExamReportListPage({
+  state = "ready",
+  examReports,
+}: StudentExamReportListPageProps) {
+  const isRuntimeMode = examReports === undefined;
+  const [runtimeState, setRuntimeState] = useState<StudentPageState>("loading");
+  const [runtimeExamReports, setRuntimeExamReports] = useState<
+    ExamReportSummaryDto[]
+  >([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<ExamStatus | "all">(
+    "all",
+  );
+  const displayState =
+    isRuntimeMode && state === "ready" ? runtimeState : state;
+  const displayExamReports = examReports ?? runtimeExamReports;
+  const filteredExamReports = displayExamReports.filter((examReport) => {
+    const matchesSearch =
+      searchKeyword.trim().length === 0 ||
+      examReport.paperName.includes(searchKeyword.trim());
+    const matchesStatus =
+      selectedStatus === "all" || examReport.examStatus === selectedStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  useEffect(() => {
+    if (!isRuntimeMode || state !== "ready") {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadExamReports() {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        if (isActive) {
+          setRuntimeState("authorization_expired");
+        }
+        return;
+      }
+
+      try {
+        const reportPayload = await fetchStudentApi<ExamReportListResultDto>(
+          "/api/v1/exam-reports?page=1&pageSize=20",
+          token,
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(reportPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (reportPayload.code !== 0 || reportPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        setRuntimeExamReports(reportPayload.data.examReports);
+        setRuntimeState("ready");
+      } catch {
+        if (isActive) {
+          setRuntimeState("error");
+        }
+      }
+    }
+
+    void loadExamReports();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isRuntimeMode, state]);
+
+  if (displayState === "loading") {
+    return (
+      <section className="space-y-4 p-4" aria-busy="true">
+        <p className="text-text-secondary text-sm">正在加载模拟考试记录</p>
+        <div className="bg-surface ring-border space-y-3 rounded-xl p-4 shadow-sm ring-1">
+          <div className="bg-border h-5 w-2/3 animate-pulse rounded" />
+          <div className="bg-border h-4 w-1/2 animate-pulse rounded" />
+          <div className="bg-border h-9 w-full animate-pulse rounded-lg" />
+        </div>
+      </section>
+    );
+  }
+
+  if (displayState === "error") {
+    return (
+      <StudentStatusMessage
+        title="模拟考试记录加载失败"
+        description="请稍后刷新页面，或重新登录后再查看记录。"
+      />
+    );
+  }
+
+  if (displayState === "authorization_expired") {
+    return (
+      <StudentStatusMessage
+        title="授权已失效"
+        description="当前授权不可用，系统已停止展示模拟考试记录。"
+        action={
+          <Link
+            href="/redeem-code"
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            查看授权
+          </Link>
+        }
+      />
+    );
+  }
+
+  return (
+    <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-5 pb-20">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <Link
+            href="/home"
+            className="text-brand-primary text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            返回首页
+          </Link>
+          <h1 className="font-heading text-text-primary text-2xl font-semibold">
+            模拟考试记录
+          </h1>
+          <p className="text-text-secondary text-sm leading-6">
+            按考试开始时间倒序查看历史模考、评分状态和报告入口。
+          </p>
+        </div>
+        <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
+          <ListChecks className="size-5" aria-hidden="true" />
+        </div>
+      </div>
+
+      <div className="bg-surface ring-border grid gap-3 rounded-xl p-4 shadow-sm ring-1 sm:grid-cols-2">
+        <label className="space-y-1.5 text-sm font-medium">
+          <span className="text-text-primary">按试卷名称搜索</span>
+          <input
+            value={searchKeyword}
+            onChange={(event) => setSearchKeyword(event.target.value)}
+            className="border-border bg-background text-text-primary focus:ring-primary/20 h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
+            placeholder="输入试卷名称"
+          />
+        </label>
+        <label className="space-y-1.5 text-sm font-medium">
+          <span className="text-text-primary">按状态筛选</span>
+          <select
+            value={selectedStatus}
+            onChange={(event) =>
+              setSelectedStatus(event.target.value as ExamStatus | "all")
+            }
+            className="border-border bg-background text-text-primary focus:ring-primary/20 h-10 w-full rounded-lg border px-3 text-sm outline-none focus:ring-2"
+          >
+            <option value="all">全部状态</option>
+            <option value="scoring">评分中</option>
+            <option value="scoring_partial_failed">评分未完成</option>
+            <option value="completed">已完成</option>
+            <option value="terminated">已终止</option>
+          </select>
+        </label>
+      </div>
+
+      {filteredExamReports.length === 0 ? (
+        <div className="border-border text-text-secondary rounded-xl border border-dashed p-4 text-sm">
+          暂无符合条件的模拟考试记录
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredExamReports.map((examReport) => (
+            <article
+              key={examReport.publicId}
+              data-public-id={examReport.publicId}
+              className="bg-surface ring-border flex flex-col gap-4 rounded-xl p-4 shadow-sm ring-1"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <h2 className="font-heading text-text-primary text-base font-semibold">
+                    {examReport.paperName}
+                  </h2>
+                  <p className="text-text-secondary text-sm">
+                    {formatDate(examReport.generatedAt)} ·{" "}
+                    {examReport.subject === "theory" ? "理论" : "技能"}
+                  </p>
+                </div>
+                <span className="bg-secondary text-secondary-foreground shrink-0 rounded-lg px-2 py-1 text-xs font-medium">
+                  {examStatusLabels[examReport.examStatus]}
+                </span>
+              </div>
+              <div className="text-text-secondary grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+                <span className="bg-background rounded-lg px-3 py-2">
+                  得分：{examReport.totalScore ?? "--"}
+                </span>
+                <span className="bg-background rounded-lg px-3 py-2">
+                  客观题：{examReport.objectiveScore ?? "--"}
+                </span>
+                <span className="bg-background rounded-lg px-3 py-2">
+                  用时：{Math.round(examReport.durationSecond / 60)} 分钟
+                </span>
+              </div>
+              {examReport.examStatus === "terminated" ? (
+                <p className="text-warning text-sm">
+                  已终止考试不生成报告，仅保留后台作答记录。
+                </p>
+              ) : (
+                <Link
+                  href={`/exam-report?examReportPublicId=${examReport.publicId}`}
+                  className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+                >
+                  查看报告
+                </Link>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

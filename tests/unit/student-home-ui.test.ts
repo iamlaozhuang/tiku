@@ -4,9 +4,10 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   StudentHomePage,
@@ -15,6 +16,9 @@ import {
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
 });
 
 describe("StudentHomePage", () => {
@@ -143,5 +147,75 @@ describe("StudentHomePage", () => {
       "href",
       "/redeem-code",
     );
+  });
+
+  it("loads authorization scopes and papers through the student REST runtime without rendering the session token", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/student-papers/scopes") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: [studentHomeFixture.scopes[1]],
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/student-papers?profession=marketing&level=3&page=1&pageSize=20"
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: studentHomeFixture.papers.filter(
+                (paper) => paper.profession === "marketing",
+              ),
+              pagination: {
+                page: 1,
+                pageSize: 20,
+                total: 3,
+                sortBy: "publishedAt",
+                sortOrder: "desc",
+              },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentHomePage));
+
+    expect(screen.getByText("正在加载授权范围")).toBeInTheDocument();
+    expect(await screen.findByText("营销理论冲刺卷 B")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "营销 3级" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 });
