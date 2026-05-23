@@ -46,3 +46,36 @@ export type QuestionDto = {
 export type QuestionResultDto = {
   question: QuestionDto;
 };
+
+export type QuestionKnowledgeRecommendationItemDto = {
+  knowledgeNodePublicId: string;
+  name: string;
+  pathName: string;
+  confidence: "high" | "medium" | "low";
+  reason: string;
+  source: "ai_recommended";
+  confirmationStatus: "pending_confirmation";
+};
+
+export type QuestionKnowledgeRecommendationDto = {
+  questionPublicId: string;
+  recommendationStatus: "recommended" | "recommendation_failed";
+  recommendations: QuestionKnowledgeRecommendationItemDto[];
+  modelConfig: {
+    modelConfigPublicId: string;
+    providerPublicId: string;
+    providerDisplayName: string;
+    providerKey: string;
+    modelName: string;
+    displayName: string;
+    aiFuncType: "kn_recommendation";
+    configVersion: number;
+    promptTemplateKey: string;
+    promptTemplateVersion: number;
+  };
+  failureReason: string | null;
+};
+
+export type QuestionKnowledgeRecommendationResultDto = {
+  recommendation: QuestionKnowledgeRecommendationDto;
+};
