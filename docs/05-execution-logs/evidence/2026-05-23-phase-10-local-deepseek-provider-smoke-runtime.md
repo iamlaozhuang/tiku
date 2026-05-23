@@ -155,8 +155,9 @@ Required validation results after this evidence was written:
   - `Test-NamingConventions.ps1`: pass.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` was ahead of `origin/master` by the implementation and merge commits, and changed files remained limited to this task.
 - Provider rerun after merge: not run, to keep the task bounded to the already recorded single successful DeepSeek request and avoid extra provider calls.
-- Push status: pending at this evidence update.
-- Cleanup status: pending until `origin/master` push succeeds.
+- first push: completed to `origin/master`; `master` advanced from `f9138bc` to `0889a07`.
+- cleanup: deleted local branch `codex/phase-10-local-deepseek-provider-smoke-runtime` after merge and first push. The first local deletion attempt hit a `.git` ref lock permission error; rerunning the same safe `git branch -d` outside the sandbox succeeded.
+- final push target: `origin/master` for this push-cleanup evidence update; final delivery records the push result after it completes.
 
 ## Taste Compliance Self-Check
 
