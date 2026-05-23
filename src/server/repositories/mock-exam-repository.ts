@@ -92,6 +92,13 @@ export type SubmitMockExamInput = {
   subjectiveScore: string | null;
   totalScore: string;
   unansweredCount: number;
+  answerRecordResults: {
+    paperQuestionPublicId: string;
+    answerRecordStatus: AnswerRecordStatus;
+    isCorrect: boolean | null;
+    score: string | null;
+    submittedAt: Date;
+  }[];
 };
 
 export type TerminateMockExamInput = {

@@ -94,6 +94,14 @@ const systemPublicIdFactory: ExamReportPublicIdFactory = {
   },
 };
 
+type ReportPaperQuestionSnapshot = {
+  paperQuestionPublicId: string;
+  questionPublicId: string;
+  questionSnapshot: Record<string, unknown>;
+  maxScore: string;
+  isObjective: boolean;
+};
+
 function hasEffectiveAuthorization(
   scopes: ExamReportAuthorizationScopeRow[],
   reportScope: { profession: ExamReportRow["profession"]; level: number },
@@ -120,6 +128,32 @@ function getStringField(
   return typeof value[key] === "string" ? value[key] : null;
 }
 
+function getScore(value: Record<string, unknown>): string {
+  const score = value.score;
+
+  if (typeof score === "number") {
+    return score.toFixed(1);
+  }
+
+  return typeof score === "string" && score.length > 0 ? score : "0.0";
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function getStandardAnswerLabels(value: Record<string, unknown>): string[] {
+  const standardAnswerLabels = value.standardAnswerLabels;
+
+  if (!Array.isArray(standardAnswerLabels)) {
+    return [];
+  }
+
+  return standardAnswerLabels.filter(
+    (label): label is string => typeof label === "string" && label.length > 0,
+  );
+}
+
 function getPaperName(paperSnapshot: Record<string, unknown>): string {
   return getStringField(paperSnapshot, "name") ?? "Untitled paper";
 }
@@ -137,8 +171,54 @@ function calculateDurationSecond(mockExam: ExamReportMockExamRow): number {
   );
 }
 
-function buildQuestionDetails(answerRecords: ExamReportAnswerRecordRow[]) {
-  return answerRecords.map((answerRecord) => ({
+function listReportPaperQuestions(
+  paperSnapshot: Record<string, unknown>,
+): ReportPaperQuestionSnapshot[] {
+  const paperSections = Array.isArray(paperSnapshot.paperSections)
+    ? paperSnapshot.paperSections
+    : [];
+
+  return paperSections.flatMap((paperSection) => {
+    if (
+      !isRecord(paperSection) ||
+      !Array.isArray(paperSection.paperQuestions)
+    ) {
+      return [];
+    }
+
+    return paperSection.paperQuestions.flatMap((paperQuestion) => {
+      if (!isRecord(paperQuestion)) {
+        return [];
+      }
+
+      const paperQuestionPublicId = getStringField(
+        paperQuestion,
+        "paperQuestionPublicId",
+      );
+      const questionPublicId = getStringField(
+        paperQuestion,
+        "questionPublicId",
+      );
+
+      if (paperQuestionPublicId === null || questionPublicId === null) {
+        return [];
+      }
+
+      return [
+        {
+          paperQuestionPublicId,
+          questionPublicId,
+          questionSnapshot: paperQuestion,
+          maxScore: getScore(paperQuestion),
+          isObjective: getStandardAnswerLabels(paperQuestion).length > 0,
+        },
+      ];
+    });
+  });
+}
+
+function buildSavedQuestionDetail(answerRecord: ExamReportAnswerRecordRow) {
+  return {
     answerRecordPublicId: answerRecord.public_id,
     paperQuestionPublicId: answerRecord.paper_question_public_id,
     questionPublicId: answerRecord.question_public_id,
@@ -150,7 +230,45 @@ function buildQuestionDetails(answerRecords: ExamReportAnswerRecordRow[]) {
     maxScore: answerRecord.max_score,
     answeredAt: answerRecord.answered_at?.toISOString() ?? null,
     submittedAt: answerRecord.submitted_at?.toISOString() ?? null,
-  }));
+  };
+}
+
+function buildUnansweredQuestionDetail(question: ReportPaperQuestionSnapshot) {
+  return {
+    answerRecordPublicId: null,
+    paperQuestionPublicId: question.paperQuestionPublicId,
+    questionPublicId: question.questionPublicId,
+    questionSnapshot: question.questionSnapshot,
+    answerSnapshot: null,
+    answerRecordStatus: null,
+    isCorrect: question.isObjective ? false : null,
+    score: question.isObjective ? "0.0" : null,
+    maxScore: question.maxScore,
+    answeredAt: null,
+    submittedAt: null,
+  };
+}
+
+function buildQuestionDetails(
+  paperSnapshot: Record<string, unknown>,
+  answerRecords: ExamReportAnswerRecordRow[],
+) {
+  const answerByPaperQuestion = new Map(
+    answerRecords.map((answerRecord) => [
+      answerRecord.paper_question_public_id,
+      answerRecord,
+    ]),
+  );
+
+  return listReportPaperQuestions(paperSnapshot).map((question) => {
+    const answerRecord = answerByPaperQuestion.get(
+      question.paperQuestionPublicId,
+    );
+
+    return answerRecord === undefined
+      ? buildUnansweredQuestionDetail(question)
+      : buildSavedQuestionDetail(answerRecord);
+  });
 }
 
 function buildReportSnapshot(
@@ -170,7 +288,10 @@ function buildReportSnapshot(
       totalScore: mockExam.total_score,
     },
     paperSnapshot: mockExam.paper_snapshot,
-    questionDetails: buildQuestionDetails(answerRecords),
+    questionDetails: buildQuestionDetails(
+      mockExam.paper_snapshot,
+      answerRecords,
+    ),
     learningSuggestionStatus: null,
   };
 }

@@ -677,7 +677,8 @@ function createPostgresMockExamRepository(
       );
     },
     async submitMockExam(input) {
-      const [row] = await getDatabase()
+      const database = getDatabase();
+      const [row] = await database
         .update(mockExam)
         .set({
           exam_status: "completed",
@@ -690,12 +691,34 @@ function createPostgresMockExamRepository(
         .where(eq(mockExam.public_id, input.publicId))
         .returning();
 
+      if (row !== undefined) {
+        await Promise.all(
+          input.answerRecordResults.map((answerRecordResult) =>
+            database
+              .update(answerRecord)
+              .set({
+                answer_record_status: answerRecordResult.answerRecordStatus,
+                is_correct: answerRecordResult.isCorrect,
+                score: answerRecordResult.score,
+                submitted_at: answerRecordResult.submittedAt,
+                updated_at: answerRecordResult.submittedAt,
+              })
+              .where(
+                and(
+                  eq(answerRecord.mock_exam_id, row.id),
+                  eq(
+                    answerRecord.paper_question_public_id,
+                    answerRecordResult.paperQuestionPublicId,
+                  ),
+                ),
+              ),
+          ),
+        );
+      }
+
       return row === undefined
         ? null
-        : mapMockExamRow(
-            row,
-            await countMockExamAnswers(getDatabase(), row.id),
-          );
+        : mapMockExamRow(row, await countMockExamAnswers(database, row.id));
     },
     async terminateMockExam(input) {
       const [row] = await getDatabase()
