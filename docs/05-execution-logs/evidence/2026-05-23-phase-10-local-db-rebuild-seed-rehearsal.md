@@ -119,6 +119,7 @@ This conclusion is local-only:
 - implementationCommit: `16ec4bf docs(agent): record phase 10 db rebuild seed rehearsal`.
 - metadataCommit: `071ff8c docs(agent): record phase 10 db rebuild metadata`.
 - merge: `6e8ad41 merge: phase 10 local db rebuild seed rehearsal`.
+- masterCloseoutEvidenceCommit: `9e86ea0 docs(agent): record phase 10 db rebuild post-merge evidence`.
 - postMergeValidation on `master`:
   - `Test-AgentSystemReadiness.ps1`: pass.
   - `Invoke-QualityGate.ps1`: pass.
@@ -131,8 +132,8 @@ This conclusion is local-only:
   - `Test-NamingConventions.ps1`: pass.
   - `docker compose ps`: local `tiku-postgres-dev` remained healthy.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` was ahead of `origin/master` by `16ec4bf`, `071ff8c`, and `6e8ad41` before this evidence update.
-- push: pending.
-- cleanup: pending.
+- push: completed to `origin/master`; first push advanced `master` from `d25c138` to `9e86ea0`.
+- cleanup: deleted local branch `codex/phase-10-local-db-rebuild-seed-rehearsal` after merge and push. No remote short-lived branch was created.
 
 ## Taste Compliance Self-Check
 
