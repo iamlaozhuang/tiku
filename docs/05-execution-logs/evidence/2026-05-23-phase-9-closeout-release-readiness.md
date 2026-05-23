@@ -123,8 +123,19 @@ This is not a production deployment approval. Production, staging, real AI provi
 ## Git Closeout
 
 - implementationCommit: `82e9854 docs(agent): close phase 9 release readiness`.
-- merge: pending.
-- postMergeValidation on `master`: pending.
+- metadataCommit: `cf6de2d docs(agent): record phase 9 release readiness metadata`.
+- merge: `24fb3eb merge: phase 9 closeout release readiness`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `103` files and `379` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js compiled successfully and listed the Phase 9 `/api/v1/` REST surface.
+  - `npm.cmd run test:e2e`: pass, `2` Chromium tests passed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` was ahead of `origin/master` by `82e9854`, `cf6de2d`, and `24fb3eb` before this closeout evidence update.
 - masterCloseoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
