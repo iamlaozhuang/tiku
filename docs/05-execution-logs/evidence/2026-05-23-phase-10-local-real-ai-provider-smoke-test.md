@@ -136,7 +136,7 @@ Post-evidence rerun:
 
 ## Git Closeout
 
-- implementationCommit: `1039c36 docs(agent): record phase 10 real provider smoke block`.
+- implementationCommit: `0a72625 docs(agent): record phase 10 real provider smoke block`.
 - merge: pending.
 - masterCloseoutEvidenceCommit: pending.
 - push: pending.

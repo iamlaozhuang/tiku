@@ -42,7 +42,7 @@ currentTask:
   planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
   branch: codex/phase-10-local-real-ai-provider-smoke-test
-  commitSha: 1039c36
+  commitSha: 0a72625
   prUrl: null
   retryCount: 0
   lastFailurePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
