@@ -96,9 +96,19 @@ Results:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
-- postMergeValidation on `master`: pending.
+- implementationCommit: `d6e0de1 docs(agent): verify phase 9 mvp acceptance`.
+- merge: `0f763da merge: phase 9 mvp acceptance verification`.
+- postMergeValidation on `master`:
+  - `docker compose ps`: pass; `tiku-postgres-dev` remained healthy.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `103` files and `379` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js compiled successfully and listed the Phase 9 `/api/v1/` REST surface.
+  - `npm.cmd run test:e2e`: pass, `2` Chromium tests passed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` was ahead of `origin/master` by the implementation and merge commits before this closeout evidence update.
 - masterCloseoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
