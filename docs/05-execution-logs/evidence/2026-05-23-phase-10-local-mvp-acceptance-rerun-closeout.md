@@ -93,11 +93,21 @@ Final MVP acceptance rerun result:
 
 ## Git Closeout
 
-- implementationCommit: pending.
-- merge: pending.
-- postMergeValidation on `master`: pending.
-- push: pending.
-- cleanup: pending.
+- implementationCommit: `78351a6 docs(agent): close phase 10 local mvp acceptance`.
+- merge: `7cb5eb9 merge: phase 10 local mvp acceptance closeout`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `105` files and `381` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js build completed successfully with `.env.local` loaded and no secret values printed.
+  - `npm.cmd run test:e2e`: pass; Playwright `2` tests passed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` was ahead of `origin/master` by the implementation and merge commits, and changed files remained limited to this task.
+- Push target: pending evidence update commit and push to `origin/master`.
+- Cleanup: pending after push.
 
 ## Taste Compliance Self-Check
 
