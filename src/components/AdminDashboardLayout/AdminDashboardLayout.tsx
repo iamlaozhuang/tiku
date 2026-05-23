@@ -30,7 +30,7 @@ const OPS_MENU: MenuItem[] = [
   { href: "/ops/organizations", label: "企业管理", icon: "🏢" },
   { href: "/ops/redeem-codes", label: "卡密管理", icon: "🔑" },
   { href: "/ops/resources", label: "资源管理", icon: "📁" },
-  { href: "/ops/audit-logs", label: "审计日志", icon: "📋" },
+  { href: "/ops/ai-audit-logs", label: "审计日志", icon: "📋" },
 ];
 
 export function AdminDashboardLayout({
