@@ -2,6 +2,7 @@ import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import {
   createErrorResponse,
   createPaginatedResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
 import {
@@ -12,6 +13,12 @@ import {
   type AdminContentKnowledgeSortField,
   ADMIN_CONTENT_KNOWLEDGE_SORT_FIELDS,
 } from "../contracts/admin-content-knowledge-ops-contract";
+import type { QuestionKnowledgeRecommendationResultDto } from "../contracts/question-contract";
+import {
+  createKnowledgeNodeSnapshot,
+  createModelConfigSnapshot,
+  type KnowledgeNodeSnapshot,
+} from "../models/ai-rag";
 import {
   createPostgresContentKnowledgeNodeRuntimeRepository,
   type ContentKnowledgeNodeRuntimeRepository,
@@ -28,6 +35,14 @@ import {
   createPostgresAdminFlowRuntimeRepositories,
   type AppendAuditLogInput,
 } from "../repositories/admin-flow-runtime-repository";
+import {
+  createPostgresAdminAiAuditLogRuntimeRepositories,
+  type AppendAiCallLogInput,
+} from "../repositories/admin-ai-audit-log-runtime-repository";
+import {
+  createKnowledgeRecommendationService,
+  type KnowledgeRecommendationRunner,
+} from "./knowledge-recommendation-service";
 import { createMaterialService } from "./material-service";
 import { createQuestionService } from "./question-service";
 import type { SessionService } from "./session-service";
@@ -41,6 +56,7 @@ type RouteContext = {
 type ContentAdminRole = "super_admin" | "ops_admin" | "content_admin";
 
 type ContentAdminActor = {
+  userPublicId: string;
   publicId: string;
   roles: [ContentAdminRole, ...ContentAdminRole[]];
 };
@@ -49,11 +65,16 @@ export type ContentAuditLogRepository = {
   appendAuditLog(input: AppendAuditLogInput): Promise<void>;
 };
 
+export type ContentAiCallLogRepository = {
+  appendAiCallLog(input: AppendAiCallLogInput): Promise<unknown>;
+};
+
 export type ContentQuestionMaterialRuntimeRepositories = {
   questionRepository: QuestionRepository;
   materialRepository: MaterialRepository;
   knowledgeNodeRepository: ContentKnowledgeNodeRuntimeRepository;
   auditLogRepository: ContentAuditLogRepository;
+  aiCallLogRepository?: ContentAiCallLogRepository;
 };
 
 export type ContentQuestionMaterialRuntimeOptions = {
@@ -68,6 +89,10 @@ const adminSessionRequiredResponse = createErrorResponse(
 const adminPermissionDeniedResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.adminPermissionDenied,
   "Admin permission denied.",
+);
+const questionNotFoundResponse = createErrorResponse(
+  404202,
+  "Question does not exist.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -108,6 +133,7 @@ async function resolveAdminActor(
   }
 
   return {
+    userPublicId: sessionResponse.data.user.publicId,
     publicId: adminPublicId,
     roles: adminRoles as [ContentAdminRole, ...ContentAdminRole[]],
   };
@@ -190,6 +216,8 @@ function readRequestIp(request: Request): string | null {
 
 function createDefaultRepositories(): ContentQuestionMaterialRuntimeRepositories {
   const adminFlowRepositories = createPostgresAdminFlowRuntimeRepositories();
+  const adminAiAuditLogRepositories =
+    createPostgresAdminAiAuditLogRuntimeRepositories();
 
   return {
     questionRepository: createPostgresQuestionRepository(),
@@ -197,6 +225,7 @@ function createDefaultRepositories(): ContentQuestionMaterialRuntimeRepositories
     knowledgeNodeRepository:
       createPostgresContentKnowledgeNodeRuntimeRepository(),
     auditLogRepository: adminFlowRepositories.auditLogRepository,
+    aiCallLogRepository: adminAiAuditLogRepositories,
   };
 }
 
@@ -260,6 +289,153 @@ function extractMaterialPublicId(
   }
 
   return null;
+}
+
+function stripHtml(value: string): string {
+  return value
+    .replace(/<[^>]*>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function splitKnowledgeNodePath(pathName: string): string[] {
+  return pathName
+    .split(/[/>]/u)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+}
+
+function mapKnowledgeNodeDtoToSnapshot(
+  knowledgeNodeDto: Awaited<
+    ReturnType<ContentKnowledgeNodeRuntimeRepository["listKnowledgeNodes"]>
+  >["knowledgeNodes"][number],
+): KnowledgeNodeSnapshot {
+  const pathParts = splitKnowledgeNodePath(knowledgeNodeDto.pathName);
+
+  return createKnowledgeNodeSnapshot({
+    public_id: knowledgeNodeDto.publicId,
+    parent_knowledge_node_public_id:
+      knowledgeNodeDto.parentKnowledgeNodePublicId,
+    profession: knowledgeNodeDto.profession,
+    level_list: knowledgeNodeDto.levelList,
+    name: knowledgeNodeDto.name,
+    path_name: knowledgeNodeDto.pathName,
+    depth: Math.max(1, Math.min(pathParts.length, 5)),
+    sort_order: knowledgeNodeDto.sortOrder,
+    kn_status: knowledgeNodeDto.knStatus,
+    is_recommendable: knowledgeNodeDto.isRecommendable,
+  });
+}
+
+const knowledgeRecommendationModelConfig = createModelConfigSnapshot({
+  providerPublicId: "model-provider-dev-local",
+  providerKey: "local_deterministic",
+  providerDisplayName: "Local deterministic provider",
+  modelConfigPublicId: "model-config-dev-kn-recommendation",
+  aiFuncType: "kn_recommendation",
+  modelName: "local-kn-recommendation-v1",
+  displayName: "Local knowledge recommendation model",
+  configVersion: 1,
+  timeoutSecond: 10,
+  maxRetryCount: 0,
+  fallbackModelConfigPublicId: null,
+  promptTemplateKey: "dev_kn_recommendation_v1",
+  promptTemplateVersion: 1,
+});
+
+const knowledgeRecommendationPromptTemplate = {
+  promptTemplateKey: "dev_kn_recommendation_v1",
+  version: 1,
+  templateHash: "dev_kn_recommendation_v1_local_deterministic",
+};
+
+const localKnowledgeRecommendationRunner: KnowledgeRecommendationRunner =
+  async (input) => {
+    const questionPlainText = [
+      input.questionText,
+      input.analysis ?? "",
+      input.standardAnswer ?? "",
+    ]
+      .join(" ")
+      .toLowerCase();
+    const recommendations = input.knowledgeNodeSnapshots
+      .map((knowledgeNodeSnapshot) => {
+        const pathParts = splitKnowledgeNodePath(
+          knowledgeNodeSnapshot.pathName,
+        );
+        const directMatch = [knowledgeNodeSnapshot.name, ...pathParts].some(
+          (term) =>
+            term.length > 0 && questionPlainText.includes(term.toLowerCase()),
+        );
+
+        return {
+          knowledgeNodePublicId: knowledgeNodeSnapshot.publicId,
+          confidence: directMatch ? "high" : "low",
+          reason: directMatch
+            ? "Local deterministic matcher found related question terms."
+            : "Local deterministic fallback candidate.",
+        };
+      })
+      .filter(
+        (recommendation, index) =>
+          recommendation.confidence === "high" || index === 0,
+      )
+      .slice(0, 5);
+
+    return {
+      recommendations,
+      providerRequestPayload: {
+        model: input.modelConfigSnapshot.modelName,
+        promptTemplateKey: input.promptTemplate.promptTemplateKey,
+        questionText: input.questionText,
+        knowledgeNodeCount: input.knowledgeNodeSnapshots.length,
+      },
+      providerResponsePayload: {
+        recommendations,
+      },
+    };
+  };
+
+function mapKnowledgeRecommendationToApi(input: {
+  questionPublicId: string;
+  result: Awaited<
+    ReturnType<
+      ReturnType<
+        typeof createKnowledgeRecommendationService
+      >["recommendKnowledgeNodes"]
+    >
+  >;
+}): QuestionKnowledgeRecommendationResultDto {
+  return {
+    recommendation: {
+      questionPublicId: input.questionPublicId,
+      recommendationStatus: input.result.recommendationStatus,
+      recommendations: input.result.recommendations.map((recommendation) => ({
+        knowledgeNodePublicId: recommendation.knowledgeNodeSnapshot.publicId,
+        name: recommendation.knowledgeNodeSnapshot.name,
+        pathName: recommendation.knowledgeNodeSnapshot.pathName,
+        confidence: recommendation.confidence,
+        reason: recommendation.reason,
+        source: recommendation.source,
+        confirmationStatus: recommendation.confirmationStatus,
+      })),
+      modelConfig: {
+        modelConfigPublicId:
+          input.result.modelConfigSnapshot.modelConfigPublicId,
+        providerPublicId: input.result.modelConfigSnapshot.providerPublicId,
+        providerDisplayName:
+          input.result.modelConfigSnapshot.providerDisplayName,
+        providerKey: input.result.modelConfigSnapshot.providerKey,
+        modelName: input.result.modelConfigSnapshot.modelName,
+        displayName: input.result.modelConfigSnapshot.displayName,
+        aiFuncType: "kn_recommendation",
+        configVersion: input.result.modelConfigSnapshot.configVersion,
+        promptTemplateKey: input.result.promptTemplateKey,
+        promptTemplateVersion: input.result.promptTemplateVersion,
+      },
+      failureReason: input.result.failureReason ?? null,
+    },
+  };
 }
 
 export function createContentQuestionMaterialRuntimeRouteHandlers(
@@ -480,6 +656,135 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
           );
 
           return createJsonResponse(response);
+        },
+      },
+      recommendKnowledgeNodes: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: "question.recommend_knowledge_nodes",
+            targetResourceType: "question",
+            targetPublicId: publicId,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const question =
+            await repositories.questionRepository.findQuestionByPublicId(
+              publicId,
+            );
+
+          if (question === null) {
+            await appendAuditLog(
+              repositories.auditLogRepository,
+              request,
+              actorOrError,
+              {
+                actionType: "question.recommend_knowledge_nodes",
+                targetResourceType: "question",
+                targetPublicId: publicId,
+                resultStatus: "failed",
+                metadataSummary:
+                  "redacted knowledge recommendation missing question metadata",
+              },
+            );
+
+            return createJsonResponse(questionNotFoundResponse);
+          }
+
+          const knowledgeNodePage =
+            await repositories.knowledgeNodeRepository.listKnowledgeNodes(
+              createAdminContentKnowledgeListQuery({
+                page: 1,
+                pageSize: 100,
+                profession: question.profession,
+                level: question.level,
+                status: "active",
+                sortBy: "sortOrder",
+                sortOrder: "asc",
+              }),
+            );
+          const recommendationService = createKnowledgeRecommendationService({
+            runner: localKnowledgeRecommendationRunner,
+          });
+          const result = await recommendationService.recommendKnowledgeNodes({
+            userPublicId: actorOrError.userPublicId,
+            questionPublicId: question.public_id,
+            questionRevisionPublicId: `${question.public_id}:${question.updated_at.toISOString()}`,
+            questionText: stripHtml(question.stem_rich_text),
+            analysis: stripHtml(question.analysis_rich_text) || null,
+            standardAnswer:
+              stripHtml(question.standard_answer_rich_text) || null,
+            profession: question.profession,
+            level: question.level,
+            knowledgeNodeSnapshots: knowledgeNodePage.knowledgeNodes.map(
+              mapKnowledgeNodeDtoToSnapshot,
+            ),
+            modelConfigSnapshot: knowledgeRecommendationModelConfig,
+            promptTemplate: knowledgeRecommendationPromptTemplate,
+          });
+          const startedAt = new Date();
+          const completedAt = new Date();
+
+          if (
+            result.aiCallLogDraft !== null &&
+            repositories.aiCallLogRepository !== undefined
+          ) {
+            await repositories.aiCallLogRepository.appendAiCallLog({
+              userPublicId: actorOrError.userPublicId,
+              answerRecordPublicId: null,
+              mockExamPublicId: null,
+              questionPublicId: question.public_id,
+              aiFuncType: "kn_recommendation",
+              callStatus: result.aiCallLogDraft.callStatus,
+              modelConfigSnapshot: result.aiCallLogDraft.modelConfigSnapshot,
+              promptTemplateKey: result.aiCallLogDraft.promptTemplateKey,
+              promptTemplateVersion:
+                result.aiCallLogDraft.promptTemplateVersion,
+              requestRedactedSnapshot:
+                result.aiCallLogDraft.requestRedactedSnapshot,
+              responseRedactedSnapshot:
+                result.aiCallLogDraft.responseRedactedSnapshot,
+              errorRedactedSnapshot:
+                result.aiCallLogDraft.errorRedactedSnapshot,
+              citationRedactedSnapshot:
+                result.aiCallLogDraft.citationRedactedSnapshot,
+              promptTokenCount: null,
+              completionTokenCount: null,
+              totalTokenCount: null,
+              latencyMs: completedAt.getTime() - startedAt.getTime(),
+              startedAt,
+              completedAt,
+            });
+          }
+
+          await appendAuditLog(
+            repositories.auditLogRepository,
+            request,
+            actorOrError,
+            {
+              actionType: "question.recommend_knowledge_nodes",
+              targetResourceType: "question",
+              targetPublicId: question.public_id,
+              resultStatus:
+                result.recommendationStatus === "recommended"
+                  ? "success"
+                  : "failed",
+              metadataSummary:
+                "redacted knowledge recommendation operation metadata",
+            },
+          );
+
+          return createJsonResponse(
+            createSuccessResponse(
+              mapKnowledgeRecommendationToApi({
+                questionPublicId: question.public_id,
+                result,
+              }),
+            ),
+          );
         },
       },
     },

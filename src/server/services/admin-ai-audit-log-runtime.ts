@@ -2,6 +2,7 @@ import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import {
   createErrorResponse,
   createPaginatedResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
 import {
@@ -14,6 +15,7 @@ import {
   createPostgresAdminAiAuditLogRuntimeRepositories,
   type AdminAiAuditLogRuntimeRepositories,
   type AdminAiAuditLogRuntimeRepositoryOptions,
+  type AppendModelConfigAuditLogInput,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
 import type { SessionService } from "./session-service";
 
@@ -32,6 +34,12 @@ type AdminAiAuditLogActor = {
   roles: [AdminAiAuditLogRole, ...AdminAiAuditLogRole[]];
 };
 
+type RouteContext = {
+  params: Promise<{
+    publicId: string;
+  }>;
+};
+
 const adminSessionRequiredResponse = createErrorResponse(
   401001,
   "Admin session is required.",
@@ -39,6 +47,10 @@ const adminSessionRequiredResponse = createErrorResponse(
 const adminPermissionDeniedResponse = createErrorResponse(
   ADMIN_AI_AUDIT_LOG_ERROR_CODES.adminPermissionDenied,
   "Admin permission denied.",
+);
+const modelConfigNotFoundResponse = createErrorResponse(
+  ADMIN_AI_AUDIT_LOG_ERROR_CODES.resourceNotFound,
+  "Model config does not exist.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -82,6 +94,20 @@ function canReadAiAuditLog(actor: AdminAiAuditLogActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
+}
+
+function canManageModelConfig(actor: AdminAiAuditLogActor): boolean {
+  return actor.roles.includes("super_admin");
+}
+
+function readRequestIp(request: Request): string | null {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor !== null) {
+    return forwardedFor.split(",")[0]?.trim() || null;
+  }
+
+  return request.headers.get("x-real-ip");
 }
 
 function readAdminAiAuditLogListQuery(
@@ -132,6 +158,85 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     return canReadAiAuditLog(actor) ? null : adminPermissionDeniedResponse;
   }
 
+  async function appendModelConfigAuditLog(
+    request: Request,
+    actor: AdminAiAuditLogActor,
+    input: Omit<
+      AppendModelConfigAuditLogInput,
+      "actorPublicId" | "actorRole" | "requestIp"
+    >,
+  ): Promise<void> {
+    if (repositories.appendAuditLog === undefined) {
+      return;
+    }
+
+    await repositories.appendAuditLog({
+      actorPublicId: actor.publicId,
+      actorRole: actor.roles[0],
+      requestIp: readRequestIp(request),
+      ...input,
+    });
+  }
+
+  async function resolveModelConfigAdminActor(
+    request: Request,
+    actionType: string,
+    targetPublicId: string,
+  ): Promise<AdminAiAuditLogActor | ApiResponse<null>> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    if (!canManageModelConfig(actor)) {
+      await appendModelConfigAuditLog(request, actor, {
+        actionType,
+        targetResourceType: "model_config",
+        targetPublicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted model_config permission denial metadata",
+      });
+
+      return adminPermissionDeniedResponse;
+    }
+
+    return actor;
+  }
+
+  async function updateModelConfigEnabled(input: {
+    request: Request;
+    context: RouteContext;
+    actionType: "model_config.enable" | "model_config.disable";
+    update: (publicId: string) => Promise<boolean>;
+  }): Promise<Response> {
+    const { publicId } = await input.context.params;
+    const actorOrError = await resolveModelConfigAdminActor(
+      input.request,
+      input.actionType,
+      publicId,
+    );
+
+    if ("code" in actorOrError) {
+      return createJsonResponse(actorOrError);
+    }
+
+    const didUpdate = await input.update(publicId);
+    const response = didUpdate
+      ? createSuccessResponse(null)
+      : modelConfigNotFoundResponse;
+
+    await appendModelConfigAuditLog(input.request, actorOrError, {
+      actionType: input.actionType,
+      targetResourceType: "model_config",
+      targetPublicId: publicId,
+      resultStatus: didUpdate ? "success" : "failed",
+      metadataSummary: "redacted model_config mutation metadata",
+    });
+
+    return createJsonResponse(response);
+  }
+
   return {
     modelConfigs: {
       async GET(request: Request): Promise<Response> {
@@ -151,6 +256,26 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
             result.pagination,
           ),
         );
+      },
+      enable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          return updateModelConfigEnabled({
+            request,
+            context,
+            actionType: "model_config.enable",
+            update: repositories.enableModelConfig ?? (async () => false),
+          });
+        },
+      },
+      disable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          return updateModelConfigEnabled({
+            request,
+            context,
+            actionType: "model_config.disable",
+            update: repositories.disableModelConfig ?? (async () => false),
+          });
+        },
       },
     },
     aiCallLogs: {

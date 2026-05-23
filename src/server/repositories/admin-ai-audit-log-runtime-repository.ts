@@ -11,6 +11,7 @@ import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAiAuditLogListQuery,
   AdminAiFunctionType,
+  AuditLogSummaryDto,
   AiCallLogCostSummaryDto,
   AiCallLogListDto,
   AiCallLogSummaryDto,
@@ -56,11 +57,19 @@ export type AppendAiCallLogInput = {
   completedAt: Date | null;
 };
 
+export type AppendModelConfigAuditLogInput = Omit<
+  AuditLogSummaryDto,
+  "publicId" | "createdAt"
+>;
+
 export type AdminAiAuditLogRuntimeRepositories = {
   listModelConfigs(
     query: AdminAiAuditLogListQuery,
   ): Promise<AdminAiAuditLogRuntimePage<ModelConfigListDto>>;
   appendAiCallLog(input: AppendAiCallLogInput): Promise<AiCallLogSummaryDto>;
+  enableModelConfig?(publicId: string): Promise<boolean>;
+  disableModelConfig?(publicId: string): Promise<boolean>;
+  appendAuditLog?(input: AppendModelConfigAuditLogInput): Promise<void>;
   listAiCallLogs(
     query: AdminAiAuditLogListQuery,
   ): Promise<AdminAiAuditLogRuntimePage<AiCallLogListDto>>;
@@ -291,6 +300,55 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
       return mapAppendInputToSummary(publicId, input);
     },
 
+    async enableModelConfig(publicId) {
+      return updateModelConfigEnabled(getDatabase(), publicId, true);
+    },
+
+    async disableModelConfig(publicId) {
+      return updateModelConfigEnabled(getDatabase(), publicId, false);
+    },
+
+    async appendAuditLog(input) {
+      const database = getDatabase();
+      const publicId = `audit-log-${randomUUID()}`;
+
+      try {
+        await executeSql(
+          database,
+          sql`
+            insert into audit_log (
+              public_id,
+              actor_public_id,
+              actor_role,
+              action_type,
+              target_resource_type,
+              target_public_id,
+              result_status,
+              metadata_summary,
+              request_ip,
+              created_at
+            )
+            values (
+              ${publicId},
+              ${input.actorPublicId},
+              ${input.actorRole},
+              ${input.actionType},
+              ${input.targetResourceType},
+              ${input.targetPublicId},
+              ${input.resultStatus},
+              ${input.metadataSummary},
+              ${input.requestIp},
+              now()
+            )
+          `,
+        );
+      } catch (error) {
+        if (!isUndefinedTableError(error)) {
+          throw error;
+        }
+      }
+    },
+
     async listAiCallLogs(query) {
       const database = getDatabase();
       const keywordCondition =
@@ -386,6 +444,34 @@ async function executeSql<TRow extends Record<string, unknown>>(
   query: SQL,
 ): Promise<TRow[]> {
   return (database as unknown as DrizzleSqlExecutor).execute<TRow>(query);
+}
+
+async function updateModelConfigEnabled(
+  database: AdminAiAuditLogRuntimeDatabase,
+  publicId: string,
+  isEnabled: boolean,
+): Promise<boolean> {
+  try {
+    const rows = await executeSql<{ public_id: string }>(
+      database,
+      sql`
+        update model_config
+        set
+          is_enabled = ${isEnabled},
+          updated_at = now()
+        where public_id = ${publicId}
+        returning public_id
+      `,
+    );
+
+    return rows.length > 0;
+  } catch (error) {
+    if (!isUndefinedTableError(error)) {
+      throw error;
+    }
+
+    return false;
+  }
 }
 
 function mapModelConfigRow(row: ModelConfigDatabaseRow): ModelConfigSummaryDto {
