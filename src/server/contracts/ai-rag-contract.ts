@@ -179,3 +179,21 @@ export type RagRetrievalResultDto = {
   citations: RagCitationDto[];
   evidenceSummary: RagRetrievalEvidenceSummaryDto;
 };
+
+export type ResourceVectorRebuildDto = {
+  resourcePublicId: string;
+  resourceStatus: ResourceStatus;
+  chunkCount: number;
+  evidenceSummary: {
+    chunkCount: number;
+    resourcePublicIds: string[];
+    chunkIndexes: number[];
+    textHashes: string[];
+    totalCharLength: number;
+    headingPaths: string[][];
+  };
+};
+
+export type ResourceVectorRebuildResultDto = {
+  resourceVector: ResourceVectorRebuildDto;
+};
