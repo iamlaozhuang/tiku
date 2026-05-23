@@ -4607,12 +4607,57 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
     status: blocked
     retryCount: 0
+  - id: phase-10-local-deepseek-provider-smoke-runtime
+    title: Local DeepSeek Provider Smoke Runtime
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-provider-rules
+    dependencies:
+      - phase-10-local-real-ai-provider-safety-plan
+    taskPlanPolicy: required
+    humanApproval: 用户已明确批准在 local dev 中把真实 DeepSeek API 纳入 Tiku 本地 smoke test。
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-deepseek-provider-smoke-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-deepseek-provider-smoke-runtime.md
+      - scripts/local/Invoke-DeepSeekProviderSmoke.ps1
+      - tests/unit/phase-10-local-deepseek-provider-smoke-runtime.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - model_provider
+      - ai_scoring
+      - ai_explanation
+      - ai_hint
+      - kn_recommendation
+      - ai_call_log
+      - secret_or_env_change
+      - external_service_config
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-deepseek-provider-smoke-runtime
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-05-23-phase-10-local-deepseek-provider-smoke-runtime.md' -Pattern 'no API key|no secret|redacted|bounded sample'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-deepseek-provider-smoke-runtime.md
+    status: closed
+    retryCount: 0
   - id: phase-10-local-rag-real-content-smoke-test
     title: Local RAG Real Content Smoke Test
     phase: phase-10-local-release-candidate-hardening
     sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
     dependencies:
-      - phase-10-local-real-ai-provider-smoke-test
+      - phase-10-local-deepseek-provider-smoke-runtime
     taskPlanPolicy: required
     allowedFiles:
       - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
