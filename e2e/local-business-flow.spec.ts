@@ -1,5 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
+type ApiPayload = {
+  code: number;
+  message: string;
+  data: unknown;
+  pagination?: unknown;
+};
+
 const studentCredential = {
   phone: "13900000002",
   password: "TikuDevStudent#2026",
@@ -21,6 +28,101 @@ async function loginViaUi(
   await page.getByLabel("密码").fill(credential.password);
   await expect(page.getByRole("button", { name: "登录" })).toBeEnabled();
   await page.getByRole("button", { name: "登录" }).click();
+}
+
+function expectStandardApiEnvelope(
+  payload: unknown,
+): asserts payload is ApiPayload {
+  expect(payload).toEqual(expect.any(Object));
+
+  const payloadRecord = payload as Record<string, unknown>;
+  const allowedKeys = ["code", "message", "data", "pagination"];
+
+  expect(
+    Object.keys(payloadRecord).every((key) => allowedKeys.includes(key)),
+  ).toBe(true);
+  expect(payloadRecord.code).toEqual(expect.any(Number));
+  expect(payloadRecord.message).toEqual(expect.any(String));
+  expect(Object.hasOwn(payloadRecord, "data")).toBe(true);
+
+  if (Object.hasOwn(payloadRecord, "pagination")) {
+    expect(payloadRecord.pagination).toEqual(
+      expect.objectContaining({
+        page: expect.any(Number),
+        pageSize: expect.any(Number),
+        total: expect.any(Number),
+        sortBy: expect.any(String),
+        sortOrder: expect.stringMatching(/^(asc|desc)$/u),
+      }),
+    );
+  }
+}
+
+function expectCamelCaseJsonKeys(value: unknown) {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      expectCamelCaseJsonKeys(item);
+    }
+    return;
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return;
+  }
+
+  for (const [key, childValue] of Object.entries(value)) {
+    expect(key).toMatch(/^[a-z][A-Za-z0-9]*$/u);
+    expectCamelCaseJsonKeys(childValue);
+  }
+}
+
+function expectNoInternalIdKeys(value: unknown) {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      expectNoInternalIdKeys(item);
+    }
+    return;
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return;
+  }
+
+  for (const [key, childValue] of Object.entries(value)) {
+    expect(key).not.toBe("id");
+    expectNoInternalIdKeys(childValue);
+  }
+}
+
+function expectNoSensitivePayload(
+  value: unknown,
+  tokens: (string | null)[] = [],
+) {
+  const serializedValue = JSON.stringify(value);
+  const sensitiveTerms = [
+    "TikuDevStudent#2026",
+    "TikuDevAdmin#2026",
+    "sk-real-secret",
+    "RAW_PROMPT",
+    "RAW_ANSWER",
+    "raw prompt",
+    "raw answer",
+    "code_hash",
+    "codeHash",
+    "RC-2026-0001-PLAIN",
+    "providerRequestPayload",
+    "providerResponsePayload",
+  ];
+
+  for (const sensitiveTerm of sensitiveTerms) {
+    expect(serializedValue).not.toContain(sensitiveTerm);
+  }
+
+  for (const token of tokens) {
+    if (token !== null) {
+      expect(serializedValue).not.toContain(token);
+    }
+  }
 }
 
 test("runs the local student, admin, audit, and mock AI business flow", async ({
@@ -251,6 +353,24 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     };
   }, studentToken);
 
+  for (const responseEnvelope of [
+    studentFlow.papers.body,
+    studentFlow.paperDetail.body,
+    studentFlow.practice.body,
+    studentFlow.restartedPractice.body,
+    studentFlow.practiceAnswer.body,
+    studentFlow.mockExam.body,
+    studentFlow.mockAnswer.body,
+    studentFlow.submit.body,
+    studentFlow.report.body,
+    studentFlow.retryLearningSuggestion.body,
+  ]) {
+    expectStandardApiEnvelope(responseEnvelope);
+    expectCamelCaseJsonKeys(responseEnvelope);
+    expectNoInternalIdKeys(responseEnvelope);
+    expectNoSensitivePayload(responseEnvelope, [studentToken]);
+  }
+
   expect(studentFlow.papers.body.code).toBe(0);
   expect(studentFlow.paperDetail.body.code).toBe(0);
   expect(studentFlow.practice.body.code).toBe(0);
@@ -433,6 +553,25 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     };
   }, adminToken);
 
+  for (const responseEnvelope of [
+    adminReads.users.body,
+    adminReads.organizations.body,
+    adminReads.orgAuths.body,
+    adminReads.employees.body,
+    adminReads.redeemCodes.body,
+    adminReads.questions.body,
+    adminReads.papers.body,
+    adminReads.resources.body,
+    adminReads.auditLogs.body,
+    adminReads.aiCallLogs.body,
+    adminReads.modelConfigs.body,
+  ]) {
+    expectStandardApiEnvelope(responseEnvelope);
+    expectCamelCaseJsonKeys(responseEnvelope);
+    expectNoInternalIdKeys(responseEnvelope);
+    expectNoSensitivePayload(responseEnvelope, [adminToken, studentToken]);
+  }
+
   expect(adminReads.users.body.code).toBe(0);
   expect(adminReads.organizations.body.code).toBe(0);
   expect(adminReads.orgAuths.body.code).toBe(0);
@@ -458,17 +597,80 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   expect(serializedAdminReads).not.toContain("RC-2026-0001-PLAIN");
   expect(serializedAdminReads).not.toContain(studentToken);
   expect(serializedAdminReads).not.toContain(adminToken);
+
+  const consoleErrorCountBeforeReadOnlyWriteGuards = consoleErrors.length;
+  const restContractGuards = await page.evaluate(async (token) => {
+    const authorizedHeaders = {
+      authorization: `Bearer ${token}`,
+      "content-type": "application/json",
+    };
+    const readJson = async (url: string, headers?: HeadersInit) => {
+      const response = await fetch(url, { headers });
+      return { status: response.status, body: await response.json() };
+    };
+    const postStatus = async (url: string) => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: authorizedHeaders,
+        body: JSON.stringify({
+          attemptedFromClientAt: new Date().toISOString(),
+        }),
+      });
+
+      return response.status;
+    };
+
+    return {
+      unauthenticatedUsers: await readJson("/api/v1/users?page=1&pageSize=20"),
+      auditLogsPostStatus: await postStatus("/api/v1/audit-logs"),
+      aiCallLogsPostStatus: await postStatus("/api/v1/ai-call-logs"),
+      aiCallLogSummaryPostStatus: await postStatus(
+        "/api/v1/ai-call-logs/summary",
+      ),
+    };
+  }, adminToken);
+
+  expectStandardApiEnvelope(restContractGuards.unauthenticatedUsers.body);
+  expect(restContractGuards.unauthenticatedUsers.body.code).toBe(401001);
+  expect(restContractGuards.unauthenticatedUsers.body.data).toBeNull();
+  expect([404, 405]).toContain(restContractGuards.auditLogsPostStatus);
+  expect([404, 405]).toContain(restContractGuards.aiCallLogsPostStatus);
+  expect([404, 405]).toContain(restContractGuards.aiCallLogSummaryPostStatus);
+
+  const readOnlyWriteGuardConsoleErrors = consoleErrors.slice(
+    consoleErrorCountBeforeReadOnlyWriteGuards,
+  );
+  expect(readOnlyWriteGuardConsoleErrors).toHaveLength(3);
+  for (const consoleError of readOnlyWriteGuardConsoleErrors) {
+    expect(consoleError).toContain(
+      "the server responded with a status of 405 (Method Not Allowed)",
+    );
+  }
+
   const unexpectedNetworkFailures = networkFailures.filter(
     (networkFailure) => !isExpectedTransitionAbort(networkFailure),
   );
 
-  expect(consoleErrors).toEqual([]);
+  expect(
+    consoleErrors.slice(0, consoleErrorCountBeforeReadOnlyWriteGuards),
+  ).toEqual([]);
   expect(unexpectedNetworkFailures).toEqual([]);
 });
 
 function isExpectedTransitionAbort(networkFailure: string) {
   if (!networkFailure.includes("net::ERR_ABORTED")) {
     return false;
+  }
+
+  if (
+    networkFailure.startsWith("POST ") &&
+    [
+      "/api/v1/audit-logs",
+      "/api/v1/ai-call-logs",
+      "/api/v1/ai-call-logs/summary",
+    ].some((expectedUrlPart) => networkFailure.includes(expectedUrlPart))
+  ) {
+    return true;
   }
 
   return [
