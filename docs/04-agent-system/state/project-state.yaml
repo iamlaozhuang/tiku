@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-23T23:18:24+08:00"
+  updatedAt: "2026-05-23T23:50:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-staging-architecture-adr
-  status: closed
-  sourceStory: docs/02-architecture/interfaces/phase-11-staging-release-planning-contract.md#proposed-phase-11-task-order
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-11-staging-architecture-adr.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-11-staging-architecture-adr.md
-  branch: codex/phase-11-staging-architecture-adr
-  commitSha: 204119a
+  id: phase-11-local-product-readiness-audit
+  status: validated
+  sourceStory: user-request-2026-05-23-local-product-readiness-audit-before-staging
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-11-local-product-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-11-local-product-readiness-audit.md
+  branch: codex/phase-11-local-product-readiness-audit
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: request explicit human approval before starting phase-11-staging-resource-plan or any staging implementation work
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-11-staging-architecture-adr.md
+  nextRecommendedAction: review the local product readiness audit framework, then run phase-11-local-product-readiness-roleplay-run before continuing broader staging planning
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-11-local-product-readiness-audit.md

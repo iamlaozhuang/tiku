@@ -4861,3 +4861,44 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-11-staging-architecture-adr.md
     status: closed
     retryCount: 0
+  - id: phase-11-local-product-readiness-audit
+    title: Phase 11 Local Product Readiness Audit
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-23-local-product-readiness-audit-before-staging
+    dependencies:
+      - phase-11-staging-architecture-adr
+    taskPlanPolicy: required
+    humanApproval: User approved Option B, a systematic local product readiness audit before continuing broader Phase 11 staging work; no staging/prod connection, deployment, cloud resource, secret/env, dependency, schema, migration, runtime, script, or provider change is approved.
+    allowedFiles:
+      - docs/superpowers/specs/2026-05-23-local-product-readiness-audit-design.md
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-11-local-product-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-05-23-phase-11-local-product-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-11-local-product-readiness-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - release_readiness
+      - product_readiness
+      - evidence_integrity
+      - environment_boundary
+      - secret_or_env_change
+      - deploy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-local-product-readiness-audit
+      - Select-String -Path 'docs\05-execution-logs\audits-reviews\2026-05-23-phase-11-local-product-readiness-audit.md' -Pattern 'P0|P1|P2|P3|student|admin|content|staging entry'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-11-local-product-readiness-audit.md
+    status: validated
+    retryCount: 0
