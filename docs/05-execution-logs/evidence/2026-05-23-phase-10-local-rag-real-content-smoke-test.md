@@ -157,6 +157,23 @@ Required validation results after state files were updated:
 - No `knowledge_base`, `resource`, `chunk`, `citation`, or `evidence_status` real-content chain is claimed beyond the existing synthetic unit/runtime baseline.
 - A follow-up task needs explicit allowed files for local import/runtime work, or an approved pre-seeded local dev fixture, before Phase 10 closeout can honestly proceed.
 
+## Git Closeout
+
+- implementationCommit: `8ee2851 docs(agent): record phase 10 rag real content blocker`.
+- merge: `7b6ad63 merge: phase 10 rag real content blocker`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `104` files and `380` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js build completed successfully with `.env.local` loaded and no secret values printed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` was ahead of `origin/master` by the implementation and merge commits, and changed files remained limited to this task.
+- push: pending after this evidence update is committed.
+- cleanup: pending after push.
+
 ## Taste Compliance Self-Check
 
 - Frontend visual taste: no UI, Tailwind, color, font, layout, or interaction change.
