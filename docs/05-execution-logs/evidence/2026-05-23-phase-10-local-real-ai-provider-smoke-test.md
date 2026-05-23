@@ -139,7 +139,7 @@ Post-evidence rerun:
 - implementationCommit: `0a72625 docs(agent): record phase 10 real provider smoke block`.
 - metadataCommit: `b26a250 docs(agent): record phase 10 smoke metadata`.
 - merge: `1ad7abd merge: phase 10 real provider smoke block`.
-- masterCloseoutEvidenceCommit: pending.
+- masterCloseoutEvidenceCommit: `f8bc8e2 docs(agent): record phase 10 smoke closeout`.
 - postMergeValidation on `master`:
   - `Test-AgentSystemReadiness.ps1`: pass.
   - `Invoke-QualityGate.ps1`: pass outside the sandbox after earlier local node_modules `EPERM` behavior was observed.
@@ -150,8 +150,8 @@ Post-evidence rerun:
   - `npm.cmd run build`: pass; Next.js build completed successfully with `.env.local` loaded but no secret values printed.
   - `Test-NamingConventions.ps1`: pass.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; ahead commits and changed files remained limited to this task.
-- push: pending.
-- cleanup: pending.
+- push: completed to `origin/master`; first push advanced `master` from `cb282eb` to `f8bc8e2`.
+- cleanup: deleted local branch `codex/phase-10-local-real-ai-provider-smoke-test` after merge and first push. No remote short-lived branch was created. The first local deletion attempt hit a `.git` ref lock permission error; rerunning the same safe `git branch -d` outside the sandbox succeeded.
 
 ## Taste Compliance Self-Check
 
