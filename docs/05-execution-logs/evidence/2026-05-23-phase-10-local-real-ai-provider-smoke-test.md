@@ -137,8 +137,19 @@ Post-evidence rerun:
 ## Git Closeout
 
 - implementationCommit: `0a72625 docs(agent): record phase 10 real provider smoke block`.
-- merge: pending.
+- metadataCommit: `b26a250 docs(agent): record phase 10 smoke metadata`.
+- merge: `1ad7abd merge: phase 10 real provider smoke block`.
 - masterCloseoutEvidenceCommit: pending.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass outside the sandbox after earlier local node_modules `EPERM` behavior was observed.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `103` files and `379` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js build completed successfully with `.env.local` loaded but no secret values printed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; ahead commits and changed files remained limited to this task.
 - push: pending.
 - cleanup: pending.
 
