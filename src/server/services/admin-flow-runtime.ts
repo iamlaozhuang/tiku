@@ -2,6 +2,7 @@ import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import {
   createErrorResponse,
   createPaginatedResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
 import {
@@ -16,6 +17,7 @@ import {
   type AdminContentKnowledgePageSize,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import {
+  ADMIN_AUTH_OPERATION_ERROR_CODES,
   createAdminAuthOperationListQuery,
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
@@ -48,6 +50,18 @@ const adminSessionRequiredResponse = createErrorResponse(
 const adminPermissionDeniedResponse = createErrorResponse(
   ADMIN_AI_AUDIT_LOG_ERROR_CODES.adminPermissionDenied,
   "Admin permission denied.",
+);
+const adminUserPermissionDeniedResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.adminPermissionDenied,
+  "Admin permission denied.",
+);
+const userNotFoundResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+  "User does not exist.",
+);
+const userPasswordResetUnavailableResponse = createErrorResponse(
+  503601,
+  "Admin user password reset runtime is not configured.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -91,6 +105,10 @@ function canReadAuditLogs(actor: AdminFlowActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
+}
+
+function canResetUserPassword(actor: AdminFlowActor): boolean {
+  return actor.roles.includes("super_admin");
 }
 
 function readRequestIp(request: Request): string | null {
@@ -188,6 +206,61 @@ export function createAdminFlowRuntimeRouteHandlers(
 
           return createJsonResponse(
             createPaginatedResponse({ users: result.users }, result.pagination),
+          );
+        },
+      },
+      resetPassword: {
+        async POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          const actor = await requireAdminActor(request);
+          const { publicId } = await context.params;
+
+          if (actor === null) {
+            return createJsonResponse(adminSessionRequiredResponse);
+          }
+
+          if (!canResetUserPassword(actor)) {
+            await repositories.auditLogRepository.appendAuditLog({
+              actorPublicId: actor.publicId,
+              actorRole: actor.roles[0],
+              actionType: "user.reset_password",
+              targetResourceType: "user",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted user credential reset permission denial metadata",
+              requestIp: readRequestIp(request),
+            });
+
+            return createJsonResponse(adminUserPermissionDeniedResponse);
+          }
+
+          const didReset =
+            (await repositories.userOrgAuthRepository.resetUserPassword?.(
+              publicId,
+            )) ?? false;
+
+          await repositories.auditLogRepository.appendAuditLog({
+            actorPublicId: actor.publicId,
+            actorRole: actor.roles[0],
+            actionType: "user.reset_password",
+            targetResourceType: "user",
+            targetPublicId: publicId,
+            resultStatus: didReset ? "success" : "failed",
+            metadataSummary: "redacted user credential reset metadata",
+            requestIp: readRequestIp(request),
+          });
+
+          if (
+            repositories.userOrgAuthRepository.resetUserPassword === undefined
+          ) {
+            return createJsonResponse(userPasswordResetUnavailableResponse);
+          }
+
+          return createJsonResponse(
+            didReset ? createSuccessResponse(null) : userNotFoundResponse,
           );
         },
       },

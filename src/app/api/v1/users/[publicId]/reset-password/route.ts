@@ -1,16 +1,5 @@
-import { createAdminUserOrgAuthOpsRouteHandlers } from "@/server/services/admin-user-org-auth-ops-route";
-import { createUnavailableAdminUserOrgAuthOpsService } from "@/server/services/admin-user-org-auth-ops-service";
+import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flow-runtime";
 
-const adminUserOrgAuthOpsRouteHandlers = createAdminUserOrgAuthOpsRouteHandlers(
-  createUnavailableAdminUserOrgAuthOpsService(),
-);
+const adminFlowRuntimeRouteHandlers = createAdminFlowRuntimeRouteHandlers();
 
-const responseContract = {
-  code: 503601,
-  message: "Admin user organization authorization runtime is not configured.",
-  data: null,
-};
-
-void responseContract;
-
-export const POST = adminUserOrgAuthOpsRouteHandlers.resetPassword.POST;
+export const POST = adminFlowRuntimeRouteHandlers.users.resetPassword.POST;

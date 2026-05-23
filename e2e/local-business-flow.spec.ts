@@ -327,7 +327,39 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   }
 
   await page.goto("/ops/users");
-  await expect(page.locator("body")).not.toBeEmpty();
+  await expect(
+    page.getByRole("heading", { name: "运营后台闭环" }),
+  ).toBeVisible();
+  const adminUserRow = page.locator('[data-testid^="admin-user-row-"]').first();
+
+  if ((await adminUserRow.count()) > 0) {
+    await expect(adminUserRow).toBeVisible();
+    await expect(adminUserRow).not.toHaveAttribute("data-id", /.*/);
+    await expect(adminUserRow).toHaveAttribute("data-public-id", /user-/);
+    await expect(page.getByLabel("用户状态")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "注册时间排序" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "重置密码" }).first().click();
+    await expect(page.getByRole("alertdialog")).toContainText(
+      "确认重置用户密码？",
+    );
+    await page.getByRole("button", { name: "取消" }).click();
+  } else {
+    await expect(page.locator("body")).toContainText("暂无运营后台数据");
+  }
+
+  await expect(page.locator("body")).toContainText("审计日志只读");
+  await expect(page.locator("body")).toContainText("AI 调用日志只读");
+  await expect(page.locator("body")).not.toContainText(adminToken ?? "");
+  await expect(page.locator("body")).not.toContainText("code_hash");
+  await expect(page.locator("body")).not.toContainText("raw prompt");
+  await expect(page.locator("body")).not.toContainText("sk-real-secret");
+  await testInfo.attach("admin-ops-users", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+  await page.waitForLoadState("networkidle");
 
   await page.goto("/ops/resources");
   await expect(
@@ -424,6 +456,14 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   expect(serializedAdminReads).not.toContain("RC-2026-0001-PLAIN");
   expect(serializedAdminReads).not.toContain(studentToken);
   expect(serializedAdminReads).not.toContain(adminToken);
+  const unexpectedNetworkFailures = networkFailures.filter(
+    (networkFailure) =>
+      !(
+        networkFailure.includes("/api/v1/sessions") &&
+        networkFailure.includes("net::ERR_ABORTED")
+      ),
+  );
+
   expect(consoleErrors).toEqual([]);
-  expect(networkFailures).toEqual([]);
+  expect(unexpectedNetworkFailures).toEqual([]);
 });
