@@ -97,9 +97,19 @@ Results on `codex/phase-10-local-real-ai-provider-safety-plan`:
 
 ## Git Closeout
 
-- implementationCommit: pending until commit.
-- merge: pending.
-- masterCloseoutEvidenceCommit: pending.
+- implementationCommit: `30272ad docs(agent): record phase 10 real provider safety plan`.
+- merge: `1f80754 merge: phase 10 real provider safety plan`.
+- masterCloseoutEvidenceCommit: pending until this post-merge evidence update is committed.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `103` files and `379` tests passed.
+    - format:check: pass.
+  - `Test-NamingConventions.ps1`: pass.
+  - Post-evidence `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; ahead commits and changed files remained limited to this task.
+  - Post-evidence `npm.cmd run format:check`: first sandbox run failed with local `EPERM` while opening the installed Prettier executable under `node_modules`; rerun outside the sandbox passed and reported all matched files use Prettier style.
 - push: pending.
 - cleanup: pending.
 
