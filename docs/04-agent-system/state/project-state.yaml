@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-10-local-release-candidate-hardening
-  updatedAt: "2026-05-23T00:00:00+08:00"
+  updatedAt: "2026-05-23T16:30:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-10-planning-and-queue-seeding
+  id: phase-10-local-fresh-checkout-readiness
   status: closed
   sourceStory: user-request-2026-05-23-local-release-candidate-hardening
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-planning-and-queue-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-planning-and-queue-seeding.md
-  branch: codex/phase-10-local-rc-planning
-  commitSha: d6d9afd
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+  branch: codex/phase-10-local-fresh-checkout-readiness
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-10-local-fresh-checkout-readiness after phase-10-planning-and-queue-seeding closes
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-planning-and-queue-seeding.md
+  nextRecommendedAction: claim phase-10-local-db-rebuild-seed-rehearsal after phase-10-local-fresh-checkout-readiness closes
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-fresh-checkout-readiness.md
