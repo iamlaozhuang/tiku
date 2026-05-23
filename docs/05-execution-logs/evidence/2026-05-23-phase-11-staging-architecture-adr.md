@@ -117,8 +117,8 @@ Status handling note:
   - `Test-NamingConventions.ps1`: pass.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` is ahead of `origin/master` by the implementation and merge commits, and changed files remain limited to ADR-005, task plan, evidence, and state/queue files.
 - Build and E2E: not run after merge because this was planning-only documentation/state work with no runtime, API, UI, dependency, schema, migration, script, or deployment change.
-- Push target: pending evidence update commit and push to `origin/master`.
-- Cleanup: pending after push.
+- Push target: `origin/master`; final push result is recorded in the delivery response after this evidence update commit is pushed.
+- Cleanup: local branch `codex/phase-11-staging-architecture-adr` deleted after merge.
 
 ## Taste Compliance Self-Check
 
