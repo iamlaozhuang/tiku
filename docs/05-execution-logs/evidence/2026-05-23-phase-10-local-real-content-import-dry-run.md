@@ -267,9 +267,17 @@ Results on `codex/phase-10-local-real-content-import-dry-run`:
 ## Git Closeout
 
 - implementationCommit: `6156bc5 docs(agent): record phase 10 real content dry run`.
-- metadataCommit: pending.
-- merge: pending.
-- postMergeValidation: pending.
+- metadataCommit: `01f5446 docs(agent): record phase 10 real content metadata`.
+- merge: `dea2d5e merge: phase 10 real content import dry run`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `103` files and `379` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js compiled successfully and listed the `/api/v1/` REST surface and app routes.
+  - `Test-NamingConventions.ps1`: pass.
 - push: pending.
 - cleanup: pending.
 
