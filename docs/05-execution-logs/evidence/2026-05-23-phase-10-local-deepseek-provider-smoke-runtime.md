@@ -140,6 +140,24 @@ Required validation results after this evidence was written:
 - The script does not write `ai_call_log`; a later task can wire this into service-level provider runners if its `allowedFiles` and risk gates permit.
 - The script depends on local `.env.local` values remaining present and valid; evidence must never include their raw values.
 
+## Git Closeout
+
+- implementationCommit: `de96f32 feat(ai): add local deepseek smoke runtime`.
+- merge: `f4339c2 merge: phase 10 deepseek provider smoke runtime`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `104` files and `380` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js build completed successfully with `.env.local` loaded and no secret values printed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass inventory; `master` was ahead of `origin/master` by the implementation and merge commits, and changed files remained limited to this task.
+- Provider rerun after merge: not run, to keep the task bounded to the already recorded single successful DeepSeek request and avoid extra provider calls.
+- Push status: pending at this evidence update.
+- Cleanup status: pending until `origin/master` push succeeds.
+
 ## Taste Compliance Self-Check
 
 - Frontend visual taste: no UI, Tailwind, color, font, layout, or interaction change.
