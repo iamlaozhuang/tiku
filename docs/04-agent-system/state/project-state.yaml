@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-10-local-release-candidate-hardening
-  updatedAt: "2026-05-23T19:18:51+08:00"
+  updatedAt: "2026-05-23T19:31:30+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-10-local-real-ai-provider-safety-plan
-  status: closed
+  id: phase-10-local-real-ai-provider-smoke-test
+  status: blocked
   sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-provider-rules
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
-  branch: codex/phase-10-local-real-ai-provider-safety-plan
-  commitSha: 30272ad
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+  branch: codex/phase-10-local-real-ai-provider-smoke-test
+  commitSha: 0a72625
   prUrl: null
   retryCount: 0
-  lastFailurePath: null
+  lastFailurePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
 qualityGates:
   desired:
     - lint
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-10-local-real-ai-provider-smoke-test after phase-10-local-real-ai-provider-safety-plan closes
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+  nextRecommendedAction: resolve blocked phase-10-local-real-ai-provider-smoke-test by preparing local-only provider env values and an approved real provider smoke entrypoint without exposing secrets
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
