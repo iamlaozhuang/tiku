@@ -1,7 +1,4 @@
-import {
-  StudentPracticePage,
-  studentPracticeFixture,
-} from "@/features/student/practice/StudentPracticePage";
+import { StudentPracticePage } from "@/features/student/practice/StudentPracticePage";
 
 type StudentPracticeRoutePageProps = {
   searchParams?: Promise<{
@@ -24,10 +21,5 @@ export default async function StudentPracticeRoutePage({
     resolvedSearchParams.paperPublicId,
   );
 
-  return (
-    <StudentPracticePage
-      paperPublicId={paperPublicId}
-      practices={studentPracticeFixture.practices}
-    />
-  );
+  return <StudentPracticePage paperPublicId={paperPublicId} />;
 }

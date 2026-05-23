@@ -1,6 +1,6 @@
 import {
+  StudentExamReportListPage,
   StudentExamReportPage,
-  studentExamReportFixture,
 } from "@/features/student/mock-exam/StudentMockExamReportPage";
 
 type StudentExamReportRoutePageProps = {
@@ -26,10 +26,9 @@ export default async function StudentExamReportRoutePage({
     resolvedSearchParams.examReportPublicId,
   );
 
-  return (
-    <StudentExamReportPage
-      examReportPublicId={examReportPublicId}
-      examReports={studentExamReportFixture.examReports}
-    />
-  );
+  if (examReportPublicId === undefined) {
+    return <StudentExamReportListPage />;
+  }
+
+  return <StudentExamReportPage examReportPublicId={examReportPublicId} />;
 }

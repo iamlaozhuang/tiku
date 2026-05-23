@@ -11,11 +11,18 @@ import {
   RotateCcw,
   XCircle,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import {
+  fetchStudentApi,
+  getStoredStudentSessionToken,
+  isStudentUnauthorizedResponse,
+} from "@/features/student/studentRuntimeApi";
 import type {
   PracticeAnswerFeedbackDto,
+  PracticeAnswerFeedbackResultDto,
   PracticeDto,
+  PracticeResultDto,
 } from "@/server/contracts/practice-contract";
 import type { Profession, Subject } from "@/server/models/paper";
 
@@ -601,10 +608,19 @@ function SubjectiveQuestionPanel({
 export function StudentPracticePage({
   state = "ready",
   paperPublicId = "paper-marketing-theory-002",
-  practices = studentPracticeFixture.practices,
+  practices,
 }: StudentPracticePageProps) {
+  const isRuntimeMode = practices === undefined;
+  const [runtimeState, setRuntimeState] =
+    useState<StudentPracticePageState>("loading");
+  const [runtimePractices, setRuntimePractices] = useState<
+    StudentPracticeFixture[]
+  >([]);
+  const displayState =
+    isRuntimeMode && state === "ready" ? runtimeState : state;
+  const displayPractices = practices ?? runtimePractices;
   const selectedPracticeFixture =
-    practices.find(
+    displayPractices.find(
       (practiceFixture) =>
         practiceFixture.practice.paperPublicId === paperPublicId,
     ) ?? null;
@@ -631,11 +647,84 @@ export function StudentPracticePage({
   const [feedbackByQuestion, setFeedbackByQuestion] = useState(emptyFeedback);
   const [isMaterialOpen, setIsMaterialOpen] = useState(true);
 
-  if (state === "loading") {
+  useEffect(() => {
+    if (!isRuntimeMode || state !== "ready") {
+      return;
+    }
+
+    let isActive = true;
+
+    async function loadPractice() {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        if (isActive) {
+          setRuntimeState("authorization_expired");
+        }
+        return;
+      }
+
+      try {
+        const practicePayload = await fetchStudentApi<PracticeResultDto>(
+          "/api/v1/practices",
+          token,
+          {
+            method: "POST",
+            body: JSON.stringify({ paperPublicId }),
+          },
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(practicePayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (practicePayload.code !== 0 || practicePayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        setRuntimePractices([
+          {
+            practice: practicePayload.data.practice,
+            feedbackByPaperQuestionPublicId: {},
+          },
+        ]);
+        setCurrentQuestionIndex(
+          Math.min(
+            practicePayload.data.practice.currentQuestionIndex,
+            Math.max(
+              extractPracticeQuestions(
+                practicePayload.data.practice.paperSnapshot,
+              ).length - 1,
+              0,
+            ),
+          ),
+        );
+        setRuntimeState("ready");
+      } catch {
+        if (isActive) {
+          setRuntimeState("error");
+        }
+      }
+    }
+
+    void loadPractice();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isRuntimeMode, paperPublicId, state]);
+
+  if (displayState === "loading") {
     return <StudentPracticeLoading />;
   }
 
-  if (state === "error") {
+  if (displayState === "error") {
     return (
       <StudentPracticeStatusMessage
         title="练习加载失败"
@@ -644,7 +733,7 @@ export function StudentPracticePage({
     );
   }
 
-  if (state === "authorization_expired") {
+  if (displayState === "authorization_expired") {
     return (
       <StudentPracticeStatusMessage
         title="授权已失效"
@@ -706,11 +795,62 @@ export function StudentPracticePage({
     });
   }
 
-  function handleSubmitAnswer() {
-    const nextFeedback =
+  async function handleSubmitAnswer() {
+    if (practice === null) {
+      return;
+    }
+
+    let nextFeedback =
       selectedPracticeFixture?.feedbackByPaperQuestionPublicId[
         currentQuestion.paperQuestionPublicId
       ] ?? null;
+
+    if (isRuntimeMode) {
+      const token = getStoredStudentSessionToken();
+
+      if (token === null) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      try {
+        const answerPayload =
+          await fetchStudentApi<PracticeAnswerFeedbackResultDto>(
+            `/api/v1/practices/${practice.publicId}/answers`,
+            token,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
+                selectedLabels:
+                  currentQuestion.questionType === "single_choice"
+                    ? selectedLabels
+                    : [],
+                textAnswer:
+                  currentQuestion.questionType === "single_choice"
+                    ? null
+                    : textAnswer,
+                savedFromClientAt: new Date().toISOString(),
+              }),
+            },
+          );
+
+        if (isStudentUnauthorizedResponse(answerPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (answerPayload.code !== 0 || answerPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        nextFeedback = answerPayload.data.feedback;
+      } catch {
+        setRuntimeState("error");
+        return;
+      }
+    }
 
     if (nextFeedback === null) {
       return;
@@ -798,7 +938,7 @@ export function StudentPracticePage({
             selectedLabels={selectedLabels}
             feedback={feedback}
             onToggleLabel={handleToggleLabel}
-            onSubmitAnswer={handleSubmitAnswer}
+            onSubmitAnswer={() => void handleSubmitAnswer()}
             onNextQuestion={handleNextQuestion}
             hasNextQuestion={hasNextQuestion}
           />
@@ -810,7 +950,7 @@ export function StudentPracticePage({
             isMaterialOpen={isMaterialOpen}
             onToggleMaterial={() => setIsMaterialOpen(!isMaterialOpen)}
             onChangeTextAnswer={handleChangeTextAnswer}
-            onSubmitAnswer={handleSubmitAnswer}
+            onSubmitAnswer={() => void handleSubmitAnswer()}
           />
         )}
       </article>

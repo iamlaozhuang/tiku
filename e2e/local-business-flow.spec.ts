@@ -269,6 +269,7 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
 
   await page.goto("/exam-report");
   await expect(page.locator("body")).not.toBeEmpty();
+  await expect(page.locator("body")).not.toContainText("正在加载模拟考试记录");
   await testInfo.attach("exam-report-page", {
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",

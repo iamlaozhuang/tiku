@@ -4,9 +4,10 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   StudentPracticePage,
@@ -15,6 +16,9 @@ import {
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
 });
 
 describe("StudentPracticePage", () => {
@@ -131,5 +135,93 @@ describe("StudentPracticePage", () => {
         name: "返回学员首页",
       }),
     ).toHaveAttribute("href", "/home");
+  });
+
+  it("starts practice and submits answers through the session runtime", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const practice = studentPracticeFixture.practices[0].practice;
+    const feedback =
+      studentPracticeFixture.practices[0].feedbackByPaperQuestionPublicId[
+        "paper-question-marketing-001"
+      ];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/practices") {
+          expect(init?.method).toBe("POST");
+          expect(JSON.parse(String(init?.body))).toEqual({
+            paperPublicId: "paper-marketing-theory-002",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-marketing-theory-001/answers"
+        ) {
+          expect(init?.method).toBe("POST");
+          expect(JSON.parse(String(init?.body))).toMatchObject({
+            paperQuestionPublicId: "paper-question-marketing-001",
+            selectedLabels: ["A"],
+            textAnswer: null,
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { feedback },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-theory-002",
+      }),
+    );
+
+    expect(screen.getByText("正在加载练习进度")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "营销理论冲刺卷 B" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "A. 市场细分" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(await screen.findByText("回答错误")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 });

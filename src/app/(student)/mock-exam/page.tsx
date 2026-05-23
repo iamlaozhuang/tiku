@@ -1,13 +1,17 @@
-import {
-  StudentMockExamPage,
-  studentMockExamFixture,
-} from "@/features/student/mock-exam/StudentMockExamReportPage";
+import { StudentMockExamPage } from "@/features/student/mock-exam/StudentMockExamReportPage";
 
 type StudentMockExamRoutePageProps = {
   searchParams?: Promise<{
+    paperPublicId?: string | string[];
     mockExamPublicId?: string | string[];
   }>;
 };
+
+function normalizePaperPublicId(
+  paperPublicId: string | string[] | undefined,
+): string | undefined {
+  return Array.isArray(paperPublicId) ? paperPublicId[0] : paperPublicId;
+}
 
 function normalizeMockExamPublicId(
   mockExamPublicId: string | string[] | undefined,
@@ -22,14 +26,17 @@ export default async function StudentMockExamRoutePage({
 }: StudentMockExamRoutePageProps) {
   const resolvedSearchParams =
     searchParams === undefined ? {} : await searchParams;
+  const paperPublicId = normalizePaperPublicId(
+    resolvedSearchParams.paperPublicId,
+  );
   const mockExamPublicId = normalizeMockExamPublicId(
     resolvedSearchParams.mockExamPublicId,
   );
 
   return (
     <StudentMockExamPage
+      paperPublicId={paperPublicId}
       mockExamPublicId={mockExamPublicId}
-      mockExams={studentMockExamFixture.mockExams}
     />
   );
 }
