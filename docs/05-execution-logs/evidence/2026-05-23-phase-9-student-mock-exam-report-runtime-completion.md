@@ -99,6 +99,7 @@ Results captured so far:
 
 - implementationCommit: `cbca08a feat(student): complete mock exam report runtime`.
 - merge: `498bbd2 merge: phase 9 student mock exam report runtime completion`.
+- mergeCloseoutCommit: `177b483 docs(agent): record student mock exam report merge closeout`.
 - postMergeValidation:
   - `Invoke-QualityGate.ps1`: pass on `master`.
     - lint: pass.
@@ -108,5 +109,5 @@ Results captured so far:
   - `npm.cmd run build`: pass on `master`.
   - `Test-NamingConventions.ps1`: pass on `master`.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory on `master`; branch ahead of `origin/master` by implementation and merge commits.
-- push: pending.
-- cleanup: pending branch deletion after push.
+- push: `git push origin master` completed; `origin/master` advanced from `83417e5` to `177b483`.
+- cleanup: local branch `codex/phase-9-student-mock-exam-report-runtime-completion` deleted after merge and push. Initial sandbox delete failed with `.git` ref lock permission denied; escalated re-run succeeded.
