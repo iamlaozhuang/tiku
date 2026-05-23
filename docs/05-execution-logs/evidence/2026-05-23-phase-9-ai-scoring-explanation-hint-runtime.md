@@ -90,5 +90,15 @@ Results:
 
 ## Git Closeout
 
-- implementationCommit: pending at evidence creation time.
-- merge/push: pending user-authorized closeout after final git completion readiness.
+- implementationCommit: `afe05e2 feat(ai): add deterministic scoring explanation runtime`.
+- merge: `1245248 merge: phase 9 ai scoring explanation hint runtime`.
+- postMergeValidation:
+  - `Invoke-QualityGate.ps1`: pass on `master`.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `99` files and `363` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass on `master`.
+  - `Test-NamingConventions.ps1`: pass on `master`.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory on `master`; branch ahead of `origin/master` by implementation and merge commits before closeout docs/push.
+- push: pending closeout docs commit.
