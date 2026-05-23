@@ -269,6 +269,7 @@ Results on `codex/phase-10-local-real-content-import-dry-run`:
 - implementationCommit: `6156bc5 docs(agent): record phase 10 real content dry run`.
 - metadataCommit: `01f5446 docs(agent): record phase 10 real content metadata`.
 - merge: `dea2d5e merge: phase 10 real content import dry run`.
+- masterCloseoutEvidenceCommit: `6c013ee docs(agent): record phase 10 real content post-merge evidence`.
 - postMergeValidation on `master`:
   - `Test-AgentSystemReadiness.ps1`: pass.
   - `Invoke-QualityGate.ps1`: pass.
@@ -278,8 +279,8 @@ Results on `codex/phase-10-local-real-content-import-dry-run`:
     - format:check: pass.
   - `npm.cmd run build`: pass; Next.js compiled successfully and listed the `/api/v1/` REST surface and app routes.
   - `Test-NamingConventions.ps1`: pass.
-- push: pending.
-- cleanup: pending.
+- push: completed to `origin/master`; first push advanced `master` from `2455527` to `6c013ee`; final push includes this cleanup evidence update.
+- cleanup: deleted local branch `codex/phase-10-local-real-content-import-dry-run` after merge and first push. No remote short-lived branch was created.
 
 ## Taste Compliance Self-Check
 
