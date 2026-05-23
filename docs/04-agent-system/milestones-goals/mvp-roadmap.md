@@ -230,3 +230,30 @@ Closeout status:
 - Local release candidate hardening is validated through planning, fresh checkout, database rebuild, redacted real-content metadata dry run, provider safety planning, one bounded local DeepSeek smoke, local real-content RAG runtime, and sanitized real-content RAG smoke evidence.
 - Final local MVP acceptance rerun passed with Docker PostgreSQL healthy, agent readiness, quality gate, production build, Playwright E2E, naming conventions, and Git inventory.
 - Staging, production, deployment, production credentials, production resources, public object storage, and customer-network acceptance remain out of scope and require separate explicit approval.
+
+## Phase 11: Staging Release Planning
+
+Primary deliverables:
+
+- Phase 11 staging release planning contract at `docs/02-architecture/interfaces/phase-11-staging-release-planning-contract.md`.
+- Staging and production boundary checklist based on ADR-004 environment isolation.
+- Human approval gates for cloud resources, deployment, secrets, migrations, dependencies, provider quota, object storage, and staging/prod connections.
+- Proposed Phase 11 task order that keeps implementation blocked until risk-specific approvals are recorded.
+
+Non-goals:
+
+- Do not create, modify, or connect staging/prod resources.
+- Do not deploy.
+- Do not add or change secrets, `.env.local`, `.env.example`, dependencies, runtime code, database schema, migrations, or deployment scripts.
+- Do not claim customer-network acceptance or production readiness.
+
+Dependency order:
+
+- Depends on Phase 10 local release candidate hardening closeout.
+- Starts with planning before any staging architecture, resource, secret, migration, provider, observability, or deployment task.
+- Any future implementation task requires explicit human approval and its own allowedFiles / blockedFiles boundary.
+
+Closeout status:
+
+- Phase 11 staging release planning is closed by `docs/05-execution-logs/evidence/2026-05-23-phase-11-staging-release-planning.md`.
+- Implementation is intentionally not approved by this planning task; the next Phase 11 task must request explicit human approval before any staging architecture, resource, secret, migration, provider, observability, deployment, or cloud work begins.
