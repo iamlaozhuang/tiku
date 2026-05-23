@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-10-local-release-candidate-hardening
-  updatedAt: "2026-05-23T22:27:09+08:00"
+  updatedAt: "2026-05-23T22:29:26+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-10-local-real-content-rag-smoke-runtime
+  id: phase-10-local-rag-real-content-smoke-test
   status: closed
   sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
-  branch: codex/phase-10-local-real-content-rag-smoke-runtime
-  commitSha: c655647
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+  branch: codex/phase-10-local-rag-real-content-smoke-test
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-10-local-rag-real-content-smoke-test and use the new local runtime to record sanitized real-content RAG smoke evidence
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
+  nextRecommendedAction: claim phase-10-local-mvp-acceptance-rerun-closeout and complete the final Phase 10 local MVP acceptance rerun
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
