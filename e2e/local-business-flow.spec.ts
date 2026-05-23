@@ -329,6 +329,32 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   await page.goto("/ops/users");
   await expect(page.locator("body")).not.toBeEmpty();
 
+  await page.goto("/ops/resources");
+  await expect(
+    page.getByRole("heading", { name: "资源与知识库管理" }),
+  ).toBeVisible();
+  const resourceRow = page.locator('[data-testid^="resource-row-"]').first();
+
+  if ((await resourceRow.count()) > 0) {
+    await expect(resourceRow).toBeVisible();
+    await expect(resourceRow).not.toHaveAttribute("data-id", /.*/);
+    await expect(resourceRow).toHaveAttribute("data-public-id", /resource-/);
+    await resourceRow.getByRole("button", { name: "重建向量" }).click();
+    await expect(page.getByRole("alertdialog")).toContainText("确认重建");
+    await page.getByRole("button", { name: "取消" }).click();
+  } else {
+    await expect(page.locator("body")).toContainText("暂无资源与知识库数据");
+  }
+
+  await expect(page.locator("body")).not.toContainText(adminToken ?? "");
+  await expect(page.locator("body")).not.toContainText("objectStoragePath");
+  await expect(page.locator("body")).not.toContainText("embedding");
+  await expect(page.locator("body")).not.toContainText("RAW_CHUNK_TEXT");
+  await testInfo.attach("admin-resources", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+
   await page.goto("/ops/ai-audit-logs");
   await expect(page.locator("body")).not.toBeEmpty();
 
@@ -366,6 +392,7 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
       redeemCodes: await getJson("/api/v1/redeem-codes?page=1&pageSize=20"),
       questions: await getJson("/api/v1/questions?page=1&pageSize=20"),
       papers: await getJson("/api/v1/papers?page=1&pageSize=20"),
+      resources: await getJson("/api/v1/resources?page=1&pageSize=20"),
       auditLogs: await getJson("/api/v1/audit-logs?page=1&pageSize=20"),
       aiCallLogs: await getJson("/api/v1/ai-call-logs?page=1&pageSize=20"),
       modelConfigs: await getJson("/api/v1/model-configs?page=1&pageSize=20"),
@@ -379,6 +406,7 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   expect(adminReads.redeemCodes.body.code).toBe(0);
   expect(adminReads.questions.body.code).toBe(0);
   expect(adminReads.papers.body.code).toBe(0);
+  expect(adminReads.resources.body.code).toBe(0);
   expect(adminReads.auditLogs.body.data.auditLogs.length).toBeGreaterThan(0);
   expect(adminReads.aiCallLogs.body.data.aiCallLogs.length).toBeGreaterThan(0);
   expect(adminReads.modelConfigs.body.data.modelConfigs[0]).toMatchObject({

@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-9-rag-resource-knowledge-runtime
+  id: phase-9-resource-knowledge-admin-ui-completion
   status: closed
-  sourceStory: docs/01-requirements/stories/epic-05-rag-knowledge.md
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
-  branch: codex/phase-9-rag-resource-knowledge-runtime
-  commitSha: e80a96e
+  sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#2-运营后台
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+  branch: codex/phase-9-resource-knowledge-admin-ui-completion
+  commitSha: c1db947
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-9-resource-knowledge-admin-ui-completion after running Test-TaskClaimReadiness
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
+  nextRecommendedAction: claim phase-9-admin-ops-runtime-ui-completion after running Test-TaskClaimReadiness
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md

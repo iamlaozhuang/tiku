@@ -5,6 +5,7 @@ import { GitBranch, Move, Pencil, Plus, Search, ShieldOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { ApiResponse } from "@/server/contracts/api-response";
 import type { AdminKnowledgeNodeOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { KnStatus } from "@/server/models/ai-rag";
@@ -17,6 +18,7 @@ import {
   DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
   PublicId,
+  createAdminAuthHeaders,
   fetchAdminApi,
   getStoredSessionToken,
   includesKeyword,
@@ -37,6 +39,34 @@ type ProfessionFilter = "all" | Profession;
 
 type KnowledgeNodeListDto = {
   knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
+};
+
+type KnowledgeNodeResultDto = {
+  knowledgeNode: AdminKnowledgeNodeOpsSummaryDto;
+};
+
+type KnowledgeNodeAction =
+  | {
+      status: "idle";
+    }
+  | {
+      status: "create" | "edit" | "disable";
+      target: AdminKnowledgeNodeOpsSummaryDto | null;
+    }
+  | {
+      status: "submitting";
+      target: AdminKnowledgeNodeOpsSummaryDto | null;
+      type: "create" | "edit" | "disable";
+    };
+
+type RunnableKnowledgeNodeAction = Extract<
+  KnowledgeNodeAction,
+  { status: "create" | "edit" | "disable" }
+>;
+
+type ToastMessage = {
+  message: string;
+  tone: "success" | "error";
 };
 
 const knStatusLabels: Record<KnStatus, string> = {
@@ -118,14 +148,19 @@ function useKnowledgeNodeData() {
     };
   }, []);
 
-  return { knowledgeNodes, loadState };
+  return { knowledgeNodes, loadState, setKnowledgeNodes };
 }
 
 export function AdminKnowledgeNodeManagement() {
   const [keyword, setKeyword] = useState("");
   const [profession, setProfession] = useState<ProfessionFilter>("all");
   const [status, setStatus] = useState<KnowledgeNodeStatusFilter>("all");
-  const { knowledgeNodes, loadState } = useKnowledgeNodeData();
+  const [action, setAction] = useState<KnowledgeNodeAction>({
+    status: "idle",
+  });
+  const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
+  const { knowledgeNodes, loadState, setKnowledgeNodes } =
+    useKnowledgeNodeData();
   const filteredKnowledgeNodes = useMemo(
     () =>
       knowledgeNodes.filter((knowledgeNode) => {
@@ -147,6 +182,81 @@ export function AdminKnowledgeNodeManagement() {
       }),
     [keyword, knowledgeNodes, profession, status],
   );
+  const activeKnowledgeNode = filteredKnowledgeNodes[0] ?? null;
+
+  async function handleConfirmAction() {
+    if (
+      action.status !== "create" &&
+      action.status !== "edit" &&
+      action.status !== "disable"
+    ) {
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setAction({ status: "idle" });
+      setToastMessage({
+        message: "管理员会话已失效，请重新登录",
+        tone: "error",
+      });
+      return;
+    }
+
+    setAction({
+      status: "submitting",
+      target: action.target,
+      type: action.status,
+    });
+
+    try {
+      const response = await runKnowledgeNodeAction({
+        action,
+        sessionToken,
+      });
+
+      if (response === null) {
+        setToastMessage({
+          message: "知识点节点操作失败，请刷新后重试",
+          tone: "error",
+        });
+        return;
+      }
+
+      if (action.status === "create") {
+        setKnowledgeNodes((currentKnowledgeNodes) => [
+          ...currentKnowledgeNodes,
+          response,
+        ]);
+        setToastMessage({
+          message: "知识点节点已新增",
+          tone: "success",
+        });
+        return;
+      }
+
+      setKnowledgeNodes((currentKnowledgeNodes) =>
+        currentKnowledgeNodes.map((knowledgeNode) =>
+          knowledgeNode.publicId === response.publicId
+            ? response
+            : knowledgeNode,
+        ),
+      );
+      setToastMessage({
+        message:
+          action.status === "edit" ? "知识点节点已更新" : "知识点节点已停用",
+        tone: "success",
+      });
+    } catch {
+      setToastMessage({
+        message: "知识点节点操作失败，请刷新后重试",
+        tone: "error",
+      });
+    } finally {
+      setAction({ status: "idle" });
+    }
+  }
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载知识点树" />;
@@ -181,13 +291,22 @@ export function AdminKnowledgeNodeManagement() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button>
+          <Button
+            onClick={() => {
+              setToastMessage(null);
+              setAction({ status: "create", target: null });
+            }}
+          >
             <Plus aria-hidden="true" data-icon="inline-start" />
             新增节点
           </Button>
           <Button
             disabled={filteredKnowledgeNodes.length === 0}
             variant="outline"
+            onClick={() => {
+              setToastMessage(null);
+              setAction({ status: "edit", target: activeKnowledgeNode });
+            }}
           >
             <Pencil aria-hidden="true" data-icon="inline-start" />
             编辑节点
@@ -202,6 +321,10 @@ export function AdminKnowledgeNodeManagement() {
           <Button
             disabled={filteredKnowledgeNodes.length === 0}
             variant="outline"
+            onClick={() => {
+              setToastMessage(null);
+              setAction({ status: "disable", target: activeKnowledgeNode });
+            }}
           >
             <ShieldOff aria-hidden="true" data-icon="inline-start" />
             停用节点
@@ -279,7 +402,163 @@ export function AdminKnowledgeNodeManagement() {
       ) : (
         <FilteredEmptyState />
       )}
+
+      {action.status === "create" ||
+      action.status === "edit" ||
+      action.status === "disable" ||
+      action.status === "submitting" ? (
+        <KnowledgeNodeActionDialog
+          action={action}
+          onCancel={() => setAction({ status: "idle" })}
+          onConfirm={handleConfirmAction}
+        />
+      ) : null}
+
+      {toastMessage === null ? null : (
+        <KnowledgeNodeToast message={toastMessage} />
+      )}
     </section>
+  );
+}
+
+async function runKnowledgeNodeAction({
+  action,
+  sessionToken,
+}: {
+  action: RunnableKnowledgeNodeAction;
+  sessionToken: string;
+}): Promise<AdminKnowledgeNodeOpsSummaryDto | null> {
+  const headers = {
+    ...createAdminAuthHeaders(sessionToken),
+    "content-type": "application/json",
+  };
+
+  if (action.status === "create") {
+    return requestKnowledgeNode("/api/v1/knowledge-nodes", {
+      body: JSON.stringify({
+        parentKnowledgeNodePublicId: null,
+        profession: "marketing",
+        levelList: [3],
+        name: "新增知识点",
+        sortOrder: 30,
+      }),
+      headers,
+      method: "POST",
+    });
+  }
+
+  if (action.target === null || !isSafePublicId(action.target.publicId)) {
+    return null;
+  }
+
+  if (action.status === "edit") {
+    return requestKnowledgeNode(
+      `/api/v1/knowledge-nodes/${action.target.publicId}`,
+      {
+        body: JSON.stringify({ name: `${action.target.name}（已更新）` }),
+        headers,
+        method: "PATCH",
+      },
+    );
+  }
+
+  return requestKnowledgeNode(
+    `/api/v1/knowledge-nodes/${action.target.publicId}/disable`,
+    {
+      headers,
+      method: "POST",
+    },
+  );
+}
+
+async function requestKnowledgeNode(
+  path: string,
+  init: RequestInit,
+): Promise<AdminKnowledgeNodeOpsSummaryDto | null> {
+  const response = await fetch(path, init);
+  const payload =
+    (await response.json()) as ApiResponse<KnowledgeNodeResultDto | null>;
+
+  if (payload.code !== 0 || payload.data === null) {
+    return null;
+  }
+
+  return payload.data.knowledgeNode;
+}
+
+function isSafePublicId(value: string) {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
+}
+
+function KnowledgeNodeActionDialog({
+  action,
+  onCancel,
+  onConfirm,
+}: {
+  action: Exclude<KnowledgeNodeAction, { status: "idle" }>;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const actionType =
+    action.status === "submitting" ? action.type : action.status;
+  const isSubmitting = action.status === "submitting";
+  const dialogTitle =
+    actionType === "create"
+      ? "新增知识点节点"
+      : actionType === "edit"
+        ? "编辑知识点节点"
+        : "确认停用知识点节点？";
+  const confirmLabel =
+    actionType === "create"
+      ? "确认新增"
+      : actionType === "edit"
+        ? "确认更新"
+        : "确认停用";
+
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <h2 className="text-text-primary text-base font-semibold">
+          {dialogTitle}
+        </h2>
+        <p className="text-text-secondary text-sm">
+          {actionType === "create"
+            ? "将创建一个营销 3级示例节点，用于验证运行时新增边界。"
+            : "操作仅提交 publicId 和允许的 JSON 字段，不提交内部自增 id。"}
+        </p>
+        <div className="flex gap-2">
+          <Button
+            disabled={isSubmitting}
+            variant={actionType === "disable" ? "destructive" : "default"}
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </Button>
+          <Button disabled={isSubmitting} variant="outline" onClick={onCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KnowledgeNodeToast({ message }: { message: ToastMessage }) {
+  return (
+    <div
+      className={
+        message.tone === "success"
+          ? "bg-secondary text-secondary-foreground fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
+          : "bg-destructive/10 text-destructive fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
+      }
+      role={message.tone === "success" ? "status" : "alert"}
+    >
+      {message.message}
+    </div>
   );
 }
 
