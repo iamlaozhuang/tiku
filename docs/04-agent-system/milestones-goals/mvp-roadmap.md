@@ -194,3 +194,32 @@ Closeout status:
 
 - Phase 9 local MVP acceptance is closed by `docs/05-execution-logs/evidence/2026-05-23-phase-9-closeout-release-readiness.md`.
 - Release readiness is limited to local `dev` MVP acceptance and owner review. Production, staging, real provider, deployment, and customer-network acceptance require separate approved tasks.
+
+## Phase 10: Local Release Candidate Hardening
+
+Primary deliverables:
+
+- Phase 10 local release candidate contract at `docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md`.
+- Fresh local checkout readiness proof for Docker PostgreSQL, migration/seed workflow, quality gates, build, and E2E.
+- Local database rebuild and seed rehearsal that proves the MVP can be recreated without production data.
+- Local dry run for real教材/试卷/resource inputs without committing sensitive source files or large verbatim content.
+- Real `model_provider` safety plan for local `dev` API key handling, feature flags, cost/volume limits, failure handling, and evidence redaction.
+- Local real-provider smoke tests for AI scoring, AI explanation, AI hint, `kn_recommendation`, and `ai_call_log` redaction after explicit human approval.
+- Local RAG smoke tests with real content for resource lifecycle, chunking, retrieval, `evidence_status`, `citation`, authorization filtering, and non-fabrication guarantees.
+- Final local MVP acceptance rerun after real-content and optional real-provider smoke tests.
+
+Non-goals:
+
+- Do not deploy or configure cloud servers.
+- Do not create, modify, or connect staging/prod resources.
+- Do not commit `.env.local`, API keys, secrets, raw prompts, raw answers, raw model responses, full教材/试卷 files, or long content excerpts.
+- Do not introduce dependencies, schema changes, migrations, or external service configuration without the required gate and explicit human approval.
+- Do not implement WeChat mini program UI or production release workflows in this phase.
+
+Dependency order:
+
+- Depends on Phase 9 local MVP acceptance closeout.
+- Starts with planning and queue seeding before any local RC hardening task.
+- Fresh checkout and database rebuild rehearsal precede real content and real provider tests.
+- Real provider smoke testing requires a safety plan and explicit human approval before any credential is used.
+- Final local MVP acceptance rerun happens only after real-content and approved provider smoke tests are recorded.

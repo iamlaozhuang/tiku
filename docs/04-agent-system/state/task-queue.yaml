@@ -4386,3 +4386,303 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-9-closeout-release-readiness.md
     status: closed
     retryCount: 0
+  - id: phase-10-planning-and-queue-seeding
+    title: Phase 10 Planning And Queue Seeding
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: user-request-2026-05-23-local-release-candidate-hardening
+    dependencies:
+      - phase-9-closeout-release-readiness
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-planning-and-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-planning-and-queue-seeding.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-planning-and-queue-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-planning-and-queue-seeding.md
+    status: closed
+    retryCount: 0
+  - id: phase-10-local-fresh-checkout-readiness
+    title: Local Fresh Checkout Readiness
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#acceptance-scope
+    dependencies:
+      - phase-10-planning-and-queue-seeding
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - local_tooling
+      - fresh_checkout
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-fresh-checkout-readiness
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+    status: pending
+    retryCount: 0
+  - id: phase-10-local-db-rebuild-seed-rehearsal
+    title: Local DB Rebuild And Seed Rehearsal
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#acceptance-scope
+    dependencies:
+      - phase-10-local-fresh-checkout-readiness
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-db-rebuild-seed-rehearsal.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-db-rebuild-seed-rehearsal.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - local_database
+      - seed_idempotent
+      - evidence_integrity
+      - destructive_data_operation
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-db-rebuild-seed-rehearsal
+      - docker compose ps
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-db-rebuild-seed-rehearsal.md
+    status: pending
+    retryCount: 0
+  - id: phase-10-local-real-content-import-dry-run
+    title: Local Real Content Import Dry Run
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
+    dependencies:
+      - phase-10-local-db-rebuild-seed-rehearsal
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-content-import-dry-run.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-import-dry-run.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - material
+      - paper
+      - resource
+      - real_content
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-real-content-import-dry-run
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-content-import-dry-run.md
+    status: pending
+    retryCount: 0
+  - id: phase-10-local-real-ai-provider-safety-plan
+    title: Local Real AI Provider Safety Plan
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-provider-rules
+    dependencies:
+      - phase-10-local-real-content-import-dry-run
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - model_provider
+      - model_config
+      - secret_or_env_change
+      - external_service_config
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-real-ai-provider-safety-plan
+      - Select-String -Path 'docs\05-execution-logs\task-plans\2026-05-23-phase-10-local-real-ai-provider-safety-plan.md' -Pattern 'human approval|.env.local|no API key|no secret'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-10-local-real-ai-provider-smoke-test
+    title: Local Real AI Provider Smoke Test
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-provider-rules
+    dependencies:
+      - phase-10-local-real-ai-provider-safety-plan
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - model_provider
+      - ai_scoring
+      - ai_explanation
+      - ai_hint
+      - kn_recommendation
+      - ai_call_log
+      - secret_or_env_change
+      - external_service_config
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-real-ai-provider-smoke-test
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-05-23-phase-10-local-real-ai-provider-smoke-test.md' -Pattern 'no API key|no secret|redacted|bounded sample'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+    status: pending
+    retryCount: 0
+  - id: phase-10-local-rag-real-content-smoke-test
+    title: Local RAG Real Content Smoke Test
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
+    dependencies:
+      - phase-10-local-real-ai-provider-smoke-test
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - rag
+      - resource
+      - knowledge_base
+      - embedding
+      - chunk
+      - citation
+      - evidence_status
+      - real_content
+      - model_provider
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-rag-real-content-smoke-test
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+    status: pending
+    retryCount: 0
+  - id: phase-10-local-mvp-acceptance-rerun-closeout
+    title: Local MVP Acceptance Rerun Closeout
+    phase: phase-10-local-release-candidate-hardening
+    sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#validation-expectations
+    dependencies:
+      - phase-10-local-rag-real-content-smoke-test
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+      - docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+    riskTypes:
+      - release_readiness
+      - evidence_integrity
+      - real_content
+      - model_provider
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-10-local-mvp-acceptance-rerun-closeout
+      - docker compose ps
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+    status: pending
+    retryCount: 0
