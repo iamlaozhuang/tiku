@@ -110,6 +110,7 @@ This conclusion is local-only:
 - implementationCommit: `a1a9485 docs(agent): record phase 10 fresh checkout readiness`.
 - metadataCommit: `c0b0601 docs(agent): record phase 10 fresh checkout metadata`.
 - merge: `9855a1f merge: phase 10 local fresh checkout readiness`.
+- masterCloseoutEvidenceCommit: `a3dce9d docs(agent): record phase 10 fresh checkout post-merge evidence`.
 - postMergeValidation on `master`:
   - `Test-AgentSystemReadiness.ps1`: pass.
   - `Invoke-QualityGate.ps1`: pass.
@@ -122,8 +123,8 @@ This conclusion is local-only:
   - `Test-NamingConventions.ps1`: pass.
   - `docker compose ps`: local `tiku-postgres-dev` remained healthy.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` was ahead of `origin/master` by `a1a9485`, `c0b0601`, and `9855a1f` before this evidence update.
-- push: pending.
-- cleanup: pending.
+- push: completed to `origin/master`; first push advanced `master` from `ba83c74` to `a3dce9d`.
+- cleanup: deleted local branch `codex/phase-10-local-fresh-checkout-readiness` after merge and push. No remote short-lived branch was created.
 
 ## Taste Compliance Self-Check
 
