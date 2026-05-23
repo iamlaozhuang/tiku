@@ -226,7 +226,7 @@ Dependency order:
 
 Closeout status:
 
-- Phase 10 is blocked, not closed, by `docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md`.
-- Local release candidate hardening is validated through planning, fresh checkout, database rebuild, redacted real-content metadata dry run, provider safety planning, and one bounded local DeepSeek smoke.
-- Final local MVP acceptance rerun is deferred because `phase-10-local-rag-real-content-smoke-test` is blocked by missing allowed runtime/import scope for real-content RAG validation.
-- Next required action is an explicit follow-up task with allowed runtime/import files or an approved pre-seeded local dev fixture/data set for real-content RAG smoke.
+- Phase 10 local release candidate hardening is closed by `docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md`.
+- Local release candidate hardening is validated through planning, fresh checkout, database rebuild, redacted real-content metadata dry run, provider safety planning, one bounded local DeepSeek smoke, local real-content RAG runtime, and sanitized real-content RAG smoke evidence.
+- Final local MVP acceptance rerun passed with Docker PostgreSQL healthy, agent readiness, quality gate, production build, Playwright E2E, naming conventions, and Git inventory.
+- Staging, production, deployment, production credentials, production resources, public object storage, and customer-network acceptance remain out of scope and require separate explicit approval.
