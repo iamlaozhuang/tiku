@@ -266,7 +266,7 @@ Results on `codex/phase-10-local-real-content-import-dry-run`:
 
 ## Git Closeout
 
-- implementationCommit: pending.
+- implementationCommit: `6156bc5 docs(agent): record phase 10 real content dry run`.
 - metadataCommit: pending.
 - merge: pending.
 - postMergeValidation: pending.
