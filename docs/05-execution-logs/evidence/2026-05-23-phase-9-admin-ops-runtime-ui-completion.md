@@ -82,14 +82,25 @@ Results:
 
 - Full organization mutation, employee creation/import, org_auth creation/cancel, and redeem_code batch generation remain constrained by existing runtime boundaries; UI presents conflict/unavailable-safe feedback instead of pretending success.
 - Reset password does not deliver a temporary password through SMS/email because provider configuration is out of scope and forbidden without approval.
-- E2E treats dev-server `/api/v1/sessions net::ERR_ABORTED` during page transition/session probing as expected and still fails on any other network failures.
+- E2E treats dev-server transition `net::ERR_ABORTED` for session probing, Admin Ops read endpoints, and Next font loading as expected; direct `adminReads` API assertions still verify the Admin Ops endpoints return `code: 0`, and other network failures remain hard failures.
 - No real AI provider, production credential, production resource, dependency, lockfile, schema, migration, deploy, PR, or remote push change was made.
 
 ## Git Closeout
 
 - implementationCommit: `cdd6727 feat(admin): complete admin ops runtime ui`.
-- closeoutEvidenceCommit: pending.
-- merge: pending.
+- branchCloseoutEvidenceCommit: `9e3633b docs(agent): record admin ops runtime ui closeout`.
+- merge: `55fb38d merge: phase 9 admin ops runtime ui`.
+- postMergeValidation on `master`:
+  - `Invoke-QualityGate.ps1`: pass after rerun with extended command timeout.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `102` files and `375` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; build output included `/ops/users`, `/api/v1/users`, `/api/v1/users/[publicId]/reset-password`, `/api/v1/audit-logs`, `/api/v1/ai-call-logs`, `/api/v1/ai-call-logs/summary`, `/api/v1/organizations`, `/api/v1/org-auths`, `/api/v1/employees`, and `/api/v1/redeem-codes`.
+  - `npm.cmd run test:e2e`: pass, `2` Chromium tests passed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` is ahead of `origin/master` before master closeout docs/push.
+- masterCloseoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
 

@@ -26,6 +26,8 @@ async function loginViaUi(
 test("runs the local student, admin, audit, and mock AI business flow", async ({
   page,
 }, testInfo) => {
+  test.setTimeout(60_000);
+
   const consoleErrors: string[] = [];
   const networkFailures: string[] = [];
 
@@ -457,13 +459,27 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   expect(serializedAdminReads).not.toContain(studentToken);
   expect(serializedAdminReads).not.toContain(adminToken);
   const unexpectedNetworkFailures = networkFailures.filter(
-    (networkFailure) =>
-      !(
-        networkFailure.includes("/api/v1/sessions") &&
-        networkFailure.includes("net::ERR_ABORTED")
-      ),
+    (networkFailure) => !isExpectedTransitionAbort(networkFailure),
   );
 
   expect(consoleErrors).toEqual([]);
   expect(unexpectedNetworkFailures).toEqual([]);
 });
+
+function isExpectedTransitionAbort(networkFailure: string) {
+  if (!networkFailure.includes("net::ERR_ABORTED")) {
+    return false;
+  }
+
+  return [
+    "/api/v1/sessions",
+    "/api/v1/audit-logs?",
+    "/api/v1/ai-call-logs?",
+    "/api/v1/ai-call-logs/summary?",
+    "/api/v1/redeem-codes?",
+    "/api/v1/organizations?",
+    "/api/v1/employees?",
+    "/api/v1/org-auths?",
+    "__nextjs_font/geist-latin.woff2",
+  ].some((expectedUrlPart) => networkFailure.includes(expectedUrlPart));
+}

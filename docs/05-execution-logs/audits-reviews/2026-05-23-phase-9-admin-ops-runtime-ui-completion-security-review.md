@@ -27,7 +27,7 @@
 
 - No dependency, lockfile, `.env.example`, schema, migration, production credential, real AI provider, deployment, PR, or production resource changes were made.
 - Organization, employee, org_auth, and redeem_code write flows that still require schema/service expansion remain behind existing authenticated unavailable/conflict boundaries instead of fixture-only success.
-- E2E filters expected dev-server `net::ERR_ABORTED` for `/api/v1/sessions` caused by browser page transition/session probing; other network failures remain hard failures.
+- E2E filters expected dev-server `net::ERR_ABORTED` transition aborts for session probing, Admin Ops read endpoints, and Next font loading; direct API assertions still verify those Admin Ops endpoints return `code: 0`, and other network failures remain hard failures.
 
 ## Residual Risk
 
