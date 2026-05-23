@@ -81,3 +81,27 @@ Staging remains blocked by the previously recorded P1/P2 findings until those ar
 - `LPR-RP-003`: student practice and `mock_exam` entry closure.
 - `LPR-RP-004`: content action closure.
 - `LPR-RP-005` through `LPR-RP-007`: named known-limitations or follow-up fixes depending on acceptance scope.
+
+## Merge Closeout
+
+- Human approval: the user explicitly requested merging and pushing this task to `origin/master`, cleaning the merged branch, and continuing the remaining role-play fixes.
+- Implementation commit: `1b5935d fix(auth): guard protected route shells`.
+- Master merge commit: `826e060 merge: phase 11 staging entry auth route guards`.
+- Post-merge `Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-entry-auth-route-guards` on `master`: expected protected-branch rejection.
+- Post-merge `docker compose ps`: `tiku-postgres-dev` healthy.
+- Post-merge `npm.cmd run test:unit -- --run tests/unit/protected-route-guard-ui.test.ts`: pass, 4 tests passed.
+- Post-merge `npm.cmd run test:e2e -- --grep "local auth route guards"`: pass, 3 Chromium tests passed.
+- Post-merge `Test-AgentSystemReadiness.ps1`: pass.
+- Post-merge `Invoke-QualityGate.ps1`: pass.
+  - `lint`: pass.
+  - `typecheck`: pass.
+  - `test:unit`: 106 test files passed, 385 tests passed.
+  - `format:check`: pass.
+- Post-merge `npm.cmd run build`: pass.
+- Post-merge `Test-NamingConventions.ps1`: pass.
+- Post-merge `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; master was ahead of `origin/master` by the implementation and merge commits before final closeout/push.
+- Final closeout `Invoke-QualityGate.ps1` after evidence/state update: pass.
+  - `lint`: pass.
+  - `typecheck`: pass.
+  - `test:unit`: 106 test files passed, 385 tests passed.
+  - `format:check`: pass.
