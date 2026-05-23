@@ -2857,9 +2857,17 @@ tasks:
       - browser_verification
       - evidence_integrity
     validationCommands:
-      - task-specific validation to be defined when claimed
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-entry-admin-audit-navigation
+      - npm.cmd run test:unit -- --run tests/unit/admin-dashboard-layout-navigation.test.ts
+      - npm.cmd run test:e2e -- --grep "admin audit navigation"
+      - docker compose ps
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-admin-audit-navigation.md
-    status: blocked
+    status: validated
     retryCount: 0
   - id: phase-11-staging-entry-student-practice-mock-entry
     title: Phase 11 Staging Entry Student Practice Mock Entry
