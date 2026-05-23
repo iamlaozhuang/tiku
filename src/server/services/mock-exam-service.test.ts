@@ -515,6 +515,93 @@ describe("mock exam service", () => {
         subjectiveScore: null,
         totalScore: "1.0",
         unansweredCount: 1,
+        answerRecordResults: [
+          {
+            paperQuestionPublicId: "paper_question_public_123",
+            answerRecordStatus: "scored",
+            isCorrect: true,
+            score: "1.0",
+            submittedAt: now,
+          },
+        ],
+      }),
+    ]);
+  });
+
+  it("submits subjective answers as pending scoring without exposing feedback", async () => {
+    const submitInputs: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_subjective",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_456",
+              question_public_id: "question_public_456",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "主观题作答",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+        async submitMockExam(input) {
+          submitInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: "completed",
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 1,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    const response = await service.submitMockExam(
+      userContext,
+      "mock_exam_public_existing",
+      {},
+    );
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          examStatus: "completed",
+        },
+        unansweredCount: 1,
+      },
+    });
+    expect(submitInputs).toEqual([
+      expect.objectContaining({
+        publicId: "mock_exam_public_existing",
+        objectiveScore: "0.0",
+        subjectiveScore: null,
+        totalScore: "0.0",
+        unansweredCount: 1,
+        answerRecordResults: [
+          {
+            paperQuestionPublicId: "paper_question_public_456",
+            answerRecordStatus: "submitted",
+            isCorrect: null,
+            score: null,
+            submittedAt: now,
+          },
+        ],
       }),
     ]);
   });

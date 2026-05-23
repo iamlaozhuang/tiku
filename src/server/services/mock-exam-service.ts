@@ -13,6 +13,7 @@ import {
   mapMockExamAnswerRecordToApi,
   mapMockExamToApi,
 } from "../mappers/mock-exam-mapper";
+import type { AnswerRecordStatus } from "../models/student-experience";
 import type {
   MockExamAnswerRecordRow,
   MockExamAuthorizationScopeRow,
@@ -295,6 +296,38 @@ function buildAnswerSnapshot(
   };
 }
 
+function buildSubmittedAnswerRecordResult(
+  question: MockExamQuestionSnapshot,
+  answerRecord: MockExamAnswerRecordRow,
+  submittedAt: Date,
+): {
+  paperQuestionPublicId: string;
+  answerRecordStatus: AnswerRecordStatus;
+  isCorrect: boolean | null;
+  score: string | null;
+  submittedAt: Date;
+} {
+  if (!isObjectiveQuestion(question)) {
+    return {
+      paperQuestionPublicId: question.paperQuestionPublicId,
+      answerRecordStatus: "submitted",
+      isCorrect: null,
+      score: null,
+      submittedAt,
+    };
+  }
+
+  const isCorrect = isCorrectObjectiveAnswer(question, answerRecord);
+
+  return {
+    paperQuestionPublicId: question.paperQuestionPublicId,
+    answerRecordStatus: "scored",
+    isCorrect,
+    score: isCorrect ? question.score : "0.0",
+    submittedAt,
+  };
+}
+
 function createMockExamNotFoundResponse(): ApiResponse<null> {
   return createErrorResponse(404312, "Mock exam does not exist.");
 }
@@ -369,6 +402,21 @@ async function submitReadableMockExam(
     subjectiveScore: null,
     totalScore: formatScore(objectiveScore),
     unansweredCount,
+    answerRecordResults: questions.flatMap((question) => {
+      const answerRecord = answerByPaperQuestion.get(
+        question.paperQuestionPublicId,
+      );
+
+      return answerRecord === undefined
+        ? []
+        : [
+            buildSubmittedAnswerRecordResult(
+              question,
+              answerRecord,
+              submittedAt,
+            ),
+          ];
+    }),
   });
 
   if (submittedMockExam === null) {
