@@ -121,4 +121,6 @@ Results:
   - `npm.cmd run test:e2e`: pass on `master`, `2` tests passed.
   - `Test-NamingConventions.ps1`: pass on `master`.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory on `master`; branch ahead of `origin/master` by implementation and merge commits.
-- push: pending.
+- push:
+  - `git push origin master`: pass; `origin/master` advanced from `b973fac` to `99f972c`.
+  - push closeout recorded in this evidence update.
