@@ -117,8 +117,8 @@ Results:
     - format:check: pass.
   - `Test-NamingConventions.ps1`: pass.
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` was ahead of `origin/master` by `d6d9afd`, `be43a32`, and `8604c4d` before this evidence update.
-- push: pending.
-- cleanup: pending.
+- push: completed to `origin/master`; final push includes this planning evidence update.
+- cleanup: deleted local branch `codex/phase-10-local-rc-planning` after merge and initial `origin/master` push. No remote short-lived branch was created.
 
 ## Taste Compliance Self-Check
 
