@@ -2741,6 +2741,219 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-11-local-product-readiness-roleplay-run.md
     status: closed
     retryCount: 0
+  - id: phase-11-staging-entry-fix-scope
+    title: Phase 11 Staging Entry Fix Scope
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/evidence/2026-05-23-phase-11-local-product-readiness-roleplay-run.md#staging-decision
+    dependencies:
+      - phase-11-local-product-readiness-roleplay-run
+    taskPlanPolicy: required
+    humanApproval: User requested to continue after the local product readiness role-play run; this task is planning and queue scoping only, with no source, dependency, env, schema, migration, script, cloud, deployment, provider, staging/prod, or secret change approved.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-fix-scope.md
+      - docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-fix-scope.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - release_readiness
+      - product_readiness
+      - fix_scope
+      - evidence_integrity
+      - environment_boundary
+      - auth_permission_model
+      - secret_or_env_change
+      - deploy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-entry-fix-scope
+      - Select-String -Path 'docs\05-execution-logs\audits-reviews\2026-05-24-phase-11-staging-entry-fix-scope.md' -Pattern 'LPR-RP-001|P0|block_staging_entry|human approval|known limitation'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-fix-scope.md
+    status: closed
+    retryCount: 0
+  - id: phase-11-staging-entry-auth-route-guards
+    title: Phase 11 Staging Entry Auth Route Guards
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#first-fix-package-recommendation
+    dependencies:
+      - phase-11-staging-entry-fix-scope
+    taskPlanPolicy: required
+    humanApprovalRequired: true
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - auth_permission_model
+      - route_guard
+      - product_readiness
+      - browser_verification
+      - evidence_integrity
+    validationCommands:
+      - human approval evidence required before task claim
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+    status: blocked
+    retryCount: 0
+  - id: phase-11-staging-entry-admin-audit-navigation
+    title: Phase 11 Staging Entry Admin Audit Navigation
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#first-fix-package-recommendation
+    dependencies:
+      - phase-11-staging-entry-fix-scope
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-admin-audit-navigation.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-admin-audit-navigation.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/app/(admin)/**
+      - src/features/admin/**
+      - tests/unit/**
+      - e2e/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - product_readiness
+      - navigation
+      - browser_verification
+      - evidence_integrity
+    validationCommands:
+      - task-specific validation to be defined when claimed
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-admin-audit-navigation.md
+    status: blocked
+    retryCount: 0
+  - id: phase-11-staging-entry-student-practice-mock-entry
+    title: Phase 11 Staging Entry Student Practice Mock Entry
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#first-fix-package-recommendation
+    dependencies:
+      - phase-11-staging-entry-fix-scope
+    taskPlanPolicy: required
+    humanApprovalRequired: true
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/app/(student)/**
+      - src/features/student/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - product_readiness
+      - practice
+      - mock_exam
+      - browser_verification
+      - evidence_integrity
+    validationCommands:
+      - human approval evidence required before task claim
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    status: blocked
+    retryCount: 0
+  - id: phase-11-staging-entry-content-action-closures
+    title: Phase 11 Staging Entry Content Action Closures
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#first-fix-package-recommendation
+    dependencies:
+      - phase-11-staging-entry-fix-scope
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-content-action-closures.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-content-action-closures.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/app/(admin)/content/**
+      - src/features/admin/**
+      - tests/unit/**
+      - e2e/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - product_readiness
+      - content
+      - browser_verification
+      - evidence_integrity
+    validationCommands:
+      - task-specific validation to be defined when claimed
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-content-action-closures.md
+    status: blocked
+    retryCount: 0
+  - id: phase-11-staging-entry-known-limitations
+    title: Phase 11 Staging Entry Known Limitations
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#known-limitations-for-staging-acceptance-notes
+    dependencies:
+      - phase-11-staging-entry-fix-scope
+    taskPlanPolicy: required
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-known-limitations.md
+      - docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-known-limitations.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-known-limitations.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - release_readiness
+      - known_limitation
+      - evidence_integrity
+    validationCommands:
+      - task-specific validation to be defined when claimed
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-known-limitations.md
+    status: blocked
+    retryCount: 0
   - id: phase-6-admin-ops-readiness-evidence
     title: Admin Ops Readiness Evidence
     phase: phase-6-admin-ops
