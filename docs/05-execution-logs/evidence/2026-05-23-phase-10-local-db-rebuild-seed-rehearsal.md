@@ -116,7 +116,7 @@ This conclusion is local-only:
 
 ## Git Closeout
 
-- implementationCommit: pending.
+- implementationCommit: `16ec4bf docs(agent): record phase 10 db rebuild seed rehearsal`.
 - metadataCommit: pending.
 - merge: pending.
 - postMergeValidation on `master`: pending.
