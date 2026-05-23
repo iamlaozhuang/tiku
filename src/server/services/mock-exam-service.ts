@@ -317,6 +317,16 @@ function listMockExamQuestions(
   });
 }
 
+function shouldReplaceMockExamSnapshot(
+  activeMockExam: MockExamRow,
+  paper: MockExamPaperRow,
+): boolean {
+  return (
+    listMockExamQuestions(activeMockExam.paper_snapshot).length === 0 &&
+    listMockExamQuestions(paper.paper_snapshot).length > 0
+  );
+}
+
 function normalizeLabels(labels: string[]): string[] {
   return [...labels].sort((left, right) => left.localeCompare(right));
 }
@@ -924,6 +934,26 @@ export function createMockExamService(
       });
 
       if (activeMockExam !== null) {
+        if (shouldReplaceMockExamSnapshot(activeMockExam, paper)) {
+          await repository.terminateMockExam({
+            publicId: activeMockExam.public_id,
+            terminatedAt: now,
+            terminationReason: "stale_empty_snapshot",
+          });
+
+          const mockExam = await createFreshMockExam(
+            repository,
+            publicIdFactory,
+            userContext,
+            paper,
+            now,
+          );
+
+          return createSuccessResponse({
+            mockExam: mapMockExamToApi(mockExam, now),
+          });
+        }
+
         if (isDeadlineReached(activeMockExam, now)) {
           const submittedResult = await submitReadableMockExam(
             repository,

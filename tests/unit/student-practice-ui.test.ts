@@ -49,6 +49,59 @@ describe("StudentPracticePage", () => {
     expect(practiceSurface).not.toHaveAttribute("data-id");
   });
 
+  it("renders runtime paper snapshots that keep section title and rich option content in normalized fields", () => {
+    const runtimePractice = {
+      ...studentPracticeFixture.practices[0].practice,
+      publicId: "practice-runtime-snapshot",
+      paperPublicId: "paper-runtime-snapshot",
+      paperSnapshot: {
+        name: "Runtime practice paper",
+        paperSections: [
+          {
+            title: "Runtime section",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-runtime-001",
+                questionPublicId: "question-runtime-001",
+                questionType: "single_choice",
+                stemRichText: "Runtime stem",
+                questionOptions: [
+                  {
+                    label: "A",
+                    contentRichText: "runtime option",
+                  },
+                ],
+                standardAnswerRichText: "A",
+                analysisRichText: "Runtime analysis",
+                score: "1.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-runtime-snapshot",
+        practices: [
+          {
+            practice: runtimePractice,
+            feedbackByPaperQuestionPublicId: {},
+          },
+        ],
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Runtime practice paper" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Runtime section")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "A. runtime option" }),
+    ).toBeInTheDocument();
+  });
+
   it("shows objective feedback after submitting and prevents a second answer", () => {
     render(
       createElement(StudentPracticePage, {

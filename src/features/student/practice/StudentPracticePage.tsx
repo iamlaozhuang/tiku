@@ -276,15 +276,23 @@ function getQuestionOptions(value: unknown): PracticeQuestionOption[] {
     return [];
   }
 
-  return value.filter(
-    (option): option is PracticeQuestionOption =>
-      isRecord(option) &&
-      typeof option.label === "string" &&
-      typeof option.content === "string",
-  );
+  return value.flatMap((option): PracticeQuestionOption[] => {
+    if (!isRecord(option) || typeof option.label !== "string") {
+      return [];
+    }
+
+    const content =
+      getStringField(option, "content") ??
+      getStringField(option, "contentRichText");
+
+    return content === null ? [] : [{ label: option.label, content }];
+  });
 }
 
-function mapPracticeQuestion(value: unknown): PracticePaperQuestion | null {
+function mapPracticeQuestion(
+  value: unknown,
+  fallbackPaperSectionTitle: string | null,
+): PracticePaperQuestion | null {
   if (!isRecord(value)) {
     return null;
   }
@@ -292,7 +300,8 @@ function mapPracticeQuestion(value: unknown): PracticePaperQuestion | null {
   const paperQuestionPublicId = getStringField(value, "paperQuestionPublicId");
   const questionPublicId = getStringField(value, "questionPublicId");
   const questionType = getStringField(value, "questionType");
-  const paperSectionTitle = getStringField(value, "paperSectionTitle");
+  const paperSectionTitle =
+    getStringField(value, "paperSectionTitle") ?? fallbackPaperSectionTitle;
   const stemRichText = getStringField(value, "stemRichText");
 
   if (
@@ -334,12 +343,17 @@ function extractPracticeQuestions(
     }
 
     const typedPaperSection = paperSection as PracticePaperSection;
+    const paperSectionTitle =
+      getStringField(paperSection, "paperSectionTitle") ??
+      getStringField(paperSection, "title");
     const paperQuestions = Array.isArray(typedPaperSection.paperQuestions)
       ? typedPaperSection.paperQuestions
       : [];
 
     return paperQuestions
-      .map(mapPracticeQuestion)
+      .map((paperQuestion) =>
+        mapPracticeQuestion(paperQuestion, paperSectionTitle),
+      )
       .filter(
         (question): question is PracticePaperQuestion => question !== null,
       );

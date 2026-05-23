@@ -72,6 +72,56 @@ describe("StudentMockExamPage", () => {
     ).toBeNull();
   });
 
+  it("renders runtime mock exam snapshots that keep section title and rich option content in normalized fields", () => {
+    const runtimeMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-runtime-snapshot",
+      paperSnapshot: {
+        name: "Runtime mock exam",
+        paperSections: [
+          {
+            title: "Runtime section",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-runtime-001",
+                questionPublicId: "question-runtime-001",
+                questionType: "single_choice",
+                stemRichText: "Runtime stem",
+                questionOptions: [
+                  {
+                    label: "A",
+                    contentRichText: "runtime option",
+                  },
+                ],
+                score: "1.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: "mock-exam-runtime-snapshot",
+        mockExams: [
+          {
+            mockExam: runtimeMockExam,
+            examReportPublicId: "exam-report-runtime-snapshot",
+          },
+        ],
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Runtime mock exam" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Runtime section")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "A. runtime option" }),
+    ).toBeInTheDocument();
+  });
+
   it("supports next question navigation, question card navigation, and submit confirmation", () => {
     render(
       createElement(StudentMockExamPage, {

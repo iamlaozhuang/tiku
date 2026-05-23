@@ -297,15 +297,23 @@ function getQuestionOptions(value: unknown): MockExamQuestionOption[] {
     return [];
   }
 
-  return value.filter(
-    (questionOption): questionOption is MockExamQuestionOption =>
-      isRecord(questionOption) &&
-      typeof questionOption.label === "string" &&
-      typeof questionOption.content === "string",
-  );
+  return value.flatMap((questionOption): MockExamQuestionOption[] => {
+    if (!isRecord(questionOption) || typeof questionOption.label !== "string") {
+      return [];
+    }
+
+    const content =
+      getStringField(questionOption, "content") ??
+      getStringField(questionOption, "contentRichText");
+
+    return content === null ? [] : [{ label: questionOption.label, content }];
+  });
 }
 
-function mapMockExamQuestion(value: unknown): MockExamPaperQuestion | null {
+function mapMockExamQuestion(
+  value: unknown,
+  fallbackPaperSectionTitle: string | null,
+): MockExamPaperQuestion | null {
   if (!isRecord(value)) {
     return null;
   }
@@ -313,7 +321,8 @@ function mapMockExamQuestion(value: unknown): MockExamPaperQuestion | null {
   const paperQuestionPublicId = getStringField(value, "paperQuestionPublicId");
   const questionPublicId = getStringField(value, "questionPublicId");
   const questionType = getStringField(value, "questionType");
-  const paperSectionTitle = getStringField(value, "paperSectionTitle");
+  const paperSectionTitle =
+    getStringField(value, "paperSectionTitle") ?? fallbackPaperSectionTitle;
   const stemRichText = getStringField(value, "stemRichText");
 
   if (
@@ -352,12 +361,17 @@ function extractMockExamQuestions(
     }
 
     const typedPaperSection = paperSection as MockExamPaperSection;
+    const paperSectionTitle =
+      getStringField(paperSection, "paperSectionTitle") ??
+      getStringField(paperSection, "title");
     const paperQuestions = Array.isArray(typedPaperSection.paperQuestions)
       ? typedPaperSection.paperQuestions
       : [];
 
     return paperQuestions
-      .map(mapMockExamQuestion)
+      .map((paperQuestion) =>
+        mapMockExamQuestion(paperQuestion, paperSectionTitle),
+      )
       .filter(
         (question): question is MockExamPaperQuestion => question !== null,
       );
