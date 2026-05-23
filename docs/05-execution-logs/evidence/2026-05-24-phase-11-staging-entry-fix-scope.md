@@ -63,3 +63,24 @@ This task is registered as blocked because it touches auth route guards and like
   - `test:unit`: 105 test files passed, 381 tests passed.
   - `format:check`: pass.
 - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; changed files are limited to this task's allowed files.
+
+## Merge Closeout
+
+- Human approval: the user explicitly requested merging and pushing this scope task to `origin/master`, and approved starting `phase-11-staging-entry-auth-route-guards`.
+- Implementation commit: `63965cf docs(agent): scope phase 11 staging entry fixes`.
+- Master merge commit: `bdc4447 merge: phase 11 staging entry fix scope`.
+- Post-merge `Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-entry-fix-scope` on `master`: expected protected-branch rejection.
+- Post-merge `Test-AgentSystemReadiness.ps1`: pass.
+- Post-merge `Test-NamingConventions.ps1`: pass.
+- Post-merge `Invoke-QualityGate.ps1`: pass.
+  - `lint`: pass.
+  - `typecheck`: pass.
+  - `test:unit`: 105 test files passed, 381 tests passed.
+  - `format:check`: pass.
+- Post-merge `npm.cmd run build`: pass.
+- Post-merge `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; master is ahead of `origin/master` by the scope implementation and merge commits before final closeout/push.
+- Final closeout `Invoke-QualityGate.ps1` after evidence/state update: pass.
+  - `lint`: pass.
+  - `typecheck`: pass.
+  - `test:unit`: 105 test files passed, 381 tests passed.
+  - `format:check`: pass.
