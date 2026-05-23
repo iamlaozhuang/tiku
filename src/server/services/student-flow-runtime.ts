@@ -1,7 +1,15 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { createMockAiProvider } from "@/ai/mock-provider";
 import type { ApiResponse } from "../contracts/api-response";
-import { createModelConfigSnapshot } from "../models/ai-rag";
+import {
+  createModelConfigSnapshot,
+  type EvidenceStatus,
+  type ModelConfigSnapshot,
+} from "../models/ai-rag";
+import type {
+  RagCitationDto,
+  RagRetrievalResultDto,
+} from "../contracts/ai-rag-contract";
 import type { StudentPaperRepository } from "../repositories/student-paper-repository";
 import type { PracticeRepository } from "../repositories/practice-repository";
 import type { MockExamRepository } from "../repositories/mock-exam-repository";
@@ -12,6 +20,7 @@ import {
   type StudentFlowRuntimeRepositoryOptions,
 } from "../repositories/student-flow-runtime-repository";
 import { createAiMockProviderRuntime } from "./ai-mock-provider-runtime";
+import { createAiScoringService } from "./ai-scoring-service";
 import {
   createExamReportRouteHandlers,
   type ExamReportUserResolver,
@@ -27,6 +36,8 @@ import {
 } from "./mock-exam-route";
 import {
   createMockExamService,
+  type MockExamAiScoringRuntime,
+  type MockExamAiScoringRuntimeContext,
   type MockExamPublicIdFactory,
 } from "./mock-exam-service";
 import {
@@ -97,6 +108,185 @@ function createDefaultLearningSuggestionOptions(): ExamReportLearningSuggestionO
   };
 }
 
+function createEmptyRagRetrievalResult(
+  evidenceStatus: EvidenceStatus = "none",
+): RagRetrievalResultDto {
+  return {
+    evidenceStatus,
+    citations: [],
+    evidenceSummary: {
+      evidenceStatus,
+      citationCount: 0,
+      resourcePublicIds: [],
+      chunkPublicIds: [],
+      chunkIndexes: [],
+      textHashes: [],
+      queryHash: "local-deterministic-query",
+      maxScore: null,
+      retrievalMode: "fusion_sort",
+    },
+  };
+}
+
+function createLocalModelConfigSnapshot(input: {
+  aiFuncType: ModelConfigSnapshot["aiFuncType"];
+  modelConfigPublicId: string;
+  modelName: string;
+  promptTemplateKey: string;
+}): ModelConfigSnapshot {
+  return createModelConfigSnapshot({
+    providerPublicId: "model-provider-dev-mock",
+    providerKey: "mock",
+    providerDisplayName: "Local Mock AI",
+    modelConfigPublicId: input.modelConfigPublicId,
+    aiFuncType: input.aiFuncType,
+    modelName: input.modelName,
+    displayName: `Local mock ${input.aiFuncType}`,
+    configVersion: 1,
+    timeoutSecond: 5,
+    maxRetryCount: 3,
+    fallbackModelConfigPublicId: null,
+    promptTemplateKey: input.promptTemplateKey,
+    promptTemplateVersion: 1,
+  });
+}
+
+function estimateTokenCount(value: string): number {
+  return Math.max(1, Math.ceil(value.length / 4));
+}
+
+function createDefaultAiScoringRuntime(): MockExamAiScoringRuntime {
+  const aiCallLogRepository =
+    createPostgresAdminAiAuditLogRuntimeRepositories();
+  const modelConfigSnapshot = createLocalModelConfigSnapshot({
+    aiFuncType: "scoring",
+    modelConfigPublicId: "model-config-dev-ai-scoring",
+    modelName: "mock-ai-scoring",
+    promptTemplateKey: "dev_ai_scoring_v1",
+  });
+  const promptTemplate = {
+    promptTemplateKey: "dev_ai_scoring_v1",
+    version: 1,
+    templateHash: "dev-ai-scoring-template-v1",
+  };
+  const aiScoringService = createAiScoringService({
+    async runner(input) {
+      const scoringPointMaxScoreTotal = input.scoringPoints.reduce(
+        (scoreTotal, scoringPoint) => scoreTotal + scoringPoint.maxScore,
+        0,
+      );
+      const answerLengthRatio = Math.min(
+        1,
+        input.studentAnswer.trim().length / 40,
+      );
+      const earnedScore = Math.min(
+        scoringPointMaxScoreTotal,
+        Math.max(0.5, scoringPointMaxScoreTotal * answerLengthRatio),
+      );
+
+      return {
+        scoringPoints: input.scoringPoints.map((scoringPoint, index) => ({
+          scoringPointPublicId: scoringPoint.scoringPointPublicId,
+          isHit: earnedScore > 0 && index === 0,
+          score: index === 0 ? earnedScore : 0,
+          reason: "Local deterministic scoring based on answer completeness.",
+        })),
+        overallComment: "本地确定性 AI 评分完成。",
+        improvementSuggestion: "围绕评分点补充法规依据和步骤说明。",
+        providerRequestPayload: {
+          model: input.modelConfigSnapshot.modelName,
+          promptTemplateKey: input.promptTemplate.promptTemplateKey,
+          answerLength: input.studentAnswer.length,
+        },
+        providerResponsePayload: {
+          requestId: "mock-ai-scoring-request-dev-001",
+          output: "local deterministic scoring result",
+        },
+      };
+    },
+  });
+
+  return {
+    async scoreSubjectiveAnswer(context: MockExamAiScoringRuntimeContext) {
+      const startedAt = new Date();
+      const result = await aiScoringService.scoreSubjectiveAnswer({
+        userPublicId: context.userPublicId,
+        mockExamPublicId: context.mockExamPublicId,
+        answerRecordPublicId: context.answerRecordPublicId,
+        questionPublicId: context.questionPublicId,
+        questionText: context.questionText,
+        standardAnswer: context.standardAnswer,
+        studentAnswer: context.studentAnswer,
+        maxScore: Number.parseFloat(context.maxScore),
+        scoringPoints: context.scoringPoints,
+        modelConfigSnapshot,
+        promptTemplate,
+        ragRetrievalResult: createEmptyRagRetrievalResult(),
+        existingResult: null,
+        retryCount: 0,
+      });
+      const completedAt = new Date();
+
+      if (result.aiCallLogDraft !== null) {
+        await aiCallLogRepository.appendAiCallLog({
+          userPublicId: context.userPublicId,
+          answerRecordPublicId: context.answerRecordPublicId,
+          mockExamPublicId: context.mockExamPublicId,
+          questionPublicId: context.questionPublicId,
+          aiFuncType: "ai_scoring",
+          callStatus: result.aiCallLogDraft.callStatus,
+          modelConfigSnapshot: result.aiCallLogDraft.modelConfigSnapshot,
+          promptTemplateKey: result.aiCallLogDraft.promptTemplateKey,
+          promptTemplateVersion: result.aiCallLogDraft.promptTemplateVersion,
+          requestRedactedSnapshot:
+            result.aiCallLogDraft.requestRedactedSnapshot,
+          responseRedactedSnapshot:
+            result.aiCallLogDraft.responseRedactedSnapshot,
+          errorRedactedSnapshot: result.aiCallLogDraft.errorRedactedSnapshot,
+          citationRedactedSnapshot:
+            result.aiCallLogDraft.citationRedactedSnapshot,
+          promptTokenCount: estimateTokenCount(context.questionText),
+          completionTokenCount: estimateTokenCount(result.overallComment),
+          totalTokenCount:
+            estimateTokenCount(context.questionText) +
+            estimateTokenCount(result.overallComment),
+          latencyMs: Math.max(1, completedAt.getTime() - startedAt.getTime()),
+          startedAt,
+          completedAt,
+        });
+      }
+
+      return {
+        answerRecordPublicId: context.answerRecordPublicId,
+        scoringStatus: result.scoringStatus,
+        score:
+          result.scoringStatus === "scored"
+            ? result.totalScore.toFixed(1)
+            : null,
+        maxScore: result.maxScore.toFixed(1),
+        scoringSnapshot:
+          result.scoringStatus === "scored"
+            ? {
+                scoringStatus: result.scoringStatus,
+                totalScore: result.totalScore.toFixed(1),
+                scoringPoints: result.scoringPoints,
+                overallComment: result.overallComment,
+                improvementSuggestion: result.improvementSuggestion,
+                citations: result.citations satisfies RagCitationDto[],
+                evidenceStatus: result.evidenceStatus,
+                modelConfigPublicId:
+                  result.modelConfigSnapshot.modelConfigPublicId,
+                modelName: result.modelConfigSnapshot.modelName,
+                promptTemplateKey: result.promptTemplateKey,
+                promptTemplateVersion: result.promptTemplateVersion,
+              }
+            : null,
+        failureReason: result.failureReason ?? null,
+      };
+    },
+  };
+}
+
 function isSuccessfulSessionResponse(
   response: Awaited<ReturnType<SessionService["getCurrentSession"]>>,
 ): response is ApiResponse<NonNullable<typeof response.data>> & {
@@ -159,9 +349,16 @@ export function createStudentFlowRuntimeRouteHandlers(
       resolveUserContext,
     ),
     mockExams: createMockExamRouteHandlers(
-      createMockExamService(repositories.mockExamRepository, clock, {
-        createPublicId: (prefix) => createPublicId(prefix),
-      }),
+      createMockExamService(
+        repositories.mockExamRepository,
+        clock,
+        {
+          createPublicId: (prefix) => createPublicId(prefix),
+        },
+        {
+          aiScoringRuntime: createDefaultAiScoringRuntime(),
+        },
+      ),
       resolveUserContext,
     ),
     examReports: createExamReportRouteHandlers(

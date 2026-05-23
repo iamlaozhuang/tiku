@@ -5,6 +5,8 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type {
+  AiExplanationDto,
+  MistakeBookAiExplanationResultDto,
   MistakeBookListResultDto,
   MistakeBookResultDto,
 } from "../contracts/mistake-book-contract";
@@ -56,7 +58,30 @@ export type MistakeBookService = {
     userContext: MistakeBookUserContext,
     publicId: string,
     input: unknown,
-  ): Promise<ApiResponse<null>>;
+  ): Promise<ApiResponse<MistakeBookAiExplanationResultDto | null>>;
+};
+
+export type MistakeBookAiExplanationRuntimeContext = {
+  userPublicId: string;
+  mistakeBookPublicId: string;
+  questionPublicId: string;
+  paperQuestionPublicId: string;
+  questionSnapshot: Record<string, unknown>;
+  learnerAnswer: string;
+  standardAnswer: string;
+  analysis: string | null;
+  isCorrect: false;
+  triggerReason: "manual_request";
+};
+
+export type MistakeBookAiExplanationRuntime = {
+  generateObjectiveExplanation(
+    context: MistakeBookAiExplanationRuntimeContext,
+  ): Promise<AiExplanationDto>;
+};
+
+export type MistakeBookServiceOptions = {
+  aiExplanationRuntime?: MistakeBookAiExplanationRuntime;
 };
 
 const mistakeBookContractTerm = "mistake_book";
@@ -84,6 +109,44 @@ function hasEffectiveAuthorization(
 
 function createMistakeBookNotFoundResponse(): ApiResponse<null> {
   return createErrorResponse(404331, "Mistake book item does not exist.");
+}
+
+function getStringField(
+  value: Record<string, unknown>,
+  key: string,
+): string | null {
+  return typeof value[key] === "string" ? value[key] : null;
+}
+
+function getLearnerAnswer(mistakeBook: MistakeBookRow): string {
+  if (
+    mistakeBook.latest_answer_snapshot.textAnswer !== null &&
+    mistakeBook.latest_answer_snapshot.textAnswer.trim().length > 0
+  ) {
+    return mistakeBook.latest_answer_snapshot.textAnswer.trim();
+  }
+
+  return mistakeBook.latest_answer_snapshot.selectedLabels.join(",");
+}
+
+function createAiExplanationRuntimeContext(
+  userContext: MistakeBookUserContext,
+  mistakeBook: MistakeBookRow,
+): MistakeBookAiExplanationRuntimeContext {
+  return {
+    userPublicId: userContext.userPublicId,
+    mistakeBookPublicId: mistakeBook.public_id,
+    questionPublicId: mistakeBook.question_public_id,
+    paperQuestionPublicId: mistakeBook.paper_question_public_id,
+    questionSnapshot: mistakeBook.question_snapshot,
+    learnerAnswer: getLearnerAnswer(mistakeBook),
+    standardAnswer:
+      getStringField(mistakeBook.question_snapshot, "standardAnswerRichText") ??
+      "",
+    analysis: getStringField(mistakeBook.question_snapshot, "analysisRichText"),
+    isCorrect: false,
+    triggerReason: "manual_request",
+  };
 }
 
 function isMistakeBookRow(
@@ -154,6 +217,7 @@ async function updateAuthorizedMistakeBook(
 export function createMistakeBookService(
   repository: MistakeBookRepository,
   clock: MistakeBookClock = systemClock,
+  options: MistakeBookServiceOptions = {},
 ): MistakeBookService {
   return {
     async listMistakeBooks(userContext, query) {
@@ -294,6 +358,17 @@ export function createMistakeBookService(
 
       if (!isMistakeBookRow(mistakeBook)) {
         return mistakeBook;
+      }
+
+      if (options.aiExplanationRuntime !== undefined) {
+        const aiExplanation =
+          await options.aiExplanationRuntime.generateObjectiveExplanation(
+            createAiExplanationRuntimeContext(userContext, mistakeBook),
+          );
+
+        return createSuccessResponse({
+          aiExplanation,
+        });
       }
 
       return createErrorResponse(

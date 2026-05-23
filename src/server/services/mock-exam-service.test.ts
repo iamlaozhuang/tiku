@@ -178,8 +178,17 @@ function createRepository(
     async submitMockExam(input) {
       return createMockExam({
         public_id: input.publicId,
-        exam_status: "completed",
+        exam_status: input.examStatus,
         submitted_at: input.submittedAt,
+        objective_score: input.objectiveScore,
+        subjective_score: input.subjectiveScore,
+        total_score: input.totalScore,
+      });
+    },
+    async applyMockExamScoringResults(input) {
+      return createMockExam({
+        public_id: input.publicId,
+        exam_status: input.examStatus,
         objective_score: input.objectiveScore,
         subjective_score: input.subjectiveScore,
         total_score: input.totalScore,
@@ -601,6 +610,415 @@ describe("mock exam service", () => {
             score: null,
             submittedAt: now,
           },
+        ],
+      }),
+    ]);
+  });
+
+  it("scores submitted subjective answers with deterministic AI runtime", async () => {
+    const submitInputs: unknown[] = [];
+    const scoringContexts: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_objective",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "1.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+            {
+              public_id: "answer_record_public_subjective",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_456",
+              question_public_id: "question_public_456",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "主观题作答",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+        async submitMockExam(input) {
+          submitInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: input.examStatus,
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 2,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+      {
+        aiScoringRuntime: {
+          async scoreSubjectiveAnswer(context) {
+            scoringContexts.push(context);
+
+            return {
+              answerRecordPublicId: context.answerRecordPublicId,
+              scoringStatus: "scored",
+              score: "4.5",
+              maxScore: "5.0",
+              scoringSnapshot: {
+                promptTemplateKey: "dev_ai_scoring_v1",
+                promptTemplateVersion: 1,
+                scoringPoints: [],
+                overallComment: "本地确定性评分完成。",
+                improvementSuggestion: "补充法规依据。",
+                citations: [],
+                evidenceStatus: "none",
+              },
+              failureReason: null,
+            };
+          },
+        },
+      },
+    );
+
+    await expect(
+      service.submitMockExam(userContext, "mock_exam_public_existing", {}),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          examStatus: "completed",
+        },
+        unansweredCount: 0,
+      },
+    });
+    expect(scoringContexts).toEqual([
+      expect.objectContaining({
+        userPublicId: "user_public_123",
+        mockExamPublicId: "mock_exam_public_existing",
+        answerRecordPublicId: "answer_record_public_subjective",
+        questionPublicId: "question_public_456",
+        studentAnswer: "主观题作答",
+        maxScore: "5.0",
+      }),
+    ]);
+    expect(submitInputs).toEqual([
+      expect.objectContaining({
+        examStatus: "completed",
+        objectiveScore: "1.0",
+        subjectiveScore: "4.5",
+        totalScore: "5.5",
+        unansweredCount: 0,
+        answerRecordResults: [
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_123",
+            answerRecordStatus: "scored",
+            score: "1.0",
+          }),
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_456",
+            answerRecordStatus: "scored",
+            score: "4.5",
+            aiScoringSnapshot: expect.objectContaining({
+              promptTemplateKey: "dev_ai_scoring_v1",
+            }),
+          }),
+        ],
+      }),
+    ]);
+  });
+
+  it("scores unanswered subjective questions as zero without invoking AI", async () => {
+    const submitInputs: unknown[] = [];
+    const scoringContexts: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_objective",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "1.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+        async submitMockExam(input) {
+          submitInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: input.examStatus,
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 1,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+      {
+        aiScoringRuntime: {
+          async scoreSubjectiveAnswer(context) {
+            scoringContexts.push(context);
+            throw new Error("unanswered subjective answer must not call AI");
+          },
+        },
+      },
+    );
+
+    await service.submitMockExam(userContext, "mock_exam_public_existing", {});
+
+    expect(scoringContexts).toEqual([]);
+    expect(submitInputs).toEqual([
+      expect.objectContaining({
+        examStatus: "completed",
+        objectiveScore: "1.0",
+        subjectiveScore: "0.0",
+        totalScore: "1.0",
+        unansweredCount: 1,
+      }),
+    ]);
+  });
+
+  it("marks mock_exam as scoring_partial_failed when subjective AI scoring fails", async () => {
+    const submitInputs: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_subjective",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_456",
+              question_public_id: "question_public_456",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "主观题作答",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+        async submitMockExam(input) {
+          submitInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: input.examStatus,
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 1,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+      {
+        aiScoringRuntime: {
+          async scoreSubjectiveAnswer(context) {
+            return {
+              answerRecordPublicId: context.answerRecordPublicId,
+              scoringStatus: "scoring_failed",
+              score: null,
+              maxScore: "5.0",
+              scoringSnapshot: null,
+              failureReason: "scoring_runner_failed",
+            };
+          },
+        },
+      },
+    );
+
+    await expect(
+      service.submitMockExam(userContext, "mock_exam_public_existing", {}),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          examStatus: "scoring_partial_failed",
+        },
+      },
+    });
+    expect(submitInputs).toEqual([
+      expect.objectContaining({
+        examStatus: "scoring_partial_failed",
+        objectiveScore: "0.0",
+        subjectiveScore: null,
+        totalScore: "0.0",
+        answerRecordResults: [
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_456",
+            answerRecordStatus: "scoring_failed",
+            score: null,
+            aiScoringSnapshot: expect.objectContaining({
+              failureReason: "scoring_runner_failed",
+            }),
+          }),
+        ],
+      }),
+    ]);
+  });
+
+  it("retries only failed subjective scoring records and preserves successful results", async () => {
+    const retryInputs: unknown[] = [];
+    const scoringContexts: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({
+            exam_status: "scoring_partial_failed",
+            submitted_at: now,
+            objective_score: "1.0",
+            subjective_score: null,
+            total_score: "1.0",
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_scored",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: null,
+              },
+              answer_record_status: "scored",
+              is_correct: true,
+              score: "1.0",
+              max_score: "1.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+            {
+              public_id: "answer_record_public_failed",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_456",
+              question_public_id: "question_public_456",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "重试作答",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "scoring_failed",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+          ];
+        },
+        async applyMockExamScoringResults(input) {
+          retryInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: input.examStatus,
+            submitted_at: now,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 2,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+      {
+        aiScoringRuntime: {
+          async scoreSubjectiveAnswer(context) {
+            scoringContexts.push(context);
+
+            return {
+              answerRecordPublicId: context.answerRecordPublicId,
+              scoringStatus: "scored",
+              score: "3.5",
+              maxScore: "5.0",
+              scoringSnapshot: {
+                promptTemplateKey: "dev_ai_scoring_v1",
+                promptTemplateVersion: 1,
+                scoringPoints: [],
+                citations: [],
+                evidenceStatus: "none",
+              },
+              failureReason: null,
+            };
+          },
+        },
+      },
+    );
+
+    await expect(
+      service.retryMockExamScoring(userContext, "mock_exam_public_existing"),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          examStatus: "completed",
+        },
+      },
+    });
+    expect(scoringContexts).toEqual([
+      expect.objectContaining({
+        answerRecordPublicId: "answer_record_public_failed",
+      }),
+    ]);
+    expect(retryInputs).toEqual([
+      expect.objectContaining({
+        examStatus: "completed",
+        objectiveScore: "1.0",
+        subjectiveScore: "3.5",
+        totalScore: "4.5",
+        answerRecordResults: [
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_456",
+            answerRecordStatus: "scored",
+            score: "3.5",
+          }),
         ],
       }),
     ]);

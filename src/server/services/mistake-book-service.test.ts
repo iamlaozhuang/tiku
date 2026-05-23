@@ -255,7 +255,7 @@ describe("mistake book service", () => {
     });
   });
 
-  it("returns documented not-available response for Phase 5 ai_explanation", async () => {
+  it("returns documented not-available response when ai_explanation runtime is absent", async () => {
     const service = createMistakeBookService(createRepository(), clock);
 
     await expect(
@@ -266,6 +266,117 @@ describe("mistake book service", () => {
       code: 422331,
       message: "AI explanation is not available for mistake book in Phase 4.",
       data: null,
+    });
+  });
+
+  it("returns deterministic AI explanation for an authorized mistake_book item", async () => {
+    const explanationContexts: unknown[] = [];
+    const service = createMistakeBookService(createRepository(), clock, {
+      aiExplanationRuntime: {
+        async generateObjectiveExplanation(context) {
+          explanationContexts.push(context);
+
+          return {
+            explanationStatus: "explained",
+            explanationText: "本地 AI 讲解：本题应先识别监管职责。",
+            keyPoints: ["识别职责", "排除干扰项"],
+            learningSuggestion: "复习行政监管基础知识。",
+            insufficientEvidenceMessage: null,
+            evidenceStatus: "sufficient",
+            citations: [
+              {
+                chunkPublicId: "chunk_public_123",
+                resourcePublicId: "resource_public_123",
+                resourceTitle: "专卖管理教材",
+                headingPath: ["第一章"],
+                chunkIndex: 1,
+                chunkText: "法规依据片段",
+                textHash: "hash_123",
+                score: 0.91,
+              },
+            ],
+            promptTemplateKey: "dev_ai_explanation_v1",
+            promptTemplateVersion: 1,
+          };
+        },
+      },
+    });
+
+    await expect(
+      service.requestAiExplanation(userContext, "mistake_book_public_123", {
+        requestedFromClientAt: "2026-05-19T09:05:00.000Z",
+      }),
+    ).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        aiExplanation: {
+          explanationStatus: "explained",
+          explanationText: "本地 AI 讲解：本题应先识别监管职责。",
+          keyPoints: ["识别职责", "排除干扰项"],
+          learningSuggestion: "复习行政监管基础知识。",
+          insufficientEvidenceMessage: null,
+          evidenceStatus: "sufficient",
+          citations: [
+            {
+              chunkPublicId: "chunk_public_123",
+              resourcePublicId: "resource_public_123",
+              resourceTitle: "专卖管理教材",
+              headingPath: ["第一章"],
+              chunkIndex: 1,
+              chunkText: "法规依据片段",
+              textHash: "hash_123",
+              score: 0.91,
+            },
+          ],
+          promptTemplateKey: "dev_ai_explanation_v1",
+          promptTemplateVersion: 1,
+        },
+      },
+    });
+    expect(explanationContexts).toEqual([
+      expect.objectContaining({
+        userPublicId: "user_public_123",
+        mistakeBookPublicId: "mistake_book_public_123",
+        questionPublicId: "question_public_123",
+        learnerAnswer: "B",
+        triggerReason: "manual_request",
+      }),
+    ]);
+  });
+
+  it("returns weak-evidence explanation without attached citations", async () => {
+    const service = createMistakeBookService(createRepository(), clock, {
+      aiExplanationRuntime: {
+        async generateObjectiveExplanation() {
+          return {
+            explanationStatus: "explained",
+            explanationText: "本地 AI 讲解：依据不足，仅给出通用复习方向。",
+            keyPoints: [],
+            learningSuggestion: null,
+            insufficientEvidenceMessage:
+              "RAG evidence is insufficient; no citation is attached.",
+            evidenceStatus: "weak",
+            citations: [],
+            promptTemplateKey: "dev_ai_explanation_v1",
+            promptTemplateVersion: 1,
+          };
+        },
+      },
+    });
+
+    await expect(
+      service.requestAiExplanation(userContext, "mistake_book_public_123", {}),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        aiExplanation: {
+          insufficientEvidenceMessage:
+            "RAG evidence is insufficient; no citation is attached.",
+          evidenceStatus: "weak",
+          citations: [],
+        },
+      },
     });
   });
 });

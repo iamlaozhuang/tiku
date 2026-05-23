@@ -1,4 +1,6 @@
 import type { Profession, Subject } from "../models/paper";
+import type { EvidenceStatus } from "../models/ai-rag";
+import type { RagCitationDto } from "./ai-rag-contract";
 import type {
   MistakeBookSource,
   MistakeBookStatus,
@@ -36,4 +38,20 @@ export type MistakeBookListResultDto = {
 
 export type MistakeBookResultDto = {
   mistakeBook: MistakeBookItemDto;
+};
+
+export type AiExplanationDto = {
+  explanationStatus: "explained" | "explanation_unavailable";
+  explanationText: string;
+  keyPoints: string[];
+  learningSuggestion: string | null;
+  insufficientEvidenceMessage: string | null;
+  evidenceStatus: EvidenceStatus;
+  citations: RagCitationDto[];
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+};
+
+export type MistakeBookAiExplanationResultDto = {
+  aiExplanation: AiExplanationDto;
 };

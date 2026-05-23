@@ -140,6 +140,27 @@ export function createMockExamRouteHandlers(
         );
       },
     },
+    retryScoring: {
+      async POST(
+        request: Request,
+        context: MockExamRouteContext,
+      ): Promise<Response> {
+        const userContext = await resolveRequiredUserContext(
+          request,
+          resolveUserContext,
+        );
+
+        if (!isMockExamUserContext(userContext)) {
+          return createJsonResponse(userContext);
+        }
+
+        const { publicId } = await context.params;
+
+        return createJsonResponse(
+          await mockExamService.retryMockExamScoring(userContext, publicId),
+        );
+      },
+    },
     terminate: {
       async POST(
         request: Request,
