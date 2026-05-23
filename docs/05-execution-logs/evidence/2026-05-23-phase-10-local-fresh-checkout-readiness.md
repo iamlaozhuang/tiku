@@ -108,9 +108,20 @@ This conclusion is local-only:
 ## Git Closeout
 
 - implementationCommit: `a1a9485 docs(agent): record phase 10 fresh checkout readiness`.
-- metadataCommit: pending.
-- merge: pending.
-- postMergeValidation on `master`: pending.
+- metadataCommit: `c0b0601 docs(agent): record phase 10 fresh checkout metadata`.
+- merge: `9855a1f merge: phase 10 local fresh checkout readiness`.
+- postMergeValidation on `master`:
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `103` files and `379` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; Next.js compiled successfully and listed the `/api/v1/` REST surface and app routes.
+  - `npm.cmd run test:e2e`: pass, `2` Chromium tests passed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `docker compose ps`: local `tiku-postgres-dev` remained healthy.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` was ahead of `origin/master` by `a1a9485`, `c0b0601`, and `9855a1f` before this evidence update.
 - push: pending.
 - cleanup: pending.
 
