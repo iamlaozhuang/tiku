@@ -92,8 +92,18 @@ Results:
 ## Git Closeout
 
 - implementationCommit: `c1db947 feat(admin): complete resource knowledge admin ui`.
-- merge: pending.
-- postMergeValidation: pending.
+- closeoutEvidenceCommit: `26aab9a docs(agent): record resource knowledge admin ui closeout`.
+- merge: `37a30a9 merge: phase 9 resource knowledge admin ui`.
+- postMergeValidation on `master`:
+  - `Invoke-QualityGate.ps1`: pass.
+    - lint: pass.
+    - typecheck: pass.
+    - test:unit: pass, `101` files and `372` tests passed.
+    - format:check: pass.
+  - `npm.cmd run build`: pass; build output included `/ops/resources`, `/api/v1/resources`, `/api/v1/resources/[publicId]/rebuild-vector`, `/api/v1/knowledge-nodes`, `/api/v1/knowledge-nodes/[publicId]`, and `/api/v1/knowledge-nodes/[publicId]/disable`.
+  - `npm.cmd run test:e2e`: pass, `2` Chromium tests passed.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` was ahead of `origin/master` by `3` commits before master closeout docs/push.
 - push: pending.
 - cleanup: pending.
 
