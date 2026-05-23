@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-10-local-release-candidate-hardening
-  updatedAt: "2026-05-23T21:09:59+08:00"
+  updatedAt: "2026-05-23T21:27:03+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-10-local-rag-real-content-smoke-test
+  id: phase-10-local-mvp-acceptance-rerun-closeout
   status: blocked
-  sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#real-content-rules
-  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
-  branch: codex/phase-10-local-rag-real-content-smoke-test
+  sourceStory: docs/02-architecture/interfaces/phase-10-local-release-candidate-contract.md#validation-expectations
+  planPath: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+  branch: codex/phase-10-local-mvp-acceptance-rerun-closeout
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+  lastFailurePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
 qualityGates:
   desired:
     - lint
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: create an explicit follow-up task with allowed runtime/import files before retrying real-content RAG smoke or Phase 10 closeout
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+  nextRecommendedAction: create an explicit follow-up task with allowed runtime/import files for local real-content RAG smoke, then rerun final Phase 10 local MVP acceptance closeout
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
