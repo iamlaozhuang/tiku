@@ -9,16 +9,18 @@ import {
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   ADMIN_AUTH_OPERATION_SORT_FIELDS,
   createAdminAuthOperationListQuery,
-  type EmployeeMutationResultDto,
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
+  type EmployeeMutationResultDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import type { OrgAuthResultDto } from "../contracts/organization-auth-contract";
 import {
   createPostgresAdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
 } from "../repositories/admin-organization-org-auth-runtime-repository";
+import { normalizeCreateOrgAuthInput } from "../validators/org-auth";
 import type { SessionService } from "./session-service";
 
 export type { AdminOrganizationOrgAuthRuntimeRepositories };
@@ -54,6 +56,22 @@ const organizationMutationUnavailableResponse = createErrorResponse(
 const orgAuthMutationUnavailableResponse = createErrorResponse(
   503006,
   "Org auth mutation runtime is not configured.",
+);
+const orgAuthInputInvalidResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "Org auth input is invalid.",
+);
+const orgAuthNotFoundResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+  "Org auth does not exist.",
+);
+const orgAuthScopeOverlapResponse = createErrorResponse(
+  409005,
+  "Org auth scope overlaps an existing active authorization.",
+);
+const orgAuthQuotaExceededResponse = createErrorResponse(
+  409006,
+  "Org auth quota is exceeded or organization does not exist.",
 );
 const employeeMutationUnavailableResponse = createErrorResponse(
   503007,
@@ -124,6 +142,12 @@ function canReadEnterpriseAuth(actor: AdminOrganizationOrgAuthActor): boolean {
 
 function canManageEmployee(actor: AdminOrganizationOrgAuthActor): boolean {
   return actor.roles.includes("super_admin");
+}
+
+function canManageOrgAuth(actor: AdminOrganizationOrgAuthActor): boolean {
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
 }
 
 function readRequestIp(request: Request): string | null {
@@ -287,6 +311,53 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     });
   }
 
+  async function appendOrgAuthAuditLog(input: {
+    request: Request;
+    actor: AdminOrganizationOrgAuthActor;
+    actionType: "org_auth.create" | "org_auth.cancel";
+    targetPublicId: string | null;
+    resultStatus: "success" | "failed";
+    metadataSummary: string;
+  }): Promise<void> {
+    await repositories.auditLogRepository?.appendAuditLog({
+      actorPublicId: input.actor.publicId,
+      actorRole: input.actor.roles[0],
+      actionType: input.actionType,
+      targetResourceType: "org_auth",
+      targetPublicId: input.targetPublicId,
+      resultStatus: input.resultStatus,
+      metadataSummary: input.metadataSummary,
+      requestIp: readRequestIp(input.request),
+    });
+  }
+
+  async function requireOrgAuthManager(
+    request: Request,
+    actionType: "org_auth.create" | "org_auth.cancel",
+    targetPublicId: string | null,
+  ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    if (!canManageOrgAuth(actor)) {
+      await appendOrgAuthAuditLog({
+        request,
+        actor,
+        actionType,
+        targetPublicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted org_auth permission denial metadata",
+      });
+
+      return adminPermissionDeniedResponse;
+    }
+
+    return actor;
+  }
+
   async function requireEmployeeManager(
     request: Request,
     actionType: "employee.create" | "employee.disable",
@@ -391,21 +462,140 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           );
         },
         async POST(request: Request): Promise<Response> {
-          return readOnlyMutationResponse(
+          const actorOrError = await requireOrgAuthManager(
             request,
-            orgAuthMutationUnavailableResponse,
+            "org_auth.create",
+            null,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (
+            repositories.hasOverlappingOrgAuth === undefined ||
+            repositories.createOrgAuth === undefined
+          ) {
+            await appendOrgAuthAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "org_auth.create",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted org_auth create unavailable metadata",
+            });
+
+            return createJsonResponse(orgAuthMutationUnavailableResponse);
+          }
+
+          const orgAuthInput = normalizeCreateOrgAuthInput(
+            await readRequestJson(request),
+          );
+
+          if (!orgAuthInput.success) {
+            await appendOrgAuthAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "org_auth.create",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted org_auth invalid input metadata",
+            });
+
+            return createJsonResponse(orgAuthInputInvalidResponse);
+          }
+
+          if (await repositories.hasOverlappingOrgAuth(orgAuthInput.value)) {
+            await appendOrgAuthAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "org_auth.create",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted org_auth overlap metadata",
+            });
+
+            return createJsonResponse(orgAuthScopeOverlapResponse);
+          }
+
+          const orgAuth = await repositories.createOrgAuth(orgAuthInput.value);
+
+          await appendOrgAuthAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "org_auth.create",
+            targetPublicId: orgAuth?.publicId ?? null,
+            resultStatus: orgAuth === null ? "failed" : "success",
+            metadataSummary:
+              orgAuth === null
+                ? "redacted org_auth quota or organization metadata"
+                : "redacted org_auth create metadata",
+          });
+
+          return createJsonResponse(
+            orgAuth === null
+              ? orgAuthQuotaExceededResponse
+              : createSuccessResponse<OrgAuthResultDto>({ orgAuth }),
           );
         },
       },
       cancel: {
         async POST(request: Request, context: RouteContext): Promise<Response> {
           const { publicId } = await context.params;
-
-          void publicId;
-
-          return readOnlyMutationResponse(
+          const actorOrError = await requireOrgAuthManager(
             request,
-            orgAuthMutationUnavailableResponse,
+            "org_auth.cancel",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.cancelOrgAuth === undefined) {
+            await appendOrgAuthAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "org_auth.cancel",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted org_auth cancel unavailable metadata",
+            });
+
+            return createJsonResponse(orgAuthMutationUnavailableResponse);
+          }
+
+          const orgAuth = await repositories.cancelOrgAuth(publicId);
+
+          if (orgAuth === null) {
+            await appendOrgAuthAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "org_auth.cancel",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted org_auth missing metadata",
+            });
+
+            return createJsonResponse(orgAuthNotFoundResponse);
+          }
+
+          const terminatedFlows =
+            repositories.terminateOrgAuthActiveFlows === undefined
+              ? { practiceCount: 0, mockExamCount: 0 }
+              : await repositories.terminateOrgAuthActiveFlows(publicId);
+
+          await appendOrgAuthAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "org_auth.cancel",
+            targetPublicId: publicId,
+            resultStatus: "success",
+            metadataSummary: `redacted org_auth cancel metadata; terminated practice=${terminatedFlows.practiceCount} mock_exam=${terminatedFlows.mockExamCount}`,
+          });
+
+          return createJsonResponse(
+            createSuccessResponse<OrgAuthResultDto>({ orgAuth }),
           );
         },
       },
