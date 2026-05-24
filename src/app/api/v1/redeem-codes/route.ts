@@ -4,3 +4,4 @@ const adminRedeemCodeRouteHandlers =
   createAdminRedeemCodeRuntimeRouteHandlers();
 
 export const GET = adminRedeemCodeRouteHandlers.redeemCodes.GET;
+export const POST = adminRedeemCodeRouteHandlers.redeemCodes.POST;

@@ -24,10 +24,10 @@ import type {
   AiCallLogSummaryListDto,
   AuditLogListDto,
 } from "@/server/contracts/admin-ai-audit-log-ops-contract";
-import { ADMIN_CONFLICT_MESSAGE } from "@/server/contracts/admin-interaction-contract";
 import type {
   EmployeeListDto,
   OrganizationListDto,
+  RedeemCodeGenerationDto,
   RedeemCodeListDto,
   AdminUserListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
@@ -72,6 +72,8 @@ type ToastMessage = {
   tone: "success" | "error";
   message: string;
 };
+
+type GeneratedRedeemCode = RedeemCodeGenerationDto["redeemCode"];
 
 type AdminOpsLoadResult =
   | {
@@ -170,10 +172,10 @@ function hasAdminOpsData(data: AdminOpsData): boolean {
   );
 }
 
-async function postAdminApi(
+async function postAdminApi<TData>(
   path: string,
   sessionToken: string,
-): Promise<ApiResponse<null>> {
+): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
     headers: {
       authorization: `Bearer ${sessionToken}`,
@@ -181,7 +183,7 @@ async function postAdminApi(
     method: "POST",
   });
 
-  return (await response.json()) as ApiResponse<null>;
+  return (await response.json()) as ApiResponse<TData | null>;
 }
 
 function getCachedAdminOpsLoadResult(listQuery: string) {
@@ -330,6 +332,8 @@ export function AdminOpsManagement() {
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState>(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
+  const [generatedRedeemCode, setGeneratedRedeemCode] =
+    useState<GeneratedRedeemCode | null>(null);
 
   const listQuery = useMemo(
     () =>
@@ -372,15 +376,34 @@ export function AdminOpsManagement() {
     }
 
     if (confirmationState.kind === "generateRedeemCode") {
+      const createRedeemCodeResponse =
+        await postAdminApi<RedeemCodeGenerationDto>(
+          "/api/v1/redeem-codes",
+          sessionToken,
+        );
+
       setConfirmationState(null);
+
+      if (
+        createRedeemCodeResponse.code !== 0 ||
+        createRedeemCodeResponse.data === null
+      ) {
+        setToastMessage({
+          message: createRedeemCodeResponse.message,
+          tone: "error",
+        });
+        return;
+      }
+
+      setGeneratedRedeemCode(createRedeemCodeResponse.data.redeemCode);
       setToastMessage({
-        message: ADMIN_CONFLICT_MESSAGE,
-        tone: "error",
+        message: "卡密已生成，请仅在本地验证时复制给学员",
+        tone: "success",
       });
       return;
     }
 
-    const resetResponse = await postAdminApi(
+    const resetResponse = await postAdminApi<null>(
       `/api/v1/users/${confirmationState.publicId}/reset-password`,
       sessionToken,
     );
@@ -506,6 +529,26 @@ export function AdminOpsManagement() {
           value={`${data.aiCallLogs.length}`}
         />
       </section>
+
+      {generatedRedeemCode === null ? null : (
+        <section
+          aria-label="本地卡密生成结果"
+          className="bg-surface border-success/40 rounded-md border p-4 shadow-sm"
+          role="status"
+        >
+          <div className="space-y-2">
+            <p className="text-text-primary text-sm font-semibold">
+              卡密已生成，请仅在本地验证时复制给学员
+            </p>
+            <p className="text-text-secondary text-xs">
+              该明文仅在本次创建响应中展示；卡密列表仍保持掩码展示。
+            </p>
+            <p className="text-text-primary font-mono text-base font-semibold tracking-normal">
+              {generatedRedeemCode.codePlainText}
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className="grid gap-4 xl:grid-cols-2">
         <AdminPanel title="用户管理">

@@ -118,6 +118,19 @@ export type RedeemCodeListDto = {
   redeemCodes: RedeemCodeSummaryDto[];
 };
 
+export type RedeemCodeGenerationDto = {
+  redeemCode: {
+    publicId: string;
+    codePlainText: string;
+    codeDisplay: string;
+    profession: Profession;
+    level: number;
+    status: RedeemCodeStatus;
+    redeemDeadlineAt: string;
+    createdAt: string;
+  };
+};
+
 export type AdminRoleSummaryDto = {
   role: AdminRole;
   label: string;

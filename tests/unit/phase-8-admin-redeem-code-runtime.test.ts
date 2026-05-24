@@ -51,6 +51,18 @@ function createSessionService(role: "super_admin" | "content_admin") {
 
 function createRepositories(): AdminRedeemCodeRuntimeRepositories {
   return {
+    async createRedeemCode() {
+      return {
+        publicId: "redeem-code-public-generated",
+        codePlainText: "ABCDEFG2",
+        codeDisplay: "ABCDEFG2",
+        profession: "monopoly",
+        level: 3,
+        status: "unused",
+        redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+        createdAt: now.toISOString(),
+      };
+    },
     async listRedeemCodes(query) {
       return {
         redeemCodes: [
@@ -164,5 +176,42 @@ describe("phase 8 admin redeem code runtime", () => {
     expect(serializedPayload).not.toContain("authUserId");
     expect(serializedPayload).not.toContain("password");
     expect(serializedPayload).not.toContain("admin-session-token");
+  });
+
+  it("generates one local redeem_code with plaintext only in the creation response", async () => {
+    const handlers = createAdminRedeemCodeRuntimeRouteHandlers({
+      repositories: createRepositories(),
+      sessionService: createSessionService("super_admin"),
+    });
+
+    const response = await (
+      handlers.redeemCodes as unknown as {
+        POST: (request: Request) => Promise<Response>;
+      }
+    ).POST(
+      new Request("http://localhost/api/v1/redeem-codes", {
+        method: "POST",
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+    );
+
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        redeemCode: {
+          publicId: "redeem-code-public-generated",
+          codePlainText: "ABCDEFG2",
+          codeDisplay: "ABCDEFG2",
+          profession: "monopoly",
+          level: 3,
+          status: "unused",
+          redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+          createdAt: now.toISOString(),
+        },
+      },
+    });
   });
 });

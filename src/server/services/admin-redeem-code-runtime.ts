@@ -2,6 +2,7 @@ import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import {
   createErrorResponse,
   createPaginatedResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
 import {
@@ -86,6 +87,10 @@ function canReadRedeemCode(actor: AdminRedeemCodeActor): boolean {
   );
 }
 
+function canCreateRedeemCode(actor: AdminRedeemCodeActor): boolean {
+  return canReadRedeemCode(actor);
+}
+
 function readAdminAuthOperationListQuery(
   request: Request,
 ): AdminAuthOperationListQuery {
@@ -162,6 +167,18 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
     return canReadRedeemCode(actor) ? null : adminPermissionDeniedResponse;
   }
 
+  async function requireWritableAdminActor(
+    request: Request,
+  ): Promise<ApiResponse<null> | null> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    return canCreateRedeemCode(actor) ? null : adminPermissionDeniedResponse;
+  }
+
   return {
     redeemCodes: {
       async GET(request: Request): Promise<Response> {
@@ -180,6 +197,19 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
             { redeemCodes: result.redeemCodes },
             result.pagination,
           ),
+        );
+      },
+      async POST(request: Request): Promise<Response> {
+        const authError = await requireWritableAdminActor(request);
+
+        if (authError !== null) {
+          return createJsonResponse(authError);
+        }
+
+        const createdRedeemCode = await repositories.createRedeemCode();
+
+        return createJsonResponse(
+          createSuccessResponse({ redeemCode: createdRedeemCode }),
         );
       },
     },
