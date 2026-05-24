@@ -28,10 +28,16 @@ import type {
   OrganizationListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type {
+  DisableOrganizationResultDto,
   OrgAuthDto,
   OrgAuthListDto,
+  OrganizationDto,
 } from "../contracts/organization-auth-contract";
 import type { NormalizedCreateOrgAuthInput } from "../validators/org-auth";
+import type {
+  NormalizedCreateOrganizationInput,
+  NormalizedUpdateOrganizationInput,
+} from "../validators/organization";
 
 type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
   typeof databaseSchema
@@ -55,6 +61,17 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   listEmployees(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<EmployeeListDto>>;
+  createOrganization?(
+    input: NormalizedCreateOrganizationInput,
+  ): Promise<OrganizationDto | null>;
+  updateOrganization?(
+    publicId: string,
+    input: NormalizedUpdateOrganizationInput,
+  ): Promise<OrganizationDto | null>;
+  disableOrganization?(input: {
+    publicId: string;
+    isCascade: boolean;
+  }): Promise<DisableOrganizationResultDto | null>;
   hasOverlappingOrgAuth?(input: NormalizedCreateOrgAuthInput): Promise<boolean>;
   createOrgAuth?(
     input: NormalizedCreateOrgAuthInput,
@@ -105,6 +122,20 @@ const {
   user,
 } = databaseSchema;
 
+type OrganizationMutationRow = {
+  id: number;
+  public_id: string;
+  name: string;
+  org_tier: OrganizationDto["orgTier"];
+  parent_organization_id: number | null;
+  status: OrganizationDto["status"];
+  contact_name: string | null;
+  contact_phone: string | null;
+  remark: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
 function createLazyDatabaseGetter(
   createDatabase: () => AdminOrganizationOrgAuthRuntimeDatabase,
 ): () => AdminOrganizationOrgAuthRuntimeDatabase {
@@ -130,6 +161,22 @@ function createPagination(
     sortBy: query.sortBy,
     sortOrder: query.sortOrder,
     total,
+  };
+}
+
+function selectOrganizationMutationColumns() {
+  return {
+    id: organization.id,
+    public_id: organization.public_id,
+    name: organization.name,
+    org_tier: organization.org_tier,
+    parent_organization_id: organization.parent_organization_id,
+    status: organization.status,
+    contact_name: organization.contact_name,
+    contact_phone: organization.contact_phone,
+    remark: organization.remark,
+    created_at: organization.created_at,
+    updated_at: organization.updated_at,
   };
 }
 
@@ -299,6 +346,110 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           status: row.status,
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
+      };
+    },
+    async createOrganization(input) {
+      const database = getDatabase();
+      const parentOrganizationId = await findParentOrganizationId(
+        database,
+        input.parentOrganizationPublicId,
+      );
+
+      if (parentOrganizationId === undefined) {
+        return null;
+      }
+
+      const now = new Date();
+      const [organizationRow] = await database
+        .insert(organization)
+        .values({
+          public_id: `organization-${randomUUID()}`,
+          name: input.name,
+          org_tier: input.orgTier,
+          parent_organization_id: parentOrganizationId,
+          status: "active",
+          contact_name: input.contactName,
+          contact_phone: input.contactPhone,
+          remark: input.remark,
+          created_at: now,
+          updated_at: now,
+        })
+        .returning(selectOrganizationMutationColumns());
+
+      return organizationRow === undefined
+        ? null
+        : mapOrganizationMutationRowToDto(database, organizationRow);
+    },
+    async updateOrganization(publicId, input) {
+      const database = getDatabase();
+      const parentOrganizationId = await findParentOrganizationId(
+        database,
+        input.parentOrganizationPublicId,
+      );
+
+      if (parentOrganizationId === undefined) {
+        return null;
+      }
+
+      const [organizationRow] = await database
+        .update(organization)
+        .set({
+          name: input.name,
+          org_tier: input.orgTier,
+          parent_organization_id: parentOrganizationId,
+          status: input.status,
+          contact_name: input.contactName,
+          contact_phone: input.contactPhone,
+          remark: input.remark,
+          updated_at: new Date(),
+        })
+        .where(eq(organization.public_id, publicId))
+        .returning(selectOrganizationMutationColumns());
+
+      return organizationRow === undefined
+        ? null
+        : mapOrganizationMutationRowToDto(database, organizationRow);
+    },
+    async disableOrganization(input) {
+      const database = getDatabase();
+      const [rootOrganization] = await database
+        .select({ id: organization.id })
+        .from(organization)
+        .where(eq(organization.public_id, input.publicId))
+        .limit(1);
+
+      if (rootOrganization === undefined) {
+        return null;
+      }
+
+      const organizationIds = input.isCascade
+        ? await listOrganizationAndDescendantIds(database, rootOrganization.id)
+        : [rootOrganization.id];
+      const rows = await database
+        .update(organization)
+        .set({
+          status: "disabled",
+          updated_at: new Date(),
+        })
+        .where(inArray(organization.id, organizationIds))
+        .returning(selectOrganizationMutationColumns());
+      const disabledOrganization = rows.find(
+        (row) => row.id === rootOrganization.id,
+      );
+
+      if (disabledOrganization === undefined) {
+        return null;
+      }
+
+      return {
+        organization: await mapOrganizationMutationRowToDto(
+          database,
+          disabledOrganization,
+        ),
+        affectedOrganizationPublicIds: await listOrganizationPublicIdsByIds(
+          database,
+          organizationIds,
+        ),
       };
     },
     async hasOverlappingOrgAuth(input) {
@@ -765,6 +916,51 @@ async function listParentOrganizationPublicIds(
     .where(inArray(organization.id, parentOrganizationIds));
 
   return new Map(rows.map((row) => [row.id, row.public_id]));
+}
+
+async function findParentOrganizationId(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  parentOrganizationPublicId: string | null,
+): Promise<number | null | undefined> {
+  if (parentOrganizationPublicId === null) {
+    return null;
+  }
+
+  const [parentOrganization] = await database
+    .select({ id: organization.id })
+    .from(organization)
+    .where(eq(organization.public_id, parentOrganizationPublicId))
+    .limit(1);
+
+  return parentOrganization?.id;
+}
+
+async function mapOrganizationMutationRowToDto(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: OrganizationMutationRow,
+): Promise<OrganizationDto> {
+  const parentPublicIds =
+    input.parent_organization_id === null
+      ? new Map<number, string>()
+      : await listParentOrganizationPublicIds(database, [
+          input.parent_organization_id,
+        ]);
+
+  return {
+    publicId: input.public_id,
+    name: input.name,
+    orgTier: input.org_tier,
+    parentOrganizationPublicId:
+      input.parent_organization_id === null
+        ? null
+        : (parentPublicIds.get(input.parent_organization_id) ?? null),
+    status: input.status,
+    contactName: input.contact_name,
+    contactPhone: input.contact_phone,
+    remark: input.remark,
+    createdAt: input.created_at.toISOString(),
+    updatedAt: input.updated_at.toISOString(),
+  };
 }
 
 async function listEmployeeCounts(

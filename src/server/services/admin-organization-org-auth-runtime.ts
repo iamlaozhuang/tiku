@@ -14,13 +14,25 @@ import {
   type AdminAuthOperationSortField,
   type EmployeeMutationResultDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
-import type { OrgAuthResultDto } from "../contracts/organization-auth-contract";
+import type {
+  DisableOrganizationResultDto,
+  OrgAuthResultDto,
+  OrganizationDto,
+  OrganizationResultDto,
+} from "../contracts/organization-auth-contract";
 import {
   createPostgresAdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
 } from "../repositories/admin-organization-org-auth-runtime-repository";
 import { normalizeCreateOrgAuthInput } from "../validators/org-auth";
+import {
+  normalizeCreateOrganizationInput,
+  normalizeDisableOrganizationInput,
+  normalizeUpdateOrganizationInput,
+  type NormalizedCreateOrganizationInput,
+  type NormalizedUpdateOrganizationInput,
+} from "../validators/organization";
 import type { SessionService } from "./session-service";
 
 export type { AdminOrganizationOrgAuthRuntimeRepositories };
@@ -52,6 +64,14 @@ const adminPermissionDeniedResponse = createErrorResponse(
 const organizationMutationUnavailableResponse = createErrorResponse(
   503005,
   "Organization mutation runtime is not configured.",
+);
+const organizationInputInvalidResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "Organization input is invalid.",
+);
+const organizationNotFoundResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+  "Organization does not exist.",
 );
 const orgAuthMutationUnavailableResponse = createErrorResponse(
   503006,
@@ -91,6 +111,21 @@ type RouteContext = {
     publicId: string;
   }>;
 };
+
+type OrganizationMutationRepositories =
+  AdminOrganizationOrgAuthRuntimeRepositories & {
+    createOrganization?(
+      input: NormalizedCreateOrganizationInput,
+    ): Promise<OrganizationDto | null>;
+    updateOrganization?(
+      publicId: string,
+      input: NormalizedUpdateOrganizationInput,
+    ): Promise<OrganizationDto | null>;
+    disableOrganization?(input: {
+      publicId: string;
+      isCascade: boolean;
+    }): Promise<DisableOrganizationResultDto | null>;
+  };
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -145,6 +180,12 @@ function canManageEmployee(actor: AdminOrganizationOrgAuthActor): boolean {
 }
 
 function canManageOrgAuth(actor: AdminOrganizationOrgAuthActor): boolean {
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
+}
+
+function canManageOrganization(actor: AdminOrganizationOrgAuthActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
@@ -266,6 +307,8 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
   const repositories =
     options.repositories ??
     createPostgresAdminOrganizationOrgAuthRuntimeRepositories(options);
+  const organizationMutationRepositories =
+    repositories as OrganizationMutationRepositories;
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
 
   async function requireReadableAdminActor(
@@ -280,15 +323,6 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     void actor.publicId;
 
     return canReadEnterpriseAuth(actor) ? null : adminPermissionDeniedResponse;
-  }
-
-  async function readOnlyMutationResponse(
-    request: Request,
-    response: ApiResponse<null>,
-  ): Promise<Response> {
-    const authError = await requireReadableAdminActor(request);
-
-    return createJsonResponse(authError ?? response);
   }
 
   async function appendEmployeeAuditLog(input: {
@@ -329,6 +363,59 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
       metadataSummary: input.metadataSummary,
       requestIp: readRequestIp(input.request),
     });
+  }
+
+  async function appendOrganizationAuditLog(input: {
+    request: Request;
+    actor: AdminOrganizationOrgAuthActor;
+    actionType:
+      | "organization.create"
+      | "organization.update"
+      | "organization.disable";
+    targetPublicId: string | null;
+    resultStatus: "success" | "failed";
+    metadataSummary: string;
+  }): Promise<void> {
+    await repositories.auditLogRepository?.appendAuditLog({
+      actorPublicId: input.actor.publicId,
+      actorRole: input.actor.roles[0],
+      actionType: input.actionType,
+      targetResourceType: "organization",
+      targetPublicId: input.targetPublicId,
+      resultStatus: input.resultStatus,
+      metadataSummary: input.metadataSummary,
+      requestIp: readRequestIp(input.request),
+    });
+  }
+
+  async function requireOrganizationManager(
+    request: Request,
+    actionType:
+      | "organization.create"
+      | "organization.update"
+      | "organization.disable",
+    targetPublicId: string | null,
+  ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    if (!canManageOrganization(actor)) {
+      await appendOrganizationAuditLog({
+        request,
+        actor,
+        actionType,
+        targetPublicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted organization permission denial metadata",
+      });
+
+      return adminPermissionDeniedResponse;
+    }
+
+    return actor;
   }
 
   async function requireOrgAuthManager(
@@ -407,9 +494,69 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           );
         },
         async POST(request: Request): Promise<Response> {
-          return readOnlyMutationResponse(
+          const actorOrError = await requireOrganizationManager(
             request,
-            organizationMutationUnavailableResponse,
+            "organization.create",
+            null,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (
+            organizationMutationRepositories.createOrganization === undefined
+          ) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.create",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted organization create unavailable metadata",
+            });
+
+            return createJsonResponse(organizationMutationUnavailableResponse);
+          }
+
+          const organizationInput = normalizeCreateOrganizationInput(
+            await readRequestJson(request),
+          );
+
+          if (!organizationInput.success) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.create",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted organization invalid input metadata",
+            });
+
+            return createJsonResponse(organizationInputInvalidResponse);
+          }
+
+          const organization =
+            await organizationMutationRepositories.createOrganization(
+              organizationInput.value,
+            );
+
+          await appendOrganizationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "organization.create",
+            targetPublicId: organization?.publicId ?? null,
+            resultStatus: organization === null ? "failed" : "success",
+            metadataSummary: "redacted organization create metadata",
+          });
+
+          return createJsonResponse(
+            organization === null
+              ? organizationNotFoundResponse
+              : createSuccessResponse<OrganizationResultDto>({
+                  organization,
+                }),
           );
         },
       },
@@ -419,24 +566,141 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           context: RouteContext,
         ): Promise<Response> {
           const { publicId } = await context.params;
-
-          void publicId;
-
-          return readOnlyMutationResponse(
+          const actorOrError = await requireOrganizationManager(
             request,
-            organizationMutationUnavailableResponse,
+            "organization.update",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (
+            organizationMutationRepositories.updateOrganization === undefined
+          ) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.update",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted organization update unavailable metadata",
+            });
+
+            return createJsonResponse(organizationMutationUnavailableResponse);
+          }
+
+          const organizationInput = normalizeUpdateOrganizationInput(
+            await readRequestJson(request),
+          );
+
+          if (!organizationInput.success) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.update",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted organization invalid input metadata",
+            });
+
+            return createJsonResponse(organizationInputInvalidResponse);
+          }
+
+          const organization =
+            await organizationMutationRepositories.updateOrganization(
+              publicId,
+              organizationInput.value,
+            );
+
+          await appendOrganizationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "organization.update",
+            targetPublicId: publicId,
+            resultStatus: organization === null ? "failed" : "success",
+            metadataSummary: "redacted organization update metadata",
+          });
+
+          return createJsonResponse(
+            organization === null
+              ? organizationNotFoundResponse
+              : createSuccessResponse<OrganizationResultDto>({
+                  organization,
+                }),
           );
         },
       },
       disable: {
         async POST(request: Request, context: RouteContext): Promise<Response> {
           const { publicId } = await context.params;
-
-          void publicId;
-
-          return readOnlyMutationResponse(
+          const actorOrError = await requireOrganizationManager(
             request,
-            organizationMutationUnavailableResponse,
+            "organization.disable",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (
+            organizationMutationRepositories.disableOrganization === undefined
+          ) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.disable",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted organization disable unavailable metadata",
+            });
+
+            return createJsonResponse(organizationMutationUnavailableResponse);
+          }
+
+          const disableInput = normalizeDisableOrganizationInput(
+            await readRequestJson(request),
+          );
+
+          if (!disableInput.success) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.disable",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted organization invalid input metadata",
+            });
+
+            return createJsonResponse(organizationInputInvalidResponse);
+          }
+
+          const result =
+            await organizationMutationRepositories.disableOrganization({
+              publicId,
+              isCascade: disableInput.value.isCascade,
+            });
+
+          await appendOrganizationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "organization.disable",
+            targetPublicId: publicId,
+            resultStatus: result === null ? "failed" : "success",
+            metadataSummary:
+              result === null
+                ? "redacted organization disable metadata"
+                : `redacted organization disable metadata; affected organization=${result.affectedOrganizationPublicIds.length}`,
+          });
+
+          return createJsonResponse(
+            result === null
+              ? organizationNotFoundResponse
+              : createSuccessResponse<DisableOrganizationResultDto>(result),
           );
         },
       },
