@@ -157,6 +157,25 @@ describe("StudentProfilePage", () => {
       }),
     );
   });
+
+  it("clears the local student session token when the profile logout control is used", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    mockProfileFetch();
+
+    render(createElement(StudentProfilePage));
+
+    expect(await screen.findByText("Dev Student")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+
+    expect(localStorage.getItem("tiku.localSessionToken")).toBeNull();
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: "前往登录" })).toHaveAttribute(
+        "href",
+        "/login",
+      ),
+    );
+  });
 });
 
 describe("StudentRedeemCodePage", () => {

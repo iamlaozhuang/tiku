@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock3,
   KeyRound,
+  LogOut,
   ShieldCheck,
   Ticket,
   UserRound,
@@ -27,11 +28,16 @@ import type {
   EffectiveAuthorizationListDto,
 } from "@/server/contracts/effective-authorization-contract";
 import type { Profession } from "@/server/models/auth";
+import {
+  clearStoredStudentSessionToken,
+  createStudentAuthHeaders,
+  getStoredStudentSessionToken,
+  isStudentUnauthorizedResponse,
+} from "../studentRuntimeApi";
 
 type LoadState = "loading" | "ready" | "unauthorized" | "error";
 type RedeemSubmitState = "idle" | "submitting" | "success" | "error";
 
-const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 const REDEEM_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/u;
 
 const professionLabels: Record<Profession, string> = {
@@ -44,18 +50,6 @@ const authorizationTypeLabels = {
   org_auth: "企业授权",
   personal_auth: "个人授权",
 } satisfies Record<string, string>;
-
-function getStoredSessionToken(): string | null {
-  const token = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY)?.trim();
-
-  return token === "" ? null : (token ?? null);
-}
-
-function createAuthHeaders(token: string) {
-  return {
-    authorization: `Bearer ${token}`,
-  };
-}
 
 function normalizeRedeemCodeInput(value: string): string {
   return value
@@ -72,16 +66,12 @@ async function fetchApi<TData>(
   const response = await fetch(path, {
     ...init,
     headers: {
-      ...createAuthHeaders(token),
+      ...createStudentAuthHeaders(token),
       ...(init?.headers ?? {}),
     },
   });
 
   return (await response.json()) as ApiResponse<TData | null>;
-}
-
-function isUnauthorizedResponse(payload: ApiResponse<unknown>): boolean {
-  return payload.code === 401001;
 }
 
 function formatDate(value: string | null): string {
@@ -169,20 +159,38 @@ function StudentProfileLoading({ label }: { label: string }) {
   );
 }
 
-function ProfileHeader({ authContext }: { authContext: AuthContextDto }) {
+function ProfileHeader({
+  authContext,
+  onLogout,
+}: {
+  authContext: AuthContextDto;
+  onLogout: () => void;
+}) {
   return (
     <section className="bg-surface ring-border flex flex-col gap-4 rounded-xl p-4 shadow-sm ring-1">
-      <div className="flex items-start gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
           <UserRound className="size-5" aria-hidden="true" />
         </div>
-        <div className="min-w-0 space-y-1">
-          <h1 className="font-heading text-text-primary text-2xl font-semibold">
-            {authContext.user.name}
-          </h1>
-          <p className="text-text-secondary text-sm">
-            {authContext.user.phone}
-          </p>
+        <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 space-y-1">
+            <h1 className="font-heading text-text-primary text-2xl font-semibold">
+              {authContext.user.name}
+            </h1>
+            <p className="text-text-secondary text-sm">
+              {authContext.user.phone}
+            </p>
+          </div>
+          <Button
+            className="w-full active:scale-[0.98] sm:w-auto"
+            onClick={onLogout}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            <LogOut aria-hidden="true" />
+            退出登录
+          </Button>
         </div>
       </div>
       <div className="text-text-secondary flex items-center gap-2 text-sm">
@@ -347,7 +355,7 @@ export function StudentProfilePage() {
     let isActive = true;
 
     async function loadProfile() {
-      const token = getStoredSessionToken();
+      const token = getStoredStudentSessionToken();
 
       if (token === null) {
         if (isActive) {
@@ -372,9 +380,9 @@ export function StudentProfilePage() {
         }
 
         if (
-          isUnauthorizedResponse(sessionResponse) ||
-          isUnauthorizedResponse(authorizationResponse) ||
-          isUnauthorizedResponse(personalAuthResponse)
+          isStudentUnauthorizedResponse(sessionResponse) ||
+          isStudentUnauthorizedResponse(authorizationResponse) ||
+          isStudentUnauthorizedResponse(personalAuthResponse)
         ) {
           setLoadState("unauthorized");
           return;
@@ -413,6 +421,15 @@ export function StudentProfilePage() {
     };
   }, []);
 
+  function handleLogout() {
+    clearStoredStudentSessionToken();
+    setAuthContext(null);
+    setAuthorizations([]);
+    setEffectiveAuthorizations([]);
+    setPersonalAuths([]);
+    setLoadState("unauthorized");
+  }
+
   if (loadState === "loading") {
     return <StudentProfileLoading label="正在加载个人中心" />;
   }
@@ -445,7 +462,7 @@ export function StudentProfilePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20">
-      <ProfileHeader authContext={authContext} />
+      <ProfileHeader authContext={authContext} onLogout={handleLogout} />
       <ProfileNavLinks />
 
       <section className="space-y-3">
@@ -519,7 +536,7 @@ export function StudentRedeemCodePage() {
     let isActive = true;
 
     async function loadPersonalAuths() {
-      const token = getStoredSessionToken();
+      const token = getStoredStudentSessionToken();
 
       if (token === null) {
         if (isActive) {
@@ -539,8 +556,8 @@ export function StudentRedeemCodePage() {
         }
 
         if (
-          isUnauthorizedResponse(sessionResponse) ||
-          isUnauthorizedResponse(personalAuthResponse)
+          isStudentUnauthorizedResponse(sessionResponse) ||
+          isStudentUnauthorizedResponse(personalAuthResponse)
         ) {
           setLoadState("unauthorized");
           return;
@@ -589,7 +606,7 @@ export function StudentRedeemCodePage() {
       const response = await fetch("/api/v1/redeem-codes/redeem", {
         method: "POST",
         headers: {
-          ...createAuthHeaders(sessionToken),
+          ...createStudentAuthHeaders(sessionToken),
           "content-type": "application/json",
         },
         body: JSON.stringify({ code: normalizedRedeemCode }),
