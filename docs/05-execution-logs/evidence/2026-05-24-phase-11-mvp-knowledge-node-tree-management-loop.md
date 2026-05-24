@@ -107,26 +107,39 @@ Post-merge result on `master`: inventory completed; `master` ahead of `origin/ma
 
 git diff --check
 Post-merge result on `master`: pass.
+
+git push origin master
+Result: pushed `master` to `origin`, `9395499..81e124c`.
+
+git branch -d codex/phase-11-mvp-knowledge-node-tree-management-loop
+First attempt: sandbox ref lock permission denied.
+Retry with approved escalation: deleted local branch `codex/phase-11-mvp-knowledge-node-tree-management-loop` at `ac61cb6`.
+
+git status --short --branch
+Result after push and cleanup: `## master...origin/master`.
+
+git branch --list codex/phase-11-mvp-knowledge-node-tree-management-loop
+Result: no matching local branch remains.
 ```
 
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                                                                                      | Result  |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-knowledge-node-tree-management-loop`, not master/main                                                                            | Pass    |
-| Allowed files        | Changed files are knowledge_node UI, RAG knowledge repository, unit tests, task plan/evidence, and queue state; boundary correction added `src/server/repositories/**` | Pass    |
-| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, staging/prod file change                                                                      | Pass    |
-| AC-to-runtime matrix | Matrix records runtime-closed move/sort/disable/audit and approval-gated exact count residual                                                                          | Pass    |
-| Problem grading      | P1 move/sort/disable/audit fixed; P1 exact persisted question count deferred with approval gate                                                                        | Pass    |
-| Validation record    | RED/GREEN targeted tests, typecheck, full unit, build, readiness, naming, Git inventory, diff check, and quality gate recorded                                         | Pass    |
-| Evidence hygiene     | No secrets, raw resource text, raw chunks, embeddings, provider payloads, or prohibited data recorded                                                                  | Pass    |
-| Commit               | Focused task commit `ac61cb6`                                                                                                                                          | Pass    |
-| Merge                | Merged to `master` with merge commit `f8e83bb`                                                                                                                         | Pass    |
-| Push                 | Pending                                                                                                                                                                | Pending |
-| Cleanup              | Pending                                                                                                                                                                | Pending |
-| Worktree residue     | Pending                                                                                                                                                                | Pending |
-| stagingDecision      | `local_task_closed_remaining_p1` because exact persisted question count needs schema/binding approval                                                                  | Pass    |
-| Next step            | Continue to `phase-11-mvp-ai-knowledge-recommendation-review-loop`; carry count binding as approval-gated follow-up                                                    | Pass    |
+| Check                | Required evidence                                                                                                                                                      | Result |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-knowledge-node-tree-management-loop`, not master/main                                                                            | Pass   |
+| Allowed files        | Changed files are knowledge_node UI, RAG knowledge repository, unit tests, task plan/evidence, and queue state; boundary correction added `src/server/repositories/**` | Pass   |
+| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, staging/prod file change                                                                      | Pass   |
+| AC-to-runtime matrix | Matrix records runtime-closed move/sort/disable/audit and approval-gated exact count residual                                                                          | Pass   |
+| Problem grading      | P1 move/sort/disable/audit fixed; P1 exact persisted question count deferred with approval gate                                                                        | Pass   |
+| Validation record    | RED/GREEN targeted tests, typecheck, full unit, build, readiness, naming, Git inventory, diff check, and quality gate recorded                                         | Pass   |
+| Evidence hygiene     | No secrets, raw resource text, raw chunks, embeddings, provider payloads, or prohibited data recorded                                                                  | Pass   |
+| Commit               | Focused task commit `ac61cb6`                                                                                                                                          | Pass   |
+| Merge                | Merged to `master` with merge commit `f8e83bb`                                                                                                                         | Pass   |
+| Push                 | Pushed `master` to `origin`, `9395499..81e124c`                                                                                                                        | Pass   |
+| Cleanup              | Deleted local short-lifecycle branch `codex/phase-11-mvp-knowledge-node-tree-management-loop` after merge and push                                                     | Pass   |
+| Worktree residue     | `git status --short --branch` reported `## master...origin/master`; no untracked files and no matching local task branch remains                                       | Pass   |
+| stagingDecision      | `local_task_closed_remaining_p1` because exact persisted question count needs schema/binding approval                                                                  | Pass   |
+| Next step            | Continue to `phase-11-mvp-ai-knowledge-recommendation-review-loop`; carry count binding as approval-gated follow-up                                                    | Pass   |
 
 ## stagingDecision
 
