@@ -93,6 +93,52 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\I
 Final result: pass. lint, typecheck, test:unit, and format:check all passed.
 ```
 
+## Commit and Merge
+
+```text
+git commit -m "feat(rag): add knowledge recommendation review loop"
+Result: pass.
+Task commit: a2a01fa2ba97a0c801d957c40664f3f85208d700
+
+git fetch origin
+Result: pass.
+
+git switch master
+Result: pass; master was up to date with origin/master before merge.
+
+git merge origin/master
+Result: already up to date.
+
+git merge --no-ff codex/phase-11-mvp-ai-knowledge-recommendation-review-loop -m "merge: phase 11 AI knowledge recommendation review loop"
+Result: pass.
+Merge commit: d78e33618d90f2ec2b19ae8fc0146f6b5748e4e4
+```
+
+## Post-Merge Validation on Master
+
+```text
+git status --short --branch
+Result: master ahead of origin/master by 2 commits after merge; no unstaged files.
+
+npm.cmd run build
+Result: pass. Build reported `.env.local` as an environment source; no contents were read or recorded.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: pass. lint, typecheck, test:unit, and format:check all passed.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Result: inventory completed. master ahead of origin/master by task and merge commits; no tracked, staged, or untracked residue.
+
+git diff --check
+Result: pass.
+```
+
 ## Repository Hygiene Closeout Checklist
 
 | Check                | Required evidence                                                                                                             | Result  |
@@ -104,8 +150,8 @@ Final result: pass. lint, typecheck, test:unit, and format:check all passed.
 | Problem grading      | Initial P1 `kn_recommendation` loop issue recorded                                                                            | Pass    |
 | Validation record    | RED/GREEN targeted tests, typecheck, full unit, build, readiness, naming, diff check, git inventory, and QualityGate recorded | Pass    |
 | Evidence hygiene     | No secrets, raw prompts, raw answers, raw model responses, provider payloads, or prohibited data recorded                     | Pass    |
-| Commit               | Pending                                                                                                                       | Pending |
-| Merge                | Pending                                                                                                                       | Pending |
+| Commit               | Task commit `a2a01fa2ba97a0c801d957c40664f3f85208d700`                                                                        | Pass    |
+| Merge                | Merged to master with merge commit `d78e33618d90f2ec2b19ae8fc0146f6b5748e4e4`                                                 | Pass    |
 | Push                 | Pending                                                                                                                       | Pending |
 | Cleanup              | Pending                                                                                                                       | Pending |
 | Worktree residue     | Pending                                                                                                                       | Pending |
