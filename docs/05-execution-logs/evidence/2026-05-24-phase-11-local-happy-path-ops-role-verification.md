@@ -133,3 +133,36 @@ Reason: system ops and content ops pass local read/entry validation, and student
 ## Evidence Hygiene
 
 This evidence intentionally excludes secrets, tokens, Authorization headers, raw provider payloads, raw prompts, raw answers, raw model responses, full paper/material/OCR text, plaintext `redeem_code` values, and customer/private data.
+
+## Master Gate Backfill
+
+```text
+git switch master
+Result: switched to master; branch up to date with origin/master before merge.
+
+git merge --no-ff codex/phase-11-local-happy-path-ops-role-verification -m "merge: phase 11 local ops role verification"
+Result: merged into master.
+Merge commit: bb66280
+
+docker compose ps
+Result: tiku-postgres-dev Up, healthy, 127.0.0.1:5432->5432/tcp
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: passed on master.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: naming convention scan completed on master.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: passed on master.
+- lint: passed.
+- typecheck: passed.
+- test:unit: 107 files passed, 395 tests passed.
+- format:check: passed.
+
+npm.cmd run test:e2e -- --grep "staging required role flows|student practice mock entry|content action closures|admin audit navigation|local auth route guards"
+Result: passed on master, 7 Chromium tests passed.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: inventory completed on master; branch ahead by the validation task commit and merge commit, and changed files are limited to this task scope.
+```
