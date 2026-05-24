@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T03:20:00+08:00"
+  updatedAt: "2026-05-24T00:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-staging-required-role-flow-closures
+  id: phase-11-local-happy-path-experience-plan
   status: closed
-  sourceStory: user-request-2026-05-24-system-ops-content-ops-required-staging-roles
-  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-required-role-flow-closures.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-required-role-flow-closures.md
-  branch: codex/phase-11-staging-required-role-flow-closures
-  commitSha: 7f9e842
+  sourceStory: user-request-2026-05-24-fresh-system-happy-path-experience
+  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-experience-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-experience-plan.md
+  branch: codex/phase-11-local-happy-path-experience-plan
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: system ops and content ops are now local-required staging validation roles with fixed discoverability gaps
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-required-role-flow-closures.md
+  nextRecommendedAction: get human approval to claim phase-11-local-happy-path-student-answer-flow before Tencent Cloud preview work
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-experience-plan.md
