@@ -68,7 +68,7 @@ If completing propagation requires schema, migration, script, dependency, real p
 2. [x] GREEN: wire propagation through existing services/contracts so `student-papers`, `practice`, and `mock_exam` can consume the newly published paper snapshot locally.
 3. [x] Extend or add focused tests for authorization visibility, publish ordering, and archive/termination behavior where existing runtime supports it.
 4. [x] Verify downstream `exam_report` and `mistake_book` behavior from the propagated snapshot; record any residual gaps with P-level grading.
-5. [ ] Run queue validation commands, update evidence, closeout checklist, commit, merge, push, cleanup, then claim the next queued task only from a clean repo.
+5. [x] Run queue validation commands, update evidence, closeout checklist, commit, merge, push, cleanup, then claim the next queued task only from a clean repo.
 
 ## Allowed Files
 

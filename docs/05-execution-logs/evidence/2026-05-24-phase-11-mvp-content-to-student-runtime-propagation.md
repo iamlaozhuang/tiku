@@ -99,25 +99,56 @@ Result: pass.
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
 Result before commit: inventory pass; changed files limited to current task code, tests, plan, evidence, and queue state.
+
+git commit -m "feat(student): wire content propagation report loop"
+Result: task commit 1d91258 created. Pre-commit hook ran lint-staged, eslint, and typecheck successfully.
+
+git merge --no-ff codex/phase-11-mvp-content-to-student-runtime-propagation -m "merge: phase 11 content to student propagation"
+Result: merge commit a96666d created on master.
+
+npm.cmd run test:unit
+Master post-merge result: passed 107 files / 402 tests.
+
+npm.cmd run test:e2e -- --workers=1
+Master post-merge result: passed 9/9 tests. ProtectedRouteGuard hydration mismatch console noise remains the recorded P2 residual.
+
+npm.cmd run build
+Master post-merge result: passed. Build output mentioned `.env.local` as an environment source; no contents were read or recorded.
+
+git diff --check
+Master post-merge result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Master post-merge result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Master post-merge result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Master post-merge result: inventory pass; master is ahead of origin/master by the task commit and merge commit before closeout push.
+
+git branch -d codex/phase-11-mvp-content-to-student-runtime-propagation
+First result: blocked by local git ref lock permission.
+Retry with approved escalation: deleted merged short-lifecycle branch at 1d91258.
 ```
 
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                                                 | Result  |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-content-to-student-runtime-propagation`, not `master` or `main`                             | Pass    |
-| Allowed files        | Changed files are student UI, unit tests, E2E tests, task plan, evidence, and queue state; blocked files untouched                | Pass    |
-| AC-to-runtime matrix | Matrix records partial runtime, entry-only, runtime_closed, and residual P1 behavior explicitly                                   | Pass    |
-| Problem grading      | P0/P1/P2 issues recorded with fixed status and residual risk                                                                      | Pass    |
-| Validation record    | Claim readiness, RED/GREEN, targeted unit/service, full unit, e2e, build, readiness, naming, and Git inventory results recorded   | Pass    |
-| Evidence hygiene     | No secrets, tokens, Authorization headers, raw provider payloads, raw prompts, raw answers, raw model responses, or private data  | Pass    |
-| Commit               | Pending task commit                                                                                                               | Pending |
-| Merge                | Pending merge to `master`                                                                                                         | Pending |
-| Push                 | Pending push to `origin/master`; user approved queue-wide routine push                                                            | Pending |
-| Cleanup              | Pending short-lifecycle branch deletion after merge and master validation                                                         | Pending |
-| Worktree residue     | Pending final clean status after merge/push/cleanup                                                                               | Pending |
-| stagingDecision      | `local_task_closed_remaining_p1` because browser-level mistake_book/newly-published-paper loop and auth hydration residual remain | Pass    |
-| Next step            | Commit, merge, push, cleanup; then claim `phase-11-mvp-student-ai-practice-mock-report-loop` only from clean `master`             | Pass    |
+| Check                | Required evidence                                                                                                                  | Result           |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-content-to-student-runtime-propagation`, not `master` or `main`                              | Pass             |
+| Allowed files        | Changed files are student UI, unit tests, E2E tests, task plan, evidence, and queue state; blocked files untouched                 | Pass             |
+| AC-to-runtime matrix | Matrix records partial runtime, entry-only, runtime_closed, and residual P1 behavior explicitly                                    | Pass             |
+| Problem grading      | P0/P1/P2 issues recorded with fixed status and residual risk                                                                       | Pass             |
+| Validation record    | Claim readiness, RED/GREEN, targeted unit/service, full unit, e2e, build, readiness, naming, and Git inventory results recorded    | Pass             |
+| Evidence hygiene     | No secrets, tokens, Authorization headers, raw provider payloads, raw prompts, raw answers, raw model responses, or private data   | Pass             |
+| Commit               | Task commit `1d91258`                                                                                                              | Pass             |
+| Merge                | Merged to `master` with merge commit `a96666d`                                                                                     | Pass             |
+| Push                 | Pending push to `origin/master` after this closeout commit; user approved queue-wide routine push                                  | Pending          |
+| Cleanup              | Merged short-lifecycle branch `codex/phase-11-mvp-content-to-student-runtime-propagation` deleted after master validation          | Pass             |
+| Worktree residue     | `git status --short --branch` after branch cleanup: `master...origin/master [ahead 2]`; no tracked/staged/untracked worktree files | Pass before push |
+| stagingDecision      | `local_task_closed_remaining_p1` because browser-level mistake_book/newly-published-paper loop and auth hydration residual remain  | Pass             |
+| Next step            | Commit, merge, push, cleanup; then claim `phase-11-mvp-student-ai-practice-mock-report-loop` only from clean `master`              | Pass             |
 
 ## stagingDecision
 
@@ -125,7 +156,7 @@ local_task_closed_remaining_p1
 
 ## Next Step
 
-Commit, merge, push, clean the short-lifecycle branch, then claim `phase-11-mvp-student-ai-practice-mock-report-loop` from a clean `master` if queue readiness passes.
+Push `master` to `origin`, record final push result, then claim `phase-11-mvp-student-ai-practice-mock-report-loop` from a clean `master` if queue readiness passes.
 
 ## Evidence Hygiene
 
