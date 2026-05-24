@@ -3222,6 +3222,50 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-redeem-code-loop.md
     status: closed
     retryCount: 0
+  - id: phase-11-local-happy-path-ops-role-verification
+    title: Phase 11 Local Happy Path Ops Role Verification
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-24-local-ops-role-experience-verification
+    dependencies:
+      - phase-11-local-happy-path-redeem-code-loop
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested continuing local role-experience verification for system ops, content ops, and their relationship to the student happy path. This task is planning and verification first; no Tencent Cloud, deployment, staging/prod connection, secret/env, dependency, schema, migration, script, package, or lockfile work is approved.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-ops-role-verification.md
+      - docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-local-happy-path-ops-role-verification.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-ops-role-verification.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - product_readiness
+      - happy_path
+      - admin_ops
+      - content_ops
+      - student_answer_flow
+      - redeem_code
+      - evidence_integrity
+      - environment_boundary
+      - secret_or_env_change
+      - deploy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-local-happy-path-ops-role-verification
+      - Select-String -Path 'docs\05-execution-logs\audits-reviews\2026-05-24-phase-11-local-happy-path-ops-role-verification.md' -Pattern 'system ops|content ops|student|P0|P1|P2|P3|stagingDecision'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-ops-role-verification.md
+    status: closed
+    retryCount: 0
   - id: phase-6-admin-ops-readiness-evidence
     title: Admin Ops Readiness Evidence
     phase: phase-6-admin-ops
