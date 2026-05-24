@@ -100,29 +100,42 @@ Result: pass.
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
 Result before commit: inventory completed; expected unstaged/untracked current-task files listed.
+Result after merge on master: inventory completed; master was ahead of origin/master by task commit and merge commit before push.
 
 rg -n "AI 讲解：暂不可用|AI 提示：暂不可用|AI讲解暂不可用" src tests e2e
 Result: no runtime/e2e occurrence; only one negative assertion remains in tests.
+
+git commit -m "feat(student): close AI practice loop"
+Result: 6084549 feat(student): close AI practice loop.
+
+git merge --no-ff codex/phase-11-mvp-student-ai-practice-mock-report-loop -m "merge: phase 11 student AI practice loop"
+Result: 32f1e3f merge: phase 11 student AI practice loop.
+
+git push origin master
+Result: pushed master from 8183896 to 32f1e3f.
+
+git branch -d codex/phase-11-mvp-student-ai-practice-mock-report-loop
+Result: deleted merged short-lifecycle branch.
 ```
 
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                    | Result  |
-| -------------------- | ---------------------------------------------------------------------------------------------------- | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-student-ai-practice-mock-report-loop`, not `master` or `main`  | Pass    |
-| Allowed files        | Changed files are student UI, practice contract/service/mappers/tests, e2e assertion, docs/state     | Pass    |
-| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, or staging/prod file change | Pass    |
-| AC-to-runtime matrix | Matrix above records runtime evidence and residual decisions                                         | Pass    |
-| Problem grading      | P0/P1/P2 issues graded above                                                                         | Pass    |
-| Validation record    | Commands and results recorded above                                                                  | Pass    |
-| Evidence hygiene     | No secrets or prohibited raw data recorded                                                           | Pass    |
-| Commit               | Pending after evidence update                                                                        | Pending |
-| Merge                | Pending after branch commit                                                                          | Pending |
-| Push                 | Pending after master closeout                                                                        | Pending |
-| Cleanup              | Pending after master push                                                                            | Pending |
-| Worktree residue     | `.next/dev` generated artifact removed after path verification                                       | Pass    |
-| stagingDecision      | Local-only closeout; no staging/prod action                                                          | Pass    |
-| Next step            | Claim `phase-11-mvp-model-config-fallback-runtime` from clean master                                 | Pass    |
+| Check                | Required evidence                                                                                    | Result |
+| -------------------- | ---------------------------------------------------------------------------------------------------- | ------ |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-student-ai-practice-mock-report-loop`, not `master` or `main`  | Pass   |
+| Allowed files        | Changed files are student UI, practice contract/service/mappers/tests, e2e assertion, docs/state     | Pass   |
+| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, or staging/prod file change | Pass   |
+| AC-to-runtime matrix | Matrix above records runtime evidence and residual decisions                                         | Pass   |
+| Problem grading      | P0/P1/P2 issues graded above                                                                         | Pass   |
+| Validation record    | Commands and results recorded above                                                                  | Pass   |
+| Evidence hygiene     | No secrets or prohibited raw data recorded                                                           | Pass   |
+| Commit               | Task commit `6084549 feat(student): close AI practice loop`; this closeout docs update follows       | Pass   |
+| Merge                | Merge commit `32f1e3f merge: phase 11 student AI practice loop` on `master`                          | Pass   |
+| Push                 | `git push origin master` pushed `8183896..32f1e3f`                                                   | Pass   |
+| Cleanup              | Deleted merged branch `codex/phase-11-mvp-student-ai-practice-mock-report-loop`                      | Pass   |
+| Worktree residue     | `.next/dev` generated artifact removed after path verification                                       | Pass   |
+| stagingDecision      | Local-only closeout; no staging/prod action                                                          | Pass   |
+| Next step            | Claim `phase-11-mvp-model-config-fallback-runtime` from clean master                                 | Pass   |
 
 ## stagingDecision
 
@@ -130,7 +143,7 @@ local_closed_no_staging_or_prod
 
 ## Next Step
 
-After commit, merge, master gate, push, and branch cleanup, claim `phase-11-mvp-model-config-fallback-runtime` from a clean `master`.
+After this closeout evidence update is committed and pushed, claim `phase-11-mvp-model-config-fallback-runtime` from a clean `master`.
 
 ## Evidence Hygiene
 
