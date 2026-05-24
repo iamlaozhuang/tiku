@@ -121,6 +121,12 @@ Post-merge result on master: pass inventory; branch ahead of origin/master by ta
 
 git diff --check
 Post-merge result on master: pass.
+
+git push origin master
+Result: pushed `master` from `894d5c0` to `b817590` on `origin/master`.
+
+git branch -d codex/phase-11-mvp-redeem-code-batch-management-loop
+Result: local short-lived branch deleted after merge and push.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -136,11 +142,11 @@ Post-merge result on master: pass.
 | Evidence hygiene     | No secrets, generated plaintext redeem_code values, or prohibited raw data recorded                                                        | Pass    |
 | Commit               | Task commit `92d641e` created                                                                                                              | Pass    |
 | Merge                | Merge commit `360473a` created on `master`                                                                                                 | Pass    |
-| Push                 | Pending                                                                                                                                    | Pending |
-| Cleanup              | Pending                                                                                                                                    | Pending |
-| Worktree residue     | Pending                                                                                                                                    | Pending |
+| Push                 | `master` pushed to `origin/master` at `b817590`                                                                                            | Pass    |
+| Cleanup              | Local branch `codex/phase-11-mvp-redeem-code-batch-management-loop` deleted after merge and push                                           | Pass    |
+| Worktree residue     | No task worktree was created; no `.worktrees/` cleanup required                                                                            | Pass    |
 | stagingDecision      | Local runtime closed; no staging/prod action approved or performed                                                                         | Pass    |
-| Next step            | Push `master`, clean the short-lived branch, and then claim the next eligible MVP gap task from clean `master`                             | Pending |
+| Next step            | Commit and push this final push/cleanup evidence, verify clean `master`, then claim the next eligible MVP gap task                         | Pending |
 
 ## stagingDecision
 
@@ -148,7 +154,7 @@ local_only_passed_no_staging_or_prod_connection
 
 ## Next Step
 
-Push `master`, clean the short-lived branch, then claim the next eligible MVP gap task from a clean `master`.
+Commit and push this final push/cleanup evidence, verify clean `master`, then claim the next eligible MVP gap task from a clean `master`.
 
 ## Evidence Hygiene
 

@@ -67,7 +67,7 @@ If completing the loop requires schema, migration, script, dependency, secret/en
 2. [x] RED: add focused failing tests for batch generation, 100 limit, status/search filters, generated redemption, and audit redaction.
 3. [x] GREEN: wire the smallest local service/runtime behavior needed to satisfy RED tests without schema/dependency changes.
 4. [x] Extend tests for permission denial, no raw code leakage in evidence, and generated-code-to-student redemption acceptance.
-5. [ ] Run validation commands, update evidence, closeout checklist, commit, merge, push, cleanup, then claim the next queued task only from a clean repo.
+5. [x] Run validation commands, update evidence, closeout checklist, commit, merge, push, cleanup, then claim the next queued task only from a clean repo.
 
 ## Allowed Files
 
