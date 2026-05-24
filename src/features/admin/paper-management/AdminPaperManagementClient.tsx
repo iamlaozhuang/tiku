@@ -16,6 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { AdminPaperOpsSummaryDto } from "@/server/contracts/admin-content-knowledge-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import type { PaperAssetDto } from "@/server/contracts/paper-asset-contract";
+import type {
+  PaperCopyResultDto,
+  PaperDraftDto,
+  PaperPublishResultDto,
+  PaperQuestionDto,
+} from "@/server/contracts/paper-draft-contract";
 import type {
   PaperStatus,
   PaperType,
@@ -46,6 +53,33 @@ type PaperTypeFilter = "all" | PaperType;
 type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
 type PaperLoadState = "loading" | "ready" | "empty" | "unauthorized" | "error";
+type PaperFormValues = {
+  name: string;
+  totalScore: string;
+};
+type PaperQuestionFormValues = {
+  paperPublicId: string;
+  questionPublicId: string;
+  score: string;
+};
+type PaperAssetFormValues = {
+  paperPublicId: string;
+  fileName: string;
+  fileHash: string;
+};
+type ActivePaperForm =
+  | {
+      kind: "paper";
+      values: PaperFormValues;
+    }
+  | {
+      kind: "paperQuestion";
+      values: PaperQuestionFormValues;
+    }
+  | {
+      kind: "paperAsset";
+      values: PaperAssetFormValues;
+    };
 
 type PaperListDto = {
   papers: AdminPaperOpsSummaryDto[];
@@ -131,7 +165,115 @@ function usePaperData() {
     };
   }, []);
 
-  return { loadState, papers };
+  return { loadState, papers, setPapers };
+}
+
+async function mutateAdminApi<TData>(
+  path: string,
+  sessionToken: string,
+  method: "POST" | "PATCH" | "DELETE",
+  body?: unknown,
+) {
+  const response = await fetch(path, {
+    method,
+    headers: {
+      authorization: `Bearer ${sessionToken}`,
+      "content-type": "application/json",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  return (await response.json()) as {
+    code: number;
+    message: string;
+    data: TData | null;
+  };
+}
+
+function upsertByPublicId<TItem extends { publicId: string }>(
+  items: TItem[],
+  nextItem: TItem,
+) {
+  if (items.some((item) => item.publicId === nextItem.publicId)) {
+    return items.map((item) =>
+      item.publicId === nextItem.publicId ? nextItem : item,
+    );
+  }
+
+  return [nextItem, ...items];
+}
+
+function mapPaperDraftToSummary(
+  paper: PaperDraftDto | AdminPaperOpsSummaryDto,
+  existingPaper?: AdminPaperOpsSummaryDto,
+): AdminPaperOpsSummaryDto {
+  return {
+    publicId: paper.publicId,
+    name: paper.name,
+    profession: paper.profession,
+    level: paper.level,
+    subject: paper.subject,
+    paperStatus: paper.paperStatus,
+    paperType: paper.paperType ?? existingPaper?.paperType ?? "mock_paper",
+    year: paper.year,
+    totalScore: paper.totalScore ?? existingPaper?.totalScore ?? "0.0",
+    questionCount: paper.questionCount,
+    mockExamCount:
+      "mockExamCount" in paper
+        ? paper.mockExamCount
+        : (existingPaper?.mockExamCount ?? 0),
+    sourceFileName:
+      "sourceFileName" in paper
+        ? paper.sourceFileName
+        : (existingPaper?.sourceFileName ?? null),
+    publishValidationSummary:
+      "publishValidationSummary" in paper
+        ? paper.publishValidationSummary
+        : (existingPaper?.publishValidationSummary ?? null),
+    updatedAt: paper.updatedAt,
+  };
+}
+
+function createPaperInput(values: PaperFormValues) {
+  return {
+    name: values.name,
+    profession: "marketing",
+    level: 3,
+    subject: "theory",
+    paperType: "mock_paper",
+    year: 2026,
+    source: null,
+    durationMinute: 90,
+    totalScore: values.totalScore,
+  };
+}
+
+function createPaperQuestionInput(values: PaperQuestionFormValues) {
+  return {
+    questionPublicId: values.questionPublicId,
+    score: values.score,
+    sortOrder: 1,
+    paperSection: {
+      title: "默认大题",
+      description: null,
+      sortOrder: 1,
+    },
+    questionGroup: null,
+  };
+}
+
+function createPaperAssetInput(values: PaperAssetFormValues) {
+  const extension = values.fileName.split(".").pop() ?? "pdf";
+
+  return {
+    paperPublicId: values.paperPublicId,
+    paperAttachmentUsage: "paper_source",
+    fileName: values.fileName,
+    objectKey: `dev/paper-asset/marketing/202605/${values.fileHash}.${extension}`,
+    contentType: "application/pdf",
+    fileSizeByte: 2048,
+    fileHash: values.fileHash,
+  };
 }
 
 export function AdminPaperManagement() {
@@ -140,7 +282,11 @@ export function AdminPaperManagement() {
   const [subject, setSubject] = useState<SubjectFilter>("all");
   const [paperStatus, setPaperStatus] = useState<PaperStatusFilter>("all");
   const [paperType, setPaperType] = useState<PaperTypeFilter>("all");
-  const { loadState, papers } = usePaperData();
+  const [activeForm, setActiveForm] = useState<ActivePaperForm | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { loadState, papers, setPapers } = usePaperData();
 
   const filteredPapers = useMemo(
     () =>
@@ -183,6 +329,217 @@ export function AdminPaperManagement() {
     );
   }
 
+  async function handleSavePaper(values: PaperFormValues) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setActionError(null);
+
+    try {
+      const response = await mutateAdminApi<{ paper: PaperDraftDto }>(
+        "/api/v1/papers",
+        sessionToken,
+        "POST",
+        createPaperInput(values),
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setActionError("试卷保存失败，请刷新后重试。");
+        return;
+      }
+
+      const savedPaper = mapPaperDraftToSummary(response.data.paper);
+      setPapers((currentPapers) => upsertByPublicId(currentPapers, savedPaper));
+      setActionMessage(`试卷 ${savedPaper.publicId} 已保存`);
+      setActiveForm(null);
+    } catch {
+      setActionError("试卷保存失败，请刷新后重试。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleAddPaperQuestion(values: PaperQuestionFormValues) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setActionError(null);
+
+    try {
+      const response = await mutateAdminApi<{
+        paperQuestion: PaperQuestionDto;
+      }>(
+        `/api/v1/papers/${values.paperPublicId}/questions`,
+        sessionToken,
+        "POST",
+        createPaperQuestionInput(values),
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setActionError("题目加入试卷失败，请刷新后重试。");
+        return;
+      }
+
+      setPapers((currentPapers) =>
+        currentPapers.map((paper) =>
+          paper.publicId === values.paperPublicId
+            ? { ...paper, questionCount: paper.questionCount + 1 }
+            : paper,
+        ),
+      );
+      setActionMessage(
+        `题目 ${response.data.paperQuestion.publicId} 已加入试卷`,
+      );
+      setActiveForm(null);
+    } catch {
+      setActionError("题目加入试卷失败，请刷新后重试。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleSavePaperAsset(values: PaperAssetFormValues) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setActionError(null);
+
+    try {
+      const response = await mutateAdminApi<{ paperAsset: PaperAssetDto }>(
+        "/api/v1/paper-assets",
+        sessionToken,
+        "POST",
+        createPaperAssetInput(values),
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setActionError("附件绑定失败，请刷新后重试。");
+        return;
+      }
+
+      const paperAsset = response.data.paperAsset;
+      setPapers((currentPapers) =>
+        currentPapers.map((paper) =>
+          paper.publicId === values.paperPublicId
+            ? { ...paper, sourceFileName: paperAsset.fileName }
+            : paper,
+        ),
+      );
+      setActionMessage(`附件 ${paperAsset.publicId} 已绑定`);
+      setActiveForm(null);
+    } catch {
+      setActionError("附件绑定失败，请刷新后重试。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handlePublishPaper(publicId: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setActionError(null);
+    const response = await mutateAdminApi<PaperPublishResultDto>(
+      `/api/v1/papers/${publicId}/publish`,
+      sessionToken,
+      "POST",
+    );
+
+    if (response.code !== 0 || response.data === null) {
+      setActionError("试卷发布失败，请检查发布校验后重试。");
+      return;
+    }
+
+    const publishedPaper = response.data.paper;
+    setPapers((currentPapers) =>
+      upsertByPublicId(
+        currentPapers,
+        mapPaperDraftToSummary(
+          publishedPaper,
+          currentPapers.find((paper) => paper.publicId === publicId),
+        ),
+      ),
+    );
+    setActionMessage(`试卷 ${publicId} 已发布`);
+  }
+
+  async function handleArchivePaper(publicId: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setActionError(null);
+    const response = await mutateAdminApi<{ paper: PaperDraftDto }>(
+      `/api/v1/papers/${publicId}/archive`,
+      sessionToken,
+      "POST",
+    );
+
+    if (response.code !== 0 || response.data === null) {
+      setActionError("试卷下架失败，请刷新后重试。");
+      return;
+    }
+
+    const archivedPaper = response.data.paper;
+    setPapers((currentPapers) =>
+      upsertByPublicId(
+        currentPapers,
+        mapPaperDraftToSummary(
+          archivedPaper,
+          currentPapers.find((paper) => paper.publicId === publicId),
+        ),
+      ),
+    );
+    setActionMessage(`试卷 ${publicId} 已下架`);
+  }
+
+  async function handleCopyPaper(publicId: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setActionError(null);
+    const response = await mutateAdminApi<PaperCopyResultDto>(
+      `/api/v1/papers/${publicId}/copy`,
+      sessionToken,
+      "POST",
+    );
+
+    if (response.code !== 0 || response.data === null) {
+      setActionError("试卷复制失败，请刷新后重试。");
+      return;
+    }
+
+    const copiedPaper = mapPaperDraftToSummary(response.data.paper);
+    setPapers((currentPapers) => upsertByPublicId(currentPapers, copiedPaper));
+    setActionMessage(`试卷 ${copiedPaper.publicId} 已复制`);
+  }
+
   return (
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -198,7 +555,19 @@ export function AdminPaperManagement() {
             publicId 与契约字段。
           </p>
         </div>
-        <ActionBar />
+        <ActionBar
+          onCreate={() => {
+            setActionError(null);
+            setActionMessage(null);
+            setActiveForm({
+              kind: "paper",
+              values: {
+                name: "新建本地组卷",
+                totalScore: "5.0",
+              },
+            });
+          }}
+        />
       </header>
 
       <ContentOpsStagingRoleArrangement />
@@ -218,8 +587,75 @@ export function AdminPaperManagement() {
 
       <SummaryRail rows={filteredPapers} />
 
+      {actionMessage === null ? null : (
+        <p className="text-brand-primary text-sm" role="status">
+          {actionMessage}
+        </p>
+      )}
+      {actionError === null ? null : (
+        <p className="text-destructive text-sm" role="alert">
+          {actionError}
+        </p>
+      )}
+
+      {activeForm?.kind === "paper" ? (
+        <PaperWriteForm
+          isSubmitting={isSubmitting}
+          values={activeForm.values}
+          onCancel={() => setActiveForm(null)}
+          onSubmit={handleSavePaper}
+        />
+      ) : null}
+
+      {activeForm?.kind === "paperQuestion" ? (
+        <PaperQuestionWriteForm
+          isSubmitting={isSubmitting}
+          values={activeForm.values}
+          onCancel={() => setActiveForm(null)}
+          onSubmit={handleAddPaperQuestion}
+        />
+      ) : null}
+
+      {activeForm?.kind === "paperAsset" ? (
+        <PaperAssetWriteForm
+          isSubmitting={isSubmitting}
+          values={activeForm.values}
+          onCancel={() => setActiveForm(null)}
+          onSubmit={handleSavePaperAsset}
+        />
+      ) : null}
+
       {filteredPapers.length > 0 ? (
-        <PaperList rows={filteredPapers} />
+        <PaperList
+          rows={filteredPapers}
+          onArchive={(publicId) => void handleArchivePaper(publicId)}
+          onBindAsset={(publicId) => {
+            setActionError(null);
+            setActionMessage(null);
+            setActiveForm({
+              kind: "paperAsset",
+              values: {
+                fileHash: "abc123def4567890abc123def4567890",
+                fileName: "local-paper-source.pdf",
+                paperPublicId: publicId,
+              },
+            });
+          }}
+          onCompose={(publicId) => {
+            setActionError(null);
+            setActionMessage(null);
+            setActiveForm({
+              kind: "paperQuestion",
+              values: {
+                paperPublicId: publicId,
+                questionPublicId: "question-marketing-001",
+                score: "5.0",
+              },
+            });
+          }}
+          onCopy={(publicId) => void handleCopyPaper(publicId)}
+          onPublish={(publicId) => void handlePublishPaper(publicId)}
+        />
       ) : (
         <FilteredEmptyState />
       )}
@@ -227,11 +663,11 @@ export function AdminPaperManagement() {
   );
 }
 
-function ActionBar() {
+function ActionBar({ onCreate }: { onCreate: () => void }) {
   return (
     <div className="max-w-xl space-y-2">
       <div className="flex flex-wrap gap-2">
-        <Button disabled aria-describedby="paper-action-unavailable">
+        <Button onClick={onCreate}>
           <FilePlus2 aria-hidden="true" data-icon="inline-start" />
           新建草稿
         </Button>
@@ -282,9 +718,176 @@ function ActionBar() {
         id="paper-action-unavailable"
         role="status"
       >
-        草稿、组卷、发布、下架、复制和附件绑定暂未接入本地运行时；当前仅开放列表查看与筛选。
+        草稿新建和行内组卷、发布、下架、复制、附件绑定已接入本地运行时；未选择试卷时请使用行内操作。
       </p>
     </div>
+  );
+}
+
+function PaperWriteForm({
+  isSubmitting,
+  values,
+  onCancel,
+  onSubmit,
+}: {
+  isSubmitting: boolean;
+  values: PaperFormValues;
+  onCancel: () => void;
+  onSubmit: (values: PaperFormValues) => void;
+}) {
+  const [formValues, setFormValues] = useState(values);
+
+  return (
+    <form
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(formValues);
+      }}
+    >
+      <h2 className="text-text-primary text-base font-semibold">新建草稿</h2>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">试卷名称</span>
+        <Input
+          aria-label="试卷名称"
+          value={formValues.name}
+          onChange={(event) =>
+            setFormValues({ ...formValues, name: event.target.value })
+          }
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">总分</span>
+        <Input
+          aria-label="总分"
+          value={formValues.totalScore}
+          onChange={(event) =>
+            setFormValues({ ...formValues, totalScore: event.target.value })
+          }
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <Button disabled={isSubmitting} type="submit">
+          保存草稿
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function PaperQuestionWriteForm({
+  isSubmitting,
+  values,
+  onCancel,
+  onSubmit,
+}: {
+  isSubmitting: boolean;
+  values: PaperQuestionFormValues;
+  onCancel: () => void;
+  onSubmit: (values: PaperQuestionFormValues) => void;
+}) {
+  const [formValues, setFormValues] = useState(values);
+
+  return (
+    <form
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(formValues);
+      }}
+    >
+      <h2 className="text-text-primary text-base font-semibold">组卷</h2>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">题目 publicId</span>
+        <Input
+          aria-label="题目 publicId"
+          value={formValues.questionPublicId}
+          onChange={(event) =>
+            setFormValues({
+              ...formValues,
+              questionPublicId: event.target.value,
+            })
+          }
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">题目分值</span>
+        <Input
+          aria-label="题目分值"
+          value={formValues.score}
+          onChange={(event) =>
+            setFormValues({ ...formValues, score: event.target.value })
+          }
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <Button disabled={isSubmitting} type="submit">
+          加入试卷
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function PaperAssetWriteForm({
+  isSubmitting,
+  values,
+  onCancel,
+  onSubmit,
+}: {
+  isSubmitting: boolean;
+  values: PaperAssetFormValues;
+  onCancel: () => void;
+  onSubmit: (values: PaperAssetFormValues) => void;
+}) {
+  const [formValues, setFormValues] = useState(values);
+
+  return (
+    <form
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(formValues);
+      }}
+    >
+      <h2 className="text-text-primary text-base font-semibold">
+        绑定原始文件
+      </h2>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">文件名</span>
+        <Input
+          aria-label="文件名"
+          value={formValues.fileName}
+          onChange={(event) =>
+            setFormValues({ ...formValues, fileName: event.target.value })
+          }
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">文件哈希</span>
+        <Input
+          aria-label="文件哈希"
+          value={formValues.fileHash}
+          onChange={(event) =>
+            setFormValues({ ...formValues, fileHash: event.target.value })
+          }
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <Button disabled={isSubmitting} type="submit">
+          保存附件
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </form>
   );
 }
 
@@ -411,7 +1014,21 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function PaperList({ rows }: { rows: AdminPaperOpsSummaryDto[] }) {
+function PaperList({
+  rows,
+  onArchive,
+  onBindAsset,
+  onCompose,
+  onCopy,
+  onPublish,
+}: {
+  rows: AdminPaperOpsSummaryDto[];
+  onArchive: (publicId: string) => void;
+  onBindAsset: (publicId: string) => void;
+  onCompose: (publicId: string) => void;
+  onCopy: (publicId: string) => void;
+  onPublish: (publicId: string) => void;
+}) {
   return (
     <div className="grid gap-3">
       {rows.map((paper) => (
@@ -448,6 +1065,58 @@ function PaperList({ rows }: { rows: AdminPaperOpsSummaryDto[] }) {
               </div>
             </div>
             <PublicId value={paper.publicId} />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              aria-label={`组卷 ${paper.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onCompose(paper.publicId)}
+            >
+              <Layers3 aria-hidden="true" data-icon="inline-start" />
+              组卷
+            </Button>
+            <Button
+              aria-label={`发布 ${paper.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onPublish(paper.publicId)}
+            >
+              <FileCheck aria-hidden="true" data-icon="inline-start" />
+              发布
+            </Button>
+            <Button
+              aria-label={`下架 ${paper.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onArchive(paper.publicId)}
+            >
+              <Archive aria-hidden="true" data-icon="inline-start" />
+              下架
+            </Button>
+            <Button
+              aria-label={`复制 ${paper.publicId}`}
+              size="sm"
+              type="button"
+              variant="secondary"
+              onClick={() => onCopy(paper.publicId)}
+            >
+              <Copy aria-hidden="true" data-icon="inline-start" />
+              复制
+            </Button>
+            <Button
+              aria-label={`绑定原始文件 ${paper.publicId}`}
+              size="sm"
+              type="button"
+              variant="secondary"
+              onClick={() => onBindAsset(paper.publicId)}
+            >
+              <Upload aria-hidden="true" data-icon="inline-start" />
+              绑定原始文件
+            </Button>
           </div>
 
           <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-3">
