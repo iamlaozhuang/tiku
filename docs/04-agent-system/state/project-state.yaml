@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T07:22:14-07:00"
+  updatedAt: "2026-05-24T07:28:07-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -42,7 +42,7 @@ currentTask:
   planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-redeem-code-batch-management-loop.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-redeem-code-batch-management-loop.md
   branch: codex/phase-11-mvp-redeem-code-batch-management-loop
-  commitSha: null
+  commitSha: 92d641e
   prUrl: null
   retryCount: 0
   lastFailurePath: null

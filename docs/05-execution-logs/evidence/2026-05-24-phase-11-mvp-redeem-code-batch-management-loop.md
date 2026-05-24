@@ -94,6 +94,33 @@ Result: inventory completed on task branch with expected task-scoped tracked/unt
 
 git diff --check
 Result: pass.
+
+git commit -m "feat(admin): add redeem code batch runtime"
+Result: task commit `92d641e` created on `codex/phase-11-mvp-redeem-code-batch-management-loop`.
+
+git merge --no-ff codex/phase-11-mvp-redeem-code-batch-management-loop -m "merge: phase 11 redeem code batch management loop"
+Result: merge commit `360473a` created on `master`.
+
+npm.cmd run test:unit
+Post-merge result on master: pass, 111 files, 422 tests.
+
+npm.cmd run build
+Post-merge result on master: pass. Output noted `.env.local` as an environment source; no `.env.local` content was read or recorded.
+
+npm.cmd run test:e2e
+Post-merge result on master: pass, 9 tests. Existing ProtectedRouteGuard hydration mismatch warnings still printed.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Post-merge result on master: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Post-merge result on master: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Post-merge result on master: pass inventory; branch ahead of origin/master by task and merge commits only.
+
+git diff --check
+Post-merge result on master: pass.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -107,13 +134,13 @@ Result: pass.
 | Problem grading      | P1 redeem_code lifecycle and audit issues graded; e2e parallel-session P2 recorded                                                         | Pass    |
 | Validation record    | Unit/build/e2e validation and agent/naming/git/diff gates recorded                                                                         | Pass    |
 | Evidence hygiene     | No secrets, generated plaintext redeem_code values, or prohibited raw data recorded                                                        | Pass    |
-| Commit               | Pending                                                                                                                                    | Pending |
-| Merge                | Pending                                                                                                                                    | Pending |
+| Commit               | Task commit `92d641e` created                                                                                                              | Pass    |
+| Merge                | Merge commit `360473a` created on `master`                                                                                                 | Pass    |
 | Push                 | Pending                                                                                                                                    | Pending |
 | Cleanup              | Pending                                                                                                                                    | Pending |
 | Worktree residue     | Pending                                                                                                                                    | Pending |
 | stagingDecision      | Local runtime closed; no staging/prod action approved or performed                                                                         | Pass    |
-| Next step            | Run agent/naming/git gates, commit, merge to master, post-merge validation, push, and cleanup                                              | Pending |
+| Next step            | Push `master`, clean the short-lived branch, and then claim the next eligible MVP gap task from clean `master`                             | Pending |
 
 ## stagingDecision
 
@@ -121,7 +148,7 @@ local_only_passed_no_staging_or_prod_connection
 
 ## Next Step
 
-Run agent-system and git closeout gates, commit, merge to `master`, rerun post-merge gates, push, clean the short-lived branch, and then claim the next eligible MVP gap task from a clean `master`.
+Push `master`, clean the short-lived branch, then claim the next eligible MVP gap task from a clean `master`.
 
 ## Evidence Hygiene
 
