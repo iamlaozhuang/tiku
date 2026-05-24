@@ -90,21 +90,21 @@ Untracked files are the new task plan, evidence, and SOP documents expected for 
 
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                                                                                                          | Result  |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-queue-runner-mechanism-hardening`, not `master` or `main`                                                                                            | Pass    |
-| Allowed files        | Changed file list is limited to SOP, task plan, evidence, project-state, and task-queue                                                                                                    | Pass    |
-| AC-to-runtime matrix | Present in task plan and evidence                                                                                                                                                          | Pass    |
-| Problem grading      | Present with P0/P1 mechanism issues                                                                                                                                                        | Pass    |
-| Validation record    | Claim readiness, marker scan, agent readiness, naming, quality gate, diff check, and Git inventory recorded                                                                                | Pass    |
-| Evidence hygiene     | No secret, token, Authorization header, raw provider payload, raw prompt, raw answer, raw model response, full paper/material/OCR text, generated plaintext `redeem_code`, or private data | Pass    |
-| Commit               | Implementation commit `e34423d docs(agent): harden mvp queue runner`                                                                                                                       | Pass    |
-| Merge                | Merged to `master` with merge commit `9aeb2e0 merge: phase 11 mvp queue runner hardening`                                                                                                  | Pass    |
-| Push                 | Pending push to `origin/master` after closeout evidence commit                                                                                                                             | Pending |
-| Cleanup              | Pending deletion of merged short-lifecycle branch after push                                                                                                                               | Pending |
-| Worktree residue     | Post-merge Git inventory found no tracked, staged, or untracked residue on `master`                                                                                                        | Pass    |
-| stagingDecision      | `not_applicable_mechanism_hardening_only`                                                                                                                                                  | Pass    |
-| Next step            | `phase-11-mvp-content-ops-question-material-write-loop` after closeout                                                                                                                     | Pass    |
+| Check                | Required evidence                                                                                                                                                                          | Result |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-queue-runner-mechanism-hardening`, not `master` or `main`                                                                                            | Pass   |
+| Allowed files        | Changed file list is limited to SOP, task plan, evidence, project-state, and task-queue                                                                                                    | Pass   |
+| AC-to-runtime matrix | Present in task plan and evidence                                                                                                                                                          | Pass   |
+| Problem grading      | Present with P0/P1 mechanism issues                                                                                                                                                        | Pass   |
+| Validation record    | Claim readiness, marker scan, agent readiness, naming, quality gate, diff check, and Git inventory recorded                                                                                | Pass   |
+| Evidence hygiene     | No secret, token, Authorization header, raw provider payload, raw prompt, raw answer, raw model response, full paper/material/OCR text, generated plaintext `redeem_code`, or private data | Pass   |
+| Commit               | Implementation commit `e34423d docs(agent): harden mvp queue runner`                                                                                                                       | Pass   |
+| Merge                | Merged to `master` with merge commit `9aeb2e0 merge: phase 11 mvp queue runner hardening`                                                                                                  | Pass   |
+| Push                 | `git push origin master` pushed `ec4646f..f6c1c19` to `origin/master`                                                                                                                      | Pass   |
+| Cleanup              | Deleted local branch `codex/phase-11-mvp-queue-runner-mechanism-hardening` after merge and push                                                                                            | Pass   |
+| Worktree residue     | Post-merge Git inventory found no tracked, staged, or untracked residue on `master`                                                                                                        | Pass   |
+| stagingDecision      | `not_applicable_mechanism_hardening_only`                                                                                                                                                  | Pass   |
+| Next step            | `phase-11-mvp-content-ops-question-material-write-loop` after closeout                                                                                                                     | Pass   |
 
 ## Master Closeout
 
@@ -150,6 +150,17 @@ Branch: master
 Ahead of origin/master before closeout evidence commit: 2 commits.
 Changed files against origin/master: automation-loop SOP, MVP queue runner SOP, Repository Hygiene Closeout Checklist, task plan, evidence, project-state.yaml, task-queue.yaml.
 Untracked files: none.
+```
+
+Final remote and cleanup result:
+
+```text
+git push origin master
+Result: pass; pushed ec4646f..f6c1c19 to origin/master.
+
+git branch -d codex/phase-11-mvp-queue-runner-mechanism-hardening
+Initial sandboxed result: permission denied while creating the Git ref lock.
+Elevated retry result: pass; deleted branch codex/phase-11-mvp-queue-runner-mechanism-hardening at e34423d.
 ```
 
 ## stagingDecision
