@@ -215,8 +215,8 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     await expect(firstMistakeBookItem).toBeVisible();
     await expect(firstMistakeBookItem).not.toHaveAttribute("data-id", /.*/);
     await expect(
-      firstMistakeBookItem.getByRole("button", { name: "AI讲解暂不可用" }),
-    ).toBeDisabled();
+      firstMistakeBookItem.getByRole("button", { name: "AI讲解" }),
+    ).toBeEnabled();
 
     const favoriteButton = firstMistakeBookItem.getByRole("button", {
       name: /收藏/,

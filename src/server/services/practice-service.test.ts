@@ -100,6 +100,37 @@ function createTwoQuestionPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createSubjectivePaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "2024年专卖三级技能案例",
+    paperSections: [
+      {
+        paperSectionTitle: "一、案例分析题",
+        paperQuestions: [
+          {
+            paperQuestionPublicId: "paper_question_subjective_123",
+            questionPublicId: "question_subjective_123",
+            questionType: "subjective",
+            stemRichText: "<p>请说明检查处置步骤。</p>",
+            standardAnswerRichText: "<p>先核验事实，再依法处置并跟进闭环。</p>",
+            analysisRichText: "<p>按事实、依据、处置、复盘展开。</p>",
+            scoringPoints: [
+              {
+                scoringPointPublicId: "scoring_point_public_1",
+                label: "事实核验",
+                maxScore: 5,
+              },
+            ],
+            score: "10.0",
+            scoringMethod: "ai_scoring",
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createEmptyPaperSnapshot(): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
@@ -606,7 +637,16 @@ describe("practice service", () => {
           analysisRichText: "<p>解析</p>",
           mistakeBookPublicId: "mistake_book_public_2",
           aiExplanationStatus: null,
+          aiExplanationText: null,
+          aiExplanationLearningSuggestion: null,
+          aiExplanationEvidenceStatus: null,
+          aiExplanationCitations: [],
           aiHintStatus: null,
+          aiHintText: null,
+          aiHintImprovementDirections: [],
+          aiHintEvidenceStatus: null,
+          aiHintCitations: [],
+          retryRemainingCount: 0,
           answeredAt: "2026-05-19T08:00:00.000Z",
         },
       },
@@ -736,6 +776,161 @@ describe("practice service", () => {
       },
     });
     expect(mistakeBookInputs).toHaveLength(1);
+  });
+
+  it("returns a redacted local AI hint and one retry budget for a subjective practice answer", async () => {
+    const service = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            subject: "skill",
+            paper_snapshot: createSubjectivePaperSnapshot(),
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_subjective_123",
+        textAnswer: "先核验现场事实，再说明处理依据和后续跟进。",
+        savedFromClientAt: "2026-05-19T08:00:00.000Z",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          answerRecordPublicId: "answer_record_public_1",
+          isCorrect: null,
+          score: null,
+          maxScore: "10.0",
+          aiHintStatus: "hinted",
+          aiHintText: expect.stringContaining("AI 提示"),
+          aiHintEvidenceStatus: "none",
+          aiHintCitations: [],
+          retryRemainingCount: 1,
+        },
+      },
+    });
+  });
+
+  it("enforces the subjective practice retry limit without exposing the raw answer", async () => {
+    const retryService = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            subject: "skill",
+            paper_snapshot: createSubjectivePaperSnapshot(),
+          });
+        },
+        async listAnswerRecordsByPractice() {
+          return [
+            {
+              public_id: "answer_record_public_existing",
+              exam_mode: "practice",
+              paper_question_public_id: "paper_question_subjective_123",
+              question_public_id: "question_subjective_123",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "first answer",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "submitted",
+              is_correct: null,
+              score: null,
+              max_score: "10.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      retryService.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_subjective_123",
+        textAnswer: "second answer after hint",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          aiHintStatus: "hinted",
+          retryRemainingCount: 0,
+        },
+      },
+    });
+
+    const exhaustedService = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            subject: "skill",
+            paper_snapshot: createSubjectivePaperSnapshot(),
+          });
+        },
+        async listAnswerRecordsByPractice() {
+          return [
+            {
+              public_id: "answer_record_public_first",
+              exam_mode: "practice",
+              paper_question_public_id: "paper_question_subjective_123",
+              question_public_id: "question_subjective_123",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "first answer",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "submitted",
+              is_correct: null,
+              score: null,
+              max_score: "10.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+            {
+              public_id: "answer_record_public_second",
+              exam_mode: "practice",
+              paper_question_public_id: "paper_question_subjective_123",
+              question_public_id: "question_subjective_123",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "second answer",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "submitted",
+              is_correct: null,
+              score: null,
+              max_score: "10.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      exhaustedService.submitPracticeAnswer(
+        userContext,
+        "practice_public_123",
+        {
+          paperQuestionPublicId: "paper_question_subjective_123",
+          textAnswer: "third answer should be rejected",
+        },
+      ),
+    ).resolves.toEqual({
+      code: 409302,
+      message: "Practice subjective question retry limit reached.",
+      data: null,
+    });
   });
 
   it("restarts and terminates practice through explicit lifecycle transitions", async () => {

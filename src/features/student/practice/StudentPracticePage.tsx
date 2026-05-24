@@ -228,7 +228,16 @@ export const studentPracticeFixture: {
           analysisRichText: "解析：客户需求分析用于识别客户真实购买动机。",
           mistakeBookPublicId: "mistake-book-marketing-001",
           aiExplanationStatus: null,
+          aiExplanationText: null,
+          aiExplanationLearningSuggestion: null,
+          aiExplanationEvidenceStatus: null,
+          aiExplanationCitations: [],
           aiHintStatus: null,
+          aiHintText: null,
+          aiHintImprovementDirections: [],
+          aiHintEvidenceStatus: null,
+          aiHintCitations: [],
+          retryRemainingCount: 0,
           answeredAt: "2026-05-19T08:12:00.000Z",
         },
         "paper-question-marketing-002": {
@@ -240,7 +249,16 @@ export const studentPracticeFixture: {
           analysisRichText: "解析：复盘需要沉淀问题、责任和改进动作。",
           mistakeBookPublicId: null,
           aiExplanationStatus: null,
+          aiExplanationText: null,
+          aiExplanationLearningSuggestion: null,
+          aiExplanationEvidenceStatus: null,
+          aiExplanationCitations: [],
           aiHintStatus: null,
+          aiHintText: null,
+          aiHintImprovementDirections: [],
+          aiHintEvidenceStatus: null,
+          aiHintCitations: [],
+          retryRemainingCount: 0,
           answeredAt: "2026-05-19T08:15:00.000Z",
         },
       },
@@ -257,7 +275,16 @@ export const studentPracticeFixture: {
           analysisRichText: null,
           mistakeBookPublicId: null,
           aiExplanationStatus: null,
+          aiExplanationText: null,
+          aiExplanationLearningSuggestion: null,
+          aiExplanationEvidenceStatus: null,
+          aiExplanationCitations: [],
           aiHintStatus: null,
+          aiHintText: null,
+          aiHintImprovementDirections: [],
+          aiHintEvidenceStatus: null,
+          aiHintCitations: [],
+          retryRemainingCount: 0,
           answeredAt: "2026-05-19T08:18:00.000Z",
         },
       },
@@ -548,6 +575,7 @@ function SubjectiveQuestionPanel({
   onToggleMaterial,
   onChangeTextAnswer,
   onSubmitAnswer,
+  onRetryWithHint,
 }: {
   question: PracticePaperQuestion;
   textAnswer: string;
@@ -556,7 +584,11 @@ function SubjectiveQuestionPanel({
   onToggleMaterial(): void;
   onChangeTextAnswer(value: string): void;
   onSubmitAnswer(): void;
+  onRetryWithHint(): void;
 }) {
+  const canRetryWithHint =
+    feedback !== null && feedback.retryRemainingCount > 0;
+
   return (
     <div className="space-y-4">
       <div className="border-border bg-background rounded-xl border p-3">
@@ -607,13 +639,31 @@ function SubjectiveQuestionPanel({
           <p className="font-heading text-text-primary text-base font-semibold">
             主观题答案已保存
           </p>
-          <p className="text-text-secondary text-sm">AI 讲解：暂不可用</p>
-          <p className="text-text-secondary text-sm">AI 提示：暂不可用</p>
+          {feedback.aiHintText === null ? (
+            <p className="text-text-secondary text-sm">AI 提示生成中</p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-text-secondary text-sm leading-6">
+                {feedback.aiHintText}
+              </p>
+              <p className="text-text-muted text-xs">
+                证据状态：{feedback.aiHintEvidenceStatus ?? "none"}
+              </p>
+              {feedback.aiHintImprovementDirections.length === 0 ? null : (
+                <ul className="text-text-secondary list-disc space-y-1 pl-5 text-xs leading-5">
+                  {feedback.aiHintImprovementDirections.map((direction) => (
+                    <li key={direction}>{direction}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"
-              disabled
-              className="border-border text-text-secondary flex h-9 items-center justify-center rounded-lg border bg-transparent text-sm font-medium"
+              disabled={!canRetryWithHint}
+              onClick={onRetryWithHint}
+              className="border-border text-text-primary flex h-9 items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               AI 提示并重答一次
             </button>
@@ -917,6 +967,19 @@ export function StudentPracticePage({
     );
   }
 
+  function handleRetryWithHint() {
+    setFeedbackByQuestion((currentFeedbackByQuestion) => {
+      const {
+        [currentQuestion.paperQuestionPublicId]: _removedFeedback,
+        ...remainingFeedbackByQuestion
+      } = currentFeedbackByQuestion;
+
+      void _removedFeedback;
+
+      return remainingFeedbackByQuestion;
+    });
+  }
+
   async function handleRestartPractice() {
     if (practice === null) {
       return;
@@ -1072,6 +1135,7 @@ export function StudentPracticePage({
             onToggleMaterial={() => setIsMaterialOpen(!isMaterialOpen)}
             onChangeTextAnswer={handleChangeTextAnswer}
             onSubmitAnswer={() => void handleSubmitAnswer()}
+            onRetryWithHint={handleRetryWithHint}
           />
         )}
       </article>

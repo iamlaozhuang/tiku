@@ -179,7 +179,7 @@ describe("StudentPracticePage", () => {
     expect(screen.getByText("以下哪项属于服务复盘动作？")).toBeInTheDocument();
   });
 
-  it("renders subjective skill practice with material and Phase 5 AI placeholders", () => {
+  it("renders subjective skill practice with material and pending AI hint state", () => {
     render(
       createElement(StudentPracticePage, {
         paperPublicId: "paper-marketing-skill-001",
@@ -201,8 +201,7 @@ describe("StudentPracticePage", () => {
     fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
 
     expect(screen.getByText("主观题答案已保存")).toBeInTheDocument();
-    expect(screen.getByText("AI 讲解：暂不可用")).toBeInTheDocument();
-    expect(screen.getByText("AI 提示：暂不可用")).toBeInTheDocument();
+    expect(screen.getByText("AI 提示生成中")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "AI 提示并重答一次" }),
     ).toBeDisabled();
@@ -352,6 +351,105 @@ describe("StudentPracticePage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("renders subjective AI hint feedback and allows one retry from the session runtime", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const practice = studentPracticeFixture.practices[1].practice;
+    const feedback = {
+      ...studentPracticeFixture.practices[1].feedbackByPaperQuestionPublicId[
+        "paper-question-skill-001"
+      ],
+      aiHintStatus: "hinted",
+      aiHintText: "AI 提示：补充事实核对、沟通动作和后续跟进闭环。",
+      aiHintImprovementDirections: ["事实核对", "后续跟进"],
+      aiHintEvidenceStatus: "none",
+      aiHintCitations: [],
+      retryRemainingCount: 1,
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-marketing-skill-001/answers"
+        ) {
+          expect(init?.method).toBe("POST");
+          expect(JSON.parse(String(init?.body))).toMatchObject({
+            paperQuestionPublicId: "paper-question-skill-001",
+            selectedLabels: [],
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { feedback },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-skill-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销技能案例卷" }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("主观题答案"), {
+      target: { value: "先确认延迟原因，再给出补偿和后续跟进计划。" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(
+      await screen.findByText(
+        "AI 提示：补充事实核对、沟通动作和后续跟进闭环。",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("证据状态：none")).toBeInTheDocument();
+    expect(screen.queryByText("AI 提示：暂不可用")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "AI 提示并重答一次" }));
+
+    expect(screen.queryByText("主观题答案已保存")).toBeNull();
+    expect(screen.getByLabelText("主观题答案")).not.toBeDisabled();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
   it("restarts an active practice through the session runtime", async () => {

@@ -112,7 +112,10 @@ describe("StudentMistakeBookPage", () => {
     expect(within(item).getByText("专卖 3级")).toBeInTheDocument();
     expect(within(item).getByText("理论")).toBeInTheDocument();
     expect(within(item).getByText("错 2 次")).toBeInTheDocument();
-    expect(within(item).getByText("AI讲解暂不可用")).toBeDisabled();
+    const aiExplanationButton = within(item).getByRole("button", {
+      name: "AI讲解",
+    });
+    expect(aiExplanationButton).not.toBeDisabled();
     expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain(
       "raw answer should not render",
@@ -121,6 +124,97 @@ describe("StudentMistakeBookPage", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/mistake-books?page=1&pageSize=20",
       expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-session-token" },
+      }),
+    );
+  });
+
+  it("requests and renders a redacted AI explanation for a mistake_book item", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(url);
+
+        if (path === "/api/v1/mistake-books?page=1&pageSize=20") {
+          return createJsonResponse(mistakeBookPayload);
+        }
+
+        expect(init).toMatchObject({
+          method: "POST",
+          headers: { authorization: "Bearer unit-test-session-token" },
+        });
+
+        if (
+          path ===
+          "/api/v1/mistake-books/mistake-book-public-001/ai-explanation"
+        ) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              aiExplanation: {
+                explanationStatus: "explained",
+                explanationText:
+                  "AI 讲解：先核对题干关键词，再对照标准答案定位原因。",
+                keyPoints: ["题干关键词", "标准答案定位"],
+                learningSuggestion: "复习对应知识点并完成同类题。",
+                insufficientEvidenceMessage: null,
+                evidenceStatus: "sufficient",
+                citations: [
+                  {
+                    chunkPublicId: "chunk-public-001",
+                    resourcePublicId: "resource-public-001",
+                    resourceTitle: "专卖管理教材",
+                    headingPath: ["第三篇", "第一章"],
+                    chunkIndex: 1,
+                    chunkText: "引用片段不应完整渲染",
+                    textHash: "chunk-hash-001",
+                    score: 0.93,
+                  },
+                ],
+                promptTemplateKey: "dev_ai_explanation_v1",
+                promptTemplateVersion: 1,
+              },
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 404331,
+          message: "missing",
+          data: null,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentMistakeBookPage));
+
+    await screen.findByTestId("mistake-book-item-mistake-book-public-001");
+
+    const aiExplanationButton = screen.getByRole("button", { name: /AI/ });
+    expect(aiExplanationButton).not.toBeDisabled();
+
+    fireEvent.click(aiExplanationButton);
+
+    expect(await screen.findByText(/AI 讲解/)).toBeInTheDocument();
+    expect(
+      screen.getByText("复习对应知识点并完成同类题。"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("专卖管理教材")).toBeInTheDocument();
+    const item = screen.getByTestId(
+      "mistake-book-item-mistake-book-public-001",
+    );
+    expect(item.textContent).toContain("第三篇 > 第一章");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(document.body.textContent).not.toContain(
+      "raw answer should not render",
+    );
+    expect(document.body.textContent).not.toContain("引用片段不应完整渲染");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/mistake-books/mistake-book-public-001/ai-explanation",
+      expect.objectContaining({
+        method: "POST",
         headers: { authorization: "Bearer unit-test-session-token" },
       }),
     );
