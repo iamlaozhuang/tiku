@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T05:26:12-07:00"
+  updatedAt: "2026-05-24T05:52:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-mvp-student-ai-practice-mock-report-loop
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-004
-  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-student-ai-practice-mock-report-loop.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-student-ai-practice-mock-report-loop.md
-  branch: codex/phase-11-mvp-student-ai-practice-mock-report-loop
+  id: phase-11-mvp-model-config-fallback-runtime
+  status: done
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-005
+  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md
+  branch: codex/phase-11-mvp-model-config-fallback-runtime
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-11-mvp-model-config-fallback-runtime from a clean master after merge and push closeout
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-student-ai-practice-mock-report-loop.md
+  nextRecommendedAction: commit phase-11-mvp-model-config-fallback-runtime, merge to master, push, clean branch, then claim next eligible queue task
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md

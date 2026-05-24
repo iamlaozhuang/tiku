@@ -1,13 +1,15 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import type { ApiResponse } from "../contracts/api-response";
 import type { RagRetrievalResultDto } from "../contracts/ai-rag-contract";
-import { createModelConfigSnapshot } from "../models/ai-rag";
 import {
   createPostgresMistakeBookRepository,
   type MistakeBookRepository,
   type MistakeBookRuntimeRepositoryOptions,
 } from "../repositories/mistake-book-repository";
-import { createPostgresAdminAiAuditLogRuntimeRepositories } from "../repositories/admin-ai-audit-log-runtime-repository";
+import {
+  createPostgresAdminAiAuditLogRuntimeRepositories,
+  type AdminAiAuditLogRuntimeRepositories,
+} from "../repositories/admin-ai-audit-log-runtime-repository";
 import { createAiExplanationHintService } from "./ai-explanation-hint-service";
 import {
   createMistakeBookRouteHandlers,
@@ -18,12 +20,22 @@ import {
   type MistakeBookAiExplanationRuntime,
   type MistakeBookAiExplanationRuntimeContext,
 } from "./mistake-book-service";
+import {
+  createLocalModelConfigRuntimeCatalog,
+  createModelConfigRuntimeResolver,
+  type ModelConfigRuntimeCatalog,
+} from "./model-config-runtime";
 import type { SessionService } from "./session-service";
 
 export type StudentMistakeBookRuntimeOptions =
   MistakeBookRuntimeRepositoryOptions & {
     mistakeBookRepository?: MistakeBookRepository;
     sessionService?: Pick<SessionService, "getCurrentSession">;
+    aiCallLogRepository?: Pick<
+      AdminAiAuditLogRuntimeRepositories,
+      "appendAiCallLog"
+    >;
+    modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
   };
 
 function isSuccessfulSessionResponse(
@@ -78,29 +90,31 @@ function estimateTokenCount(value: string): number {
   return Math.max(1, Math.ceil(value.length / 4));
 }
 
-function createDefaultAiExplanationRuntime(): MistakeBookAiExplanationRuntime {
+function createDefaultAiExplanationRuntime(input: {
+  aiCallLogRepository?: Pick<
+    AdminAiAuditLogRuntimeRepositories,
+    "appendAiCallLog"
+  >;
+  modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
+}): MistakeBookAiExplanationRuntime {
   const aiCallLogRepository =
+    input.aiCallLogRepository ??
     createPostgresAdminAiAuditLogRuntimeRepositories();
-  const modelConfigSnapshot = createModelConfigSnapshot({
-    providerPublicId: "model-provider-dev-mock",
-    providerKey: "mock",
-    providerDisplayName: "Local Mock AI",
-    modelConfigPublicId: "model-config-dev-ai-explanation",
+  const modelConfigSelection = createModelConfigRuntimeResolver(
+    input.modelConfigRuntimeCatalog ?? createLocalModelConfigRuntimeCatalog(),
+  ).resolve({
     aiFuncType: "explanation",
-    modelName: "mock-ai-explanation",
-    displayName: "Local mock explanation",
-    configVersion: 1,
-    timeoutSecond: 5,
-    maxRetryCount: 1,
-    fallbackModelConfigPublicId: "model-config-dev-ai-explanation-fallback",
-    promptTemplateKey: "dev_ai_explanation_v1",
-    promptTemplateVersion: 1,
+    allowFallback: true,
   });
-  const promptTemplate = {
-    promptTemplateKey: "dev_ai_explanation_v1",
-    version: 1,
-    templateHash: "dev-ai-explanation-template-v1",
-  };
+
+  if (modelConfigSelection.status !== "selected") {
+    throw new Error(
+      `Local ai_explanation model_config is unavailable: ${modelConfigSelection.reason}`,
+    );
+  }
+
+  const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
+  const promptTemplate = modelConfigSelection.promptTemplate;
   const explanationHintService = createAiExplanationHintService({
     async explanationRunner(input) {
       return {
@@ -219,7 +233,10 @@ export function createStudentMistakeBookRuntimeRouteHandlers(
 
   return createMistakeBookRouteHandlers(
     createMistakeBookService(repository, clock, {
-      aiExplanationRuntime: createDefaultAiExplanationRuntime(),
+      aiExplanationRuntime: createDefaultAiExplanationRuntime({
+        aiCallLogRepository: options.aiCallLogRepository,
+        modelConfigRuntimeCatalog: options.modelConfigRuntimeCatalog,
+      }),
     }),
     createStudentMistakeBookUserResolver(sessionService),
   );
