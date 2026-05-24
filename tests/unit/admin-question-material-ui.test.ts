@@ -146,6 +146,161 @@ function mockContentFetch() {
   return fetchMock;
 }
 
+function mockWritableContentFetch() {
+  const fetchMock = vi.fn(
+    async (url: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(url);
+      const method = init?.method ?? "GET";
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (path.startsWith("/api/v1/questions?")) {
+        return createJsonResponse(questionPayload);
+      }
+
+      if (path.startsWith("/api/v1/materials?")) {
+        return createJsonResponse(materialPayload);
+      }
+
+      if (path === "/api/v1/questions" && method === "POST") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            question: {
+              ...questionPayload.data[0],
+              publicId: "question-created-001",
+              stemRichText: "新建题目题干",
+            },
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/questions/question-marketing-001" &&
+        method === "PATCH"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            question: {
+              ...questionPayload.data[0],
+              stemRichText: "编辑后的题干",
+            },
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/questions/question-marketing-001/disable" &&
+        method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            question: {
+              ...questionPayload.data[0],
+              status: "disabled",
+            },
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/questions/question-marketing-001/copy" &&
+        method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            question: {
+              ...questionPayload.data[0],
+              publicId: "question-marketing-001-copy",
+            },
+          },
+        });
+      }
+
+      if (path === "/api/v1/materials" && method === "POST") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            material: {
+              ...materialPayload.data[0],
+              publicId: "material-created-001",
+              title: "新建案例材料",
+            },
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/materials/material-marketing-001" &&
+        method === "PATCH"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            material: {
+              ...materialPayload.data[0],
+              title: "编辑后的材料",
+            },
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/materials/material-marketing-001/disable" &&
+        method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            material: {
+              ...materialPayload.data[0],
+              status: "disabled",
+            },
+          },
+        });
+      }
+
+      if (
+        path === "/api/v1/materials/material-marketing-001/copy" &&
+        method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            material: {
+              ...materialPayload.data[0],
+              publicId: "material-marketing-001-copy",
+            },
+          },
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    },
+  );
+
+  vi.stubGlobal("fetch", fetchMock);
+
+  return fetchMock;
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -182,13 +337,25 @@ describe("AdminQuestionMaterialManagement", () => {
       "aria-selected",
       "true",
     );
-    expect(screen.getByRole("button", { name: "新建题目" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "编辑题目" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "停用题目" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "复制题目" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "新建题目" })).toBeEnabled();
     expect(
-      screen.getByTestId("content-action-unavailable"),
+      screen.getByTestId("content-action-runtime-ready"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "编辑题目 question-marketing-001",
+      }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("button", {
+        name: "停用题目 question-marketing-001",
+      }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("button", {
+        name: "复制题目 question-marketing-001",
+      }),
+    ).toBeEnabled();
 
     expect(
       screen.getByTestId("question-row-question-marketing-001"),
@@ -247,9 +414,9 @@ describe("AdminQuestionMaterialManagement", () => {
       "aria-selected",
       "true",
     );
-    expect(screen.getByRole("button", { name: "新建材料" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "新建材料" })).toBeEnabled();
     expect(
-      screen.getByTestId("content-action-unavailable"),
+      screen.getByTestId("content-action-runtime-ready"),
     ).toBeInTheDocument();
 
     const materialRow = screen.getByTestId(
@@ -266,5 +433,152 @@ describe("AdminQuestionMaterialManagement", () => {
     });
 
     expect(screen.getByText("没有匹配的材料")).toBeInTheDocument();
+  });
+
+  it("creates, edits, disables, and copies questions through the protected runtime", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+    fireEvent.change(screen.getByLabelText("题干"), {
+      target: { value: "新建题目题干" },
+    });
+    fireEvent.change(screen.getByLabelText("标准答案"), {
+      target: { value: "A" },
+    });
+    fireEvent.change(screen.getByLabelText("老师解析"), {
+      target: { value: "新建题目解析" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
+
+    expect(
+      await screen.findByText("题目 question-created-001 已保存"),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/questions",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          authorization: "Bearer unit-test-admin-token",
+          "content-type": "application/json",
+        }),
+      }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "编辑题目 question-marketing-001",
+      }),
+    );
+    fireEvent.change(screen.getByLabelText("题干"), {
+      target: { value: "编辑后的题干" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
+
+    expect(
+      await screen.findByText("题目 question-marketing-001 已保存"),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/questions/question-marketing-001",
+      expect.objectContaining({ method: "PATCH" }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "停用题目 question-marketing-001",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "复制题目 question-marketing-001",
+      }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/questions/question-marketing-001/disable",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/questions/question-marketing-001/copy",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
+  it("creates, edits, disables, and copies materials through the protected runtime", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    await screen.findByText("营销案例材料 A");
+    fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
+    fireEvent.change(screen.getByLabelText("材料标题"), {
+      target: { value: "新建案例材料" },
+    });
+    fireEvent.change(screen.getByLabelText("材料正文"), {
+      target: { value: "新建材料正文" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存材料" }));
+
+    expect(
+      await screen.findByText("材料 material-created-001 已保存"),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/materials",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          authorization: "Bearer unit-test-admin-token",
+          "content-type": "application/json",
+        }),
+      }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "编辑材料 material-marketing-001",
+      }),
+    );
+    fireEvent.change(screen.getByLabelText("材料标题"), {
+      target: { value: "编辑后的材料" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存材料" }));
+
+    expect(
+      await screen.findByText("材料 material-marketing-001 已保存"),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/materials/material-marketing-001",
+      expect.objectContaining({ method: "PATCH" }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "停用材料 material-marketing-001",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "复制材料 material-marketing-001",
+      }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/materials/material-marketing-001/disable",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/materials/material-marketing-001/copy",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
   });
 });
