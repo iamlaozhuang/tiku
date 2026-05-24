@@ -289,6 +289,12 @@ function getQuestionOptions(value: unknown): PracticeQuestionOption[] {
   });
 }
 
+function getQuestionOptionSource(value: Record<string, unknown>): unknown {
+  return Array.isArray(value.questionOptions)
+    ? value.questionOptions
+    : value.options;
+}
+
 function mapPracticeQuestion(
   value: unknown,
   fallbackPaperSectionTitle: string | null,
@@ -323,7 +329,7 @@ function mapPracticeQuestion(
     materialTitle: getStringField(value, "materialTitle"),
     materialRichText: getStringField(value, "materialRichText"),
     stemRichText,
-    questionOptions: getQuestionOptions(value.questionOptions),
+    questionOptions: getQuestionOptions(getQuestionOptionSource(value)),
     standardAnswerRichText: getStringField(value, "standardAnswerRichText"),
     analysisRichText: getStringField(value, "analysisRichText"),
     score: getStringField(value, "score") ?? "0.0",
@@ -660,6 +666,7 @@ export function StudentPracticePage({
     useState(emptyTextAnswers);
   const [feedbackByQuestion, setFeedbackByQuestion] = useState(emptyFeedback);
   const [isMaterialOpen, setIsMaterialOpen] = useState(true);
+  const [isRestarting, setIsRestarting] = useState(false);
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -882,6 +889,78 @@ export function StudentPracticePage({
     );
   }
 
+  async function handleRestartPractice() {
+    if (practice === null) {
+      return;
+    }
+
+    if (!isRuntimeMode) {
+      setCurrentQuestionIndex(0);
+      setSelectedLabelsByQuestion(emptyAnswerSelections);
+      setTextAnswerByQuestion(emptyTextAnswers);
+      setFeedbackByQuestion(emptyFeedback);
+      setIsMaterialOpen(true);
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("authorization_expired");
+      return;
+    }
+
+    setIsRestarting(true);
+
+    try {
+      const restartPayload = await fetchStudentApi<PracticeResultDto>(
+        `/api/v1/practices/${practice.publicId}/restart`,
+        token,
+        {
+          method: "POST",
+        },
+      );
+
+      if (isStudentUnauthorizedResponse(restartPayload)) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      if (restartPayload.code !== 0 || restartPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      const restartedPractice = restartPayload.data.practice;
+
+      setRuntimePractices([
+        {
+          practice: restartedPractice,
+          feedbackByPaperQuestionPublicId: {},
+        },
+      ]);
+      setCurrentQuestionIndex(
+        Math.min(
+          restartedPractice.currentQuestionIndex,
+          Math.max(
+            extractPracticeQuestions(restartedPractice.paperSnapshot).length -
+              1,
+            0,
+          ),
+        ),
+      );
+      setSelectedLabelsByQuestion(emptyAnswerSelections);
+      setTextAnswerByQuestion(emptyTextAnswers);
+      setFeedbackByQuestion(emptyFeedback);
+      setIsMaterialOpen(true);
+      setRuntimeState("ready");
+    } catch {
+      setRuntimeState("error");
+    } finally {
+      setIsRestarting(false);
+    }
+  }
+
   return (
     <section
       data-testid={`practice-surface-${practice.publicId}`}
@@ -971,6 +1050,9 @@ export function StudentPracticePage({
 
       <button
         type="button"
+        data-testid="practice-restart-button"
+        disabled={isRestarting}
+        onClick={() => void handleRestartPractice()}
         className="border-border text-text-primary flex h-10 items-center justify-center gap-2 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
       >
         <RotateCcw className="size-4" aria-hidden="true" />

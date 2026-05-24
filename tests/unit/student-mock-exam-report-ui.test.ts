@@ -122,6 +122,53 @@ describe("StudentMockExamPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders local seed mock exam snapshots that store objective choices as options", () => {
+    const runtimeMockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      publicId: "mock-exam-local-seed-snapshot",
+      paperSnapshot: {
+        name: "Local seed mock exam",
+        paperSections: [
+          {
+            title: "Local seed section",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-local-seed-001",
+                questionPublicId: "question-local-seed-001",
+                questionType: "single_choice",
+                stemRichText: "Local seed stem",
+                options: [
+                  {
+                    label: "A",
+                    contentRichText: "local seed option",
+                  },
+                ],
+                standardAnswerLabels: ["A"],
+                score: "1.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: "mock-exam-local-seed-snapshot",
+        mockExams: [
+          {
+            mockExam: runtimeMockExam,
+            examReportPublicId: "exam-report-local-seed-snapshot",
+          },
+        ],
+      }),
+    );
+
+    expect(
+      screen.getByRole("button", { name: "A. local seed option" }),
+    ).toBeInTheDocument();
+  });
+
   it("supports next question navigation, question card navigation, and submit confirmation", () => {
     render(
       createElement(StudentMockExamPage, {
