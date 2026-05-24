@@ -310,6 +310,12 @@ function getQuestionOptions(value: unknown): MockExamQuestionOption[] {
   });
 }
 
+function getQuestionOptionSource(value: Record<string, unknown>): unknown {
+  return Array.isArray(value.questionOptions)
+    ? value.questionOptions
+    : value.options;
+}
+
 function mapMockExamQuestion(
   value: unknown,
   fallbackPaperSectionTitle: string | null,
@@ -343,7 +349,7 @@ function mapMockExamQuestion(
     questionType,
     paperSectionTitle,
     stemRichText,
-    questionOptions: getQuestionOptions(value.questionOptions),
+    questionOptions: getQuestionOptions(getQuestionOptionSource(value)),
     score: getStringField(value, "score") ?? "0.0",
   };
 }

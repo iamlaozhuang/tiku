@@ -102,6 +102,56 @@ describe("StudentPracticePage", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders local seed paper snapshots that store objective choices as options", () => {
+    const runtimePractice = {
+      ...studentPracticeFixture.practices[0].practice,
+      publicId: "practice-local-seed-snapshot",
+      paperPublicId: "paper-local-seed-snapshot",
+      paperSnapshot: {
+        name: "Local seed practice paper",
+        paperSections: [
+          {
+            title: "Local seed section",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-local-seed-001",
+                questionPublicId: "question-local-seed-001",
+                questionType: "single_choice",
+                stemRichText: "Local seed stem",
+                options: [
+                  {
+                    label: "A",
+                    contentRichText: "local seed option",
+                  },
+                ],
+                standardAnswerLabels: ["A"],
+                standardAnswerRichText: "A",
+                analysisRichText: "Local seed analysis",
+                score: "1.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-local-seed-snapshot",
+        practices: [
+          {
+            practice: runtimePractice,
+            feedbackByPaperQuestionPublicId: {},
+          },
+        ],
+      }),
+    );
+
+    expect(
+      screen.getByRole("button", { name: "A. local seed option" }),
+    ).toBeInTheDocument();
+  });
+
   it("shows objective feedback after submitting and prevents a second answer", () => {
     render(
       createElement(StudentPracticePage, {
@@ -275,6 +325,86 @@ describe("StudentPracticePage", () => {
     expect(await screen.findByText("回答错误")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-session-token");
 
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("restarts an active practice through the session runtime", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const startedPractice = studentPracticeFixture.practices[0].practice;
+    const restartedPractice = {
+      ...startedPractice,
+      publicId: "practice-marketing-theory-restarted",
+      currentQuestionIndex: 0,
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice: startedPractice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-marketing-theory-001/restart"
+        ) {
+          expect(init?.method).toBe("POST");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice: restartedPractice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-theory-002",
+      }),
+    );
+
+    expect(
+      await screen.findByText("practice-marketing-theory-001"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("practice-restart-button"));
+
+    expect(
+      await screen.findByText("practice-marketing-theory-restarted"),
+    ).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 });
