@@ -216,6 +216,28 @@ function mockKnowledgeNodeFetch(payload: unknown = knowledgeNodePayload) {
         path === "/api/v1/knowledge-nodes/knowledge-node-public-001" &&
         init?.method === "PATCH"
       ) {
+        const body =
+          typeof init.body === "string"
+            ? (JSON.parse(init.body) as Record<string, unknown>)
+            : {};
+
+        if ("parentKnowledgeNodePublicId" in body) {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              knowledgeNode: {
+                ...knowledgeNodePayload.data.knowledgeNodes[0],
+                parentKnowledgeNodePublicId: "knowledge-node-public-002",
+                pathName: "物流/成本核算/市场调研",
+                sortOrder: 30,
+                updatedAt: "2026-05-20T15:30:00.000Z",
+                id: 501,
+              },
+            },
+          });
+        }
+
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -693,6 +715,42 @@ describe("admin content and knowledge ops baseline", () => {
         method: "POST",
       }),
     );
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain('"id"');
+  });
+
+  it("moves and sorts knowledge_node rows through publicId-safe runtime actions", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockKnowledgeNodeFetch();
+
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    expect(
+      await screen.findByRole("heading", { name: "知识点树维护" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "移动节点" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("移动知识点节点");
+    fireEvent.click(screen.getByRole("button", { name: "确认移动" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "知识点节点已移动",
+    );
+    expect(screen.getByText("物流/成本核算/市场调研")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/knowledge-nodes/knowledge-node-public-001",
+      expect.objectContaining({
+        body: JSON.stringify({
+          parentKnowledgeNodePublicId: "knowledge-node-public-002",
+          sortOrder: 30,
+        }),
+        headers: expect.objectContaining({
+          authorization: "Bearer unit-test-admin-token",
+        }),
+        method: "PATCH",
+      }),
+    );
+    expect(screen.queryByRole("button", { name: "删除节点" })).toBeNull();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain('"id"');
   });

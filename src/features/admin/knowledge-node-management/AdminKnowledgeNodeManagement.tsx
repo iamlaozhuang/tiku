@@ -55,14 +55,20 @@ type KnowledgeNodeAction =
       target: AdminKnowledgeNodeOpsSummaryDto | null;
     }
   | {
+      status: "move";
+      parentTarget: AdminKnowledgeNodeOpsSummaryDto | null;
+      target: AdminKnowledgeNodeOpsSummaryDto | null;
+    }
+  | {
+      parentTarget?: AdminKnowledgeNodeOpsSummaryDto | null;
       status: "submitting";
       target: AdminKnowledgeNodeOpsSummaryDto | null;
-      type: "create" | "edit" | "disable";
+      type: "create" | "edit" | "disable" | "move";
     };
 
 type RunnableKnowledgeNodeAction = Extract<
   KnowledgeNodeAction,
-  { status: "create" | "edit" | "disable" }
+  { status: "create" | "edit" | "disable" | "move" }
 >;
 
 type ToastMessage = {
@@ -184,12 +190,23 @@ export function AdminKnowledgeNodeManagement() {
     [keyword, knowledgeNodes, profession, status],
   );
   const activeKnowledgeNode = filteredKnowledgeNodes[0] ?? null;
+  const moveParentCandidate = useMemo(
+    () =>
+      activeKnowledgeNode === null
+        ? null
+        : (filteredKnowledgeNodes.find(
+            (knowledgeNode) =>
+              knowledgeNode.publicId !== activeKnowledgeNode.publicId,
+          ) ?? null),
+    [activeKnowledgeNode, filteredKnowledgeNodes],
+  );
 
   async function handleConfirmAction() {
     if (
       action.status !== "create" &&
       action.status !== "edit" &&
-      action.status !== "disable"
+      action.status !== "disable" &&
+      action.status !== "move"
     ) {
       return;
     }
@@ -206,6 +223,7 @@ export function AdminKnowledgeNodeManagement() {
     }
 
     setAction({
+      parentTarget: action.status === "move" ? action.parentTarget : undefined,
       status: "submitting",
       target: action.target,
       type: action.status,
@@ -246,7 +264,11 @@ export function AdminKnowledgeNodeManagement() {
       );
       setToastMessage({
         message:
-          action.status === "edit" ? "知识点节点已更新" : "知识点节点已停用",
+          action.status === "edit"
+            ? "知识点节点已更新"
+            : action.status === "move"
+              ? "知识点节点已移动"
+              : "知识点节点已停用",
         tone: "success",
       });
     } catch {
@@ -313,8 +335,18 @@ export function AdminKnowledgeNodeManagement() {
             编辑节点
           </Button>
           <Button
-            disabled={filteredKnowledgeNodes.length === 0}
+            disabled={
+              activeKnowledgeNode === null || moveParentCandidate === null
+            }
             variant="outline"
+            onClick={() => {
+              setToastMessage(null);
+              setAction({
+                parentTarget: moveParentCandidate,
+                status: "move",
+                target: activeKnowledgeNode,
+              });
+            }}
           >
             <Move aria-hidden="true" data-icon="inline-start" />
             移动节点
@@ -408,6 +440,7 @@ export function AdminKnowledgeNodeManagement() {
 
       {action.status === "create" ||
       action.status === "edit" ||
+      action.status === "move" ||
       action.status === "disable" ||
       action.status === "submitting" ? (
         <KnowledgeNodeActionDialog
@@ -465,6 +498,29 @@ async function runKnowledgeNodeAction({
     );
   }
 
+  if (action.status === "move") {
+    if (
+      action.parentTarget === null ||
+      !isSafePublicId(action.parentTarget.publicId)
+    ) {
+      return null;
+    }
+
+    return requestKnowledgeNode(
+      `/api/v1/knowledge-nodes/${action.target.publicId}`,
+      {
+        body: JSON.stringify({
+          parentKnowledgeNodePublicId: action.parentTarget.publicId,
+          sortOrder:
+            Math.max(action.target.sortOrder, action.parentTarget.sortOrder) +
+            10,
+        }),
+        headers,
+        method: "PATCH",
+      },
+    );
+  }
+
   return requestKnowledgeNode(
     `/api/v1/knowledge-nodes/${action.target.publicId}/disable`,
     {
@@ -510,13 +566,17 @@ function KnowledgeNodeActionDialog({
       ? "新增知识点节点"
       : actionType === "edit"
         ? "编辑知识点节点"
-        : "确认停用知识点节点？";
+        : actionType === "move"
+          ? "移动知识点节点"
+          : "确认停用知识点节点？";
   const confirmLabel =
     actionType === "create"
       ? "确认新增"
       : actionType === "edit"
         ? "确认更新"
-        : "确认停用";
+        : actionType === "move"
+          ? "确认移动"
+          : "确认停用";
 
   return (
     <div
@@ -531,7 +591,9 @@ function KnowledgeNodeActionDialog({
         <p className="text-text-secondary text-sm">
           {actionType === "create"
             ? "将创建一个营销 3级示例节点，用于验证运行时新增边界。"
-            : "操作仅提交 publicId 和允许的 JSON 字段，不提交内部自增 id。"}
+            : actionType === "move"
+              ? "将目标节点移动到当前结果中的另一个 publicId 父节点下，并同步提交排序值。"
+              : "操作仅提交 publicId 和允许的 JSON 字段，不提交内部自增 id。"}
         </p>
         <div className="flex gap-2">
           <Button

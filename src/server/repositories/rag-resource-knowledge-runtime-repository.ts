@@ -22,6 +22,7 @@ import type { ResourceStatus } from "../models/ai-rag";
 import {
   assertKnowledgeNodeDepth,
   canTransitionResourceStatus,
+  maxKnowledgeNodeDepth,
 } from "../models/ai-rag";
 import type {
   KnowledgeNodeMutationInput,
@@ -457,6 +458,18 @@ function createPostgresRagKnowledgeNodeRuntimeRepository(
         return null;
       }
 
+      if (
+        parentNode !== null &&
+        (parentNode.id === currentNode.id ||
+          (await isKnowledgeNodeDescendant(
+            database,
+            parentNode.id,
+            currentNode.id,
+          )))
+      ) {
+        return null;
+      }
+
       const nextName = input.name ?? currentNode.name;
       const depth = (parentNode?.depth ?? 0) + 1;
       assertKnowledgeNodeDepth(depth);
@@ -765,6 +778,36 @@ async function findKnowledgeNodeByPublicId(
     depth: row.depth,
     sort_order: row.sort_order,
   };
+}
+
+async function isKnowledgeNodeDescendant(
+  database: RuntimeDatabase,
+  candidateNodeId: number,
+  ancestorNodeId: number,
+): Promise<boolean> {
+  let nextNodeId: number | null = candidateNodeId;
+
+  for (let depth = 0; depth < maxKnowledgeNodeDepth; depth += 1) {
+    if (nextNodeId === ancestorNodeId) {
+      return true;
+    }
+
+    const [row] = await database
+      .select({
+        parent_knowledge_node_id: knowledgeNode.parent_knowledge_node_id,
+      })
+      .from(knowledgeNode)
+      .where(eq(knowledgeNode.id, nextNodeId))
+      .limit(1);
+
+    if (row === undefined || row.parent_knowledge_node_id === null) {
+      return false;
+    }
+
+    nextNodeId = row.parent_knowledge_node_id;
+  }
+
+  return false;
 }
 
 function createResourceOpsReturningSelection() {
