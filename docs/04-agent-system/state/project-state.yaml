@@ -42,7 +42,7 @@ currentTask:
   planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-required-role-flow-closures.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-required-role-flow-closures.md
   branch: codex/phase-11-staging-required-role-flow-closures
-  commitSha: null
+  commitSha: 7f9e842
   prUrl: null
   retryCount: 0
   lastFailurePath: null

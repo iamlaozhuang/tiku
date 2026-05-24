@@ -111,3 +111,42 @@ Post-close note:
 `stagingDecision: local_required_roles_pass_for_staging_entry`
 
 The task is ready to close locally, commit, merge to `master`, rerun necessary master gates, push `origin/master`, and remove the merged short-lived branch.
+
+## Master Gate Backfill
+
+```text
+git merge --no-ff codex/phase-11-staging-required-role-flow-closures -m "merge: phase 11 staging required role flows"
+Result: merged into master
+Merge commit: 7f9e842
+
+docker compose ps
+Result: tiku-postgres-dev Up, healthy, 127.0.0.1:5432->5432/tcp
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: passed on master
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: naming convention scan completed on master
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: passed on master
+- lint: passed
+- typecheck: passed
+- test:unit: 107 files passed, 391 tests passed
+- format:check: passed
+
+npm.cmd run test:e2e -- --grep "staging required role flows"
+Result: 1 passed on master
+
+npm.cmd run build
+Result: passed on master
+- Next.js production build compiled successfully
+- static pages generated: 47/47
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: git completion readiness inventory completed on master
+- branch: master
+- upstream: origin/master
+- commits ahead before push: 2
+- files changed against base are limited to this task scope
+```
