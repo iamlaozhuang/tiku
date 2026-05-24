@@ -95,6 +95,30 @@ Result: pass. It ran lint, typecheck, test:unit, and format:check.
 
 git diff --check
 Result: pass.
+
+git commit -m "feat(rag): add resource publish index loop"
+Result: created task commit `330b52c`.
+
+git switch master
+Result: switched to `master`, aligned with `origin/master` before merge.
+
+git merge --no-ff codex/phase-11-mvp-resource-knowledge-base-publish-index-loop -m "merge: phase 11 resource knowledge publish index loop"
+Result: merge commit `71da43c`.
+
+npm.cmd run test:unit
+Post-merge result on master: pass, 112 files / 426 tests.
+
+npm.cmd run build
+Post-merge result on master: pass. Build output listed `.env.local` as a Next.js environment source; this task did not read or record `.env.local` contents.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Post-merge result on master: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Post-merge result on master: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Post-merge result on master: pass inventory. Master is ahead of origin/master by 2 commits (`71da43c`, `330b52c`), with no tracked, staged, or untracked local changes before this post-merge evidence update.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -108,13 +132,13 @@ Result: pass.
 | Problem grading      | P1 local fixture scope fixed; gated residuals recorded                                                                                | Pass    |
 | Validation record    | RED/GREEN, related tests, full unit, build, readiness, naming, quality gate, and diff check recorded                                  | Pass    |
 | Evidence hygiene     | No secrets, raw resource text, raw chunks, embeddings, provider payloads, or prohibited data recorded                                 | Pass    |
-| Commit               | Ready after evidence/state update                                                                                                     | Pending |
-| Merge                | Pending post-commit                                                                                                                   | Pending |
-| Push                 | Pending post-merge                                                                                                                    | Pending |
+| Commit               | Task commit `330b52c`                                                                                                                 | Pass    |
+| Merge                | Merged to `master` with merge commit `71da43c`                                                                                        | Pass    |
+| Push                 | Pending post-merge evidence commit                                                                                                    | Pending |
 | Cleanup              | Pending post-push                                                                                                                     | Pending |
 | Worktree residue     | No worktree-specific residue created                                                                                                  | Pass    |
 | stagingDecision      | Local task can close; staging remains blocked by remaining MVP gap tasks and hard gates                                               | Pass    |
-| Next step            | Commit, merge to `master`, push, cleanup branch, then claim next queue task                                                           | Pass    |
+| Next step            | Commit post-merge evidence, push `master`, cleanup branch, then claim next queue task                                                 | Pass    |
 
 ## stagingDecision
 
@@ -122,7 +146,7 @@ local_task_complete_staging_blocked
 
 ## Next Step
 
-Commit this task, merge/push to `master`, clean the short lifecycle branch, then claim `phase-11-mvp-knowledge-node-tree-management-loop` from a clean repository.
+Commit post-merge evidence, push `master`, clean the short lifecycle branch, then claim `phase-11-mvp-knowledge-node-tree-management-loop` from a clean repository.
 
 ## Evidence Hygiene
 
