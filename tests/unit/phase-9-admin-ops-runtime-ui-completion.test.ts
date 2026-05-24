@@ -151,7 +151,9 @@ function createOkPayload<TData>(data: TData) {
 function mockAdminOpsFetch() {
   localStorage.setItem("tiku.localSessionToken", "admin-session-token");
 
-  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+  const fetchMock = vi.spyOn(globalThis, "fetch");
+
+  return fetchMock.mockImplementation(async (input, init) => {
     const url =
       input instanceof Request
         ? input.url
@@ -265,6 +267,27 @@ function mockAdminOpsFetch() {
     }
 
     if (url.startsWith("/api/v1/redeem-codes")) {
+      if (
+        input instanceof Request
+          ? input.method === "POST"
+          : init?.method === "POST"
+      ) {
+        return Response.json(
+          createOkPayload({
+            redeemCode: {
+              publicId: "redeem-code-public-generated",
+              codePlainText: "ABCDEFG2",
+              codeDisplay: "ABCDEFG2",
+              profession: "monopoly",
+              level: 3,
+              status: "unused",
+              redeemDeadlineAt: "2027-05-23T08:00:00.000Z",
+              createdAt: now,
+            },
+          }),
+        );
+      }
+
       return Response.json(
         createOkPayload({
           redeemCodes: [
@@ -522,8 +545,10 @@ describe("phase 9 admin ops runtime ui completion", () => {
       "卡密生成需要二次确认",
     );
     fireEvent.click(screen.getByRole("button", { name: "确认生成" }));
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "数据已被其他操作更新，请刷新后重试",
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "卡密已生成，请仅在本地验证时复制给学员",
     );
+    expect(screen.getByText("ABCDEFG2")).toBeInTheDocument();
+    expect(screen.queryByText("admin-session-token")).toBeNull();
   });
 });

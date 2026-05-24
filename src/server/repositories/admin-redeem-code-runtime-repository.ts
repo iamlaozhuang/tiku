@@ -1,3 +1,4 @@
+import { createHash, randomInt, randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -19,6 +20,7 @@ import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAuthOperationListQuery,
+  RedeemCodeGenerationDto,
   RedeemCodeListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 
@@ -33,12 +35,17 @@ export type AdminRedeemCodePage<TData> = TData & {
 };
 
 export type AdminRedeemCodeRuntimeRepositories = {
+  createRedeemCode(): Promise<RedeemCodeGenerationDto["redeemCode"]>;
   listRedeemCodes(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminRedeemCodePage<RedeemCodeListDto>>;
 };
 
 const { redeemCode, user } = databaseSchema;
+const LOCAL_REDEEM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const LOCAL_REDEEM_CODE_LENGTH = 8;
+const LOCAL_REDEEM_CODE_DURATION_DAY = 365;
+const LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS = 5;
 
 function createLazyDatabaseGetter(
   createDatabase: () => AdminRedeemCodeRuntimeDatabase,
@@ -76,6 +83,68 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
   );
 
   return {
+    async createRedeemCode() {
+      const database = getDatabase();
+
+      for (
+        let attemptIndex = 0;
+        attemptIndex < LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS;
+        attemptIndex += 1
+      ) {
+        const codePlainText = createLocalRedeemCodePlainText();
+        const redeemDeadlineAt = addDays(
+          new Date(),
+          LOCAL_REDEEM_CODE_DURATION_DAY,
+        );
+
+        try {
+          const [createdRedeemCode] = await database
+            .insert(redeemCode)
+            .values({
+              public_id: `redeem-code-${randomUUID()}`,
+              code_hash: createRedeemCodeHash(codePlainText),
+              code_display: codePlainText,
+              profession: "monopoly",
+              level: 3,
+              duration_day: LOCAL_REDEEM_CODE_DURATION_DAY,
+              redeem_deadline_at: redeemDeadlineAt,
+              status: "unused",
+              generation_group_id: "local-happy-path",
+            })
+            .returning({
+              public_id: redeemCode.public_id,
+              code_display: redeemCode.code_display,
+              profession: redeemCode.profession,
+              level: redeemCode.level,
+              status: redeemCode.status,
+              redeem_deadline_at: redeemCode.redeem_deadline_at,
+              created_at: redeemCode.created_at,
+            });
+
+          if (createdRedeemCode === undefined) {
+            throw new Error("Redeem code creation returned no row.");
+          }
+
+          return {
+            publicId: createdRedeemCode.public_id,
+            codePlainText,
+            codeDisplay: createdRedeemCode.code_display,
+            profession: createdRedeemCode.profession,
+            level: createdRedeemCode.level,
+            status: createdRedeemCode.status,
+            redeemDeadlineAt:
+              createdRedeemCode.redeem_deadline_at.toISOString(),
+            createdAt: createdRedeemCode.created_at.toISOString(),
+          };
+        } catch (error) {
+          if (attemptIndex === LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS - 1) {
+            throw error;
+          }
+        }
+      }
+
+      throw new Error("Redeem code creation exhausted retry attempts.");
+    },
     async listRedeemCodes(query) {
       const database = getDatabase();
       const conditions = createRedeemCodeConditions(query);
@@ -180,6 +249,29 @@ async function listRedeemedUserPublicIds(
     .where(inArray(user.id, userIds));
 
   return new Map(rows.map((row) => [row.id, row.public_id]));
+}
+
+function addDays(value: Date, days: number): Date {
+  const result = new Date(value);
+
+  result.setUTCDate(result.getUTCDate() + days);
+
+  return result;
+}
+
+function createLocalRedeemCodePlainText(): string {
+  let codePlainText = "";
+
+  for (let index = 0; index < LOCAL_REDEEM_CODE_LENGTH; index += 1) {
+    codePlainText +=
+      LOCAL_REDEEM_CODE_ALPHABET[randomInt(LOCAL_REDEEM_CODE_ALPHABET.length)];
+  }
+
+  return codePlainText;
+}
+
+function createRedeemCodeHash(codePlainText: string): string {
+  return createHash("sha256").update(codePlainText).digest("hex");
 }
 
 function maskRedeemCodeDisplay(codeDisplay: string): string {

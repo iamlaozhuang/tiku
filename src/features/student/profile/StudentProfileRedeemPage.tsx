@@ -350,7 +350,7 @@ function RedeemCodePreparationNotice() {
         <div className="space-y-1">
           <p className="text-text-primary text-sm font-semibold">等待卡密</p>
           <p className="text-text-secondary text-sm leading-6">
-            <span>卡密来源未配置</span>
+            <span>卡密来源：系统运营</span>
             。请使用系统运营提供的未使用卡密完成兑换。
           </p>
         </div>
