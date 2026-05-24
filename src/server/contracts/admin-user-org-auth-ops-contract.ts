@@ -115,6 +115,7 @@ export type RedeemCodeSummaryDto = {
   level: number;
   status: RedeemCodeStatus;
   redeemedUserPublicId: string | null;
+  redeemDeadlineAt: string;
   createdAt: string;
 };
 
@@ -122,17 +123,27 @@ export type RedeemCodeListDto = {
   redeemCodes: RedeemCodeSummaryDto[];
 };
 
+export type RedeemCodeGenerationItemDto = {
+  publicId: string;
+  codePlainText: string;
+  codeDisplay: string;
+  profession: Profession;
+  level: number;
+  status: RedeemCodeStatus;
+  redeemDeadlineAt: string;
+  createdAt: string;
+};
+
 export type RedeemCodeGenerationDto = {
-  redeemCode: {
-    publicId: string;
-    codePlainText: string;
-    codeDisplay: string;
+  generation: {
+    generationGroupId: string;
+    count: number;
     profession: Profession;
     level: number;
-    status: RedeemCodeStatus;
+    durationDay: number;
     redeemDeadlineAt: string;
-    createdAt: string;
   };
+  redeemCodes: RedeemCodeGenerationItemDto[];
 };
 
 export type AdminRoleSummaryDto = {

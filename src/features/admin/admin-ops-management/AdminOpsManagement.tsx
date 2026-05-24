@@ -73,7 +73,11 @@ type ToastMessage = {
   message: string;
 };
 
-type GeneratedRedeemCode = RedeemCodeGenerationDto["redeemCode"];
+type GeneratedRedeemCode = RedeemCodeGenerationDto["redeemCodes"][number];
+
+type LegacyRedeemCodeGenerationDto = RedeemCodeGenerationDto & {
+  redeemCode?: GeneratedRedeemCode;
+};
 
 type AdminOpsLoadResult =
   | {
@@ -395,7 +399,9 @@ export function AdminOpsManagement() {
         return;
       }
 
-      setGeneratedRedeemCode(createRedeemCodeResponse.data.redeemCode);
+      setGeneratedRedeemCode(
+        getFirstGeneratedRedeemCode(createRedeemCodeResponse.data),
+      );
       setToastMessage({
         message: "卡密已生成，请仅在本地验证时复制给学员",
         tone: "success",
@@ -714,6 +720,12 @@ export function AdminOpsManagement() {
       {toastMessage === null ? null : <AdminOpsToast message={toastMessage} />}
     </main>
   );
+}
+
+function getFirstGeneratedRedeemCode(
+  data: LegacyRedeemCodeGenerationDto,
+): GeneratedRedeemCode | null {
+  return data.redeemCodes?.[0] ?? data.redeemCode ?? null;
 }
 
 function SummaryTile({
