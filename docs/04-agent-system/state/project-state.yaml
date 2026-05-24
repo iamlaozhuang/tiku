@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T04:10:00-07:00"
+  updatedAt: "2026-05-24T04:13:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -37,7 +37,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
   id: phase-11-mvp-content-ops-question-material-write-loop
-  status: merged
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-001
   planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: push and close phase-11-mvp-content-ops-question-material-write-loop before claiming the next MVP gap task
+  nextRecommendedAction: claim phase-11-mvp-content-ops-paper-composition-publish-loop as the next MVP gap task
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
