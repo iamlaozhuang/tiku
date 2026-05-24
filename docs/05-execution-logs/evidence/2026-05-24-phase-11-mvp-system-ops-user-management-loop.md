@@ -79,6 +79,32 @@ Result: pass.
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
 Pre-commit inventory result: pass/inventory completed. Uncommitted files are limited to this task's allowed files.
+
+git commit -m "feat(admin): add system ops user lifecycle runtime"
+Result: pass after amend. Task commit `6b5a902`.
+
+git merge --no-ff codex/phase-11-mvp-system-ops-user-management-loop -m "merge: phase 11 system ops user management loop"
+Result: pass. Merge commit on `master`: `cdca975`.
+
+Post-merge master gates:
+
+npm.cmd run test:unit
+Result: pass, 109 test files, 414 tests.
+
+npm.cmd run build
+Result: pass. New user and employee lifecycle routes are present in the build route list. Next.js reported `.env.local` as an environment source; no `.env.local` secret value was read, output, or recorded.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: pass/inventory completed. `master` is ahead of `origin/master` by the task commit and merge commit.
+
+git diff --check HEAD~2..HEAD
+Result: pass.
 ```
 
 ## Implementation Notes
@@ -105,9 +131,9 @@ Pre-commit inventory result: pass/inventory completed. Uncommitted files are lim
 | Problem grading      | Initial P0 user/employee lifecycle issue recorded                                                                                           | Pass    |
 | Validation record    | RED/GREEN targeted tests, related unit tests, full unit, build, readiness, naming, and diff checks recorded                                 | Pass    |
 | Evidence hygiene     | No secrets or prohibited raw data recorded                                                                                                  | Pass    |
-| Commit               | Ready after evidence/state update and final formatting                                                                                      | Pending |
-| Merge                | Pending post-commit                                                                                                                         | Pending |
-| Push                 | Pending post-merge master validation                                                                                                        | Pending |
+| Commit               | Task commit `6b5a902`                                                                                                                       | Pass    |
+| Merge                | Merge commit `cdca975` on `master`                                                                                                          | Pass    |
+| Push                 | Pending after this closeout evidence commit                                                                                                 | Pending |
 | Cleanup              | Pending post-push branch cleanup                                                                                                            | Pending |
 | Worktree residue     | No extra worktree created for this task                                                                                                     | Pass    |
 | stagingDecision      | Local-only task; no staging/prod connection, deployment, cloud, env, schema, migration, script, package, lockfile, or provider work         | Pass    |
@@ -119,7 +145,7 @@ local_only_complete_no_staging_or_prod
 
 ## Next Step
 
-Commit this task, merge to `master`, run master closeout gates, push, clean the short branch, and then claim `phase-11-mvp-system-ops-org-auth-management-loop` only from a clean repository.
+Commit closeout evidence, push `master` to `origin`, clean the short branch, and then claim `phase-11-mvp-system-ops-org-auth-management-loop` only from a clean repository.
 
 ## Evidence Hygiene
 
