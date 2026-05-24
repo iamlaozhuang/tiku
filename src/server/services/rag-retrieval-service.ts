@@ -5,6 +5,7 @@ import {
   type RagCitation,
   type RagRetrievalEvidenceSummary,
 } from "@/rag/retrieval";
+import type { RagCitationSourceDto } from "@/server/contracts/ai-rag-contract";
 import type { EvidenceStatus } from "@/rag/retrieval";
 import type { Profession, ResourceStatus } from "@/server/models/ai-rag";
 
@@ -69,6 +70,19 @@ export function buildRagRetrievalContextFromChunks(
       createDeterministicRetrievalCandidate(input.query, chunk),
     ),
   });
+}
+
+export function createRagCitationSourceDtos(
+  citations: readonly RagCitation[],
+): RagCitationSourceDto[] {
+  return citations.map((citation) => ({
+    chunkPublicId: citation.chunkPublicId,
+    resourcePublicId: citation.resourcePublicId,
+    resourceTitle: citation.resourceTitle,
+    headingPath: [...citation.headingPath],
+    chunkIndex: citation.chunkIndex,
+    score: citation.score,
+  }));
 }
 
 function createDeterministicRetrievalCandidate(

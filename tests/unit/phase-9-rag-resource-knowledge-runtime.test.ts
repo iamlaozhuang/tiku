@@ -64,6 +64,8 @@ function createRuntimeRepositories(input: {
               downloadAvailable: true,
               markdownPreviewAvailable: true,
               isVectorStale: false,
+              publishedAt: createdAt.toISOString(),
+              indexingErrorSummary: null,
               uploadedAt: createdAt.toISOString(),
               updatedAt: createdAt.toISOString(),
             },
@@ -76,6 +78,12 @@ function createRuntimeRepositories(input: {
             total: 1,
           },
         };
+      },
+      async publishResourceMarkdown() {
+        throw new Error("not used");
+      },
+      async markResourceIndexingStarted() {
+        return undefined;
       },
       async findResourceForIndexing(publicId) {
         if (publicId !== "resource-public-001") {
@@ -111,6 +119,8 @@ function createRuntimeRepositories(input: {
           downloadAvailable: true,
           markdownPreviewAvailable: true,
           isVectorStale: false,
+          publishedAt: createdAt.toISOString(),
+          indexingErrorSummary: result.indexingErrorMessage,
           uploadedAt: createdAt.toISOString(),
           updatedAt: createdAt.toISOString(),
         };

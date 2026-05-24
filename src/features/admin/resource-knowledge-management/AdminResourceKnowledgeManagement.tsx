@@ -64,6 +64,19 @@ type RebuildState =
       status: "submitting";
     };
 
+type PublishState =
+  | {
+      status: "idle";
+    }
+  | {
+      resource: AdminResourceOpsSummaryDto;
+      status: "confirming";
+    }
+  | {
+      resource: AdminResourceOpsSummaryDto;
+      status: "submitting";
+    };
+
 type ToastMessage = {
   message: string;
   tone: "success" | "error";
@@ -136,6 +149,28 @@ async function postResourceVectorRebuild(
   return payload.data;
 }
 
+async function postResourceMarkdownPublish(
+  resourcePublicId: string,
+  sessionToken: string,
+): Promise<AdminResourceOpsSummaryDto | null> {
+  const response = await fetch(
+    `/api/v1/resources/${resourcePublicId}/publish`,
+    {
+      headers: createAdminAuthHeaders(sessionToken),
+      method: "POST",
+    },
+  );
+  const payload = (await response.json()) as ApiResponse<{
+    resource: AdminResourceOpsSummaryDto;
+  } | null>;
+
+  if (payload.code !== 0 || payload.data === null) {
+    return null;
+  }
+
+  return payload.data.resource;
+}
+
 function useResourceData() {
   const [loadState, setLoadState] = useState<ResourceLoadState>("loading");
   const [resources, setResources] = useState<AdminResourceOpsSummaryDto[]>([]);
@@ -203,7 +238,7 @@ function useResourceData() {
     };
   }, []);
 
-  return { loadState, resources };
+  return { loadState, resources, setResources };
 }
 
 export function AdminResourceKnowledgeManagement() {
@@ -214,8 +249,11 @@ export function AdminResourceKnowledgeManagement() {
   const [rebuildState, setRebuildState] = useState<RebuildState>({
     status: "idle",
   });
+  const [publishState, setPublishState] = useState<PublishState>({
+    status: "idle",
+  });
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
-  const { loadState, resources } = useResourceData();
+  const { loadState, resources, setResources } = useResourceData();
   const filteredResources = useMemo(
     () =>
       resources.filter((resource) => {
@@ -286,6 +324,62 @@ export function AdminResourceKnowledgeManagement() {
       });
     } finally {
       setRebuildState({ status: "idle" });
+    }
+  }
+
+  async function handleConfirmPublish() {
+    if (publishState.status !== "confirming") {
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+
+    if (
+      sessionToken === null ||
+      !isSafePublicId(publishState.resource.publicId)
+    ) {
+      setPublishState({ status: "idle" });
+      setToastMessage({
+        message: "资源 publicId 异常，请刷新后重试",
+        tone: "error",
+      });
+      return;
+    }
+
+    setPublishState({ resource: publishState.resource, status: "submitting" });
+
+    try {
+      const publishedResource = await postResourceMarkdownPublish(
+        publishState.resource.publicId,
+        sessionToken,
+      );
+
+      if (publishedResource === null) {
+        setToastMessage({
+          message: "资源发布失败，请刷新后重试",
+          tone: "error",
+        });
+        return;
+      }
+
+      setResources((currentResources) =>
+        currentResources.map((resource) =>
+          resource.publicId === publishedResource.publicId
+            ? publishedResource
+            : resource,
+        ),
+      );
+      setToastMessage({
+        message: "资源发布完成，向量待重建",
+        tone: "success",
+      });
+    } catch {
+      setToastMessage({
+        message: "资源发布失败，请刷新后重试",
+        tone: "error",
+      });
+    } finally {
+      setPublishState({ status: "idle" });
     }
   }
 
@@ -407,6 +501,10 @@ export function AdminResourceKnowledgeManagement() {
       {filteredResources.length > 0 ? (
         <ResourceList
           rows={filteredResources}
+          onRequestPublish={(resource) => {
+            setToastMessage(null);
+            setPublishState({ resource, status: "confirming" });
+          }}
           onRequestRebuild={(resource) => {
             setToastMessage(null);
             setRebuildState({ resource, status: "confirming" });
@@ -423,6 +521,16 @@ export function AdminResourceKnowledgeManagement() {
           resource={rebuildState.resource}
           onCancel={() => setRebuildState({ status: "idle" })}
           onConfirm={handleConfirmRebuild}
+        />
+      ) : null}
+
+      {publishState.status === "confirming" ||
+      publishState.status === "submitting" ? (
+        <PublishConfirmationDialog
+          isSubmitting={publishState.status === "submitting"}
+          resource={publishState.resource}
+          onCancel={() => setPublishState({ status: "idle" })}
+          onConfirm={handleConfirmPublish}
         />
       ) : null}
 
@@ -475,9 +583,11 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
 }
 
 function ResourceList({
+  onRequestPublish,
   onRequestRebuild,
   rows,
 }: {
+  onRequestPublish: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestRebuild: (resource: AdminResourceOpsSummaryDto) => void;
   rows: AdminResourceOpsSummaryDto[];
 }) {
@@ -526,6 +636,20 @@ function ResourceList({
             </div>
             <div className="flex flex-col gap-3 xl:items-end">
               <PublicId value={resource.publicId} />
+              {resource.resourceStatus === "draft" ||
+              resource.resourceStatus === "rag_ready" ? (
+                <Button
+                  disabled={
+                    !isSafePublicId(resource.publicId) ||
+                    !resource.markdownPreviewAvailable
+                  }
+                  variant="outline"
+                  onClick={() => onRequestPublish(resource)}
+                >
+                  <FileText aria-hidden="true" data-icon="inline-start" />
+                  发布 Markdown
+                </Button>
+              ) : null}
               <Button
                 disabled={!isSafePublicId(resource.publicId)}
                 variant={
@@ -578,6 +702,47 @@ function FilteredEmptyState() {
       <p className="text-text-secondary mt-2 text-sm">
         调整关键词或筛选条件后再试。
       </p>
+    </div>
+  );
+}
+
+function PublishConfirmationDialog({
+  isSubmitting,
+  onCancel,
+  onConfirm,
+  resource,
+}: {
+  isSubmitting: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+  resource: AdminResourceOpsSummaryDto;
+}) {
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <h2 className="text-text-primary text-base font-semibold">
+          确认发布{resource.title}的 Markdown？
+        </h2>
+        <p className="text-text-secondary text-sm">
+          发布后资源进入待建向量状态，RAG 仅在重建完成后使用新内容。
+        </p>
+        <div className="flex gap-2">
+          <Button
+            disabled={isSubmitting}
+            variant="destructive"
+            onClick={onConfirm}
+          >
+            确认发布
+          </Button>
+          <Button disabled={isSubmitting} variant="outline" onClick={onCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
