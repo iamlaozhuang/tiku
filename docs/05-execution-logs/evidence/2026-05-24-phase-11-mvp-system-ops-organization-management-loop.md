@@ -108,6 +108,33 @@ Result: pass. Subcommands passed: lint, typecheck, test:unit (118 files / 444 te
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
 Result: pass inventory on branch codex/phase-11-mvp-system-ops-organization-management-loop. Staged changes: none before commit. Untracked task files: plan, evidence, unit test. No package, lockfile, env, schema, migration, script, cloud, deployment, staging, or prod file reported.
+
+git commit -m "feat(organization): close system ops organization loop"
+Result: pass. Task commit `73044b8`.
+
+git switch master
+Result: pass. Master was up to date with `origin/master` before merge.
+
+git merge --no-ff codex/phase-11-mvp-system-ops-organization-management-loop -m "merge: phase-11 mvp system ops organization loop"
+Result: pass. Merge commit `4ccd1c2`.
+
+npm.cmd run test:unit -- tests/unit/phase-11-system-ops-organization-management-loop.test.ts
+Result on master after merge: pass, 1 file / 4 tests.
+
+npm.cmd run build
+Result on master after merge: pass. Build output noted `.env.local` loading but no secret values were read or recorded.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result on master after merge: pass. Subcommands passed: lint, typecheck, test:unit (118 files / 444 tests), format:check.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result on master after merge: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Result on master after merge: pass inventory. Master was ahead of origin/master by task commit and merge commit; tracked changes, staged changes, and untracked files were none.
+
+git branch -d codex/phase-11-mvp-system-ops-organization-management-loop
+Result: pass. Local short-lifecycle task branch deleted after merge and master gates.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -121,13 +148,13 @@ Result: pass inventory on branch codex/phase-11-mvp-system-ops-organization-mana
 | Problem grading      | P1 organization lifecycle issue fixed; P2 direct DB side-effect smoke deferred with reason                                                                       | Pass    |
 | Validation record    | Claim readiness, RED/GREEN, related regressions, typecheck, build, full unit, readiness, naming, diff check, quality gate, and Git completion inventory recorded | Pass    |
 | Evidence hygiene     | No secret values, credential values, Authorization header values, raw provider payloads, or private data recorded                                                | Pass    |
-| Commit               | Pending                                                                                                                                                          | Pending |
-| Merge                | Pending                                                                                                                                                          | Pending |
-| Push                 | Pending                                                                                                                                                          | Pending |
-| Cleanup              | Pending                                                                                                                                                          | Pending |
-| Worktree residue     | Pending                                                                                                                                                          | Pending |
+| Commit               | Task commit `73044b8`                                                                                                                                            | Pass    |
+| Merge                | Merged into `master` with merge commit `4ccd1c2`                                                                                                                 | Pass    |
+| Push                 | Pending final `master` push after this closeout update                                                                                                           | Pending |
+| Cleanup              | Local merged short-lifecycle branch deleted                                                                                                                      | Pass    |
+| Worktree residue     | `git status --short --branch` on master reported no tracked, staged, or untracked files before closeout docs update                                              | Pass    |
 | stagingDecision      | `local_task_closed_no_known_p0_p1`                                                                                                                               | Pass    |
-| Next step            | Commit, merge to master, push, cleanup, then claim `phase-11-mvp-contact-config-purchase-guidance-loop` from clean master                                        | Pass    |
+| Next step            | Push `master` to `origin`, then claim `phase-11-mvp-contact-config-purchase-guidance-loop` from clean master                                                     | Pass    |
 
 ## stagingDecision
 
@@ -135,7 +162,7 @@ local_task_closed_no_known_p0_p1
 
 ## Next Step
 
-Commit, merge to master, push, cleanup, and then claim `phase-11-mvp-contact-config-purchase-guidance-loop` from a clean repository.
+Push `master` to `origin`, then claim `phase-11-mvp-contact-config-purchase-guidance-loop` from a clean repository.
 
 ## Evidence Hygiene
 
