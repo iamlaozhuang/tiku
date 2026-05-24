@@ -50,6 +50,9 @@ export type AdminUserOrgAuthRuntimeRepository = {
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
   resetUserPassword?(publicId: string): Promise<boolean>;
+  disableUser?(publicId: string): Promise<boolean>;
+  enableUser?(publicId: string): Promise<boolean>;
+  revokeUserSessions?(publicId: string): Promise<boolean>;
 };
 
 export type AdminContentKnowledgeRuntimeRepository = {
@@ -81,6 +84,7 @@ export type AdminFlowRuntimeRepositories = {
 
 const {
   authAccount,
+  authSession,
   employee,
   mockExam,
   organization,
@@ -220,7 +224,64 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
 
       return rows.length > 0;
     },
+    async disableUser(publicId) {
+      return updateUserStatus(getDatabase(), publicId, "disabled");
+    },
+    async enableUser(publicId) {
+      return updateUserStatus(getDatabase(), publicId, "active");
+    },
+    async revokeUserSessions(publicId) {
+      return revokeUserSessions(getDatabase(), publicId);
+    },
   };
+}
+
+async function updateUserStatus(
+  database: AdminFlowRuntimeDatabase,
+  publicId: string,
+  status: "active" | "disabled",
+): Promise<boolean> {
+  const rows = await database
+    .update(user)
+    .set({
+      status,
+      disabled_at: status === "disabled" ? new Date() : null,
+      locked_until_at: status === "active" ? null : undefined,
+      updated_at: new Date(),
+    })
+    .where(eq(user.public_id, publicId))
+    .returning({
+      id: user.id,
+    });
+
+  return rows.length > 0;
+}
+
+async function revokeUserSessions(
+  database: AdminFlowRuntimeDatabase,
+  publicId: string,
+): Promise<boolean> {
+  const [userRow] = await database
+    .select({
+      auth_user_id: user.auth_user_id,
+    })
+    .from(user)
+    .where(eq(user.public_id, publicId))
+    .limit(1);
+
+  if (userRow === undefined) {
+    return false;
+  }
+
+  if (userRow.auth_user_id === null) {
+    return true;
+  }
+
+  await database
+    .delete(authSession)
+    .where(eq(authSession.user_id, userRow.auth_user_id));
+
+  return true;
 }
 
 function createPostgresAdminContentKnowledgeRuntimeRepository(

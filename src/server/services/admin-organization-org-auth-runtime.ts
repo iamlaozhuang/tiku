@@ -2,12 +2,14 @@ import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import {
   createErrorResponse,
   createPaginatedResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
 import {
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   ADMIN_AUTH_OPERATION_SORT_FIELDS,
   createAdminAuthOperationListQuery,
+  type EmployeeMutationResultDto,
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
@@ -56,6 +58,14 @@ const orgAuthMutationUnavailableResponse = createErrorResponse(
 const employeeMutationUnavailableResponse = createErrorResponse(
   503007,
   "Employee account mutation runtime is not configured.",
+);
+const employeeNotFoundResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+  "Employee does not exist.",
+);
+const employeeInputInvalidResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "Employee input is invalid.",
 );
 
 type RouteContext = {
@@ -110,6 +120,51 @@ function canReadEnterpriseAuth(actor: AdminOrganizationOrgAuthActor): boolean {
   return (
     actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
   );
+}
+
+function canManageEmployee(actor: AdminOrganizationOrgAuthActor): boolean {
+  return actor.roles.includes("super_admin");
+}
+
+function readRequestIp(request: Request): string | null {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor !== null) {
+    return forwardedFor.split(",")[0]?.trim() || null;
+  }
+
+  return request.headers.get("x-real-ip");
+}
+
+async function readRequestJson(request: Request): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeEmployeeCreateInput(
+  input: unknown,
+): { userPublicId: string; organizationPublicId: string } | null {
+  if (typeof input !== "object" || input === null) {
+    return null;
+  }
+
+  const value = input as {
+    userPublicId?: unknown;
+    organizationPublicId?: unknown;
+  };
+
+  return typeof value.userPublicId === "string" &&
+    value.userPublicId.trim().length > 0 &&
+    typeof value.organizationPublicId === "string" &&
+    value.organizationPublicId.trim().length > 0
+    ? {
+        userPublicId: value.userPublicId.trim(),
+        organizationPublicId: value.organizationPublicId.trim(),
+      }
+    : null;
 }
 
 function readAdminAuthOperationListQuery(
@@ -210,6 +265,53 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     const authError = await requireReadableAdminActor(request);
 
     return createJsonResponse(authError ?? response);
+  }
+
+  async function appendEmployeeAuditLog(input: {
+    request: Request;
+    actor: AdminOrganizationOrgAuthActor;
+    actionType: "employee.create" | "employee.disable";
+    targetPublicId: string | null;
+    resultStatus: "success" | "failed";
+    metadataSummary: string;
+  }): Promise<void> {
+    await repositories.auditLogRepository?.appendAuditLog({
+      actorPublicId: input.actor.publicId,
+      actorRole: input.actor.roles[0],
+      actionType: input.actionType,
+      targetResourceType: "employee",
+      targetPublicId: input.targetPublicId,
+      resultStatus: input.resultStatus,
+      metadataSummary: input.metadataSummary,
+      requestIp: readRequestIp(input.request),
+    });
+  }
+
+  async function requireEmployeeManager(
+    request: Request,
+    actionType: "employee.create" | "employee.disable",
+    targetPublicId: string | null,
+  ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
+    const actor = await resolveAdminActor(request, sessionService);
+
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    if (!canManageEmployee(actor)) {
+      await appendEmployeeAuditLog({
+        request,
+        actor,
+        actionType,
+        targetPublicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted employee permission denial metadata",
+      });
+
+      return adminPermissionDeniedResponse;
+    }
+
+    return actor;
   }
 
   return {
@@ -329,9 +431,94 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           );
         },
         async POST(request: Request): Promise<Response> {
-          return readOnlyMutationResponse(
+          const actorOrError = await requireEmployeeManager(
             request,
-            employeeMutationUnavailableResponse,
+            "employee.create",
+            null,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.createEmployee === undefined) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.create",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted employee create unavailable metadata",
+            });
+
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
+
+          const normalizedInput = normalizeEmployeeCreateInput(
+            await readRequestJson(request),
+          );
+
+          if (normalizedInput === null) {
+            return createJsonResponse(employeeInputInvalidResponse);
+          }
+
+          const employee = await repositories.createEmployee(normalizedInput);
+
+          await appendEmployeeAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "employee.create",
+            targetPublicId: employee?.publicId ?? null,
+            resultStatus: employee === null ? "failed" : "success",
+            metadataSummary: "redacted employee create metadata",
+          });
+
+          return createJsonResponse(
+            employee === null
+              ? employeeNotFoundResponse
+              : createSuccessResponse<EmployeeMutationResultDto>({ employee }),
+          );
+        },
+      },
+      disable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireEmployeeManager(
+            request,
+            "employee.disable",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.disableEmployee === undefined) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.disable",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted employee disable unavailable metadata",
+            });
+
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
+
+          const didDisable = await repositories.disableEmployee(publicId);
+
+          await appendEmployeeAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "employee.disable",
+            targetPublicId: publicId,
+            resultStatus: didDisable ? "success" : "failed",
+            metadataSummary: "redacted employee disable metadata",
+          });
+
+          return createJsonResponse(
+            didDisable ? createSuccessResponse(null) : employeeNotFoundResponse,
           );
         },
       },

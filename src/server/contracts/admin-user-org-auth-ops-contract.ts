@@ -86,6 +86,10 @@ export type EmployeeListDto = {
   employees: EmployeeSummaryDto[];
 };
 
+export type EmployeeMutationResultDto = {
+  employee: EmployeeSummaryDto;
+};
+
 export type AuthorizationSummaryDto = {
   publicId: string;
   purchaserName: string;
