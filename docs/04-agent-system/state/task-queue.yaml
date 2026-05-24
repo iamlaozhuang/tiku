@@ -3134,6 +3134,94 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-student-answer-flow.md
     status: closed
     retryCount: 0
+  - id: phase-11-local-happy-path-student-session-controls
+    title: Phase 11 Local Happy Path Student Session Controls
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-24-fresh-system-happy-path-experience
+    dependencies:
+      - phase-11-local-happy-path-student-answer-flow
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved continuing through the two local happy path closeout tasks, with commit, merge, push, cleanup, and a clean repository. Scope is local student session controls for happy-path role switching. No dependency, env, schema, migration, script, staging/prod, deployment, cloud-resource, provider, or secret change is approved.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-student-session-controls.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-student-session-controls.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - tests/unit/student-profile-redeem-ui.test.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - product_readiness
+      - happy_path
+      - student_session
+      - evidence_integrity
+      - environment_boundary
+      - secret_or_env_change
+      - deploy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-local-happy-path-student-session-controls
+      - npm.cmd run test:unit -- tests/unit/student-profile-redeem-ui.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-student-session-controls.md
+    status: closed
+    retryCount: 0
+  - id: phase-11-local-happy-path-redeem-code-loop
+    title: Phase 11 Local Happy Path Redeem Code Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-24-fresh-system-happy-path-experience
+    dependencies:
+      - phase-11-local-happy-path-student-session-controls
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved continuing through the two local happy path closeout tasks, with commit, merge, push, cleanup, and a clean repository. Scope is local redeem_code happy-path validation support using existing local dev seed/fixture boundaries. No dependency, env, schema, migration, script, staging/prod, deployment, cloud-resource, provider, or secret change is approved.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-redeem-code-loop.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-redeem-code-loop.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - src/server/services/admin-redeem-code-runtime.ts
+      - tests/unit/student-profile-redeem-ui.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+      - src/db/schema/**
+    riskTypes:
+      - product_readiness
+      - happy_path
+      - redeem_code
+      - evidence_integrity
+      - environment_boundary
+      - secret_or_env_change
+      - deploy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-local-happy-path-redeem-code-loop
+      - npm.cmd run test:unit -- tests/unit/student-profile-redeem-ui.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/phase-8-admin-redeem-code-runtime.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-local-happy-path-redeem-code-loop.md
+    status: pending
+    retryCount: 0
   - id: phase-6-admin-ops-readiness-evidence
     title: Admin Ops Readiness Evidence
     phase: phase-6-admin-ops

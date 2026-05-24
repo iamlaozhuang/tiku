@@ -8,6 +8,10 @@ export function getStoredStudentSessionToken(): string | null {
   return token === "" ? null : (token ?? null);
 }
 
+export function clearStoredStudentSessionToken() {
+  localStorage.removeItem(STUDENT_SESSION_TOKEN_STORAGE_KEY);
+}
+
 export function createStudentAuthHeaders(token: string) {
   return {
     authorization: `Bearer ${token}`,
