@@ -102,26 +102,35 @@ Result on master after merge: pass.
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
 Result on master after merge: inventory completed; master ahead of origin/master by b83366f and 8a49702, with only current-task files changed against origin/master.
+
+git commit -m "docs(agent): close model config fallback task"
+Result on master: closeout evidence commit d252cc2. Hook ran lint-staged, npm.cmd run lint, and npm.cmd run typecheck successfully.
+
+git push origin master
+Result: pushed master to origin from f7ca4de to d252cc2.
+
+git branch -d codex/phase-11-mvp-model-config-fallback-runtime
+Result: deleted merged short-lived branch after sandbox escalation for .git ref lock permission.
 ```
 
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                    | Result  |
-| -------------------- | ---------------------------------------------------------------------------------------------------- | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-model-config-fallback-runtime`, not `master` or `main`         | Pass    |
-| Allowed files        | Runtime, admin API/service baseline, unit tests, task plan/evidence, and state/queue only            | Pass    |
-| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, or staging/prod file change | Pass    |
-| AC-to-runtime matrix | Matrix records implemented decisions and bounded follow-ups                                          | Pass    |
-| Problem grading      | P0/P1 issues recorded with fixed status and follow-ups                                               | Pass    |
-| Validation record    | RED, targeted GREEN, full unit, typecheck, build, readiness, naming, and diff-check recorded         | Pass    |
-| Evidence hygiene     | No secrets or prohibited raw data recorded                                                           | Pass    |
-| Commit               | Task commit b83366f created on short branch; hook lint/typecheck passed                              | Pass    |
-| Merge                | Merge commit 8a49702 created on `master`; post-merge gates passed                                    | Pass    |
-| Push                 | Pending                                                                                              | Pending |
-| Cleanup              | Pending until `master` push succeeds                                                                 | Pending |
-| Worktree residue     | No new worktree or dependency/cache directory introduced                                             | Pass    |
-| stagingDecision      | Local-only; no staging/prod action                                                                   | Pass    |
-| Next step            | Push approved `master`, clean merged branch, then claim next eligible queue task                     | Pass    |
+| Check                | Required evidence                                                                                    | Result |
+| -------------------- | ---------------------------------------------------------------------------------------------------- | ------ |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-model-config-fallback-runtime`, not `master` or `main`         | Pass   |
+| Allowed files        | Runtime, admin API/service baseline, unit tests, task plan/evidence, and state/queue only            | Pass   |
+| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, or staging/prod file change | Pass   |
+| AC-to-runtime matrix | Matrix records implemented decisions and bounded follow-ups                                          | Pass   |
+| Problem grading      | P0/P1 issues recorded with fixed status and follow-ups                                               | Pass   |
+| Validation record    | RED, targeted GREEN, full unit, typecheck, build, readiness, naming, and diff-check recorded         | Pass   |
+| Evidence hygiene     | No secrets or prohibited raw data recorded                                                           | Pass   |
+| Commit               | Task commit b83366f created on short branch; hook lint/typecheck passed                              | Pass   |
+| Merge                | Merge commit 8a49702 created on `master`; post-merge gates passed                                    | Pass   |
+| Push                 | `master` pushed to `origin` through d252cc2                                                          | Pass   |
+| Cleanup              | Local short-lived branch deleted after successful push                                               | Pass   |
+| Worktree residue     | No new worktree or dependency/cache directory introduced                                             | Pass   |
+| stagingDecision      | Local-only; no staging/prod action                                                                   | Pass   |
+| Next step            | Claim next eligible queue task from clean `master`                                                   | Pass   |
 
 ## stagingDecision
 
@@ -129,7 +138,7 @@ local_only_complete_no_staging_or_prod
 
 ## Next Step
 
-Push approved `master`, clean the short-lived branch, then claim the next eligible queue task from clean `master`.
+Claim the next eligible queue task from clean `master`.
 
 ## Evidence Hygiene
 

@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T05:58:24-07:00"
+  updatedAt: "2026-05-24T06:00:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: push master for phase-11-mvp-model-config-fallback-runtime, clean merged branch, then claim next eligible queue task
+  nextRecommendedAction: claim next eligible Phase 11 MVP gap task from clean master
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md
