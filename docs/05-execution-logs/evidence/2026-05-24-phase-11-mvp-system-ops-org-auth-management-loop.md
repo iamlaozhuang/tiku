@@ -93,6 +93,36 @@ Pre-commit inventory result: pass/inventory completed. Uncommitted files are lim
 
 git diff --check
 Result: pass.
+
+git commit -m "feat(admin): add org auth lifecycle runtime"
+Result: pass. Task commit `ae51074`.
+
+git merge --no-ff codex/phase-11-mvp-system-ops-org-auth-management-loop -m "merge: phase 11 system ops org auth management loop"
+Result: pass. Merge commit on `master`: `480a783`.
+
+Post-merge master gates:
+
+npm.cmd run test:unit
+Result: pass, 110 test files, 418 tests.
+
+npm.cmd run build
+First post-merge result: failed due transient `next/font/google` Noto Sans SC font download errors from `fonts.gstatic.com`; no source files changed.
+Rerun result: pass. Next.js reported `.env.local` as an environment source; no `.env.local` secret value was read, output, or recorded.
+
+npm.cmd run test:e2e
+Result: pass, 9 tests. Playwright webServer emitted existing ProtectedRouteGuard hydration mismatch warnings, but all tests passed and this task did not modify that guard.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: pass/inventory completed. `master` is ahead of `origin/master` by the task commit and merge commit.
+
+git diff --check HEAD~2..HEAD
+Result: pass.
 ```
 
 ## Implementation Notes
@@ -114,9 +144,9 @@ Result: pass.
 | Problem grading      | P0/P1 org_auth lifecycle issues recorded and fixed                                                                                  | Pass    |
 | Validation record    | RED/GREEN, related unit, full unit, build, e2e, readiness, naming, git inventory, and diff checks recorded                          | Pass    |
 | Evidence hygiene     | No secrets or prohibited raw data recorded                                                                                          | Pass    |
-| Commit               | Ready after evidence/state update and final formatting                                                                              | Pending |
-| Merge                | Pending post-commit                                                                                                                 | Pending |
-| Push                 | Pending post-merge master validation                                                                                                | Pending |
+| Commit               | Task commit `ae51074`                                                                                                               | Pass    |
+| Merge                | Merge commit `480a783` on `master`                                                                                                  | Pass    |
+| Push                 | Pending after this closeout evidence commit                                                                                         | Pending |
 | Cleanup              | Pending post-push branch cleanup                                                                                                    | Pending |
 | Worktree residue     | No extra worktree created for this task                                                                                             | Pass    |
 | stagingDecision      | Local-only task; no staging/prod connection, deployment, cloud, env, schema, migration, script, package, lockfile, or provider work | Pass    |
@@ -128,7 +158,7 @@ local_only_complete_no_staging_or_prod
 
 ## Next Step
 
-Commit this task, merge to `master`, run master closeout gates, push, clean the short branch, and then claim `phase-11-mvp-redeem-code-batch-management-loop` only from a clean repository.
+Commit closeout evidence, push `master` to `origin`, clean the short branch, and then claim `phase-11-mvp-redeem-code-batch-management-loop` only from a clean repository.
 
 ## Evidence Hygiene
 
