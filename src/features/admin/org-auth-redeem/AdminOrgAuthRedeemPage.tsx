@@ -500,6 +500,26 @@ function RedeemCodeList({
   );
 }
 
+function RedeemCodePlainTextUnavailableNotice() {
+  return (
+    <section className="border-border bg-surface rounded-md border border-dashed p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+          <AlertCircle className="size-4" aria-hidden="true" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-text-primary text-base font-semibold">
+            卡密明文不可用
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            当前列表仅返回脱敏卡密，不能直接交给学员兑换。需要通过受控生成流程提供一次性卡密后再验证学生兑换。
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function useAdminOrgAuthData() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminOrgAuthData>({
@@ -757,6 +777,10 @@ export function AdminOrgAuthPage() {
 
 export function AdminRedeemCodePage() {
   const { data, loadState } = useAdminRedeemCodeData();
+  const hasUnavailablePlainTextCode = data.redeemCodes.some(
+    (redeemCode) =>
+      redeemCode.status === "unused" && !redeemCode.canViewPlainText,
+  );
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载卡密数据" />;
@@ -799,6 +823,10 @@ export function AdminRedeemCodePage() {
         testId="system-ops-redeem-code-generate-entry"
         title="生成卡密入口"
       />
+
+      {hasUnavailablePlainTextCode ? (
+        <RedeemCodePlainTextUnavailableNotice />
+      ) : null}
 
       <section className="grid gap-4 xl:grid-cols-3" aria-label="卡密摘要">
         <SummaryTile

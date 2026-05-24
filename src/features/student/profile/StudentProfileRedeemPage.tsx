@@ -340,6 +340,25 @@ function ProfileNavLinks() {
   );
 }
 
+function RedeemCodePreparationNotice() {
+  return (
+    <section className="border-border bg-surface rounded-xl border border-dashed p-4">
+      <div className="flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+          <AlertCircle className="size-4" aria-hidden="true" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-text-primary text-sm font-semibold">等待卡密</p>
+          <p className="text-text-secondary text-sm leading-6">
+            <span>卡密来源未配置</span>
+            。请使用系统运营提供的未使用卡密完成兑换。
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function StudentProfilePage() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [authContext, setAuthContext] = useState<AuthContextDto | null>(null);
@@ -479,6 +498,8 @@ export function StudentProfilePage() {
           effectiveAuthorizations={effectiveAuthorizations}
         />
       </section>
+
+      {personalAuths.length === 0 ? <RedeemCodePreparationNotice /> : null}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
@@ -725,6 +746,8 @@ export function StudentRedeemCodePage() {
           </Button>
         </form>
       </section>
+
+      {personalAuths.length === 0 ? <RedeemCodePreparationNotice /> : null}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">

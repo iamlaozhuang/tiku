@@ -308,6 +308,7 @@ describe("AdminRedeemCodePage", () => {
 
     expect(screen.getByText("正在加载卡密数据")).toBeInTheDocument();
     expect(await screen.findByText("RC-2026-****")).toBeInTheDocument();
+    expect(screen.getByText("卡密明文不可用")).toBeInTheDocument();
 
     const redeemCode = screen.getByTestId(
       "admin-redeem-code-redeem-code-public-001",
