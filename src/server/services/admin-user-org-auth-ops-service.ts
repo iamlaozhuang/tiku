@@ -120,6 +120,7 @@ const sampleRedeemCodes: Omit<
     level: 3,
     status: "unused",
     redeemedUserPublicId: null,
+    redeemDeadlineAt: "2027-05-20T15:59:59.999Z",
     createdAt: "2026-05-20T08:00:00.000Z",
   },
 ];

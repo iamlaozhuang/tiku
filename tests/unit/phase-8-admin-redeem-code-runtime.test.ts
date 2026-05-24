@@ -51,16 +51,28 @@ function createSessionService(role: "super_admin" | "content_admin") {
 
 function createRepositories(): AdminRedeemCodeRuntimeRepositories {
   return {
-    async createRedeemCode() {
+    async createRedeemCodeBatch() {
       return {
-        publicId: "redeem-code-public-generated",
-        codePlainText: "ABCDEFG2",
-        codeDisplay: "ABCDEFG2",
-        profession: "monopoly",
-        level: 3,
-        status: "unused",
-        redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
-        createdAt: now.toISOString(),
+        generation: {
+          generationGroupId: "redeem-code-batch-public-001",
+          count: 1,
+          profession: "monopoly",
+          level: 3,
+          durationDay: 365,
+          redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+        },
+        redeemCodes: [
+          {
+            publicId: "redeem-code-public-generated",
+            codePlainText: "ABCDEFG2",
+            codeDisplay: "ABCDEFG2",
+            profession: "monopoly",
+            level: 3,
+            status: "unused",
+            redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+            createdAt: now.toISOString(),
+          },
+        ],
       };
     },
     async listRedeemCodes(query) {
@@ -74,6 +86,7 @@ function createRepositories(): AdminRedeemCodeRuntimeRepositories {
             level: 3,
             status: "unused",
             redeemedUserPublicId: null,
+            redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
             createdAt: now.toISOString(),
           },
         ],
@@ -156,6 +169,7 @@ describe("phase 8 admin redeem code runtime", () => {
             level: 3,
             status: "unused",
             redeemedUserPublicId: null,
+            redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
             createdAt: now.toISOString(),
           },
         ],
@@ -201,16 +215,26 @@ describe("phase 8 admin redeem code runtime", () => {
       code: 0,
       message: "ok",
       data: {
-        redeemCode: {
-          publicId: "redeem-code-public-generated",
-          codePlainText: "ABCDEFG2",
-          codeDisplay: "ABCDEFG2",
+        generation: {
+          generationGroupId: "redeem-code-batch-public-001",
+          count: 1,
           profession: "monopoly",
           level: 3,
-          status: "unused",
+          durationDay: 365,
           redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
-          createdAt: now.toISOString(),
         },
+        redeemCodes: [
+          {
+            publicId: "redeem-code-public-generated",
+            codePlainText: "ABCDEFG2",
+            codeDisplay: "ABCDEFG2",
+            profession: "monopoly",
+            level: 3,
+            status: "unused",
+            redeemDeadlineAt: "2027-05-22T10:00:00.000Z",
+            createdAt: now.toISOString(),
+          },
+        ],
       },
     });
   });

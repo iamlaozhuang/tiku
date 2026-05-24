@@ -8,8 +8,10 @@ import {
   count,
   desc,
   eq,
+  gte,
   ilike,
   inArray,
+  lt,
   or,
   type SQL,
 } from "drizzle-orm";
@@ -21,13 +23,16 @@ import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAuthOperationListQuery,
   RedeemCodeGenerationDto,
+  RedeemCodeGenerationItemDto,
   RedeemCodeListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import type { Profession, RedeemCodeStatus } from "../models/auth";
 
 type AdminRedeemCodeRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
 export type AdminRedeemCodeRuntimeRepositoryOptions = {
   createDatabase?: () => AdminRedeemCodeRuntimeDatabase;
+  now?: () => Date;
 };
 
 export type AdminRedeemCodePage<TData> = TData & {
@@ -35,16 +40,42 @@ export type AdminRedeemCodePage<TData> = TData & {
 };
 
 export type AdminRedeemCodeRuntimeRepositories = {
-  createRedeemCode(): Promise<RedeemCodeGenerationDto["redeemCode"]>;
+  createRedeemCodeBatch(
+    input: CreateRedeemCodeBatchInput,
+  ): Promise<RedeemCodeGenerationDto>;
   listRedeemCodes(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminRedeemCodePage<RedeemCodeListDto>>;
+  auditLogRepository?: {
+    appendAuditLog(input: AppendRedeemCodeAuditLogInput): Promise<void>;
+  };
 };
 
-const { redeemCode, user } = databaseSchema;
+export type CreateRedeemCodeBatchInput = {
+  count: number;
+  profession: Profession;
+  level: number;
+  durationDay: number;
+  redeemDeadlineAt: Date;
+  actorPublicId: string;
+};
+
+export type AppendRedeemCodeAuditLogInput = {
+  actorPublicId: string;
+  actorRole: string;
+  actionType: string;
+  targetResourceType: string;
+  targetPublicId: string | null;
+  resultStatus: "success" | "failed";
+  metadataSummary: string | null;
+  requestIp: string | null;
+};
+
+export const REDEEM_CODE_BATCH_CREATE_LIMIT = 100;
+
+const { auditLog, redeemCode, user } = databaseSchema;
 const LOCAL_REDEEM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const LOCAL_REDEEM_CODE_LENGTH = 8;
-const LOCAL_REDEEM_CODE_DURATION_DAY = 365;
 const LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS = 5;
 
 function createLazyDatabaseGetter(
@@ -81,73 +112,39 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
   const getDatabase = createLazyDatabaseGetter(
     options.createDatabase ?? createLocalRuntimeDatabase,
   );
+  const clock = options.now ?? (() => new Date());
 
   return {
-    async createRedeemCode() {
+    async createRedeemCodeBatch(input) {
       const database = getDatabase();
+      const generationGroupId = `redeem-code-batch-${randomUUID()}`;
+      const redeemCodes: RedeemCodeGenerationItemDto[] = [];
 
-      for (
-        let attemptIndex = 0;
-        attemptIndex < LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS;
-        attemptIndex += 1
-      ) {
-        const codePlainText = createLocalRedeemCodePlainText();
-        const redeemDeadlineAt = addDays(
-          new Date(),
-          LOCAL_REDEEM_CODE_DURATION_DAY,
+      for (let codeIndex = 0; codeIndex < input.count; codeIndex += 1) {
+        redeemCodes.push(
+          await createRedeemCodeWithRetry(database, {
+            ...input,
+            generationGroupId,
+          }),
         );
-
-        try {
-          const [createdRedeemCode] = await database
-            .insert(redeemCode)
-            .values({
-              public_id: `redeem-code-${randomUUID()}`,
-              code_hash: createRedeemCodeHash(codePlainText),
-              code_display: codePlainText,
-              profession: "monopoly",
-              level: 3,
-              duration_day: LOCAL_REDEEM_CODE_DURATION_DAY,
-              redeem_deadline_at: redeemDeadlineAt,
-              status: "unused",
-              generation_group_id: "local-happy-path",
-            })
-            .returning({
-              public_id: redeemCode.public_id,
-              code_display: redeemCode.code_display,
-              profession: redeemCode.profession,
-              level: redeemCode.level,
-              status: redeemCode.status,
-              redeem_deadline_at: redeemCode.redeem_deadline_at,
-              created_at: redeemCode.created_at,
-            });
-
-          if (createdRedeemCode === undefined) {
-            throw new Error("Redeem code creation returned no row.");
-          }
-
-          return {
-            publicId: createdRedeemCode.public_id,
-            codePlainText,
-            codeDisplay: createdRedeemCode.code_display,
-            profession: createdRedeemCode.profession,
-            level: createdRedeemCode.level,
-            status: createdRedeemCode.status,
-            redeemDeadlineAt:
-              createdRedeemCode.redeem_deadline_at.toISOString(),
-            createdAt: createdRedeemCode.created_at.toISOString(),
-          };
-        } catch (error) {
-          if (attemptIndex === LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS - 1) {
-            throw error;
-          }
-        }
       }
 
-      throw new Error("Redeem code creation exhausted retry attempts.");
+      return {
+        generation: {
+          generationGroupId,
+          count: redeemCodes.length,
+          profession: input.profession,
+          level: input.level,
+          durationDay: input.durationDay,
+          redeemDeadlineAt: input.redeemDeadlineAt.toISOString(),
+        },
+        redeemCodes,
+      };
     },
     async listRedeemCodes(query) {
       const database = getDatabase();
-      const conditions = createRedeemCodeConditions(query);
+      const now = clock();
+      const conditions = createRedeemCodeConditions(query, now);
       const rows = await database
         .select({
           id: redeemCode.id,
@@ -157,6 +154,7 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
           level: redeemCode.level,
           status: redeemCode.status,
           used_by_user_id: redeemCode.used_by_user_id,
+          redeem_deadline_at: redeemCode.redeem_deadline_at,
           created_at: redeemCode.created_at,
           updated_at: redeemCode.updated_at,
         })
@@ -183,20 +181,100 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
           canViewPlainText: false,
           profession: row.profession,
           level: row.level,
-          status: row.status,
+          status: getEffectiveRedeemCodeStatus(row, now),
           redeemedUserPublicId:
             row.used_by_user_id === null
               ? null
               : (redeemedUserPublicIds.get(row.used_by_user_id) ?? null),
+          redeemDeadlineAt: row.redeem_deadline_at.toISOString(),
           createdAt: row.created_at.toISOString(),
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
     },
+    auditLogRepository: {
+      async appendAuditLog(input) {
+        await getDatabase()
+          .insert(auditLog)
+          .values({
+            public_id: `audit-log-${randomUUID()}`,
+            actor_public_id: input.actorPublicId,
+            actor_role: input.actorRole,
+            action_type: input.actionType,
+            target_resource_type: input.targetResourceType,
+            target_public_id: input.targetPublicId,
+            result_status: input.resultStatus,
+            metadata_summary: input.metadataSummary,
+            request_ip: input.requestIp,
+          });
+      },
+    },
   };
 }
 
-function createRedeemCodeConditions(query: AdminAuthOperationListQuery): SQL[] {
+async function createRedeemCodeWithRetry(
+  database: AdminRedeemCodeRuntimeDatabase,
+  input: CreateRedeemCodeBatchInput & { generationGroupId: string },
+): Promise<RedeemCodeGenerationItemDto> {
+  for (
+    let attemptIndex = 0;
+    attemptIndex < LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS;
+    attemptIndex += 1
+  ) {
+    const codePlainText = createLocalRedeemCodePlainText();
+
+    try {
+      const [createdRedeemCode] = await database
+        .insert(redeemCode)
+        .values({
+          public_id: `redeem-code-${randomUUID()}`,
+          code_hash: createRedeemCodeHash(codePlainText),
+          code_display: codePlainText,
+          profession: input.profession,
+          level: input.level,
+          duration_day: input.durationDay,
+          redeem_deadline_at: input.redeemDeadlineAt,
+          status: "unused",
+          generation_group_id: input.generationGroupId,
+        })
+        .returning({
+          public_id: redeemCode.public_id,
+          code_display: redeemCode.code_display,
+          profession: redeemCode.profession,
+          level: redeemCode.level,
+          status: redeemCode.status,
+          redeem_deadline_at: redeemCode.redeem_deadline_at,
+          created_at: redeemCode.created_at,
+        });
+
+      if (createdRedeemCode === undefined) {
+        throw new Error("Redeem code creation returned no row.");
+      }
+
+      return {
+        publicId: createdRedeemCode.public_id,
+        codePlainText,
+        codeDisplay: createdRedeemCode.code_display,
+        profession: createdRedeemCode.profession,
+        level: createdRedeemCode.level,
+        status: createdRedeemCode.status,
+        redeemDeadlineAt: createdRedeemCode.redeem_deadline_at.toISOString(),
+        createdAt: createdRedeemCode.created_at.toISOString(),
+      };
+    } catch (error) {
+      if (attemptIndex === LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS - 1) {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error("Redeem code creation exhausted retry attempts.");
+}
+
+function createRedeemCodeConditions(
+  query: AdminAuthOperationListQuery,
+  now: Date,
+): SQL[] {
   const conditions: SQL[] = [];
 
   if (query.keyword !== null) {
@@ -209,11 +287,24 @@ function createRedeemCodeConditions(query: AdminAuthOperationListQuery): SQL[] {
     );
   }
 
-  if (
-    query.status === "unused" ||
-    query.status === "used" ||
-    query.status === "expired"
-  ) {
+  if (query.status === "expired") {
+    conditions.push(
+      or(
+        eq(redeemCode.status, "expired"),
+        and(
+          eq(redeemCode.status, "unused"),
+          lt(redeemCode.redeem_deadline_at, now),
+        ),
+      )!,
+    );
+  } else if (query.status === "unused") {
+    conditions.push(
+      and(
+        eq(redeemCode.status, "unused"),
+        gte(redeemCode.redeem_deadline_at, now),
+      )!,
+    );
+  } else if (query.status === "used") {
     conditions.push(eq(redeemCode.status, query.status));
   }
 
@@ -225,6 +316,12 @@ function createRedeemCodeOrderBy(query: AdminAuthOperationListQuery): SQL {
     return query.sortOrder === "asc"
       ? asc(redeemCode.created_at)
       : desc(redeemCode.created_at);
+  }
+
+  if (query.sortBy === "expiresAt") {
+    return query.sortOrder === "asc"
+      ? asc(redeemCode.redeem_deadline_at)
+      : desc(redeemCode.redeem_deadline_at);
   }
 
   return query.sortOrder === "asc"
@@ -251,12 +348,13 @@ async function listRedeemedUserPublicIds(
   return new Map(rows.map((row) => [row.id, row.public_id]));
 }
 
-function addDays(value: Date, days: number): Date {
-  const result = new Date(value);
-
-  result.setUTCDate(result.getUTCDate() + days);
-
-  return result;
+function getEffectiveRedeemCodeStatus(
+  row: { status: RedeemCodeStatus; redeem_deadline_at: Date },
+  now: Date,
+): RedeemCodeStatus {
+  return row.status === "unused" && row.redeem_deadline_at < now
+    ? "expired"
+    : row.status;
 }
 
 function createLocalRedeemCodePlainText(): string {

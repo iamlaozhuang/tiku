@@ -30,6 +30,36 @@ async function loginViaUi(
   await page.getByRole("button", { name: "登录" }).click();
 }
 
+async function ensureStudentHomeReady(page: Page) {
+  for (let attemptIndex = 0; attemptIndex < 3; attemptIndex += 1) {
+    if (await isLoginFormVisible(page)) {
+      await loginViaUi(page, studentCredential);
+      await expect(page).toHaveURL(/\/home$/);
+    }
+
+    const firstPaperCard = page.locator('[data-testid^="paper-card-"]').first();
+
+    try {
+      await expect(firstPaperCard).toBeVisible({ timeout: 5_000 });
+      return;
+    } catch (error) {
+      if (attemptIndex === 2) {
+        throw error;
+      }
+
+      if (await isLoginFormVisible(page)) {
+        continue;
+      }
+
+      await page.goto("/home");
+    }
+  }
+}
+
+async function isLoginFormVisible(page: Page): Promise<boolean> {
+  return page.locator('input[name="phone"]').isVisible();
+}
+
 function expectStandardApiEnvelope(
   payload: unknown,
 ): asserts payload is ApiPayload {
@@ -153,6 +183,7 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
 
   await loginViaUi(page, studentCredential);
   await expect(page).toHaveURL(/\/home$/);
+  await ensureStudentHomeReady(page);
   const studentToken = await page.evaluate(() =>
     localStorage.getItem("tiku.localSessionToken"),
   );
