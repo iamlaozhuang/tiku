@@ -409,6 +409,15 @@ export function createAdminFlowRuntimeRouteHandlers(
               publicId,
             )) ?? false;
 
+          if (
+            didReset &&
+            repositories.userOrgAuthRepository.revokeUserSessions !== undefined
+          ) {
+            await repositories.userOrgAuthRepository.revokeUserSessions(
+              publicId,
+            );
+          }
+
           await repositories.auditLogRepository.appendAuditLog({
             actorPublicId: actor.publicId,
             actorRole: actor.roles[0],
