@@ -8,8 +8,10 @@ import {
   count,
   desc,
   eq,
+  gt,
   ilike,
   inArray,
+  lt,
   or,
   sql,
   type SQL,
@@ -25,7 +27,11 @@ import type {
   EmployeeListDto,
   OrganizationListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
-import type { OrgAuthListDto } from "../contracts/organization-auth-contract";
+import type {
+  OrgAuthDto,
+  OrgAuthListDto,
+} from "../contracts/organization-auth-contract";
+import type { NormalizedCreateOrgAuthInput } from "../validators/org-auth";
 
 type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
   typeof databaseSchema
@@ -49,6 +55,14 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   listEmployees(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<EmployeeListDto>>;
+  hasOverlappingOrgAuth?(input: NormalizedCreateOrgAuthInput): Promise<boolean>;
+  createOrgAuth?(
+    input: NormalizedCreateOrgAuthInput,
+  ): Promise<OrgAuthDto | null>;
+  cancelOrgAuth?(publicId: string): Promise<OrgAuthDto | null>;
+  terminateOrgAuthActiveFlows?(
+    publicId: string,
+  ): Promise<OrgAuthTerminationResult>;
   createEmployee?(
     input: CreateEmployeeInput,
   ): Promise<EmployeeMutationResultDto["employee"] | null>;
@@ -74,12 +88,20 @@ export type AppendEmployeeAuditLogInput = {
   requestIp: string | null;
 };
 
+export type OrgAuthTerminationResult = {
+  practiceCount: number;
+  mockExamCount: number;
+};
+
 const {
+  auditLog,
   authSession,
   employee,
+  mockExam,
   orgAuth,
   orgAuthOrganization,
   organization,
+  practice,
   user,
 } = databaseSchema;
 
@@ -279,6 +301,229 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
     },
+    async hasOverlappingOrgAuth(input) {
+      const database = getDatabase();
+      const organizationIds = await listInputOrganizationIds(database, input);
+
+      if (organizationIds.length === 0) {
+        return false;
+      }
+
+      const [row] = await database
+        .select({ value: count() })
+        .from(orgAuth)
+        .innerJoin(
+          orgAuthOrganization,
+          eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+        )
+        .where(
+          and(
+            eq(orgAuth.status, "active"),
+            eq(orgAuth.profession, input.profession),
+            eq(orgAuth.level, input.level),
+            lt(orgAuth.starts_at, input.expiresAt),
+            gt(orgAuth.expires_at, input.startsAt),
+            inArray(orgAuthOrganization.organization_id, organizationIds),
+          ),
+        );
+
+      return (row?.value ?? 0) > 0;
+    },
+    async createOrgAuth(input) {
+      const database = getDatabase();
+      const [purchaserOrganization] = await database
+        .select({ id: organization.id, public_id: organization.public_id })
+        .from(organization)
+        .where(eq(organization.public_id, input.purchaserOrganizationPublicId))
+        .limit(1);
+
+      if (purchaserOrganization === undefined) {
+        return null;
+      }
+
+      const organizationIds = await listInputOrganizationIds(database, input);
+
+      if (organizationIds.length === 0) {
+        return null;
+      }
+
+      const usedQuota = await countActiveEmployeesByOrganizationIds(
+        database,
+        organizationIds,
+      );
+
+      if (usedQuota > input.accountQuota) {
+        return null;
+      }
+
+      const now = new Date();
+      const [orgAuthRow] = await database
+        .insert(orgAuth)
+        .values({
+          public_id: `org-auth-${randomUUID()}`,
+          name: input.name,
+          purchaser_organization_id: purchaserOrganization.id,
+          auth_scope_type: input.authScopeType,
+          profession: input.profession,
+          level: input.level,
+          account_quota: input.accountQuota,
+          used_quota: usedQuota,
+          starts_at: input.startsAt,
+          expires_at: input.expiresAt,
+          status: "active",
+          cancelled_at: null,
+          created_at: now,
+          updated_at: now,
+        })
+        .returning({
+          id: orgAuth.id,
+          public_id: orgAuth.public_id,
+          name: orgAuth.name,
+          auth_scope_type: orgAuth.auth_scope_type,
+          profession: orgAuth.profession,
+          level: orgAuth.level,
+          account_quota: orgAuth.account_quota,
+          used_quota: orgAuth.used_quota,
+          starts_at: orgAuth.starts_at,
+          expires_at: orgAuth.expires_at,
+          status: orgAuth.status,
+          cancelled_at: orgAuth.cancelled_at,
+          created_at: orgAuth.created_at,
+          updated_at: orgAuth.updated_at,
+        });
+
+      if (orgAuthRow === undefined) {
+        return null;
+      }
+
+      await database.insert(orgAuthOrganization).values(
+        organizationIds.map((organizationId) => ({
+          org_auth_id: orgAuthRow.id,
+          organization_id: organizationId,
+        })),
+      );
+
+      const organizationPublicIds = await listOrganizationPublicIdsByIds(
+        database,
+        organizationIds,
+      );
+
+      return mapOrgAuthMutationRowToDto({
+        ...orgAuthRow,
+        purchaser_organization_public_id: purchaserOrganization.public_id,
+        organization_public_ids: organizationPublicIds,
+      });
+    },
+    async cancelOrgAuth(publicId) {
+      const database = getDatabase();
+      const now = new Date();
+      const [orgAuthRow] = await database
+        .update(orgAuth)
+        .set({
+          status: "cancelled",
+          cancelled_at: now,
+          updated_at: now,
+        })
+        .where(eq(orgAuth.public_id, publicId))
+        .returning({
+          id: orgAuth.id,
+          public_id: orgAuth.public_id,
+          name: orgAuth.name,
+          purchaser_organization_id: orgAuth.purchaser_organization_id,
+          auth_scope_type: orgAuth.auth_scope_type,
+          profession: orgAuth.profession,
+          level: orgAuth.level,
+          account_quota: orgAuth.account_quota,
+          used_quota: orgAuth.used_quota,
+          starts_at: orgAuth.starts_at,
+          expires_at: orgAuth.expires_at,
+          status: orgAuth.status,
+          cancelled_at: orgAuth.cancelled_at,
+          created_at: orgAuth.created_at,
+          updated_at: orgAuth.updated_at,
+        });
+
+      if (orgAuthRow === undefined) {
+        return null;
+      }
+
+      const [purchaserOrganization] = await database
+        .select({ public_id: organization.public_id })
+        .from(organization)
+        .where(eq(organization.id, orgAuthRow.purchaser_organization_id))
+        .limit(1);
+      const organizationPublicIdsByOrgAuthId =
+        await listOrgAuthOrganizationPublicIds(database, [orgAuthRow.id]);
+
+      return mapOrgAuthMutationRowToDto({
+        ...orgAuthRow,
+        purchaser_organization_public_id:
+          purchaserOrganization?.public_id ?? "",
+        organization_public_ids:
+          organizationPublicIdsByOrgAuthId.get(orgAuthRow.id) ?? [],
+      });
+    },
+    async terminateOrgAuthActiveFlows(publicId) {
+      const database = getDatabase();
+      const activeFlowScope = await findOrgAuthActiveFlowScope(
+        database,
+        publicId,
+      );
+
+      if (activeFlowScope === null) {
+        return { practiceCount: 0, mockExamCount: 0 };
+      }
+
+      const userIds = await listActiveUserIdsByOrganizationIds(
+        database,
+        activeFlowScope.organizationIds,
+      );
+
+      if (userIds.length === 0) {
+        return { practiceCount: 0, mockExamCount: 0 };
+      }
+
+      const now = new Date();
+      const terminatedPractices = await database
+        .update(practice)
+        .set({
+          practice_status: "terminated",
+          terminated_at: now,
+          termination_reason: "authorization_invalid",
+          updated_at: now,
+        })
+        .where(
+          and(
+            inArray(practice.user_id, userIds),
+            eq(practice.profession, activeFlowScope.profession),
+            eq(practice.level, activeFlowScope.level),
+            eq(practice.practice_status, "in_progress"),
+          ),
+        )
+        .returning({ id: practice.id });
+      const terminatedMockExams = await database
+        .update(mockExam)
+        .set({
+          exam_status: "terminated",
+          terminated_at: now,
+          termination_reason: "authorization_invalid",
+          updated_at: now,
+        })
+        .where(
+          and(
+            inArray(mockExam.user_id, userIds),
+            eq(mockExam.profession, activeFlowScope.profession),
+            eq(mockExam.level, activeFlowScope.level),
+            eq(mockExam.exam_status, "in_progress"),
+          ),
+        )
+        .returning({ id: mockExam.id });
+
+      return {
+        practiceCount: terminatedPractices.length,
+        mockExamCount: terminatedMockExams.length,
+      };
+    },
     async createEmployee(input) {
       const database = getDatabase();
       const [userRow] = await database
@@ -377,6 +622,23 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
       }
 
       return true;
+    },
+    auditLogRepository: {
+      async appendAuditLog(input) {
+        await getDatabase()
+          .insert(auditLog)
+          .values({
+            public_id: `audit-log-${randomUUID()}`,
+            actor_public_id: input.actorPublicId,
+            actor_role: input.actorRole,
+            action_type: input.actionType,
+            target_resource_type: input.targetResourceType,
+            target_public_id: input.targetPublicId,
+            result_status: input.resultStatus,
+            metadata_summary: input.metadataSummary,
+            request_ip: input.requestIp,
+          });
+      },
     },
   };
 }
@@ -587,6 +849,185 @@ async function listOrgAuthOrganizationPublicIds(
   }
 
   return publicIds;
+}
+
+async function listOrganizationPublicIdsByIds(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<string[]> {
+  if (organizationIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select({ public_id: organization.public_id })
+    .from(organization)
+    .where(inArray(organization.id, organizationIds))
+    .orderBy(asc(organization.public_id));
+
+  return rows.map((row) => row.public_id);
+}
+
+async function listInputOrganizationIds(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: NormalizedCreateOrgAuthInput,
+): Promise<number[]> {
+  if (input.authScopeType === "specified_nodes") {
+    const rows = await database
+      .select({ id: organization.id })
+      .from(organization)
+      .where(inArray(organization.public_id, input.organizationPublicIds));
+
+    return rows.map((row) => row.id);
+  }
+
+  const [rootOrganization] = await database
+    .select({ id: organization.id })
+    .from(organization)
+    .where(eq(organization.public_id, input.purchaserOrganizationPublicId))
+    .limit(1);
+
+  if (rootOrganization === undefined) {
+    return [];
+  }
+
+  return listOrganizationAndDescendantIds(database, rootOrganization.id);
+}
+
+async function listOrganizationAndDescendantIds(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  rootOrganizationId: number,
+): Promise<number[]> {
+  let organizationIds = [rootOrganizationId];
+  let frontierIds = [rootOrganizationId];
+
+  for (let depth = 0; depth < 4 && frontierIds.length > 0; depth += 1) {
+    const childRows = await database
+      .select({ id: organization.id })
+      .from(organization)
+      .where(inArray(organization.parent_organization_id, frontierIds));
+    const childIds = childRows.map((row) => row.id);
+
+    organizationIds = [...organizationIds, ...childIds];
+    frontierIds = childIds;
+  }
+
+  return organizationIds;
+}
+
+async function countActiveEmployeesByOrganizationIds(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<number> {
+  if (organizationIds.length === 0) {
+    return 0;
+  }
+
+  const [row] = await database
+    .select({ value: count() })
+    .from(employee)
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .where(
+      and(
+        inArray(employee.organization_id, organizationIds),
+        eq(user.status, "active"),
+      ),
+    );
+
+  return row?.value ?? 0;
+}
+
+async function findOrgAuthActiveFlowScope(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  publicId: string,
+): Promise<{
+  organizationIds: number[];
+  profession: (typeof orgAuth.$inferSelect)["profession"];
+  level: number;
+} | null> {
+  const [orgAuthRow] = await database
+    .select({
+      id: orgAuth.id,
+      profession: orgAuth.profession,
+      level: orgAuth.level,
+    })
+    .from(orgAuth)
+    .where(eq(orgAuth.public_id, publicId))
+    .limit(1);
+
+  if (orgAuthRow === undefined) {
+    return null;
+  }
+
+  const organizationRows = await database
+    .select({ organization_id: orgAuthOrganization.organization_id })
+    .from(orgAuthOrganization)
+    .where(eq(orgAuthOrganization.org_auth_id, orgAuthRow.id));
+
+  return {
+    organizationIds: organizationRows.map((row) => row.organization_id),
+    profession: orgAuthRow.profession,
+    level: orgAuthRow.level,
+  };
+}
+
+async function listActiveUserIdsByOrganizationIds(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<number[]> {
+  if (organizationIds.length === 0) {
+    return [];
+  }
+
+  const rows = await database
+    .select({ id: user.id })
+    .from(employee)
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .where(
+      and(
+        inArray(employee.organization_id, organizationIds),
+        eq(user.status, "active"),
+      ),
+    );
+
+  return rows.map((row) => row.id);
+}
+
+function mapOrgAuthMutationRowToDto(input: {
+  public_id: string;
+  name: string;
+  purchaser_organization_public_id: string;
+  auth_scope_type: OrgAuthDto["authScopeType"];
+  profession: OrgAuthDto["profession"];
+  level: number;
+  account_quota: number;
+  used_quota: number;
+  starts_at: Date;
+  expires_at: Date;
+  status: OrgAuthDto["status"];
+  cancelled_at: Date | null;
+  organization_public_ids: string[];
+  created_at: Date;
+  updated_at: Date;
+}): OrgAuthDto {
+  return {
+    publicId: input.public_id,
+    name: input.name,
+    purchaserOrganizationPublicId: input.purchaser_organization_public_id,
+    authScopeType: input.auth_scope_type,
+    profession: input.profession,
+    level: input.level,
+    accountQuota: input.account_quota,
+    usedQuota: input.used_quota,
+    startsAt: input.starts_at.toISOString(),
+    expiresAt: input.expires_at.toISOString(),
+    status: input.status,
+    cancelledAt:
+      input.cancelled_at === null ? null : input.cancelled_at.toISOString(),
+    organizationPublicIds: input.organization_public_ids,
+    createdAt: input.created_at.toISOString(),
+    updatedAt: input.updated_at.toISOString(),
+  };
 }
 
 function createLocalRuntimeDatabase(): AdminOrganizationOrgAuthRuntimeDatabase {
