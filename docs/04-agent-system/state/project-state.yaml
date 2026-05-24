@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T07:51:01-07:00"
+  updatedAt: "2026-05-24T08:08:42-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-mvp-resource-knowledge-base-publish-index-loop
-  status: done
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-010
-  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
-  branch: codex/phase-11-mvp-resource-knowledge-base-publish-index-loop
+  id: phase-11-mvp-knowledge-node-tree-management-loop
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-011
+  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-knowledge-node-tree-management-loop.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-knowledge-node-tree-management-loop.md
+  branch: codex/phase-11-mvp-knowledge-node-tree-management-loop
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: merge and push phase-11-mvp-resource-knowledge-base-publish-index-loop, clean branch, then claim phase-11-mvp-knowledge-node-tree-management-loop from clean master
+  nextRecommendedAction: commit merge push and clean phase-11-mvp-knowledge-node-tree-management-loop, then claim phase-11-mvp-ai-knowledge-recommendation-review-loop; exact persisted question-to-knowledge_node count remains schema-approval gated
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
