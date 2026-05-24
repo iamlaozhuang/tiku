@@ -83,6 +83,30 @@ Result: pass.
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
 Result: pass. Gate ran lint, typecheck, test:unit (113 files / 429 tests), and format:check.
+
+git commit -m "feat(rag): harden knowledge node tree management"
+Result: task commit `ac61cb6`.
+
+git merge --no-ff codex/phase-11-mvp-knowledge-node-tree-management-loop -m "merge: phase 11 knowledge node tree management loop"
+Result: merge commit `f8e83bb` on `master`.
+
+npm.cmd run build
+Post-merge result on `master`: pass. Build summary listed `.env.local` as an environment source; no `.env.local` contents were read or recorded.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Post-merge result on `master`: pass. Gate ran lint, typecheck, test:unit (113 files / 429 tests), and format:check.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Post-merge result on `master`: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Post-merge result on `master`: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Post-merge result on `master`: inventory completed; `master` ahead of `origin/master` by task + merge commits pending push.
+
+git diff --check
+Post-merge result on `master`: pass.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -96,8 +120,8 @@ Result: pass. Gate ran lint, typecheck, test:unit (113 files / 429 tests), and f
 | Problem grading      | P1 move/sort/disable/audit fixed; P1 exact persisted question count deferred with approval gate                                                                        | Pass    |
 | Validation record    | RED/GREEN targeted tests, typecheck, full unit, build, readiness, naming, Git inventory, diff check, and quality gate recorded                                         | Pass    |
 | Evidence hygiene     | No secrets, raw resource text, raw chunks, embeddings, provider payloads, or prohibited data recorded                                                                  | Pass    |
-| Commit               | Pending                                                                                                                                                                | Pending |
-| Merge                | Pending                                                                                                                                                                | Pending |
+| Commit               | Focused task commit `ac61cb6`                                                                                                                                          | Pass    |
+| Merge                | Merged to `master` with merge commit `f8e83bb`                                                                                                                         | Pass    |
 | Push                 | Pending                                                                                                                                                                | Pending |
 | Cleanup              | Pending                                                                                                                                                                | Pending |
 | Worktree residue     | Pending                                                                                                                                                                | Pending |
