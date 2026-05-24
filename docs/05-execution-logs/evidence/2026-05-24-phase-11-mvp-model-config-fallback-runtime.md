@@ -80,6 +80,28 @@ Result before commit: inventory completed; branch contains only current-task tra
 
 git diff --check
 Result: pass.
+
+git commit -m "feat(ai): add model config fallback runtime"
+Result on branch codex/phase-11-mvp-model-config-fallback-runtime: commit b83366f.
+Pre-commit hook ran lint-staged, npm.cmd run lint, and npm.cmd run typecheck successfully.
+
+git merge --no-ff codex/phase-11-mvp-model-config-fallback-runtime -m "merge: phase 11 model config fallback runtime"
+Result on master: merge commit 8a49702.
+
+npm.cmd run test:unit
+Result on master after merge: 108 files passed, 411 tests passed.
+
+npm.cmd run build
+Result on master after merge: pass. Next.js build compiled successfully and generated 47 static pages. Build output reported the presence of .env.local as an environment source; no .env.local content was read or recorded.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result on master after merge: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result on master after merge: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result on master after merge: inventory completed; master ahead of origin/master by b83366f and 8a49702, with only current-task files changed against origin/master.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -93,13 +115,13 @@ Result: pass.
 | Problem grading      | P0/P1 issues recorded with fixed status and follow-ups                                               | Pass    |
 | Validation record    | RED, targeted GREEN, full unit, typecheck, build, readiness, naming, and diff-check recorded         | Pass    |
 | Evidence hygiene     | No secrets or prohibited raw data recorded                                                           | Pass    |
-| Commit               | Pending                                                                                              | Pending |
-| Merge                | Pending                                                                                              | Pending |
+| Commit               | Task commit b83366f created on short branch; hook lint/typecheck passed                              | Pass    |
+| Merge                | Merge commit 8a49702 created on `master`; post-merge gates passed                                    | Pass    |
 | Push                 | Pending                                                                                              | Pending |
-| Cleanup              | Pending                                                                                              | Pending |
+| Cleanup              | Pending until `master` push succeeds                                                                 | Pending |
 | Worktree residue     | No new worktree or dependency/cache directory introduced                                             | Pass    |
 | stagingDecision      | Local-only; no staging/prod action                                                                   | Pass    |
-| Next step            | Commit, merge to `master`, push approved `master`, cleanup branch, then claim next queue task        | Pass    |
+| Next step            | Push approved `master`, clean merged branch, then claim next eligible queue task                     | Pass    |
 
 ## stagingDecision
 
@@ -107,7 +129,7 @@ local_only_complete_no_staging_or_prod
 
 ## Next Step
 
-Commit this task, merge to `master`, push approved `master`, clean the short-lived branch, then claim the next eligible queue task from clean `master`.
+Push approved `master`, clean the short-lived branch, then claim the next eligible queue task from clean `master`.
 
 ## Evidence Hygiene
 
