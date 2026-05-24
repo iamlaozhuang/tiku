@@ -232,12 +232,38 @@ describe("StudentPracticePage", () => {
         practices: studentPracticeFixture.practices,
       }),
     );
-    expect(screen.getByText("暂无可继续的练习")).toBeInTheDocument();
+    expect(screen.getByText("未找到练习")).toBeInTheDocument();
     expect(
       within(screen.getByTestId("practice-empty-state")).getByRole("link", {
         name: "返回学员首页",
       }),
     ).toHaveAttribute("href", "/home");
+  });
+
+  it("distinguishes a missing runtime practice from a generic load failure", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({
+          code: 404001,
+          message: "missing",
+          data: null,
+        }),
+      })),
+    );
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-missing",
+      }),
+    );
+
+    expect(await screen.findByText("未找到练习")).toBeInTheDocument();
+    expect(screen.queryByText("练习加载失败")).toBeNull();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
   it("starts practice and submits answers through the session runtime", async () => {

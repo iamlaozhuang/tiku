@@ -33,7 +33,12 @@ import type {
 } from "@/server/contracts/mock-exam-contract";
 import type { ExamStatus } from "@/server/models/student-experience";
 
-type StudentPageState = "ready" | "loading" | "error" | "authorization_expired";
+type StudentPageState =
+  | "ready"
+  | "loading"
+  | "error"
+  | "not_found"
+  | "authorization_expired";
 
 type StudentMockExamPageProps = {
   state?: StudentPageState;
@@ -105,6 +110,10 @@ const examStatusLabels: Record<ExamStatus, string> = {
 };
 
 const emptyAnswerSelections: Record<string, string[]> = {};
+
+function isStudentResourceNotFoundResponse(payload: { code: number }): boolean {
+  return payload.code === 404001;
+}
 
 function createMockExamDto(
   mockExam: Omit<MockExamDto, "questionCount">,
@@ -654,6 +663,11 @@ export function StudentMockExamPage({
           return;
         }
 
+        if (isStudentResourceNotFoundResponse(mockExamPayload)) {
+          setRuntimeState("not_found");
+          return;
+        }
+
         if (mockExamPayload.code !== 0 || mockExamPayload.data === null) {
           setRuntimeState("error");
           return;
@@ -710,11 +724,25 @@ export function StudentMockExamPage({
     );
   }
 
-  if (
-    selectedMockExamFixture === null ||
-    mockExam === null ||
-    questions.length === 0
-  ) {
+  if (displayState === "not_found" || selectedMockExamFixture === null) {
+    return (
+      <StudentStatusMessage
+        title="未找到模拟考试"
+        description="该模拟考试入口不存在或已不可用，请从学员首页重新进入。"
+        testId="mock-exam-empty-state"
+        action={
+          <Link
+            href="/home"
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            返回学员首页
+          </Link>
+        }
+      />
+    );
+  }
+
+  if (mockExam === null || questions.length === 0) {
     return (
       <StudentStatusMessage
         title="暂无可进入的模拟考试"
@@ -1074,6 +1102,11 @@ export function StudentExamReportPage({
           return;
         }
 
+        if (isStudentResourceNotFoundResponse(reportPayload)) {
+          setRuntimeState("not_found");
+          return;
+        }
+
         if (reportPayload.code !== 0 || reportPayload.data === null) {
           setRuntimeState("error");
           return;
@@ -1125,6 +1158,24 @@ export function StudentExamReportPage({
     );
   }
 
+  if (displayState === "not_found") {
+    return (
+      <StudentStatusMessage
+        title="未找到考试报告"
+        description="该考试报告不存在或已不可用，请从模拟考试记录重新进入。"
+        testId="exam-report-empty-state"
+        action={
+          <Link
+            href="/exam-report"
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            返回模拟考试记录
+          </Link>
+        }
+      />
+    );
+  }
+
   const examReport =
     displayExamReports.find(
       (report) => report.publicId === examReportPublicId,
@@ -1133,15 +1184,15 @@ export function StudentExamReportPage({
   if (examReport === null) {
     return (
       <StudentStatusMessage
-        title="暂无考试报告"
-        description="该模拟考试暂未生成可展示的考试报告。"
+        title="未找到考试报告"
+        description="该考试报告不存在或已不可用，请从模拟考试记录重新进入。"
         testId="exam-report-empty-state"
         action={
           <Link
-            href="/home"
+            href="/exam-report"
             className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
           >
-            返回学员首页
+            返回模拟考试记录
           </Link>
         }
       />

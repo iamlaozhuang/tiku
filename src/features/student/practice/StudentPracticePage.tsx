@@ -30,6 +30,7 @@ type StudentPracticePageState =
   | "ready"
   | "loading"
   | "error"
+  | "not_found"
   | "authorization_expired";
 
 type StudentPracticePageProps = {
@@ -81,6 +82,10 @@ const subjectLabels: Record<Subject, string> = {
 const emptyAnswerSelections: Record<string, string[]> = {};
 const emptyTextAnswers: Record<string, string> = {};
 const emptyFeedback: Record<string, PracticeAnswerFeedbackDto> = {};
+
+function isStudentResourceNotFoundResponse(payload: { code: number }): boolean {
+  return payload.code === 404001;
+}
 
 function createPracticeDto(
   practice: Omit<PracticeDto, "questionCount">,
@@ -704,6 +709,11 @@ export function StudentPracticePage({
           return;
         }
 
+        if (isStudentResourceNotFoundResponse(practicePayload)) {
+          setRuntimeState("not_found");
+          return;
+        }
+
         if (practicePayload.code !== 0 || practicePayload.data === null) {
           setRuntimeState("error");
           return;
@@ -765,6 +775,24 @@ export function StudentPracticePage({
             className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
           >
             查看授权
+          </Link>
+        }
+      />
+    );
+  }
+
+  if (displayState === "not_found" || selectedPracticeFixture === null) {
+    return (
+      <StudentPracticeStatusMessage
+        title="未找到练习"
+        description="该练习入口不存在或已不可用，请从学员首页重新进入。"
+        testId="practice-empty-state"
+        action={
+          <Link
+            href="/home"
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            返回学员首页
           </Link>
         }
       />
