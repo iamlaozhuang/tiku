@@ -10,6 +10,8 @@ import {
   createAdminAiAuditLogListQuery,
   type AdminAiAuditLogListQuery,
   type AdminAiAuditLogPageSize,
+  type AiCallLogListDto,
+  type AiCallLogSummaryListDto,
 } from "../contracts/admin-ai-audit-log-ops-contract";
 import {
   createPostgresAdminAiAuditLogRuntimeRepositories,
@@ -125,6 +127,9 @@ function readAdminAiAuditLogListQuery(
     keyword: searchParams.get("keyword"),
     level: Number.isFinite(level) && level > 0 ? level : null,
     actionType: searchParams.get("actionType") ?? "all",
+    aiFuncType: searchParams.get("aiFuncType") ?? "all",
+    callStatus: searchParams.get("callStatus") ?? "all",
+    profession: searchParams.get("profession") ?? "all",
     targetResourceType: searchParams.get("targetResourceType") ?? "all",
     resultStatus:
       resultStatus === "success" || resultStatus === "failed"
@@ -141,6 +146,111 @@ function readPageSize(
   const pageSize = Number(searchParams.get("pageSize"));
 
   return options.includes(pageSize) ? pageSize : fallback;
+}
+
+function matchesAiCallLogFilter<TValue>(
+  value: TValue,
+  expected: TValue | "all",
+): boolean {
+  return expected === "all" || value === expected;
+}
+
+function matchesAiCallLogKeyword(input: {
+  aiCallLog: AiCallLogListDto["aiCallLogs"][number];
+  keyword: string | null;
+}): boolean {
+  if (input.keyword === null) {
+    return true;
+  }
+
+  const keyword = input.keyword.toLowerCase();
+  const searchableText = [
+    input.aiCallLog.publicId,
+    input.aiCallLog.userPublicId ?? "",
+    input.aiCallLog.organizationPublicId ?? "",
+    input.aiCallLog.aiFuncType,
+    input.aiCallLog.callStatus,
+    input.aiCallLog.providerDisplayName,
+    input.aiCallLog.modelAlias,
+    input.aiCallLog.promptSummary ?? "",
+    input.aiCallLog.outputSummary ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(keyword);
+}
+
+function filterAiCallLogsForQuery(
+  result: Awaited<
+    ReturnType<AdminAiAuditLogRuntimeRepositories["listAiCallLogs"]>
+  >,
+  query: AdminAiAuditLogListQuery,
+) {
+  const aiCallLogs = result.aiCallLogs.filter(
+    (aiCallLog) =>
+      matchesAiCallLogFilter(aiCallLog.aiFuncType, query.aiFuncType) &&
+      matchesAiCallLogFilter(aiCallLog.callStatus, query.callStatus) &&
+      matchesAiCallLogFilter(aiCallLog.profession, query.profession) &&
+      (query.level === null || aiCallLog.level === query.level) &&
+      matchesAiCallLogKeyword({ aiCallLog, keyword: query.keyword }),
+  );
+
+  return {
+    aiCallLogs,
+    pagination: {
+      ...result.pagination,
+      total: aiCallLogs.length,
+    },
+  };
+}
+
+function matchesAiCallLogSummaryKeyword(input: {
+  dailySummary: AiCallLogSummaryListDto["dailySummaries"][number];
+  keyword: string | null;
+}): boolean {
+  if (input.keyword === null) {
+    return true;
+  }
+
+  const keyword = input.keyword.toLowerCase();
+  const searchableText = [
+    input.dailySummary.bucket,
+    input.dailySummary.aiFuncType,
+    input.dailySummary.providerDisplayName,
+    input.dailySummary.modelAlias,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(keyword);
+}
+
+function filterAiCallLogSummariesForQuery(
+  result: Awaited<
+    ReturnType<AdminAiAuditLogRuntimeRepositories["summarizeAiCallLogs"]>
+  >,
+  query: AdminAiAuditLogListQuery,
+) {
+  const dailySummaries = result.dailySummaries.filter(
+    (dailySummary) =>
+      matchesAiCallLogFilter(dailySummary.aiFuncType, query.aiFuncType) &&
+      (query.callStatus === "all" ||
+        (query.callStatus === "success" && dailySummary.successCount > 0) ||
+        (query.callStatus === "failed" && dailySummary.failedCount > 0)) &&
+      matchesAiCallLogSummaryKeyword({
+        dailySummary,
+        keyword: query.keyword,
+      }),
+  );
+
+  return {
+    dailySummaries,
+    pagination: {
+      ...result.pagination,
+      total: dailySummaries.length,
+    },
+  };
 }
 
 export function createAdminAiAuditLogRuntimeRouteHandlers(
@@ -293,8 +403,10 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           return createJsonResponse(authError);
         }
 
-        const result = await repositories.listAiCallLogs(
-          readAdminAiAuditLogListQuery(request),
+        const query = readAdminAiAuditLogListQuery(request);
+        const result = filterAiCallLogsForQuery(
+          await repositories.listAiCallLogs(query),
+          query,
         );
 
         return createJsonResponse(
@@ -313,8 +425,10 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           return createJsonResponse(authError);
         }
 
-        const result = await repositories.summarizeAiCallLogs(
-          readAdminAiAuditLogListQuery(request),
+        const query = readAdminAiAuditLogListQuery(request);
+        const result = filterAiCallLogSummariesForQuery(
+          await repositories.summarizeAiCallLogs(query),
+          query,
         );
 
         return createJsonResponse(
