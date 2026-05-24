@@ -22,6 +22,7 @@ import type {
   RedeemCodeRedemptionDto,
 } from "@/server/contracts/authorization-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/server/contracts/contact-config-contract";
 import type {
   AuthorizationListItemDto,
   EffectiveAuthorizationDto,
@@ -342,16 +343,71 @@ function ProfileNavLinks() {
 
 function RedeemCodePreparationNotice() {
   return (
-    <section className="border-border bg-surface rounded-xl border border-dashed p-4">
+    <div className="space-y-3">
+      <section className="border-border bg-surface rounded-xl border border-dashed p-4">
+        <div className="flex items-start gap-3">
+          <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+            <AlertCircle className="size-4" aria-hidden="true" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-text-primary text-sm font-semibold">等待卡密</p>
+            <p className="text-text-secondary text-sm leading-6">
+              <span>卡密来源：系统运营</span>
+              。请使用系统运营提供的未使用卡密完成兑换。
+            </p>
+          </div>
+        </div>
+      </section>
+      <PurchaseGuidanceContactConfigNotice testId="student-purchase-guidance-contact-config" />
+    </div>
+  );
+}
+
+function PurchaseGuidanceContactConfigNotice({ testId }: { testId: string }) {
+  const contactConfig = LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG;
+
+  return (
+    <section
+      className="bg-surface ring-border rounded-xl p-4 shadow-sm ring-1"
+      data-testid={testId}
+    >
       <div className="flex items-start gap-3">
         <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
-          <AlertCircle className="size-4" aria-hidden="true" />
+          <Ticket className="size-4" aria-hidden="true" />
         </div>
-        <div className="space-y-1">
-          <p className="text-text-primary text-sm font-semibold">等待卡密</p>
-          <p className="text-text-secondary text-sm leading-6">
-            <span>卡密来源：系统运营</span>
-            。请使用系统运营提供的未使用卡密完成兑换。
+        <div className="min-w-0 space-y-3">
+          <div className="space-y-1">
+            <h2 className="text-text-primary text-sm font-semibold">
+              {contactConfig.title}
+            </h2>
+            <p className="text-text-secondary text-sm leading-6">
+              {contactConfig.summary}
+            </p>
+          </div>
+          <div className="space-y-2">
+            {contactConfig.channels.map((channel) => (
+              <div
+                key={`${channel.channelType}-${channel.value}`}
+                className="text-text-secondary text-sm leading-6"
+              >
+                <p className="text-text-primary font-medium">{channel.label}</p>
+                {channel.href === null ? (
+                  <p>{channel.value}</p>
+                ) : (
+                  <a
+                    className="text-brand-primary font-medium transition-transform active:scale-[0.98]"
+                    href={channel.href}
+                  >
+                    {channel.value}
+                  </a>
+                )}
+                <p>{channel.serviceHours}</p>
+                <p>{channel.usage}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-text-muted text-xs leading-5">
+            {contactConfig.safetyNotice}
           </p>
         </div>
       </div>
