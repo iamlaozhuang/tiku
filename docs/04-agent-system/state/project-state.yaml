@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T01:48:00-07:00"
+  updatedAt: "2026-05-24T03:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-mvp-functional-completeness-gap-audit
-  status: closed
-  sourceStory: user-request-2026-05-24-mvp-functional-completeness-gap-audit
-  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
-  branch: codex/phase-11-mvp-functional-completeness-gap-audit
-  commitSha: 89add6b
+  id: phase-11-mvp-queue-runner-mechanism-hardening
+  status: validated
+  sourceStory: user-request-2026-05-24-mvp-queue-runner-mechanism-hardening
+  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+  branch: codex/phase-11-mvp-queue-runner-mechanism-hardening
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-11-mvp-content-ops-question-material-write-loop as the first P0 MVP gap implementation task; do not resume staging/cloud/deploy work
-  lastSummaryPath: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+  nextRecommendedAction: close phase-11-mvp-queue-runner-mechanism-hardening, then claim phase-11-mvp-content-ops-question-material-write-loop; do not resume staging/cloud/deploy work
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md

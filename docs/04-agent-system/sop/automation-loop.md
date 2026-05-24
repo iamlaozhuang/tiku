@@ -82,6 +82,13 @@ For each claimed task:
 
 Each step should leave enough evidence for another agent to resume without guessing.
 
+For Phase 11 MVP gap tasks, also follow:
+
+- `docs/04-agent-system/sop/mvp-queue-runner.md`
+- `docs/04-agent-system/sop/repository-hygiene-closeout-checklist.md`
+
+Those documents are mandatory for the 16 MVP gap tasks created by `phase-11-mvp-functional-completeness-gap-audit`. They require an AC-to-runtime matrix, P0/P1/P2/P3 problem grading, explicit `fixture-only` / `mock-only` / `read-only` / `entry-only` labels, validation records, a Repository Hygiene Closeout Checklist, `stagingDecision`, and next-step evidence before the next task is claimed.
+
 Every new queue task should declare `taskPlanPolicy: required`, `taskPlanPolicy: evidence_only`, or `taskPlanPolicy: skipped_with_reason`.
 
 - Use `required` for normal implementation tasks.

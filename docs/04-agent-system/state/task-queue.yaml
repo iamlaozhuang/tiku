@@ -3417,7 +3417,7 @@ tasks:
     phase: phase-11-staging-release-planning
     sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-001
     dependencies:
-      - phase-11-mvp-functional-completeness-gap-audit
+      - phase-11-mvp-queue-runner-mechanism-hardening
     taskPlanPolicy: required
     humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local question/material write loop only; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
     allowedFiles:
@@ -3456,6 +3456,46 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
     status: pending
+    retryCount: 0
+  - id: phase-11-mvp-queue-runner-mechanism-hardening
+    title: Phase 11 MVP Queue Runner Mechanism Hardening
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-24-mvp-queue-runner-mechanism-hardening
+    dependencies:
+      - phase-11-mvp-functional-completeness-gap-audit
+    taskPlanPolicy: required
+    humanApproval: User requested this mechanism-hardening task before starting the 16 MVP gap tasks and approved future commit, merge, push, and safe short-lifecycle branch cleanup for those tasks. This approval does not cover dependency, schema, migration, script, secret/env, real provider, Tencent Cloud, staging/prod, deployment, major permission model, or destructive data operations.
+    allowedFiles:
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/sop/mvp-queue-runner.md
+      - docs/04-agent-system/sop/repository-hygiene-closeout-checklist.md
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - automation_policy
+      - evidence_integrity
+      - release_readiness
+      - repository_hygiene
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-queue-runner-mechanism-hardening
+      - Select-String -Path 'docs\04-agent-system\sop\mvp-queue-runner.md','docs\04-agent-system\sop\repository-hygiene-closeout-checklist.md' -Pattern 'AC-to-runtime|fixture-only|mock-only|read-only|entry-only|Repository Hygiene Closeout Checklist|stagingDecision'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+    status: validated
     retryCount: 0
   - id: phase-11-mvp-content-ops-paper-composition-publish-loop
     title: Phase 11 MVP Content Ops Paper Composition Publish Loop
