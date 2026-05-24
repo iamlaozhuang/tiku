@@ -21,6 +21,7 @@ import type {
   RedeemCodeListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
+import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/server/contracts/contact-config-contract";
 import type { OrgAuthListDto } from "@/server/contracts/organization-auth-contract";
 import type {
   AuthScopeType,
@@ -520,6 +521,56 @@ function RedeemCodePlainTextUnavailableNotice() {
   );
 }
 
+function SystemOpsPurchaseGuidanceContactConfig() {
+  const contactConfig = LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG;
+
+  return (
+    <section
+      className="border-border bg-surface rounded-md border p-4 shadow-sm"
+      data-testid="system-ops-purchase-guidance-contact-config"
+    >
+      <div className="flex items-start gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-full">
+          <Ticket className="size-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 space-y-3">
+          <div className="space-y-1">
+            <p className="text-brand-primary text-xs font-medium">
+              contact_config
+            </p>
+            <h2 className="text-text-primary text-base font-semibold">
+              {contactConfig.title}
+            </h2>
+            <p className="text-text-secondary text-sm leading-6">
+              {contactConfig.summary}
+            </p>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {contactConfig.channels.map((channel) => (
+              <div
+                key={`${channel.channelType}-${channel.value}`}
+                className="bg-background ring-border rounded-md p-3 text-sm ring-1"
+              >
+                <p className="text-text-primary font-medium">{channel.label}</p>
+                <p className="text-brand-primary font-medium">
+                  {channel.value}
+                </p>
+                <p className="text-text-secondary mt-1">
+                  {channel.serviceHours}
+                </p>
+                <p className="text-text-muted mt-1">{channel.usage}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-text-muted text-xs leading-5">
+            {contactConfig.safetyNotice}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function useAdminOrgAuthData() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminOrgAuthData>({
@@ -823,6 +874,8 @@ export function AdminRedeemCodePage() {
         testId="system-ops-redeem-code-generate-entry"
         title="生成卡密入口"
       />
+
+      <SystemOpsPurchaseGuidanceContactConfig />
 
       {hasUnavailablePlainTextCode ? (
         <RedeemCodePlainTextUnavailableNotice />
