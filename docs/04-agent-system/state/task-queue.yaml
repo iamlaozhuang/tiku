@@ -3659,6 +3659,7 @@ tasks:
       - src/features/admin/**
       - src/server/contracts/**
       - src/server/services/**
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
       - tests/unit/**
       - e2e/**
       - docs/05-execution-logs/task-plans/**
@@ -3942,6 +3943,7 @@ tasks:
       - src/features/admin/**
       - src/server/contracts/**
       - src/server/services/**
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
       - tests/unit/**
       - e2e/**
       - docs/05-execution-logs/task-plans/**
@@ -4154,7 +4156,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-system-ops-organization-management-loop.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-11-mvp-contact-config-purchase-guidance-loop
     title: Phase 11 MVP Contact Config Purchase Guidance Loop
