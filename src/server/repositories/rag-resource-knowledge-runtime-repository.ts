@@ -19,7 +19,10 @@ import type {
   AdminResourceOpsListDto,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import type { ResourceStatus } from "../models/ai-rag";
-import { assertKnowledgeNodeDepth } from "../models/ai-rag";
+import {
+  assertKnowledgeNodeDepth,
+  canTransitionResourceStatus,
+} from "../models/ai-rag";
 import type {
   KnowledgeNodeMutationInput,
   KnowledgeNodeUpdateInput,
@@ -53,10 +56,28 @@ export type SaveResourceIndexingResultInput = {
   indexingErrorMessage: string | null;
 };
 
+export type ResourcePublishMarkdownResult =
+  | {
+      status: "published";
+      resource: AdminResourceOpsListDto["resources"][number];
+    }
+  | {
+      status: "not_found";
+    }
+  | {
+      status: "conflict";
+      currentStatus: ResourceStatus;
+      reason: "resource_not_publishable" | "missing_markdown_content";
+    };
+
 export type RagResourceRuntimeRepository = {
   listResources(
     query: AdminContentKnowledgeListQuery,
   ): Promise<ResourceKnowledgePage<AdminResourceOpsListDto>>;
+  publishResourceMarkdown(
+    publicId: string,
+  ): Promise<ResourcePublishMarkdownResult>;
+  markResourceIndexingStarted(publicId: string): Promise<void>;
   findResourceForIndexing(
     publicId: string,
   ): Promise<ResourceIndexingSource | null>;
@@ -104,6 +125,23 @@ type KnowledgeNodeRowForMapping = {
   updated_at: Date;
 };
 
+type ResourceOpsRowForMapping = {
+  public_id: string;
+  title: string;
+  resource_type: AdminResourceOpsListDto["resources"][number]["resourceType"];
+  resource_status: AdminResourceOpsListDto["resources"][number]["resourceStatus"];
+  profession: AdminResourceOpsListDto["resources"][number]["profession"];
+  level: number | null;
+  original_file_name: string | null;
+  object_storage_path: string | null;
+  markdown_content_hash: string | null;
+  indexing_error_message: string | null;
+  is_vector_stale: boolean;
+  published_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
 export function createPostgresRagResourceKnowledgeRuntimeRepositories(
   options: RuntimeDatabaseOptions = {},
 ): RagResourceKnowledgeRuntimeRepositories {
@@ -137,7 +175,9 @@ function createPostgresRagResourceRuntimeRepository(
           original_file_name: resource.original_file_name,
           object_storage_path: resource.object_storage_path,
           markdown_content_hash: resource.markdown_content_hash,
+          indexing_error_message: resource.indexing_error_message,
           is_vector_stale: resource.is_vector_stale,
+          published_at: resource.published_at,
           created_at: resource.created_at,
           updated_at: resource.updated_at,
         })
@@ -152,22 +192,76 @@ function createPostgresRagResourceRuntimeRepository(
         .where(and(...conditions));
 
       return {
-        resources: rows.map((row) => ({
-          publicId: row.public_id,
-          title: row.title,
-          resourceType: row.resource_type,
-          resourceStatus: row.resource_status,
-          profession: row.profession,
-          level: row.level,
-          originalFileName: row.original_file_name,
-          downloadAvailable: row.object_storage_path !== null,
-          markdownPreviewAvailable: row.markdown_content_hash !== null,
-          isVectorStale: row.is_vector_stale,
-          uploadedAt: row.created_at.toISOString(),
-          updatedAt: row.updated_at.toISOString(),
-        })),
+        resources: rows.map(mapResourceOpsRow),
         pagination: createPagination(queryInput, totalRow?.value ?? 0),
       };
+    },
+    async publishResourceMarkdown(publicId) {
+      const database = getDatabase();
+      const [currentRow] = await database
+        .select({
+          resource_status: resource.resource_status,
+          markdown_content: resource.markdown_content,
+          markdown_content_hash: resource.markdown_content_hash,
+        })
+        .from(resource)
+        .where(eq(resource.public_id, publicId))
+        .limit(1);
+
+      if (currentRow === undefined) {
+        return { status: "not_found" };
+      }
+
+      const hasMarkdownContent =
+        (currentRow.markdown_content?.trim().length ?? 0) > 0 &&
+        currentRow.markdown_content_hash !== null;
+
+      if (!hasMarkdownContent) {
+        return {
+          status: "conflict",
+          currentStatus: currentRow.resource_status,
+          reason: "missing_markdown_content",
+        };
+      }
+
+      if (
+        !canTransitionResourceStatus(currentRow.resource_status, "published")
+      ) {
+        return {
+          status: "conflict",
+          currentStatus: currentRow.resource_status,
+          reason: "resource_not_publishable",
+        };
+      }
+
+      const now = new Date();
+      const [row] = await database
+        .update(resource)
+        .set({
+          resource_status: "published",
+          indexing_error_message: null,
+          is_vector_stale: true,
+          published_at: now,
+          disabled_at: null,
+          updated_at: now,
+        })
+        .where(eq(resource.public_id, publicId))
+        .returning(createResourceOpsReturningSelection());
+
+      return row === undefined
+        ? { status: "not_found" }
+        : { status: "published", resource: mapResourceOpsRow(row) };
+    },
+    async markResourceIndexingStarted(publicId) {
+      const database = getDatabase();
+
+      await database
+        .update(resource)
+        .set({
+          resource_status: "indexing",
+          updated_at: new Date(),
+        })
+        .where(eq(resource.public_id, publicId));
     },
     async findResourceForIndexing(publicId) {
       const database = getDatabase();
@@ -230,27 +324,14 @@ function createPostgresRagResourceRuntimeRepository(
           original_file_name: resource.original_file_name,
           object_storage_path: resource.object_storage_path,
           markdown_content_hash: resource.markdown_content_hash,
+          indexing_error_message: resource.indexing_error_message,
           is_vector_stale: resource.is_vector_stale,
+          published_at: resource.published_at,
           created_at: resource.created_at,
           updated_at: resource.updated_at,
         });
 
-      return row === undefined
-        ? null
-        : {
-            publicId: row.public_id,
-            title: row.title,
-            resourceType: row.resource_type,
-            resourceStatus: row.resource_status,
-            profession: row.profession,
-            level: row.level,
-            originalFileName: row.original_file_name,
-            downloadAvailable: row.object_storage_path !== null,
-            markdownPreviewAvailable: row.markdown_content_hash !== null,
-            isVectorStale: row.is_vector_stale,
-            uploadedAt: row.created_at.toISOString(),
-            updatedAt: row.updated_at.toISOString(),
-          };
+      return row === undefined ? null : mapResourceOpsRow(row);
     },
   };
 }
@@ -535,6 +616,40 @@ function createPagination(
   };
 }
 
+function mapResourceOpsRow(
+  row: ResourceOpsRowForMapping,
+): AdminResourceOpsListDto["resources"][number] {
+  return {
+    publicId: row.public_id,
+    title: row.title,
+    resourceType: row.resource_type,
+    resourceStatus: row.resource_status,
+    profession: row.profession,
+    level: row.level,
+    originalFileName: row.original_file_name,
+    downloadAvailable: row.object_storage_path !== null,
+    markdownPreviewAvailable: row.markdown_content_hash !== null,
+    isVectorStale: row.is_vector_stale,
+    publishedAt: row.published_at?.toISOString() ?? null,
+    indexingErrorSummary: createIndexingErrorSummary(
+      row.indexing_error_message,
+    ),
+    uploadedAt: row.created_at.toISOString(),
+    updatedAt: row.updated_at.toISOString(),
+  };
+}
+
+function createIndexingErrorSummary(message: string | null): string | null {
+  if (message === null) {
+    return null;
+  }
+
+  return message === "resource_status_not_chunkable" ||
+    message === "missing_markdown_content"
+    ? message
+    : "redacted_indexing_error";
+}
+
 function mapKnowledgeNodeRow(
   row: KnowledgeNodeRowForMapping,
   parentPublicIds: ReadonlyMap<number, string>,
@@ -649,6 +764,25 @@ async function findKnowledgeNodeByPublicId(
     path_name: row.path_name,
     depth: row.depth,
     sort_order: row.sort_order,
+  };
+}
+
+function createResourceOpsReturningSelection() {
+  return {
+    public_id: resource.public_id,
+    title: resource.title,
+    resource_type: resource.resource_type,
+    resource_status: resource.resource_status,
+    profession: resource.profession,
+    level: resource.level,
+    original_file_name: resource.original_file_name,
+    object_storage_path: resource.object_storage_path,
+    markdown_content_hash: resource.markdown_content_hash,
+    indexing_error_message: resource.indexing_error_message,
+    is_vector_stale: resource.is_vector_stale,
+    published_at: resource.published_at,
+    created_at: resource.created_at,
+    updated_at: resource.updated_at,
   };
 }
 

@@ -3847,6 +3847,8 @@ tasks:
       - src/app/api/v1/resources/**
       - src/features/admin/**
       - src/server/contracts/**
+      - src/server/models/**
+      - src/server/repositories/**
       - src/server/services/**
       - tests/unit/**
       - e2e/**
@@ -3880,7 +3882,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-11-mvp-knowledge-node-tree-management-loop
     title: Phase 11 MVP Knowledge Node Tree Management Loop

@@ -100,6 +100,8 @@ export type AdminResourceOpsSummaryDto = {
   downloadAvailable: boolean;
   markdownPreviewAvailable: boolean;
   isVectorStale: boolean;
+  publishedAt: string | null;
+  indexingErrorSummary: string | null;
   uploadedAt: string;
   updatedAt: string;
 };

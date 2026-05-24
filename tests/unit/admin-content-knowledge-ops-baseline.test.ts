@@ -112,6 +112,8 @@ const resourcePayload = {
         downloadAvailable: true,
         markdownPreviewAvailable: true,
         isVectorStale: true,
+        publishedAt: "2026-05-20T12:00:00.000Z",
+        indexingErrorSummary: null,
         uploadedAt: "2026-05-19T08:00:00.000Z",
         updatedAt: "2026-05-20T12:00:00.000Z",
         id: 801,
@@ -129,6 +131,8 @@ const resourcePayload = {
         downloadAvailable: false,
         markdownPreviewAvailable: false,
         isVectorStale: false,
+        publishedAt: "2026-05-20T13:00:00.000Z",
+        indexingErrorSummary: null,
         uploadedAt: "2026-05-18T08:00:00.000Z",
         updatedAt: "2026-05-20T13:00:00.000Z",
         id: 802,
@@ -270,6 +274,25 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
 
       if (path.startsWith("/api/v1/resources?")) {
         return createJsonResponse(payload);
+      }
+
+      if (
+        path === "/api/v1/resources/resource-public-001/publish" &&
+        init?.method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            resource: {
+              ...resourcePayload.data.resources[0],
+              resourceStatus: "published",
+              isVectorStale: true,
+              publishedAt: "2026-05-20T14:00:00.000Z",
+              updatedAt: "2026-05-20T14:00:00.000Z",
+            },
+          },
+        });
       }
 
       if (
@@ -734,6 +757,51 @@ describe("admin content and knowledge ops baseline", () => {
       }),
     );
     expect(document.body.textContent).not.toContain("hash-one");
+  });
+
+  it("publishes a draft Markdown resource through the protected runtime", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockResourceFetch({
+      ...resourcePayload,
+      data: {
+        resources: [
+          {
+            ...resourcePayload.data.resources[0],
+            resourceStatus: "draft",
+            isVectorStale: false,
+            publishedAt: null,
+            indexingErrorSummary: null,
+          },
+        ],
+      },
+    });
+
+    render(createElement(AdminResourceKnowledgeManagement));
+
+    const firstResource = await screen.findByTestId(
+      "resource-row-resource-public-001",
+    );
+
+    fireEvent.click(
+      within(firstResource).getByRole("button", { name: "发布 Markdown" }),
+    );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "确认发布营销知识库讲义的 Markdown？",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "资源发布完成，向量待重建",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/resources/resource-public-001/publish",
+      expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-admin-token" },
+        method: "POST",
+      }),
+    );
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain("objectStoragePath");
   });
 
   it("renders resource empty, unauthorized, error, filtered-empty, and unsafe publicId boundaries", async () => {

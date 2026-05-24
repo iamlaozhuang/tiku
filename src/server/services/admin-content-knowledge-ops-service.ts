@@ -120,6 +120,8 @@ const sampleResources: AdminResourceOpsListDto["resources"] = [
     downloadAvailable: true,
     markdownPreviewAvailable: true,
     isVectorStale: false,
+    publishedAt: "2026-05-20T10:30:00.000Z",
+    indexingErrorSummary: null,
     uploadedAt: "2026-05-20T10:00:00.000Z",
     updatedAt: "2026-05-20T11:00:00.000Z",
   },

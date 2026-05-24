@@ -214,7 +214,7 @@ const resourceStatusTransitions = {
   published: ["indexing", "disabled"],
   indexing: ["rag_ready", "index_failed", "disabled"],
   index_failed: ["indexing", "disabled"],
-  rag_ready: ["indexing", "disabled"],
+  rag_ready: ["published", "indexing", "disabled"],
   disabled: ["published", "rag_ready"],
 } satisfies Record<ResourceStatus, ResourceStatus[]>;
 

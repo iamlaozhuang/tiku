@@ -13,6 +13,7 @@ import {
   type AdminContentKnowledgeListQuery,
   type AdminContentKnowledgePageSize,
   type AdminContentKnowledgeSortField,
+  type AdminResourceOpsSummaryDto,
   type AdminKnowledgeNodeOpsSummaryDto,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import type { ResourceVectorRebuildResultDto } from "../contracts/ai-rag-contract";
@@ -81,6 +82,10 @@ const knowledgeNodeNotFoundResponse = createErrorResponse(
 const validationFailedResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
   "Request validation failed.",
+);
+const resourcePublishConflictResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+  "Resource cannot be published from its current state.",
 );
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -269,6 +274,8 @@ async function rebuildResourceVector(input: {
     );
   }
 
+  await input.resourceRepository.markResourceIndexingStarted(input.publicId);
+
   const savedResource =
     await input.resourceRepository.saveResourceIndexingResult({
       resourcePublicId: input.publicId,
@@ -285,6 +292,27 @@ async function rebuildResourceVector(input: {
       chunkingResult,
     ),
   );
+}
+
+async function publishResourceMarkdown(input: {
+  resourceRepository: RagResourceRuntimeRepository;
+  publicId: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  const publishResult = await input.resourceRepository.publishResourceMarkdown(
+    input.publicId,
+  );
+
+  if (publishResult.status === "not_found") {
+    return resourceNotFoundResponse;
+  }
+
+  if (publishResult.status === "conflict") {
+    void publishResult.currentStatus;
+    void publishResult.reason;
+    return resourcePublishConflictResponse;
+  }
+
+  return createSuccessResponse({ resource: publishResult.resource });
 }
 
 function mapKnowledgeNodeResult(
@@ -350,6 +378,40 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
               result.pagination,
             ),
           );
+        },
+      },
+      publish: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: "resource.publish_markdown",
+            targetResourceType: "resource",
+            targetPublicId: publicId,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const response = await publishResourceMarkdown({
+            resourceRepository: repositories.resourceRepository,
+            publicId,
+          });
+
+          await appendAuditLog(
+            repositories.auditLogRepository,
+            request,
+            actorOrError,
+            {
+              actionType: "resource.publish_markdown",
+              targetResourceType: "resource",
+              targetPublicId: publicId,
+              resultStatus: response.code === 0 ? "success" : "failed",
+              metadataSummary: "redacted resource publish metadata",
+            },
+          );
+
+          return createJsonResponse(response);
         },
       },
       rebuildVector: {

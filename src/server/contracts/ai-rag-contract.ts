@@ -162,6 +162,15 @@ export type RagCitationDto = {
   score: number;
 };
 
+export type RagCitationSourceDto = {
+  chunkPublicId: string;
+  resourcePublicId: string;
+  resourceTitle: string;
+  headingPath: string[];
+  chunkIndex: number;
+  score: number;
+};
+
 export type RagRetrievalEvidenceSummaryDto = {
   evidenceStatus: EvidenceStatus;
   citationCount: number;
