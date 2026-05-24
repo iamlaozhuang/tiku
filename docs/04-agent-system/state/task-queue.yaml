@@ -3801,6 +3801,7 @@ tasks:
       - src/features/admin/**
       - src/features/student/**
       - src/server/contracts/**
+      - src/server/repositories/**
       - src/server/services/**
       - tests/unit/**
       - e2e/**
