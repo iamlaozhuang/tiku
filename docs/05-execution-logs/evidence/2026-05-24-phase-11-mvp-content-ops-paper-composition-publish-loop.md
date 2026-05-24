@@ -104,6 +104,33 @@ Result: pass. The build command printed that `.env.local` was an environment sou
 
 npm.cmd run test:unit
 Result: pass, 107 files, 402 tests.
+
+Post-merge closeout on `master`:
+
+Task commit: `c5b9bce feat(content): wire paper composition publish loop`.
+
+Merge commit: `5bb5c32 merge: phase 11 paper composition publish loop`.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass on `master`.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: pass on `master`.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Result: pass inventory on `master`; ahead of `origin/master` by the task commit and merge commit before closeout evidence commit.
+
+git diff --check
+Result: pass on `master`.
+
+npm.cmd run test:unit
+Result: pass on `master`, 107 files, 402 tests.
+
+npm.cmd run build
+Result: pass on `master`. The build command printed that `.env.local` was an environment source; no `.env.local` contents or secrets were read or recorded.
+
+git branch -d codex/phase-11-mvp-content-ops-paper-composition-publish-loop
+Result: first sandboxed attempt hit a local git ref lock permission boundary; escalated retry deleted the already-merged short-lifecycle branch at `c5b9bce`.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -116,13 +143,13 @@ Result: pass, 107 files, 402 tests.
 | Problem grading      | P0/P1 issues recorded with fixed status and residual risk                                                                                                                                                                                                                                              | Pass    |
 | Validation record    | Claim readiness, RED/GREEN tests, targeted tests, build retries, full unit, readiness, naming, Git inventory, and diff check recorded                                                                                                                                                                  | Pass    |
 | Evidence hygiene     | No secrets or prohibited raw data recorded                                                                                                                                                                                                                                                             | Pass    |
-| Commit               | Pending                                                                                                                                                                                                                                                                                                | Pending |
-| Merge                | Pending                                                                                                                                                                                                                                                                                                | Pending |
-| Push                 | Pending                                                                                                                                                                                                                                                                                                | Pending |
-| Cleanup              | Pending                                                                                                                                                                                                                                                                                                | Pending |
-| Worktree residue     | Pending                                                                                                                                                                                                                                                                                                | Pending |
+| Commit               | Task commit `c5b9bce`; closeout evidence commit pending                                                                                                                                                                                                                                                | Pass    |
+| Merge                | Merge commit `5bb5c32` on `master`                                                                                                                                                                                                                                                                     | Pass    |
+| Push                 | Pending post-closeout commit                                                                                                                                                                                                                                                                           | Pending |
+| Cleanup              | Local merged branch deleted after post-merge gates                                                                                                                                                                                                                                                     | Pass    |
+| Worktree residue     | No task worktree was created for this branch; local branch cleanup completed                                                                                                                                                                                                                           | Pass    |
 | stagingDecision      | `local_task_closed_remaining_p1` recorded                                                                                                                                                                                                                                                              | Pass    |
-| Next step            | Commit, merge, push, cleanup, then claim `phase-11-mvp-content-to-student-runtime-propagation`                                                                                                                                                                                                         | Pass    |
+| Next step            | Commit closeout evidence, push `master`, then claim `phase-11-mvp-content-to-student-runtime-propagation`                                                                                                                                                                                              | Pass    |
 
 ## stagingDecision
 
@@ -130,7 +157,7 @@ local_task_closed_remaining_p1
 
 ## Next Step
 
-Commit this task, merge to `master`, run post-merge closeout gates, push `master`, clean the short-lifecycle branch, then claim `phase-11-mvp-content-to-student-runtime-propagation`.
+Commit closeout evidence, push `master`, then claim `phase-11-mvp-content-to-student-runtime-propagation`.
 
 ## Evidence Hygiene
 
