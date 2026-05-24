@@ -620,6 +620,9 @@ export function StudentMockExamPage({
   const [isSubmitConfirmationOpen, setIsSubmitConfirmationOpen] =
     useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [runtimeExamReportPublicId, setRuntimeExamReportPublicId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -859,6 +862,27 @@ export function StudentMockExamPage({
           setRuntimeState("error");
           return;
         }
+
+        const reportPayload = await fetchStudentApi<ExamReportResultDto>(
+          "/api/v1/exam-reports",
+          token,
+          {
+            method: "POST",
+            body: JSON.stringify({ mockExamPublicId: mockExam.publicId }),
+          },
+        );
+
+        if (isStudentUnauthorizedResponse(reportPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (reportPayload.code !== 0 || reportPayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        setRuntimeExamReportPublicId(reportPayload.data.examReport.publicId);
       } catch {
         setRuntimeState("error");
         return;
@@ -869,6 +893,9 @@ export function StudentMockExamPage({
   }
 
   if (isSubmitted) {
+    const submittedExamReportPublicId =
+      runtimeExamReportPublicId ?? selectedMockExamFixture.examReportPublicId;
+
     return (
       <section className="mx-auto flex min-h-[calc(100vh-7rem)] max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="bg-success/10 text-success flex size-12 items-center justify-center rounded-full">
@@ -884,13 +911,13 @@ export function StudentMockExamPage({
         </div>
         <Link
           href={
-            selectedMockExamFixture.examReportPublicId === ""
+            submittedExamReportPublicId === ""
               ? "/exam-report"
-              : `/exam-report?examReportPublicId=${selectedMockExamFixture.examReportPublicId}`
+              : `/exam-report?examReportPublicId=${submittedExamReportPublicId}`
           }
           className="bg-primary text-primary-foreground flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
         >
-          {selectedMockExamFixture.examReportPublicId === ""
+          {submittedExamReportPublicId === ""
             ? "查看模拟考试记录"
             : "查看考试报告"}
         </Link>

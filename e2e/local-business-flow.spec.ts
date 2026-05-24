@@ -678,6 +678,7 @@ function isExpectedTransitionAbort(networkFailure: string) {
     "/api/v1/audit-logs?",
     "/api/v1/ai-call-logs?",
     "/api/v1/ai-call-logs/summary?",
+    "/api/v1/exam-reports?",
     "/api/v1/users?",
     "/api/v1/redeem-codes?",
     "/api/v1/organizations?",

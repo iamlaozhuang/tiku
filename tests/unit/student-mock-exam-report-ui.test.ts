@@ -266,7 +266,10 @@ describe("StudentMockExamPage", () => {
 
   it("starts, saves, and submits a mock exam through the session runtime without exposing answers before submit", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
-    const mockExam = studentMockExamFixture.mockExams[0].mockExam;
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
         expect(init?.headers).toMatchObject({
@@ -276,7 +279,7 @@ describe("StudentMockExamPage", () => {
         if (String(url) === "/api/v1/mock-exams") {
           expect(init?.method).toBe("POST");
           expect(JSON.parse(String(init?.body))).toEqual({
-            paperPublicId: "paper-marketing-theory-mock-001",
+            paperPublicId: "paper-content-published-001",
           });
 
           return {
@@ -354,6 +357,30 @@ describe("StudentMockExamPage", () => {
           };
         }
 
+        if (String(url) === "/api/v1/exam-reports") {
+          expect(init?.method).toBe("POST");
+          expect(JSON.parse(String(init?.body))).toEqual({
+            mockExamPublicId: "mock-exam-marketing-theory-001",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                examReport: {
+                  ...studentExamReportFixture.examReports[0],
+                  publicId: "exam-report-from-runtime-submit",
+                  mockExamPublicId: "mock-exam-marketing-theory-001",
+                  paperPublicId: "paper-content-published-001",
+                },
+              },
+            }),
+          };
+        }
+
         return {
           ok: false,
           status: 404,
@@ -373,7 +400,7 @@ describe("StudentMockExamPage", () => {
 
     render(
       createElement(StudentMockExamPage, {
-        paperPublicId: "paper-marketing-theory-mock-001",
+        paperPublicId: "paper-content-published-001",
       } satisfies RuntimeMockExamProps),
     );
 
@@ -395,9 +422,13 @@ describe("StudentMockExamPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "确认交卷" }));
 
     expect(await screen.findByText("模考已提交")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "查看考试报告" })).toHaveAttribute(
+      "href",
+      "/exam-report?examReportPublicId=exam-report-from-runtime-submit",
+    );
     expect(document.body.textContent).not.toContain("unit-test-session-token");
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
   });
 });
 
