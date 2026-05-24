@@ -139,24 +139,43 @@ git diff --check
 Result: pass.
 ```
 
+## Push and Cleanup
+
+```text
+git push origin master
+Result: pass.
+Push target: `origin/master`.
+Pushed range: `aeeebbd..be9e931`.
+
+git branch -d codex/phase-11-mvp-ai-knowledge-recommendation-review-loop
+First sandbox result: failed to create ref lock due permission denied.
+Escalated rerun result: pass.
+
+git status --short --branch
+Result: clean `master...origin/master`.
+
+git branch --list "codex/phase-11-mvp-ai-knowledge-recommendation-review-loop"
+Result: no branch returned.
+```
+
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                                             | Result  |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-ai-knowledge-recommendation-review-loop`, not master/main                               | Pass    |
-| Allowed files        | Changed files are within queue allowed files: admin UI, contracts, services, unit tests, task docs/state                      | Pass    |
-| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, staging/prod file change                             | Pass    |
-| AC-to-runtime matrix | Matrix records partial-runtime starting state and pending decisions                                                           | Pass    |
-| Problem grading      | Initial P1 `kn_recommendation` loop issue recorded                                                                            | Pass    |
-| Validation record    | RED/GREEN targeted tests, typecheck, full unit, build, readiness, naming, diff check, git inventory, and QualityGate recorded | Pass    |
-| Evidence hygiene     | No secrets, raw prompts, raw answers, raw model responses, provider payloads, or prohibited data recorded                     | Pass    |
-| Commit               | Task commit `a2a01fa2ba97a0c801d957c40664f3f85208d700`                                                                        | Pass    |
-| Merge                | Merged to master with merge commit `d78e33618d90f2ec2b19ae8fc0146f6b5748e4e4`                                                 | Pass    |
-| Push                 | Pending                                                                                                                       | Pending |
-| Cleanup              | Pending                                                                                                                       | Pending |
-| Worktree residue     | Pending                                                                                                                       | Pending |
-| stagingDecision      | `local_task_closed_remaining_persistence_deferred`                                                                            | Pass    |
-| Next step            | Commit, merge to master, push, run post-merge gates, clean branch, then claim next queue task                                 | Pass    |
+| Check                | Required evidence                                                                                                             | Result |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-ai-knowledge-recommendation-review-loop`, not master/main                               | Pass   |
+| Allowed files        | Changed files are within queue allowed files: admin UI, contracts, services, unit tests, task docs/state                      | Pass   |
+| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, staging/prod file change                             | Pass   |
+| AC-to-runtime matrix | Matrix records partial-runtime starting state and pending decisions                                                           | Pass   |
+| Problem grading      | Initial P1 `kn_recommendation` loop issue recorded                                                                            | Pass   |
+| Validation record    | RED/GREEN targeted tests, typecheck, full unit, build, readiness, naming, diff check, git inventory, and QualityGate recorded | Pass   |
+| Evidence hygiene     | No secrets, raw prompts, raw answers, raw model responses, provider payloads, or prohibited data recorded                     | Pass   |
+| Commit               | Task commit `a2a01fa2ba97a0c801d957c40664f3f85208d700`                                                                        | Pass   |
+| Merge                | Merged to master with merge commit `d78e33618d90f2ec2b19ae8fc0146f6b5748e4e4`                                                 | Pass   |
+| Push                 | `git push origin master` pushed `aeeebbd..be9e931`                                                                            | Pass   |
+| Cleanup              | Deleted merged branch `codex/phase-11-mvp-ai-knowledge-recommendation-review-loop`                                            | Pass   |
+| Worktree residue     | No separate worktree was created for this task; `git status --short --branch` clean after cleanup                             | Pass   |
+| stagingDecision      | `local_task_closed_remaining_persistence_deferred`                                                                            | Pass   |
+| Next step            | Push this closeout evidence commit, verify clean master, then claim next queue task                                           | Pass   |
 
 ## stagingDecision
 
@@ -164,7 +183,7 @@ local_task_closed_remaining_persistence_deferred
 
 ## Next Step
 
-Commit, merge to master, push, run post-merge gates, clean the short lifecycle branch, then claim `phase-11-mvp-audit-log-coverage-hardening` only from a clean repository.
+Push this closeout evidence commit, verify clean master, then claim `phase-11-mvp-audit-log-coverage-hardening` only from a clean repository.
 
 ## Implementation Summary
 
