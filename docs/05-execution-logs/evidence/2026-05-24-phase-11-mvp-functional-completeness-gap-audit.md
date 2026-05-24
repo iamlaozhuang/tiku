@@ -110,6 +110,51 @@ Result: pass.
 
 `stagingDecision`: `blocked_by_p0_mvp_functional_gaps`
 
+## Post-Merge Closeout
+
+Human approval:
+
+- User approved merging `codex/phase-11-mvp-functional-completeness-gap-audit` into `master`, pushing `master` to `origin`, running post-merge gates, recording evidence, and cleaning the merged short-lifecycle branch.
+- User also approved future commit, merge, push, and safe short-lifecycle branch cleanup for the 16 queued MVP gap repair tasks, while preserving the hard stop gates for dependency, schema, migration, script, secret/env, real provider, Tencent Cloud, staging/prod, deployment, major permission model, and destructive data operations.
+
+Merge result:
+
+```text
+git switch master
+Result: switched to master; branch was up to date with origin/master before merge.
+
+git merge --no-ff codex/phase-11-mvp-functional-completeness-gap-audit -m "merge: phase 11 mvp functional gap audit"
+Result: merge succeeded.
+Merge commit: 4f09a8c
+Merged task commit: 89add6b docs(agent): audit mvp functional gaps
+```
+
+Post-merge validation on `master`:
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass.
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result: pass.
+Details: lint pass; typecheck pass; test:unit pass with 107 test files and 399 tests; format:check pass.
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: pass.
+```
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master
+Result: pass.
+Branch: master
+Ahead of origin/master before closeout evidence commit: 2 commits.
+Changed files against origin/master: task plan, audit review, evidence, project-state.yaml, task-queue.yaml.
+```
+
 ## Evidence Hygiene
 
 This evidence intentionally excludes secrets, tokens, Authorization headers, raw provider payloads, raw prompts, raw answers, raw model responses, full paper/material/OCR text, generated plaintext `redeem_code` values, and customer/private data.
