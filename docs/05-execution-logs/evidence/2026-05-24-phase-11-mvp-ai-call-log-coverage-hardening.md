@@ -96,25 +96,56 @@ Result before commit: pass inventory; branch had task-only unstaged/untracked ch
 
 git diff --check
 Result: pass.
+
+git switch master
+Result: pass.
+
+git merge --no-ff codex/phase-11-mvp-ai-call-log-coverage-hardening -m "merge: phase 11 AI call log coverage hardening"
+Result: pass. Merge commit f6a3d85 created on master.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Post-merge result on master: pass. lint, typecheck, test:unit, and format:check passed.
+
+npm.cmd run build
+Post-merge result on master: pass. Next.js compiled, TypeScript passed, 47 static pages generated.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Post-merge result on master: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Post-merge result on master: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Post-merge result on master: pass inventory; master was ahead of origin/master by task commit a76dda6 and merge commit f6a3d85.
+
+git diff --check
+Post-merge result on master: pass.
+
+git push origin master
+Result: pass. Pushed master to origin from 8708839 to f6a3d85.
+
+git branch -d codex/phase-11-mvp-ai-call-log-coverage-hardening
+First result: failed in sandbox because git could not create the local ref lock.
+Escalated retry result: pass. Deleted merged local branch codex/phase-11-mvp-ai-call-log-coverage-hardening at a76dda6.
 ```
 
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                         | Result                  |
-| -------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-ai-call-log-coverage-hardening`, not master/main                    | Pass                    |
-| Allowed files        | Changed files match task allowedFiles; no package, lockfile, env, schema, migration, script, cloud files  | Pass                    |
-| AC-to-runtime matrix | Matrix labels `runtime_closed`, `partial_runtime`, and approval-blocked residuals                         | Pass                    |
-| Problem grading      | P1 fixed items and P2 approval-blocked residuals recorded                                                 | Pass                    |
-| Validation record    | Claim readiness, RED/GREEN target test, full unit, build, readiness, naming, quality gate recorded        | Pass                    |
-| Evidence hygiene     | No secrets, raw prompts, raw answers, raw model responses, provider payloads, or prohibited data recorded | Pass                    |
-| Commit               | Pending task commit                                                                                       | Pending post-validation |
-| Merge                | Pending merge to `master`                                                                                 | Pending post-validation |
-| Push                 | Pending push to `origin/master` under queue-wide approval                                                 | Pending post-validation |
-| Cleanup              | Pending deletion of merged short-lifecycle branch                                                         | Pending post-validation |
-| Worktree residue     | Pending final clean repository check after merge/push/cleanup                                             | Pending post-validation |
-| stagingDecision      | `local_task_closed_remaining_p1`                                                                          | Pass                    |
-| Next step            | After closeout, claim `phase-11-mvp-auth-session-account-hardening` from clean `master`                   | Pass                    |
+| Check                | Required evidence                                                                                         | Result |
+| -------------------- | --------------------------------------------------------------------------------------------------------- | ------ |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-ai-call-log-coverage-hardening`, not master/main                    | Pass   |
+| Allowed files        | Changed files match task allowedFiles; no package, lockfile, env, schema, migration, script, cloud files  | Pass   |
+| AC-to-runtime matrix | Matrix labels `runtime_closed`, `partial_runtime`, and approval-blocked residuals                         | Pass   |
+| Problem grading      | P1 fixed items and P2 approval-blocked residuals recorded                                                 | Pass   |
+| Validation record    | Claim readiness, RED/GREEN target test, full unit, build, readiness, naming, quality gate recorded        | Pass   |
+| Evidence hygiene     | No secrets, raw prompts, raw answers, raw model responses, provider payloads, or prohibited data recorded | Pass   |
+| Commit               | Task commit `a76dda6 feat(audit): harden ai call log coverage`                                            | Pass   |
+| Merge                | Merged into `master` with merge commit `f6a3d85 merge: phase 11 AI call log coverage hardening`           | Pass   |
+| Push                 | Pushed `master` to `origin/master` from `8708839` to `f6a3d85` under queue-wide approval                  | Pass   |
+| Cleanup              | Deleted merged local branch `codex/phase-11-mvp-ai-call-log-coverage-hardening`                           | Pass   |
+| Worktree residue     | Post-merge working tree was clean before closeout evidence update                                         | Pass   |
+| stagingDecision      | `local_task_closed_remaining_p1`                                                                          | Pass   |
+| Next step            | After closeout, claim `phase-11-mvp-auth-session-account-hardening` from clean `master`                   | Pass   |
 
 ## stagingDecision
 
@@ -124,7 +155,7 @@ Reason: local AI call log and summary redaction/filtering is closed for returned
 
 ## Next Step
 
-Commit, merge to `master`, push `master`, run post-merge gates, clean the merged short-lifecycle branch, then claim `phase-11-mvp-auth-session-account-hardening` only after `master` and `origin/master` are aligned and the repo is clean.
+Commit closeout evidence, push `master`, confirm `master` and `origin/master` are aligned and the repo is clean, then claim `phase-11-mvp-auth-session-account-hardening`.
 
 ## Evidence Hygiene
 
