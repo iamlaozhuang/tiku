@@ -78,7 +78,7 @@ describe("admin ai and audit log ops baseline", () => {
     expect(modelConfigList).toMatchObject({
       code: 0,
       message: "ok",
-      pagination: { page: 1, pageSize: 20, total: 2 },
+      pagination: { page: 1, pageSize: 20, total: 3 },
     });
     expect(modelConfigList.data?.modelConfigs[0]).toMatchObject({
       publicId: "model-config-public-001",
@@ -86,7 +86,12 @@ describe("admin ai and audit log ops baseline", () => {
       providerDisplayName: "通义千问",
       apiKeyDisplay: "****1234",
       aiFuncType: "ai_scoring",
-      fallbackModelConfigPublicId: "model-config-public-002",
+      fallbackModelConfigPublicId: null,
+    });
+    expect(modelConfigList.data?.modelConfigs[1]).toMatchObject({
+      publicId: "model-config-public-002",
+      aiFuncType: "ai_explanation",
+      fallbackModelConfigPublicId: "model-config-public-003",
     });
     expect(modelConfigList.data?.modelConfigs[0]).not.toHaveProperty("id");
     expect(modelConfigList.data?.modelConfigs[0]).not.toHaveProperty("apiKey");
@@ -201,7 +206,7 @@ describe("admin ai and audit log ops baseline", () => {
       pagination: {
         page: 2,
         pageSize: 50,
-        total: 2,
+        total: 3,
       },
       data: {
         modelConfigs: expect.arrayContaining([

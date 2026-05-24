@@ -1,11 +1,7 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { createMockAiProvider } from "@/ai/mock-provider";
 import type { ApiResponse } from "../contracts/api-response";
-import {
-  createModelConfigSnapshot,
-  type EvidenceStatus,
-  type ModelConfigSnapshot,
-} from "../models/ai-rag";
+import type { EvidenceStatus } from "../models/ai-rag";
 import type {
   RagCitationDto,
   RagRetrievalResultDto,
@@ -50,6 +46,11 @@ import {
 } from "./practice-service";
 import type { SessionService } from "./session-service";
 import {
+  createLocalModelConfigRuntimeCatalog,
+  createModelConfigRuntimeResolver,
+  type ModelConfigRuntimeCatalog,
+} from "./model-config-runtime";
+import {
   createStudentPaperRouteHandlers,
   type StudentPaperUserResolver,
 } from "./student-paper-route";
@@ -67,6 +68,7 @@ export type StudentFlowRuntimeOptions = StudentFlowRuntimeRepositoryOptions & {
   mockExamRepository?: MockExamRepository;
   examReportRepository?: ExamReportRepository;
   examReportLearningSuggestionOptions?: ExamReportLearningSuggestionOptions;
+  modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
   createPublicId?: (prefix: StudentFlowPublicIdPrefix) => string;
 };
 
@@ -79,32 +81,29 @@ function createDefaultPublicId(prefix: StudentFlowPublicIdPrefix): string {
   return `${prefix}_${crypto.randomUUID()}`;
 }
 
-function createDefaultLearningSuggestionOptions(): ExamReportLearningSuggestionOptions {
+function createDefaultLearningSuggestionOptions(
+  modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
+): ExamReportLearningSuggestionOptions {
+  const modelConfigSelection = createModelConfigRuntimeResolver(
+    modelConfigRuntimeCatalog ?? createLocalModelConfigRuntimeCatalog(),
+  ).resolve({
+    aiFuncType: "learning_suggestion",
+    allowFallback: true,
+  });
+
+  if (modelConfigSelection.status !== "selected") {
+    throw new Error(
+      `Local learning_suggestion model_config is unavailable: ${modelConfigSelection.reason}`,
+    );
+  }
+
   return {
     learningSuggestionRuntime: createAiMockProviderRuntime({
       provider: createMockAiProvider(),
       aiCallLogRepository: createPostgresAdminAiAuditLogRuntimeRepositories(),
     }),
-    modelConfigSnapshot: createModelConfigSnapshot({
-      providerPublicId: "model-provider-dev-mock",
-      providerKey: "mock",
-      providerDisplayName: "Local Mock AI",
-      modelConfigPublicId: "model-config-dev-learning-suggestion",
-      aiFuncType: "learning_suggestion",
-      modelName: "mock-learning-suggestion",
-      displayName: "Local mock learning suggestion",
-      configVersion: 1,
-      timeoutSecond: 5,
-      maxRetryCount: 0,
-      fallbackModelConfigPublicId: null,
-      promptTemplateKey: "dev_learning_suggestion",
-      promptTemplateVersion: 1,
-    }),
-    promptTemplate: {
-      promptTemplateKey: "dev_learning_suggestion",
-      version: 1,
-      templateHash: "dev-learning-suggestion-template-v1",
-    },
+    modelConfigSnapshot: modelConfigSelection.modelConfigSnapshot,
+    promptTemplate: modelConfigSelection.promptTemplate,
   };
 }
 
@@ -128,47 +127,30 @@ function createEmptyRagRetrievalResult(
   };
 }
 
-function createLocalModelConfigSnapshot(input: {
-  aiFuncType: ModelConfigSnapshot["aiFuncType"];
-  modelConfigPublicId: string;
-  modelName: string;
-  promptTemplateKey: string;
-}): ModelConfigSnapshot {
-  return createModelConfigSnapshot({
-    providerPublicId: "model-provider-dev-mock",
-    providerKey: "mock",
-    providerDisplayName: "Local Mock AI",
-    modelConfigPublicId: input.modelConfigPublicId,
-    aiFuncType: input.aiFuncType,
-    modelName: input.modelName,
-    displayName: `Local mock ${input.aiFuncType}`,
-    configVersion: 1,
-    timeoutSecond: 5,
-    maxRetryCount: 3,
-    fallbackModelConfigPublicId: null,
-    promptTemplateKey: input.promptTemplateKey,
-    promptTemplateVersion: 1,
-  });
-}
-
 function estimateTokenCount(value: string): number {
   return Math.max(1, Math.ceil(value.length / 4));
 }
 
-function createDefaultAiScoringRuntime(): MockExamAiScoringRuntime {
+function createDefaultAiScoringRuntime(
+  modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
+): MockExamAiScoringRuntime {
   const aiCallLogRepository =
     createPostgresAdminAiAuditLogRuntimeRepositories();
-  const modelConfigSnapshot = createLocalModelConfigSnapshot({
+  const modelConfigSelection = createModelConfigRuntimeResolver(
+    modelConfigRuntimeCatalog ?? createLocalModelConfigRuntimeCatalog(),
+  ).resolve({
     aiFuncType: "scoring",
-    modelConfigPublicId: "model-config-dev-ai-scoring",
-    modelName: "mock-ai-scoring",
-    promptTemplateKey: "dev_ai_scoring_v1",
+    allowFallback: false,
   });
-  const promptTemplate = {
-    promptTemplateKey: "dev_ai_scoring_v1",
-    version: 1,
-    templateHash: "dev-ai-scoring-template-v1",
-  };
+
+  if (modelConfigSelection.status !== "selected") {
+    throw new Error(
+      `Local ai_scoring model_config is unavailable: ${modelConfigSelection.reason}`,
+    );
+  }
+
+  const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
+  const promptTemplate = modelConfigSelection.promptTemplate;
   const aiScoringService = createAiScoringService({
     async runner(input) {
       const scoringPointMaxScoreTotal = input.scoringPoints.reduce(
@@ -356,7 +338,9 @@ export function createStudentFlowRuntimeRouteHandlers(
           createPublicId: (prefix) => createPublicId(prefix),
         },
         {
-          aiScoringRuntime: createDefaultAiScoringRuntime(),
+          aiScoringRuntime: createDefaultAiScoringRuntime(
+            options.modelConfigRuntimeCatalog,
+          ),
         },
       ),
       resolveUserContext,
@@ -369,7 +353,9 @@ export function createStudentFlowRuntimeRouteHandlers(
           createPublicId: (prefix) => createPublicId(prefix),
         },
         options.examReportLearningSuggestionOptions ??
-          createDefaultLearningSuggestionOptions(),
+          createDefaultLearningSuggestionOptions(
+            options.modelConfigRuntimeCatalog,
+          ),
       ),
       resolveUserContext,
     ),
