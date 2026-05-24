@@ -123,6 +123,15 @@ Result: pass/inventory completed. `master` is ahead of `origin/master` by the ta
 
 git diff --check HEAD~2..HEAD
 Result: pass.
+
+git commit -m "docs(agent): close system ops org auth task"
+Result: pass. Closeout commit `30f83e4`.
+
+git push origin master
+Result: pass. `origin/master` advanced from `75fba35` to `30f83e4`.
+
+git branch -d codex/phase-11-mvp-system-ops-org-auth-management-loop
+Result: pass. Deleted merged short lifecycle branch at `ae51074`.
 ```
 
 ## Implementation Notes
@@ -135,22 +144,22 @@ Result: pass.
 
 ## Repository Hygiene Closeout Checklist
 
-| Check                | Required evidence                                                                                                                   | Result  |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-system-ops-org-auth-management-loop`, not `master` or `main`                                  | Pass    |
-| Allowed files        | Changed files are within corrected task roots: admin org_auth service/repository, tests, task docs, and queue state                 | Pass    |
-| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, or staging/prod file change                                | Pass    |
-| AC-to-runtime matrix | Matrix records implemented/effective runtime status and bounded residuals                                                           | Pass    |
-| Problem grading      | P0/P1 org_auth lifecycle issues recorded and fixed                                                                                  | Pass    |
-| Validation record    | RED/GREEN, related unit, full unit, build, e2e, readiness, naming, git inventory, and diff checks recorded                          | Pass    |
-| Evidence hygiene     | No secrets or prohibited raw data recorded                                                                                          | Pass    |
-| Commit               | Task commit `ae51074`                                                                                                               | Pass    |
-| Merge                | Merge commit `480a783` on `master`                                                                                                  | Pass    |
-| Push                 | Pending after this closeout evidence commit                                                                                         | Pending |
-| Cleanup              | Pending post-push branch cleanup                                                                                                    | Pending |
-| Worktree residue     | No extra worktree created for this task                                                                                             | Pass    |
-| stagingDecision      | Local-only task; no staging/prod connection, deployment, cloud, env, schema, migration, script, package, lockfile, or provider work | Pass    |
-| Next step            | Commit task, merge to master, run master closeout gates, push, cleanup, then claim next queue task from clean master                | Pass    |
+| Check                | Required evidence                                                                                                                   | Result |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Branch isolation     | Current branch is `codex/phase-11-mvp-system-ops-org-auth-management-loop`, not `master` or `main`                                  | Pass   |
+| Allowed files        | Changed files are within corrected task roots: admin org_auth service/repository, tests, task docs, and queue state                 | Pass   |
+| Blocked files        | No package, lockfile, env, schema, migration, script, cloud, deployment, or staging/prod file change                                | Pass   |
+| AC-to-runtime matrix | Matrix records implemented/effective runtime status and bounded residuals                                                           | Pass   |
+| Problem grading      | P0/P1 org_auth lifecycle issues recorded and fixed                                                                                  | Pass   |
+| Validation record    | RED/GREEN, related unit, full unit, build, e2e, readiness, naming, git inventory, and diff checks recorded                          | Pass   |
+| Evidence hygiene     | No secrets or prohibited raw data recorded                                                                                          | Pass   |
+| Commit               | Task commit `ae51074`                                                                                                               | Pass   |
+| Merge                | Merge commit `480a783` on `master`                                                                                                  | Pass   |
+| Push                 | `master` pushed to `origin` at `30f83e4`                                                                                            | Pass   |
+| Cleanup              | Deleted merged branch `codex/phase-11-mvp-system-ops-org-auth-management-loop`                                                      | Pass   |
+| Worktree residue     | No extra worktree created for this task                                                                                             | Pass   |
+| stagingDecision      | Local-only task; no staging/prod connection, deployment, cloud, env, schema, migration, script, package, lockfile, or provider work | Pass   |
+| Next step            | Commit task, merge to master, run master closeout gates, push, cleanup, then claim next queue task from clean master                | Pass   |
 
 ## stagingDecision
 
@@ -158,7 +167,7 @@ local_only_complete_no_staging_or_prod
 
 ## Next Step
 
-Commit closeout evidence, push `master` to `origin`, clean the short branch, and then claim `phase-11-mvp-redeem-code-batch-management-loop` only from a clean repository.
+Commit this final push/cleanup evidence, push `master` to `origin`, and then claim `phase-11-mvp-redeem-code-batch-management-loop` only from a clean repository.
 
 ## Evidence Hygiene
 
