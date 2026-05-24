@@ -63,6 +63,10 @@ const userPasswordResetUnavailableResponse = createErrorResponse(
   503601,
   "Admin user password reset runtime is not configured.",
 );
+const userLifecycleMutationUnavailableResponse = createErrorResponse(
+  503602,
+  "Admin user lifecycle runtime is not configured.",
+);
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -108,6 +112,10 @@ function canReadAuditLogs(actor: AdminFlowActor): boolean {
 }
 
 function canResetUserPassword(actor: AdminFlowActor): boolean {
+  return actor.roles.includes("super_admin");
+}
+
+function canManageUserLifecycle(actor: AdminFlowActor): boolean {
   return actor.roles.includes("super_admin");
 }
 
@@ -177,6 +185,27 @@ function readPageSize(
   return options.includes(pageSize) ? pageSize : fallback;
 }
 
+async function appendUserLifecycleAuditLog(input: {
+  repositories: AdminFlowRuntimeRepositories;
+  request: Request;
+  actor: AdminFlowActor;
+  actionType: "user.disable" | "user.enable";
+  targetPublicId: string;
+  resultStatus: "success" | "failed";
+  metadataSummary: string;
+}): Promise<void> {
+  await input.repositories.auditLogRepository.appendAuditLog({
+    actorPublicId: input.actor.publicId,
+    actorRole: input.actor.roles[0],
+    actionType: input.actionType,
+    targetResourceType: "user",
+    targetPublicId: input.targetPublicId,
+    resultStatus: input.resultStatus,
+    metadataSummary: input.metadataSummary,
+    requestIp: readRequestIp(input.request),
+  });
+}
+
 export function createAdminFlowRuntimeRouteHandlers(
   options: AdminFlowRuntimeOptions = {},
 ) {
@@ -186,6 +215,74 @@ export function createAdminFlowRuntimeRouteHandlers(
 
   async function requireAdminActor(request: Request) {
     return resolveAdminActor(request, sessionService);
+  }
+
+  async function updateUserLifecycle(input: {
+    request: Request;
+    context: { params: Promise<{ publicId: string }> };
+    actionType: "user.disable" | "user.enable";
+    mutate: ((publicId: string) => Promise<boolean>) | undefined;
+    revokeSessions: boolean;
+    successMetadataSummary: string;
+  }): Promise<Response> {
+    const actor = await requireAdminActor(input.request);
+    const { publicId } = await input.context.params;
+
+    if (actor === null) {
+      return createJsonResponse(adminSessionRequiredResponse);
+    }
+
+    if (!canManageUserLifecycle(actor)) {
+      await appendUserLifecycleAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType: input.actionType,
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted user lifecycle permission denial metadata",
+      });
+
+      return createJsonResponse(adminUserPermissionDeniedResponse);
+    }
+
+    if (input.mutate === undefined) {
+      await appendUserLifecycleAuditLog({
+        repositories,
+        request: input.request,
+        actor,
+        actionType: input.actionType,
+        targetPublicId: publicId,
+        resultStatus: "failed",
+        metadataSummary: "redacted user lifecycle unavailable metadata",
+      });
+
+      return createJsonResponse(userLifecycleMutationUnavailableResponse);
+    }
+
+    const didMutate = await input.mutate(publicId);
+
+    if (
+      didMutate &&
+      input.revokeSessions &&
+      repositories.userOrgAuthRepository.revokeUserSessions !== undefined
+    ) {
+      await repositories.userOrgAuthRepository.revokeUserSessions(publicId);
+    }
+
+    await appendUserLifecycleAuditLog({
+      repositories,
+      request: input.request,
+      actor,
+      actionType: input.actionType,
+      targetPublicId: publicId,
+      resultStatus: didMutate ? "success" : "failed",
+      metadataSummary: input.successMetadataSummary,
+    });
+
+    return createJsonResponse(
+      didMutate ? createSuccessResponse(null) : userNotFoundResponse,
+    );
   }
 
   return {
@@ -262,6 +359,36 @@ export function createAdminFlowRuntimeRouteHandlers(
           return createJsonResponse(
             didReset ? createSuccessResponse(null) : userNotFoundResponse,
           );
+        },
+      },
+      disable: {
+        async POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          return updateUserLifecycle({
+            request,
+            context,
+            actionType: "user.disable",
+            mutate: repositories.userOrgAuthRepository.disableUser,
+            revokeSessions: true,
+            successMetadataSummary: "redacted user disable metadata",
+          });
+        },
+      },
+      enable: {
+        async POST(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          return updateUserLifecycle({
+            request,
+            context,
+            actionType: "user.enable",
+            mutate: repositories.userOrgAuthRepository.enableUser,
+            revokeSessions: false,
+            successMetadataSummary: "redacted user enable metadata",
+          });
         },
       },
     },

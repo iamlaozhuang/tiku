@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -20,6 +21,7 @@ import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAuthOperationListQuery,
+  EmployeeMutationResultDto,
   EmployeeListDto,
   OrganizationListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
@@ -47,10 +49,39 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   listEmployees(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<EmployeeListDto>>;
+  createEmployee?(
+    input: CreateEmployeeInput,
+  ): Promise<EmployeeMutationResultDto["employee"] | null>;
+  disableEmployee?(publicId: string): Promise<boolean>;
+  auditLogRepository?: {
+    appendAuditLog(input: AppendEmployeeAuditLogInput): Promise<void>;
+  };
 };
 
-const { employee, orgAuth, orgAuthOrganization, organization, user } =
-  databaseSchema;
+export type CreateEmployeeInput = {
+  userPublicId: string;
+  organizationPublicId: string;
+};
+
+export type AppendEmployeeAuditLogInput = {
+  actorPublicId: string;
+  actorRole: string;
+  actionType: string;
+  targetResourceType: string;
+  targetPublicId: string | null;
+  resultStatus: "success" | "failed";
+  metadataSummary: string | null;
+  requestIp: string | null;
+};
+
+const {
+  authSession,
+  employee,
+  orgAuth,
+  orgAuthOrganization,
+  organization,
+  user,
+} = databaseSchema;
 
 function createLazyDatabaseGetter(
   createDatabase: () => AdminOrganizationOrgAuthRuntimeDatabase,
@@ -247,6 +278,105 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
+    },
+    async createEmployee(input) {
+      const database = getDatabase();
+      const [userRow] = await database
+        .select({
+          id: user.id,
+          public_id: user.public_id,
+          phone: user.phone,
+          name: user.name,
+        })
+        .from(user)
+        .where(eq(user.public_id, input.userPublicId))
+        .limit(1);
+      const [organizationRow] = await database
+        .select({
+          id: organization.id,
+          public_id: organization.public_id,
+        })
+        .from(organization)
+        .where(eq(organization.public_id, input.organizationPublicId))
+        .limit(1);
+
+      if (userRow === undefined || organizationRow === undefined) {
+        return null;
+      }
+
+      const [employeeRow] = await database
+        .insert(employee)
+        .values({
+          public_id: `employee-${randomUUID()}`,
+          user_id: userRow.id,
+          organization_id: organizationRow.id,
+        })
+        .returning({
+          public_id: employee.public_id,
+        });
+
+      await database
+        .update(user)
+        .set({
+          user_type: "employee",
+          status: "active",
+          disabled_at: null,
+          updated_at: new Date(),
+        })
+        .where(eq(user.id, userRow.id));
+
+      if (employeeRow === undefined) {
+        return null;
+      }
+
+      return {
+        publicId: employeeRow.public_id,
+        userPublicId: userRow.public_id,
+        phone: userRow.phone,
+        name: userRow.name,
+        organizationPublicId: organizationRow.public_id,
+        status: "active",
+      };
+    },
+    async disableEmployee(publicId) {
+      const database = getDatabase();
+      const [employeeRow] = await database
+        .select({
+          employee_id: employee.id,
+          user_id: user.id,
+          auth_user_id: user.auth_user_id,
+        })
+        .from(employee)
+        .innerJoin(user, eq(user.id, employee.user_id))
+        .where(eq(employee.public_id, publicId))
+        .limit(1);
+
+      if (employeeRow === undefined) {
+        return false;
+      }
+
+      await database
+        .update(user)
+        .set({
+          status: "disabled",
+          disabled_at: new Date(),
+          updated_at: new Date(),
+        })
+        .where(eq(user.id, employeeRow.user_id));
+      await database
+        .update(employee)
+        .set({
+          updated_at: new Date(),
+        })
+        .where(eq(employee.id, employeeRow.employee_id));
+
+      if (employeeRow.auth_user_id !== null) {
+        await database
+          .delete(authSession)
+          .where(eq(authSession.user_id, employeeRow.auth_user_id));
+      }
+
+      return true;
     },
   };
 }
