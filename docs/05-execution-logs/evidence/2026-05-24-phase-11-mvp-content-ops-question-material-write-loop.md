@@ -71,25 +71,51 @@ Result: pass.
 
 git diff --check
 Result: pass.
+
+git commit -m "feat(content): wire question material write loop"
+Result: pass. Task commit: eb91b55.
+
+git merge --no-ff codex/phase-11-mvp-content-ops-question-material-write-loop -m "merge: phase 11 content question material write loop"
+Result: pass. Merge commit: 5664a41.
+
+Post-merge on master:
+npm.cmd run test:unit
+Result: pass, 107 files, 401 tests.
+
+npm.cmd run build
+Result: pass. Next.js build completed route generation. The build command printed that `.env.local` was an environment source; no `.env.local` contents or secrets were read or recorded.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Result: pass inventory. master ahead of origin/master by task and merge commits before closeout push.
+
+git branch -d codex/phase-11-mvp-content-ops-question-material-write-loop
+First result: failed because sandbox could not create the Git ref lock.
+Retry with approved escalation: pass. Local short-lifecycle branch deleted.
 ```
 
 ## Repository Hygiene Closeout Checklist
 
 | Check                | Required evidence                                                                                                                                                                                                                                                                                                                         | Result  |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| Branch isolation     | Current branch is `codex/phase-11-mvp-content-ops-question-material-write-loop`, not `master` or `main`                                                                                                                                                                                                                                   | Pass    |
+| Branch isolation     | Implementation ran on `codex/phase-11-mvp-content-ops-question-material-write-loop`, not `master` or `main`; closeout ran after merge on `master`                                                                                                                                                                                         | Pass    |
 | Allowed files        | Changed files: `docs/04-agent-system/state/project-state.yaml`, `docs/04-agent-system/state/task-queue.yaml`, this evidence, task plan, `src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx`, `tests/unit/admin-question-material-ui.test.ts`; all match queue allowedFiles and avoid blockedFiles | Pass    |
 | AC-to-runtime matrix | Matrix labels partial runtime, runtime closed, residual P1, and implemented decisions                                                                                                                                                                                                                                                     | Pass    |
 | Problem grading      | P1/P2 issues recorded with fixed status and residual risk                                                                                                                                                                                                                                                                                 | Pass    |
-| Validation record    | Claim readiness, RED/GREEN tests, targeted tests, full unit, build, readiness, naming, and diff check recorded                                                                                                                                                                                                                            | Pass    |
+| Validation record    | Claim readiness, RED/GREEN tests, targeted tests, full unit, build, readiness, naming, diff check, and post-merge master gates recorded                                                                                                                                                                                                   | Pass    |
 | Evidence hygiene     | No secrets or prohibited raw data recorded                                                                                                                                                                                                                                                                                                | Pass    |
-| Commit               | Pending                                                                                                                                                                                                                                                                                                                                   | Pending |
-| Merge                | Pending                                                                                                                                                                                                                                                                                                                                   | Pending |
-| Push                 | Pending                                                                                                                                                                                                                                                                                                                                   | Pending |
-| Cleanup              | Pending                                                                                                                                                                                                                                                                                                                                   | Pending |
-| Worktree residue     | Pending                                                                                                                                                                                                                                                                                                                                   | Pending |
-| stagingDecision      | Pending                                                                                                                                                                                                                                                                                                                                   | Pending |
-| Next step            | Pending                                                                                                                                                                                                                                                                                                                                   | Pending |
+| Commit               | Task commit `eb91b55` recorded                                                                                                                                                                                                                                                                                                            | Pass    |
+| Merge                | Merged into `master` with merge commit `5664a41`                                                                                                                                                                                                                                                                                          | Pass    |
+| Push                 | Pending final `origin/master` push after closeout evidence commit                                                                                                                                                                                                                                                                         | Pending |
+| Cleanup              | Local short-lifecycle branch deleted after merge; first sandbox attempt failed on Git ref lock, approved escalation succeeded                                                                                                                                                                                                             | Pass    |
+| Worktree residue     | Normal repo, no separate worktree; `git status --short --branch` clean on master before closeout evidence edits                                                                                                                                                                                                                           | Pass    |
+| stagingDecision      | `local_task_closed_remaining_p1` recorded                                                                                                                                                                                                                                                                                                 | Pass    |
+| Next step            | Push/close this task, then claim `phase-11-mvp-content-ops-paper-composition-publish-loop`                                                                                                                                                                                                                                                | Pass    |
 
 ## stagingDecision
 
@@ -97,7 +123,7 @@ local_task_closed_remaining_p1
 
 ## Next Step
 
-Commit this task, merge to `master`, run post-merge closeout gates, push `master`, clean the short-lifecycle branch, then claim `phase-11-mvp-paper-draft-composition-publish-loop`.
+Push `master` to `origin`, record final push closeout, then claim `phase-11-mvp-paper-draft-composition-publish-loop`.
 
 ## Evidence Hygiene
 
