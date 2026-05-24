@@ -147,7 +147,17 @@ export function mapPracticeAnswerFeedbackToApi(
     analysisRichText: feedback.analysis_rich_text,
     mistakeBookPublicId: feedback.mistake_book_public_id,
     aiExplanationStatus: feedback.ai_explanation_status,
+    aiExplanationText: feedback.ai_explanation_text,
+    aiExplanationLearningSuggestion:
+      feedback.ai_explanation_learning_suggestion,
+    aiExplanationEvidenceStatus: feedback.ai_explanation_evidence_status,
+    aiExplanationCitations: feedback.ai_explanation_citations,
     aiHintStatus: feedback.ai_hint_status,
+    aiHintText: feedback.ai_hint_text,
+    aiHintImprovementDirections: feedback.ai_hint_improvement_directions,
+    aiHintEvidenceStatus: feedback.ai_hint_evidence_status,
+    aiHintCitations: feedback.ai_hint_citations,
+    retryRemainingCount: feedback.retry_remaining_count,
     answeredAt: formatNullableTimestamp(feedback.answered_at),
   };
 }

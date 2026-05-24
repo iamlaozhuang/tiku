@@ -15,6 +15,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
+  AiExplanationDto,
+  MistakeBookAiExplanationResultDto,
   MistakeBookItemDto,
   MistakeBookListResultDto,
   MistakeBookResultDto,
@@ -28,6 +30,7 @@ import type { Profession, Subject } from "@/server/models/paper";
 
 type LoadState = "loading" | "ready" | "unauthorized" | "error";
 type ActionState = "idle" | "submitting";
+type AiExplanationByPublicId = Record<string, AiExplanationDto>;
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 
@@ -98,6 +101,10 @@ function formatScopeLabel(mistakeBook: MistakeBookItemDto): string {
 
 function formatDate(value: string | null): string {
   return value === null ? "未记录" : value.slice(0, 10);
+}
+
+function formatCitationHeadingPath(headingPath: string[]): string {
+  return headingPath.length === 0 ? "未标注章节" : headingPath.join(" > ");
 }
 
 function readQuestionType(
@@ -208,13 +215,17 @@ function StudentMistakeBookEmpty() {
 
 function StudentMistakeBookCard({
   actionState,
+  aiExplanation,
   mistakeBook,
+  onAiExplanation,
   onFavorite,
   onMarkMastered,
   onRemove,
 }: {
   actionState: ActionState;
+  aiExplanation: AiExplanationDto | null;
   mistakeBook: MistakeBookItemDto;
+  onAiExplanation: (mistakeBook: MistakeBookItemDto) => void;
   onFavorite: (mistakeBook: MistakeBookItemDto) => void;
   onMarkMastered: (mistakeBook: MistakeBookItemDto) => void;
   onRemove: (mistakeBook: MistakeBookItemDto) => void;
@@ -306,11 +317,12 @@ function StudentMistakeBookCard({
         </button>
         <button
           type="button"
-          className="border-border text-text-secondary flex h-9 items-center justify-center gap-1.5 rounded-lg border bg-transparent text-sm font-medium disabled:cursor-not-allowed disabled:opacity-70"
-          disabled
+          className="border-border text-text-primary hover:bg-muted flex h-9 items-center justify-center gap-1.5 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={isSubmitting}
+          onClick={() => onAiExplanation(mistakeBook)}
         >
           <Brain className="size-4" aria-hidden="true" />
-          AI讲解暂不可用
+          AI讲解
         </button>
         <button
           type="button"
@@ -322,6 +334,50 @@ function StudentMistakeBookCard({
           移除
         </button>
       </div>
+
+      {aiExplanation === null ? null : (
+        <section className="border-border bg-background space-y-3 rounded-xl border p-3">
+          <div className="space-y-1">
+            <p className="text-text-primary text-sm font-semibold">AI讲解</p>
+            <p className="text-text-secondary text-sm leading-6">
+              {aiExplanation.explanationText}
+            </p>
+          </div>
+          {aiExplanation.learningSuggestion === null ? null : (
+            <p className="text-text-secondary text-sm leading-6">
+              {aiExplanation.learningSuggestion}
+            </p>
+          )}
+          {aiExplanation.insufficientEvidenceMessage === null ? null : (
+            <p className="text-warning text-sm leading-6">
+              {aiExplanation.insufficientEvidenceMessage}
+            </p>
+          )}
+          {aiExplanation.citations.length === 0 ? null : (
+            <div className="space-y-2">
+              <p className="text-text-primary text-xs font-semibold">
+                参考来源
+              </p>
+              <ul className="space-y-1">
+                {aiExplanation.citations.map((citation) => (
+                  <li
+                    key={`${citation.resourcePublicId}-${citation.chunkPublicId}`}
+                    className="text-text-secondary text-xs leading-5"
+                  >
+                    <span className="text-text-primary font-medium">
+                      {citation.resourceTitle}
+                    </span>
+                    <span>
+                      {" "}
+                      · {formatCitationHeadingPath(citation.headingPath)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
     </article>
   );
 }
@@ -331,6 +387,8 @@ export function StudentMistakeBookPage() {
   const [actionState, setActionState] = useState<ActionState>("idle");
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [mistakeBooks, setMistakeBooks] = useState<MistakeBookItemDto[]>([]);
+  const [aiExplanationByPublicId, setAiExplanationByPublicId] =
+    useState<AiExplanationByPublicId>({});
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const activeMistakeBooks = useMemo(
@@ -437,6 +495,48 @@ export function StudentMistakeBookPage() {
     }
   }
 
+  async function handleAiExplanation(mistakeBook: MistakeBookItemDto) {
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    setActionState("submitting");
+    setFeedbackMessage(null);
+
+    try {
+      const explanationPayload =
+        await fetchApi<MistakeBookAiExplanationResultDto>(
+          `/api/v1/mistake-books/${mistakeBook.publicId}/ai-explanation`,
+          sessionToken,
+          {
+            method: "POST",
+          },
+        );
+
+      if (isUnauthorizedResponse(explanationPayload)) {
+        setLoadState("unauthorized");
+        return;
+      }
+
+      if (explanationPayload.code !== 0 || explanationPayload.data === null) {
+        setFeedbackMessage("AI讲解生成失败，请稍后重试");
+        return;
+      }
+
+      const aiExplanation = explanationPayload.data.aiExplanation;
+
+      setAiExplanationByPublicId((currentExplanations) => ({
+        ...currentExplanations,
+        [mistakeBook.publicId]: aiExplanation,
+      }));
+    } catch {
+      setFeedbackMessage("AI讲解生成失败，请稍后重试");
+    } finally {
+      setActionState("idle");
+    }
+  }
+
   if (loadState === "loading") {
     return <StudentMistakeBookLoading />;
   }
@@ -507,7 +607,13 @@ export function StudentMistakeBookPage() {
             <StudentMistakeBookCard
               key={mistakeBook.publicId}
               actionState={actionState}
+              aiExplanation={
+                aiExplanationByPublicId[mistakeBook.publicId] ?? null
+              }
               mistakeBook={mistakeBook}
+              onAiExplanation={(selectedMistakeBook) =>
+                handleAiExplanation(selectedMistakeBook)
+              }
               onFavorite={(selectedMistakeBook) =>
                 handleMistakeBookAction(
                   selectedMistakeBook,

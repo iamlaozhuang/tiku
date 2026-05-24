@@ -15,6 +15,7 @@ import {
 } from "../mappers/practice-mapper";
 import type {
   PracticeAuthorizationScopeRow,
+  PracticeAnswerFeedbackRow,
   PracticePaperRow,
   PracticeRepository,
   PracticeRow,
@@ -253,6 +254,66 @@ function normalizeLabels(labels: string[]): string[] {
 
 function isObjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
   return question.standardAnswerLabels.length > 0;
+}
+
+function isSubjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
+  return question.questionType === "subjective";
+}
+
+function createEmptyAiFeedback(): Pick<
+  PracticeAnswerFeedbackRow,
+  | "ai_explanation_text"
+  | "ai_explanation_learning_suggestion"
+  | "ai_explanation_evidence_status"
+  | "ai_explanation_citations"
+  | "ai_hint_text"
+  | "ai_hint_improvement_directions"
+  | "ai_hint_evidence_status"
+  | "ai_hint_citations"
+  | "retry_remaining_count"
+> {
+  return {
+    ai_explanation_text: null,
+    ai_explanation_learning_suggestion: null,
+    ai_explanation_evidence_status: null,
+    ai_explanation_citations: [],
+    ai_hint_text: null,
+    ai_hint_improvement_directions: [],
+    ai_hint_evidence_status: null,
+    ai_hint_citations: [],
+    retry_remaining_count: 0,
+  };
+}
+
+function createSubjectiveAiHintFeedback(
+  retryRemainingCount: number,
+): Pick<
+  PracticeAnswerFeedbackRow,
+  | "ai_explanation_text"
+  | "ai_explanation_learning_suggestion"
+  | "ai_explanation_evidence_status"
+  | "ai_explanation_citations"
+  | "ai_hint_text"
+  | "ai_hint_improvement_directions"
+  | "ai_hint_evidence_status"
+  | "ai_hint_citations"
+  | "retry_remaining_count"
+> {
+  return {
+    ai_explanation_text: null,
+    ai_explanation_learning_suggestion: null,
+    ai_explanation_evidence_status: null,
+    ai_explanation_citations: [],
+    ai_hint_text: "AI 提示：补充事实核对、处理依据、沟通动作和后续跟进闭环。",
+    ai_hint_improvement_directions: [
+      "补充事实核对",
+      "说明处理依据",
+      "写清后续跟进",
+    ],
+    ai_hint_evidence_status: "none",
+    ai_hint_citations: [],
+    retry_remaining_count: retryRemainingCount,
+  };
 }
 
 function isCorrectObjectiveAnswer(
@@ -613,6 +674,26 @@ export function createPracticeService(
         );
       }
 
+      const subjectiveAnswerCount = isSubjectiveQuestion(question)
+        ? (
+            await repository.listAnswerRecordsByPractice({
+              userPublicId: userContext.userPublicId,
+              practicePublicId: publicId,
+            })
+          ).filter(
+            (answerRecord) =>
+              answerRecord.paper_question_public_id ===
+              normalizedInput.paperQuestionPublicId,
+          ).length
+        : 0;
+
+      if (isSubjectiveQuestion(question) && subjectiveAnswerCount >= 2) {
+        return createErrorResponse(
+          409302,
+          "Practice subjective question retry limit reached.",
+        );
+      }
+
       const { isCorrect, score } = calculateObjectiveScore(
         question,
         normalizedInput,
@@ -654,6 +735,12 @@ export function createPracticeService(
               latestWrongAt: now,
             })
           : null;
+      const retryRemainingCount = isSubjectiveQuestion(question)
+        ? Math.max(0, 1 - subjectiveAnswerCount)
+        : 0;
+      const aiFeedback = isSubjectiveQuestion(question)
+        ? createSubjectiveAiHintFeedback(retryRemainingCount)
+        : createEmptyAiFeedback();
 
       return createSuccessResponse({
         feedback: mapPracticeAnswerFeedbackToApi({
@@ -665,7 +752,8 @@ export function createPracticeService(
           analysis_rich_text: question.analysisRichText,
           mistake_book_public_id: mistakeBook?.public_id ?? null,
           ai_explanation_status: null,
-          ai_hint_status: null,
+          ai_hint_status: isSubjectiveQuestion(question) ? "hinted" : null,
+          ...aiFeedback,
           answered_at: answerRecord.answered_at,
         }),
       });

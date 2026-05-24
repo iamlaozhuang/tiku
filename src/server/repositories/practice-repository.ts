@@ -1,6 +1,8 @@
 import type { AuthorizationType } from "../contracts/effective-authorization-contract";
 import type { PracticeAnswerSnapshotDto } from "../contracts/practice-contract";
 import type { Profession, Subject } from "../models/paper";
+import type { RagCitationDto } from "../contracts/ai-rag-contract";
+import type { EvidenceStatus } from "../models/ai-rag";
 import type {
   AnswerRecordStatus,
   PracticeStatus,
@@ -58,7 +60,16 @@ export type PracticeAnswerFeedbackRow = {
   analysis_rich_text: string | null;
   mistake_book_public_id: string | null;
   ai_explanation_status: string | null;
+  ai_explanation_text: string | null;
+  ai_explanation_learning_suggestion: string | null;
+  ai_explanation_evidence_status: EvidenceStatus | null;
+  ai_explanation_citations: RagCitationDto[];
   ai_hint_status: string | null;
+  ai_hint_text: string | null;
+  ai_hint_improvement_directions: string[];
+  ai_hint_evidence_status: EvidenceStatus | null;
+  ai_hint_citations: RagCitationDto[];
+  retry_remaining_count: number;
   answered_at: Date | null;
 };
 
