@@ -117,12 +117,19 @@ function readAdminAiAuditLogListQuery(
   const pageSize = readPageSize(searchParams, [20, 50, 100], 20);
   const page = Number(searchParams.get("page"));
   const level = Number(searchParams.get("level"));
+  const resultStatus = searchParams.get("resultStatus");
 
   return createAdminAiAuditLogListQuery({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: pageSize as AdminAiAuditLogPageSize,
     keyword: searchParams.get("keyword"),
     level: Number.isFinite(level) && level > 0 ? level : null,
+    actionType: searchParams.get("actionType") ?? "all",
+    targetResourceType: searchParams.get("targetResourceType") ?? "all",
+    resultStatus:
+      resultStatus === "success" || resultStatus === "failed"
+        ? resultStatus
+        : "all",
   });
 }
 

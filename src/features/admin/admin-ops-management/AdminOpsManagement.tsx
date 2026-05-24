@@ -5,6 +5,7 @@ import { AlertCircle, KeyRound, RotateCcwKey, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   AdminEmptyState,
   AdminErrorState,
@@ -140,6 +141,7 @@ const emptyAdminOpsData: AdminOpsData = {
 const adminOpsLoadCache = new Map<string, Promise<AdminOpsLoadResult>>();
 
 function createListSearchParams(input: {
+  auditKeyword: string;
   sortBy: string;
   sortOrder: string;
   userStatus: string;
@@ -158,6 +160,12 @@ function createListSearchParams(input: {
 
   if (input.userType !== "all") {
     searchParams.set("userType", input.userType);
+  }
+
+  const auditKeyword = input.auditKeyword.trim();
+
+  if (auditKeyword.length > 0) {
+    searchParams.set("keyword", auditKeyword);
   }
 
   return searchParams.toString();
@@ -331,6 +339,7 @@ export function AdminOpsManagement() {
   const [data, setData] = useState<AdminOpsData>(emptyAdminOpsData);
   const [userStatus, setUserStatus] = useState<UserStatus | "all">("all");
   const [userType, setUserType] = useState<UserType | "all">("all");
+  const [auditKeyword, setAuditKeyword] = useState("");
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER);
   const [confirmationState, setConfirmationState] =
@@ -342,12 +351,13 @@ export function AdminOpsManagement() {
   const listQuery = useMemo(
     () =>
       createListSearchParams({
+        auditKeyword,
         sortBy,
         sortOrder,
         userStatus,
         userType,
       }),
-    [sortBy, sortOrder, userStatus, userType],
+    [auditKeyword, sortBy, sortOrder, userStatus, userType],
   );
 
   useEffect(() => {
@@ -508,6 +518,15 @@ export function AdminOpsManagement() {
         >
           注册时间排序
         </Button>
+        <label className="flex min-w-64 flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">审计关键词</span>
+          <Input
+            aria-label="Audit log keyword"
+            placeholder="actionType / publicId / metadata"
+            value={auditKeyword}
+            onChange={(event) => setAuditKeyword(event.target.value)}
+          />
+        </label>
         <p className="text-text-muted text-sm">
           筛选变化自动刷新；关键写操作使用二次确认。
         </p>
