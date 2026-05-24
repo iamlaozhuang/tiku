@@ -235,7 +235,33 @@ describe("StudentMockExamPage", () => {
         mockExams: studentMockExamFixture.mockExams,
       }),
     );
-    expect(screen.getByText("暂无可进入的模拟考试")).toBeInTheDocument();
+    expect(screen.getByText("未找到模拟考试")).toBeInTheDocument();
+  });
+
+  it("distinguishes a missing runtime mock exam from a generic load failure", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({
+          code: 404001,
+          message: "missing",
+          data: null,
+        }),
+      })),
+    );
+
+    render(
+      createElement(StudentMockExamPage, {
+        mockExamPublicId: "mock-exam-missing",
+      }),
+    );
+
+    expect(await screen.findByText("未找到模拟考试")).toBeInTheDocument();
+    expect(screen.queryByText("模拟考试加载失败")).toBeNull();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
   it("starts, saves, and submits a mock exam through the session runtime without exposing answers before submit", async () => {
@@ -456,7 +482,33 @@ describe("StudentExamReportPage", () => {
         examReports: studentExamReportFixture.examReports,
       }),
     );
-    expect(screen.getByText("暂无考试报告")).toBeInTheDocument();
+    expect(screen.getByText("未找到考试报告")).toBeInTheDocument();
+  });
+
+  it("distinguishes a missing runtime exam report from a generic load failure", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({
+          code: 404001,
+          message: "missing",
+          data: null,
+        }),
+      })),
+    );
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-missing",
+      }),
+    );
+
+    expect(await screen.findByText("未找到考试报告")).toBeInTheDocument();
+    expect(screen.queryByText("考试报告加载失败")).toBeNull();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
   it("loads exam report detail through the session runtime", async () => {
