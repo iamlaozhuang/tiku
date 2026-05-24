@@ -27,6 +27,7 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
+  ContentOpsStagingRoleArrangement,
   DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
   PublicId,
@@ -199,6 +200,8 @@ export function AdminPaperManagement() {
         </div>
         <ActionBar />
       </header>
+
+      <ContentOpsStagingRoleArrangement />
 
       <FilterPanel
         keyword={keyword}

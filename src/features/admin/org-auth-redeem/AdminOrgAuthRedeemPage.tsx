@@ -267,6 +267,43 @@ function AdminPageHeader({
   );
 }
 
+function SystemOpsRequiredRoleEntry({
+  actionHref,
+  actionLabel,
+  description,
+  testId,
+  title,
+}: {
+  actionHref: string;
+  actionLabel: string;
+  description: string;
+  testId: string;
+  title: string;
+}) {
+  return (
+    <section
+      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+      data-testid={testId}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">
+            系统运营 staging 必验
+          </p>
+          <h2 className="text-text-primary text-base font-semibold">{title}</h2>
+          <p className="text-text-secondary text-sm leading-6">{description}</p>
+        </div>
+        <Link
+          className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+          href={actionHref}
+        >
+          {actionLabel}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 function SummaryTile({
   icon,
   label,
@@ -683,6 +720,14 @@ export function AdminOrgAuthPage() {
         icon={<Building2 className="size-5" aria-hidden="true" />}
       />
 
+      <SystemOpsRequiredRoleEntry
+        actionHref="/ops/users"
+        actionLabel="新增企业授权"
+        description="企业授权新增入口目前集中在运营后台闭环页；从这里跳转后由二次确认保护写操作，并继续只提交 publicId。"
+        testId="system-ops-org-auth-create-entry"
+        title="新增企业授权入口"
+      />
+
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
         <SummaryTile
           icon={<Building2 className="size-4" aria-hidden="true" />}
@@ -745,6 +790,14 @@ export function AdminRedeemCodePage() {
         title="卡密管理"
         description="查看卡密使用状态和授权范围。页面只展示 API 提供的脱敏卡密，不展示明文或哈希。"
         icon={<Ticket className="size-5" aria-hidden="true" />}
+      />
+
+      <SystemOpsRequiredRoleEntry
+        actionHref="/ops/users"
+        actionLabel="生成卡密"
+        description="卡密生成入口目前集中在运营后台闭环页；从这里跳转后必须经过二次确认，页面仍不会展示卡密明文或哈希。"
+        testId="system-ops-redeem-code-generate-entry"
+        title="生成卡密入口"
       />
 
       <section className="grid gap-4 xl:grid-cols-3" aria-label="卡密摘要">

@@ -236,3 +236,32 @@ export function FilterSelect({
     </label>
   );
 }
+
+export function ContentOpsStagingRoleArrangement() {
+  return (
+    <section
+      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+      data-testid="content-ops-staging-required-role-arrangement"
+    >
+      <div className="space-y-2">
+        <p className="text-brand-primary text-xs font-medium">
+          内容运营 staging 必验
+        </p>
+        <h2 className="text-text-primary text-base font-semibold">
+          内容运营体验安排
+        </h2>
+        <div className="grid gap-3 text-sm leading-6 lg:grid-cols-3">
+          <p className="text-text-secondary">
+            知识点节点新增、编辑、停用作为本轮可写闭环。
+          </p>
+          <p className="text-text-secondary">
+            题目、材料、试卷先验只读筛选和列表可见性。
+          </p>
+          <p className="text-text-secondary">
+            不可用写操作必须显示原因和下一步，避免半成品按钮。
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}

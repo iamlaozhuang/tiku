@@ -2995,6 +2995,56 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-known-limitations.md
     status: closed
     retryCount: 0
+  - id: phase-11-staging-required-role-flow-closures
+    title: Phase 11 Staging Required Role Flow Closures
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-24-system-ops-content-ops-required-staging-roles
+    dependencies:
+      - phase-11-staging-entry-known-limitations
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested system ops and content ops as staging required validation roles, with local dev planning, issue discovery, recording, analysis, and fixes under the previous Phase 11 mechanism. No staging/prod connection, deployment, cloud resource, secret/env, dependency, schema, migration, script, package, or lockfile change is approved.
+    humanApprovalRequired: true
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-required-role-flow-closures.md
+      - docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-required-role-flow-closures.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-required-role-flow-closures.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/app/(admin)/content/**
+      - src/app/(admin)/ops/**
+      - src/features/admin/**
+      - tests/unit/**
+      - e2e/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - product_readiness
+      - staging_acceptance
+      - admin_ops
+      - content_ops
+      - org_auth
+      - redeem_code
+      - browser_verification
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-staging-required-role-flow-closures
+      - npm.cmd run test:unit -- --run tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - npm.cmd run test:e2e -- --grep "staging required role flows"
+      - docker compose ps
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-required-role-flow-closures.md
+    status: closed
+    retryCount: 0
   - id: phase-6-admin-ops-readiness-evidence
     title: Admin Ops Readiness Evidence
     phase: phase-6-admin-ops
