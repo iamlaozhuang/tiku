@@ -481,6 +481,20 @@ describe("admin content and knowledge ops baseline", () => {
     cleanup();
     render(createElement(AdminContentKnowledgeOpsBaseline));
 
+    const requiredRoleArrangement = screen.getByTestId(
+      "content-ops-staging-required-role-arrangement",
+    );
+    expect(requiredRoleArrangement).toHaveTextContent("内容运营 staging 必验");
+    expect(requiredRoleArrangement).toHaveTextContent(
+      "知识点节点新增、编辑、停用",
+    );
+    expect(requiredRoleArrangement).toHaveTextContent(
+      "题目、材料、试卷先验只读筛选",
+    );
+    expect(requiredRoleArrangement).toHaveTextContent(
+      "不可用写操作必须显示原因和下一步",
+    );
+
     expect(
       screen.getByRole("heading", { name: "内容与知识库运营" }),
     ).toBeInTheDocument();

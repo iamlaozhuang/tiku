@@ -27,6 +27,7 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
+  ContentOpsStagingRoleArrangement,
   DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
   PublicId,
@@ -249,6 +250,8 @@ export function AdminQuestionMaterialManagement({
         </div>
         <ActionBar activeView={activeView} />
       </header>
+
+      <ContentOpsStagingRoleArrangement />
 
       <FilterPanel
         keyword={keyword}

@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T02:19:14+08:00"
+  updatedAt: "2026-05-24T03:20:00+08:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-staging-entry-known-limitations
+  id: phase-11-staging-required-role-flow-closures
   status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-staging-entry-fix-scope.md#first-fix-package-recommendation
-  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-known-limitations.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-known-limitations.md
-  branch: codex/phase-11-staging-entry-known-limitations
-  commitSha: 5459fec
+  sourceStory: user-request-2026-05-24-system-ops-content-ops-required-staging-roles
+  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-required-role-flow-closures.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-required-role-flow-closures.md
+  branch: codex/phase-11-staging-required-role-flow-closures
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: all Phase 11 local role-play findings are fixed or explicitly closed for first staging entry
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-known-limitations.md
+  nextRecommendedAction: system ops and content ops are now local-required staging validation roles with fixed discoverability gaps
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-required-role-flow-closures.md

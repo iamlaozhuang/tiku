@@ -1,8 +1,18 @@
 import { createElement } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminUserOrgAuthOpsBaseline } from "@/components/admin/UserOrgAuthOps/AdminUserOrgAuthOpsBaseline";
+import {
+  AdminOrgAuthPage,
+  AdminRedeemCodePage,
+} from "@/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage";
 import {
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   ADMIN_AUTH_OPERATION_PAGE_SIZE_OPTIONS,
@@ -17,7 +27,152 @@ import { createAdminUserOrgAuthOpsRouteHandlers } from "@/server/services/admin-
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
 });
+
+const adminSessionPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: "user-admin-ops",
+      phone: "13900000001",
+      name: "System Ops",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: null,
+      adminPublicId: "admin-ops-public-001",
+      adminRoles: ["ops_admin"],
+    },
+    session: {
+      expiresAt: "2026-05-29T04:00:00.000Z",
+    },
+  },
+};
+
+const organizationPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    organizations: [
+      {
+        publicId: "organization-public-001",
+        name: "杭州烟草",
+        orgTier: "city",
+        parentOrganizationPublicId: "organization-public-000",
+        status: "active",
+        employeeCount: 42,
+        authSummary: "专卖 3级 / 42 / 100",
+      },
+    ],
+  },
+};
+
+const orgAuthPayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    orgAuths: [
+      {
+        publicId: "org-auth-public-001",
+        name: "杭州烟草企业授权",
+        purchaserOrganizationPublicId: "organization-public-001",
+        authScopeType: "current_and_descendants",
+        profession: "monopoly",
+        level: 3,
+        accountQuota: 100,
+        usedQuota: 42,
+        startsAt: "2026-05-22T00:00:00.000Z",
+        expiresAt: "2026-08-22T00:00:00.000Z",
+        status: "active",
+        cancelledAt: null,
+        organizationPublicIds: ["organization-public-001"],
+        createdAt: "2026-05-22T00:00:00.000Z",
+        updatedAt: "2026-05-22T00:00:00.000Z",
+      },
+    ],
+  },
+};
+
+const employeePayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    employees: [
+      {
+        publicId: "employee-public-001",
+        userPublicId: "user-employee-public-001",
+        phone: "13800000000",
+        name: "张三",
+        organizationPublicId: "organization-public-001",
+        status: "active",
+      },
+    ],
+  },
+};
+
+const redeemCodePayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    redeemCodes: [
+      {
+        publicId: "redeem-code-public-001",
+        codeDisplay: "RC-2026-****",
+        canViewPlainText: false,
+        profession: "monopoly",
+        level: 3,
+        status: "unused",
+        redeemedUserPublicId: null,
+        createdAt: "2026-05-22T00:00:00.000Z",
+      },
+    ],
+  },
+};
+
+function createJsonResponse(payload: unknown) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => payload,
+  };
+}
+
+function mockSystemOpsFetch() {
+  const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+    const path = String(url);
+
+    if (path === "/api/v1/sessions") {
+      return createJsonResponse(adminSessionPayload);
+    }
+
+    if (path === "/api/v1/organizations?page=1&pageSize=20") {
+      return createJsonResponse(organizationPayload);
+    }
+
+    if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+      return createJsonResponse(orgAuthPayload);
+    }
+
+    if (path === "/api/v1/employees?page=1&pageSize=20") {
+      return createJsonResponse(employeePayload);
+    }
+
+    if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
+      return createJsonResponse(redeemCodePayload);
+    }
+
+    return createJsonResponse({ code: 404001, message: "missing", data: null });
+  });
+
+  vi.stubGlobal("fetch", fetchMock);
+
+  return fetchMock;
+}
 
 describe("admin user organization authorization ops baseline", () => {
   it("defines list query and operation contracts with public identifiers only", () => {
@@ -223,5 +378,34 @@ describe("admin user organization authorization ops baseline", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "数据已被其他操作更新，请刷新后重试",
     );
+  });
+
+  it("makes required system ops staging entries discoverable from org_auth and redeem_code pages", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetch();
+
+    render(createElement(AdminRedeemCodePage));
+
+    const redeemCodeEntry = await screen.findByTestId(
+      "system-ops-redeem-code-generate-entry",
+    );
+    expect(
+      within(redeemCodeEntry).getByRole("link", { name: "生成卡密" }),
+    ).toHaveAttribute("href", "/ops/users");
+    expect(redeemCodeEntry).toHaveTextContent("系统运营 staging 必验");
+
+    cleanup();
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    const orgAuthEntry = await screen.findByTestId(
+      "system-ops-org-auth-create-entry",
+    );
+    expect(
+      within(orgAuthEntry).getByRole("link", { name: "新增企业授权" }),
+    ).toHaveAttribute("href", "/ops/users");
+    expect(orgAuthEntry).toHaveTextContent("系统运营 staging 必验");
   });
 });

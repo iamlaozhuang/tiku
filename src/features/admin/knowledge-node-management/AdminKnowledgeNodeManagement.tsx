@@ -15,6 +15,7 @@ import {
   AdminErrorState,
   AdminLoadingState,
   AdminUnauthorizedState,
+  ContentOpsStagingRoleArrangement,
   DEFAULT_CONTENT_LIST_QUERY,
   FilterSelect,
   PublicId,
@@ -331,6 +332,8 @@ export function AdminKnowledgeNodeManagement() {
           </Button>
         </div>
       </header>
+
+      <ContentOpsStagingRoleArrangement />
 
       <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
