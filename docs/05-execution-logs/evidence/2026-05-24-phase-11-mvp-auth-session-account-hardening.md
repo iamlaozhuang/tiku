@@ -100,7 +100,7 @@ Result before commit: inventory completed; changed files are current task runtim
 | Problem grading      | P1 account/session issue fixed; P2 hydration warning deferred with allowed-file reason                                                                             | Pass    |
 | Validation record    | Claim readiness, RED/GREEN, unit, e2e, build, readiness, quality gate, naming, git inventory recorded                                                              | Pass    |
 | Evidence hygiene     | No secret values, credential values, Authorization header values, raw provider payloads, prompts, answers, model responses, full content, or private data recorded | Pass    |
-| Commit               | Task commit `9beeb45 feat(auth): harden session account reset`                                                                                                     | Pass    |
+| Commit               | Task commit `690acfa feat(auth): harden session account reset`                                                                                                     | Pass    |
 | Merge                | Pending                                                                                                                                                            | Pending |
 | Push                 | Pending                                                                                                                                                            | Pending |
 | Cleanup              | Pending                                                                                                                                                            | Pending |
