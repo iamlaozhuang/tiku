@@ -57,9 +57,16 @@ export type QuestionKnowledgeRecommendationItemDto = {
   confirmationStatus: "pending_confirmation";
 };
 
+export type QuestionKnowledgeRecommendationReviewStateDto = {
+  questionUpdatedAt: string;
+  staleCheck: "question_updated_at_mismatch";
+  bindingMode: "local_review_only";
+};
+
 export type QuestionKnowledgeRecommendationDto = {
   questionPublicId: string;
   recommendationStatus: "recommended" | "recommendation_failed";
+  reviewState: QuestionKnowledgeRecommendationReviewStateDto;
   recommendations: QuestionKnowledgeRecommendationItemDto[];
   modelConfig: {
     modelConfigPublicId: string;
