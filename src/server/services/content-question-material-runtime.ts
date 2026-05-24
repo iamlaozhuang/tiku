@@ -398,6 +398,7 @@ const localKnowledgeRecommendationRunner: KnowledgeRecommendationRunner =
 
 function mapKnowledgeRecommendationToApi(input: {
   questionPublicId: string;
+  questionUpdatedAt: string;
   result: Awaited<
     ReturnType<
       ReturnType<
@@ -410,6 +411,11 @@ function mapKnowledgeRecommendationToApi(input: {
     recommendation: {
       questionPublicId: input.questionPublicId,
       recommendationStatus: input.result.recommendationStatus,
+      reviewState: {
+        questionUpdatedAt: input.questionUpdatedAt,
+        staleCheck: "question_updated_at_mismatch",
+        bindingMode: "local_review_only",
+      },
       recommendations: input.result.recommendations.map((recommendation) => ({
         knowledgeNodePublicId: recommendation.knowledgeNodeSnapshot.publicId,
         name: recommendation.knowledgeNodeSnapshot.name,
@@ -781,6 +787,7 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
             createSuccessResponse(
               mapKnowledgeRecommendationToApi({
                 questionPublicId: question.public_id,
+                questionUpdatedAt: question.updated_at.toISOString(),
                 result,
               }),
             ),

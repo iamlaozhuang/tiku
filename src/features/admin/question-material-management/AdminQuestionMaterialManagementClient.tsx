@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  Ban,
+  Check,
   Copy,
   FileQuestion,
   FileText,
@@ -9,13 +11,17 @@ import {
   Plus,
   Search,
   ShieldOff,
+  Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { MaterialDto } from "@/server/contracts/material-contract";
-import type { QuestionDto } from "@/server/contracts/question-contract";
+import type {
+  QuestionDto,
+  QuestionKnowledgeRecommendationResultDto,
+} from "@/server/contracts/question-contract";
 import type {
   MaterialStatus,
   Profession,
@@ -46,6 +52,9 @@ type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
 type QuestionFormMode = "create" | "edit";
 type MaterialFormMode = "create" | "edit";
+type RecommendationReviewStatus = "accepted" | "discarded";
+type QuestionKnowledgeRecommendationDto =
+  QuestionKnowledgeRecommendationResultDto["recommendation"];
 
 type ContentLoadState =
   | "loading"
@@ -82,6 +91,14 @@ type ActiveContentForm =
       publicId: string | null;
       values: MaterialFormValues;
     };
+
+type KnowledgeRecommendationReviewState = {
+  recommendation: QuestionKnowledgeRecommendationDto;
+  reviewStatusByKnowledgeNodePublicId: Record<
+    string,
+    RecommendationReviewStatus
+  >;
+};
 
 const statusLabels: Record<QuestionStatus | MaterialStatus, string> = {
   available: "可用",
@@ -264,6 +281,10 @@ export function AdminQuestionMaterialManagement({
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [
+    recommendationsByQuestionPublicId,
+    setRecommendationsByQuestionPublicId,
+  ] = useState<Record<string, KnowledgeRecommendationReviewState>>({});
   const { loadState, materials, questions, setMaterials, setQuestions } =
     useQuestionMaterialData(activeView);
 
@@ -451,6 +472,92 @@ export function AdminQuestionMaterialManagement({
     setActionMessage(`题目 ${updatedQuestion.publicId} 已更新`);
   }
 
+  async function handleRecommendKnowledgeNodes(question: QuestionDto) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setActionError(null);
+    const response =
+      await mutateAdminApi<QuestionKnowledgeRecommendationResultDto>(
+        `/api/v1/questions/${question.publicId}/recommend-knowledge-nodes`,
+        sessionToken,
+        "POST",
+      );
+
+    if (response.code !== 0 || response.data === null) {
+      setActionError("知识点推荐生成失败，请刷新后重试。");
+      return;
+    }
+
+    const recommendationResult = response.data;
+
+    setRecommendationsByQuestionPublicId((currentRecommendations) => ({
+      ...currentRecommendations,
+      [question.publicId]: {
+        recommendation: recommendationResult.recommendation,
+        reviewStatusByKnowledgeNodePublicId: {},
+      },
+    }));
+    setActionMessage(`题目 ${question.publicId} 知识点推荐已生成`);
+  }
+
+  function handleReviewKnowledgeRecommendation(
+    questionPublicId: string,
+    knowledgeNodePublicId: string,
+    reviewStatus: RecommendationReviewStatus,
+  ) {
+    setRecommendationsByQuestionPublicId((currentRecommendations) => {
+      const currentRecommendation =
+        currentRecommendations[questionPublicId] ?? null;
+
+      if (currentRecommendation === null) {
+        return currentRecommendations;
+      }
+
+      return {
+        ...currentRecommendations,
+        [questionPublicId]: {
+          ...currentRecommendation,
+          reviewStatusByKnowledgeNodePublicId: {
+            ...currentRecommendation.reviewStatusByKnowledgeNodePublicId,
+            [knowledgeNodePublicId]: reviewStatus,
+          },
+        },
+      };
+    });
+
+    if (reviewStatus === "accepted") {
+      setQuestions((currentQuestions) =>
+        currentQuestions.map((question) => {
+          if (
+            question.publicId !== questionPublicId ||
+            question.knowledgeNodePublicIds.includes(knowledgeNodePublicId)
+          ) {
+            return question;
+          }
+
+          return {
+            ...question,
+            knowledgeNodePublicIds: [
+              ...question.knowledgeNodePublicIds,
+              knowledgeNodePublicId,
+            ],
+          };
+        }),
+      );
+    }
+
+    setActionMessage(
+      reviewStatus === "accepted"
+        ? `已采纳推荐 ${knowledgeNodePublicId}`
+        : `已丢弃推荐 ${knowledgeNodePublicId}`,
+    );
+  }
+
   async function handleMaterialAction(
     publicId: string,
     action: "copy" | "disable",
@@ -600,6 +707,7 @@ export function AdminQuestionMaterialManagement({
 
       {activeView === "questions" ? (
         <QuestionList
+          recommendationByQuestionPublicId={recommendationsByQuestionPublicId}
           rows={filteredQuestions}
           onCopy={(publicId) => void handleQuestionAction(publicId, "copy")}
           onDisable={(publicId) =>
@@ -621,6 +729,10 @@ export function AdminQuestionMaterialManagement({
               },
             });
           }}
+          onRecommend={(question) =>
+            void handleRecommendKnowledgeNodes(question)
+          }
+          onReviewRecommendation={handleReviewKnowledgeRecommendation}
         />
       ) : (
         <MaterialList
@@ -895,15 +1007,28 @@ function FilterPanel({
 }
 
 function QuestionList({
+  recommendationByQuestionPublicId,
   rows,
   onCopy,
   onDisable,
   onEdit,
+  onRecommend,
+  onReviewRecommendation,
 }: {
+  recommendationByQuestionPublicId: Record<
+    string,
+    KnowledgeRecommendationReviewState
+  >;
   rows: QuestionDto[];
   onCopy: (publicId: string) => void;
   onDisable: (publicId: string) => void;
   onEdit: (question: QuestionDto) => void;
+  onRecommend: (question: QuestionDto) => void;
+  onReviewRecommendation: (
+    questionPublicId: string,
+    knowledgeNodePublicId: string,
+    reviewStatus: RecommendationReviewStatus,
+  ) => void;
 }) {
   if (rows.length === 0) {
     return <FilteredEmptyState title="没有匹配的题目" />;
@@ -984,7 +1109,22 @@ function QuestionList({
               <Copy aria-hidden="true" data-icon="inline-start" />
               复制
             </Button>
+            <Button
+              aria-label={`Recommend knowledge nodes for ${question.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onRecommend(question)}
+            >
+              <Sparkles aria-hidden="true" data-icon="inline-start" />
+              推荐知识点
+            </Button>
           </div>
+          <KnowledgeRecommendationReviewPanel
+            question={question}
+            reviewState={recommendationByQuestionPublicId[question.publicId]}
+            onReviewRecommendation={onReviewRecommendation}
+          />
           <ReferenceBlock
             label="关联材料"
             value={question.materialPublicId ?? "未关联材料"}
@@ -992,6 +1132,132 @@ function QuestionList({
         </article>
       ))}
     </div>
+  );
+}
+
+function KnowledgeRecommendationReviewPanel({
+  question,
+  reviewState,
+  onReviewRecommendation,
+}: {
+  question: QuestionDto;
+  reviewState: KnowledgeRecommendationReviewState | undefined;
+  onReviewRecommendation: (
+    questionPublicId: string,
+    knowledgeNodePublicId: string,
+    reviewStatus: RecommendationReviewStatus,
+  ) => void;
+}) {
+  if (reviewState === undefined) {
+    return null;
+  }
+
+  const isStale =
+    reviewState.recommendation.reviewState.questionUpdatedAt !==
+    question.updatedAt;
+
+  return (
+    <section
+      className="border-border bg-muted/30 mt-4 rounded-md border p-3"
+      data-stale={String(isStale)}
+      data-testid={`knowledge-recommendation-panel-${question.publicId}`}
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-text-primary text-sm font-semibold">
+            知识点推荐审查
+          </h3>
+          <p className="text-text-secondary text-xs leading-5">
+            {isStale
+              ? "stale: question updated after recommendation"
+              : "current: pending_confirmation recommendations"}
+          </p>
+        </div>
+        <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs">
+          {reviewState.recommendation.reviewState.bindingMode}
+        </span>
+      </div>
+
+      {reviewState.recommendation.recommendations.length === 0 ? (
+        <p className="text-text-secondary mt-3 text-sm">
+          本次没有可审查的推荐结果。
+        </p>
+      ) : (
+        <div className="mt-3 grid gap-2">
+          {reviewState.recommendation.recommendations.map((recommendation) => {
+            const reviewStatus =
+              reviewState.reviewStatusByKnowledgeNodePublicId[
+                recommendation.knowledgeNodePublicId
+              ] ?? recommendation.confirmationStatus;
+
+            return (
+              <article
+                className="bg-surface border-border rounded-md border p-3"
+                data-review-status={reviewStatus}
+                data-testid={`knowledge-recommendation-row-${recommendation.knowledgeNodePublicId}`}
+                key={recommendation.knowledgeNodePublicId}
+              >
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
+                        {recommendation.confidence}
+                      </span>
+                      <span className="text-text-muted text-xs">
+                        {reviewStatus}
+                      </span>
+                    </div>
+                    <p className="text-text-primary text-sm font-medium">
+                      {recommendation.name}
+                    </p>
+                    <p className="text-text-secondary text-xs leading-5">
+                      {recommendation.pathName}
+                    </p>
+                    <p className="text-text-secondary text-xs leading-5">
+                      {recommendation.reason}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      aria-label={`Accept recommendation ${recommendation.knowledgeNodePublicId}`}
+                      size="sm"
+                      type="button"
+                      variant="secondary"
+                      onClick={() =>
+                        onReviewRecommendation(
+                          question.publicId,
+                          recommendation.knowledgeNodePublicId,
+                          "accepted",
+                        )
+                      }
+                    >
+                      <Check aria-hidden="true" data-icon="inline-start" />
+                      采纳
+                    </Button>
+                    <Button
+                      aria-label={`Discard recommendation ${recommendation.knowledgeNodePublicId}`}
+                      size="sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        onReviewRecommendation(
+                          question.publicId,
+                          recommendation.knowledgeNodePublicId,
+                          "discarded",
+                        )
+                      }
+                    >
+                      <Ban aria-hidden="true" data-icon="inline-start" />
+                      丢弃
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
 

@@ -189,6 +189,7 @@ function mockWritableContentFetch() {
             question: {
               ...questionPayload.data[0],
               stemRichText: "编辑后的题干",
+              updatedAt: "2026-05-19T06:30:00.000Z",
             },
           },
         });
@@ -221,6 +222,61 @@ function mockWritableContentFetch() {
             question: {
               ...questionPayload.data[0],
               publicId: "question-marketing-001-copy",
+            },
+          },
+        });
+      }
+
+      if (
+        path ===
+          "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes" &&
+        method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            recommendation: {
+              questionPublicId: "question-marketing-001",
+              recommendationStatus: "recommended",
+              reviewState: {
+                questionUpdatedAt: "2026-05-19T06:20:00.000Z",
+                staleCheck: "question_updated_at_mismatch",
+                bindingMode: "local_review_only",
+              },
+              recommendations: [
+                {
+                  knowledgeNodePublicId: "knowledge-node-sampling-v2",
+                  name: "Sampling v2",
+                  pathName: "Marketing / Research / Sampling v2",
+                  confidence: "high",
+                  reason: "bounded local fixture reason",
+                  source: "ai_recommended",
+                  confirmationStatus: "pending_confirmation",
+                },
+                {
+                  knowledgeNodePublicId: "knowledge-node-segmentation",
+                  name: "Segmentation",
+                  pathName: "Marketing / Research / Segmentation",
+                  confidence: "low",
+                  reason: "bounded local fallback reason",
+                  source: "ai_recommended",
+                  confirmationStatus: "pending_confirmation",
+                },
+              ],
+              modelConfig: {
+                modelConfigPublicId: "model-config-dev-kn-recommendation",
+                providerPublicId: "model-provider-dev-local",
+                providerDisplayName: "Local deterministic provider",
+                providerKey: "local_deterministic",
+                modelName: "local-kn-recommendation-v1",
+                displayName: "Local knowledge recommendation model",
+                aiFuncType: "kn_recommendation",
+                configVersion: 1,
+                promptTemplateKey: "dev_kn_recommendation_v1",
+                promptTemplateVersion: 1,
+              },
+              failureReason: null,
             },
           },
         });
@@ -505,6 +561,77 @@ describe("AdminQuestionMaterialManagement", () => {
       "/api/v1/questions/question-marketing-001/copy",
       expect.objectContaining({ method: "POST" }),
     );
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
+  it("reviews knowledge_node recommendations with confidence, stale, accept, and discard states", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Recommend knowledge nodes for question-marketing-001",
+      }),
+    );
+
+    const panel = await screen.findByTestId(
+      "knowledge-recommendation-panel-question-marketing-001",
+    );
+    expect(panel).toHaveAttribute("data-stale", "false");
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-row-knowledge-node-sampling-v2",
+      ),
+    ).toHaveTextContent("high");
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-row-knowledge-node-segmentation",
+      ),
+    ).toHaveTextContent("low");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/questions/question-marketing-001/recommend-knowledge-nodes",
+      expect.objectContaining({ method: "POST" }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Accept recommendation knowledge-node-sampling-v2",
+      }),
+    );
+    expect(
+      screen.getByTestId("question-row-question-marketing-001"),
+    ).toHaveTextContent("knowledge-node-sampling-v2");
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Discard recommendation knowledge-node-segmentation",
+      }),
+    );
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-row-knowledge-node-segmentation",
+      ),
+    ).toHaveTextContent("discarded");
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "编辑题目 question-marketing-001",
+      }),
+    );
+    fireEvent.change(screen.getByLabelText("题干"), {
+      target: { value: "updated bounded fixture stem" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存题目" }));
+
+    await screen.findByText("题目 question-marketing-001 已保存");
+    expect(
+      screen.getByTestId(
+        "knowledge-recommendation-panel-question-marketing-001",
+      ),
+    ).toHaveAttribute("data-stale", "true");
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
   });
 
