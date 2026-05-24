@@ -3363,6 +3363,796 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-staging-entry-student-error-states.md
     status: closed
     retryCount: 0
+  - id: phase-11-mvp-functional-completeness-gap-audit
+    title: Phase 11 MVP Functional Completeness Gap Audit
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-24-mvp-functional-completeness-gap-audit
+    dependencies:
+      - phase-11-staging-entry-student-error-states
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested an MVP completeness gap audit across requirements, including but not limited to content ops write loops, student content propagation, AI capability use, model_config fallback, redeem_code management, user management, and org_auth management. Scope is planning/audit only; no runtime, cloud, deployment, staging/prod, secret/env, dependency, schema, migration, script, package, or lockfile work is approved.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+      - docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - product_readiness
+      - release_readiness
+      - requirement_traceability
+      - content_ops
+      - system_ops
+      - student_experience
+      - ai_scoring
+      - ai_explanation
+      - ai_hint
+      - model_config
+      - org_auth
+      - redeem_code
+      - evidence_integrity
+      - environment_boundary
+      - secret_or_env_change
+      - deploy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-functional-completeness-gap-audit
+      - Select-String -Path 'docs\05-execution-logs\audits-reviews\2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md' -Pattern 'P0|P1|P2|P3|content ops|system ops|student|AI|model_config|redeem_code|org_auth|stagingDecision'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+    status: closed
+    retryCount: 0
+  - id: phase-11-mvp-content-ops-question-material-write-loop
+    title: Phase 11 MVP Content Ops Question Material Write Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-001
+    dependencies:
+      - phase-11-mvp-functional-completeness-gap-audit
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local question/material write loop only; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/questions/**
+      - src/app/api/v1/materials/**
+      - src/features/admin/question-material-management/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - content_ops
+      - question
+      - material
+      - audit_log
+      - api_contract
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-content-ops-question-material-write-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-content-ops-paper-composition-publish-loop
+    title: Phase 11 MVP Content Ops Paper Composition Publish Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-002
+    dependencies:
+      - phase-11-mvp-content-ops-question-material-write-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local paper draft, composition, publish, archive/copy, and paper_asset binding only; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/papers/**
+      - src/app/api/v1/paper-assets/**
+      - src/features/admin/paper-management/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - content_ops
+      - paper
+      - paper_asset
+      - audit_log
+      - api_contract
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-content-ops-paper-composition-publish-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-content-ops-paper-composition-publish-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-content-to-student-runtime-propagation
+    title: Phase 11 MVP Content To Student Runtime Propagation
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-003
+    dependencies:
+      - phase-11-mvp-content-ops-paper-composition-publish-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local propagation from published content to student papers, practice, mock_exam, reports, and mistake_book; no cloud, deployment, staging/prod, secret/env, dependency, schema, migration, script, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/student-papers/**
+      - src/app/api/v1/practices/**
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/app/api/v1/mistake-books/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - student_experience
+      - content_ops
+      - authorization
+      - practice
+      - mock_exam
+      - exam_report
+      - mistake_book
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-content-to-student-runtime-propagation
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-content-to-student-runtime-propagation.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-student-ai-practice-mock-report-loop
+    title: Phase 11 MVP Student AI Practice Mock Report Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-004
+    dependencies:
+      - phase-11-mvp-content-to-student-runtime-propagation
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope is mock-provider-first local ai_scoring, ai_explanation, ai_hint, learning_suggestion, citation, and ai_call_log integration in student flows; real provider and secret/env work are not approved.
+    allowedFiles:
+      - src/app/api/v1/practices/**
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/app/api/v1/mistake-books/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - student_experience
+      - ai_scoring
+      - ai_explanation
+      - ai_hint
+      - kn_recommendation
+      - rag
+      - citation
+      - ai_call_log
+      - prompt_template
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-student-ai-practice-mock-report-loop
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-student-ai-practice-mock-report-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-model-config-fallback-runtime
+    title: Phase 11 MVP Model Config Fallback Runtime
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-005
+    dependencies:
+      - phase-11-mvp-student-ai-practice-mock-report-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope is local mock-provider-first model_config and prompt_template runtime selection with primary/fallback behavior; no real API key, provider call, secret/env, dependency, cloud, deployment, staging/prod, package, lockfile, schema, migration, or script work is approved.
+    allowedFiles:
+      - src/app/api/v1/model-configs/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - model_config
+      - model_provider
+      - prompt_template
+      - ai_call_log
+      - secret_or_env_change
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-model-config-fallback-runtime
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-system-ops-user-management-loop
+    title: Phase 11 MVP System Ops User Management Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-006
+    dependencies:
+      - phase-11-mvp-functional-completeness-gap-audit
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local user and employee management granularity; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/users/**
+      - src/app/api/v1/employees/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - src/server/auth/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - system_ops
+      - user
+      - employee
+      - session
+      - authorization
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-system-ops-user-management-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-system-ops-user-management-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-system-ops-org-auth-management-loop
+    title: Phase 11 MVP System Ops Org Auth Management Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-007
+    dependencies:
+      - phase-11-mvp-system-ops-user-management-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local org_auth create/cancel/overlap/quota/effective authorization behavior; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/org-auths/**
+      - src/app/api/v1/authorizations/**
+      - src/app/api/v1/personal-auths/**
+      - src/features/admin/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - system_ops
+      - org_auth
+      - organization
+      - authorization
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-system-ops-org-auth-management-loop
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-system-ops-org-auth-management-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-redeem-code-batch-management-loop
+    title: Phase 11 MVP Redeem Code Batch Management Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-008
+    dependencies:
+      - phase-11-mvp-system-ops-org-auth-management-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local redeem_code batch management and redemption evidence only; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/redeem-codes/**
+      - src/app/api/v1/authorizations/**
+      - src/app/api/v1/personal-auths/**
+      - src/features/admin/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - system_ops
+      - redeem_code
+      - personal_auth
+      - authorization
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-redeem-code-batch-management-loop
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-redeem-code-batch-management-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-resource-knowledge-base-publish-index-loop
+    title: Phase 11 MVP Resource Knowledge Base Publish Index Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-010
+    dependencies:
+      - phase-11-mvp-student-ai-practice-mock-report-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local resource and knowledge_base publish/index workflow with fixture-safe inputs only; dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, real-content commit, and real-provider work are not approved.
+    allowedFiles:
+      - src/app/api/v1/resources/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - resource
+      - knowledge_base
+      - rag
+      - embedding
+      - chunk
+      - citation
+      - evidence_status
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-resource-knowledge-base-publish-index-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-knowledge-node-tree-management-loop
+    title: Phase 11 MVP Knowledge Node Tree Management Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-011
+    dependencies:
+      - phase-11-mvp-content-ops-question-material-write-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local knowledge_node tree management; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/knowledge-nodes/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - content_ops
+      - knowledge_node
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-knowledge-node-tree-management-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-knowledge-node-tree-management-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-ai-knowledge-recommendation-review-loop
+    title: Phase 11 MVP AI Knowledge Recommendation Review Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-012
+    dependencies:
+      - phase-11-mvp-knowledge-node-tree-management-loop
+      - phase-11-mvp-model-config-fallback-runtime
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers mock-provider-first kn_recommendation trigger/review/correction only; no real provider, dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, or lockfile work is approved.
+    allowedFiles:
+      - src/app/api/v1/questions/**
+      - src/app/api/v1/knowledge-nodes/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - kn_recommendation
+      - knowledge_node
+      - model_config
+      - ai_call_log
+      - content_ops
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-ai-knowledge-recommendation-review-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-ai-knowledge-recommendation-review-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-audit-log-coverage-hardening
+    title: Phase 11 MVP Audit Log Coverage Hardening
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-013
+    dependencies:
+      - phase-11-mvp-content-ops-paper-composition-publish-loop
+      - phase-11-mvp-system-ops-org-auth-management-loop
+      - phase-11-mvp-redeem-code-batch-management-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local audit_log coverage and verification; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/audit-logs/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - audit_log
+      - system_ops
+      - content_ops
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-audit-log-coverage-hardening
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-audit-log-coverage-hardening.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-ai-call-log-coverage-hardening
+    title: Phase 11 MVP AI Call Log Coverage Hardening
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-013
+    dependencies:
+      - phase-11-mvp-student-ai-practice-mock-report-loop
+      - phase-11-mvp-model-config-fallback-runtime
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local ai_call_log redacted coverage and summary verification; no raw prompt/answer/model response recording, real provider, dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, or lockfile work is approved.
+    allowedFiles:
+      - src/app/api/v1/ai-call-logs/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - ai_call_log
+      - ai_scoring
+      - ai_explanation
+      - ai_hint
+      - prompt_template
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-ai-call-log-coverage-hardening
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-ai-call-log-coverage-hardening.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-auth-session-account-hardening
+    title: Phase 11 MVP Auth Session Account Hardening
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-014
+    dependencies:
+      - phase-11-mvp-system-ops-user-management-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local auth/session/account acceptance gaps; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/(auth)/**
+      - src/app/api/v1/sessions/**
+      - src/app/api/v1/users/**
+      - src/features/student/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - src/server/auth/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - user
+      - session
+      - authorization
+      - security
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-auth-session-account-hardening
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-auth-session-account-hardening.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-system-ops-organization-management-loop
+    title: Phase 11 MVP System Ops Organization Management Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-015
+    dependencies:
+      - phase-11-mvp-system-ops-org-auth-management-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local organization tree management only; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/app/api/v1/organizations/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - system_ops
+      - organization
+      - authorization
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-system-ops-organization-management-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-system-ops-organization-management-loop.md
+    status: pending
+    retryCount: 0
+  - id: phase-11-mvp-contact-config-purchase-guidance-loop
+    title: Phase 11 MVP Contact Config Purchase Guidance Loop
+    phase: phase-11-staging-release-planning
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-009
+    dependencies:
+      - phase-11-mvp-redeem-code-batch-management-loop
+    taskPlanPolicy: required
+    humanApproval: User requested prioritized short tasks to implement MVP completeness gaps. Scope covers local contact_config purchase guidance and audit evidence only; no dependency, schema, migration, script, cloud, deployment, staging/prod, secret/env, package, lockfile, or real-provider work is approved.
+    allowedFiles:
+      - src/features/admin/**
+      - src/features/student/**
+      - src/server/contracts/**
+      - src/server/services/**
+      - tests/unit/**
+      - e2e/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - contact_config
+      - redeem_code
+      - student_experience
+      - audit_log
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-mvp-contact-config-purchase-guidance-loop
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-contact-config-purchase-guidance-loop.md
+    status: pending
+    retryCount: 0
   - id: phase-6-admin-ops-readiness-evidence
     title: Admin Ops Readiness Evidence
     phase: phase-6-admin-ops
