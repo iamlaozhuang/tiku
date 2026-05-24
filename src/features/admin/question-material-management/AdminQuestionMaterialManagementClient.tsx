@@ -44,6 +44,8 @@ type ViewMode = "questions" | "materials";
 type StatusFilter = "all" | QuestionStatus | MaterialStatus;
 type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
+type QuestionFormMode = "create" | "edit";
+type MaterialFormMode = "create" | "edit";
 
 type ContentLoadState =
   | "loading"
@@ -55,6 +57,31 @@ type ContentLoadState =
 export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
 };
+
+type QuestionFormValues = {
+  stemRichText: string;
+  analysisRichText: string;
+  standardAnswerRichText: string;
+};
+
+type MaterialFormValues = {
+  title: string;
+  contentRichText: string;
+};
+
+type ActiveContentForm =
+  | {
+      kind: "question";
+      mode: QuestionFormMode;
+      publicId: string | null;
+      values: QuestionFormValues;
+    }
+  | {
+      kind: "material";
+      mode: MaterialFormMode;
+      publicId: string | null;
+      values: MaterialFormValues;
+    };
 
 const statusLabels: Record<QuestionStatus | MaterialStatus, string> = {
   available: "可用",
@@ -153,7 +180,76 @@ function useQuestionMaterialData(activeView: ViewMode) {
     };
   }, [activeView]);
 
-  return { loadState, materials, questions };
+  return { loadState, materials, questions, setMaterials, setQuestions };
+}
+
+async function mutateAdminApi<TData>(
+  path: string,
+  sessionToken: string,
+  method: "POST" | "PATCH",
+  body?: unknown,
+) {
+  const response = await fetch(path, {
+    method,
+    headers: {
+      authorization: `Bearer ${sessionToken}`,
+      "content-type": "application/json",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  return (await response.json()) as {
+    code: number;
+    message: string;
+    data: TData | null;
+  };
+}
+
+function createQuestionInput(values: QuestionFormValues) {
+  return {
+    questionType: "single_choice",
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    stemRichText: values.stemRichText,
+    analysisRichText: values.analysisRichText,
+    standardAnswerRichText: values.standardAnswerRichText,
+    multiChoiceRule: "all_correct_only",
+    scoringMethod: "auto_match",
+    materialPublicId: null,
+    questionOptions: [
+      {
+        label: "A",
+        contentRichText: values.standardAnswerRichText,
+        isCorrect: true,
+        sortOrder: 1,
+      },
+    ],
+    scoringPoints: [],
+  };
+}
+
+function createMaterialInput(values: MaterialFormValues) {
+  return {
+    title: values.title,
+    contentRichText: values.contentRichText,
+    profession: "monopoly",
+    level: 3,
+    subject: "skill",
+  };
+}
+
+function upsertByPublicId<TItem extends { publicId: string }>(
+  items: TItem[],
+  nextItem: TItem,
+) {
+  if (items.some((item) => item.publicId === nextItem.publicId)) {
+    return items.map((item) =>
+      item.publicId === nextItem.publicId ? nextItem : item,
+    );
+  }
+
+  return [nextItem, ...items];
 }
 
 export function AdminQuestionMaterialManagement({
@@ -164,7 +260,11 @@ export function AdminQuestionMaterialManagement({
   const [profession, setProfession] = useState<ProfessionFilter>("all");
   const [subject, setSubject] = useState<SubjectFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
-  const { loadState, materials, questions } =
+  const [activeForm, setActiveForm] = useState<ActiveContentForm | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { loadState, materials, questions, setMaterials, setQuestions } =
     useQuestionMaterialData(activeView);
 
   const filteredQuestions = useMemo(
@@ -233,6 +333,154 @@ export function AdminQuestionMaterialManagement({
     );
   }
 
+  async function handleSaveQuestion(values: QuestionFormValues) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || activeForm?.kind !== "question") {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setActionError(null);
+
+    try {
+      const response = await mutateAdminApi<{ question: QuestionDto }>(
+        activeForm.mode === "create"
+          ? "/api/v1/questions"
+          : `/api/v1/questions/${activeForm.publicId}`,
+        sessionToken,
+        activeForm.mode === "create" ? "POST" : "PATCH",
+        activeForm.mode === "create"
+          ? createQuestionInput(values)
+          : {
+              ...createQuestionInput(values),
+              status: "available",
+            },
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setActionError("题目保存失败，请刷新后重试。");
+        return;
+      }
+
+      const savedQuestion = response.data.question;
+      setQuestions((currentQuestions) =>
+        upsertByPublicId(currentQuestions, savedQuestion),
+      );
+      setActionMessage(`题目 ${savedQuestion.publicId} 已保存`);
+      setActiveForm(null);
+    } catch {
+      setActionError("题目保存失败，请刷新后重试。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleSaveMaterial(values: MaterialFormValues) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || activeForm?.kind !== "material") {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setActionError(null);
+
+    try {
+      const response = await mutateAdminApi<{ material: MaterialDto }>(
+        activeForm.mode === "create"
+          ? "/api/v1/materials"
+          : `/api/v1/materials/${activeForm.publicId}`,
+        sessionToken,
+        activeForm.mode === "create" ? "POST" : "PATCH",
+        activeForm.mode === "create"
+          ? createMaterialInput(values)
+          : {
+              ...createMaterialInput(values),
+              status: "available",
+            },
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setActionError("材料保存失败，请刷新后重试。");
+        return;
+      }
+
+      const savedMaterial = response.data.material;
+      setMaterials((currentMaterials) =>
+        upsertByPublicId(currentMaterials, savedMaterial),
+      );
+      setActionMessage(`材料 ${savedMaterial.publicId} 已保存`);
+      setActiveForm(null);
+    } catch {
+      setActionError("材料保存失败，请刷新后重试。");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleQuestionAction(
+    publicId: string,
+    action: "copy" | "disable",
+  ) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setActionError(null);
+    const response = await mutateAdminApi<{ question: QuestionDto }>(
+      `/api/v1/questions/${publicId}/${action}`,
+      sessionToken,
+      "POST",
+    );
+
+    if (response.code !== 0 || response.data === null) {
+      setActionError("题目操作失败，请刷新后重试。");
+      return;
+    }
+
+    const updatedQuestion = response.data.question;
+    setQuestions((currentQuestions) =>
+      upsertByPublicId(currentQuestions, updatedQuestion),
+    );
+    setActionMessage(`题目 ${updatedQuestion.publicId} 已更新`);
+  }
+
+  async function handleMaterialAction(
+    publicId: string,
+    action: "copy" | "disable",
+  ) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setActionError("管理员会话已失效，请重新登录后再操作。");
+      return;
+    }
+
+    setActionError(null);
+    const response = await mutateAdminApi<{ material: MaterialDto }>(
+      `/api/v1/materials/${publicId}/${action}`,
+      sessionToken,
+      "POST",
+    );
+
+    if (response.code !== 0 || response.data === null) {
+      setActionError("材料操作失败，请刷新后重试。");
+      return;
+    }
+
+    const updatedMaterial = response.data.material;
+    setMaterials((currentMaterials) =>
+      upsertByPublicId(currentMaterials, updatedMaterial),
+    );
+    setActionMessage(`材料 ${updatedMaterial.publicId} 已更新`);
+  }
+
   return (
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -248,7 +496,35 @@ export function AdminQuestionMaterialManagement({
             中的 publicId，不暴露内部自增 id。
           </p>
         </div>
-        <ActionBar activeView={activeView} />
+        <ActionBar
+          activeView={activeView}
+          onCreate={() => {
+            setActionError(null);
+            setActionMessage(null);
+            setActiveForm(
+              activeView === "questions"
+                ? {
+                    kind: "question",
+                    mode: "create",
+                    publicId: null,
+                    values: {
+                      analysisRichText: "老师解析",
+                      standardAnswerRichText: "A",
+                      stemRichText: "新建题目题干",
+                    },
+                  }
+                : {
+                    kind: "material",
+                    mode: "create",
+                    publicId: null,
+                    values: {
+                      contentRichText: "新建材料正文",
+                      title: "新建案例材料",
+                    },
+                  },
+            );
+          }}
+        />
       </header>
 
       <ContentOpsStagingRoleArrangement />
@@ -263,6 +539,37 @@ export function AdminQuestionMaterialManagement({
         onStatusChange={setStatus}
         onSubjectChange={setSubject}
       />
+
+      {actionMessage === null ? null : (
+        <p className="text-brand-primary text-sm" role="status">
+          {actionMessage}
+        </p>
+      )}
+      {actionError === null ? null : (
+        <p className="text-destructive text-sm" role="alert">
+          {actionError}
+        </p>
+      )}
+
+      {activeForm?.kind === "question" ? (
+        <QuestionWriteForm
+          isSubmitting={isSubmitting}
+          mode={activeForm.mode}
+          values={activeForm.values}
+          onCancel={() => setActiveForm(null)}
+          onSubmit={handleSaveQuestion}
+        />
+      ) : null}
+
+      {activeForm?.kind === "material" ? (
+        <MaterialWriteForm
+          isSubmitting={isSubmitting}
+          mode={activeForm.mode}
+          values={activeForm.values}
+          onCancel={() => setActiveForm(null)}
+          onSubmit={handleSaveMaterial}
+        />
+      ) : null}
 
       <div
         aria-label="题库资源类型"
@@ -292,58 +599,224 @@ export function AdminQuestionMaterialManagement({
       </div>
 
       {activeView === "questions" ? (
-        <QuestionList rows={filteredQuestions} />
+        <QuestionList
+          rows={filteredQuestions}
+          onCopy={(publicId) => void handleQuestionAction(publicId, "copy")}
+          onDisable={(publicId) =>
+            void handleQuestionAction(publicId, "disable")
+          }
+          onEdit={(question) => {
+            setActionError(null);
+            setActionMessage(null);
+            setActiveForm({
+              kind: "question",
+              mode: "edit",
+              publicId: question.publicId,
+              values: {
+                analysisRichText: stripRichText(question.analysisRichText),
+                standardAnswerRichText: stripRichText(
+                  question.standardAnswerRichText,
+                ),
+                stemRichText: stripRichText(question.stemRichText),
+              },
+            });
+          }}
+        />
       ) : (
-        <MaterialList rows={filteredMaterials} />
+        <MaterialList
+          rows={filteredMaterials}
+          onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
+          onDisable={(publicId) =>
+            void handleMaterialAction(publicId, "disable")
+          }
+          onEdit={(material) => {
+            setActionError(null);
+            setActionMessage(null);
+            setActiveForm({
+              kind: "material",
+              mode: "edit",
+              publicId: material.publicId,
+              values: {
+                contentRichText: stripRichText(material.contentRichText),
+                title: material.title,
+              },
+            });
+          }}
+        />
       )}
     </section>
   );
 }
 
-function ActionBar({ activeView }: { activeView: ViewMode }) {
+function ActionBar({
+  activeView,
+  onCreate,
+}: {
+  activeView: ViewMode;
+  onCreate: () => void;
+}) {
   const noun = activeView === "questions" ? "题目" : "材料";
 
   return (
     <div className="max-w-xl space-y-2">
       <div className="flex flex-wrap gap-2">
-        <Button disabled aria-describedby="content-action-unavailable">
+        <Button onClick={onCreate}>
           <Plus aria-hidden="true" data-icon="inline-start" />
           新建{noun}
-        </Button>
-        <Button
-          disabled
-          aria-describedby="content-action-unavailable"
-          variant="outline"
-        >
-          <Pencil aria-hidden="true" data-icon="inline-start" />
-          编辑{noun}
-        </Button>
-        <Button
-          disabled
-          aria-describedby="content-action-unavailable"
-          variant="outline"
-        >
-          <ShieldOff aria-hidden="true" data-icon="inline-start" />
-          停用{noun}
-        </Button>
-        <Button
-          disabled
-          aria-describedby="content-action-unavailable"
-          variant="secondary"
-        >
-          <Copy aria-hidden="true" data-icon="inline-start" />
-          复制{noun}
         </Button>
       </div>
       <p
         className="text-text-secondary text-xs leading-5"
-        data-testid="content-action-unavailable"
-        id="content-action-unavailable"
+        data-testid="content-action-runtime-ready"
         role="status"
       >
-        新建、编辑、停用和复制暂未接入本地运行时；当前仅开放列表查看与筛选。
+        新建、编辑、停用和复制已接入本地运行时，写操作会记录脱敏审计摘要。
       </p>
     </div>
+  );
+}
+
+function QuestionWriteForm({
+  isSubmitting,
+  mode,
+  values,
+  onCancel,
+  onSubmit,
+}: {
+  isSubmitting: boolean;
+  mode: QuestionFormMode;
+  values: QuestionFormValues;
+  onCancel: () => void;
+  onSubmit: (values: QuestionFormValues) => void;
+}) {
+  const [formValues, setFormValues] = useState(values);
+
+  return (
+    <form
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(formValues);
+      }}
+    >
+      <h2 className="text-text-primary text-base font-semibold">
+        {mode === "create" ? "新建题目" : "编辑题目"}
+      </h2>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">题干</span>
+        <textarea
+          aria-label="题干"
+          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+          value={formValues.stemRichText}
+          onChange={(event) =>
+            setFormValues({
+              ...formValues,
+              stemRichText: event.target.value,
+            })
+          }
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">标准答案</span>
+        <Input
+          aria-label="标准答案"
+          value={formValues.standardAnswerRichText}
+          onChange={(event) =>
+            setFormValues({
+              ...formValues,
+              standardAnswerRichText: event.target.value,
+            })
+          }
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">老师解析</span>
+        <textarea
+          aria-label="老师解析"
+          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+          value={formValues.analysisRichText}
+          onChange={(event) =>
+            setFormValues({
+              ...formValues,
+              analysisRichText: event.target.value,
+            })
+          }
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <Button disabled={isSubmitting} type="submit">
+          保存题目
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function MaterialWriteForm({
+  isSubmitting,
+  mode,
+  values,
+  onCancel,
+  onSubmit,
+}: {
+  isSubmitting: boolean;
+  mode: MaterialFormMode;
+  values: MaterialFormValues;
+  onCancel: () => void;
+  onSubmit: (values: MaterialFormValues) => void;
+}) {
+  const [formValues, setFormValues] = useState(values);
+
+  return (
+    <form
+      className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(formValues);
+      }}
+    >
+      <h2 className="text-text-primary text-base font-semibold">
+        {mode === "create" ? "新建材料" : "编辑材料"}
+      </h2>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">材料标题</span>
+        <Input
+          aria-label="材料标题"
+          value={formValues.title}
+          onChange={(event) =>
+            setFormValues({
+              ...formValues,
+              title: event.target.value,
+            })
+          }
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">材料正文</span>
+        <textarea
+          aria-label="材料正文"
+          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-24 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+          value={formValues.contentRichText}
+          onChange={(event) =>
+            setFormValues({
+              ...formValues,
+              contentRichText: event.target.value,
+            })
+          }
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <Button disabled={isSubmitting} type="submit">
+          保存材料
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </form>
   );
 }
 
@@ -421,7 +894,17 @@ function FilterPanel({
   );
 }
 
-function QuestionList({ rows }: { rows: QuestionDto[] }) {
+function QuestionList({
+  rows,
+  onCopy,
+  onDisable,
+  onEdit,
+}: {
+  rows: QuestionDto[];
+  onCopy: (publicId: string) => void;
+  onDisable: (publicId: string) => void;
+  onEdit: (question: QuestionDto) => void;
+}) {
   if (rows.length === 0) {
     return <FilteredEmptyState title="没有匹配的题目" />;
   }
@@ -470,6 +953,38 @@ function QuestionList({ rows }: { rows: QuestionDto[] }) {
             </div>
             <PublicId value={question.publicId} />
           </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              aria-label={`编辑题目 ${question.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onEdit(question)}
+            >
+              <Pencil aria-hidden="true" data-icon="inline-start" />
+              编辑
+            </Button>
+            <Button
+              aria-label={`停用题目 ${question.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onDisable(question.publicId)}
+            >
+              <ShieldOff aria-hidden="true" data-icon="inline-start" />
+              停用
+            </Button>
+            <Button
+              aria-label={`复制题目 ${question.publicId}`}
+              size="sm"
+              type="button"
+              variant="secondary"
+              onClick={() => onCopy(question.publicId)}
+            >
+              <Copy aria-hidden="true" data-icon="inline-start" />
+              复制
+            </Button>
+          </div>
           <ReferenceBlock
             label="关联材料"
             value={question.materialPublicId ?? "未关联材料"}
@@ -480,7 +995,17 @@ function QuestionList({ rows }: { rows: QuestionDto[] }) {
   );
 }
 
-function MaterialList({ rows }: { rows: MaterialDto[] }) {
+function MaterialList({
+  rows,
+  onCopy,
+  onDisable,
+  onEdit,
+}: {
+  rows: MaterialDto[];
+  onCopy: (publicId: string) => void;
+  onDisable: (publicId: string) => void;
+  onEdit: (material: MaterialDto) => void;
+}) {
   if (rows.length === 0) {
     return <FilteredEmptyState title="没有匹配的材料" />;
   }
@@ -510,6 +1035,38 @@ function MaterialList({ rows }: { rows: MaterialDto[] }) {
               </p>
             </div>
             <PublicId value={material.publicId} />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              aria-label={`编辑材料 ${material.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onEdit(material)}
+            >
+              <Pencil aria-hidden="true" data-icon="inline-start" />
+              编辑
+            </Button>
+            <Button
+              aria-label={`停用材料 ${material.publicId}`}
+              size="sm"
+              type="button"
+              variant="outline"
+              onClick={() => onDisable(material.publicId)}
+            >
+              <ShieldOff aria-hidden="true" data-icon="inline-start" />
+              停用
+            </Button>
+            <Button
+              aria-label={`复制材料 ${material.publicId}`}
+              size="sm"
+              type="button"
+              variant="secondary"
+              onClick={() => onCopy(material.publicId)}
+            >
+              <Copy aria-hidden="true" data-icon="inline-start" />
+              复制
+            </Button>
           </div>
           <ReferenceBlock
             label="材料锁定"
