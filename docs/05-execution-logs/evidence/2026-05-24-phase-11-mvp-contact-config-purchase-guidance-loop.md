@@ -86,6 +86,33 @@ Result: pass. Subcommands passed: lint, typecheck, test:unit (119 files / 447 te
 
 npm.cmd run build
 Result after formatting and full quality gate: pass. Build output noted `.env.local` loading but no secret values were read or recorded.
+
+git commit -m "feat(contact-config): add purchase guidance loop"
+Result: pass. Task commit `df5c3d0`.
+
+git switch master
+Result: pass. Master was up to date with `origin/master` before merge.
+
+git merge --no-ff codex/phase-11-mvp-contact-config-purchase-guidance-loop -m "merge: phase-11 mvp contact config purchase guidance"
+Result: pass. Merge commit `517422d`.
+
+npm.cmd run test:unit -- tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts
+Result on master after merge: pass, 1 file / 3 tests.
+
+npm.cmd run build
+Result on master after merge: pass. Build output noted `.env.local` loading but no secret values were read or recorded.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+Result on master after merge: pass. Subcommands passed: lint, typecheck, test:unit (119 files / 447 tests), format:check.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+Result on master after merge: pass.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+Result on master after merge: pass inventory. Master was ahead of origin/master by task commit and merge commit; tracked changes, staged changes, and untracked files were none.
+
+git branch -d codex/phase-11-mvp-contact-config-purchase-guidance-loop
+Result: pass. Local short-lifecycle task branch deleted after merge and master gates.
 ```
 
 ## Repository Hygiene Closeout Checklist
@@ -99,13 +126,13 @@ Result after formatting and full quality gate: pass. Build output noted `.env.lo
 | Problem grading      | P1 purchase guidance issue fixed; P2 persisted admin editing deferred with reason                                                                     | Pass    |
 | Validation record    | Claim readiness, RED/GREEN, related regressions, typecheck, build, diff check, readiness, naming, Git completion inventory, and quality gate recorded | Pass    |
 | Evidence hygiene     | No secret values, credential values, Authorization header values, raw provider payloads, or private data recorded                                     | Pass    |
-| Commit               | Pending                                                                                                                                               | Pending |
-| Merge                | Pending                                                                                                                                               | Pending |
-| Push                 | Pending                                                                                                                                               | Pending |
-| Cleanup              | Pending                                                                                                                                               | Pending |
-| Worktree residue     | Pending                                                                                                                                               | Pending |
+| Commit               | Task commit `df5c3d0`                                                                                                                                 | Pass    |
+| Merge                | Merged into `master` with merge commit `517422d`                                                                                                      | Pass    |
+| Push                 | Pending final `master` push after this closeout update                                                                                                | Pending |
+| Cleanup              | Local merged short-lifecycle branch deleted                                                                                                           | Pass    |
+| Worktree residue     | `git status --short --branch` on master reported no tracked, staged, or untracked files before closeout docs update                                   | Pass    |
 | stagingDecision      | `local_task_closed_no_known_p0_p1`                                                                                                                    | Pass    |
-| Next step            | Run full closeout gates, commit, merge, push, cleanup                                                                                                 | Pass    |
+| Next step            | Push `master` to `origin`, then claim the next pending MVP gap task from clean master                                                                 | Pass    |
 
 ## stagingDecision
 
@@ -113,7 +140,7 @@ local_task_closed_no_known_p0_p1
 
 ## Next Step
 
-Run full closeout gates, commit, merge, push, cleanup, then claim the next queue task from a clean repository.
+Push `master` to `origin`, then claim the next pending MVP gap task from a clean repository.
 
 ## Evidence Hygiene
 
