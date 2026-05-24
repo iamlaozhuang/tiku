@@ -209,6 +209,8 @@ describe("StudentRedeemCodePage", () => {
     render(createElement(StudentRedeemCodePage));
 
     expect(await screen.findByText("暂无个人授权记录")).toBeInTheDocument();
+    expect(screen.getByText("等待卡密")).toBeInTheDocument();
+    expect(screen.getByText("卡密来源未配置")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "兑换" })).toBeDisabled();
 
     fireEvent.change(screen.getByLabelText("兑换码"), {
