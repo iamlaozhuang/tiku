@@ -34,6 +34,18 @@ export type AdminAiFunctionType =
 
 export type AdminAuditResultStatus = "success" | "failed";
 
+const adminAiFunctionTypes = [
+  "ai_scoring",
+  "ai_explanation",
+  "ai_hint",
+  "kn_recommendation",
+  "learning_suggestion",
+] as const;
+
+const aiCallStatuses = ["success", "failed"] as const;
+
+const professions = ["monopoly", "marketing", "logistics"] as const;
+
 export type AdminAiAuditLogListQuery = {
   page: number;
   pageSize: AdminAiAuditLogPageSize;
@@ -130,12 +142,36 @@ export type AiCallLogSummaryListDto = {
   dailySummaries: AiCallLogCostSummaryDto[];
 };
 
+type AdminAiAuditLogListQueryOverrides = Partial<
+  Omit<
+    AdminAiAuditLogListQuery,
+    | "actionType"
+    | "aiFuncType"
+    | "callStatus"
+    | "keyword"
+    | "profession"
+    | "resultStatus"
+    | "targetResourceType"
+  >
+> & {
+  actionType?: string;
+  aiFuncType?: string;
+  callStatus?: string;
+  keyword?: string | null;
+  profession?: string;
+  resultStatus?: string;
+  targetResourceType?: string;
+};
+
 export function createAdminAiAuditLogListQuery(
-  overrides: Partial<AdminAiAuditLogListQuery> = {},
+  overrides: AdminAiAuditLogListQueryOverrides = {},
 ): AdminAiAuditLogListQuery {
   const {
     actionType,
+    aiFuncType,
+    callStatus,
     keyword,
+    profession,
     resultStatus,
     targetResourceType,
     ...queryOverrides
@@ -146,13 +182,13 @@ export function createAdminAiAuditLogListQuery(
     pageSize: 20,
     sortBy: "updatedAt",
     sortOrder: "desc",
-    aiFuncType: "all",
-    callStatus: "all",
-    profession: "all",
     level: null,
     ...queryOverrides,
     actionType:
       typeof actionType === "string" ? normalizeFilterText(actionType) : "all",
+    aiFuncType: normalizeAdminAiFunctionType(aiFuncType),
+    callStatus: normalizeAiCallStatus(callStatus),
+    profession: normalizeProfession(profession),
     resultStatus:
       resultStatus === "success" || resultStatus === "failed"
         ? resultStatus
@@ -175,4 +211,44 @@ function normalizeFilterText(value: string): string | "all" {
   const filterText = value.trim();
 
   return filterText.length === 0 ? "all" : filterText;
+}
+
+function normalizeAdminAiFunctionType(
+  value: string | undefined,
+): AdminAiFunctionType | "all" {
+  if (typeof value !== "string") {
+    return "all";
+  }
+
+  const aiFuncType = value.trim();
+
+  return adminAiFunctionTypes.includes(aiFuncType as AdminAiFunctionType)
+    ? (aiFuncType as AdminAiFunctionType)
+    : "all";
+}
+
+function normalizeAiCallStatus(
+  value: string | undefined,
+): AiCallStatus | "all" {
+  if (typeof value !== "string") {
+    return "all";
+  }
+
+  const callStatus = value.trim();
+
+  return aiCallStatuses.includes(callStatus as AiCallStatus)
+    ? (callStatus as AiCallStatus)
+    : "all";
+}
+
+function normalizeProfession(value: string | undefined): Profession | "all" {
+  if (typeof value !== "string") {
+    return "all";
+  }
+
+  const profession = value.trim();
+
+  return professions.includes(profession as Profession)
+    ? (profession as Profession)
+    : "all";
 }
