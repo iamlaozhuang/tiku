@@ -46,7 +46,9 @@ test.describe("staging required role flows", () => {
     await expect(questionArrangement).toContainText(
       "题目、材料、试卷先验只读筛选",
     );
-    await expect(page.getByTestId("content-action-unavailable")).toBeVisible();
+    await expect(
+      page.getByTestId("content-action-runtime-ready"),
+    ).toBeVisible();
 
     await page.goto("/content/papers");
     const paperArrangement = page.getByTestId(

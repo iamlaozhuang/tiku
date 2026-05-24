@@ -151,6 +151,12 @@ describe("StudentHomePage", () => {
 
   it("loads authorization scopes and papers through the student REST runtime without rendering the session token", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const contentPublishedPaper = {
+      ...studentHomeFixture.papers[1],
+      publicId: "paper-content-published-001",
+      name: "内容侧新发布理论卷",
+      publishedAt: "2026-05-24T04:40:00.000Z",
+    };
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
         expect(init?.headers).toMatchObject({
@@ -179,13 +185,16 @@ describe("StudentHomePage", () => {
             json: async () => ({
               code: 0,
               message: "ok",
-              data: studentHomeFixture.papers.filter(
-                (paper) => paper.profession === "marketing",
-              ),
+              data: [
+                contentPublishedPaper,
+                ...studentHomeFixture.papers.filter(
+                  (paper) => paper.profession === "marketing",
+                ),
+              ],
               pagination: {
                 page: 1,
                 pageSize: 20,
-                total: 3,
+                total: 4,
                 sortBy: "publishedAt",
                 sortOrder: "desc",
               },
@@ -209,7 +218,23 @@ describe("StudentHomePage", () => {
     render(createElement(StudentHomePage));
 
     expect(screen.getByText("正在加载授权范围")).toBeInTheDocument();
+    expect(await screen.findByText("内容侧新发布理论卷")).toBeInTheDocument();
     expect(await screen.findByText("营销理论冲刺卷 B")).toBeInTheDocument();
+    const publishedPaperCard = screen.getByTestId(
+      "paper-card-paper-content-published-001",
+    );
+    expect(
+      within(publishedPaperCard).getByRole("link", { name: "练习" }),
+    ).toHaveAttribute(
+      "href",
+      "/practice?paperPublicId=paper-content-published-001",
+    );
+    expect(
+      within(publishedPaperCard).getByRole("link", { name: "模拟考试" }),
+    ).toHaveAttribute(
+      "href",
+      "/mock-exam?paperPublicId=paper-content-published-001",
+    );
     expect(screen.getByRole("button", { name: "营销 3级" })).toHaveAttribute(
       "aria-pressed",
       "true",

@@ -14,7 +14,7 @@ async function loginAsAdmin(page: Page) {
 }
 
 test.describe("content action closures", () => {
-  test("marks unsupported content and paper primary actions unavailable instead of enabled dead ends", async ({
+  test("keeps content write actions wired and paper context-only actions guarded", async ({
     page,
   }) => {
     await loginAsAdmin(page);
@@ -23,31 +23,37 @@ test.describe("content action closures", () => {
     await expect(
       page.getByRole("heading", { name: "题库与材料管理" }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: "新建题目" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "编辑题目" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "停用题目" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "复制题目" })).toBeDisabled();
-    await expect(page.getByTestId("content-action-unavailable")).toBeVisible();
+    await expect(page.getByRole("button", { name: "新建题目" })).toBeEnabled();
+    await expect(
+      page.getByTestId("content-action-runtime-ready"),
+    ).toBeVisible();
 
     await page.goto("/content/materials");
     await expect(
       page.getByRole("heading", { name: "题库与材料管理" }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: "新建材料" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "编辑材料" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "停用材料" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "复制材料" })).toBeDisabled();
-    await expect(page.getByTestId("content-action-unavailable")).toBeVisible();
+    await expect(page.getByRole("button", { name: "新建材料" })).toBeEnabled();
+    await expect(
+      page.getByTestId("content-action-runtime-ready"),
+    ).toBeVisible();
 
     await page.goto("/content/papers");
     await expect(page.getByRole("heading", { name: "试卷管理" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "新建草稿" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "组卷" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "发布" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "下架" })).toBeDisabled();
-    await expect(page.getByRole("button", { name: "复制" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "新建草稿" })).toBeEnabled();
     await expect(
-      page.getByRole("button", { name: "绑定原始文件" }),
+      page.getByRole("button", { name: "组卷", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "发布", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "下架", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "复制", exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "绑定原始文件", exact: true }),
     ).toBeDisabled();
     await expect(page.getByTestId("paper-action-unavailable")).toBeVisible();
   });
