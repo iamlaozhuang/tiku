@@ -40,6 +40,9 @@ export type AdminAiAuditLogListQuery = {
   sortBy: AdminAiAuditLogSortField;
   sortOrder: AdminAiAuditLogSortOrder;
   keyword: string | null;
+  actionType: string | "all";
+  targetResourceType: string | "all";
+  resultStatus: AdminAuditResultStatus | "all";
   aiFuncType: AdminAiFunctionType | "all";
   callStatus: AiCallStatus | "all";
   profession: Profession | "all";
@@ -130,7 +133,13 @@ export type AiCallLogSummaryListDto = {
 export function createAdminAiAuditLogListQuery(
   overrides: Partial<AdminAiAuditLogListQuery> = {},
 ): AdminAiAuditLogListQuery {
-  const { keyword, ...queryOverrides } = overrides;
+  const {
+    actionType,
+    keyword,
+    resultStatus,
+    targetResourceType,
+    ...queryOverrides
+  } = overrides;
 
   return {
     page: 1,
@@ -142,6 +151,16 @@ export function createAdminAiAuditLogListQuery(
     profession: "all",
     level: null,
     ...queryOverrides,
+    actionType:
+      typeof actionType === "string" ? normalizeFilterText(actionType) : "all",
+    resultStatus:
+      resultStatus === "success" || resultStatus === "failed"
+        ? resultStatus
+        : "all",
+    targetResourceType:
+      typeof targetResourceType === "string"
+        ? normalizeFilterText(targetResourceType)
+        : "all",
     keyword: typeof keyword === "string" ? normalizeKeyword(keyword) : null,
   };
 }
@@ -150,4 +169,10 @@ function normalizeKeyword(value: string): string | null {
   const keyword = value.trim();
 
   return keyword.length === 0 ? null : keyword;
+}
+
+function normalizeFilterText(value: string): string | "all" {
+  const filterText = value.trim();
+
+  return filterText.length === 0 ? "all" : filterText;
 }
