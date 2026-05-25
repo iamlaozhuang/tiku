@@ -440,7 +440,7 @@ export function AdminPaperManagement() {
             : paper,
         ),
       );
-      setActionMessage(`附件 ${paperAsset.publicId} 已绑定`);
+      setActionMessage(`附件 ${paperAsset.publicId} metadata 已登记`);
       setActiveForm(null);
     } catch {
       setActionError("附件绑定失败，请刷新后重试。");
@@ -718,7 +718,8 @@ function ActionBar({ onCreate }: { onCreate: () => void }) {
         id="paper-action-unavailable"
         role="status"
       >
-        草稿新建和行内组卷、发布、下架、复制、附件绑定已接入本地运行时；未选择试卷时请使用行内操作。
+        草稿新建和行内组卷、发布、下架、复制、附件 metadata
+        登记已接入本地运行时；未选择试卷时请使用行内操作。
       </p>
     </div>
   );
@@ -857,8 +858,11 @@ function PaperAssetWriteForm({
       }}
     >
       <h2 className="text-text-primary text-base font-semibold">
-        绑定原始文件
+        登记原始文件 metadata
       </h2>
+      <p className="text-text-secondary text-sm">
+        本地仅登记文件 metadata，不上传文件正文、OCR 或公开 URL。
+      </p>
       <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">文件名</span>
         <Input
