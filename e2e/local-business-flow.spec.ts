@@ -252,7 +252,19 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
     const favoriteButton = firstMistakeBookItem.getByRole("button", {
       name: /收藏/,
     });
+    const favoriteResponsePromise = page.waitForResponse((response) => {
+      const request = response.request();
+
+      return (
+        request.method() === "POST" &&
+        /\/api\/v1\/mistake-books\/[^/]+\/(?:favorite|unfavorite)$/.test(
+          new URL(response.url()).pathname,
+        )
+      );
+    });
     await favoriteButton.click();
+    const favoriteResponse = await favoriteResponsePromise;
+    expect(favoriteResponse.ok()).toBe(true);
     await expect(
       firstMistakeBookItem.getByRole("button", {
         name: /收藏/,

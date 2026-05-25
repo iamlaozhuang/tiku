@@ -6770,6 +6770,7 @@ tasks:
     humanApproval: User approved fixing the P1 local E2E/PostgreSQL connection pressure finding first, with commit, merge, push, and short-lived branch cleanup after completion. Approval does not cover dependency/package/lockfile changes, schema/migration/script changes, secret/env changes, staging/prod connection, deployment, cloud resource changes, destructive data operations, or recording sensitive/raw content.
     allowedFiles:
       - playwright.config.ts
+      - e2e/local-business-flow.spec.ts
       - tests/unit/**
       - docs/05-execution-logs/task-plans/2026-05-25-phase-11-local-e2e-postgres-connection-pressure-fix.md
       - docs/05-execution-logs/evidence/2026-05-25-phase-11-local-e2e-postgres-connection-pressure-fix.md
@@ -6802,7 +6803,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-e2e-postgres-connection-pressure-fix.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: phase-11-protected-route-hydration-fix
     title: Phase 11 Protected Route Hydration Fix
