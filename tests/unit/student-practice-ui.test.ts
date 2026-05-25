@@ -353,6 +353,222 @@ describe("StudentPracticePage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
+  it("submits canonical multi_choice practice answers with multiple selected labels", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const practice = {
+      ...studentPracticeFixture.practices[0].practice,
+      publicId: "practice-multi-choice-runtime",
+      paperPublicId: "paper-multi-choice-runtime",
+      paperSnapshot: {
+        name: "Canonical multi choice practice",
+        paperSections: [
+          {
+            title: "多选题",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-multi-choice-001",
+                questionPublicId: "question-multi-choice-001",
+                questionType: "multi_choice",
+                stemRichText: "哪些动作属于客户需求分析？",
+                questionOptions: [
+                  { label: "A", contentRichText: "访谈客户" },
+                  { label: "B", contentRichText: "复盘购买记录" },
+                  { label: "C", contentRichText: "删除反馈记录" },
+                ],
+                standardAnswerRichText: "A、B",
+                analysisRichText: "需要结合访谈与购买记录。",
+                score: "3.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const feedback = {
+      ...studentPracticeFixture.practices[0].feedbackByPaperQuestionPublicId[
+        "paper-question-marketing-001"
+      ],
+      isCorrect: true,
+      mistakeBookPublicId: null,
+      score: "3.0",
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-multi-choice-runtime/answers"
+        ) {
+          expect(JSON.parse(String(init?.body))).toMatchObject({
+            paperQuestionPublicId: "paper-question-multi-choice-001",
+            selectedLabels: ["A", "B"],
+            textAnswer: null,
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { feedback },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-multi-choice-runtime",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Canonical multi choice practice",
+      }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "A. 访谈客户" }));
+    fireEvent.click(screen.getByRole("button", { name: "B. 复盘购买记录" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(await screen.findByText("回答正确")).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("submits canonical fill_blank practice answers as textAnswer", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const practice = {
+      ...studentPracticeFixture.practices[0].practice,
+      publicId: "practice-fill-blank-runtime",
+      paperPublicId: "paper-fill-blank-runtime",
+      paperSnapshot: {
+        name: "Canonical fill blank practice",
+        paperSections: [
+          {
+            title: "填空题",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-fill-blank-001",
+                questionPublicId: "question-fill-blank-001",
+                questionType: "fill_blank",
+                stemRichText: "客户需求分析应先识别客户____。",
+                standardAnswerRichText: "真实购买动机",
+                analysisRichText: "先识别真实购买动机。",
+                score: "2.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const feedback = {
+      ...studentPracticeFixture.practices[0].feedbackByPaperQuestionPublicId[
+        "paper-question-marketing-001"
+      ],
+      isCorrect: true,
+      mistakeBookPublicId: null,
+      score: "2.0",
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-fill-blank-runtime/answers"
+        ) {
+          expect(JSON.parse(String(init?.body))).toMatchObject({
+            paperQuestionPublicId: "paper-question-fill-blank-001",
+            selectedLabels: [],
+            textAnswer: "真实购买动机",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { feedback },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-fill-blank-runtime",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Canonical fill blank practice",
+      }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("填空题答案"), {
+      target: { value: "真实购买动机" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(await screen.findByText("回答正确")).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
   it("renders subjective AI hint feedback and allows one retry from the session runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const practice = studentPracticeFixture.practices[1].practice;

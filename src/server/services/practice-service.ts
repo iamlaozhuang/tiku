@@ -67,6 +67,7 @@ type PracticeQuestionSnapshot = {
   questionPublicId: string;
   questionType: string | null;
   multiChoiceRule: string | null;
+  scoringMethod: string | null;
   standardAnswerLabels: string[];
   standardAnswerRichText: string | null;
   analysisRichText: string | null;
@@ -231,6 +232,7 @@ function findPracticeQuestion(
         questionPublicId,
         questionType: getStringField(paperQuestion, "questionType"),
         multiChoiceRule: getStringField(paperQuestion, "multiChoiceRule"),
+        scoringMethod: getStringField(paperQuestion, "scoringMethod"),
         standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
         standardAnswerRichText: getStringField(
           paperQuestion,
@@ -284,12 +286,55 @@ function normalizeLabels(labels: string[]): string[] {
   return [...labels].sort((left, right) => left.localeCompare(right));
 }
 
+function normalizeAutoMatchText(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, "")
+    .replace(/^正确答案[:：]\s*/, "")
+    .trim()
+    .toLocaleLowerCase();
+}
+
+function getAutoMatchAnswers(question: PracticeQuestionSnapshot): string[] {
+  if (question.standardAnswerLabels.length > 0) {
+    return question.standardAnswerLabels;
+  }
+
+  return question.standardAnswerRichText === null
+    ? []
+    : [question.standardAnswerRichText];
+}
+
+function isOptionQuestion(question: PracticeQuestionSnapshot): boolean {
+  return (
+    question.questionType === "single_choice" ||
+    question.questionType === "multi_choice" ||
+    question.questionType === "multiple_choice" ||
+    question.questionType === "true_false"
+  );
+}
+
+function isAutoMatchFillBlankQuestion(
+  question: PracticeQuestionSnapshot,
+): boolean {
+  return (
+    question.questionType === "fill_blank" &&
+    question.scoringMethod === "auto_match"
+  );
+}
+
 function isObjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
-  return question.standardAnswerLabels.length > 0;
+  return (
+    (isOptionQuestion(question) && question.standardAnswerLabels.length > 0) ||
+    (isAutoMatchFillBlankQuestion(question) &&
+      getAutoMatchAnswers(question).length > 0)
+  );
 }
 
 function isSubjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
-  return question.questionType === "subjective";
+  return (
+    question.questionType === "short_answer" ||
+    question.questionType === "subjective"
+  );
 }
 
 function createEmptyAiFeedback(): Pick<
@@ -356,6 +401,19 @@ function isCorrectObjectiveAnswer(
     return null;
   }
 
+  if (isAutoMatchFillBlankQuestion(question)) {
+    if (input.textAnswer === null) {
+      return false;
+    }
+
+    const normalizedTextAnswer = normalizeAutoMatchText(input.textAnswer);
+
+    return getAutoMatchAnswers(question).some(
+      (standardAnswer) =>
+        normalizeAutoMatchText(standardAnswer) === normalizedTextAnswer,
+    );
+  }
+
   return (
     normalizeLabels(question.standardAnswerLabels).join("|") ===
     normalizeLabels(input.selectedLabels).join("|")
@@ -387,7 +445,8 @@ function calculateObjectiveScore(
   }
 
   if (
-    question.questionType !== "multiple_choice" ||
+    (question.questionType !== "multi_choice" &&
+      question.questionType !== "multiple_choice") ||
     question.multiChoiceRule !== "partial_credit"
   ) {
     return {

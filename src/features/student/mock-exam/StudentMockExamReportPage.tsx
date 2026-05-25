@@ -63,10 +63,17 @@ type StudentMockExamFixture = {
   examReportPublicId: string;
 };
 
+type MockExamQuestionType =
+  | "single_choice"
+  | "multi_choice"
+  | "true_false"
+  | "fill_blank"
+  | "short_answer";
+
 type MockExamPaperQuestion = {
   paperQuestionPublicId: string;
   questionPublicId: string;
-  questionType: "single_choice" | "true_false" | "subjective";
+  questionType: MockExamQuestionType;
   paperSectionTitle: string;
   stemRichText: string;
   questionOptions: MockExamQuestionOption[];
@@ -110,6 +117,7 @@ const examStatusLabels: Record<ExamStatus, string> = {
 };
 
 const emptyAnswerSelections: Record<string, string[]> = {};
+const emptyTextAnswers: Record<string, string> = {};
 
 function isStudentResourceNotFoundResponse(payload: { code: number }): boolean {
   return payload.code === 404001;
@@ -325,6 +333,37 @@ function getQuestionOptionSource(value: Record<string, unknown>): unknown {
     : value.options;
 }
 
+function normalizeMockExamQuestionType(
+  value: string | null,
+): MockExamQuestionType | null {
+  switch (value) {
+    case "single_choice":
+    case "multi_choice":
+    case "true_false":
+    case "fill_blank":
+    case "short_answer":
+      return value;
+    case "multiple_choice":
+      return "multi_choice";
+    case "subjective":
+      return "short_answer";
+    default:
+      return null;
+  }
+}
+
+function isOptionMockExamQuestion(questionType: MockExamQuestionType): boolean {
+  return (
+    questionType === "single_choice" ||
+    questionType === "multi_choice" ||
+    questionType === "true_false"
+  );
+}
+
+function isTextMockExamQuestion(questionType: MockExamQuestionType): boolean {
+  return questionType === "fill_blank" || questionType === "short_answer";
+}
+
 function mapMockExamQuestion(
   value: unknown,
   fallbackPaperSectionTitle: string | null,
@@ -335,7 +374,9 @@ function mapMockExamQuestion(
 
   const paperQuestionPublicId = getStringField(value, "paperQuestionPublicId");
   const questionPublicId = getStringField(value, "questionPublicId");
-  const questionType = getStringField(value, "questionType");
+  const questionType = normalizeMockExamQuestionType(
+    getStringField(value, "questionType"),
+  );
   const paperSectionTitle =
     getStringField(value, "paperSectionTitle") ?? fallbackPaperSectionTitle;
   const stemRichText = getStringField(value, "stemRichText");
@@ -345,9 +386,7 @@ function mapMockExamQuestion(
     questionPublicId === null ||
     paperSectionTitle === null ||
     stemRichText === null ||
-    (questionType !== "single_choice" &&
-      questionType !== "true_false" &&
-      questionType !== "subjective")
+    questionType === null
   ) {
     return null;
   }
@@ -540,6 +579,47 @@ function MockExamQuestionPanel({
   );
 }
 
+function MockExamTextAnswerPanel({
+  textAnswer,
+  isSaved,
+  onChangeTextAnswer,
+  onSaveAnswer,
+}: {
+  textAnswer: string;
+  isSaved: boolean;
+  onChangeTextAnswer(value: string): void;
+  onSaveAnswer(): void;
+}) {
+  return (
+    <div className="space-y-4">
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">文字答案</span>
+        <textarea
+          aria-label="文字答案"
+          value={textAnswer}
+          onChange={(event) => onChangeTextAnswer(event.target.value)}
+          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-28 rounded-lg border px-3 py-2 text-sm transition-[border-color,box-shadow] outline-none focus-visible:ring-3"
+        />
+      </label>
+
+      <button
+        type="button"
+        disabled={textAnswer.trim().length === 0}
+        onClick={onSaveAnswer}
+        className="bg-primary text-primary-foreground flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        保存本题作答
+      </button>
+
+      {isSaved ? (
+        <p className="text-success bg-success/10 rounded-lg px-3 py-2 text-sm font-medium">
+          本题作答已保存
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function parseReportSnapshot(
   reportSnapshot: ExamReportSnapshotDto,
 ): ParsedReportSnapshot {
@@ -614,6 +694,8 @@ export function StudentMockExamPage({
   const [selectedLabelsByQuestion, setSelectedLabelsByQuestion] = useState(
     emptyAnswerSelections,
   );
+  const [textAnswerByQuestion, setTextAnswerByQuestion] =
+    useState(emptyTextAnswers);
   const [savedAnswerByQuestion, setSavedAnswerByQuestion] = useState(
     emptyAnswerSelections,
   );
@@ -766,6 +848,8 @@ export function StudentMockExamPage({
   const currentQuestion = questions[currentQuestionIndex] ?? questions[0];
   const selectedLabels =
     selectedLabelsByQuestion[currentQuestion.paperQuestionPublicId] ?? [];
+  const textAnswer =
+    textAnswerByQuestion[currentQuestion.paperQuestionPublicId] ?? "";
   const isCurrentQuestionSaved =
     savedAnswerByQuestion[currentQuestion.paperQuestionPublicId] !== undefined;
   const answeredCount = Object.keys(savedAnswerByQuestion).length;
@@ -773,13 +857,25 @@ export function StudentMockExamPage({
   const remainingMinute = getRemainingMinute(mockExam);
 
   function handleToggleLabel(label: string) {
-    const nextSelectedLabels = includesLabel(selectedLabels, label)
-      ? []
-      : [label];
+    const nextSelectedLabels =
+      currentQuestion.questionType === "multi_choice"
+        ? includesLabel(selectedLabels, label)
+          ? selectedLabels.filter((selectedLabel) => selectedLabel !== label)
+          : [...selectedLabels, label]
+        : includesLabel(selectedLabels, label)
+          ? []
+          : [label];
 
     setSelectedLabelsByQuestion({
       ...selectedLabelsByQuestion,
       [currentQuestion.paperQuestionPublicId]: nextSelectedLabels,
+    });
+  }
+
+  function handleChangeTextAnswer(textAnswerValue: string) {
+    setTextAnswerByQuestion({
+      ...textAnswerByQuestion,
+      [currentQuestion.paperQuestionPublicId]: textAnswerValue,
     });
   }
 
@@ -805,8 +901,14 @@ export function StudentMockExamPage({
               method: "POST",
               body: JSON.stringify({
                 paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
-                selectedLabels,
-                textAnswer: null,
+                selectedLabels: isOptionMockExamQuestion(
+                  currentQuestion.questionType,
+                )
+                  ? selectedLabels
+                  : [],
+                textAnswer: isTextMockExamQuestion(currentQuestion.questionType)
+                  ? textAnswer
+                  : null,
                 savedFromClientAt: new Date().toISOString(),
               }),
             },
@@ -829,7 +931,11 @@ export function StudentMockExamPage({
 
     setSavedAnswerByQuestion({
       ...savedAnswerByQuestion,
-      [currentQuestion.paperQuestionPublicId]: selectedLabels,
+      [currentQuestion.paperQuestionPublicId]: isOptionMockExamQuestion(
+        currentQuestion.questionType,
+      )
+        ? selectedLabels
+        : [textAnswer],
     });
   }
 
@@ -988,13 +1094,22 @@ export function StudentMockExamPage({
           </p>
         </div>
 
-        <MockExamQuestionPanel
-          question={currentQuestion}
-          selectedLabels={selectedLabels}
-          isSaved={isCurrentQuestionSaved}
-          onToggleLabel={handleToggleLabel}
-          onSaveAnswer={() => void handleSaveAnswer()}
-        />
+        {isOptionMockExamQuestion(currentQuestion.questionType) ? (
+          <MockExamQuestionPanel
+            question={currentQuestion}
+            selectedLabels={selectedLabels}
+            isSaved={isCurrentQuestionSaved}
+            onToggleLabel={handleToggleLabel}
+            onSaveAnswer={() => void handleSaveAnswer()}
+          />
+        ) : (
+          <MockExamTextAnswerPanel
+            textAnswer={textAnswer}
+            isSaved={isCurrentQuestionSaved}
+            onChangeTextAnswer={handleChangeTextAnswer}
+            onSaveAnswer={() => void handleSaveAnswer()}
+          />
+        )}
       </article>
 
       <div className="bg-surface ring-border space-y-3 rounded-xl p-4 shadow-sm ring-1">

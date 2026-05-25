@@ -116,7 +116,10 @@ export type MockExamServiceOptions = {
 type MockExamQuestionSnapshot = {
   paperQuestionPublicId: string;
   questionPublicId: string;
+  questionType: string | null;
+  scoringMethod: string | null;
   standardAnswerLabels: string[];
+  standardAnswerRichText: string | null;
   score: string;
   snapshot: Record<string, unknown>;
 };
@@ -293,7 +296,13 @@ function findMockExamQuestion(
       return {
         paperQuestionPublicId,
         questionPublicId,
+        questionType: getStringField(paperQuestion, "questionType"),
+        scoringMethod: getStringField(paperQuestion, "scoringMethod"),
         standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
+        standardAnswerRichText: getStringField(
+          paperQuestion,
+          "standardAnswerRichText",
+        ),
         score: getScore(paperQuestion),
         snapshot: paperQuestion,
       };
@@ -340,7 +349,13 @@ function listMockExamQuestions(
         {
           paperQuestionPublicId,
           questionPublicId,
+          questionType: getStringField(paperQuestion, "questionType"),
+          scoringMethod: getStringField(paperQuestion, "scoringMethod"),
           standardAnswerLabels: getStandardAnswerLabels(paperQuestion),
+          standardAnswerRichText: getStringField(
+            paperQuestion,
+            "standardAnswerRichText",
+          ),
           score: getScore(paperQuestion),
           snapshot: paperQuestion,
         },
@@ -363,8 +378,48 @@ function normalizeLabels(labels: string[]): string[] {
   return [...labels].sort((left, right) => left.localeCompare(right));
 }
 
+function normalizeAutoMatchText(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, "")
+    .replace(/^正确答案[:：]\s*/, "")
+    .trim()
+    .toLocaleLowerCase();
+}
+
+function getAutoMatchAnswers(question: MockExamQuestionSnapshot): string[] {
+  if (question.standardAnswerLabels.length > 0) {
+    return question.standardAnswerLabels;
+  }
+
+  return question.standardAnswerRichText === null
+    ? []
+    : [question.standardAnswerRichText];
+}
+
+function isOptionQuestion(question: MockExamQuestionSnapshot): boolean {
+  return (
+    question.questionType === "single_choice" ||
+    question.questionType === "multi_choice" ||
+    question.questionType === "multiple_choice" ||
+    question.questionType === "true_false"
+  );
+}
+
+function isAutoMatchFillBlankQuestion(
+  question: MockExamQuestionSnapshot,
+): boolean {
+  return (
+    question.questionType === "fill_blank" &&
+    question.scoringMethod === "auto_match"
+  );
+}
+
 function isObjectiveQuestion(question: MockExamQuestionSnapshot): boolean {
-  return question.standardAnswerLabels.length > 0;
+  return (
+    (isOptionQuestion(question) && question.standardAnswerLabels.length > 0) ||
+    (isAutoMatchFillBlankQuestion(question) &&
+      getAutoMatchAnswers(question).length > 0)
+  );
 }
 
 function isAiScoringQuestion(question: MockExamQuestionSnapshot): boolean {
@@ -375,6 +430,21 @@ function isCorrectObjectiveAnswer(
   question: MockExamQuestionSnapshot,
   answerRecord: MockExamAnswerRecordRow,
 ): boolean {
+  if (isAutoMatchFillBlankQuestion(question)) {
+    const textAnswer = answerRecord.answer_snapshot.textAnswer;
+
+    if (textAnswer === null) {
+      return false;
+    }
+
+    const normalizedTextAnswer = normalizeAutoMatchText(textAnswer);
+
+    return getAutoMatchAnswers(question).some(
+      (standardAnswer) =>
+        normalizeAutoMatchText(standardAnswer) === normalizedTextAnswer,
+    );
+  }
+
   return (
     normalizeLabels(question.standardAnswerLabels).join("|") ===
     normalizeLabels(answerRecord.answer_snapshot.selectedLabels).join("|")

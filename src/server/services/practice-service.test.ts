@@ -86,7 +86,7 @@ function createTwoQuestionPaperSnapshot(): Record<string, unknown> {
           {
             paperQuestionPublicId: "paper_question_public_456",
             questionPublicId: "question_public_456",
-            questionType: "multiple_choice",
+            questionType: "multi_choice",
             standardAnswerLabels: ["A", "B"],
             standardAnswerRichText: "<p>A、B</p>",
             analysisRichText: "<p>解析</p>",
@@ -138,6 +138,30 @@ function createQuestionOptionsOnlyPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createFillBlankPaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "2024年专卖三级理论填空题",
+    paperSections: [
+      {
+        paperSectionTitle: "二、填空题",
+        paperQuestions: [
+          {
+            paperQuestionPublicId: "paper_question_fill_blank_123",
+            questionPublicId: "question_fill_blank_123",
+            questionType: "fill_blank",
+            stemRichText: "<p>客户需求分析应先识别客户____。</p>",
+            standardAnswerRichText: "<p>真实购买动机</p>",
+            analysisRichText: "<p>先识别真实购买动机。</p>",
+            score: "2.0",
+            scoringMethod: "auto_match",
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createSubjectivePaperSnapshot(): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
@@ -149,7 +173,7 @@ function createSubjectivePaperSnapshot(): Record<string, unknown> {
           {
             paperQuestionPublicId: "paper_question_subjective_123",
             questionPublicId: "question_subjective_123",
-            questionType: "subjective",
+            questionType: "short_answer",
             stemRichText: "<p>请说明检查处置步骤。</p>",
             standardAnswerRichText: "<p>先核验事实，再依法处置并跟进闭环。</p>",
             analysisRichText: "<p>按事实、依据、处置、复盘展开。</p>",
@@ -842,6 +866,47 @@ describe("practice service", () => {
           score: "1.5",
           maxScore: "3.0",
           mistakeBookPublicId: "mistake_book_public_2",
+        },
+      },
+    });
+    expect(mistakeBookInputs).toHaveLength(1);
+  });
+
+  it("scores auto-match fill_blank answers and adds wrong answers to mistake_book", async () => {
+    const mistakeBookInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            paper_snapshot: createFillBlankPaperSnapshot(),
+          });
+        },
+        async upsertMistakeBookFromWrongAnswer(input) {
+          mistakeBookInputs.push(input);
+
+          return {
+            public_id: input.publicId,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_fill_blank_123",
+        textAnswer: "购买频率",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          isCorrect: false,
+          score: "0.0",
+          maxScore: "2.0",
+          mistakeBookPublicId: "mistake_book_public_2",
+          aiHintStatus: null,
         },
       },
     });

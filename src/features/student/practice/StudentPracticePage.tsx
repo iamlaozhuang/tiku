@@ -44,10 +44,17 @@ type StudentPracticeFixture = {
   feedbackByPaperQuestionPublicId: Record<string, PracticeAnswerFeedbackDto>;
 };
 
+type PracticeQuestionType =
+  | "single_choice"
+  | "multi_choice"
+  | "true_false"
+  | "fill_blank"
+  | "short_answer";
+
 type PracticePaperQuestion = {
   paperQuestionPublicId: string;
   questionPublicId: string;
-  questionType: "single_choice" | "subjective";
+  questionType: PracticeQuestionType;
   paperSectionTitle: string;
   questionGroupTitle: string | null;
   materialTitle: string | null;
@@ -327,6 +334,45 @@ function getQuestionOptionSource(value: Record<string, unknown>): unknown {
     : value.options;
 }
 
+function normalizePracticeQuestionType(
+  value: string | null,
+): PracticeQuestionType | null {
+  switch (value) {
+    case "single_choice":
+    case "multi_choice":
+    case "true_false":
+    case "fill_blank":
+    case "short_answer":
+      return value;
+    case "multiple_choice":
+      return "multi_choice";
+    case "subjective":
+      return "short_answer";
+    default:
+      return null;
+  }
+}
+
+function isOptionPracticeQuestion(questionType: PracticeQuestionType): boolean {
+  return (
+    questionType === "single_choice" ||
+    questionType === "multi_choice" ||
+    questionType === "true_false"
+  );
+}
+
+function isFillBlankPracticeQuestion(
+  questionType: PracticeQuestionType,
+): boolean {
+  return questionType === "fill_blank";
+}
+
+function isSubjectivePracticeQuestion(
+  questionType: PracticeQuestionType,
+): boolean {
+  return questionType === "short_answer";
+}
+
 function mapPracticeQuestion(
   value: unknown,
   fallbackPaperSectionTitle: string | null,
@@ -337,7 +383,9 @@ function mapPracticeQuestion(
 
   const paperQuestionPublicId = getStringField(value, "paperQuestionPublicId");
   const questionPublicId = getStringField(value, "questionPublicId");
-  const questionType = getStringField(value, "questionType");
+  const questionType = normalizePracticeQuestionType(
+    getStringField(value, "questionType"),
+  );
   const paperSectionTitle =
     getStringField(value, "paperSectionTitle") ?? fallbackPaperSectionTitle;
   const stemRichText = getStringField(value, "stemRichText");
@@ -347,7 +395,7 @@ function mapPracticeQuestion(
     questionPublicId === null ||
     paperSectionTitle === null ||
     stemRichText === null ||
-    (questionType !== "single_choice" && questionType !== "subjective")
+    questionType === null
   ) {
     return null;
   }
@@ -561,6 +609,85 @@ function ObjectiveQuestionPanel({
           >
             {hasNextQuestion ? "下一题" : "已到最后一题"}
           </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FillBlankQuestionPanel({
+  textAnswer,
+  feedback,
+  onChangeTextAnswer,
+  onSubmitAnswer,
+  onNextQuestion,
+  hasNextQuestion,
+}: {
+  textAnswer: string;
+  feedback: PracticeAnswerFeedbackDto | null;
+  onChangeTextAnswer(value: string): void;
+  onSubmitAnswer(): void;
+  onNextQuestion(): void;
+  hasNextQuestion: boolean;
+}) {
+  const hasFeedback = feedback !== null;
+
+  return (
+    <div className="space-y-4">
+      <label className="grid gap-2 text-sm font-medium">
+        <span className="text-text-secondary">填空题答案</span>
+        <input
+          aria-label="填空题答案"
+          disabled={hasFeedback}
+          value={textAnswer}
+          onChange={(event) => onChangeTextAnswer(event.target.value)}
+          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-10 rounded-lg border px-3 text-sm transition-[border-color,box-shadow] outline-none focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-60"
+        />
+      </label>
+
+      <button
+        type="button"
+        disabled={textAnswer.trim().length === 0 || hasFeedback}
+        onClick={onSubmitAnswer}
+        className="bg-primary text-primary-foreground flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        提交答案
+      </button>
+
+      {feedback === null ? null : (
+        <div className="bg-background ring-border space-y-3 rounded-xl p-4 ring-1">
+          <div className="flex items-center gap-2">
+            {feedback.isCorrect ? (
+              <CheckCircle2
+                className="text-success size-5"
+                aria-hidden="true"
+              />
+            ) : (
+              <XCircle className="text-error size-5" aria-hidden="true" />
+            )}
+            <p className="text-text-primary text-sm font-semibold">
+              {feedback.isCorrect ? "回答正确" : "回答错误"}
+            </p>
+          </div>
+          {feedback.standardAnswerRichText === null ? null : (
+            <p className="text-text-secondary text-sm">
+              正确答案：{feedback.standardAnswerRichText}
+            </p>
+          )}
+          {feedback.analysisRichText === null ? null : (
+            <p className="text-text-secondary text-sm">
+              解析：{feedback.analysisRichText}
+            </p>
+          )}
+          {hasNextQuestion ? (
+            <button
+              type="button"
+              onClick={onNextQuestion}
+              className="border-border text-text-primary flex h-9 w-full items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
+            >
+              下一题
+            </button>
+          ) : null}
         </div>
       )}
     </div>
@@ -877,9 +1004,14 @@ export function StudentPracticePage({
   const hasNextQuestion = currentQuestionIndex < questions.length - 1;
 
   function handleToggleLabel(label: string) {
-    const nextSelectedLabels = includesLabel(selectedLabels, label)
-      ? []
-      : [label];
+    const nextSelectedLabels =
+      currentQuestion.questionType === "multi_choice"
+        ? includesLabel(selectedLabels, label)
+          ? selectedLabels.filter((selectedLabel) => selectedLabel !== label)
+          : [...selectedLabels, label]
+        : includesLabel(selectedLabels, label)
+          ? []
+          : [label];
 
     setSelectedLabelsByQuestion({
       ...selectedLabelsByQuestion,
@@ -921,14 +1053,16 @@ export function StudentPracticePage({
               method: "POST",
               body: JSON.stringify({
                 paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
-                selectedLabels:
-                  currentQuestion.questionType === "single_choice"
-                    ? selectedLabels
-                    : [],
+                selectedLabels: isOptionPracticeQuestion(
+                  currentQuestion.questionType,
+                )
+                  ? selectedLabels
+                  : [],
                 textAnswer:
-                  currentQuestion.questionType === "single_choice"
-                    ? null
-                    : textAnswer,
+                  isFillBlankPracticeQuestion(currentQuestion.questionType) ||
+                  isSubjectivePracticeQuestion(currentQuestion.questionType)
+                    ? textAnswer
+                    : null,
                 savedFromClientAt: new Date().toISOString(),
               }),
             },
@@ -1116,12 +1250,21 @@ export function StudentPracticePage({
           </p>
         </div>
 
-        {currentQuestion.questionType === "single_choice" ? (
+        {isOptionPracticeQuestion(currentQuestion.questionType) ? (
           <ObjectiveQuestionPanel
             question={currentQuestion}
             selectedLabels={selectedLabels}
             feedback={feedback}
             onToggleLabel={handleToggleLabel}
+            onSubmitAnswer={() => void handleSubmitAnswer()}
+            onNextQuestion={handleNextQuestion}
+            hasNextQuestion={hasNextQuestion}
+          />
+        ) : isFillBlankPracticeQuestion(currentQuestion.questionType) ? (
+          <FillBlankQuestionPanel
+            textAnswer={textAnswer}
+            feedback={feedback}
+            onChangeTextAnswer={handleChangeTextAnswer}
             onSubmitAnswer={() => void handleSubmitAnswer()}
             onNextQuestion={handleNextQuestion}
             hasNextQuestion={hasNextQuestion}
