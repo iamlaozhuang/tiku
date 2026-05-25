@@ -71,6 +71,26 @@ Pre-commit note:
 | Changed runtime scope           | content question authoring UI and unit coverage only                |
 | Next task after closeout        | `phase-12-repair-student-question-type-runtime` from clean `master` |
 
+## Master Merge Validation
+
+| Item           | Result                                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Merge          | fast-forwarded `codex/phase-12-content-question-authoring-existing-types` into `master`                                                     |
+| Unit tests     | pass: `npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts tests/unit/phase-9-content-question-material-runtime.test.ts` |
+| E2E            | pass after local idle DB backend cleanup: `npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts`                                     |
+| Build          | pass: `npm.cmd run build`                                                                                                                   |
+| Readiness      | pass: `Test-AgentSystemReadiness.ps1`                                                                                                       |
+| Naming         | pass: `Test-NamingConventions.ps1`                                                                                                          |
+| Git completion | pass inventory against `origin/master`; master was ahead by the task commit only                                                            |
+| Whitespace     | pass: `git diff --check`                                                                                                                    |
+
+Post-merge E2E diagnostic:
+
+- First post-merge E2E attempts showed `题库加载失败` because `/api/v1/questions` returned 500.
+- Server logs showed Postgres `53300` / `sorry, too many clients already`, with 93 local `postgres.js` idle connections in `pg_stat_activity`.
+- Recovery action was limited to local/dev runtime cleanup: terminated idle `postgres.js` backends for local database `tiku`; no data, schema, migration, secret, staging/prod, cloud, or deployment changes.
+- After cleanup, connection count returned to active/system-only baseline and the same E2E command passed.
+
 ## Implementation Summary
 
 - Added content question form controls for question type, profession, level, subject, scoring method, multi-choice rule, and material publicId.
