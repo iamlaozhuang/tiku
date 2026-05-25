@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-repair-ai-rag-citation-local-integration
+  id: phase-12-repair-content-question-edit-ux
   status: closed
   sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
-  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-ai-rag-citation-local-integration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ai-rag-citation-local-integration.md
-  branch: codex/phase-12-ai-rag-citation-local-integration
-  commitSha: 4b699c5
+  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-question-edit-ux.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-edit-ux.md
+  branch: codex/phase-12-content-question-edit-ux
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Continue from clean master to phase-12-repair-content-question-edit-ux after closeout
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ai-rag-citation-local-integration.md
+  nextRecommendedAction: Continue from clean master to phase-12-plan-question-type-schema-expansion gate review
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-edit-ux.md

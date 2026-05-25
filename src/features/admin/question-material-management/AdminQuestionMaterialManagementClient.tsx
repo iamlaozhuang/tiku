@@ -462,6 +462,11 @@ export function AdminQuestionMaterialManagement({
       }),
     [keyword, materials, profession, status, subject],
   );
+  const selectedQuestionPublicId =
+    activeForm?.kind === "question" ? activeForm.publicId : null;
+  const selectedMaterialPublicId =
+    activeForm?.kind === "material" ? activeForm.publicId : null;
+
   if (loadState === "loading") {
     return (
       <AdminLoadingState
@@ -785,27 +790,6 @@ export function AdminQuestionMaterialManagement({
         </p>
       )}
 
-      {activeForm?.kind === "question" ? (
-        <QuestionWriteForm
-          isSubmitting={isSubmitting}
-          key={`${activeForm.mode}-${activeForm.publicId ?? "new"}`}
-          mode={activeForm.mode}
-          values={activeForm.values}
-          onCancel={() => setActiveForm(null)}
-          onSubmit={handleSaveQuestion}
-        />
-      ) : null}
-
-      {activeForm?.kind === "material" ? (
-        <MaterialWriteForm
-          isSubmitting={isSubmitting}
-          mode={activeForm.mode}
-          values={activeForm.values}
-          onCancel={() => setActiveForm(null)}
-          onSubmit={handleSaveMaterial}
-        />
-      ) : null}
-
       <div
         aria-label="题库资源类型"
         className="border-border bg-surface inline-flex rounded-md border p-1"
@@ -833,51 +817,103 @@ export function AdminQuestionMaterialManagement({
         </button>
       </div>
 
-      {activeView === "questions" ? (
-        <QuestionList
-          recommendationByQuestionPublicId={recommendationsByQuestionPublicId}
-          rows={filteredQuestions}
-          onCopy={(publicId) => void handleQuestionAction(publicId, "copy")}
-          onDisable={(publicId) =>
-            void handleQuestionAction(publicId, "disable")
-          }
-          onEdit={(question) => {
-            setActionError(null);
-            setActionMessage(null);
-            setActiveForm({
-              kind: "question",
-              mode: "edit",
-              publicId: question.publicId,
-              values: createQuestionFormValuesFromQuestion(question),
-            });
-          }}
-          onRecommend={(question) =>
-            void handleRecommendKnowledgeNodes(question)
-          }
-          onReviewRecommendation={handleReviewKnowledgeRecommendation}
-        />
-      ) : (
-        <MaterialList
-          rows={filteredMaterials}
-          onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
-          onDisable={(publicId) =>
-            void handleMaterialAction(publicId, "disable")
-          }
-          onEdit={(material) => {
-            setActionError(null);
-            setActionMessage(null);
-            setActiveForm({
-              kind: "material",
-              mode: "edit",
-              publicId: material.publicId,
-              values: {
-                contentRichText: stripRichText(material.contentRichText),
-                title: material.title,
-              },
-            });
-          }}
-        />
-      )}
+      <div
+        className={
+          activeForm === null
+            ? "grid gap-4"
+            : "grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)]"
+        }
+      >
+        <div className="min-w-0">
+          {activeView === "questions" ? (
+            <QuestionList
+              recommendationByQuestionPublicId={
+                recommendationsByQuestionPublicId
+              }
+              rows={filteredQuestions}
+              selectedPublicId={selectedQuestionPublicId}
+              onCopy={(publicId) => void handleQuestionAction(publicId, "copy")}
+              onDisable={(publicId) =>
+                void handleQuestionAction(publicId, "disable")
+              }
+              onEdit={(question) => {
+                setActionError(null);
+                setActionMessage(null);
+                setActiveForm({
+                  kind: "question",
+                  mode: "edit",
+                  publicId: question.publicId,
+                  values: createQuestionFormValuesFromQuestion(question),
+                });
+              }}
+              onRecommend={(question) =>
+                void handleRecommendKnowledgeNodes(question)
+              }
+              onReviewRecommendation={handleReviewKnowledgeRecommendation}
+            />
+          ) : (
+            <MaterialList
+              rows={filteredMaterials}
+              selectedPublicId={selectedMaterialPublicId}
+              onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
+              onDisable={(publicId) =>
+                void handleMaterialAction(publicId, "disable")
+              }
+              onEdit={(material) => {
+                setActionError(null);
+                setActionMessage(null);
+                setActiveForm({
+                  kind: "material",
+                  mode: "edit",
+                  publicId: material.publicId,
+                  values: {
+                    contentRichText: stripRichText(material.contentRichText),
+                    title: material.title,
+                  },
+                });
+              }}
+            />
+          )}
+        </div>
+        {activeForm === null ? null : (
+          <aside
+            className="min-w-0 xl:sticky xl:top-4 xl:self-start"
+            data-testid="content-edit-context-panel"
+          >
+            <div className="mb-3 flex flex-col gap-1">
+              <p
+                className="text-text-primary text-sm font-semibold"
+                data-testid="content-edit-context-label"
+              >
+                {activeForm.mode === "create" ? "新建" : "编辑"}
+                {activeForm.kind === "question" ? "题目" : "材料"}
+              </p>
+              <p className="text-text-muted text-xs">
+                {activeForm.publicId ?? "new local draft"}
+              </p>
+            </div>
+            {activeForm.kind === "question" ? (
+              <QuestionWriteForm
+                isSubmitting={isSubmitting}
+                key={`${activeForm.mode}-${activeForm.publicId ?? "new"}`}
+                mode={activeForm.mode}
+                values={activeForm.values}
+                onCancel={() => setActiveForm(null)}
+                onSubmit={handleSaveQuestion}
+              />
+            ) : (
+              <MaterialWriteForm
+                isSubmitting={isSubmitting}
+                key={`${activeForm.mode}-${activeForm.publicId ?? "new"}`}
+                mode={activeForm.mode}
+                values={activeForm.values}
+                onCancel={() => setActiveForm(null)}
+                onSubmit={handleSaveMaterial}
+              />
+            )}
+          </aside>
+        )}
+      </div>
     </section>
   );
 }
@@ -1368,6 +1404,7 @@ function FilterPanel({
 function QuestionList({
   recommendationByQuestionPublicId,
   rows,
+  selectedPublicId,
   onCopy,
   onDisable,
   onEdit,
@@ -1379,6 +1416,7 @@ function QuestionList({
     KnowledgeRecommendationReviewState
   >;
   rows: QuestionDto[];
+  selectedPublicId: string | null;
   onCopy: (publicId: string) => void;
   onDisable: (publicId: string) => void;
   onEdit: (question: QuestionDto) => void;
@@ -1395,101 +1433,110 @@ function QuestionList({
 
   return (
     <div className="grid gap-3">
-      {rows.map((question) => (
-        <article
-          className="bg-surface border-border rounded-md border p-4 shadow-sm"
-          data-public-id={question.publicId}
-          data-testid={`question-row-${question.publicId}`}
-          key={question.publicId}
-        >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={question.status} />
-                <span className="text-text-muted text-xs">
-                  {questionTypeLabels[question.questionType]}
-                </span>
-                <span className="text-text-muted text-xs">
-                  {formatScope(question)}
-                </span>
-              </div>
-              <h2 className="text-text-primary text-base font-semibold">
-                {readQuestionSummary(question)}
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {question.knowledgeNodePublicIds.map((publicId) => (
-                  <span
-                    className="bg-muted text-muted-foreground rounded-md px-2 py-1 text-xs"
-                    key={publicId}
-                  >
-                    {publicId}
+      {rows.map((question) => {
+        const isSelected = question.publicId === selectedPublicId;
+
+        return (
+          <article
+            aria-current={isSelected ? "true" : undefined}
+            className={`bg-surface border-border rounded-md border p-4 shadow-sm ${
+              isSelected ? "ring-primary/60 bg-primary/5 ring-2" : ""
+            }`}
+            data-public-id={question.publicId}
+            data-selected={String(isSelected)}
+            data-testid={`question-row-${question.publicId}`}
+            key={question.publicId}
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge status={question.status} />
+                  <span className="text-text-muted text-xs">
+                    {questionTypeLabels[question.questionType]}
                   </span>
-                ))}
-                {question.tagPublicIds.map((publicId) => (
-                  <span
-                    className="border-border text-text-secondary rounded-md border px-2 py-1 text-xs"
-                    key={publicId}
-                  >
-                    {publicId}
+                  <span className="text-text-muted text-xs">
+                    {formatScope(question)}
                   </span>
-                ))}
+                </div>
+                <h2 className="text-text-primary text-base font-semibold">
+                  {readQuestionSummary(question)}
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {question.knowledgeNodePublicIds.map((publicId) => (
+                    <span
+                      className="bg-muted text-muted-foreground rounded-md px-2 py-1 text-xs"
+                      key={publicId}
+                    >
+                      {publicId}
+                    </span>
+                  ))}
+                  {question.tagPublicIds.map((publicId) => (
+                    <span
+                      className="border-border text-text-secondary rounded-md border px-2 py-1 text-xs"
+                      key={publicId}
+                    >
+                      {publicId}
+                    </span>
+                  ))}
+                </div>
               </div>
+              <PublicId value={question.publicId} />
             </div>
-            <PublicId value={question.publicId} />
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              aria-label={`编辑题目 ${question.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onEdit(question)}
-            >
-              <Pencil aria-hidden="true" data-icon="inline-start" />
-              编辑
-            </Button>
-            <Button
-              aria-label={`停用题目 ${question.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onDisable(question.publicId)}
-            >
-              <ShieldOff aria-hidden="true" data-icon="inline-start" />
-              停用
-            </Button>
-            <Button
-              aria-label={`复制题目 ${question.publicId}`}
-              size="sm"
-              type="button"
-              variant="secondary"
-              onClick={() => onCopy(question.publicId)}
-            >
-              <Copy aria-hidden="true" data-icon="inline-start" />
-              复制
-            </Button>
-            <Button
-              aria-label={`Recommend knowledge nodes for ${question.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onRecommend(question)}
-            >
-              <Sparkles aria-hidden="true" data-icon="inline-start" />
-              推荐知识点
-            </Button>
-          </div>
-          <KnowledgeRecommendationReviewPanel
-            question={question}
-            reviewState={recommendationByQuestionPublicId[question.publicId]}
-            onReviewRecommendation={onReviewRecommendation}
-          />
-          <ReferenceBlock
-            label="关联材料"
-            value={question.materialPublicId ?? "未关联材料"}
-          />
-        </article>
-      ))}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                aria-label={`编辑题目 ${question.publicId}`}
+                data-testid={`question-edit-${question.publicId}`}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onEdit(question)}
+              >
+                <Pencil aria-hidden="true" data-icon="inline-start" />
+                编辑
+              </Button>
+              <Button
+                aria-label={`停用题目 ${question.publicId}`}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onDisable(question.publicId)}
+              >
+                <ShieldOff aria-hidden="true" data-icon="inline-start" />
+                停用
+              </Button>
+              <Button
+                aria-label={`复制题目 ${question.publicId}`}
+                size="sm"
+                type="button"
+                variant="secondary"
+                onClick={() => onCopy(question.publicId)}
+              >
+                <Copy aria-hidden="true" data-icon="inline-start" />
+                复制
+              </Button>
+              <Button
+                aria-label={`Recommend knowledge nodes for ${question.publicId}`}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onRecommend(question)}
+              >
+                <Sparkles aria-hidden="true" data-icon="inline-start" />
+                推荐知识点
+              </Button>
+            </div>
+            <KnowledgeRecommendationReviewPanel
+              question={question}
+              reviewState={recommendationByQuestionPublicId[question.publicId]}
+              onReviewRecommendation={onReviewRecommendation}
+            />
+            <ReferenceBlock
+              label="关联材料"
+              value={question.materialPublicId ?? "未关联材料"}
+            />
+          </article>
+        );
+      })}
     </div>
   );
 }
@@ -1622,11 +1669,13 @@ function KnowledgeRecommendationReviewPanel({
 
 function MaterialList({
   rows,
+  selectedPublicId,
   onCopy,
   onDisable,
   onEdit,
 }: {
   rows: MaterialDto[];
+  selectedPublicId: string | null;
   onCopy: (publicId: string) => void;
   onDisable: (publicId: string) => void;
   onEdit: (material: MaterialDto) => void;
@@ -1637,68 +1686,76 @@ function MaterialList({
 
   return (
     <div className="grid gap-3">
-      {rows.map((material) => (
-        <article
-          className="bg-surface border-border rounded-md border p-4 shadow-sm"
-          data-public-id={material.publicId}
-          data-testid={`material-row-${material.publicId}`}
-          key={material.publicId}
-        >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={material.status} />
-                <span className="text-text-muted text-xs">
-                  {formatScope(material)}
-                </span>
+      {rows.map((material) => {
+        const isSelected = material.publicId === selectedPublicId;
+
+        return (
+          <article
+            aria-current={isSelected ? "true" : undefined}
+            className={`bg-surface border-border rounded-md border p-4 shadow-sm ${
+              isSelected ? "ring-primary/60 bg-primary/5 ring-2" : ""
+            }`}
+            data-public-id={material.publicId}
+            data-selected={String(isSelected)}
+            data-testid={`material-row-${material.publicId}`}
+            key={material.publicId}
+          >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge status={material.status} />
+                  <span className="text-text-muted text-xs">
+                    {formatScope(material)}
+                  </span>
+                </div>
+                <h2 className="text-text-primary text-base font-semibold">
+                  {material.title}
+                </h2>
+                <p className="text-text-secondary line-clamp-2 text-sm">
+                  {stripRichText(material.contentRichText)}
+                </p>
               </div>
-              <h2 className="text-text-primary text-base font-semibold">
-                {material.title}
-              </h2>
-              <p className="text-text-secondary line-clamp-2 text-sm">
-                {stripRichText(material.contentRichText)}
-              </p>
+              <PublicId value={material.publicId} />
             </div>
-            <PublicId value={material.publicId} />
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              aria-label={`编辑材料 ${material.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onEdit(material)}
-            >
-              <Pencil aria-hidden="true" data-icon="inline-start" />
-              编辑
-            </Button>
-            <Button
-              aria-label={`停用材料 ${material.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onDisable(material.publicId)}
-            >
-              <ShieldOff aria-hidden="true" data-icon="inline-start" />
-              停用
-            </Button>
-            <Button
-              aria-label={`复制材料 ${material.publicId}`}
-              size="sm"
-              type="button"
-              variant="secondary"
-              onClick={() => onCopy(material.publicId)}
-            >
-              <Copy aria-hidden="true" data-icon="inline-start" />
-              复制
-            </Button>
-          </div>
-          <ReferenceBlock
-            label="材料锁定"
-            value={material.isLocked ? "已被发布试卷锁定" : "未锁定"}
-          />
-        </article>
-      ))}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                aria-label={`编辑材料 ${material.publicId}`}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onEdit(material)}
+              >
+                <Pencil aria-hidden="true" data-icon="inline-start" />
+                编辑
+              </Button>
+              <Button
+                aria-label={`停用材料 ${material.publicId}`}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onDisable(material.publicId)}
+              >
+                <ShieldOff aria-hidden="true" data-icon="inline-start" />
+                停用
+              </Button>
+              <Button
+                aria-label={`复制材料 ${material.publicId}`}
+                size="sm"
+                type="button"
+                variant="secondary"
+                onClick={() => onCopy(material.publicId)}
+              >
+                <Copy aria-hidden="true" data-icon="inline-start" />
+                复制
+              </Button>
+            </div>
+            <ReferenceBlock
+              label="材料锁定"
+              value={material.isLocked ? "已被发布试卷锁定" : "未锁定"}
+            />
+          </article>
+        );
+      })}
     </div>
   );
 }

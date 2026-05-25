@@ -736,6 +736,27 @@ describe("AdminQuestionMaterialManagement", () => {
     ]);
   });
 
+  it("opens question edit in a contextual panel tied to the selected row", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+    fireEvent.click(screen.getByTestId("question-edit-question-marketing-001"));
+
+    const editPanel = screen.getByTestId("content-edit-context-panel");
+
+    expect(editPanel).toHaveTextContent("question-marketing-001");
+    expect(
+      screen.getByTestId("question-row-question-marketing-001"),
+    ).toHaveAttribute("data-selected", "true");
+    expect(
+      screen.getByTestId("question-row-question-logistics-002"),
+    ).toHaveAttribute("data-selected", "false");
+    expect(within(editPanel).getByRole("form")).toBeInTheDocument();
+  });
+
   it("reviews knowledge_node recommendations with confidence, stale, accept, and discard states", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockWritableContentFetch();

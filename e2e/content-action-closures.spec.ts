@@ -27,6 +27,16 @@ test.describe("content action closures", () => {
     await expect(
       page.getByTestId("content-action-runtime-ready"),
     ).toBeVisible();
+    const firstQuestionRow = page
+      .locator('[data-testid^="question-row-"]')
+      .first();
+    await expect(firstQuestionRow).toBeVisible();
+    await firstQuestionRow.locator('[data-testid^="question-edit-"]').click();
+    await expect(page.getByTestId("content-edit-context-panel")).toBeVisible();
+    await expect(firstQuestionRow).toHaveAttribute("data-selected", "true");
+    await expect(
+      page.getByTestId("content-edit-context-panel").getByRole("form"),
+    ).toBeVisible();
 
     await page.goto("/content/materials");
     await expect(
