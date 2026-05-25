@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-mvp-requirements-runtime-audit-round-2
+  id: phase-12-mvp-full-requirements-audit-pass-1
   status: closed
-  sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-round-audit
+  sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
   planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-  branch: codex/phase-12-mvp-audit-round-2
+  branch: codex/phase-12-mvp-full-audit-pass-1
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: From clean master, claim phase-12-mvp-requirements-runtime-audit-round-3 and verify the Round 2 SSOT/code findings through local browser/runtime walkthrough
+  nextRecommendedAction: From clean master, claim phase-12-mvp-full-requirements-audit-pass-2 and repeat a complete independent SSOT-to-runtime audit without relying on pass 1 conclusions
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md

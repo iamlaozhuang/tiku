@@ -2,7 +2,7 @@
 
 ## Goal
 
-Run a requirements-first local audit that uses `docs/01-requirements/` as the SSOT and maps MVP requirements to current UI, API, service/repository runtime, tests, evidence, and role-based browser usability.
+Run three complete, independent, requirements-first local audit passes that use `docs/01-requirements/` as the SSOT and map MVP requirements to current UI, API, service/repository runtime, tests, evidence, and role-based browser usability.
 
 This document is intentionally reused across the audit batch. Each audit round is a separate queue task and closeout, but the plan/evidence files may be updated in place to avoid document sprawl.
 
@@ -59,61 +59,57 @@ Every requirement item is assessed with the same matrix columns:
 | Severity           | P0/P1/P2/P3 with rationale.                                                     |
 | Follow-up task     | proposed queue task or approval gate.                                           |
 
-## Audit Rounds And Closeout Boundaries
+## Audit Passes And Closeout Boundaries
 
-Each round must close out independently:
+User clarification on 2026-05-25: the requested "three rounds" are not three stages of one audit. They are three independent full audits. Each pass must start from SSOT requirements again and cover the full product surface across student, content_admin, ops_admin, super_admin, unauthenticated, and system/runtime boundaries.
+
+Each full pass must close out independently:
 
 1. update this shared plan/evidence as needed;
 2. run the round's validation commands;
 3. stage, commit, merge to `master`, push, and clean the short-lived branch when safe;
 4. register or advance the next queued task from clean `master`.
 
-### Round 1: SSOT Decomposition
+The earlier stage-oriented tasks are retained as preparation evidence only:
+
+| Task                                              | Handling                                                                                |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `phase-12-mvp-requirements-runtime-audit-round-1` | closed; useful SSOT inventory, but not treated as one complete independent audit pass   |
+| `phase-12-mvp-requirements-runtime-audit-round-2` | closed; useful static code/API/test mapping, but not treated as one complete audit pass |
+| `phase-12-mvp-requirements-runtime-audit-round-3` | blocked/superseded by the corrected three full-pass audit protocol                      |
+| `phase-12-mvp-requirements-runtime-audit-summary` | blocked/superseded by `phase-12-mvp-full-requirements-audit-summary-and-repair-queue`   |
+
+### Full Audit Pass 1
 
 - Read all requirement modules and stories fresh.
-- Break requirements into role-based acceptance units for:
-  - student;
-  - content_admin;
-  - ops_admin;
-  - super_admin;
-  - unauthenticated/authorization edge cases.
-- Mark explicit non-goals so implementation gaps are not misclassified.
-- Produce the initial AC inventory and role/module coverage map.
-- Closeout task: `phase-12-mvp-requirements-runtime-audit-round-1`.
+- Rebuild the AC inventory from SSOT instead of relying on previous notes.
+- Inspect UI, API, service/repository, and tests for every epic group.
+- Verify representative local/browser routes for the largest uncertainty areas.
+- Classify P0/P1/P2/P3 findings and note evidence confidence.
+- Closeout task: `phase-12-mvp-full-requirements-audit-pass-1`.
 
-### Round 2: Code/API/Test Mapping
+### Full Audit Pass 2
 
-- Map each AC to current routes under `src/app`, UI components under `src/features`, API handlers under `src/app/api/v1`, service files under `src/server/services`, repository files under `src/server/repositories`, and tests under `tests/unit` and `e2e`.
-- Classify gaps separately:
-  - UI absent but API exists;
-  - UI present but read-only;
-  - UI writes but does not expose required fields;
-  - API exists but service is stub/unavailable;
-  - service exists but persistence/audit/logging is partial;
-  - test coverage claims more than runtime supports.
+- Repeat the full SSOT-to-runtime audit independently from pass 1.
+- Use pass 1 only as a challenge list after independently reading docs/code/runtime.
+- Confirm, refine, or reject each pass 1 finding with fresh evidence.
+- Add missed stories, role boundaries, API gaps, or false positives.
+- Closeout task: `phase-12-mvp-full-requirements-audit-pass-2`.
+
+### Full Audit Pass 3
+
+- Repeat the full SSOT-to-runtime audit independently from passes 1 and 2.
+- Focus on blind spots left by the first two passes while still covering every epic.
+- Recheck browser/runtime surfaces for key student/content/ops/super_admin flows.
 - Do not infer completion from file existence alone.
-- Closeout task: `phase-12-mvp-requirements-runtime-audit-round-2`.
-
-### Round 3: Local Runtime And UX Walkthrough
-
-- Use local/dev only.
-- Validate selected representative paths in the browser/API for student, content_admin, ops_admin, and super_admin surfaces.
-- Record screenshots or local paths only when useful and sanitized.
-- Verify specific suspected gaps without limiting the audit to them:
-  - content question type and per-type fields;
-  - content question edit UX;
-  - redeem_code generation workflow;
-  - org_auth creation/cancel workflow;
-  - employee/organization operational flows;
-  - student authorization-to-practice/mock/report/mistake_book flows;
-  - AI/RAG visible citation/log boundaries.
-- Closeout task: `phase-12-mvp-requirements-runtime-audit-round-3`.
+- Closeout task: `phase-12-mvp-full-requirements-audit-pass-3`.
 
 ### Summary: Repair Queue Seeding
 
-- Consolidate the three rounds.
+- Consolidate the three full independent audit passes.
 - Produce the severity-ranked issue register and repair queue.
-- Closeout task: `phase-12-mvp-requirements-runtime-audit-summary`.
+- Seed independently shippable repair tasks with allowedFiles, blockedFiles, validation commands, and high-risk approval gates.
+- Closeout task: `phase-12-mvp-full-requirements-audit-summary-and-repair-queue`.
 
 ## Deliverables
 

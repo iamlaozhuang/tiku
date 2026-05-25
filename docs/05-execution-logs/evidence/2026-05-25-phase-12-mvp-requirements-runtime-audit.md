@@ -2,7 +2,7 @@
 
 ## Status
 
-`round_2_validated`
+`full_audit_pass_1_validated`
 
 ## Scope Boundary
 
@@ -26,6 +26,7 @@ Forbidden actions:
 | Started from           | clean `master`                                                                              |
 | Round 1 branch         | `codex/phase-12-mvp-requirements-runtime-audit`                                             |
 | Round 2 branch         | `codex/phase-12-mvp-audit-round-2`                                                          |
+| Full pass 1 branch     | `codex/phase-12-mvp-full-audit-pass-1`                                                      |
 | Current phase          | `phase-11-staging-release-planning`                                                         |
 | Staging implementation | remains paused                                                                              |
 | External readiness     | DNS not configured, ICP pending, cloud server not purchased, database service not purchased |
@@ -49,24 +50,38 @@ The SSOT is `docs/01-requirements/`. User-reported issues are treated as example
 
 Each round must read documents and inspect code/runtime fresh enough to support the finding. Completion cannot be inferred from conversation memory or from route/file existence alone.
 
-## Three-Round Audit Plan
+## User Clarification And Protocol Correction
 
-| Round   | Purpose                                | Evidence requirement                                              |
-| ------- | -------------------------------------- | ----------------------------------------------------------------- |
-| Round 1 | SSOT decomposition into role-based ACs | Requirement/module/story references and initial AC inventory      |
-| Round 2 | Code/API/test mapping                  | UI/API/service/repository/test mapping and status classification  |
-| Round 3 | Local runtime and UX walkthrough       | Browser/API observations, sanitized screenshots/paths when useful |
+On 2026-05-25, the user clarified that "three rounds" means three complete independent audits, not three stages of one audit.
+
+Handling:
+
+- the closed stage-oriented Round 1 and Round 2 commits remain valid preparation evidence;
+- they must not be counted as complete independent audit passes;
+- the old stage-oriented Round 3 and summary queue entries are blocked/superseded;
+- new queue tasks `phase-12-mvp-full-requirements-audit-pass-1`, `pass-2`, `pass-3`, and `summary-and-repair-queue` are registered;
+- each full audit pass must reread SSOT requirements, inspect code/tests, check local/browser runtime where useful, close out independently, then start the next pass from clean `master`.
+
+## Three Full Independent Audit Passes
+
+| Pass   | Purpose                                                                  | Evidence requirement                                                                        |
+| ------ | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Pass 1 | Full SSOT-to-runtime audit across all epics and roles                    | Fresh requirement reads, code/API/test mapping, representative browser/runtime observations |
+| Pass 2 | Independent repeat audit, challenging pass 1 findings and looking gaps   | Fresh reads, independently derived deltas, confirmations/rejections of pass 1 findings      |
+| Pass 3 | Independent repeat audit, focused on blind spots while covering all SSOT | Fresh reads, runtime/UX checks, final missed-story sweep before repair queue planning       |
 
 ## Closeout Model
 
-The audit is split into independent queue tasks:
+The corrected audit is split into independent queue tasks:
 
-| Task                                              | Purpose                              | Closeout expectation              |
-| ------------------------------------------------- | ------------------------------------ | --------------------------------- |
-| `phase-12-mvp-requirements-runtime-audit-round-1` | SSOT decomposition                   | commit, merge, push, clean branch |
-| `phase-12-mvp-requirements-runtime-audit-round-2` | code/API/test mapping                | commit, merge, push, clean branch |
-| `phase-12-mvp-requirements-runtime-audit-round-3` | browser/runtime/UX walkthrough       | commit, merge, push, clean branch |
-| `phase-12-mvp-requirements-runtime-audit-summary` | consolidated report and repair queue | commit, merge, push, clean branch |
+| Task                                                            | Purpose                                   | Closeout expectation              |
+| --------------------------------------------------------------- | ----------------------------------------- | --------------------------------- |
+| `phase-12-mvp-full-requirements-audit-pass-1`                   | first complete independent audit pass     | commit, merge, push, clean branch |
+| `phase-12-mvp-full-requirements-audit-pass-2`                   | second complete independent audit pass    | commit, merge, push, clean branch |
+| `phase-12-mvp-full-requirements-audit-pass-3`                   | third complete independent audit pass     | commit, merge, push, clean branch |
+| `phase-12-mvp-full-requirements-audit-summary-and-repair-queue` | consolidated report and repair task queue | commit, merge, push, clean branch |
+
+The earlier `phase-12-mvp-requirements-runtime-audit-round-1` and `round-2` remain closed preparation tasks. The earlier `round-3` and `summary` are blocked/superseded by the corrected tasks above.
 
 ## Round 1 Log
 
@@ -232,24 +247,88 @@ Round 2 is static mapping only. It does not claim browser behavior; Round 3 must
 
 ## Round 3 Log
 
-Pending.
+Blocked/superseded by the corrected three complete independent audit pass protocol. The old Round 3 task was not used for browser-only stage evidence after the user clarified the intended audit shape.
+
+## Full Audit Pass 1 Log
+
+### Fresh Reads And Scans
+
+Full pass 1 reread or rescanned:
+
+- `AGENTS.md`
+- `docs/03-standards/code-taste-ten-commandments.md`
+- `docs/02-architecture/adr/*.md`
+- `docs/01-requirements/00-index.md`
+- `docs/01-requirements/modules/*.md`
+- `docs/01-requirements/stories/*.md`
+- `docs/04-agent-system/state/project-state.yaml`
+- `docs/04-agent-system/state/task-queue.yaml`
+- `src/app/**`, `src/features/**`, `src/server/**`, `tests/unit/**`, and `e2e/**` targeted to the SSOT role/story inventory.
+
+### Browser Runtime Walkthrough
+
+Local target: `http://127.0.0.1:3000`.
+
+No `.env.local`, token, Authorization header, raw API payload, raw prompt, raw answer, raw model response, full paper, full textbook, OCR full text, or customer/customer-like private data was recorded.
+
+Sanitized screenshots were written under `C:\tmp\tiku-phase12-full-audit-pass1\`.
+
+| Route                      | Runtime observation                                                                                                                                 | Screenshot                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `/content/questions`       | Page loads for admin. Filters expose keyword/profession/subject/status only. Question rows expose edit/disable/copy/kn_recommendation actions.      | `C:\tmp\tiku-phase12-full-audit-pass1\content-questions.png`         |
+| new question form          | Clicking `新建题目` shows only stem, standard answer, and analysis fields; no question type, option, scoring, material, tag, or knowledge controls. | `C:\tmp\tiku-phase12-full-audit-pass1\content-question-new-form.png` |
+| `/content/materials`       | Material list and create/edit/disable/copy actions are visible; filters remain narrower than full SSOT.                                             | `C:\tmp\tiku-phase12-full-audit-pass1\content-materials.png`         |
+| `/content/papers`          | Paper page exposes draft, compose, publish, archive, copy, and paper_asset metadata actions; this is the strongest content-admin area in pass 1.    | `C:\tmp\tiku-phase12-full-audit-pass1\content-papers.png`            |
+| `/content/knowledge-nodes` | Knowledge node page exposes add/edit/move/disable buttons, but runtime data was empty in this local state.                                          | `C:\tmp\tiku-phase12-full-audit-pass1\content-knowledge-nodes.png`   |
+| `/ops/users`               | Ops page shows users, reset password, summary counts, and a single `生成卡密` action; full org/auth/redeem forms are not directly action-closed.    | `C:\tmp\tiku-phase12-full-audit-pass1\ops-users.png`                 |
+| `/ops/organizations`       | Organization/auth page is mostly read-oriented and points back to centralized ops entry for new org_auth. No inline create/cancel form observed.    | `C:\tmp\tiku-phase12-full-audit-pass1\ops-organizations.png`         |
+| `/ops/redeem-codes`        | Redeem code page is read-oriented and explicitly says plaintext/hash is not shown; batch generation form for count/scope/duration/deadline absent.  | `C:\tmp\tiku-phase12-full-audit-pass1\ops-redeem-codes.png`          |
+| `/ops/resources`           | Resource page displays upload/Markdown/download buttons but empty state says upload, download, Markdown proofreading, and disable are out of scope. | `C:\tmp\tiku-phase12-full-audit-pass1\ops-resources.png`             |
+| `/ops/ai-audit-logs`       | AI/log page shows static model config/log/cost panels, API key masked text, and only enable/disable model config actions.                           | `C:\tmp\tiku-phase12-full-audit-pass1\ops-ai-audit-logs.png`         |
+| `/home`                    | Student home loads, authorized scope and paper practice/mock entries are visible.                                                                   | `C:\tmp\tiku-phase12-full-audit-pass1\student-home.png`              |
+| `/profile`                 | Student profile displays session, authorization, and personal_auth status.                                                                          | `C:\tmp\tiku-phase12-full-audit-pass1\student-profile.png`           |
+| `/redeem-code`             | Student redeem page displays a redeem code input and current personal authorization.                                                                | `C:\tmp\tiku-phase12-full-audit-pass1\student-redeem-code.png`       |
+| `/mistake-book`            | Mistake book list/actions are visible, but pass 1 did not find visible type/source/mastery filters required by SSOT.                                | `C:\tmp\tiku-phase12-full-audit-pass1\student-mistake-book.png`      |
+| `/exam-report`             | Exam report list exposes search and status filter; per-report details still require deeper pass 2/3 review.                                         | `C:\tmp\tiku-phase12-full-audit-pass1\student-exam-report.png`       |
+
+### Targeted Test Evidence
+
+| Command                                                                                                                                                                                                                                                                                                                                                                                                                          | Result | Notes                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| `npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/admin-ai-audit-log-ops-baseline.test.ts tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts tests/unit/phase-11-auth-session-account-hardening.test.ts` | pass   | 7 files, 42 tests passed. These tests prove existing slices, not full SSOT closure. |
+| `npm.cmd run test:e2e -- e2e/student-practice-mock-entry.spec.ts e2e/content-action-closures.spec.ts`                                                                                                                                                                                                                                                                                                                            | pass   | 2 E2E tests passed for representative student and content action entry paths.       |
+
+### Full Pass 1 Findings
+
+| ID      | Severity | Area                          | Pass 1 finding                                                                                                                                             | Confidence |
+| ------- | -------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| FP1-F01 | P1       | Content question authoring    | New question UX cannot choose question type and cannot enter type-specific options/scoring/material/knowledge/tag fields required by US-02-01/US-06-08.    | high       |
+| FP1-F02 | P1       | Student question type support | Static code scan still shows student practice/report paths only handling a narrow type set; browser pass only exercised existing single-choice local data. | medium     |
+| FP1-F03 | P1       | Ops org_auth/redeem closure   | Browser confirms org_auth and redeem pages are read-oriented or redirect-style, while SSOT expects direct create/cancel/detail and batch configuration.    | high       |
+| FP1-F04 | P1       | Resource knowledge lifecycle  | Resource page explicitly states upload/download/Markdown proofreading/disable are out of current runtime scope, conflicting with US-06-06/US-05 lifecycle. | high       |
+| FP1-F05 | P2       | Mistake book filters          | Mistake book shows list/actions, but no visible type/source/mastery filters in pass 1.                                                                     | medium     |
+| FP1-F06 | P2       | AI/model ops                  | AI ops page shows masked config and logs, but not full model provider add/edit/fallback mapping CRUD; secret/env work remains gated.                       | medium     |
+| FP1-F07 | P2       | Knowledge node data/runtime   | Knowledge node page actions exist, but local data was empty and row-level action usability could not be validated in pass 1.                               | medium     |
+| FP1-F08 | P0       | Audit protocol                | The previous stage-oriented interpretation was corrected; future evidence must count only full independent passes toward the requested three audits.       | high       |
+
+Full pass 1 status: `complete_for_first_full_independent_audit`.
 
 ## MVP Requirements Runtime Coverage Matrix
 
-Round 2 static mapping adds implementation status. Browser/UX confirmation remains deferred to Round 3.
+Round 2 static mapping adds implementation status. Full pass 1 adds the first complete independent runtime/browser confirmation, but passes 2 and 3 must still re-audit independently.
 
-| Module                      | SSOT stories | Primary roles                                             | Round 1 status | Round 2 static status                                                                                 |
-| --------------------------- | -----------: | --------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- |
-| User/auth                   |           14 | student, employee student, ops_admin, super_admin, system | decomposed     | partial; auth/session paths exist, but org/employee/admin workflow closure depends on ops UI gaps     |
-| Question/paper              |           11 | content_admin, student, system                            | decomposed     | partial; paper stronger, question authoring is P1 incomplete                                          |
-| Student experience          |            9 | student                                                   | decomposed     | partial; practice/mock/report/mistake_book exist, question type support and filters need repair       |
-| AI scoring/explanation/hint |            8 | student, content_admin, super_admin, system               | decomposed     | partial; local/mock paths exist, real provider and RAG citation closure not proven                    |
-| RAG/knowledge               |            9 | ops_admin, content_admin, student, system                 | decomposed     | partial; knowledge/resource list/publish/rebuild exists, upload/review/disable lifecycle is P1 gap    |
-| Admin ops/logging           |           13 | ops_admin, content_admin, super_admin                     | decomposed     | partial; backend services broader than UI, org_auth/redeem/model/log workflows require action closure |
+| Module                      | SSOT stories | Primary roles                                             | Round 1 status | Round 2 static status                                                                                 | Full pass 1 status                                                                                 |
+| --------------------------- | -----------: | --------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| User/auth                   |           14 | student, employee student, ops_admin, super_admin, system | decomposed     | partial; auth/session paths exist, but org/employee/admin workflow closure depends on ops UI gaps     | partial; admin/student login and profile paths work, employee/org closure remains tied to ops gaps |
+| Question/paper              |           11 | content_admin, student, system                            | decomposed     | partial; paper stronger, question authoring is P1 incomplete                                          | partial; paper UI works better, question creation form is confirmed P1 incomplete                  |
+| Student experience          |            9 | student                                                   | decomposed     | partial; practice/mock/report/mistake_book exist, question type support and filters need repair       | partial; home/profile/redeem/mistake/exam list visible, mistake filters and type breadth pending   |
+| AI scoring/explanation/hint |            8 | student, content_admin, super_admin, system               | decomposed     | partial; local/mock paths exist, real provider and RAG citation closure not proven                    | partial; representative E2E passed, full AI/RAG citation and model CRUD remain unproven            |
+| RAG/knowledge               |            9 | ops_admin, content_admin, student, system                 | decomposed     | partial; knowledge/resource list/publish/rebuild exists, upload/review/disable lifecycle is P1 gap    | partial; resource page explicitly reports upload/review/download/disable outside current scope     |
+| Admin ops/logging           |           13 | ops_admin, content_admin, super_admin                     | decomposed     | partial; backend services broader than UI, org_auth/redeem/model/log workflows require action closure | partial; browser confirms read-heavy org/redeem pages and partial AI/log controls                  |
 
 ## Issue Register
 
-Round 2 classifies static implementation gaps; Round 3 must confirm runtime behavior before repair queue finalization.
+Round 2 classified static implementation gaps. Full pass 1 confirmed several runtime/UI gaps. Passes 2 and 3 must independently re-audit before final repair queue seeding.
 
 | Severity | Area                     | Finding                                                                                                      | Next audit action                                                                                               |
 | -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
@@ -259,10 +338,13 @@ Round 2 classifies static implementation gaps; Round 3 must confirm runtime beha
 | P1       | Resource knowledge/RAG   | Resource upload/review/detail/disable lifecycle is not complete in UI/API mapping.                           | Round 3 should verify visible resource page and local-only boundary.                                            |
 | P2       | Model/log observability  | Model config, audit_log, and ai_call_log management is only partially mapped.                                | Round 3 should verify visible filters/detail and whether any action requires secret/env approval before repair. |
 | P3       | Content question edit UX | Row edit context is detached from selected row.                                                              | Confirm in browser and schedule after the blocking question data-model/form gap.                                |
+| P1       | Content question form    | Browser confirms no question type/type-specific field controls on the new question form.                     | Pass 2 should recheck source and browser, then decide schema-gated versus UI-only repair split.                 |
+| P1       | Resource lifecycle       | Browser confirms resource page declares upload/download/Markdown/disable out of current runtime scope.       | Pass 2 should inspect API/service boundaries and identify local-only storage repair path.                       |
+| P1       | Ops action closure       | Browser confirms org_auth/redeem pages are read-oriented or link back to a centralized page.                 | Pass 2 should test exact API/service availability and UI form gaps separately.                                  |
 
 ## Proposed Repair Queue
 
-Pending until Round 3 and summary. Round 2 provides candidate repair areas, but repair tasks will only be seeded after browser/runtime confirmation.
+Pending until three full audit passes and summary. Full pass 1 provides candidate repair areas, but repair tasks will only be seeded after passes 2 and 3 independently confirm or refine the findings.
 
 ## Validation Commands
 
@@ -291,6 +373,17 @@ Round 2 validation:
 | `git diff --check`                                                                                                                                                   | pass   | No whitespace errors.                                                       |
 | `node .\node_modules\prettier\bin\prettier.cjs --write ...`                                                                                                          | pass   | Only this audit's docs/state files were targeted; no runtime files changed. |
 
+Full pass 1 validation:
+
+| Command                                                                                                                                                          | Result | Notes                                                            |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------- |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-full-requirements-audit-pass-1` | pass   | Corrected full audit task was claimable from the current branch. |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                   | pass   | Required docs, scripts, npm scripts, and skills were available.  |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                      | pass   | Naming scan completed.                                           |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                              | pass   | Inventory showed only allowed docs/state files changed.          |
+| `git diff --check`                                                                                                                                               | pass   | No whitespace errors.                                            |
+| `node .\node_modules\prettier\bin\prettier.cjs --write ...`                                                                                                      | pass   | Only this audit's docs/state files were targeted.                |
+
 ## Repository Hygiene Closeout Checklist
 
 | Check                                                                                        | Result |
@@ -302,7 +395,8 @@ Round 2 validation:
 | No `.env.local` or `.env.example` read/change                                                | pass   |
 | No staging/prod, deployment, cloud, DNS, COS, public URL, provider, or object storage change | pass   |
 | No secret/token/raw provider/full content recorded                                           | pass   |
-| Round 2 closed and Round 3/summary remain queued                                             | pass   |
+| Corrected full-pass audit queue registered                                                   | pass   |
+| Full pass 1 closed and pass 2/pass 3/summary remain queued                                   | pass   |
 
 ## Taste Compliance Self-Check
 

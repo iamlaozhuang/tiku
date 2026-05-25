@@ -7342,7 +7342,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-    status: pending
+    status: blocked
     retryCount: 0
   - id: phase-12-mvp-requirements-runtime-audit-summary
     title: Phase 12 MVP Requirements Runtime Audit Summary And Repair Queue
@@ -7377,6 +7377,169 @@ tasks:
     securityReviewRequired: true
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-requirements-runtime-audit-summary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: blocked
+    retryCount: 0
+  - id: phase-12-mvp-full-requirements-audit-pass-1
+    title: Phase 12 MVP Full Requirements Audit Pass 1
+    phase: phase-12-mvp-requirements-runtime-audit
+    sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
+    dependencies:
+      - phase-12-mvp-requirements-runtime-audit-round-2
+    taskPlanPolicy: required
+    humanApproval: User clarified that the requested three rounds are three complete independent audits, not three stages of one audit. Approval covers local/dev requirements-first audit work and docs/state/evidence updates only, with commit, merge, push, and short-lived branch cleanup after completion. Approval does not cover dependency/package/lockfile changes, schema/migration/script changes, business/runtime code changes, secret/env changes, staging/prod connection, deployment, cloud resource changes, Tencent Cloud COS, public object storage URL creation, real provider calls, destructive data operations, or recording sensitive/raw/full content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - runtime_coverage
+      - browser_verification
+      - evidence_integrity
+      - product_readiness
+      - environment_boundary
+      - secret_or_env_change
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-full-requirements-audit-pass-1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: closed
+    retryCount: 0
+  - id: phase-12-mvp-full-requirements-audit-pass-2
+    title: Phase 12 MVP Full Requirements Audit Pass 2
+    phase: phase-12-mvp-requirements-runtime-audit
+    sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
+    dependencies:
+      - phase-12-mvp-full-requirements-audit-pass-1
+    taskPlanPolicy: required
+    humanApproval: User clarified that the requested three rounds are three complete independent audits, not three stages of one audit. Approval covers local/dev requirements-first audit work and docs/state/evidence updates only, with commit, merge, push, and short-lived branch cleanup after completion. Approval does not cover dependency/package/lockfile changes, schema/migration/script changes, business/runtime code changes, secret/env changes, staging/prod connection, deployment, cloud resource changes, Tencent Cloud COS, public object storage URL creation, real provider calls, destructive data operations, or recording sensitive/raw/full content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - runtime_coverage
+      - browser_verification
+      - evidence_integrity
+      - product_readiness
+      - environment_boundary
+      - secret_or_env_change
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-full-requirements-audit-pass-2
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-mvp-full-requirements-audit-pass-3
+    title: Phase 12 MVP Full Requirements Audit Pass 3
+    phase: phase-12-mvp-requirements-runtime-audit
+    sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
+    dependencies:
+      - phase-12-mvp-full-requirements-audit-pass-2
+    taskPlanPolicy: required
+    humanApproval: User clarified that the requested three rounds are three complete independent audits, not three stages of one audit. Approval covers local/dev requirements-first audit work and docs/state/evidence updates only, with commit, merge, push, and short-lived branch cleanup after completion. Approval does not cover dependency/package/lockfile changes, schema/migration/script changes, business/runtime code changes, secret/env changes, staging/prod connection, deployment, cloud resource changes, Tencent Cloud COS, public object storage URL creation, real provider calls, destructive data operations, or recording sensitive/raw/full content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - runtime_coverage
+      - browser_verification
+      - evidence_integrity
+      - product_readiness
+      - environment_boundary
+      - secret_or_env_change
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-full-requirements-audit-pass-3
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-mvp-full-requirements-audit-summary-and-repair-queue
+    title: Phase 12 MVP Full Requirements Audit Summary And Repair Queue
+    phase: phase-12-mvp-requirements-runtime-audit
+    sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
+    dependencies:
+      - phase-12-mvp-full-requirements-audit-pass-3
+    taskPlanPolicy: required
+    humanApproval: User requested consolidated repair task queue planning after three complete independent audits. Approval covers docs/state/evidence queue planning only, with commit, merge, push, and short-lived branch cleanup after completion. Repair implementation still follows each queued task's own allowedFiles, blockedFiles, validation commands, and high-risk approval gates.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - repair_queue_planning
+      - evidence_integrity
+      - product_readiness
+      - environment_boundary
+      - secret_or_env_change
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-full-requirements-audit-summary-and-repair-queue
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
