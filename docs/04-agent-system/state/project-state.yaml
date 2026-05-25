@@ -42,7 +42,7 @@ currentTask:
   planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-local-resource-lifecycle.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-local-resource-lifecycle.md
   branch: codex/phase-12-local-resource-lifecycle
-  commitSha: null
+  commitSha: 1ec9287
   prUrl: null
   retryCount: 0
   lastFailurePath: null

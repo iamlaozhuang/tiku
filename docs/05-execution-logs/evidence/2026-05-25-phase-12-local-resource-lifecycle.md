@@ -2,7 +2,7 @@
 
 ## Status
 
-`validated`
+`closed`
 
 ## Boundary
 
@@ -40,6 +40,19 @@ This task implements local/dev resource lifecycle only. It does not change depen
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                                                                                                                                                                                                           | pass                    |
 | `git diff --check`                                                                                                                                                                                                                                                                                                                                    | pass                    |
 
+## Master Merge Validation
+
+| Command                                                                                                                                                                                                                                                                                                                                               | Result                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `git merge --ff-only codex/phase-12-local-resource-lifecycle`                                                                                                                                                                                                                                                                                         | pass: master at `1ec9287`                                    |
+| `npm.cmd run test:unit -- tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/phase-11-local-file-upload-storage-adapter.test.ts tests/unit/phase-11-local-text-document-parser-boundary.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts tests/unit/phase-11-local-rag-mock-embedding-pipeline.test.ts` | pass: 5 files, 26 tests                                      |
+| `npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts`                                                                                                                                                                                                                                                                                             | pass: 1 Playwright test                                      |
+| `npm.cmd run build`                                                                                                                                                                                                                                                                                                                                   | pass                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                                                                                                                                                                                                        | pass                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                                                                                                                                                                                                           | pass                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                                                                                                                                                                                                   | pass: only local commit ahead of `origin/master` before push |
+| `git diff --check`                                                                                                                                                                                                                                                                                                                                    | pass                                                         |
+
 ## Runtime Notes
 
 - The first E2E resource assertion exposed that the empty resource page did not render an upload entry; this was fixed so local upload remains available even before any resource exists.
@@ -56,6 +69,9 @@ This task implements local/dev resource lifecycle only. It does not change depen
 | Staging/prod/cloud/deploy       | not touched                                        |
 | Runtime output                  | local ignored `.runtime/` only                     |
 | Provider calls                  | none                                               |
+| Commit                          | `1ec9287 feat(resource): close local lifecycle`    |
+| Merge                           | fast-forward into `master`                         |
+| Push authorization              | user pre-authorized per-task push to `master`      |
 | Next task after closeout        | `phase-12-repair-student-mistake-book-ac-coverage` |
 
 ## Notes
