@@ -12,6 +12,8 @@ Queue registration validation completed on `codex/phase-11-role-based-full-flow-
 
 The user approved planning and queueing a reusable role-based full-flow local acceptance task, including a staging acceptance template and newly added test-only data. The approval explicitly remains bounded by the project restrictions: no secret access, no staging/prod connection, no deployment, no cloud resource change, no dependency/package/lockfile change, no schema/migration/script change, no real provider call, and no sensitive/raw/full-content evidence.
 
+Follow-up review approved tightening the planned queue so role flows must account for different data prerequisites before experience automation starts.
+
 ## Artifact Boundary
 
 Planned committed artifacts:
@@ -33,6 +35,7 @@ Generated runtime artifacts must not be staged unless a future task explicitly a
 
 | Acceptance criterion                  | Runtime proof planned                                                                | Current result |
 | ------------------------------------- | ------------------------------------------------------------------------------------ | -------------- |
+| Role data readiness order             | Preflight inventory before system ops, content ops, student, oversight, and template | Planned        |
 | Local role-based full-flow acceptance | Browser or e2e proof for student, content ops, system ops, and oversight flows       | Not run        |
 | Staging acceptance template           | Reusable template under `docs/05-execution-logs/acceptance/role-based-full-flow/`    | Not created    |
 | Test-only data isolation              | Deterministic test prefix and cleanup/isolation notes                                | Not run        |
@@ -59,6 +62,15 @@ Queue registration validation:
 | `Test-GitCompletionReadiness.ps1 -BaseBranch master`                                 | Inventory completed; branch dirty before commit as expected          |
 | `Invoke-QualityGate.ps1`                                                             | Pass: lint, typecheck, 119 unit test files / 447 tests, format check |
 
+Review correction validation:
+
+- `Test-TaskClaimReadiness.ps1 -TaskId phase-11-role-based-full-flow-acceptance-rerun`: Pass; task now reports `data_readiness` in risk gates.
+- `Select-String` for `Role Data Readiness Matrix`, `Execution Order`, `Preflight Data Inventory`, `System Ops Data Readiness`, `Content Ops Readiness`, `Student Positive Flow`, `Student Negative Flow`, and `Oversight Flow`: Pass.
+- `git diff --check`: Pass.
+- `Test-AgentSystemReadiness.ps1`: Pass.
+- `Test-NamingConventions.ps1`: Pass.
+- `Invoke-QualityGate.ps1`: Pass: lint, typecheck, 119 unit test files / 447 tests, format check.
+
 Pending for next session acceptance execution:
 
 - `Test-TaskClaimReadiness.ps1 -TaskId phase-11-role-based-full-flow-acceptance-rerun`
@@ -76,6 +88,7 @@ Pending for next session acceptance execution:
 - Generated artifact cleanup: pending next session.
 - `git status --short --branch`: pending next session.
 - Evidence redaction review: pending next session.
+- Role data readiness review: pending next session.
 
 ## stagingDecision
 

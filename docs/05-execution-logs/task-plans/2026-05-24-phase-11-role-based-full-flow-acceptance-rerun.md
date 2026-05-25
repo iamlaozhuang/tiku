@@ -27,7 +27,8 @@ The user approved:
 - a reusable staging acceptance template;
 - reusable automation assets;
 - newly added test-only data;
-- use of project-owned textbook and real paper assets as bounded test references.
+- use of project-owned textbook and real paper assets as bounded test references;
+- a data-readiness preflight and role execution order that accounts for different data prerequisites per role.
 
 This approval does not authorize dependency/package/lockfile changes, schema/migration changes, script changes, `.env.local` or secret access, staging/prod connection, deployment, cloud resource changes, real provider calls, destructive data operations, or evidence that records full textbook, full paper, OCR full text, raw prompt, raw answer, raw model response, Authorization headers, tokens, secrets, or customer-like private content.
 
@@ -60,6 +61,30 @@ The future task must cover, at minimum:
 - Do not record full paper content, full textbook content, OCR full text, raw prompt, raw answer, raw model response, secrets, provider payloads, or customer-like private data in committed artifacts.
 - Pause if the flow needs schema/migration/script changes, dependency changes, real provider calls, staging/prod access, or destructive cleanup beyond test-only records.
 
+## Role Data Readiness Matrix
+
+| Role or phase             | Data prerequisites                                                                                                                 | If already present                                                               | If missing                                                                                                                 | Evidence requirement                                                             |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Preflight Data Inventory  | Test-only user, organization, org_auth, redeem_code, contact_config, material, question, published paper, and audit/AI log anchors | Reuse only if records are clearly test-only and bounded to this acceptance run   | Create only test-only data through approved local runtime entrypoints; pause if schema/migration/script changes are needed | Inventory table with record labels or public identifiers only                    |
+| System Ops Data Readiness | Admin/system ops account, organization tree, org_auth, redeem_code, contact_config                                                 | Verify management screens/API show expected test-only records                    | Create or repair test-only records before student/content flows                                                            | Runtime proof for each managed entity and no sensitive data in evidence          |
+| Content Ops Readiness     | Material, question, paper composition, publish status, student visibility bridge                                                   | Reuse an already published test-only paper if it matches required role scenarios | Create bounded question/material/paper data and publish it before student flow                                             | Published paper identifier, visibility proof, and redacted content summary       |
+| Student Positive Flow     | Authorized student, visible paper/content, answerable practice or mock session                                                     | Reuse authorized test-only student if authorization scope matches                | Create or assign test-only personal_auth/org_auth before positive flow                                                     | Login/session proof, authorized access, answer submission, report/feedback proof |
+| Student Negative Flow     | Student without valid authorization or with missing scope plus contact_config                                                      | Reuse a clearly isolated negative student account                                | Create isolated no-auth or expired-scope test-only account; do not alter positive user                                     | Purchase/contact guidance proof and no accidental access                         |
+| Oversight Flow            | Prior operations that should produce audit_log and, where AI is mocked locally, ai_call_log entries                                | Verify logs for current acceptance-run identifiers                               | Run only local approved operations that generate missing log anchors                                                       | Redacted audit/AI log evidence, no raw provider payloads                         |
+| Staging Template          | Local acceptance results and unresolved findings                                                                                   | Reuse current local evidence as template input                                   | Create template only; do not connect to staging                                                                            | Template-ready checklist with staging-only placeholders                          |
+
+## Execution Order
+
+1. **Preflight Data Inventory**: perform a read-only inventory first and classify each prerequisite as present, missing, stale, or unsafe to reuse.
+2. **System Ops Data Readiness**: ensure user, organization, org_auth, redeem_code, and contact_config prerequisites exist before downstream flows.
+3. **Content Ops Readiness**: ensure material/question/paper composition and publish state exist before any student positive flow.
+4. **Student Positive Flow**: validate an authorized learner can access content, answer, and see feedback/report surfaces.
+5. **Student Negative Flow**: validate a no-auth or missing-scope learner reaches purchase/contact guidance without content leakage.
+6. **Oversight Flow**: validate audit_log and ai_call_log coverage after the operations that should produce them.
+7. **Staging Template**: convert local evidence into a reusable staging acceptance template without connecting to staging.
+
+Do not skip earlier phases based on assumptions. If a prerequisite is only available through fixture/mock/read-only/entry-only paths, record the limitation and decide whether it is sufficient for the role experience being tested.
+
 ## Browser And E2E Strategy
 
 - Use the Browser plugin first for rendered local validation when available.
@@ -71,6 +96,7 @@ The future task must cover, at minimum:
 
 | Acceptance criterion                                            | Runtime proof required                                                                                                    |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Role experience order respects data prerequisites               | Preflight inventory and role data readiness matrix completed before role flows                                            |
 | Local full-flow acceptance covers all primary roles             | Browser or e2e evidence for student, content ops, system ops, and oversight flows                                         |
 | Staging acceptance is reusable but not executed against staging | Staging template under `docs/05-execution-logs/acceptance/role-based-full-flow/` with no staging/prod connection evidence |
 | Test-only data is allowed but isolated                          | Test data prefix, cleanup/isolation notes, no production/customer-like content                                            |
