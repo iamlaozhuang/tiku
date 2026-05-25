@@ -61,6 +61,20 @@ Mechanism note:
 | Changed runtime scope           | student practice/mock_exam UI and practice/mock_exam service only    |
 | Next task after closeout        | `phase-12-repair-ops-org-auth-redeem-ui-closure` from clean `master` |
 
+## Master Merge Validation
+
+| Item      | Result                                                                                                |
+| --------- | ----------------------------------------------------------------------------------------------------- |
+| Merge     | fast-forwarded `codex/phase-12-student-question-type-runtime` into `master`                           |
+| Commit    | `f084b34 fix(student): align canonical question type runtime`                                         |
+| Unit      | pass: 5 files, 58 tests                                                                               |
+| E2E       | pass: `e2e/student-practice-mock-entry.spec.ts`                                                       |
+| Build     | pass: `npm.cmd run build`                                                                             |
+| Readiness | pass: `Test-AgentSystemReadiness`                                                                     |
+| Naming    | pass: `Test-NamingConventions`                                                                        |
+| Git       | pass: `Test-GitCompletionReadiness -BaseBranch origin/master`; master ahead by 1 expected task commit |
+| Diff      | pass: `git diff --check`                                                                              |
+
 ## Implementation Summary
 
 - Practice service now recognizes canonical `multi_choice`, `fill_blank`, and `short_answer`; it keeps legacy snapshot aliases for local backward compatibility.
