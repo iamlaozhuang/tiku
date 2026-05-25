@@ -61,6 +61,23 @@ This task does not create cloud resources, connect to `staging` or `prod`, read 
 - Which owner account process is acceptable for staging acceptance without sharing production credentials.
 - Which monitoring channel owns staging failures and rollback decisions.
 
+## Current External Readiness Snapshot
+
+Recorded on `2026-05-25` from user report:
+
+- Domain: `jiandingtiku.cn`.
+- Domain status: applied for.
+- DNS resolution is not configured.
+- ICP filing is pending.
+- Cloud server: not purchased.
+- Database services have not been purchased.
+
+Planning impact:
+
+- Do not start DNS cutover, callback verification, staging/prod deployment, cloud resource provisioning, database connection, object storage implementation, or real secret/env injection yet.
+- The suitable next task remains planning-only `phase-11-staging-secret-and-env-plan`, because it can define names, owners, injection rules, placeholders, redaction boundaries, and approval gates without requiring purchased infrastructure.
+- Update this snapshot when the domain filing, DNS, cloud server, or database status changes.
+
 ## Exit Criteria
 
 This resource planning task can close when:
