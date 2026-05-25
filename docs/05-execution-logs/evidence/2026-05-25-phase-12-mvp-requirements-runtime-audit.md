@@ -2,7 +2,7 @@
 
 ## Status
 
-`round_1_validated`
+`round_2_validated`
 
 ## Scope Boundary
 
@@ -24,7 +24,8 @@ Forbidden actions:
 | Item                   | Result                                                                                      |
 | ---------------------- | ------------------------------------------------------------------------------------------- |
 | Started from           | clean `master`                                                                              |
-| Branch                 | `codex/phase-12-mvp-requirements-runtime-audit`                                             |
+| Round 1 branch         | `codex/phase-12-mvp-requirements-runtime-audit`                                             |
+| Round 2 branch         | `codex/phase-12-mvp-audit-round-2`                                                          |
 | Current phase          | `phase-11-staging-release-planning`                                                         |
 | Staging implementation | remains paused                                                                              |
 | External readiness     | DNS not configured, ICP pending, cloud server not purchased, database service not purchased |
@@ -168,7 +169,66 @@ Round 1 status: `complete_for_ssot_decomposition`.
 
 ## Round 2 Log
 
-Pending.
+### Fresh Reads
+
+Round 2 reread the required governance and SSOT sources, then mapped the relevant implementation surface:
+
+- `AGENTS.md`
+- `docs/03-standards/code-taste-ten-commandments.md`
+- `docs/02-architecture/adr/*.md`
+- `docs/01-requirements/modules/02-question-paper.md`
+- `docs/01-requirements/modules/03-student-experience.md`
+- `docs/01-requirements/modules/04-ai-scoring.md`
+- `docs/01-requirements/modules/05-rag-knowledge.md`
+- `docs/01-requirements/modules/06-admin-ops.md`
+- `docs/01-requirements/stories/epic-02-question-paper.md`
+- `docs/01-requirements/stories/epic-03-student-experience.md`
+- `docs/01-requirements/stories/epic-04-ai-scoring.md`
+- `docs/01-requirements/stories/epic-05-rag-knowledge.md`
+- `docs/01-requirements/stories/epic-06-admin-ops.md`
+- `src/features/admin/**`, `src/features/student/**`, `src/app/api/v1/**`, `src/server/services/**`, selected unit tests.
+
+Round 2 is static mapping only. It does not claim browser behavior; Round 3 must verify the runtime/UX observations in local/dev.
+
+### Severity Semantics
+
+| Severity | Meaning used by this audit                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------ |
+| P0       | Security/data-loss/process gate that invalidates release evidence or blocks safe continuation.               |
+| P1       | MVP acceptance blocker for a P0 SSOT story or a primary user role workflow.                                  |
+| P2       | Important completeness, observability, permissions, test, or UX risk that weakens operations but has a path. |
+| P3       | Local boundary, polish, copy, ergonomics, or interaction issue that should be scheduled after P1/P2.         |
+
+### Code/API/Test Mapping
+
+| Area                    | SSOT expectation                                                                                         | Round 2 mapping                                                                                                                                                                                                                                                                         | Static status |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| Question authoring      | Content admin can create/edit all MVP question types with type-specific fields, options, scoring, links. | `AdminQuestionMaterialManagementClient.tsx` exposes only stem, standard answer, and analysis. `createQuestionInput()` hardcodes `single_choice`, `profession`, `level`, `subject`, scoring method, and one generated option. DB enum currently lacks `case_analysis` and `calculation`. | P1 gap        |
+| Question list/filter    | Filter by profession, level, subject, question type, status, tag, knowledge_node.                        | UI filters keyword, profession, subject, and status. No level/questionType/tag/knowledge_node filter was found in the content question page.                                                                                                                                            | P2 gap        |
+| Question edit UX        | Row actions should open an understandable edit context for the selected question.                        | Row edit fills a single top-page form instead of an inline, drawer, modal, or detail pane context, matching the user's observed UX issue.                                                                                                                                               | P3 gap        |
+| Paper lifecycle         | Draft, compose, publish validation, archive/delete constraints, copy, paper_asset metadata.              | Paper management has UI handlers and tests for create, compose, publish, archive, copy, and paper_asset metadata binding. This area is comparatively stronger than question authoring, but Round 3 should still check browser ergonomics.                                               | partial       |
+| Student practice/mock   | Student can consume authorized theory/skill questions and get reports/mistake_book.                      | Practice and report UI only map a narrow subset of question types. `StudentPracticePage.tsx` drops unknown canonical types. `practice-service.ts` checks `multiple_choice` while canonical glossary/schema uses `multi_choice`, risking partial-credit mismatch.                        | P1 gap        |
+| Mistake book            | Objective mistake_book with filters, status, report source, redo and explanation entry.                  | Mistake book page exists with core list/actions, but static scan found incomplete type labeling/filtering relative to SSOT.                                                                                                                                                             | P2 gap        |
+| Organization management | Ops admin can create/edit/disable organizations, manage employees, view auth.                            | Backend services/routes exist for organization and employee create/update/disable. Admin UI primarily renders lists/links and does not expose the full action-closed workflow.                                                                                                          | P1 gap        |
+| Org authorization       | Ops admin can create/cancel org_auth and inspect detail.                                                 | Backend `org-auths` create/cancel routes and service tests exist. UI has read-only summaries/links instead of a complete create/cancel/detail flow.                                                                                                                                     | P1 gap        |
+| Redeem code             | Ops admin can batch generate, filter/search, inspect detail, and see plaintext only at generation time.  | Backend batch creation exists with validation. UI exposes a default generation button and list but no full batch form for count/scope/duration/deadline and no SSOT-complete detail/filter flow.                                                                                        | P1 gap        |
+| Resource knowledge      | Upload/convert, Markdown review, publish, rebuild, disable/enable, detail/download.                      | Resource page lists resources and calls publish/rebuild. It explicitly documents upload/download/Markdown proofreading/disable as out of the current local scope. API route scan found GET/publish/rebuild but no upload or disable/enable resource routes.                             | P1 gap        |
+| Model provider/config   | Super admin can add/edit/enable/disable model providers/configs with masked API keys and fallback.       | Runtime exposes a local static catalog plus list/enable/disable routes. Create/edit/provider-secret management is not represented in UI/API scan and remains high-risk due secret/env boundary.                                                                                         | P2 gap        |
+| Audit and AI call logs  | Ops/super admin can query important audit_log and ai_call_log dimensions and inspect status/cost.        | Admin ops page loads and displays audit/AI log summaries and lists. Round 2 did not find full SSOT filter/detail coverage.                                                                                                                                                              | P2 gap        |
+| AI/RAG student boundary | ai_scoring, ai_explanation, ai_hint, learning_suggestion, kn_recommendation, RAG citation.               | Local/mock AI scoring and logging paths exist. Static scan shows some student AI paths use deterministic/local results and empty RAG retrieval, so citation-backed behavior needs deeper runtime verification.                                                                          | partial       |
+
+### Round 2 Finding Register
+
+| ID     | Severity | Area                   | Finding                                                                                                                        | Evidence pointers                                                                                                                                         | Repair direction                                                                                                                |
+| ------ | -------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| R2-F01 | P1       | Content question       | Question authoring is not SSOT-complete: no type selector/type-specific fields, hardcoded `single_choice`, and missing types.  | `AdminQuestionMaterialManagementClient.tsx`; `src/db/schema/paper.ts`; `src/server/validators/question.ts`; Epic 02 US-02-01/03 and Epic 06 US-06-08.     | Split repair into UI-to-existing-schema coverage first; request explicit schema/migration approval before adding missing enums. |
+| R2-F02 | P1       | Student question usage | Student practice/report paths can drop canonical question types; multi-choice partial-credit check uses non-glossary spelling. | `StudentPracticePage.tsx`; `StudentMockExamReportPage.tsx`; `practice-service.ts`; Epic 03 and Epic 02 scoring stories.                                   | Repair mapping and tests for existing canonical types first; schema enum expansion remains separately gated.                    |
+| R2-F03 | P1       | System ops             | Organization, employee, org_auth, and redeem_code backend actions exist more broadly than the admin UI workflow exposes.       | `AdminOpsManagement.tsx`; `AdminOrgAuthRedeemPage.tsx`; `admin-organization-org-auth-runtime.ts`; `admin-redeem-code-runtime.ts`; Epic 06 US-06-03/04/05. | Build action-closed ops UI forms/detail/cancel flows against existing APIs, with permission and audit assertions.               |
+| R2-F04 | P1       | Resource knowledge/RAG | Resource upload, Markdown review, detail/download, disable/enable are not available as a complete local UI/API loop.           | `AdminResourceKnowledgeManagement.tsx`; `rag-resource-knowledge-runtime.ts`; Epic 05 and Epic 06 US-06-06.                                                | Plan local storage/resource lifecycle carefully; cloud/COS remains blocked without approval.                                    |
+| R2-F05 | P2       | Model config           | Super admin model provider/config lifecycle is mostly static/list/enable/disable, not full add/edit/fallback/key-masked CRUD.  | `model-config-runtime.ts`; `src/app/api/v1/model-configs/**`; Epic 04 US-04-07/08 and Epic 06 US-06-07.                                                   | Keep secret/env boundary; design masked local config UX before any real provider/env change.                                    |
+| R2-F06 | P2       | Logs/observability     | audit_log and ai_call_log lists exist, but full SSOT filter/detail/cost/status workflows are not proven by static mapping.     | `AdminOpsManagement.tsx`; `src/app/api/v1/audit-logs/route.ts`; `src/app/api/v1/ai-call-logs/route.ts`; Epic 06 US-06-11/12.                              | Add filter/detail acceptance tests and UI completion after Round 3 confirms runtime state.                                      |
+| R2-F07 | P3       | Content UX             | Editing a selected question populates a detached top form, which is hard to understand for row-level editing.                  | `AdminQuestionMaterialManagementClient.tsx`; user browser observation at `/content/questions`.                                                            | Prefer drawer/modal/detail panel tied to selected row after the P1 type/schema issues are planned.                              |
+| R2-F08 | P0       | Process/evidence       | A release readiness conclusion cannot rely on route existence or representative local slices.                                  | Round 1 SSOT inventory plus Round 2 mismatch between backend routes and visible UI workflows.                                                             | Keep AC-to-runtime matrix as the required evidence shape for future closeout.                                                   |
 
 ## Round 3 Log
 
@@ -176,28 +236,33 @@ Pending.
 
 ## MVP Requirements Runtime Coverage Matrix
 
-Round 1 baseline matrix. Runtime mapping is intentionally deferred to Round 2 and browser/UX confirmation to Round 3.
+Round 2 static mapping adds implementation status. Browser/UX confirmation remains deferred to Round 3.
 
-| Module                      | SSOT stories | Primary roles                                             | Round 1 status |
-| --------------------------- | -----------: | --------------------------------------------------------- | -------------- |
-| User/auth                   |           14 | student, employee student, ops_admin, super_admin, system | decomposed     |
-| Question/paper              |           11 | content_admin, student, system                            | decomposed     |
-| Student experience          |            9 | student                                                   | decomposed     |
-| AI scoring/explanation/hint |            8 | student, content_admin, super_admin, system               | decomposed     |
-| RAG/knowledge               |            9 | ops_admin, content_admin, student, system                 | decomposed     |
-| Admin ops/logging           |           13 | ops_admin, content_admin, super_admin                     | decomposed     |
+| Module                      | SSOT stories | Primary roles                                             | Round 1 status | Round 2 static status                                                                                 |
+| --------------------------- | -----------: | --------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------- |
+| User/auth                   |           14 | student, employee student, ops_admin, super_admin, system | decomposed     | partial; auth/session paths exist, but org/employee/admin workflow closure depends on ops UI gaps     |
+| Question/paper              |           11 | content_admin, student, system                            | decomposed     | partial; paper stronger, question authoring is P1 incomplete                                          |
+| Student experience          |            9 | student                                                   | decomposed     | partial; practice/mock/report/mistake_book exist, question type support and filters need repair       |
+| AI scoring/explanation/hint |            8 | student, content_admin, super_admin, system               | decomposed     | partial; local/mock paths exist, real provider and RAG citation closure not proven                    |
+| RAG/knowledge               |            9 | ops_admin, content_admin, student, system                 | decomposed     | partial; knowledge/resource list/publish/rebuild exists, upload/review/disable lifecycle is P1 gap    |
+| Admin ops/logging           |           13 | ops_admin, content_admin, super_admin                     | decomposed     | partial; backend services broader than UI, org_auth/redeem/model/log workflows require action closure |
 
 ## Issue Register
 
-Round 1 does not classify implementation defects yet. It establishes the SSOT inventory and flags a process-level risk:
+Round 2 classifies static implementation gaps; Round 3 must confirm runtime behavior before repair queue finalization.
 
-| Severity | Area          | Finding                                                                        | Next audit action                                                                                  |
-| -------- | ------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| P0       | Audit/process | Past evidence can close local slices without proving full SSOT module closure. | Round 2 must map every story group to UI/API/service/test; Round 3 must sample role-based runtime. |
+| Severity | Area                     | Finding                                                                                                      | Next audit action                                                                                               |
+| -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| P0       | Audit/process            | Past evidence can close local slices without proving full SSOT module closure.                               | Preserve AC-to-runtime matrix and require it for summary and repair closeout.                                   |
+| P1       | Content question         | Question authoring and student consumption are not complete against SSOT question types and type fields.     | Round 3 browser walkthrough must verify visible UI and local behavior; summary must split schema-gated work.    |
+| P1       | System ops               | Organization, employee, org_auth, and redeem_code workflows are not UI action-closed despite backend pieces. | Round 3 browser walkthrough must verify ops role pages and actions.                                             |
+| P1       | Resource knowledge/RAG   | Resource upload/review/detail/disable lifecycle is not complete in UI/API mapping.                           | Round 3 should verify visible resource page and local-only boundary.                                            |
+| P2       | Model/log observability  | Model config, audit_log, and ai_call_log management is only partially mapped.                                | Round 3 should verify visible filters/detail and whether any action requires secret/env approval before repair. |
+| P3       | Content question edit UX | Row edit context is detached from selected row.                                                              | Confirm in browser and schedule after the blocking question data-model/form gap.                                |
 
 ## Proposed Repair Queue
 
-Pending until Round 3 and summary. No repair task is allowed to be seeded solely from Round 1 without code/runtime confirmation.
+Pending until Round 3 and summary. Round 2 provides candidate repair areas, but repair tasks will only be seeded after browser/runtime confirmation.
 
 ## Validation Commands
 
@@ -215,6 +280,17 @@ Formatting:
 
 - `node .\node_modules\prettier\bin\prettier.cjs --write ...` passed after sandbox escalation; only this task's docs/state files were targeted.
 
+Round 2 validation:
+
+| Command                                                                                                                                                              | Result | Notes                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------- |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-requirements-runtime-audit-round-2` | pass   | Task was claimable after Round 1 closed.                                    |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                       | pass   | Required docs, scripts, npm scripts, and skills were available.             |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                          | pass   | Naming scan completed.                                                      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                  | pass   | Inventory showed only allowed docs/state files changed.                     |
+| `git diff --check`                                                                                                                                                   | pass   | No whitespace errors.                                                       |
+| `node .\node_modules\prettier\bin\prettier.cjs --write ...`                                                                                                          | pass   | Only this audit's docs/state files were targeted; no runtime files changed. |
+
 ## Repository Hygiene Closeout Checklist
 
 | Check                                                                                        | Result |
@@ -226,7 +302,7 @@ Formatting:
 | No `.env.local` or `.env.example` read/change                                                | pass   |
 | No staging/prod, deployment, cloud, DNS, COS, public URL, provider, or object storage change | pass   |
 | No secret/token/raw provider/full content recorded                                           | pass   |
-| Round 2/3/summary tasks registered as pending                                                | pass   |
+| Round 2 closed and Round 3/summary remain queued                                             | pass   |
 
 ## Taste Compliance Self-Check
 
