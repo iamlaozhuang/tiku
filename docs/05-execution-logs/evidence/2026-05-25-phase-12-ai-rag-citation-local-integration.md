@@ -5,7 +5,8 @@
 - id: `phase-12-repair-ai-rag-citation-local-integration`
 - branch: `codex/phase-12-ai-rag-citation-local-integration`
 - source: Phase 12 SSOT audit repair queue
-- status: closed pending commit/merge closeout
+- status: closed
+- featureCommit: `4b699c5`
 
 ## Boundary
 
@@ -52,6 +53,7 @@
 - Evidence created: yes.
 - Queue state updated: `phase-12-repair-ai-rag-citation-local-integration` closed.
 - Project state updated: current task points to this closeout.
+- Feature commit created: `4b699c5 fix(ai): wire local rag citations`.
 - Package/lockfile changed: no.
 - Schema/migration/script changed: no.
 - Cloud/staging/prod/deploy touched: no.
