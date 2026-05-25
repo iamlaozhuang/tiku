@@ -362,6 +362,14 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               or question_public_id ilike ${`%${query.keyword}%`}
               or prompt_template_key ilike ${`%${query.keyword}%`}
             )`;
+      const aiFuncTypeCondition =
+        query.aiFuncType === "all"
+          ? sql`true`
+          : sql`ai_func_type = ${toDatabaseAiFuncType(query.aiFuncType)}::ai_func_type`;
+      const callStatusCondition =
+        query.callStatus === "all"
+          ? sql`true`
+          : sql`call_status = ${query.callStatus}::ai_call_status`;
       const orderBy =
         query.sortOrder === "asc" ? sql`started_at asc` : sql`started_at desc`;
 
@@ -390,6 +398,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               completed_at
             from ai_call_log
             where ${keywordCondition}
+              and ${aiFuncTypeCondition}
+              and ${callStatusCondition}
             order by ${orderBy}
             limit ${query.pageSize}
             offset ${(query.page - 1) * query.pageSize}
@@ -401,6 +411,8 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
             select count(*)::int as value
             from ai_call_log
             where ${keywordCondition}
+              and ${aiFuncTypeCondition}
+              and ${callStatusCondition}
           `,
         );
 
