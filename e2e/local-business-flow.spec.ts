@@ -727,6 +727,7 @@ function isExpectedTransitionAbort(networkFailure: string) {
     "/api/v1/organizations?",
     "/api/v1/employees?",
     "/api/v1/org-auths?",
+    "/_next/static/chunks/",
     "__nextjs_font/geist-latin.woff2",
   ].some((expectedUrlPart) => networkFailure.includes(expectedUrlPart));
 }
