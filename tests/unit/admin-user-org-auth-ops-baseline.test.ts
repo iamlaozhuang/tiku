@@ -134,6 +134,33 @@ const redeemCodePayload = {
   },
 };
 
+const generatedRedeemCodePayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    generation: {
+      generationGroupId: "redeem-code-batch-public-001",
+      count: 3,
+      profession: "monopoly",
+      level: 3,
+      durationDay: 365,
+      redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+    },
+    redeemCodes: [
+      {
+        publicId: "redeem-code-public-generated-001",
+        codePlainText: "LOCALTST",
+        codeDisplay: "LOCALTST",
+        profession: "monopoly",
+        level: 3,
+        status: "unused",
+        redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
+        createdAt: "2026-05-25T00:00:00.000Z",
+      },
+    ],
+  },
+};
+
 function createJsonResponse(payload: unknown) {
   return {
     ok: true,
@@ -143,31 +170,78 @@ function createJsonResponse(payload: unknown) {
 }
 
 function mockSystemOpsFetch() {
-  const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
-    const path = String(url);
+  const fetchMock = vi.fn(
+    async (url: RequestInfo | URL, init?: RequestInit) => {
+      void init;
+      const path = String(url);
 
-    if (path === "/api/v1/sessions") {
-      return createJsonResponse(adminSessionPayload);
-    }
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
 
-    if (path === "/api/v1/organizations?page=1&pageSize=20") {
-      return createJsonResponse(organizationPayload);
-    }
+      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+        return createJsonResponse(organizationPayload);
+      }
 
-    if (path === "/api/v1/org-auths?page=1&pageSize=20") {
-      return createJsonResponse(orgAuthPayload);
-    }
+      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+        return createJsonResponse(orgAuthPayload);
+      }
 
-    if (path === "/api/v1/employees?page=1&pageSize=20") {
-      return createJsonResponse(employeePayload);
-    }
+      if (path === "/api/v1/employees?page=1&pageSize=20") {
+        return createJsonResponse(employeePayload);
+      }
 
-    if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
-      return createJsonResponse(redeemCodePayload);
-    }
+      if (path === "/api/v1/redeem-codes?page=1&pageSize=20") {
+        return createJsonResponse(redeemCodePayload);
+      }
 
-    return createJsonResponse({ code: 404001, message: "missing", data: null });
-  });
+      if (
+        path ===
+        "/api/v1/redeem-codes?page=1&pageSize=20&status=unused&keyword=RC-2026"
+      ) {
+        return createJsonResponse(redeemCodePayload);
+      }
+
+      if (path === "/api/v1/org-auths") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            orgAuth: {
+              ...orgAuthPayload.data.orgAuths[0],
+              publicId: "org-auth-public-created-001",
+              name: "本地验证企业授权",
+              usedQuota: 0,
+            },
+          },
+        });
+      }
+
+      if (path === "/api/v1/org-auths/org-auth-public-001/cancel") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            orgAuth: {
+              ...orgAuthPayload.data.orgAuths[0],
+              status: "cancelled",
+              cancelledAt: "2026-05-25T00:00:00.000Z",
+            },
+          },
+        });
+      }
+
+      if (path === "/api/v1/redeem-codes") {
+        return createJsonResponse(generatedRedeemCodePayload);
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    },
+  );
 
   vi.stubGlobal("fetch", fetchMock);
 
@@ -407,5 +481,109 @@ describe("admin user organization authorization ops baseline", () => {
       within(orgAuthEntry).getByRole("link", { name: "新增企业授权" }),
     ).toHaveAttribute("href", "/ops/users");
     expect(orgAuthEntry).toHaveTextContent("系统运营 staging 必验");
+  });
+
+  it("closes org_auth create and cancel actions on the organization page", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetch();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业授权运营" });
+
+    fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "确认创建企业授权？",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认创建" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "企业授权已创建",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/org-auths",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
+    const createCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/org-auths",
+    );
+    expect(JSON.parse(String(createCall?.[1]?.body))).toMatchObject({
+      purchaserOrganizationPublicId: "organization-public-001",
+      authScopeType: "current_and_descendants",
+      profession: "monopoly",
+      level: 3,
+      accountQuota: 100,
+      organizationPublicIds: ["organization-public-001"],
+    });
+
+    const activeOrgAuthRow = screen.getByTestId(
+      "admin-org-auth-org-auth-public-001",
+    );
+    fireEvent.click(
+      within(activeOrgAuthRow).getByRole("button", { name: "取消授权" }),
+    );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "确认取消企业授权？",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认取消" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "企业授权已取消",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/org-auths/org-auth-public-001/cancel",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
+  });
+
+  it("closes redeem_code generation and filtering on the redeem code page", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetch();
+
+    render(createElement(AdminRedeemCodePage));
+
+    await screen.findByRole("heading", { name: "卡密管理" });
+
+    fireEvent.change(screen.getByLabelText("卡密状态"), {
+      target: { value: "unused" },
+    });
+    fireEvent.change(screen.getByLabelText("卡密搜索"), {
+      target: { value: "RC-2026" },
+    });
+
+    expect(await screen.findByText("RC-2026-****")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/redeem-codes?page=1&pageSize=20&status=unused&keyword=RC-2026",
+      expect.anything(),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "生成卡密" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认生成卡密？");
+    fireEvent.click(screen.getByRole("button", { name: "确认生成" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "卡密已生成，请仅在本地验证时复制给学员",
+    );
+    expect(screen.getAllByText("LOCALTST").length).toBeGreaterThan(0);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/redeem-codes",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
+    const generateCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/redeem-codes",
+    );
+    expect(JSON.parse(String(generateCall?.[1]?.body))).toMatchObject({
+      count: 3,
+      profession: "monopoly",
+      level: 3,
+      durationDay: 365,
+      redeemDeadlineDate: "2026-06-24",
+    });
   });
 });

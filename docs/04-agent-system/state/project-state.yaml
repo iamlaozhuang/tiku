@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-repair-student-question-type-runtime
+  id: phase-12-repair-ops-org-auth-redeem-ui-closure
   status: closed
   sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
-  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-student-question-type-runtime.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-student-question-type-runtime.md
-  branch: codex/phase-12-student-question-type-runtime
-  commitSha: f084b34
+  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md
+  branch: codex/phase-12-ops-org-auth-redeem-ui-closure
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: From clean master, claim phase-12-repair-ops-org-auth-redeem-ui-closure and close org_auth/redeem_code UI flows against existing protected APIs
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-student-question-type-runtime.md
+  nextRecommendedAction: Close phase-12-repair-ops-org-auth-redeem-ui-closure against existing protected APIs, then continue from clean master to phase-12-repair-local-resource-lifecycle
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md

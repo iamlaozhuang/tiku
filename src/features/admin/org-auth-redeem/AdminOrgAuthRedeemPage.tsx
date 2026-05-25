@@ -18,11 +18,15 @@ import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
   EmployeeListDto,
   OrganizationListDto,
+  RedeemCodeGenerationDto,
   RedeemCodeListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/server/contracts/contact-config-contract";
-import type { OrgAuthListDto } from "@/server/contracts/organization-auth-contract";
+import type {
+  OrgAuthListDto,
+  OrgAuthResultDto,
+} from "@/server/contracts/organization-auth-contract";
 import type {
   AuthScopeType,
   AuthStatus,
@@ -41,6 +45,27 @@ type AdminOrgAuthData = {
 };
 
 type AdminRedeemCodeData = RedeemCodeListDto;
+
+type OrgAuthConfirmationState =
+  | {
+      kind: "createOrgAuth";
+    }
+  | {
+      kind: "cancelOrgAuth";
+      publicId: string;
+    }
+  | null;
+
+type RedeemCodeConfirmationState = {
+  kind: "generateRedeemCode";
+} | null;
+
+type ToastMessage = {
+  message: string;
+  tone: "error" | "success";
+};
+
+type GeneratedRedeemCode = RedeemCodeGenerationDto["redeemCodes"][number];
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 const DEFAULT_LIST_QUERY = "page=1&pageSize=20";
@@ -103,6 +128,23 @@ async function fetchAdminApi<TData>(
   return (await response.json()) as ApiResponse<TData | null>;
 }
 
+async function postAdminApi<TData>(
+  path: string,
+  sessionToken: string,
+  body?: unknown,
+): Promise<ApiResponse<TData | null>> {
+  const response = await fetch(path, {
+    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: {
+      ...createAdminAuthHeaders(sessionToken),
+      "content-type": "application/json",
+    },
+    method: "POST",
+  });
+
+  return (await response.json()) as ApiResponse<TData | null>;
+}
+
 function isUnauthorizedResponse(payload: ApiResponse<unknown>): boolean {
   return payload.code === 401001;
 }
@@ -123,6 +165,53 @@ function formatProfessionLevel(input: {
   level: number;
 }): string {
   return `${professionLabels[input.profession]} ${input.level}级`;
+}
+
+function createRedeemCodeListQuery(input: {
+  keyword: string;
+  status: RedeemCodeStatus | "all";
+}): string {
+  const searchParams = new URLSearchParams(DEFAULT_LIST_QUERY);
+  const keyword = input.keyword.trim();
+
+  if (input.status !== "all") {
+    searchParams.set("status", input.status);
+  }
+
+  if (keyword.length > 0) {
+    searchParams.set("keyword", keyword);
+  }
+
+  return searchParams.toString();
+}
+
+function createDefaultOrgAuthInput(
+  organizations: AdminOrgAuthData["organizations"],
+) {
+  const organizationPublicId = organizations[0]?.publicId ?? "";
+
+  return {
+    accountQuota: 100,
+    authScopeType: "current_and_descendants",
+    expiresAt: "2027-05-25T00:00:00.000Z",
+    level: 3,
+    name: "本地验证企业授权",
+    organizationPublicIds:
+      organizationPublicId.length === 0 ? [] : [organizationPublicId],
+    profession: "monopoly",
+    purchaserOrganizationPublicId: organizationPublicId,
+    startsAt: "2026-05-25T00:00:00.000Z",
+  };
+}
+
+function createDefaultRedeemCodeInput() {
+  return {
+    count: 3,
+    durationDay: 365,
+    level: 3,
+    profession: "monopoly",
+    redeemDeadlineDate: "2026-06-24",
+  };
 }
 
 function AdminSurfaceStatus({
@@ -397,7 +486,13 @@ function OrganizationList({
   );
 }
 
-function OrgAuthList({ orgAuths }: { orgAuths: AdminOrgAuthData["orgAuths"] }) {
+function OrgAuthList({
+  onCancelOrgAuth,
+  orgAuths,
+}: {
+  onCancelOrgAuth: (publicId: string) => void;
+  orgAuths: AdminOrgAuthData["orgAuths"];
+}) {
   return (
     <AdminPanel title="企业授权">
       {orgAuths.map((orgAuth) => (
@@ -421,10 +516,24 @@ function OrgAuthList({ orgAuths }: { orgAuths: AdminOrgAuthData["orgAuths"] }) {
               {authScopeTypeLabels[orgAuth.authScopeType]} /{" "}
               {formatDate(orgAuth.startsAt)} 至 {formatDate(orgAuth.expiresAt)}
             </p>
+            <p className="text-text-muted text-xs">
+              覆盖企业 {orgAuth.organizationPublicIds.join("、") || "无"}
+            </p>
           </div>
-          <span className="bg-success/10 text-success w-fit rounded-lg px-2 py-1 text-xs font-medium">
-            {authStatusLabels[orgAuth.status]}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="bg-success/10 text-success w-fit rounded-lg px-2 py-1 text-xs font-medium">
+              {authStatusLabels[orgAuth.status]}
+            </span>
+            {orgAuth.status === "active" ? (
+              <button
+                type="button"
+                className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                onClick={() => onCancelOrgAuth(orgAuth.publicId)}
+              >
+                取消授权
+              </button>
+            ) : null}
+          </div>
         </AdminDataRow>
       ))}
     </AdminPanel>
@@ -517,6 +626,211 @@ function RedeemCodePlainTextUnavailableNotice() {
           </p>
         </div>
       </div>
+    </section>
+  );
+}
+
+function AdminToast({ toastMessage }: { toastMessage: ToastMessage }) {
+  return (
+    <div
+      className={
+        toastMessage.tone === "success"
+          ? "bg-secondary text-secondary-foreground fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
+          : "bg-destructive/10 text-destructive fixed right-6 bottom-6 rounded-md px-4 py-3 text-sm shadow-lg"
+      }
+      role={toastMessage.tone === "success" ? "status" : "alert"}
+    >
+      {toastMessage.message}
+    </div>
+  );
+}
+
+function OrgAuthConfirmationDialog({
+  confirmationState,
+  onCancel,
+  onConfirm,
+}: {
+  confirmationState: Exclude<OrgAuthConfirmationState, null>;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const isCreate = confirmationState.kind === "createOrgAuth";
+
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <AlertCircle
+            className="text-brand-primary size-4"
+            aria-hidden="true"
+          />
+          <h2 className="text-text-primary text-base font-semibold">
+            {isCreate ? "确认创建企业授权？" : "确认取消企业授权？"}
+          </h2>
+        </div>
+        <p className="text-text-muted text-sm">
+          {isCreate
+            ? "创建会提交企业 publicId、授权范围、专业等级、额度和有效期，由后端执行重叠校验。"
+            : "取消会终止该企业授权，并由后端处理受影响的练习和模拟考试会话。"}
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={
+              isCreate
+                ? "bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                : "bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            }
+            onClick={onConfirm}
+          >
+            {isCreate ? "确认创建" : "确认取消"}
+          </button>
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onCancel}
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RedeemCodeConfirmationDialog({
+  onCancel,
+  onConfirm,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <AlertCircle
+            className="text-brand-primary size-4"
+            aria-hidden="true"
+          />
+          <h2 className="text-text-primary text-base font-semibold">
+            确认生成卡密？
+          </h2>
+        </div>
+        <p className="text-text-muted text-sm">
+          批量生成会调用后端原子创建流程；明文只在本次响应中显示，不能写入
+          evidence。
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onConfirm}
+          >
+            确认生成
+          </button>
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onCancel}
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrgAuthActionPanel({
+  disabled,
+  onCreateOrgAuth,
+}: {
+  disabled: boolean;
+  onCreateOrgAuth: () => void;
+}) {
+  return (
+    <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">org_auth</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            本页创建企业授权
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            使用第一条企业组织作为购买主体和覆盖范围，提交后由后端校验重叠范围与权限。
+          </p>
+        </div>
+        <button
+          type="button"
+          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={disabled}
+          onClick={onCreateOrgAuth}
+        >
+          创建企业授权
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function RedeemCodeActionPanel({
+  keyword,
+  onGenerateRedeemCode,
+  onKeywordChange,
+  onStatusChange,
+  status,
+}: {
+  keyword: string;
+  onGenerateRedeemCode: () => void;
+  onKeywordChange: (value: string) => void;
+  onStatusChange: (value: RedeemCodeStatus | "all") => void;
+  status: RedeemCodeStatus | "all";
+}) {
+  return (
+    <section className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm">
+      <label className="flex min-w-44 flex-col gap-2 text-sm font-medium">
+        <span className="text-text-secondary">卡密状态</span>
+        <select
+          className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+          value={status}
+          onChange={(event) =>
+            onStatusChange(event.target.value as RedeemCodeStatus | "all")
+          }
+        >
+          <option value="all">全部状态</option>
+          <option value="unused">未使用</option>
+          <option value="used">已使用</option>
+          <option value="expired">已过期</option>
+        </select>
+      </label>
+      <label className="flex min-w-56 flex-col gap-2 text-sm font-medium">
+        <span className="text-text-secondary">卡密搜索</span>
+        <input
+          className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+          placeholder="卡密号或批次关键词"
+          value={keyword}
+          onChange={(event) => onKeywordChange(event.target.value)}
+        />
+      </label>
+      <button
+        type="button"
+        className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+        onClick={onGenerateRedeemCode}
+      >
+        生成卡密
+      </button>
+      <p className="text-text-muted text-sm">
+        筛选变化自动刷新；生成操作需要二次确认。
+      </p>
     </section>
   );
 }
@@ -670,10 +984,10 @@ function useAdminOrgAuthData() {
     };
   }, []);
 
-  return { data, loadState };
+  return { data, loadState, setData, setLoadState };
 }
 
-function useAdminRedeemCodeData() {
+function useAdminRedeemCodeData(listQuery: string) {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [data, setData] = useState<AdminRedeemCodeData>({
     redeemCodes: [],
@@ -711,7 +1025,7 @@ function useAdminRedeemCodeData() {
         }
 
         const redeemCodeResponse = await fetchAdminApi<RedeemCodeListDto>(
-          `/api/v1/redeem-codes?${DEFAULT_LIST_QUERY}`,
+          `/api/v1/redeem-codes?${listQuery}`,
           sessionToken,
         );
 
@@ -740,13 +1054,16 @@ function useAdminRedeemCodeData() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [listQuery]);
 
-  return { data, loadState };
+  return { data, loadState, setData, setLoadState };
 }
 
 export function AdminOrgAuthPage() {
-  const { data, loadState } = useAdminOrgAuthData();
+  const { data, loadState, setData, setLoadState } = useAdminOrgAuthData();
+  const [confirmationState, setConfirmationState] =
+    useState<OrgAuthConfirmationState>(null);
+  const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const totalEmployeeCount = useMemo(
     () =>
       data.organizations.reduce(
@@ -756,6 +1073,75 @@ export function AdminOrgAuthPage() {
       ),
     [data.organizations],
   );
+
+  async function handleConfirmOrgAuthAction() {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || confirmationState === null) {
+      setConfirmationState(null);
+      setLoadState("unauthorized");
+      return;
+    }
+
+    if (confirmationState.kind === "createOrgAuth") {
+      const createResponse = await postAdminApi<OrgAuthResultDto>(
+        "/api/v1/org-auths",
+        sessionToken,
+        createDefaultOrgAuthInput(data.organizations),
+      );
+
+      setConfirmationState(null);
+
+      if (createResponse.code !== 0 || createResponse.data === null) {
+        setToastMessage({
+          message: createResponse.message,
+          tone: "error",
+        });
+        return;
+      }
+
+      const createdOrgAuth = createResponse.data.orgAuth;
+
+      setData((currentData) => ({
+        ...currentData,
+        orgAuths: [
+          createdOrgAuth,
+          ...currentData.orgAuths.filter(
+            (orgAuth) => orgAuth.publicId !== createdOrgAuth.publicId,
+          ),
+        ],
+      }));
+      setToastMessage({ message: "企业授权已创建", tone: "success" });
+      return;
+    }
+
+    const cancelResponse = await postAdminApi<OrgAuthResultDto>(
+      `/api/v1/org-auths/${confirmationState.publicId}/cancel`,
+      sessionToken,
+    );
+
+    setConfirmationState(null);
+
+    if (cancelResponse.code !== 0 || cancelResponse.data === null) {
+      setToastMessage({
+        message: cancelResponse.message,
+        tone: "error",
+      });
+      return;
+    }
+
+    const cancelledOrgAuth = cancelResponse.data.orgAuth;
+
+    setData((currentData) => ({
+      ...currentData,
+      orgAuths: currentData.orgAuths.map((orgAuth) =>
+        orgAuth.publicId === cancelledOrgAuth.publicId
+          ? cancelledOrgAuth
+          : orgAuth,
+      ),
+    }));
+    setToastMessage({ message: "企业授权已取消", tone: "success" });
+  }
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载企业授权运营数据" />;
@@ -799,6 +1185,11 @@ export function AdminOrgAuthPage() {
         title="新增企业授权入口"
       />
 
+      <OrgAuthActionPanel
+        disabled={data.organizations.length === 0}
+        onCreateOrgAuth={() => setConfirmationState({ kind: "createOrgAuth" })}
+      />
+
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
         <SummaryTile
           icon={<Building2 className="size-4" aria-hidden="true" />}
@@ -819,19 +1210,105 @@ export function AdminOrgAuthPage() {
 
       <section className="grid gap-4 xl:grid-cols-3">
         <OrganizationList organizations={data.organizations} />
-        <OrgAuthList orgAuths={data.orgAuths} />
+        <OrgAuthList
+          orgAuths={data.orgAuths}
+          onCancelOrgAuth={(publicId) =>
+            setConfirmationState({ kind: "cancelOrgAuth", publicId })
+          }
+        />
         <EmployeeList employees={data.employees} />
       </section>
+
+      {confirmationState === null ? null : (
+        <OrgAuthConfirmationDialog
+          confirmationState={confirmationState}
+          onCancel={() => setConfirmationState(null)}
+          onConfirm={() => void handleConfirmOrgAuthAction()}
+        />
+      )}
+
+      {toastMessage === null ? null : (
+        <AdminToast toastMessage={toastMessage} />
+      )}
     </main>
   );
 }
 
 export function AdminRedeemCodePage() {
-  const { data, loadState } = useAdminRedeemCodeData();
+  const [redeemCodeStatus, setRedeemCodeStatus] = useState<
+    RedeemCodeStatus | "all"
+  >("all");
+  const [redeemCodeKeyword, setRedeemCodeKeyword] = useState("");
+  const redeemCodeListQuery = useMemo(
+    () =>
+      createRedeemCodeListQuery({
+        keyword: redeemCodeKeyword,
+        status: redeemCodeStatus,
+      }),
+    [redeemCodeKeyword, redeemCodeStatus],
+  );
+  const { data, loadState, setData, setLoadState } =
+    useAdminRedeemCodeData(redeemCodeListQuery);
+  const [confirmationState, setConfirmationState] =
+    useState<RedeemCodeConfirmationState>(null);
+  const [generatedRedeemCode, setGeneratedRedeemCode] =
+    useState<GeneratedRedeemCode | null>(null);
+  const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const hasUnavailablePlainTextCode = data.redeemCodes.some(
     (redeemCode) =>
       redeemCode.status === "unused" && !redeemCode.canViewPlainText,
   );
+
+  async function handleConfirmRedeemCodeAction() {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || confirmationState === null) {
+      setConfirmationState(null);
+      setLoadState("unauthorized");
+      return;
+    }
+
+    const createResponse = await postAdminApi<RedeemCodeGenerationDto>(
+      "/api/v1/redeem-codes",
+      sessionToken,
+      createDefaultRedeemCodeInput(),
+    );
+
+    setConfirmationState(null);
+
+    if (createResponse.code !== 0 || createResponse.data === null) {
+      setToastMessage({
+        message: createResponse.message,
+        tone: "error",
+      });
+      return;
+    }
+
+    const firstGeneratedRedeemCode = createResponse.data.redeemCodes[0] ?? null;
+    const generatedRedeemCodes = createResponse.data.redeemCodes;
+
+    setGeneratedRedeemCode(firstGeneratedRedeemCode);
+    setData((currentData) => ({
+      redeemCodes: [
+        ...generatedRedeemCodes.map((redeemCode) => ({
+          canViewPlainText: true,
+          codeDisplay: redeemCode.codeDisplay,
+          createdAt: redeemCode.createdAt,
+          level: redeemCode.level,
+          profession: redeemCode.profession,
+          publicId: redeemCode.publicId,
+          redeemDeadlineAt: redeemCode.redeemDeadlineAt,
+          redeemedUserPublicId: null,
+          status: redeemCode.status,
+        })),
+        ...currentData.redeemCodes,
+      ],
+    }));
+    setToastMessage({
+      message: "卡密已生成，请仅在本地验证时复制给学员",
+      tone: "success",
+    });
+  }
 
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载卡密数据" />;
@@ -875,7 +1352,36 @@ export function AdminRedeemCodePage() {
         title="生成卡密入口"
       />
 
+      <RedeemCodeActionPanel
+        keyword={redeemCodeKeyword}
+        status={redeemCodeStatus}
+        onGenerateRedeemCode={() =>
+          setConfirmationState({ kind: "generateRedeemCode" })
+        }
+        onKeywordChange={setRedeemCodeKeyword}
+        onStatusChange={setRedeemCodeStatus}
+      />
+
       <SystemOpsPurchaseGuidanceContactConfig />
+
+      {generatedRedeemCode === null ? null : (
+        <section
+          aria-label="本地卡密生成结果"
+          className="bg-surface border-success/40 rounded-md border p-4 shadow-sm"
+        >
+          <div className="space-y-2">
+            <p className="text-text-primary text-sm font-semibold">
+              卡密已生成，请仅在本地验证时复制给学员
+            </p>
+            <p className="text-text-secondary text-xs">
+              明文仅在本次创建响应中展示；提交 evidence 时只记录脱敏摘要。
+            </p>
+            <p className="text-text-primary font-mono text-base font-semibold tracking-normal">
+              {generatedRedeemCode.codePlainText}
+            </p>
+          </div>
+        </section>
+      )}
 
       {hasUnavailablePlainTextCode ? (
         <RedeemCodePlainTextUnavailableNotice />
@@ -908,6 +1414,17 @@ export function AdminRedeemCodePage() {
       </section>
 
       <RedeemCodeList redeemCodes={data.redeemCodes} />
+
+      {confirmationState === null ? null : (
+        <RedeemCodeConfirmationDialog
+          onCancel={() => setConfirmationState(null)}
+          onConfirm={() => void handleConfirmRedeemCodeAction()}
+        />
+      )}
+
+      {toastMessage === null ? null : (
+        <AdminToast toastMessage={toastMessage} />
+      )}
     </main>
   );
 }

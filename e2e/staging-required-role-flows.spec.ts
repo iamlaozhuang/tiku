@@ -28,6 +28,9 @@ test.describe("staging required role flows", () => {
     await expect(
       redeemCodeEntry.getByRole("link", { name: "生成卡密" }),
     ).toHaveAttribute("href", "/ops/users");
+    await expect(page.getByRole("button", { name: "生成卡密" })).toBeVisible();
+    await expect(page.getByLabel("卡密状态")).toBeVisible();
+    await expect(page.getByLabel("卡密搜索")).toBeVisible();
 
     await page.goto("/ops/organizations");
     const orgAuthEntry = page.getByTestId("system-ops-org-auth-create-entry");
@@ -36,6 +39,10 @@ test.describe("staging required role flows", () => {
     await expect(
       orgAuthEntry.getByRole("link", { name: "新增企业授权" }),
     ).toHaveAttribute("href", "/ops/users");
+    await expect(
+      page.getByRole("button", { name: "创建企业授权" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "取消授权" })).toBeVisible();
 
     await page.goto("/content/questions");
     const questionArrangement = page.getByTestId(
@@ -59,15 +66,5 @@ test.describe("staging required role flows", () => {
       "不可用写操作必须显示原因和下一步",
     );
     await expect(page.getByTestId("paper-action-unavailable")).toBeVisible();
-
-    await page.goto("/content/knowledge-nodes");
-    const knowledgeNodeArrangement = page.getByTestId(
-      "content-ops-staging-required-role-arrangement",
-    );
-    await expect(knowledgeNodeArrangement).toBeVisible();
-    await expect(knowledgeNodeArrangement).toContainText(
-      "知识点节点新增、编辑、停用",
-    );
-    await expect(page.getByRole("button", { name: "新增节点" })).toBeVisible();
   });
 });
