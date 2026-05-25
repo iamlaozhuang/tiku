@@ -441,6 +441,8 @@ test.describe("phase 11 role-based full-flow acceptance rerun", () => {
       data: {
         feedback: {
           answerRecordPublicId: expect.any(String),
+          isCorrect: true,
+          score: "5.0",
         },
       },
     });

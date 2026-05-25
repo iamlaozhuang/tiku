@@ -78,6 +78,45 @@ function createPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createQuestionOptionsOnlyPaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "content-created-objective-paper",
+    durationMinute: 120,
+    paperSections: [
+      {
+        paperSectionTitle: "objective questions",
+        paperQuestions: [
+          {
+            paperQuestionPublicId: "paper_question_options_only_123",
+            questionPublicId: "question_options_only_123",
+            questionType: "single_choice",
+            stemRichText: "<p>content-created objective question</p>",
+            questionOptions: [
+              {
+                label: "A",
+                contentRichText: "<p>correct question_option</p>",
+                isCorrect: true,
+                sortOrder: 1,
+              },
+              {
+                label: "B",
+                contentRichText: "<p>distractor question_option</p>",
+                isCorrect: false,
+                sortOrder: 2,
+              },
+            ],
+            standardAnswerRichText: "<p>A</p>",
+            analysisRichText: "<p>analysis</p>",
+            score: "5.0",
+            scoringMethod: "auto_match",
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createEmptyPaperSnapshot(): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
@@ -600,6 +639,83 @@ describe("mock exam service", () => {
             answerRecordStatus: "scored",
             isCorrect: true,
             score: "1.0",
+            submittedAt: now,
+          },
+        ],
+      }),
+    ]);
+  });
+
+  it("derives mock objective scoring from question options when standard labels are absent", async () => {
+    const submitInputs: unknown[] = [];
+    const service = createMockExamService(
+      createRepository({
+        async findMockExamByPublicId() {
+          return createMockExam({
+            paper_snapshot: createQuestionOptionsOnlyPaperSnapshot(),
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_123",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_options_only_123",
+              question_public_id: "question_options_only_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+        async submitMockExam(input) {
+          submitInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: "completed",
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 1,
+            paper_snapshot: createQuestionOptionsOnlyPaperSnapshot(),
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitMockExam(userContext, "mock_exam_public_existing", {}),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          examStatus: "completed",
+        },
+        unansweredCount: 0,
+      },
+    });
+    expect(submitInputs).toEqual([
+      expect.objectContaining({
+        objectiveScore: "5.0",
+        totalScore: "5.0",
+        answerRecordResults: [
+          {
+            paperQuestionPublicId: "paper_question_options_only_123",
+            answerRecordStatus: "scored",
+            isCorrect: true,
+            score: "5.0",
             submittedAt: now,
           },
         ],

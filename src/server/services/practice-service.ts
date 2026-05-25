@@ -146,11 +146,43 @@ function getScore(value: Record<string, unknown>): string {
 function getStandardAnswerLabels(value: Record<string, unknown>): string[] {
   const standardAnswerLabels = value.standardAnswerLabels;
 
-  if (!Array.isArray(standardAnswerLabels)) {
+  if (Array.isArray(standardAnswerLabels)) {
+    const labels = filterStringLabels(standardAnswerLabels);
+
+    if (labels.length > 0) {
+      return labels;
+    }
+  }
+
+  const standardAnswer = value.standardAnswer;
+
+  if (Array.isArray(standardAnswer)) {
+    const labels = filterStringLabels(standardAnswer);
+
+    if (labels.length > 0) {
+      return labels;
+    }
+  }
+
+  const questionOptions = value.questionOptions;
+
+  if (!Array.isArray(questionOptions)) {
     return [];
   }
 
-  return standardAnswerLabels.filter(
+  return questionOptions
+    .filter(
+      (questionOption): questionOption is Record<string, unknown> =>
+        isRecord(questionOption) && questionOption.isCorrect === true,
+    )
+    .map((questionOption) => questionOption.label)
+    .filter(
+      (label): label is string => typeof label === "string" && label.length > 0,
+    );
+}
+
+function filterStringLabels(labels: unknown[]): string[] {
+  return labels.filter(
     (label): label is string => typeof label === "string" && label.length > 0,
   );
 }

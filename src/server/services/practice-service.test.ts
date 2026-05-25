@@ -100,6 +100,44 @@ function createTwoQuestionPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createQuestionOptionsOnlyPaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "content-created-objective-paper",
+    paperSections: [
+      {
+        paperSectionTitle: "objective questions",
+        paperQuestions: [
+          {
+            paperQuestionPublicId: "paper_question_options_only_123",
+            questionPublicId: "question_options_only_123",
+            questionType: "single_choice",
+            stemRichText: "<p>content-created objective question</p>",
+            questionOptions: [
+              {
+                label: "A",
+                contentRichText: "<p>correct question_option</p>",
+                isCorrect: true,
+                sortOrder: 1,
+              },
+              {
+                label: "B",
+                contentRichText: "<p>distractor question_option</p>",
+                isCorrect: false,
+                sortOrder: 2,
+              },
+            ],
+            standardAnswerRichText: "<p>A</p>",
+            analysisRichText: "<p>analysis</p>",
+            score: "5.0",
+            scoringMethod: "auto_match",
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createSubjectivePaperSnapshot(): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
@@ -667,6 +705,38 @@ describe("practice service", () => {
         paperQuestionPublicId: "paper_question_public_123",
       }),
     ]);
+  });
+
+  it("derives objective feedback correctness from question options when standard labels are absent", async () => {
+    const service = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            paper_snapshot: createQuestionOptionsOnlyPaperSnapshot(),
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_options_only_123",
+        selectedLabels: ["A"],
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          answerRecordPublicId: "answer_record_public_1",
+          isCorrect: true,
+          score: "5.0",
+          maxScore: "5.0",
+          mistakeBookPublicId: null,
+        },
+      },
+    });
   });
 
   it("returns saved answer records for practice resume progress", async () => {

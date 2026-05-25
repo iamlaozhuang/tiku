@@ -6458,3 +6458,51 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md
     status: closed
     retryCount: 0
+  - id: phase-11-objective-feedback-correctness-fix
+    title: Phase 11 Objective Feedback Correctness Fix
+    phase: phase-11-staging-release-planning
+    sourceStory: user-request-2026-05-25-p2-objective-feedback-correctness-fix
+    dependencies:
+      - phase-11-role-based-full-flow-acceptance-rerun
+    taskPlanPolicy: required
+    humanApproval: User approved fixing the recorded P2 content-created objective practice feedback correctness gap, and approved one reviewable commit, merge to master, push to origin/master, and short-lived branch cleanup. Approval does not cover dependency/package/lockfile changes, schema/migration changes, script changes, secret/env changes, staging/prod connection, deployment, cloud resource changes, real provider calls, destructive data operations, or recording full textbook/paper/OCR/raw prompt/raw answer/raw model response/customer-like private content.
+    allowedFiles:
+      - src/**
+      - e2e/role-based-acceptance/**
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-11-objective-feedback-correctness-fix.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-11-objective-feedback-correctness-fix.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - bugfix
+      - practice
+      - answer_record
+      - api_contract
+      - e2e
+      - evidence_integrity
+      - environment_boundary
+      - secret_or_env_change
+      - deploy
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-11-objective-feedback-correctness-fix
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e -- e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-11-objective-feedback-correctness-fix.md
+    status: closed
+    retryCount: 0
