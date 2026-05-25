@@ -8,6 +8,7 @@ import {
   FileText,
   Search,
   Upload,
+  XCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,23 @@ type ResourceListDto = {
   resources: AdminResourceOpsSummaryDto[];
 };
 
+type LocalResourceUploadSummaryDto = {
+  parserMode: "local_only";
+  markdownContentHash: string | null;
+  charLength: number;
+  lineCount: number;
+  chunkCandidateCount: number;
+  headingPaths: string[][];
+  redactedPreview: string | null;
+  skippedReason: string | null;
+};
+
+type LocalResourceDetailDto = {
+  resource: AdminResourceOpsSummaryDto;
+  localOnly: boolean;
+  markdownContent: string | null;
+};
+
 type RebuildState =
   | {
       status: "idle";
@@ -76,6 +94,34 @@ type PublishState =
       resource: AdminResourceOpsSummaryDto;
       status: "submitting";
     };
+
+type MarkdownReviewState =
+  | {
+      status: "idle";
+    }
+  | {
+      markdownContent: string;
+      resource: AdminResourceOpsSummaryDto;
+      status: "editing" | "submitting";
+    };
+
+type DisableState =
+  | {
+      status: "idle";
+    }
+  | {
+      resource: AdminResourceOpsSummaryDto;
+      status: "confirming" | "submitting";
+    };
+
+type UploadState = {
+  file: File | null;
+  level: string;
+  profession: Profession;
+  resourceType: ResourceType;
+  status: "idle" | "submitting";
+  title: string;
+};
 
 type ToastMessage = {
   message: string;
@@ -171,6 +217,94 @@ async function postResourceMarkdownPublish(
   return payload.data.resource;
 }
 
+async function postLocalResourceUpload(
+  uploadState: UploadState,
+  sessionToken: string,
+): Promise<{
+  localResource: LocalResourceUploadSummaryDto;
+  resource: AdminResourceOpsSummaryDto;
+} | null> {
+  if (uploadState.file === null) {
+    return null;
+  }
+
+  const formData = new FormData();
+
+  formData.set("title", uploadState.title);
+  formData.set("profession", uploadState.profession);
+  formData.set("level", uploadState.level);
+  formData.set("resourceType", uploadState.resourceType);
+  formData.set("fileName", uploadState.file.name);
+  formData.set("file", uploadState.file);
+
+  const response = await fetch("/api/v1/resources", {
+    body: formData,
+    headers: createAdminAuthHeaders(sessionToken),
+    method: "POST",
+  });
+  const payload = (await response.json()) as ApiResponse<{
+    localResource: LocalResourceUploadSummaryDto;
+    resource: AdminResourceOpsSummaryDto;
+  } | null>;
+
+  return payload.code === 0 && payload.data !== null ? payload.data : null;
+}
+
+async function getLocalResourceDetail(
+  resourcePublicId: string,
+  sessionToken: string,
+): Promise<LocalResourceDetailDto | null> {
+  const response = await fetch(`/api/v1/resources/${resourcePublicId}`, {
+    headers: createAdminAuthHeaders(sessionToken),
+  });
+  const payload =
+    (await response.json()) as ApiResponse<LocalResourceDetailDto | null>;
+
+  return payload.code === 0 && payload.data !== null ? payload.data : null;
+}
+
+async function patchLocalResourceMarkdown(
+  resourcePublicId: string,
+  markdownContent: string,
+  sessionToken: string,
+): Promise<AdminResourceOpsSummaryDto | null> {
+  const response = await fetch(`/api/v1/resources/${resourcePublicId}`, {
+    body: JSON.stringify({ markdownContent }),
+    headers: {
+      ...createAdminAuthHeaders(sessionToken),
+      "content-type": "application/json",
+    },
+    method: "PATCH",
+  });
+  const payload = (await response.json()) as ApiResponse<{
+    resource: AdminResourceOpsSummaryDto;
+  } | null>;
+
+  return payload.code === 0 && payload.data !== null
+    ? payload.data.resource
+    : null;
+}
+
+async function postLocalResourceDisable(
+  resourcePublicId: string,
+  sessionToken: string,
+): Promise<AdminResourceOpsSummaryDto | null> {
+  const response = await fetch(
+    `/api/v1/resources/${resourcePublicId}/disable`,
+    {
+      headers: createAdminAuthHeaders(sessionToken),
+      method: "POST",
+    },
+  );
+  const payload = (await response.json()) as ApiResponse<{
+    resource: AdminResourceOpsSummaryDto;
+  } | null>;
+
+  return payload.code === 0 && payload.data !== null
+    ? payload.data.resource
+    : null;
+}
+
 function useResourceData() {
   const [loadState, setLoadState] = useState<ResourceLoadState>("loading");
   const [resources, setResources] = useState<AdminResourceOpsSummaryDto[]>([]);
@@ -251,6 +385,21 @@ export function AdminResourceKnowledgeManagement() {
   });
   const [publishState, setPublishState] = useState<PublishState>({
     status: "idle",
+  });
+  const [disableState, setDisableState] = useState<DisableState>({
+    status: "idle",
+  });
+  const [markdownReviewState, setMarkdownReviewState] =
+    useState<MarkdownReviewState>({
+      status: "idle",
+    });
+  const [uploadState, setUploadState] = useState<UploadState>({
+    file: null,
+    level: "3",
+    profession: "marketing",
+    resourceType: "knowledge_doc",
+    status: "idle",
+    title: "本地资源验证资料",
   });
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const { loadState, resources, setResources } = useResourceData();
@@ -383,6 +532,213 @@ export function AdminResourceKnowledgeManagement() {
     }
   }
 
+  async function handleUploadResource() {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || uploadState.file === null) {
+      setToastMessage({
+        message: "请选择本地资源文件",
+        tone: "error",
+      });
+      return;
+    }
+
+    setUploadState((currentState) => ({
+      ...currentState,
+      status: "submitting",
+    }));
+
+    try {
+      const uploadResult = await postLocalResourceUpload(
+        uploadState,
+        sessionToken,
+      );
+
+      if (uploadResult === null) {
+        setToastMessage({
+          message: "资源上传失败，请确认格式和大小",
+          tone: "error",
+        });
+        return;
+      }
+
+      setResources((currentResources) => [
+        uploadResult.resource,
+        ...currentResources.filter(
+          (resource) => resource.publicId !== uploadResult.resource.publicId,
+        ),
+      ]);
+      setToastMessage({
+        message:
+          uploadResult.localResource.skippedReason === null
+            ? "资源上传完成，已生成 Markdown 草稿"
+            : "资源上传完成，但本地解析失败",
+        tone:
+          uploadResult.localResource.skippedReason === null
+            ? "success"
+            : "error",
+      });
+    } catch {
+      setToastMessage({
+        message: "资源上传失败，请稍后重试",
+        tone: "error",
+      });
+    } finally {
+      setUploadState((currentState) => ({
+        ...currentState,
+        status: "idle",
+      }));
+    }
+  }
+
+  async function handleOpenMarkdownReview(
+    resource: AdminResourceOpsSummaryDto,
+  ) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || !isSafePublicId(resource.publicId)) {
+      setToastMessage({
+        message: "资源 publicId 异常，请刷新后重试",
+        tone: "error",
+      });
+      return;
+    }
+
+    const resourceDetail = await getLocalResourceDetail(
+      resource.publicId,
+      sessionToken,
+    );
+
+    if (resourceDetail === null || resourceDetail.markdownContent === null) {
+      setToastMessage({
+        message: "Markdown 草稿不可用",
+        tone: "error",
+      });
+      return;
+    }
+
+    setMarkdownReviewState({
+      markdownContent: resourceDetail.markdownContent,
+      resource: resourceDetail.resource,
+      status: "editing",
+    });
+  }
+
+  async function handleSaveMarkdownReview() {
+    if (markdownReviewState.status !== "editing") {
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+
+    if (
+      sessionToken === null ||
+      !isSafePublicId(markdownReviewState.resource.publicId)
+    ) {
+      setMarkdownReviewState({ status: "idle" });
+      setToastMessage({
+        message: "资源 publicId 异常，请刷新后重试",
+        tone: "error",
+      });
+      return;
+    }
+
+    setMarkdownReviewState({
+      ...markdownReviewState,
+      status: "submitting",
+    });
+
+    try {
+      const savedResource = await patchLocalResourceMarkdown(
+        markdownReviewState.resource.publicId,
+        markdownReviewState.markdownContent,
+        sessionToken,
+      );
+
+      if (savedResource === null) {
+        setToastMessage({
+          message: "Markdown 草稿保存失败",
+          tone: "error",
+        });
+        return;
+      }
+
+      setResources((currentResources) =>
+        currentResources.map((resource) =>
+          resource.publicId === savedResource.publicId
+            ? savedResource
+            : resource,
+        ),
+      );
+      setToastMessage({
+        message: "Markdown 草稿已保存",
+        tone: "success",
+      });
+      setMarkdownReviewState({ status: "idle" });
+    } catch {
+      setToastMessage({
+        message: "Markdown 草稿保存失败",
+        tone: "error",
+      });
+    }
+  }
+
+  async function handleConfirmDisable() {
+    if (disableState.status !== "confirming") {
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+
+    if (
+      sessionToken === null ||
+      !isSafePublicId(disableState.resource.publicId)
+    ) {
+      setDisableState({ status: "idle" });
+      setToastMessage({
+        message: "资源 publicId 异常，请刷新后重试",
+        tone: "error",
+      });
+      return;
+    }
+
+    setDisableState({ resource: disableState.resource, status: "submitting" });
+
+    try {
+      const disabledResource = await postLocalResourceDisable(
+        disableState.resource.publicId,
+        sessionToken,
+      );
+
+      if (disabledResource === null) {
+        setToastMessage({
+          message: "资源停用失败",
+          tone: "error",
+        });
+        return;
+      }
+
+      setResources((currentResources) =>
+        currentResources.map((resource) =>
+          resource.publicId === disabledResource.publicId
+            ? disabledResource
+            : resource,
+        ),
+      );
+      setToastMessage({
+        message: "资源已停用",
+        tone: "success",
+      });
+    } catch {
+      setToastMessage({
+        message: "资源停用失败",
+        tone: "error",
+      });
+    } finally {
+      setDisableState({ status: "idle" });
+    }
+  }
+
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载资源与知识库" />;
   }
@@ -404,8 +760,13 @@ export function AdminResourceKnowledgeManagement() {
     return (
       <section className="space-y-6">
         <ResourcePageHeader />
+        <ResourceUploadPanel
+          uploadState={uploadState}
+          onChange={setUploadState}
+          onSubmit={handleUploadResource}
+        />
         <AdminEmptyState
-          description="当前运行时未返回资源数据。上传、下载、Markdown 校对与资源停用接口不在本任务允许改动范围内。"
+          description="当前运行时未返回资源数据。可先上传受控本地 Markdown/txt 文件建立草稿。"
           title="暂无资源与知识库数据"
         />
       </section>
@@ -415,6 +776,12 @@ export function AdminResourceKnowledgeManagement() {
   return (
     <section className="space-y-6">
       <ResourcePageHeader />
+
+      <ResourceUploadPanel
+        uploadState={uploadState}
+        onChange={setUploadState}
+        onSubmit={handleUploadResource}
+      />
 
       <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end">
@@ -509,6 +876,14 @@ export function AdminResourceKnowledgeManagement() {
             setToastMessage(null);
             setRebuildState({ resource, status: "confirming" });
           }}
+          onRequestDisable={(resource) => {
+            setToastMessage(null);
+            setDisableState({ resource, status: "confirming" });
+          }}
+          onRequestMarkdownReview={(resource) => {
+            setToastMessage(null);
+            void handleOpenMarkdownReview(resource);
+          }}
         />
       ) : (
         <FilteredEmptyState />
@@ -531,6 +906,34 @@ export function AdminResourceKnowledgeManagement() {
           resource={publishState.resource}
           onCancel={() => setPublishState({ status: "idle" })}
           onConfirm={handleConfirmPublish}
+        />
+      ) : null}
+
+      {disableState.status === "confirming" ||
+      disableState.status === "submitting" ? (
+        <DisableConfirmationDialog
+          isSubmitting={disableState.status === "submitting"}
+          resource={disableState.resource}
+          onCancel={() => setDisableState({ status: "idle" })}
+          onConfirm={handleConfirmDisable}
+        />
+      ) : null}
+
+      {markdownReviewState.status === "editing" ||
+      markdownReviewState.status === "submitting" ? (
+        <MarkdownReviewDialog
+          isSubmitting={markdownReviewState.status === "submitting"}
+          markdownContent={markdownReviewState.markdownContent}
+          resource={markdownReviewState.resource}
+          onCancel={() => setMarkdownReviewState({ status: "idle" })}
+          onChange={(markdownContent) =>
+            setMarkdownReviewState((currentState) =>
+              currentState.status === "idle"
+                ? currentState
+                : { ...currentState, markdownContent },
+            )
+          }
+          onConfirm={handleSaveMarkdownReview}
         />
       ) : null}
 
@@ -558,18 +961,109 @@ function ResourcePageHeader() {
       <div className="flex flex-wrap gap-2">
         <Button disabled variant="outline">
           <Upload aria-hidden="true" data-icon="inline-start" />
-          上传资源
+          云端上传待资源审批
         </Button>
         <Button disabled variant="outline">
           <FileText aria-hidden="true" data-icon="inline-start" />
-          Markdown 校对
+          批量校对待规划
         </Button>
         <Button disabled variant="outline">
           <Download aria-hidden="true" data-icon="inline-start" />
-          原始文件下载
+          云端下载待资源审批
         </Button>
       </div>
     </header>
+  );
+}
+
+function ResourceUploadPanel({
+  onChange,
+  onSubmit,
+  uploadState,
+}: {
+  onChange: (nextState: UploadState) => void;
+  onSubmit: () => void;
+  uploadState: UploadState;
+}) {
+  return (
+    <section className="border-border bg-surface rounded-md border p-4 shadow-sm">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px_160px_160px_auto] lg:items-end">
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">本地资源标题</span>
+          <Input
+            aria-label="本地资源标题"
+            value={uploadState.title}
+            onChange={(event) =>
+              onChange({ ...uploadState, title: event.target.value })
+            }
+          />
+        </label>
+        <FilterSelect
+          label="专业"
+          options={[
+            ["marketing", "营销"],
+            ["logistics", "物流"],
+            ["monopoly", "专卖"],
+          ]}
+          value={uploadState.profession}
+          onChange={(value) =>
+            onChange({ ...uploadState, profession: value as Profession })
+          }
+        />
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">等级</span>
+          <Input
+            aria-label="等级"
+            inputMode="numeric"
+            value={uploadState.level}
+            onChange={(event) =>
+              onChange({ ...uploadState, level: event.target.value })
+            }
+          />
+        </label>
+        <FilterSelect
+          label="资料类型"
+          options={[
+            ["textbook", "教材"],
+            ["courseware", "课件"],
+            ["knowledge_doc", "知识点文档"],
+            ["lecture_note", "讲义"],
+            ["other", "其他"],
+          ]}
+          value={uploadState.resourceType}
+          onChange={(value) =>
+            onChange({ ...uploadState, resourceType: value as ResourceType })
+          }
+        />
+        <div className="flex flex-col gap-2">
+          <label className="text-text-secondary text-sm font-medium">
+            本地文件
+            <input
+              aria-label="本地资源文件"
+              className="mt-2 block w-full text-sm"
+              type="file"
+              onChange={(event) =>
+                onChange({
+                  ...uploadState,
+                  file: event.target.files?.[0] ?? null,
+                })
+              }
+            />
+          </label>
+          <Button
+            disabled={uploadState.status === "submitting"}
+            onClick={onSubmit}
+          >
+            <Upload aria-hidden="true" data-icon="inline-start" />
+            {uploadState.status === "submitting" ? "上传中" : "上传本地资源"}
+          </Button>
+        </div>
+      </div>
+      <p className="text-text-muted mt-3 text-xs">
+        本地模式仅写入 ignored `.runtime/`，支持 Markdown/txt
+        转草稿；DOCX/PPTX/PDF 云端转换仍需后续资源审批。
+      </p>
+    </section>
   );
 }
 
@@ -583,10 +1077,14 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
 }
 
 function ResourceList({
+  onRequestDisable,
+  onRequestMarkdownReview,
   onRequestPublish,
   onRequestRebuild,
   rows,
 }: {
+  onRequestDisable: (resource: AdminResourceOpsSummaryDto) => void;
+  onRequestMarkdownReview: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestPublish: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestRebuild: (resource: AdminResourceOpsSummaryDto) => void;
   rows: AdminResourceOpsSummaryDto[];
@@ -651,6 +1149,17 @@ function ResourceList({
                 </Button>
               ) : null}
               <Button
+                disabled={
+                  !isSafePublicId(resource.publicId) ||
+                  !resource.markdownPreviewAvailable
+                }
+                variant="outline"
+                onClick={() => onRequestMarkdownReview(resource)}
+              >
+                <FileText aria-hidden="true" data-icon="inline-start" />
+                Markdown 校对
+              </Button>
+              <Button
                 disabled={!isSafePublicId(resource.publicId)}
                 variant={
                   resource.resourceStatus === "published" ||
@@ -675,6 +1184,16 @@ function ResourceList({
                   </>
                 )}
               </Button>
+              {resource.resourceStatus === "disabled" ? null : (
+                <Button
+                  disabled={!isSafePublicId(resource.publicId)}
+                  variant="destructive"
+                  onClick={() => onRequestDisable(resource)}
+                >
+                  <XCircle aria-hidden="true" data-icon="inline-start" />
+                  停用资源
+                </Button>
+              )}
             </div>
           </div>
           <p className="text-text-muted border-border mt-4 border-t pt-4 text-xs">
@@ -778,6 +1297,94 @@ function RebuildConfirmationDialog({
             onClick={onConfirm}
           >
             确认重建
+          </Button>
+          <Button disabled={isSubmitting} variant="outline" onClick={onCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DisableConfirmationDialog({
+  isSubmitting,
+  onCancel,
+  onConfirm,
+  resource,
+}: {
+  isSubmitting: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+  resource: AdminResourceOpsSummaryDto;
+}) {
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <h2 className="text-text-primary text-base font-semibold">
+          确认停用{resource.title}？
+        </h2>
+        <p className="text-text-secondary text-sm">
+          停用后该资源不参与新的本地 RAG 检索。
+        </p>
+        <div className="flex gap-2">
+          <Button
+            disabled={isSubmitting}
+            variant="destructive"
+            onClick={onConfirm}
+          >
+            确认停用
+          </Button>
+          <Button disabled={isSubmitting} variant="outline" onClick={onCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarkdownReviewDialog({
+  isSubmitting,
+  markdownContent,
+  onCancel,
+  onChange,
+  onConfirm,
+  resource,
+}: {
+  isSubmitting: boolean;
+  markdownContent: string;
+  onCancel: () => void;
+  onChange: (markdownContent: string) => void;
+  onConfirm: () => void;
+  resource: AdminResourceOpsSummaryDto;
+}) {
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-12 left-1/2 z-50 flex max-h-[80vh] w-[min(960px,calc(100vw-32px))] -translate-x-1/2 flex-col rounded-md border p-4 shadow-lg"
+      role="dialog"
+    >
+      <div className="space-y-3">
+        <h2 className="text-text-primary text-base font-semibold">
+          校对{resource.title}的 Markdown
+        </h2>
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          <span className="text-text-secondary">Markdown 草稿</span>
+          <textarea
+            aria-label="Markdown 草稿"
+            className="border-border bg-surface text-text-primary min-h-80 resize-y rounded-md border p-3 font-mono text-sm"
+            value={markdownContent}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </label>
+        <div className="flex gap-2">
+          <Button disabled={isSubmitting} onClick={onConfirm}>
+            保存草稿
           </Button>
           <Button disabled={isSubmitting} variant="outline" onClick={onCancel}>
             取消

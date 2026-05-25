@@ -4,6 +4,6 @@ const ragResourceKnowledgeRuntimeRouteHandlers =
   createRagResourceKnowledgeRuntimeRouteHandlers();
 
 export const GET =
-  ragResourceKnowledgeRuntimeRouteHandlers.resources.collection.GET;
-export const POST =
-  ragResourceKnowledgeRuntimeRouteHandlers.resources.collection.POST;
+  ragResourceKnowledgeRuntimeRouteHandlers.resources.detail.GET;
+export const PATCH =
+  ragResourceKnowledgeRuntimeRouteHandlers.resources.detail.PATCH;

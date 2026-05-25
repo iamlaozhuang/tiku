@@ -1,3 +1,7 @@
+import { mkdtemp } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -343,5 +347,180 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
       "indexing:resource-public-draft",
       "success:resource-public-draft",
     ]);
+  });
+
+  it("runs a local-only upload, markdown review, publish, rebuild, and disable lifecycle without exposing storage internals", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-local-resource-"));
+    const auditLogEntries: unknown[] = [];
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      localResourceStorageRoot: storageRoot,
+      repositories: createRepositories({ auditLogEntries, publishCalls: [] }),
+      sessionService: createAdminSessionService(),
+    });
+    const formData = new FormData();
+
+    formData.set("title", "本地资源验证讲义");
+    formData.set("profession", "marketing");
+    formData.set("level", "3");
+    formData.set("resourceType", "knowledge_doc");
+    formData.set("fileName", "local-resource.md");
+    formData.set(
+      "file",
+      new File(
+        ["# 本地资源验证\n\n受控测试资料摘要\n\n## 第一节\n\n向量处理片段"],
+        "local-resource.md",
+        { type: "text/markdown" },
+      ),
+    );
+
+    const uploadResponse = await handlers.resources.collection.POST(
+      new Request("http://localhost/api/v1/resources", {
+        body: formData,
+        headers: { authorization: "Bearer admin-session-token" },
+        method: "POST",
+      }),
+    );
+    const uploadPayload = await uploadResponse.json();
+    expect(uploadPayload).toMatchObject({ code: 0 });
+    const resourcePublicId = uploadPayload.data.resource.publicId as string;
+
+    expect(uploadPayload).toMatchObject({
+      code: 0,
+      data: {
+        resource: {
+          title: "本地资源验证讲义",
+          resourceStatus: "draft",
+          profession: "marketing",
+          level: 3,
+          markdownPreviewAvailable: true,
+          downloadAvailable: true,
+        },
+        localResource: {
+          parserMode: "local_only",
+          chunkCandidateCount: expect.any(Number),
+          redactedPreview: expect.stringMatching(
+            /^\[redacted:[a-f0-9]{12}\]$/u,
+          ),
+        },
+      },
+    });
+    expect(JSON.stringify(uploadPayload)).not.toContain(storageRoot);
+    expect(JSON.stringify(uploadPayload)).not.toContain("受控测试资料摘要");
+
+    const listResponse = await handlers.resources.collection.GET(
+      new Request("http://localhost/api/v1/resources?page=1&pageSize=20", {
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+    );
+    await expect(listResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        resources: expect.arrayContaining([
+          expect.objectContaining({
+            publicId: resourcePublicId,
+            resourceStatus: "draft",
+          }),
+        ]),
+      },
+    });
+
+    const detailResponse = await handlers.resources.detail.GET(
+      new Request(`http://localhost/api/v1/resources/${resourcePublicId}`, {
+        headers: { authorization: "Bearer admin-session-token" },
+      }),
+      { params: Promise.resolve({ publicId: resourcePublicId }) },
+    );
+    await expect(detailResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        localOnly: true,
+        markdownContent: expect.any(String),
+      },
+    });
+
+    const updateResponse = await handlers.resources.detail.PATCH(
+      new Request(`http://localhost/api/v1/resources/${resourcePublicId}`, {
+        body: JSON.stringify({
+          markdownContent: "# 本地资源验证\n\n## 第一节\n\n已校对摘要",
+        }),
+        headers: {
+          authorization: "Bearer admin-session-token",
+          "content-type": "application/json",
+        },
+        method: "PATCH",
+      }),
+      { params: Promise.resolve({ publicId: resourcePublicId }) },
+    );
+    await expect(updateResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        resource: { publicId: resourcePublicId, resourceStatus: "draft" },
+      },
+    });
+
+    const publishResponse = await handlers.resources.publish.POST(
+      new Request(
+        `http://localhost/api/v1/resources/${resourcePublicId}/publish`,
+        {
+          headers: { authorization: "Bearer admin-session-token" },
+          method: "POST",
+        },
+      ),
+      { params: Promise.resolve({ publicId: resourcePublicId }) },
+    );
+    await expect(publishResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        resource: {
+          publicId: resourcePublicId,
+          resourceStatus: "published",
+          isVectorStale: true,
+        },
+      },
+    });
+
+    const rebuildResponse = await handlers.resources.rebuildVector.POST(
+      new Request(
+        `http://localhost/api/v1/resources/${resourcePublicId}/rebuild-vector`,
+        {
+          headers: { authorization: "Bearer admin-session-token" },
+          method: "POST",
+        },
+      ),
+      { params: Promise.resolve({ publicId: resourcePublicId }) },
+    );
+    await expect(rebuildResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        resourceVector: {
+          resourcePublicId,
+          resourceStatus: "rag_ready",
+          chunkCount: expect.any(Number),
+        },
+      },
+    });
+
+    const disableResponse = await handlers.resources.disable.POST(
+      new Request(
+        `http://localhost/api/v1/resources/${resourcePublicId}/disable`,
+        {
+          headers: { authorization: "Bearer admin-session-token" },
+          method: "POST",
+        },
+      ),
+      { params: Promise.resolve({ publicId: resourcePublicId }) },
+    );
+    await expect(disableResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        resource: {
+          publicId: resourcePublicId,
+          resourceStatus: "disabled",
+        },
+      },
+    });
+    expect(JSON.stringify(auditLogEntries)).not.toContain(
+      "admin-session-token",
+    );
   });
 });

@@ -9,7 +9,10 @@ import {
   createPaperCompositionLifecycleRuntimeRouteHandlers,
   type PaperCompositionLifecycleRuntimeRepositories,
 } from "@/server/services/paper-composition-lifecycle-runtime";
-import { storeLocalPaperAssetFile } from "@/server/services/local-paper-asset-storage";
+import {
+  storeLocalPaperAssetFile,
+  storeLocalResourceFile,
+} from "@/server/services/local-paper-asset-storage";
 import type { SessionService } from "@/server/services/session-service";
 import type { PaperAssetRepository } from "@/server/repositories/paper-asset-repository";
 import type { PaperDraftRepository } from "@/server/repositories/paper-draft-repository";
@@ -169,5 +172,37 @@ describe("phase 11 local file upload storage adapter", () => {
     ]);
     expect(serializedPayload).not.toContain("objectKey");
     expect(serializedPayload).not.toContain(storageRoot);
+  });
+
+  it("stores uploaded resource bytes under ignored local resource storage", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-resource-test-"));
+    const fileBytes = new TextEncoder().encode(
+      "# Local Resource\n\ncontrolled",
+    );
+    const expectedHash = createHash("sha256").update(fileBytes).digest("hex");
+
+    const metadata = await storeLocalResourceFile({
+      file: new File([fileBytes], "local-resource.md", {
+        type: "text/markdown",
+      }),
+      profession: "marketing",
+      resourceType: "knowledge_doc",
+      storageRoot,
+      uploadedAt: new Date("2026-05-25T08:10:00.000Z"),
+    });
+
+    expect(metadata).toMatchObject({
+      contentType: "text/markdown",
+      fileHash: expectedHash,
+      fileName: "local-resource.md",
+      fileSizeByte: fileBytes.byteLength,
+      objectKey: `dev/resource/marketing/202605/${expectedHash}.md`,
+      profession: "marketing",
+      resourceType: "knowledge_doc",
+    });
+    expect(metadata).not.toHaveProperty("localFilePath");
+    await expect(
+      readFile(join(storageRoot, metadata.objectKey), "utf8"),
+    ).resolves.toBe("# Local Resource\n\ncontrolled");
   });
 });

@@ -530,12 +530,27 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   await expect(
     page.getByRole("heading", { name: "资源与知识库管理" }),
   ).toBeVisible();
+  await expect(page.getByLabel("本地资源标题")).toBeVisible();
+  await page.getByLabel("本地资源标题").fill("E2E 本地资源验证资料");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "local-resource-e2e.md",
+    mimeType: "text/markdown",
+    buffer: Buffer.from("# E2E 本地资源\n\n受控测试摘要"),
+  });
+  await page.getByRole("button", { name: "上传本地资源" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "资源上传完成，已生成 Markdown 草稿",
+  );
+  await expect(page.locator("body")).toContainText("E2E 本地资源验证资料");
   const resourceRow = page.locator('[data-testid^="resource-row-"]').first();
 
   if ((await resourceRow.count()) > 0) {
     await expect(resourceRow).toBeVisible();
     await expect(resourceRow).not.toHaveAttribute("data-id", /.*/);
     await expect(resourceRow).toHaveAttribute("data-public-id", /resource-/);
+    await expect(
+      resourceRow.getByRole("button", { name: "Markdown 校对" }),
+    ).toBeVisible();
     await resourceRow.getByRole("button", { name: "重建向量" }).click();
     await expect(page.getByRole("alertdialog")).toContainText("确认重建");
     await page.getByRole("button", { name: "取消" }).click();

@@ -3,7 +3,5 @@ import { createRagResourceKnowledgeRuntimeRouteHandlers } from "@/server/service
 const ragResourceKnowledgeRuntimeRouteHandlers =
   createRagResourceKnowledgeRuntimeRouteHandlers();
 
-export const GET =
-  ragResourceKnowledgeRuntimeRouteHandlers.resources.collection.GET;
 export const POST =
-  ragResourceKnowledgeRuntimeRouteHandlers.resources.collection.POST;
+  ragResourceKnowledgeRuntimeRouteHandlers.resources.disable.POST;

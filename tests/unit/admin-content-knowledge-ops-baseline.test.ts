@@ -298,6 +298,67 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
         return createJsonResponse(payload);
       }
 
+      if (path === "/api/v1/resources" && init?.method === "POST") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            resource: {
+              publicId: "resource-local-uploaded",
+              title: "本地资源验证资料",
+              resourceType: "knowledge_doc",
+              resourceStatus: "draft",
+              profession: "marketing",
+              level: 3,
+              originalFileName: "local-resource.md",
+              downloadAvailable: true,
+              markdownPreviewAvailable: true,
+              isVectorStale: false,
+              publishedAt: null,
+              indexingErrorSummary: null,
+              uploadedAt: "2026-05-25T08:00:00.000Z",
+              updatedAt: "2026-05-25T08:00:00.000Z",
+            },
+            localResource: {
+              parserMode: "local_only",
+              markdownContentHash: "local-markdown-hash",
+              charLength: 80,
+              lineCount: 5,
+              chunkCandidateCount: 2,
+              headingPaths: [["第一章"]],
+              redactedPreview: "[redacted:123456789abc]",
+              skippedReason: null,
+            },
+          },
+        });
+      }
+
+      if (path === "/api/v1/resources/resource-public-001") {
+        if (init?.method === "PATCH") {
+          return createJsonResponse({
+            code: 0,
+            message: "ok",
+            data: {
+              resource: {
+                ...resourcePayload.data.resources[0],
+                resourceStatus: "draft",
+                isVectorStale: true,
+              },
+            },
+          });
+        }
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            resource: resourcePayload.data.resources[0],
+            localOnly: true,
+            markdownContent: "# 受控本地草稿\n\n仅用于单元测试",
+          },
+        });
+      }
+
       if (
         path === "/api/v1/resources/resource-public-001/publish" &&
         init?.method === "POST"
@@ -322,6 +383,22 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
         init?.method === "POST"
       ) {
         return createJsonResponse(resourceVectorRebuildPayload);
+      }
+
+      if (
+        path === "/api/v1/resources/resource-public-001/disable" &&
+        init?.method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            resource: {
+              ...resourcePayload.data.resources[0],
+              resourceStatus: "disabled",
+            },
+          },
+        });
       }
 
       return createJsonResponse({
@@ -853,6 +930,82 @@ describe("admin content and knowledge ops baseline", () => {
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/resources/resource-public-001/publish",
+      expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-admin-token" },
+        method: "POST",
+      }),
+    );
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain("objectStoragePath");
+  });
+
+  it("uploads, reviews, and disables local resources through protected resource actions", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockResourceFetch();
+
+    render(createElement(AdminResourceKnowledgeManagement));
+
+    expect(
+      await screen.findByRole("heading", { name: "资源与知识库管理" }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("本地资源文件"), {
+      target: {
+        files: [
+          new File(["# 本地资源\n\n受控测试资料"], "local-resource.md", {
+            type: "text/markdown",
+          }),
+        ],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "上传本地资源" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "资源上传完成，已生成 Markdown 草稿",
+    );
+    expect(screen.getByText("本地资源验证资料")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/resources",
+      expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-admin-token" },
+        method: "POST",
+      }),
+    );
+
+    const firstResource = screen.getByTestId(
+      "resource-row-resource-public-001",
+    );
+
+    fireEvent.click(
+      within(firstResource).getByRole("button", { name: "Markdown 校对" }),
+    );
+    expect(await screen.findByRole("dialog")).toHaveTextContent(
+      "校对营销知识库讲义的 Markdown",
+    );
+    fireEvent.change(screen.getByLabelText("Markdown 草稿"), {
+      target: { value: "# 已校对\n\n受控摘要" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Markdown 草稿已保存",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/resources/resource-public-001",
+      expect.objectContaining({
+        body: JSON.stringify({ markdownContent: "# 已校对\n\n受控摘要" }),
+        method: "PATCH",
+      }),
+    );
+
+    fireEvent.click(
+      within(firstResource).getByRole("button", { name: "停用资源" }),
+    );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "确认停用营销知识库讲义？",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("资源已停用");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/resources/resource-public-001/disable",
       expect.objectContaining({
         headers: { authorization: "Bearer unit-test-admin-token" },
         method: "POST",

@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve, sep } from "node:path";
+
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import {
   createErrorResponse,
@@ -17,6 +21,8 @@ import {
   type AdminKnowledgeNodeOpsSummaryDto,
 } from "../contracts/admin-content-knowledge-ops-contract";
 import type { ResourceVectorRebuildResultDto } from "../contracts/ai-rag-contract";
+import type { ResourceStatus, ResourceType } from "../models/ai-rag";
+import { canTransitionResourceStatus } from "../models/ai-rag";
 import type { Profession } from "../models/auth";
 import {
   createPostgresAdminFlowRuntimeRepositories,
@@ -32,6 +38,15 @@ import {
   parseKnowledgeNodeMutationInput,
   parseKnowledgeNodeUpdateInput,
 } from "../validators/rag-resource-knowledge";
+import {
+  defaultLocalUploadStorageRoot,
+  storeLocalResourceFile,
+  type StoredLocalResourceMetadata,
+} from "./local-paper-asset-storage";
+import {
+  parseLocalTextDocumentAsset,
+  type LocalTextDocumentEvidenceSummary,
+} from "./local-text-document-parser";
 import { buildResourceChunks } from "./rag-chunking-service";
 import type { SessionService } from "./session-service";
 
@@ -59,8 +74,55 @@ export type RagResourceKnowledgeRuntimeRepositoriesWithAudit =
   };
 
 export type RagResourceKnowledgeRuntimeOptions = {
+  localResourceStorageRoot?: string;
   repositories?: RagResourceKnowledgeRuntimeRepositoriesWithAudit;
   sessionService?: Pick<SessionService, "getCurrentSession">;
+};
+
+type LocalResourceCatalogEntry = {
+  publicId: string;
+  title: string;
+  resourceType: ResourceType;
+  resourceStatus: ResourceStatus;
+  profession: Profession;
+  level: number | null;
+  originalFileName: string;
+  objectKey: string;
+  contentType: string;
+  fileSizeByte: number;
+  fileHash: string;
+  markdownContent: string | null;
+  markdownContentHash: string | null;
+  indexingErrorMessage: string | null;
+  isVectorStale: boolean;
+  publishedAt: string | null;
+  uploadedAt: string;
+  updatedAt: string;
+  disabledFromStatus: ResourceStatus | null;
+  chunkCount: number;
+  textHashes: string[];
+  headingPaths: string[][];
+};
+
+type LocalResourceCatalog = {
+  resources: LocalResourceCatalogEntry[];
+};
+
+type LocalResourceUploadSummary = {
+  parserMode: "local_only";
+  markdownContentHash: string | null;
+  charLength: number;
+  lineCount: number;
+  chunkCandidateCount: number;
+  headingPaths: string[][];
+  redactedPreview: string | null;
+  skippedReason: string | null;
+};
+
+type LocalResourceDetailDto = {
+  resource: AdminResourceOpsSummaryDto;
+  localOnly: boolean;
+  markdownContent: string | null;
 };
 
 const adminSessionRequiredResponse = createErrorResponse(
@@ -108,7 +170,9 @@ function isContentAdminRole(role: string): role is ContentAdminRole {
 
 function canManageContent(actor: ContentAdminActor): boolean {
   return (
-    actor.roles.includes("super_admin") || actor.roles.includes("content_admin")
+    actor.roles.includes("super_admin") ||
+    actor.roles.includes("ops_admin") ||
+    actor.roles.includes("content_admin")
   );
 }
 
@@ -200,6 +264,231 @@ function readRequestIp(request: Request): string | null {
   return request.headers.get("x-real-ip");
 }
 
+function resolveInsideStorageRoot(storageRoot: string, relativePath: string) {
+  const resolvedRoot = resolve(storageRoot);
+  const targetPath = resolve(resolvedRoot, ...relativePath.split("/"));
+  const rootPrefix = resolvedRoot.endsWith(sep)
+    ? resolvedRoot
+    : `${resolvedRoot}${sep}`;
+
+  if (targetPath !== resolvedRoot && !targetPath.startsWith(rootPrefix)) {
+    throw new Error("Local resource catalog target escaped storage root.");
+  }
+
+  return targetPath;
+}
+
+function getLocalResourceCatalogPath(storageRoot: string) {
+  return resolveInsideStorageRoot(storageRoot, "dev/resource/catalog.json");
+}
+
+async function readLocalResourceCatalog(
+  storageRoot: string,
+): Promise<LocalResourceCatalog> {
+  try {
+    const parsedValue = JSON.parse(
+      await readFile(getLocalResourceCatalogPath(storageRoot), "utf8"),
+    ) as Partial<LocalResourceCatalog>;
+
+    return {
+      resources: Array.isArray(parsedValue.resources)
+        ? parsedValue.resources.filter(isLocalResourceCatalogEntry)
+        : [],
+    };
+  } catch {
+    return { resources: [] };
+  }
+}
+
+async function writeLocalResourceCatalog(
+  storageRoot: string,
+  catalog: LocalResourceCatalog,
+) {
+  const catalogPath = getLocalResourceCatalogPath(storageRoot);
+
+  await mkdir(dirname(catalogPath), { recursive: true });
+  await writeFile(catalogPath, JSON.stringify(catalog, null, 2));
+}
+
+function isLocalResourceCatalogEntry(
+  value: unknown,
+): value is LocalResourceCatalogEntry {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const entry = value as Partial<LocalResourceCatalogEntry>;
+
+  return (
+    typeof entry.publicId === "string" &&
+    typeof entry.title === "string" &&
+    isResourceType(entry.resourceType) &&
+    isResourceStatus(entry.resourceStatus) &&
+    isProfession(entry.profession) &&
+    (typeof entry.level === "number" || entry.level === null) &&
+    typeof entry.originalFileName === "string" &&
+    typeof entry.objectKey === "string" &&
+    typeof entry.contentType === "string" &&
+    typeof entry.fileSizeByte === "number" &&
+    typeof entry.fileHash === "string" &&
+    (typeof entry.markdownContent === "string" ||
+      entry.markdownContent === null) &&
+    (typeof entry.markdownContentHash === "string" ||
+      entry.markdownContentHash === null) &&
+    (typeof entry.indexingErrorMessage === "string" ||
+      entry.indexingErrorMessage === null) &&
+    typeof entry.isVectorStale === "boolean" &&
+    (typeof entry.publishedAt === "string" || entry.publishedAt === null) &&
+    typeof entry.uploadedAt === "string" &&
+    typeof entry.updatedAt === "string" &&
+    (isResourceStatus(entry.disabledFromStatus) ||
+      entry.disabledFromStatus === null) &&
+    typeof entry.chunkCount === "number" &&
+    Array.isArray(entry.textHashes) &&
+    Array.isArray(entry.headingPaths)
+  );
+}
+
+function isProfession(value: unknown): value is Profession {
+  return value === "monopoly" || value === "marketing" || value === "logistics";
+}
+
+function isResourceType(value: unknown): value is ResourceType {
+  return (
+    value === "textbook" ||
+    value === "courseware" ||
+    value === "knowledge_doc" ||
+    value === "lecture_note" ||
+    value === "other"
+  );
+}
+
+function isResourceStatus(value: unknown): value is ResourceStatus {
+  return (
+    value === "uploaded" ||
+    value === "converting" ||
+    value === "conversion_failed" ||
+    value === "draft" ||
+    value === "published" ||
+    value === "indexing" ||
+    value === "index_failed" ||
+    value === "rag_ready" ||
+    value === "disabled"
+  );
+}
+
+function isUploadFile(value: unknown): value is File {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { name?: unknown }).name === "string" &&
+    typeof (value as { arrayBuffer?: unknown }).arrayBuffer === "function" &&
+    typeof (value as { size?: unknown }).size === "number"
+  );
+}
+
+function createMarkdownContentHash(markdownContent: string) {
+  return createHash("sha256").update(markdownContent).digest("hex");
+}
+
+function createLocalResourcePublicId(metadata: StoredLocalResourceMetadata) {
+  return `resource-local-${metadata.fileHash.slice(0, 12)}`;
+}
+
+function normalizeLocalResourceTitle(value: FormDataEntryValue | null) {
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : null;
+}
+
+function parseLocalResourceLevel(value: FormDataEntryValue | null) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return null;
+  }
+
+  const level = Number(value);
+
+  return Number.isInteger(level) && level > 0 ? level : null;
+}
+
+function mapLocalResourceEntry(
+  entry: LocalResourceCatalogEntry,
+): AdminResourceOpsSummaryDto {
+  return {
+    publicId: entry.publicId,
+    title: entry.title,
+    resourceType: entry.resourceType,
+    resourceStatus: entry.resourceStatus,
+    profession: entry.profession,
+    level: entry.level,
+    originalFileName: entry.originalFileName,
+    downloadAvailable: true,
+    markdownPreviewAvailable: entry.markdownContentHash !== null,
+    isVectorStale: entry.isVectorStale,
+    publishedAt: entry.publishedAt,
+    indexingErrorSummary: createLocalIndexingErrorSummary(
+      entry.indexingErrorMessage,
+    ),
+    uploadedAt: entry.uploadedAt,
+    updatedAt: entry.updatedAt,
+  };
+}
+
+function createLocalIndexingErrorSummary(message: string | null) {
+  if (message === null) {
+    return null;
+  }
+
+  return message === "unsupported_extension" ||
+    message === "file_too_large" ||
+    message === "missing_markdown_content" ||
+    message === "resource_status_not_chunkable"
+    ? message
+    : "redacted_indexing_error";
+}
+
+function matchesLocalResourceQuery(
+  resourceSummary: AdminResourceOpsSummaryDto,
+  query: AdminContentKnowledgeListQuery,
+) {
+  const searchableText = [
+    resourceSummary.publicId,
+    resourceSummary.title,
+    resourceSummary.originalFileName,
+    resourceSummary.resourceStatus,
+    resourceSummary.resourceType,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    (query.keyword === null ||
+      searchableText.includes(query.keyword.toLowerCase())) &&
+    (query.status === "all" ||
+      resourceSummary.resourceStatus === query.status) &&
+    (query.profession === "all" ||
+      resourceSummary.profession === query.profession) &&
+    (query.level === null || resourceSummary.level === query.level)
+  );
+}
+
+function createLocalUploadSummary(
+  parseSummary: LocalTextDocumentEvidenceSummary | null,
+  skippedReason: string | null,
+): LocalResourceUploadSummary {
+  return {
+    parserMode: "local_only",
+    markdownContentHash: parseSummary?.markdownContentHash ?? null,
+    charLength: parseSummary?.charLength ?? 0,
+    lineCount: parseSummary?.lineCount ?? 0,
+    chunkCandidateCount: parseSummary?.chunkCandidateCount ?? 0,
+    headingPaths: parseSummary?.headingPaths ?? [],
+    redactedPreview: parseSummary?.redactedPreview ?? null,
+    skippedReason,
+  };
+}
+
 function createDefaultRepositories(): RagResourceKnowledgeRuntimeRepositoriesWithAudit {
   const adminFlowRepositories = createPostgresAdminFlowRuntimeRepositories();
 
@@ -239,6 +528,7 @@ function createResourceVectorResult(
 }
 
 async function rebuildResourceVector(input: {
+  localResourceStorageRoot: string;
   resourceRepository: RagResourceRuntimeRepository;
   publicId: string;
 }): Promise<ApiResponse<ResourceVectorRebuildResultDto | null>> {
@@ -246,7 +536,10 @@ async function rebuildResourceVector(input: {
     await input.resourceRepository.findResourceForIndexing(input.publicId);
 
   if (resourceForIndexing === null) {
-    return resourceNotFoundResponse;
+    return rebuildLocalResourceVector({
+      publicId: input.publicId,
+      storageRoot: input.localResourceStorageRoot,
+    });
   }
 
   const chunkingResult = buildResourceChunks({
@@ -295,6 +588,7 @@ async function rebuildResourceVector(input: {
 }
 
 async function publishResourceMarkdown(input: {
+  localResourceStorageRoot: string;
   resourceRepository: RagResourceRuntimeRepository;
   publicId: string;
 }): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
@@ -303,7 +597,10 @@ async function publishResourceMarkdown(input: {
   );
 
   if (publishResult.status === "not_found") {
-    return resourceNotFoundResponse;
+    return publishLocalResourceMarkdown({
+      publicId: input.publicId,
+      storageRoot: input.localResourceStorageRoot,
+    });
   }
 
   if (publishResult.status === "conflict") {
@@ -313,6 +610,333 @@ async function publishResourceMarkdown(input: {
   }
 
   return createSuccessResponse({ resource: publishResult.resource });
+}
+
+async function uploadLocalResource(input: {
+  request: Request;
+  storageRoot: string;
+}): Promise<
+  ApiResponse<{
+    resource: AdminResourceOpsSummaryDto;
+    localResource: LocalResourceUploadSummary;
+  } | null>
+> {
+  const formData = await input.request.formData();
+  const fileValue = formData.get("file");
+  const professionValue = formData.get("profession");
+  const resourceTypeValue = formData.get("resourceType");
+  const title = normalizeLocalResourceTitle(formData.get("title"));
+
+  if (
+    !isUploadFile(fileValue) ||
+    !isProfession(professionValue) ||
+    !isResourceType(resourceTypeValue)
+  ) {
+    return validationFailedResponse;
+  }
+
+  const uploadedAt = new Date();
+  const storedResource = await storeLocalResourceFile({
+    file: fileValue,
+    fileName:
+      typeof formData.get("fileName") === "string"
+        ? (formData.get("fileName") as string)
+        : undefined,
+    profession: professionValue,
+    resourceType: resourceTypeValue,
+    storageRoot: input.storageRoot,
+    uploadedAt,
+  });
+  const parseResult = await parseLocalTextDocumentAsset({
+    fileName: storedResource.fileName,
+    objectKey: storedResource.objectKey,
+    storageRoot: input.storageRoot,
+    maxFileSizeByte: 50 * 1024 * 1024,
+  });
+  const now = uploadedAt.toISOString();
+  const publicId = createLocalResourcePublicId(storedResource);
+  const catalog = await readLocalResourceCatalog(input.storageRoot);
+  const parsedResource = parseResult.status === "parsed" ? parseResult : null;
+  const entry: LocalResourceCatalogEntry = {
+    publicId,
+    title: title ?? storedResource.fileName.replace(/\.[^.]+$/u, ""),
+    resourceType: storedResource.resourceType,
+    resourceStatus: parsedResource === null ? "conversion_failed" : "draft",
+    profession: storedResource.profession,
+    level: parseLocalResourceLevel(formData.get("level")),
+    originalFileName: storedResource.fileName,
+    objectKey: storedResource.objectKey,
+    contentType: storedResource.contentType,
+    fileSizeByte: storedResource.fileSizeByte,
+    fileHash: storedResource.fileHash,
+    markdownContent: parsedResource?.markdownContent ?? null,
+    markdownContentHash: parsedResource?.markdownContentHash ?? null,
+    indexingErrorMessage:
+      parseResult.status === "skipped" ? parseResult.skippedReason : null,
+    isVectorStale: false,
+    publishedAt: null,
+    uploadedAt: now,
+    updatedAt: now,
+    disabledFromStatus: null,
+    chunkCount: 0,
+    textHashes: [],
+    headingPaths: parsedResource?.headingPaths ?? [],
+  };
+  const nextCatalog = {
+    resources: [
+      entry,
+      ...catalog.resources.filter((resource) => resource.publicId !== publicId),
+    ],
+  };
+
+  await writeLocalResourceCatalog(input.storageRoot, nextCatalog);
+
+  return createSuccessResponse({
+    resource: mapLocalResourceEntry(entry),
+    localResource: createLocalUploadSummary(
+      parsedResource?.evidenceSummary ?? null,
+      parseResult.status === "skipped" ? parseResult.skippedReason : null,
+    ),
+  });
+}
+
+async function findLocalResource(input: {
+  publicId: string;
+  storageRoot: string;
+}): Promise<LocalResourceCatalogEntry | null> {
+  const catalog = await readLocalResourceCatalog(input.storageRoot);
+
+  return (
+    catalog.resources.find(
+      (resource) => resource.publicId === input.publicId,
+    ) ?? null
+  );
+}
+
+async function saveLocalResource(input: {
+  resource: LocalResourceCatalogEntry;
+  storageRoot: string;
+}) {
+  const catalog = await readLocalResourceCatalog(input.storageRoot);
+
+  await writeLocalResourceCatalog(input.storageRoot, {
+    resources: catalog.resources.map((resource) =>
+      resource.publicId === input.resource.publicId ? input.resource : resource,
+    ),
+  });
+}
+
+async function getLocalResourceDetail(input: {
+  publicId: string;
+  storageRoot: string;
+}): Promise<ApiResponse<LocalResourceDetailDto | null>> {
+  const resource = await findLocalResource(input);
+
+  if (resource === null) {
+    return resourceNotFoundResponse;
+  }
+
+  return createSuccessResponse({
+    resource: mapLocalResourceEntry(resource),
+    localOnly: true,
+    markdownContent: resource.markdownContent,
+  });
+}
+
+async function updateLocalResourceMarkdown(input: {
+  publicId: string;
+  request: Request;
+  storageRoot: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  const resource = await findLocalResource(input);
+
+  if (resource === null) {
+    return resourceNotFoundResponse;
+  }
+
+  const requestBody = await readRequestJson(input.request);
+
+  if (
+    typeof requestBody !== "object" ||
+    requestBody === null ||
+    typeof (requestBody as { markdownContent?: unknown }).markdownContent !==
+      "string"
+  ) {
+    return validationFailedResponse;
+  }
+
+  const markdownContent = (
+    requestBody as { markdownContent: string }
+  ).markdownContent.trim();
+
+  if (markdownContent.length === 0) {
+    return validationFailedResponse;
+  }
+
+  const markdownContentHash = createMarkdownContentHash(markdownContent);
+  const now = new Date().toISOString();
+  const nextResource: LocalResourceCatalogEntry = {
+    ...resource,
+    resourceStatus:
+      resource.resourceStatus === "disabled" ? "disabled" : "draft",
+    markdownContent,
+    markdownContentHash,
+    indexingErrorMessage: null,
+    isVectorStale: resource.resourceStatus === "rag_ready",
+    updatedAt: now,
+    headingPaths: markdownContent
+      .split("\n")
+      .filter((line) => line.startsWith("#"))
+      .map((line) => [line.replace(/^#+\s*/u, "").trim()]),
+  };
+
+  await saveLocalResource({
+    resource: nextResource,
+    storageRoot: input.storageRoot,
+  });
+
+  return createSuccessResponse({
+    resource: mapLocalResourceEntry(nextResource),
+  });
+}
+
+async function publishLocalResourceMarkdown(input: {
+  publicId: string;
+  storageRoot: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  const resource = await findLocalResource(input);
+
+  if (resource === null) {
+    return resourceNotFoundResponse;
+  }
+
+  if (
+    resource.markdownContent === null ||
+    resource.markdownContentHash === null
+  ) {
+    return resourcePublishConflictResponse;
+  }
+
+  if (!canTransitionResourceStatus(resource.resourceStatus, "published")) {
+    return resourcePublishConflictResponse;
+  }
+
+  const now = new Date().toISOString();
+  const nextResource: LocalResourceCatalogEntry = {
+    ...resource,
+    resourceStatus: "published",
+    indexingErrorMessage: null,
+    isVectorStale: true,
+    publishedAt: now,
+    updatedAt: now,
+  };
+
+  await saveLocalResource({
+    resource: nextResource,
+    storageRoot: input.storageRoot,
+  });
+
+  return createSuccessResponse({
+    resource: mapLocalResourceEntry(nextResource),
+  });
+}
+
+async function rebuildLocalResourceVector(input: {
+  publicId: string;
+  storageRoot: string;
+}): Promise<ApiResponse<ResourceVectorRebuildResultDto | null>> {
+  const resource = await findLocalResource(input);
+
+  if (resource === null) {
+    return resourceNotFoundResponse;
+  }
+
+  const chunkingResult = buildResourceChunks({
+    resourcePublicId: resource.publicId,
+    resourceTitle: resource.title,
+    resourceStatus: resource.resourceStatus,
+    profession: resource.profession,
+    level: resource.level,
+    markdownContent: resource.markdownContent,
+    markdownContentHash: resource.markdownContentHash,
+  });
+
+  const now = new Date().toISOString();
+
+  if (chunkingResult.status === "skipped") {
+    const failedResource: LocalResourceCatalogEntry = {
+      ...resource,
+      resourceStatus: "index_failed",
+      indexingErrorMessage: chunkingResult.skippedReason,
+      isVectorStale: false,
+      updatedAt: now,
+    };
+
+    await saveLocalResource({
+      resource: failedResource,
+      storageRoot: input.storageRoot,
+    });
+
+    return createErrorResponse(
+      ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.validationFailed,
+      "Resource is not ready for vector rebuild.",
+    );
+  }
+
+  const readyResource: LocalResourceCatalogEntry = {
+    ...resource,
+    resourceStatus: "rag_ready",
+    indexingErrorMessage: null,
+    isVectorStale: false,
+    updatedAt: now,
+    chunkCount: chunkingResult.chunks.length,
+    textHashes: chunkingResult.chunks.map((chunk) => chunk.textHash),
+    headingPaths: chunkingResult.evidenceSummary.headingPaths,
+  };
+
+  await saveLocalResource({
+    resource: readyResource,
+    storageRoot: input.storageRoot,
+  });
+
+  return createSuccessResponse(
+    createResourceVectorResult(
+      readyResource.publicId,
+      readyResource.resourceStatus,
+      chunkingResult,
+    ),
+  );
+}
+
+async function disableLocalResource(input: {
+  publicId: string;
+  storageRoot: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  const resource = await findLocalResource(input);
+
+  if (resource === null) {
+    return resourceNotFoundResponse;
+  }
+
+  const now = new Date().toISOString();
+  const nextResource: LocalResourceCatalogEntry = {
+    ...resource,
+    resourceStatus: "disabled",
+    disabledFromStatus:
+      resource.resourceStatus === "disabled"
+        ? resource.disabledFromStatus
+        : resource.resourceStatus,
+    updatedAt: now,
+  };
+
+  await saveLocalResource({
+    resource: nextResource,
+    storageRoot: input.storageRoot,
+  });
+
+  return createSuccessResponse({
+    resource: mapLocalResourceEntry(nextResource),
+  });
 }
 
 function mapKnowledgeNodeResult(
@@ -328,6 +952,8 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
 ) {
   const repositories = options.repositories ?? createDefaultRepositories();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const localResourceStorageRoot =
+    options.localResourceStorageRoot ?? defaultLocalUploadStorageRoot;
 
   async function requireContentAdminActor(
     request: Request,
@@ -368,16 +994,113 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           void actorOrError;
-          const result = await repositories.resourceRepository.listResources(
-            readListQuery(request),
-          );
+          const listQuery = readListQuery(request);
+          const [result, localCatalog] = await Promise.all([
+            repositories.resourceRepository.listResources(listQuery),
+            readLocalResourceCatalog(localResourceStorageRoot),
+          ]);
+          const localResources = localCatalog.resources
+            .map(mapLocalResourceEntry)
+            .filter((resource) =>
+              matchesLocalResourceQuery(resource, listQuery),
+            );
+          const resources = [...localResources, ...result.resources];
 
           return createJsonResponse(
             createPaginatedResponse(
-              { resources: result.resources },
-              result.pagination,
+              { resources },
+              {
+                ...result.pagination,
+                total: result.pagination.total + localResources.length,
+              },
             ),
           );
+        },
+        async POST(request: Request): Promise<Response> {
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: "resource.upload",
+            targetResourceType: "resource",
+            targetPublicId: null,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const response = await uploadLocalResource({
+            request,
+            storageRoot: localResourceStorageRoot,
+          });
+
+          await appendAuditLog(
+            repositories.auditLogRepository,
+            request,
+            actorOrError,
+            {
+              actionType: "resource.upload",
+              targetResourceType: "resource",
+              targetPublicId: response.data?.resource.publicId ?? null,
+              resultStatus: response.code === 0 ? "success" : "failed",
+              metadataSummary: "redacted local resource upload metadata",
+            },
+          );
+
+          return createJsonResponse(response);
+        },
+      },
+      detail: {
+        async GET(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireContentAdminActor(request);
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          void actorOrError;
+
+          return createJsonResponse(
+            await getLocalResourceDetail({
+              publicId,
+              storageRoot: localResourceStorageRoot,
+            }),
+          );
+        },
+        async PATCH(
+          request: Request,
+          context: RouteContext,
+        ): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: "resource.update_markdown",
+            targetResourceType: "resource",
+            targetPublicId: publicId,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const response = await updateLocalResourceMarkdown({
+            publicId,
+            request,
+            storageRoot: localResourceStorageRoot,
+          });
+
+          await appendAuditLog(
+            repositories.auditLogRepository,
+            request,
+            actorOrError,
+            {
+              actionType: "resource.update_markdown",
+              targetResourceType: "resource",
+              targetPublicId: publicId,
+              resultStatus: response.code === 0 ? "success" : "failed",
+              metadataSummary: "redacted local resource markdown metadata",
+            },
+          );
+
+          return createJsonResponse(response);
         },
       },
       publish: {
@@ -394,6 +1117,7 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           const response = await publishResourceMarkdown({
+            localResourceStorageRoot,
             resourceRepository: repositories.resourceRepository,
             publicId,
           });
@@ -428,6 +1152,7 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
           }
 
           const response = await rebuildResourceVector({
+            localResourceStorageRoot,
             resourceRepository: repositories.resourceRepository,
             publicId,
           });
@@ -442,6 +1167,40 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
               targetPublicId: publicId,
               resultStatus: response.code === 0 ? "success" : "failed",
               metadataSummary: "redacted resource vector rebuild metadata",
+            },
+          );
+
+          return createJsonResponse(response);
+        },
+      },
+      disable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: "resource.disable",
+            targetResourceType: "resource",
+            targetPublicId: publicId,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const response = await disableLocalResource({
+            publicId,
+            storageRoot: localResourceStorageRoot,
+          });
+
+          await appendAuditLog(
+            repositories.auditLogRepository,
+            request,
+            actorOrError,
+            {
+              actionType: "resource.disable",
+              targetResourceType: "resource",
+              targetPublicId: publicId,
+              resultStatus: response.code === 0 ? "success" : "failed",
+              metadataSummary: "redacted local resource disable metadata",
             },
           );
 

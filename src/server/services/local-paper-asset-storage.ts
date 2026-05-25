@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, resolve, sep } from "node:path";
 
 import type { PaperAttachmentUsage, Profession } from "../models/paper";
+import type { ResourceType } from "../models/ai-rag";
 import type { NormalizedCreatePaperAssetInput } from "../validators/paper-asset";
 
 export type StoreLocalPaperAssetFileInput = {
@@ -17,7 +18,30 @@ export type StoreLocalPaperAssetFileInput = {
 
 export type StoredLocalPaperAssetMetadata = NormalizedCreatePaperAssetInput;
 
-const defaultStorageRoot = join(process.cwd(), ".runtime", "uploads");
+export type StoreLocalResourceFileInput = {
+  file: File;
+  fileName?: string;
+  profession: Profession;
+  resourceType: ResourceType;
+  storageRoot?: string;
+  uploadedAt?: Date;
+};
+
+export type StoredLocalResourceMetadata = {
+  fileName: string;
+  objectKey: string;
+  contentType: string;
+  fileSizeByte: number;
+  fileHash: string;
+  profession: Profession;
+  resourceType: ResourceType;
+};
+
+export const defaultLocalUploadStorageRoot = join(
+  process.cwd(),
+  ".runtime",
+  "uploads",
+);
 const safeExtensionPattern = /^[a-z0-9]+$/;
 
 function formatYearMonth(date: Date): string {
@@ -59,7 +83,7 @@ export async function storeLocalPaperAssetFile({
   paperAttachmentUsage,
   paperPublicId,
   profession,
-  storageRoot = defaultStorageRoot,
+  storageRoot = defaultLocalUploadStorageRoot,
   uploadedAt = new Date(),
 }: StoreLocalPaperAssetFileInput): Promise<StoredLocalPaperAssetMetadata> {
   const fileName = normalizeFileName(inputFileName ?? file.name);
@@ -86,5 +110,40 @@ export async function storeLocalPaperAssetFile({
     contentType: file.type || "application/octet-stream",
     fileSizeByte: bytes.byteLength,
     fileHash,
+  };
+}
+
+export async function storeLocalResourceFile({
+  file,
+  fileName: inputFileName,
+  profession,
+  resourceType,
+  storageRoot = defaultLocalUploadStorageRoot,
+  uploadedAt = new Date(),
+}: StoreLocalResourceFileInput): Promise<StoredLocalResourceMetadata> {
+  const fileName = normalizeFileName(inputFileName ?? file.name);
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const fileHash = createHash("sha256").update(bytes).digest("hex");
+  const extension = normalizeExtension(fileName);
+  const objectKey = [
+    "dev",
+    "resource",
+    profession,
+    formatYearMonth(uploadedAt),
+    `${fileHash}.${extension}`,
+  ].join("/");
+  const targetPath = resolveInsideStorageRoot(storageRoot, objectKey);
+
+  await mkdir(dirname(targetPath), { recursive: true });
+  await writeFile(targetPath, bytes);
+
+  return {
+    fileName,
+    objectKey,
+    contentType: file.type || "application/octet-stream",
+    fileSizeByte: bytes.byteLength,
+    fileHash,
+    profession,
+    resourceType,
   };
 }
