@@ -2,6 +2,7 @@ import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { createMockAiProvider } from "@/ai/mock-provider";
 import type { ApiResponse } from "../contracts/api-response";
 import type { EvidenceStatus } from "../models/ai-rag";
+import type { Profession } from "../models/auth";
 import type {
   RagCitationDto,
   RagRetrievalResultDto,
@@ -50,6 +51,8 @@ import {
   createModelConfigRuntimeResolver,
   type ModelConfigRuntimeCatalog,
 } from "./model-config-runtime";
+import { defaultLocalUploadStorageRoot } from "./local-paper-asset-storage";
+import { buildLocalResourceRagRetrievalResult } from "./rag-resource-knowledge-runtime";
 import {
   createStudentPaperRouteHandlers,
   type StudentPaperUserResolver,
@@ -69,7 +72,15 @@ export type StudentFlowRuntimeOptions = StudentFlowRuntimeRepositoryOptions & {
   examReportRepository?: ExamReportRepository;
   examReportLearningSuggestionOptions?: ExamReportLearningSuggestionOptions;
   modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
+  localResourceStorageRoot?: string;
+  ragRetrievalRuntime?: StudentFlowRagRetrievalRuntime;
   createPublicId?: (prefix: StudentFlowPublicIdPrefix) => string;
+};
+
+type StudentFlowRagRetrievalRuntime = {
+  retrieveForAiScoring(
+    context: MockExamAiScoringRuntimeContext,
+  ): Promise<RagRetrievalResultDto>;
 };
 
 type StudentFlowUserResolver = StudentPaperUserResolver &
@@ -127,12 +138,81 @@ function createEmptyRagRetrievalResult(
   };
 }
 
+function readSnapshotProfession(
+  questionSnapshot: Record<string, unknown>,
+): Profession | null {
+  const profession = questionSnapshot.profession;
+
+  return profession === "monopoly" ||
+    profession === "marketing" ||
+    profession === "logistics"
+    ? profession
+    : null;
+}
+
+function readSnapshotLevel(
+  questionSnapshot: Record<string, unknown>,
+): number | null {
+  const level = questionSnapshot.level;
+
+  if (typeof level === "number" && Number.isInteger(level) && level > 0) {
+    return level;
+  }
+
+  if (typeof level === "string" && level.trim().length > 0) {
+    const parsedLevel = Number(level);
+
+    return Number.isInteger(parsedLevel) && parsedLevel > 0
+      ? parsedLevel
+      : null;
+  }
+
+  return null;
+}
+
+function createAiScoringRetrievalQuery(
+  context: MockExamAiScoringRuntimeContext,
+): string {
+  return [
+    context.questionText,
+    context.standardAnswer,
+    context.studentAnswer,
+    ...context.scoringPoints.map((scoringPoint) => scoringPoint.label),
+  ]
+    .join(" ")
+    .trim();
+}
+
+function createDefaultStudentFlowRagRetrievalRuntime(
+  storageRoot: string,
+): StudentFlowRagRetrievalRuntime {
+  return {
+    async retrieveForAiScoring(context) {
+      const profession = readSnapshotProfession(context.questionSnapshot);
+
+      if (profession === null) {
+        return createEmptyRagRetrievalResult();
+      }
+
+      return buildLocalResourceRagRetrievalResult({
+        storageRoot,
+        query: createAiScoringRetrievalQuery(context),
+        profession,
+        level: readSnapshotLevel(context.questionSnapshot),
+      });
+    },
+  };
+}
+
 function estimateTokenCount(value: string): number {
   return Math.max(1, Math.ceil(value.length / 4));
 }
 
 function createDefaultAiScoringRuntime(
   modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
+  ragRetrievalRuntime: StudentFlowRagRetrievalRuntime = createDefaultStudentFlowRagRetrievalRuntime(
+    defaultLocalUploadStorageRoot,
+  ),
 ): MockExamAiScoringRuntime {
   const aiCallLogRepository =
     createPostgresAdminAiAuditLogRuntimeRepositories();
@@ -203,7 +283,8 @@ function createDefaultAiScoringRuntime(
         scoringPoints: context.scoringPoints,
         modelConfigSnapshot,
         promptTemplate,
-        ragRetrievalResult: createEmptyRagRetrievalResult(),
+        ragRetrievalResult:
+          await ragRetrievalRuntime.retrieveForAiScoring(context),
         existingResult: null,
         retryCount: 0,
       });
@@ -340,6 +421,11 @@ export function createStudentFlowRuntimeRouteHandlers(
         {
           aiScoringRuntime: createDefaultAiScoringRuntime(
             options.modelConfigRuntimeCatalog,
+            options.ragRetrievalRuntime ??
+              createDefaultStudentFlowRagRetrievalRuntime(
+                options.localResourceStorageRoot ??
+                  defaultLocalUploadStorageRoot,
+              ),
           ),
         },
       ),

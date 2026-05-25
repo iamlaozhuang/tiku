@@ -1,6 +1,7 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import type { ApiResponse } from "../contracts/api-response";
 import type { RagRetrievalResultDto } from "../contracts/ai-rag-contract";
+import type { Profession } from "../models/auth";
 import {
   createPostgresMistakeBookRepository,
   type MistakeBookRepository,
@@ -25,6 +26,8 @@ import {
   createModelConfigRuntimeResolver,
   type ModelConfigRuntimeCatalog,
 } from "./model-config-runtime";
+import { defaultLocalUploadStorageRoot } from "./local-paper-asset-storage";
+import { buildLocalResourceRagRetrievalResult } from "./rag-resource-knowledge-runtime";
 import type { SessionService } from "./session-service";
 
 export type StudentMistakeBookRuntimeOptions =
@@ -36,7 +39,15 @@ export type StudentMistakeBookRuntimeOptions =
       "appendAiCallLog"
     >;
     modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
+    localResourceStorageRoot?: string;
+    ragRetrievalRuntime?: MistakeBookRagRetrievalRuntime;
   };
+
+type MistakeBookRagRetrievalRuntime = {
+  retrieveForAiExplanation(
+    context: MistakeBookAiExplanationRuntimeContext,
+  ): Promise<RagRetrievalResultDto>;
+};
 
 function isSuccessfulSessionResponse(
   response: Awaited<ReturnType<SessionService["getCurrentSession"]>>,
@@ -86,6 +97,74 @@ function createEmptyRagRetrievalResult(): RagRetrievalResultDto {
   };
 }
 
+function readSnapshotProfession(
+  questionSnapshot: Record<string, unknown>,
+): Profession | null {
+  const profession = questionSnapshot.profession;
+
+  return profession === "monopoly" ||
+    profession === "marketing" ||
+    profession === "logistics"
+    ? profession
+    : null;
+}
+
+function readSnapshotLevel(
+  questionSnapshot: Record<string, unknown>,
+): number | null {
+  const level = questionSnapshot.level;
+
+  if (typeof level === "number" && Number.isInteger(level) && level > 0) {
+    return level;
+  }
+
+  if (typeof level === "string" && level.trim().length > 0) {
+    const parsedLevel = Number(level);
+
+    return Number.isInteger(parsedLevel) && parsedLevel > 0
+      ? parsedLevel
+      : null;
+  }
+
+  return null;
+}
+
+function createAiExplanationRetrievalQuery(
+  context: MistakeBookAiExplanationRuntimeContext,
+): string {
+  return [
+    typeof context.questionSnapshot.stemRichText === "string"
+      ? context.questionSnapshot.stemRichText
+      : "",
+    context.standardAnswer,
+    context.analysis ?? "",
+    context.learnerAnswer,
+  ]
+    .join(" ")
+    .trim();
+}
+
+function createDefaultMistakeBookRagRetrievalRuntime(
+  storageRoot: string,
+): MistakeBookRagRetrievalRuntime {
+  return {
+    async retrieveForAiExplanation(context) {
+      const profession = readSnapshotProfession(context.questionSnapshot);
+
+      if (profession === null) {
+        return createEmptyRagRetrievalResult();
+      }
+
+      return buildLocalResourceRagRetrievalResult({
+        storageRoot,
+        query: createAiExplanationRetrievalQuery(context),
+        profession,
+        level: readSnapshotLevel(context.questionSnapshot),
+      });
+    },
+  };
+}
+
 function estimateTokenCount(value: string): number {
   return Math.max(1, Math.ceil(value.length / 4));
 }
@@ -96,6 +175,8 @@ function createDefaultAiExplanationRuntime(input: {
     "appendAiCallLog"
   >;
   modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog;
+  ragRetrievalRuntime?: MistakeBookRagRetrievalRuntime;
+  localResourceStorageRoot?: string;
 }): MistakeBookAiExplanationRuntime {
   const aiCallLogRepository =
     input.aiCallLogRepository ??
@@ -115,6 +196,11 @@ function createDefaultAiExplanationRuntime(input: {
 
   const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
   const promptTemplate = modelConfigSelection.promptTemplate;
+  const ragRetrievalRuntime =
+    input.ragRetrievalRuntime ??
+    createDefaultMistakeBookRagRetrievalRuntime(
+      input.localResourceStorageRoot ?? defaultLocalUploadStorageRoot,
+    );
   const explanationHintService = createAiExplanationHintService({
     async explanationRunner(input) {
       return {
@@ -174,7 +260,8 @@ function createDefaultAiExplanationRuntime(input: {
         triggerReason: "manual_request",
         modelConfigSnapshot,
         promptTemplate,
-        ragRetrievalResult: createEmptyRagRetrievalResult(),
+        ragRetrievalResult:
+          await ragRetrievalRuntime.retrieveForAiExplanation(context),
       });
       const completedAt = new Date();
 
@@ -236,6 +323,8 @@ export function createStudentMistakeBookRuntimeRouteHandlers(
       aiExplanationRuntime: createDefaultAiExplanationRuntime({
         aiCallLogRepository: options.aiCallLogRepository,
         modelConfigRuntimeCatalog: options.modelConfigRuntimeCatalog,
+        ragRetrievalRuntime: options.ragRetrievalRuntime,
+        localResourceStorageRoot: options.localResourceStorageRoot,
       }),
     }),
     createStudentMistakeBookUserResolver(sessionService),

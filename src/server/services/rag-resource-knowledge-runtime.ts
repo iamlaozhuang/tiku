@@ -20,7 +20,10 @@ import {
   type AdminResourceOpsSummaryDto,
   type AdminKnowledgeNodeOpsSummaryDto,
 } from "../contracts/admin-content-knowledge-ops-contract";
-import type { ResourceVectorRebuildResultDto } from "../contracts/ai-rag-contract";
+import type {
+  RagRetrievalResultDto,
+  ResourceVectorRebuildResultDto,
+} from "../contracts/ai-rag-contract";
 import type { ResourceStatus, ResourceType } from "../models/ai-rag";
 import { canTransitionResourceStatus } from "../models/ai-rag";
 import type { Profession } from "../models/auth";
@@ -48,6 +51,7 @@ import {
   type LocalTextDocumentEvidenceSummary,
 } from "./local-text-document-parser";
 import { buildResourceChunks } from "./rag-chunking-service";
+import { buildRagRetrievalContextFromChunks } from "./rag-retrieval-service";
 import type { SessionService } from "./session-service";
 
 type RouteContext = {
@@ -123,6 +127,14 @@ type LocalResourceDetailDto = {
   resource: AdminResourceOpsSummaryDto;
   localOnly: boolean;
   markdownContent: string | null;
+};
+
+export type LocalResourceRagRetrievalInput = {
+  storageRoot?: string;
+  query: string;
+  profession: Profession;
+  level: number | null;
+  authorizedResourcePublicIds?: string[];
 };
 
 const adminSessionRequiredResponse = createErrorResponse(
@@ -936,6 +948,53 @@ async function disableLocalResource(input: {
 
   return createSuccessResponse({
     resource: mapLocalResourceEntry(nextResource),
+  });
+}
+
+export async function buildLocalResourceRagRetrievalResult({
+  authorizedResourcePublicIds,
+  level,
+  profession,
+  query,
+  storageRoot = defaultLocalUploadStorageRoot,
+}: LocalResourceRagRetrievalInput): Promise<RagRetrievalResultDto> {
+  const catalog = await readLocalResourceCatalog(storageRoot);
+  const eligibleResources = catalog.resources.filter(
+    (resource) =>
+      resource.resourceStatus === "rag_ready" &&
+      resource.markdownContent !== null &&
+      resource.markdownContentHash !== null &&
+      resource.profession === profession &&
+      (level === null || resource.level === null || resource.level === level),
+  );
+  const authorizedPublicIds =
+    authorizedResourcePublicIds ??
+    eligibleResources.map((resource) => resource.publicId);
+  const chunks = eligibleResources.flatMap((resource) => {
+    const chunkingResult = buildResourceChunks({
+      resourcePublicId: resource.publicId,
+      resourceTitle: resource.title,
+      resourceStatus: resource.resourceStatus,
+      profession: resource.profession,
+      level: resource.level,
+      markdownContent: resource.markdownContent,
+      markdownContentHash: resource.markdownContentHash,
+    });
+
+    return chunkingResult.status === "chunked"
+      ? chunkingResult.chunks.map((chunk) => ({
+          ...chunk,
+          resourceStatus: resource.resourceStatus,
+        }))
+      : [];
+  });
+
+  return buildRagRetrievalContextFromChunks({
+    query,
+    profession,
+    level,
+    authorizedResourcePublicIds: authorizedPublicIds,
+    chunks,
   });
 }
 

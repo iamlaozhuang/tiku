@@ -1,4 +1,4 @@
-import { mkdtemp } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -8,7 +8,10 @@ import {
   createRagCitationSourceDtos,
   buildRagRetrievalContextFromChunks,
 } from "@/server/services/rag-retrieval-service";
-import { createRagResourceKnowledgeRuntimeRouteHandlers } from "@/server/services/rag-resource-knowledge-runtime";
+import {
+  buildLocalResourceRagRetrievalResult,
+  createRagResourceKnowledgeRuntimeRouteHandlers,
+} from "@/server/services/rag-resource-knowledge-runtime";
 import type { RagResourceKnowledgeRuntimeRepositoriesWithAudit } from "@/server/services/rag-resource-knowledge-runtime";
 import type { SessionService } from "@/server/services/session-service";
 
@@ -522,5 +525,111 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
     expect(JSON.stringify(auditLogEntries)).not.toContain(
       "admin-session-token",
     );
+  });
+
+  it("builds local RAG retrieval citations from rag_ready resources only", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-local-rag-"));
+    const catalogDir = join(storageRoot, "dev", "resource");
+    const catalogPath = join(catalogDir, "catalog.json");
+    const resourcePublicId = "resource-local-citation";
+
+    await mkdir(catalogDir, { recursive: true });
+    await writeFile(
+      catalogPath,
+      JSON.stringify(
+        {
+          resources: [
+            {
+              publicId: resourcePublicId,
+              title: "Local Citation Resource",
+              resourceType: "knowledge_doc",
+              resourceStatus: "rag_ready",
+              profession: "marketing",
+              level: 3,
+              originalFileName: "local-citation.md",
+              objectKey: "dev/resource/marketing/202605/local-citation.md",
+              contentType: "text/markdown",
+              fileSizeByte: 180,
+              fileHash: "local-citation-file-hash",
+              markdownContent: [
+                "# Marketing Citation",
+                "",
+                "marketing citation keyword controlled first passage",
+                "",
+                "## Retail Rule",
+                "",
+                "marketing citation keyword controlled second passage",
+              ].join("\n"),
+              markdownContentHash: "local-citation-markdown-hash",
+              indexingErrorMessage: null,
+              isVectorStale: false,
+              publishedAt: "2026-05-25T08:00:00.000Z",
+              uploadedAt: "2026-05-25T08:00:00.000Z",
+              updatedAt: "2026-05-25T08:00:00.000Z",
+              disabledFromStatus: null,
+              chunkCount: 2,
+              textHashes: ["redacted-hash-1", "redacted-hash-2"],
+              headingPaths: [["Marketing Citation"], ["Retail Rule"]],
+            },
+            {
+              publicId: "resource-local-disabled",
+              title: "Disabled Citation Resource",
+              resourceType: "knowledge_doc",
+              resourceStatus: "disabled",
+              profession: "marketing",
+              level: 3,
+              originalFileName: "disabled-citation.md",
+              objectKey: "dev/resource/marketing/202605/disabled-citation.md",
+              contentType: "text/markdown",
+              fileSizeByte: 120,
+              fileHash: "disabled-citation-file-hash",
+              markdownContent: "marketing citation keyword disabled passage",
+              markdownContentHash: "disabled-citation-markdown-hash",
+              indexingErrorMessage: null,
+              isVectorStale: false,
+              publishedAt: "2026-05-25T08:00:00.000Z",
+              uploadedAt: "2026-05-25T08:00:00.000Z",
+              updatedAt: "2026-05-25T08:00:00.000Z",
+              disabledFromStatus: "rag_ready",
+              chunkCount: 1,
+              textHashes: ["redacted-disabled-hash"],
+              headingPaths: [[]],
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+    );
+
+    const retrievalResult = await buildLocalResourceRagRetrievalResult({
+      storageRoot,
+      query: "marketing citation keyword",
+      profession: "marketing",
+      level: 3,
+    });
+    const serializedEvidence = JSON.stringify(retrievalResult.evidenceSummary);
+
+    expect(retrievalResult.evidenceStatus).toBe("sufficient");
+    expect(retrievalResult.citations).toHaveLength(2);
+    expect(retrievalResult.citations[0]).toMatchObject({
+      resourcePublicId,
+      resourceTitle: "Local Citation Resource",
+    });
+    expect(serializedEvidence).not.toContain("controlled first passage");
+    expect(serializedEvidence).not.toContain("controlled second passage");
+
+    await expect(
+      buildLocalResourceRagRetrievalResult({
+        storageRoot,
+        query: "marketing citation keyword",
+        profession: "marketing",
+        level: 3,
+        authorizedResourcePublicIds: ["resource-local-disabled"],
+      }),
+    ).resolves.toMatchObject({
+      evidenceStatus: "none",
+      citations: [],
+    });
   });
 });
