@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-local-findings-queue-seeding
+  id: phase-11-local-e2e-postgres-connection-pressure-fix
   status: closed
-  sourceStory: user-request-2026-05-25-proceed-p1-p2-p2-local-findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-11-local-findings-queue-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-findings-queue-seeding.md
-  branch: codex/phase-11-local-findings-queue-seeding
+  sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-system-validation.md#issue-register
+  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-11-local-e2e-postgres-connection-pressure-fix.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-e2e-postgres-connection-pressure-fix.md
+  branch: codex/phase-11-local-e2e-postgres-connection-pressure-fix
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: run phase-11-local-e2e-postgres-connection-pressure-fix followed by phase-11-protected-route-hydration-fix and phase-11-ai-call-log-visibility-fix; keep Phase 11 staging implementation planning paused until DNS, ICP, cloud server, and database readiness change
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-findings-queue-seeding.md
+  nextRecommendedAction: run phase-11-protected-route-hydration-fix, then phase-11-ai-call-log-visibility-fix; keep Phase 11 staging implementation planning paused until DNS, ICP, cloud server, and database readiness change
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-e2e-postgres-connection-pressure-fix.md
