@@ -2,7 +2,7 @@
 
 ## Status
 
-`validated`
+`closed`
 
 ## Boundary
 
@@ -45,17 +45,32 @@ This task improves local student `mistake_book` acceptance coverage only. It doe
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                   | pass inventory; uncommitted task files before commit |
 | `git diff --check`                                                                                                                                                    | pass                                                 |
 
+## Master Merge Validation
+
+| Command                                                                                                                                                               | Result                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `git merge --ff-only codex/phase-12-student-mistake-book-ac-coverage`                                                                                                 | pass: master at `92d9779`                                    |
+| `npm.cmd run test:unit -- tests/unit/student-mistake-book-ui.test.ts src/server/services/mistake-book-service.test.ts src/server/services/mistake-book-route.test.ts` | pass: 3 files, 19 tests                                      |
+| `npm.cmd run build`                                                                                                                                                   | pass                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                        | pass                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                           | pass                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                   | pass: only local commit ahead of `origin/master` before push |
+| `git diff --check`                                                                                                                                                    | pass                                                         |
+
 ## Repository Hygiene
 
-| Item                            | Result                                              |
-| ------------------------------- | --------------------------------------------------- |
-| Package/lockfile changes        | none                                                |
-| Schema/migration/script changes | none                                                |
-| Secret/env access               | no `.env.local` content read or output              |
-| Staging/prod/cloud/deploy       | not touched                                         |
-| Provider calls                  | none                                                |
-| Runtime output                  | none                                                |
-| Next task after closeout        | `phase-12-repair-ai-rag-citation-local-integration` |
+| Item                            | Result                                                   |
+| ------------------------------- | -------------------------------------------------------- |
+| Package/lockfile changes        | none                                                     |
+| Schema/migration/script changes | none                                                     |
+| Secret/env access               | no `.env.local` content read or output                   |
+| Staging/prod/cloud/deploy       | not touched                                              |
+| Provider calls                  | none                                                     |
+| Runtime output                  | none                                                     |
+| Commit                          | `92d9779 fix(student): improve mistake book ac coverage` |
+| Merge                           | fast-forward into `master`                               |
+| Push authorization              | user pre-authorized per-task push to `master`            |
+| Next task after closeout        | `phase-12-repair-ai-rag-citation-local-integration`      |
 
 ## Notes
 
