@@ -7545,5 +7545,417 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
+    status: closed
+    retryCount: 0
+  - id: phase-12-repair-content-question-authoring-existing-types
+    title: Phase 12 Repair Content Question Authoring Existing Types
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-mvp-full-requirements-audit-summary-and-repair-queue
+    taskPlanPolicy: required
+    humanApproval: User authorized post-audit local repair tasks after queue planning, with commit, merge, push, and cleanup per task. This task may implement existing schema-supported question authoring UI/runtime/tests only. It does not approve dependency/package/lockfile changes, schema/migration/script changes, secret/env changes, cloud/COS/staging/prod/deployment work, or adding new question_type enum values.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-question-authoring-existing-types.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-authoring-existing-types.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/question-material-management/**
+      - src/server/validators/question.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/phase-9-content-question-material-runtime.test.ts
+      - e2e/content-action-closures.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - content_question_authoring
+      - runtime_coverage
+      - ux_repair
+      - schema_boundary
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-content-question-authoring-existing-types
+      - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts tests/unit/phase-9-content-question-material-runtime.test.ts
+      - npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-authoring-existing-types.md
     status: pending
+    retryCount: 0
+  - id: phase-12-repair-student-question-type-runtime
+    title: Phase 12 Repair Student Question Type Runtime
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-repair-content-question-authoring-existing-types
+    taskPlanPolicy: required
+    humanApproval: User authorized local repair tasks after queue planning. This task may align student practice/mock/report/mistake_book handling with existing canonical question types only. It does not approve schema/migration/script, dependency/package/lockfile, secret/env, cloud, staging/prod, deployment, or destructive data changes.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-student-question-type-runtime.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-student-question-type-runtime.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/student/practice/**
+      - src/features/student/mock-exam/**
+      - src/features/student/mistake-book/**
+      - src/server/services/practice-service.ts
+      - src/server/services/mock-exam-service.ts
+      - src/server/validators/mistake-book.ts
+      - tests/unit/student-practice-ui.test.ts
+      - tests/unit/student-mock-exam-report-ui.test.ts
+      - tests/unit/student-mistake-book-ui.test.ts
+      - src/server/services/practice-service.test.ts
+      - src/server/services/mock-exam-service.test.ts
+      - e2e/student-practice-mock-entry.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - student_runtime
+      - question_type_runtime
+      - test_coverage
+      - schema_boundary
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-student-question-type-runtime
+      - npm.cmd run test:unit -- tests/unit/student-practice-ui.test.ts tests/unit/student-mock-exam-report-ui.test.ts tests/unit/student-mistake-book-ui.test.ts src/server/services/practice-service.test.ts src/server/services/mock-exam-service.test.ts
+      - npm.cmd run test:e2e -- e2e/student-practice-mock-entry.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-student-question-type-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-ops-org-auth-redeem-ui-closure
+    title: Phase 12 Repair Ops Org Auth Redeem UI Closure
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-repair-student-question-type-runtime
+    taskPlanPolicy: required
+    humanApproval: User authorized local repair tasks after queue planning. This task may close org_auth and redeem_code UI flows against existing protected APIs. It does not approve permission model rewrite, secret/env changes, schema/migration/script changes, dependency changes, cloud/staging/prod/deployment, or destructive data operations.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/admin-ops-management/**
+      - src/features/admin/org-auth-redeem/**
+      - tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts
+      - tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
+      - e2e/staging-required-role-flows.spec.ts
+      - e2e/role-based-acceptance/role-based-full-flow.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - admin_ops_runtime
+      - org_auth
+      - redeem_code
+      - authorization_boundary
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-ops-org-auth-redeem-ui-closure
+      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts tests/unit/phase-11-system-ops-org-auth-management-loop.test.ts tests/unit/phase-11-redeem-code-batch-management-loop.test.ts
+      - npm.cmd run test:e2e -- e2e/staging-required-role-flows.spec.ts e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-local-resource-lifecycle
+    title: Phase 12 Repair Local Resource Lifecycle
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-repair-ops-org-auth-redeem-ui-closure
+    taskPlanPolicy: required
+    humanApproval: User authorized local repair tasks after queue planning. This task may implement local/dev resource lifecycle where existing schema and dependencies permit. It does not approve Tencent Cloud COS, public object storage URLs, staging/prod storage, dependency changes, schema/migration/script changes, secret/env changes, deployment, or destructive data operations.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-local-resource-lifecycle.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-local-resource-lifecycle.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/resource-knowledge-management/**
+      - src/app/api/v1/resources/**
+      - src/server/services/rag-resource-knowledge-runtime.ts
+      - src/server/services/local-paper-asset-storage.ts
+      - src/server/services/local-text-document-parser.ts
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/phase-11-local-file-upload-storage-adapter.test.ts
+      - tests/unit/phase-11-local-text-document-parser-boundary.test.ts
+      - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+      - tests/unit/phase-11-local-rag-mock-embedding-pipeline.test.ts
+      - e2e/local-business-flow.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - local_storage
+      - rag_resource
+      - knowledge_base
+      - cloud_boundary
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-local-resource-lifecycle
+      - npm.cmd run test:unit -- tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/phase-11-local-file-upload-storage-adapter.test.ts tests/unit/phase-11-local-text-document-parser-boundary.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts tests/unit/phase-11-local-rag-mock-embedding-pipeline.test.ts
+      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-local-resource-lifecycle.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-student-mistake-book-ac-coverage
+    title: Phase 12 Repair Student Mistake Book AC Coverage
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-repair-local-resource-lifecycle
+    taskPlanPolicy: required
+    humanApproval: User authorized local repair tasks after queue planning. This task may improve mistake_book filters/actions and tests without schema, dependency, secret/env, cloud, staging/prod, deployment, or destructive data changes.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-student-mistake-book-ac-coverage.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-student-mistake-book-ac-coverage.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/student/mistake-book/**
+      - src/server/services/mistake-book-service.ts
+      - src/server/services/mistake-book-route.ts
+      - src/server/validators/mistake-book.ts
+      - tests/unit/student-mistake-book-ui.test.ts
+      - src/server/services/mistake-book-service.test.ts
+      - src/server/services/mistake-book-route.test.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - student_runtime
+      - mistake_book
+      - test_coverage
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-student-mistake-book-ac-coverage
+      - npm.cmd run test:unit -- tests/unit/student-mistake-book-ui.test.ts src/server/services/mistake-book-service.test.ts src/server/services/mistake-book-route.test.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-student-mistake-book-ac-coverage.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-ai-rag-citation-local-integration
+    title: Phase 12 Repair AI RAG Citation Local Integration
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-repair-student-mistake-book-ac-coverage
+    taskPlanPolicy: required
+    humanApproval: User authorized local repair tasks after queue planning. This task may improve local/mock RAG citation integration and redacted evidence only. It does not approve real provider calls, raw prompt/answer/model payload evidence, secret/env changes, cloud/staging/prod/deployment, schema/migration/script changes, or dependency changes.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-ai-rag-citation-local-integration.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-ai-rag-citation-local-integration.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/server/services/student-flow-runtime.ts
+      - src/server/services/student-mistake-book-runtime.ts
+      - src/server/services/knowledge-recommendation-service.ts
+      - src/server/services/rag-resource-knowledge-runtime.ts
+      - tests/unit/phase-11-local-rag-mock-embedding-pipeline.test.ts
+      - tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts
+      - tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts
+      - tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - ai_runtime
+      - rag_citation
+      - evidence_redaction
+      - provider_boundary
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-ai-rag-citation-local-integration
+      - npm.cmd run test:unit -- tests/unit/phase-11-local-rag-mock-embedding-pipeline.test.ts tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts tests/unit/phase-11-ai-knowledge-recommendation-review-loop.test.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ai-rag-citation-local-integration.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-content-question-edit-ux
+    title: Phase 12 Repair Content Question Edit UX
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-repair-ai-rag-citation-local-integration
+    taskPlanPolicy: required
+    humanApproval: User authorized local repair tasks after queue planning. This task may improve content question edit UX after the P1 form/runtime work closes. It does not approve schema, dependency, secret/env, cloud, staging/prod, deployment, or destructive data changes.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-question-edit-ux.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-edit-ux.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/question-material-management/**
+      - tests/unit/admin-question-material-ui.test.ts
+      - e2e/content-action-closures.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - ux_repair
+      - content_question_authoring
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-content-question-edit-ux
+      - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts
+      - npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-edit-ux.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-plan-question-type-schema-expansion
+    title: Phase 12 Plan Question Type Schema Expansion
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-mvp-full-requirements-audit-summary-and-repair-queue
+    taskPlanPolicy: required
+    humanApproval: Not yet approved. This is a blocked planning gate for possible `case_analysis` and `calculation` schema/migration expansion. Explicit human approval is required before modifying schema, migration, scripts, package files, or runtime code for new enum values.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-question-type-schema-expansion.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-question-type-schema-expansion.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - database_migration
+      - schema_change
+      - approval_gate
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-plan-question-type-schema-expansion
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-question-type-schema-expansion.md
+    status: blocked
+    retryCount: 0
+  - id: phase-12-plan-model-config-secret-crud
+    title: Phase 12 Plan Model Config Secret CRUD
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md#proposed-repair-queue
+    dependencies:
+      - phase-12-mvp-full-requirements-audit-summary-and-repair-queue
+    taskPlanPolicy: required
+    humanApproval: Not yet approved. This is a blocked planning gate for provider/model_config/prompt CRUD and secret/env handling. Explicit human approval is required before reading, changing, outputting, or configuring secrets/env/provider/cloud/staging/prod resources.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-model-config-secret-crud.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-model-config-secret-crud.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - secret_or_env_change
+      - external_service_config
+      - provider_config
+      - approval_gate
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-plan-model-config-secret-crud
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-model-config-secret-crud.md
+    status: blocked
     retryCount: 0

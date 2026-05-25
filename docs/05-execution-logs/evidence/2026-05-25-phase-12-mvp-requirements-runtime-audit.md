@@ -2,7 +2,7 @@
 
 ## Status
 
-`full_audit_pass_3_validated`
+`summary_and_repair_queue_validated`
 
 ## Scope Boundary
 
@@ -456,7 +456,42 @@ Round 2 classified static implementation gaps. Full pass 1 confirmed several run
 
 ## Proposed Repair Queue
 
-Pending summary task. The three full passes now provide enough convergence to seed the repair queue from a clean `master` branch.
+The three complete independent audits converge enough to seed implementation tasks. The queue below is intentionally split so local MVP closure work can proceed without smuggling high-risk schema, dependency, secret, cloud, staging/prod, or deployment work into implementation commits.
+
+| Order | Task ID                                                     | Severity | Purpose                                                                                   | Approval boundary                                                                                  |
+| ----: | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+|     1 | `phase-12-repair-content-question-authoring-existing-types` | P1       | Make content question authoring usable for existing schema-supported types and fields.    | No schema enum expansion; `case_analysis` and `calculation` require a separate approval task.      |
+|     2 | `phase-12-repair-student-question-type-runtime`             | P1       | Align student practice/mock/report behavior with canonical existing question types.       | No schema/migration; fix local type mapping and AC-level tests first.                              |
+|     3 | `phase-12-repair-ops-org-auth-redeem-ui-closure`            | P1       | Close org_auth and redeem_code UI flows against existing protected APIs.                  | No permission model rewrite; no destructive data operation; no secret output.                      |
+|     4 | `phase-12-repair-local-resource-lifecycle`                  | P1       | Add local-only resource upload/review/download/disable path where current schema permits. | No Tencent Cloud COS, public URL, staging/prod storage, dependency, or schema change without gate. |
+|     5 | `phase-12-repair-student-mistake-book-ac-coverage`          | P2       | Improve mistake_book filters/actions and E2E/unit coverage against SSOT acceptance items. | No schema/migration; stay in student UI/API/service/test surface.                                  |
+|     6 | `phase-12-repair-ai-rag-citation-local-integration`         | P2       | Wire local resource/knowledge evidence into AI/RAG citation paths with redacted evidence. | No real provider call unless explicitly approved again; no raw prompt/answer/model payload.        |
+|     7 | `phase-12-repair-content-question-edit-ux`                  | P3       | Replace detached top-of-page edit experience after question form model is strengthened.   | UX-only follow-up after P1 content form task.                                                      |
+|     8 | `phase-12-plan-question-type-schema-expansion`              | Gate     | Plan `case_analysis`/`calculation` schema/migration and rollout if still required.        | Requires explicit human approval before schema/migration/script/package changes.                   |
+|     9 | `phase-12-plan-model-config-secret-crud`                    | Gate     | Plan provider/model_config/prompt CRUD and secret/env handling.                           | Requires explicit human approval before secret/env/provider/cloud changes.                         |
+
+### Repair Sequencing Decision
+
+Start with local, non-gated P1 implementation tasks in order: content question authoring, student question type runtime, ops org_auth/redeem UI closure, then local resource lifecycle. This maximizes local confidence before any staging/cloud/schema/secret work and keeps each commit reviewable.
+
+### stagingDecision
+
+`staging_go`: `false`
+
+Reason: Phase 11 staging implementation remains paused because DNS is not configured, ICP is pending, cloud server is not purchased, database service is not purchased, and three independent audits found P1 MVP runtime gaps in content question authoring, ops action closure, and resource/RAG lifecycle.
+
+### Summary Task Validation
+
+| Command                                                                                                                                                                            | Result | Notes                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------- |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-mvp-full-requirements-audit-summary-and-repair-queue` | pass   | Summary/repair queue task was claimable after full pass 3 closed. |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                                     | pass   | Required docs, scripts, npm scripts, and skills available.        |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                                        | pass   | Naming scan completed.                                            |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                                | pass   | Inventory showed only allowed docs/state/evidence files changed.  |
+| `git diff --check`                                                                                                                                                                 | pass   | No whitespace errors.                                             |
+| `node .\node_modules\prettier\bin\prettier.cjs --write ...`                                                                                                                        | pass   | Only this summary task's docs/state/evidence files were targeted. |
+
+Summary task status: `complete_for_repair_queue_seeding`.
 
 ## Validation Commands
 
@@ -533,7 +568,8 @@ Full pass 3 validation:
 | No staging/prod, deployment, cloud, DNS, COS, public URL, provider, or object storage change | pass   |
 | No secret/token/raw provider/full content recorded                                           | pass   |
 | Corrected full-pass audit queue registered                                                   | pass   |
-| Full pass 1, pass 2, and pass 3 closed; summary remains queued                               | pass   |
+| Full pass 1, pass 2, pass 3, and summary task closed                                         | pass   |
+| Repair implementation queue seeded with local-first and approval-gated tasks                 | pass   |
 
 ## Taste Compliance Self-Check
 
