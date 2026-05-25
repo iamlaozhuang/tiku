@@ -24,8 +24,11 @@ import type {
 } from "@/server/contracts/question-contract";
 import type {
   MaterialStatus,
+  MultiChoiceRule,
   Profession,
   QuestionStatus,
+  QuestionType,
+  ScoringMethod,
   Subject,
 } from "@/server/models/paper";
 
@@ -71,6 +74,26 @@ type QuestionFormValues = {
   stemRichText: string;
   analysisRichText: string;
   standardAnswerRichText: string;
+  questionType: QuestionType;
+  profession: Profession;
+  level: string;
+  subject: Subject;
+  materialPublicId: string;
+  multiChoiceRule: MultiChoiceRule;
+  scoringMethod: ScoringMethod;
+  questionOptions: QuestionOptionFormValue[];
+  scoringPoints: ScoringPointFormValue[];
+};
+
+type QuestionOptionFormValue = {
+  label: string;
+  contentRichText: string;
+  isCorrect: boolean;
+};
+
+type ScoringPointFormValue = {
+  description: string;
+  score: string;
 };
 
 type MaterialFormValues = {
@@ -113,12 +136,109 @@ const questionTypeLabels: Record<QuestionDto["questionType"], string> = {
   true_false: "判断题",
 };
 
+const professionLabels: Record<Profession, string> = {
+  logistics: "物流",
+  marketing: "营销",
+  monopoly: "专卖",
+};
+
+const subjectLabels: Record<Subject, string> = {
+  skill: "技能",
+  theory: "理论",
+};
+
+const multiChoiceRuleLabels: Record<MultiChoiceRule, string> = {
+  all_correct_only: "全对得分",
+  partial_credit: "部分得分",
+};
+
+const scoringMethodLabels: Record<ScoringMethod, string> = {
+  ai_scoring: "AI 评分",
+  auto_match: "自动匹配",
+};
+
+const optionQuestionTypes = new Set<QuestionType>([
+  "single_choice",
+  "multi_choice",
+  "true_false",
+]);
+
 function readQuestionSummary(question: QuestionDto): string {
   return stripRichText(question.stemRichText);
 }
 
 function stripRichText(value: string): string {
   return value.replace(/<[^>]*>/g, "").trim();
+}
+
+function createDefaultQuestionOptions(
+  questionType: QuestionType,
+): QuestionOptionFormValue[] {
+  if (questionType === "true_false") {
+    return [
+      { contentRichText: "正确", isCorrect: true, label: "A" },
+      { contentRichText: "错误", isCorrect: false, label: "B" },
+    ];
+  }
+
+  return ["A", "B", "C", "D"].map((label, optionIndex) => ({
+    contentRichText: label,
+    isCorrect: questionType === "single_choice" && optionIndex === 0,
+    label,
+  }));
+}
+
+function createDefaultScoringPoints(): ScoringPointFormValue[] {
+  return [{ description: "评分点", score: "1.0" }];
+}
+
+function createDefaultQuestionFormValues(): QuestionFormValues {
+  return {
+    analysisRichText: "老师解析",
+    level: "3",
+    materialPublicId: "",
+    multiChoiceRule: "all_correct_only",
+    profession: "monopoly",
+    questionOptions: createDefaultQuestionOptions("single_choice"),
+    questionType: "single_choice",
+    scoringMethod: "auto_match",
+    scoringPoints: createDefaultScoringPoints(),
+    standardAnswerRichText: "A",
+    stemRichText: "新建题目题干",
+    subject: "theory",
+  };
+}
+
+function createQuestionFormValuesFromQuestion(
+  question: QuestionDto,
+): QuestionFormValues {
+  return {
+    analysisRichText: stripRichText(question.analysisRichText),
+    level: String(question.level),
+    materialPublicId: question.materialPublicId ?? "",
+    multiChoiceRule: question.multiChoiceRule,
+    profession: question.profession,
+    questionOptions:
+      question.questionOptions.length === 0
+        ? createDefaultQuestionOptions(question.questionType)
+        : question.questionOptions.map((questionOption) => ({
+            contentRichText: stripRichText(questionOption.contentRichText),
+            isCorrect: questionOption.isCorrect,
+            label: questionOption.label,
+          })),
+    questionType: question.questionType,
+    scoringMethod: question.scoringMethod,
+    scoringPoints:
+      question.scoringPoints.length === 0
+        ? createDefaultScoringPoints()
+        : question.scoringPoints.map((scoringPoint) => ({
+            description: scoringPoint.description,
+            score: scoringPoint.score,
+          })),
+    standardAnswerRichText: stripRichText(question.standardAnswerRichText),
+    stemRichText: stripRichText(question.stemRichText),
+    subject: question.subject,
+  };
 }
 
 function useQuestionMaterialData(activeView: ViewMode) {
@@ -223,26 +343,37 @@ async function mutateAdminApi<TData>(
 }
 
 function createQuestionInput(values: QuestionFormValues) {
+  const isOptionQuestion = optionQuestionTypes.has(values.questionType);
+
   return {
-    questionType: "single_choice",
-    profession: "monopoly",
-    level: 3,
-    subject: "theory",
+    questionType: values.questionType,
+    profession: values.profession,
+    level: Number(values.level),
+    subject: values.subject,
     stemRichText: values.stemRichText,
     analysisRichText: values.analysisRichText,
     standardAnswerRichText: values.standardAnswerRichText,
-    multiChoiceRule: "all_correct_only",
-    scoringMethod: "auto_match",
-    materialPublicId: null,
-    questionOptions: [
-      {
-        label: "A",
-        contentRichText: values.standardAnswerRichText,
-        isCorrect: true,
-        sortOrder: 1,
-      },
-    ],
-    scoringPoints: [],
+    multiChoiceRule: values.multiChoiceRule,
+    scoringMethod: values.scoringMethod,
+    materialPublicId:
+      values.materialPublicId.trim().length === 0
+        ? null
+        : values.materialPublicId.trim(),
+    questionOptions: isOptionQuestion
+      ? values.questionOptions.map((questionOption, optionIndex) => ({
+          label: questionOption.label,
+          contentRichText: questionOption.contentRichText,
+          isCorrect: questionOption.isCorrect,
+          sortOrder: optionIndex + 1,
+        }))
+      : [],
+    scoringPoints: isOptionQuestion
+      ? []
+      : values.scoringPoints.map((scoringPoint, pointIndex) => ({
+          description: scoringPoint.description,
+          score: scoringPoint.score,
+          sortOrder: pointIndex + 1,
+        })),
   };
 }
 
@@ -614,11 +745,7 @@ export function AdminQuestionMaterialManagement({
                     kind: "question",
                     mode: "create",
                     publicId: null,
-                    values: {
-                      analysisRichText: "老师解析",
-                      standardAnswerRichText: "A",
-                      stemRichText: "新建题目题干",
-                    },
+                    values: createDefaultQuestionFormValues(),
                   }
                 : {
                     kind: "material",
@@ -661,6 +788,7 @@ export function AdminQuestionMaterialManagement({
       {activeForm?.kind === "question" ? (
         <QuestionWriteForm
           isSubmitting={isSubmitting}
+          key={`${activeForm.mode}-${activeForm.publicId ?? "new"}`}
           mode={activeForm.mode}
           values={activeForm.values}
           onCancel={() => setActiveForm(null)}
@@ -720,13 +848,7 @@ export function AdminQuestionMaterialManagement({
               kind: "question",
               mode: "edit",
               publicId: question.publicId,
-              values: {
-                analysisRichText: stripRichText(question.analysisRichText),
-                standardAnswerRichText: stripRichText(
-                  question.standardAnswerRichText,
-                ),
-                stemRichText: stripRichText(question.stemRichText),
-              },
+              values: createQuestionFormValuesFromQuestion(question),
             });
           }}
           onRecommend={(question) =>
@@ -802,9 +924,11 @@ function QuestionWriteForm({
   onSubmit: (values: QuestionFormValues) => void;
 }) {
   const [formValues, setFormValues] = useState(values);
+  const isOptionQuestion = optionQuestionTypes.has(formValues.questionType);
 
   return (
     <form
+      aria-label="题目表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -814,6 +938,96 @@ function QuestionWriteForm({
       <h2 className="text-text-primary text-base font-semibold">
         {mode === "create" ? "新建题目" : "编辑题目"}
       </h2>
+      <div className="grid gap-3 md:grid-cols-4">
+        <QuestionFormSelect
+          label="题型"
+          options={Object.entries(questionTypeLabels)}
+          value={formValues.questionType}
+          onChange={(value) => {
+            const questionType = value as QuestionType;
+
+            setFormValues({
+              ...formValues,
+              questionOptions: createDefaultQuestionOptions(questionType),
+              questionType,
+            });
+          }}
+        />
+        <QuestionFormSelect
+          label="专业"
+          options={Object.entries(professionLabels)}
+          value={formValues.profession}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              profession: value as Profession,
+            })
+          }
+        />
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">等级</span>
+          <Input
+            aria-label="等级"
+            min={1}
+            type="number"
+            value={formValues.level}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                level: event.target.value,
+              })
+            }
+          />
+        </label>
+        <QuestionFormSelect
+          label="科目"
+          options={Object.entries(subjectLabels)}
+          value={formValues.subject}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              subject: value as Subject,
+            })
+          }
+        />
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        <QuestionFormSelect
+          label="评分方式"
+          options={Object.entries(scoringMethodLabels)}
+          value={formValues.scoringMethod}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              scoringMethod: value as ScoringMethod,
+            })
+          }
+        />
+        <QuestionFormSelect
+          label="多选评分规则"
+          options={Object.entries(multiChoiceRuleLabels)}
+          value={formValues.multiChoiceRule}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              multiChoiceRule: value as MultiChoiceRule,
+            })
+          }
+        />
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">关联材料 publicId</span>
+          <Input
+            aria-label="关联材料 publicId"
+            value={formValues.materialPublicId}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                materialPublicId: event.target.value,
+              })
+            }
+          />
+        </label>
+      </div>
       <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">题干</span>
         <textarea
@@ -855,6 +1069,121 @@ function QuestionWriteForm({
           }
         />
       </label>
+      {isOptionQuestion ? (
+        <fieldset className="border-border grid gap-3 rounded-md border p-3">
+          <legend className="text-text-secondary px-1 text-sm font-medium">
+            选项
+          </legend>
+          <div className="grid gap-3 md:grid-cols-2">
+            {formValues.questionOptions.map((questionOption, optionIndex) => (
+              <div className="grid gap-2" key={questionOption.label}>
+                <label className="grid gap-2 text-sm font-medium">
+                  <span className="text-text-secondary">
+                    选项 {questionOption.label}
+                  </span>
+                  <Input
+                    aria-label={`选项 ${questionOption.label}`}
+                    value={questionOption.contentRichText}
+                    onChange={(event) =>
+                      setFormValues({
+                        ...formValues,
+                        questionOptions: formValues.questionOptions.map(
+                          (currentOption, currentIndex) =>
+                            currentIndex === optionIndex
+                              ? {
+                                  ...currentOption,
+                                  contentRichText: event.target.value,
+                                }
+                              : currentOption,
+                        ),
+                      })
+                    }
+                  />
+                </label>
+                <label className="text-text-secondary flex items-center gap-2 text-sm">
+                  <input
+                    aria-label={`选项 ${questionOption.label} 正确`}
+                    checked={questionOption.isCorrect}
+                    type="checkbox"
+                    onChange={(event) =>
+                      setFormValues({
+                        ...formValues,
+                        questionOptions: formValues.questionOptions.map(
+                          (currentOption, currentIndex) =>
+                            currentIndex === optionIndex
+                              ? {
+                                  ...currentOption,
+                                  isCorrect: event.target.checked,
+                                }
+                              : currentOption,
+                        ),
+                      })
+                    }
+                  />
+                  正确答案
+                </label>
+              </div>
+            ))}
+          </div>
+        </fieldset>
+      ) : (
+        <fieldset className="border-border grid gap-3 rounded-md border p-3">
+          <legend className="text-text-secondary px-1 text-sm font-medium">
+            评分点
+          </legend>
+          {formValues.scoringPoints.map((scoringPoint, pointIndex) => (
+            <div
+              className="grid gap-3 md:grid-cols-[minmax(0,1fr)_8rem]"
+              key={`scoring-point-${pointIndex + 1}`}
+            >
+              <label className="grid gap-2 text-sm font-medium">
+                <span className="text-text-secondary">
+                  评分点 {pointIndex + 1}
+                </span>
+                <Input
+                  aria-label={`评分点 ${pointIndex + 1}`}
+                  value={scoringPoint.description}
+                  onChange={(event) =>
+                    setFormValues({
+                      ...formValues,
+                      scoringPoints: formValues.scoringPoints.map(
+                        (currentPoint, currentIndex) =>
+                          currentIndex === pointIndex
+                            ? {
+                                ...currentPoint,
+                                description: event.target.value,
+                              }
+                            : currentPoint,
+                      ),
+                    })
+                  }
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-medium">
+                <span className="text-text-secondary">分值</span>
+                <Input
+                  aria-label={`评分点 ${pointIndex + 1} 分值`}
+                  value={scoringPoint.score}
+                  onChange={(event) =>
+                    setFormValues({
+                      ...formValues,
+                      scoringPoints: formValues.scoringPoints.map(
+                        (currentPoint, currentIndex) =>
+                          currentIndex === pointIndex
+                            ? {
+                                ...currentPoint,
+                                score: event.target.value,
+                              }
+                            : currentPoint,
+                      ),
+                    })
+                  }
+                />
+              </label>
+            </div>
+          ))}
+        </fieldset>
+      )}
       <div className="flex flex-wrap gap-2">
         <Button disabled={isSubmitting} type="submit">
           保存题目
@@ -864,6 +1193,36 @@ function QuestionWriteForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function QuestionFormSelect({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: [string, string][];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-medium">
+      <span className="text-text-secondary">{label}</span>
+      <select
+        aria-label={label}
+        className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface h-9 rounded-lg border px-3 py-1 text-sm outline-none focus-visible:ring-3"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>
+            {optionLabel}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 

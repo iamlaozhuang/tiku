@@ -1,5 +1,11 @@
 import { createElement } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminQuestionMaterialManagement } from "@/features/admin/question-material-management/AdminQuestionMaterialManagement";
@@ -357,6 +363,25 @@ function mockWritableContentFetch() {
   return fetchMock;
 }
 
+function readJsonRequestBody(
+  fetchMock: ReturnType<typeof vi.fn>,
+  path: string,
+  method: string,
+) {
+  const matchedCall = fetchMock.mock.calls.find(
+    ([requestUrl, requestInit]) =>
+      String(requestUrl) === path && requestInit?.method === method,
+  );
+
+  expect(matchedCall).toBeDefined();
+
+  const requestBody = matchedCall?.[1]?.body;
+
+  expect(typeof requestBody).toBe("string");
+
+  return JSON.parse(String(requestBody)) as Record<string, unknown>;
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -562,6 +587,153 @@ describe("AdminQuestionMaterialManagement", () => {
       expect.objectContaining({ method: "POST" }),
     );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
+  it("posts selected existing question type fields instead of hardcoded single_choice defaults", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fireEvent.change(questionForm.getByLabelText("题型"), {
+      target: { value: "multi_choice" },
+    });
+    fireEvent.change(questionForm.getByLabelText("专业"), {
+      target: { value: "marketing" },
+    });
+    fireEvent.change(questionForm.getByLabelText("等级"), {
+      target: { value: "2" },
+    });
+    fireEvent.change(questionForm.getByLabelText("科目"), {
+      target: { value: "skill" },
+    });
+    fireEvent.change(questionForm.getByLabelText("关联材料 publicId"), {
+      target: { value: "material-marketing-001" },
+    });
+    fireEvent.change(questionForm.getByLabelText("题干"), {
+      target: { value: "多选题题干" },
+    });
+    fireEvent.change(questionForm.getByLabelText("标准答案"), {
+      target: { value: "A,B" },
+    });
+    fireEvent.change(questionForm.getByLabelText("老师解析"), {
+      target: { value: "多选题解析" },
+    });
+    fireEvent.change(questionForm.getByLabelText("多选评分规则"), {
+      target: { value: "partial_credit" },
+    });
+    fireEvent.change(questionForm.getByLabelText("选项 A"), {
+      target: { value: "候选项 A" },
+    });
+    fireEvent.change(questionForm.getByLabelText("选项 B"), {
+      target: { value: "候选项 B" },
+    });
+    fireEvent.click(questionForm.getByLabelText("选项 A 正确"));
+    fireEvent.click(questionForm.getByLabelText("选项 B 正确"));
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+    expect(
+      await screen.findByText("题目 question-created-001 已保存"),
+    ).toBeInTheDocument();
+
+    const requestBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/questions",
+      "POST",
+    );
+
+    expect(requestBody).toMatchObject({
+      level: 2,
+      materialPublicId: "material-marketing-001",
+      multiChoiceRule: "partial_credit",
+      profession: "marketing",
+      questionType: "multi_choice",
+      scoringMethod: "auto_match",
+      subject: "skill",
+    });
+    expect(requestBody.questionOptions).toEqual([
+      {
+        contentRichText: "候选项 A",
+        isCorrect: true,
+        label: "A",
+        sortOrder: 1,
+      },
+      {
+        contentRichText: "候选项 B",
+        isCorrect: true,
+        label: "B",
+        sortOrder: 2,
+      },
+      {
+        contentRichText: "C",
+        isCorrect: false,
+        label: "C",
+        sortOrder: 3,
+      },
+      {
+        contentRichText: "D",
+        isCorrect: false,
+        label: "D",
+        sortOrder: 4,
+      },
+    ]);
+    expect(requestBody.scoringPoints).toEqual([]);
+  });
+
+  it("posts non-option existing question type scoring points without option rows", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fireEvent.change(questionForm.getByLabelText("题型"), {
+      target: { value: "short_answer" },
+    });
+    fireEvent.change(questionForm.getByLabelText("评分方式"), {
+      target: { value: "ai_scoring" },
+    });
+    fireEvent.change(questionForm.getByLabelText("题干"), {
+      target: { value: "简答题题干" },
+    });
+    fireEvent.change(questionForm.getByLabelText("标准答案"), {
+      target: { value: "简答题参考答案" },
+    });
+    fireEvent.change(questionForm.getByLabelText("评分点 1"), {
+      target: { value: "说明关键步骤" },
+    });
+    fireEvent.change(questionForm.getByLabelText("评分点 1 分值"), {
+      target: { value: "2.5" },
+    });
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+    expect(
+      await screen.findByText("题目 question-created-001 已保存"),
+    ).toBeInTheDocument();
+
+    const requestBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/questions",
+      "POST",
+    );
+
+    expect(requestBody).toMatchObject({
+      questionType: "short_answer",
+      scoringMethod: "ai_scoring",
+    });
+    expect(requestBody.questionOptions).toEqual([]);
+    expect(requestBody.scoringPoints).toEqual([
+      {
+        description: "说明关键步骤",
+        score: "2.5",
+        sortOrder: 1,
+      },
+    ]);
   });
 
   it("reviews knowledge_node recommendations with confidence, stale, accept, and discard states", async () => {
