@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-24T14:12:00-07:00"
+  updatedAt: "2026-05-24T19:14:28-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: push master closeout, then claim the next pending MVP gap task from clean master
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-contact-config-purchase-guidance-loop.md
+  nextRecommendedAction: claim phase-11-role-based-full-flow-acceptance-rerun from clean master in the next session; start with role data readiness preflight, then run local role-based full-flow acceptance and produce the staging acceptance template without staging/prod connection or generated artifact pollution
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md
