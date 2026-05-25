@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-mvp-contact-config-purchase-guidance-loop
+  id: phase-11-role-based-full-flow-acceptance-rerun
   status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md#MVP-GAP-009
-  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-contact-config-purchase-guidance-loop.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-mvp-contact-config-purchase-guidance-loop.md
-  branch: codex/phase-11-mvp-contact-config-purchase-guidance-loop
-  commitSha: df5c3d0
+  sourceStory: user-request-2026-05-24-role-based-full-flow-acceptance-rerun
+  planPath: docs/05-execution-logs/task-plans/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md
+  branch: codex/phase-11-role-based-full-flow-acceptance-rerun
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: claim phase-11-role-based-full-flow-acceptance-rerun from clean master in the next session; start with role data readiness preflight, then run local role-based full-flow acceptance and produce the staging acceptance template without staging/prod connection or generated artifact pollution
+  nextRecommendedAction: address the recorded P2 content-created objective feedback correctness gap before any approved staging execution, or explicitly waive it in a future staging approval task
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md

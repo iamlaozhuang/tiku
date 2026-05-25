@@ -2,7 +2,7 @@
 
 ## Scope
 
-Plan and execute one reusable role-based local acceptance automation pass for the Phase 11 release-candidate decision surface, then produce a staging acceptance template for later owner acceptance. This task is execution-ready for the next session, but this planning commit does not run the acceptance flow.
+Plan and execute one reusable role-based local acceptance automation pass for the Phase 11 release-candidate decision surface, then produce a staging acceptance template for later owner acceptance. This session claims the queued task from a clean short-lived branch and runs the acceptance flow locally only.
 
 ## Readiness Inputs
 
@@ -43,6 +43,14 @@ Committed reusable assets must stay under task-owned paths:
 - `docs/05-execution-logs/evidence/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md`
 
 Runtime-generated screenshots, traces, video, and raw browser reports must remain outside committed source or inside existing ignored locations such as `/test-results` or `/playwright-report`. If artifact isolation requires a new ignore rule, pause for approval before editing `.gitignore`.
+
+## Implementation Plan
+
+1. Claim the pending queue task from `master` on `codex/phase-11-role-based-full-flow-acceptance-rerun`.
+2. Add a reusable Playwright spec under `e2e/role-based-acceptance/` that enforces the required execution order in a serial describe block.
+3. Use existing local dev seed records where they are clearly test-only, and create only bounded test-only records through local runtime APIs when a readiness phase needs them.
+4. Keep runtime attachments in Playwright-managed ignored output; commit only redacted summaries, contract, and staging template.
+5. Run the queue validation commands, update evidence with actual results, then complete repository closeout.
 
 ## Role Flows
 
@@ -94,15 +102,15 @@ Do not skip earlier phases based on assumptions. If a prerequisite is only avail
 
 ## AC-To-Runtime Matrix
 
-| Acceptance criterion                                            | Runtime proof required                                                                                                    |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Role experience order respects data prerequisites               | Preflight inventory and role data readiness matrix completed before role flows                                            |
-| Local full-flow acceptance covers all primary roles             | Browser or e2e evidence for student, content ops, system ops, and oversight flows                                         |
-| Staging acceptance is reusable but not executed against staging | Staging template under `docs/05-execution-logs/acceptance/role-based-full-flow/` with no staging/prod connection evidence |
-| Test-only data is allowed but isolated                          | Test data prefix, cleanup/isolation notes, no production/customer-like content                                            |
-| Generated artifacts do not pollute code                         | Screenshots/traces/reports kept in ignored runtime artifact paths; committed artifacts limited to allowed paths           |
-| Sensitive content is redacted                                   | Evidence contains bounded identifiers or summaries only, no secrets/raw payloads/full OCR/full paper/full textbook        |
-| Findings are actionable                                         | Evidence includes question severity, validation records, `stagingDecision`, and next recommendations                      |
+| Acceptance criterion                                            | Runtime surface                                          | Current state    | Implementation evidence                                                                                       | Downstream effect                           | Remaining gap                                                        | Decision               |
+| --------------------------------------------------------------- | -------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------- | ---------------------- |
+| Role experience order respects data prerequisites               | `e2e/role-based-acceptance/role-based-full-flow.spec.ts` | `runtime_closed` | Serial E2E order: preflight -> system ops -> content ops -> student positive -> student negative -> oversight | Release-boundary confidence                 | none                                                                 | implemented            |
+| Local full-flow acceptance covers all primary roles             | Local browser/API runtime                                | `runtime_closed` | `npm.cmd run test:e2e` plus redacted Playwright attachments in ignored output                                 | Student, content ops, system ops, oversight | one P2 content-created objective feedback correctness gap            | implemented_with_p2    |
+| Staging acceptance is reusable but not executed against staging | Acceptance template                                      | `template_only`  | `docs/05-execution-logs/acceptance/role-based-full-flow/staging-acceptance-template.md`                       | Future owner acceptance                     | blocked_by_approval                                                  | deferred_with_approval |
+| Test-only data is allowed but isolated                          | Local runtime entrypoints                                | `runtime_closed` | `acceptance-20260524-role-flow` labels and independent authorized/no-auth test-only students                  | Data readiness                              | generated plaintext `redeem_code` used only in memory and not logged | implemented            |
+| Generated artifacts do not pollute code                         | Playwright output paths                                  | `runtime_closed` | `/test-results` and `/playwright-report` ignored; committed files limited to allowed paths                    | Repository hygiene                          | none                                                                 | implemented            |
+| Sensitive content is redacted                                   | Evidence and test assertions                             | `runtime_closed` | Test assertions reject token/secret/raw payload terms; evidence uses summaries only                           | Evidence integrity                          | none                                                                 | implemented            |
+| Findings are actionable                                         | Evidence                                                 | `runtime_closed` | Problem grading, validation records, `stagingDecision`, next recommendation                                   | Queue closeout                              | one P2 follow-up recorded                                            | implemented            |
 
 ## Validation Commands
 
@@ -133,6 +141,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 ## Staging Decision
 
-`stagingDecision: not_started_planning_only`
+`stagingDecision: template_only_not_executed`
 
 This task may produce a staging acceptance template, but it must not connect to, deploy to, or validate against staging without separate future approval.
