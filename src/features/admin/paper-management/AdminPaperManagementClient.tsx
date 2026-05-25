@@ -64,8 +64,8 @@ type PaperQuestionFormValues = {
 };
 type PaperAssetFormValues = {
   paperPublicId: string;
-  fileName: string;
-  fileHash: string;
+  profession: Profession;
+  file: File | null;
 };
 type ActivePaperForm =
   | {
@@ -190,6 +190,26 @@ async function mutateAdminApi<TData>(
   };
 }
 
+async function mutateAdminMultipartApi<TData>(
+  path: string,
+  sessionToken: string,
+  body: FormData,
+) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${sessionToken}`,
+    },
+    body,
+  });
+
+  return (await response.json()) as {
+    code: number;
+    message: string;
+    data: TData | null;
+  };
+}
+
 function upsertByPublicId<TItem extends { publicId: string }>(
   items: TItem[],
   nextItem: TItem,
@@ -262,18 +282,19 @@ function createPaperQuestionInput(values: PaperQuestionFormValues) {
   };
 }
 
-function createPaperAssetInput(values: PaperAssetFormValues) {
-  const extension = values.fileName.split(".").pop() ?? "pdf";
+function createPaperAssetFormData(values: PaperAssetFormValues) {
+  const formData = new FormData();
 
-  return {
-    paperPublicId: values.paperPublicId,
-    paperAttachmentUsage: "paper_source",
-    fileName: values.fileName,
-    objectKey: `dev/paper-asset/marketing/202605/${values.fileHash}.${extension}`,
-    contentType: "application/pdf",
-    fileSizeByte: 2048,
-    fileHash: values.fileHash,
-  };
+  formData.set("paperPublicId", values.paperPublicId);
+  formData.set("paperAttachmentUsage", "paper_source");
+  formData.set("profession", values.profession);
+
+  if (values.file !== null) {
+    formData.set("fileName", values.file.name);
+    formData.set("file", values.file);
+  }
+
+  return formData;
 }
 
 export function AdminPaperManagement() {
@@ -416,15 +437,21 @@ export function AdminPaperManagement() {
       return;
     }
 
+    if (values.file === null) {
+      setActionError("请选择本地文件后再保存。");
+      return;
+    }
+
     setIsSubmitting(true);
     setActionError(null);
 
     try {
-      const response = await mutateAdminApi<{ paperAsset: PaperAssetDto }>(
+      const response = await mutateAdminMultipartApi<{
+        paperAsset: PaperAssetDto;
+      }>(
         "/api/v1/paper-assets",
         sessionToken,
-        "POST",
-        createPaperAssetInput(values),
+        createPaperAssetFormData(values),
       );
 
       if (response.code !== 0 || response.data === null) {
@@ -619,6 +646,7 @@ export function AdminPaperManagement() {
       {activeForm?.kind === "paperAsset" ? (
         <PaperAssetWriteForm
           isSubmitting={isSubmitting}
+          key={activeForm.values.paperPublicId}
           values={activeForm.values}
           onCancel={() => setActiveForm(null)}
           onSubmit={handleSavePaperAsset}
@@ -632,12 +660,15 @@ export function AdminPaperManagement() {
           onBindAsset={(publicId) => {
             setActionError(null);
             setActionMessage(null);
+            const selectedPaper = papers.find(
+              (paper) => paper.publicId === publicId,
+            );
             setActiveForm({
               kind: "paperAsset",
               values: {
-                fileHash: "abc123def4567890abc123def4567890",
-                fileName: "local-paper-source.pdf",
                 paperPublicId: publicId,
+                profession: selectedPaper?.profession ?? "marketing",
+                file: null,
               },
             });
           }}
@@ -861,25 +892,19 @@ function PaperAssetWriteForm({
         登记原始文件 metadata
       </h2>
       <p className="text-text-secondary text-sm">
-        本地仅登记文件 metadata，不上传文件正文、OCR 或公开 URL。
+        本地会把文件写入 ignored runtime 目录；不会创建 COS、OCR 或公开 URL。
       </p>
       <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">文件名</span>
+        <span className="text-text-secondary">本地文件</span>
         <Input
-          aria-label="文件名"
-          value={formValues.fileName}
+          aria-label="本地文件"
+          accept=".txt,.md,.pdf,application/pdf,text/plain,text/markdown"
+          type="file"
           onChange={(event) =>
-            setFormValues({ ...formValues, fileName: event.target.value })
-          }
-        />
-      </label>
-      <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">文件哈希</span>
-        <Input
-          aria-label="文件哈希"
-          value={formValues.fileHash}
-          onChange={(event) =>
-            setFormValues({ ...formValues, fileHash: event.target.value })
+            setFormValues({
+              ...formValues,
+              file: event.target.files?.[0] ?? null,
+            })
           }
         />
       </label>

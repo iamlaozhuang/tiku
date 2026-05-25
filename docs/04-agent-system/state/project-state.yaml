@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-11-local-runtime-capability-queue-seeding
+  id: phase-11-local-file-upload-storage-adapter
   status: closed
   sourceStory: user-request-2026-05-25-local-first-runtime-capabilities
-  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-11-local-runtime-capability-queue-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-runtime-capability-queue-seeding.md
-  branch: codex/phase-11-local-runtime-capability-queue-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-11-local-file-upload-storage-adapter.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-file-upload-storage-adapter.md
+  branch: codex/phase-11-local-file-upload-storage-adapter
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: run phase-11-local-file-upload-storage-adapter next; keep Phase 11 staging implementation planning paused until DNS, ICP, cloud server, and database readiness change
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-runtime-capability-queue-seeding.md
+  nextRecommendedAction: run phase-11-local-text-document-parser-boundary next; keep Phase 11 staging implementation planning paused until DNS, ICP, cloud server, and database readiness change
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-11-local-file-upload-storage-adapter.md
