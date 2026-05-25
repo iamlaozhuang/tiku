@@ -128,6 +128,79 @@ describe("mistake book service", () => {
     });
   });
 
+  it("passes normalized filter query to the repository and excludes removed records from student lists", async () => {
+    const receivedQueries: unknown[] = [];
+    const service = createMistakeBookService(
+      createRepository({
+        async listMistakeBooks(query) {
+          receivedQueries.push(query);
+
+          return {
+            rows: [
+              createMistakeBookRow({
+                question_snapshot: {
+                  questionType: "multi_choice",
+                },
+                mistake_book_source: "favorite",
+                mistake_book_status: "mastered",
+                is_favorite: true,
+                mastered_at: now,
+              }),
+              createMistakeBookRow({
+                public_id: "removed_mistake_book_public_123",
+                is_removed: true,
+                mistake_book_status: "removed",
+              }),
+            ],
+            total: 2,
+          };
+        },
+      }),
+      clock,
+    );
+
+    await expect(
+      service.listMistakeBooks(userContext, {
+        page: "2",
+        pageSize: "50",
+        questionType: "multi_choice",
+        source: "favorite",
+        status: "mastered",
+        isFavorite: "true",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mistakeBooks: [
+          {
+            publicId: "mistake_book_public_123",
+            mistakeBookSource: "favorite",
+            mistakeBookStatus: "mastered",
+            isFavorite: true,
+          },
+        ],
+      },
+      pagination: {
+        page: 2,
+        pageSize: 50,
+        total: 1,
+      },
+    });
+    expect(receivedQueries).toEqual([
+      expect.objectContaining({
+        userPublicId: "user_public_123",
+        page: 2,
+        pageSize: 50,
+        questionType: "multi_choice",
+        source: "favorite",
+        status: "mastered",
+        isFavorite: true,
+        sortBy: "latestWrongAt",
+        sortOrder: "desc",
+      }),
+    ]);
+  });
+
   it("hides detail when current authorization no longer covers its scope", async () => {
     const service = createMistakeBookService(
       createRepository({

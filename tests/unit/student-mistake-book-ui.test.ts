@@ -26,6 +26,8 @@ const mistakeBookPayload = {
         questionSnapshot: {
           questionType: "single_choice",
           stemRichText: "<p>卷烟市场监管重点是什么？</p>",
+          standardAnswerRichText: "<p>A</p>",
+          analysisRichText: "<p>应先判断监管对象，再匹配职责边界。</p>",
           rawAnswer: "do-not-render",
           code_hash: "do-not-render",
         },
@@ -112,6 +114,13 @@ describe("StudentMistakeBookPage", () => {
     expect(within(item).getByText("专卖 3级")).toBeInTheDocument();
     expect(within(item).getByText("理论")).toBeInTheDocument();
     expect(within(item).getByText("错 2 次")).toBeInTheDocument();
+    expect(within(item).getByText("我的作答")).toBeInTheDocument();
+    expect(within(item).getByText("B")).toBeInTheDocument();
+    expect(within(item).getByText("标准答案")).toBeInTheDocument();
+    expect(within(item).getByText("A")).toBeInTheDocument();
+    expect(
+      within(item).getByText("应先判断监管对象，再匹配职责边界。"),
+    ).toBeInTheDocument();
     const aiExplanationButton = within(item).getByRole("button", {
       name: "AI讲解",
     });
@@ -258,6 +267,89 @@ describe("StudentMistakeBookPage", () => {
     render(createElement(StudentMistakeBookPage));
 
     expect(await screen.findByText("错题本加载失败")).toBeInTheDocument();
+  });
+
+  it("reloads the list when question type, source, mastery status, and pagination controls change", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) =>
+      createJsonResponse({
+        ...mistakeBookPayload,
+        data: { mistakeBooks: [] },
+        pagination: {
+          page: String(url).includes("page=2") ? 2 : 1,
+          pageSize: 20,
+          total: 42,
+          sortBy: "latestWrongAt",
+          sortOrder: "desc",
+        },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentMistakeBookPage));
+
+    expect(await screen.findByLabelText("题型")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("题型"), {
+      target: { value: "multi_choice" },
+    });
+    fireEvent.change(screen.getByLabelText("来源"), {
+      target: { value: "favorite" },
+    });
+    fireEvent.change(screen.getByLabelText("掌握状态"), {
+      target: { value: "mastered" },
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/mistake-books?page=1&pageSize=20&questionType=multi_choice&source=favorite&status=mastered",
+        expect.any(Object),
+      ),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "下一页" }));
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/mistake-books?page=2&pageSize=20&questionType=multi_choice&source=favorite&status=mastered",
+        expect.any(Object),
+      ),
+    );
+  });
+
+  it("keeps disabled source questions visible with review fields and AI entry", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        createJsonResponse({
+          ...mistakeBookPayload,
+          data: {
+            mistakeBooks: [
+              {
+                ...mistakeBookPayload.data.mistakeBooks[0],
+                questionSnapshot: {
+                  ...mistakeBookPayload.data.mistakeBooks[0].questionSnapshot,
+                  questionStatus: "disabled",
+                },
+              },
+            ],
+          },
+        }),
+      ),
+    );
+
+    render(createElement(StudentMistakeBookPage));
+
+    const item = await screen.findByTestId(
+      "mistake-book-item-mistake-book-public-001",
+    );
+
+    expect(within(item).getByText("该题目已停用")).toBeInTheDocument();
+    expect(within(item).getByText("我的作答")).toBeInTheDocument();
+    expect(
+      within(item).getByRole("button", { name: "AI讲解" }),
+    ).not.toBeDisabled();
   });
 
   it("keeps favorite and mastered actions scoped by publicId and bearer token", async () => {

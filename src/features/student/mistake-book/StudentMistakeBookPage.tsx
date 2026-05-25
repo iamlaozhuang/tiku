@@ -13,7 +13,10 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import type { ApiResponse } from "@/server/contracts/api-response";
+import type {
+  ApiPagination,
+  ApiResponse,
+} from "@/server/contracts/api-response";
 import type {
   AiExplanationDto,
   MistakeBookAiExplanationResultDto,
@@ -31,6 +34,11 @@ import type { Profession, Subject } from "@/server/models/paper";
 type LoadState = "loading" | "ready" | "unauthorized" | "error";
 type ActionState = "idle" | "submitting";
 type AiExplanationByPublicId = Record<string, AiExplanationDto>;
+type MistakeBookFilterState = {
+  questionType: QuestionType | "all";
+  source: MistakeBookSource | "all";
+  status: Exclude<MistakeBookStatus, "removed"> | "all";
+};
 
 const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 
@@ -61,6 +69,22 @@ const questionTypeLabels: Partial<Record<QuestionType, string>> = {
   multi_choice: "多选题",
   single_choice: "单选题",
   true_false: "判断题",
+};
+
+const pageSize = 20;
+
+const defaultFilters: MistakeBookFilterState = {
+  questionType: "all",
+  source: "all",
+  status: "all",
+};
+
+const emptyPagination: ApiPagination = {
+  page: 1,
+  pageSize,
+  total: 0,
+  sortBy: "latestWrongAt",
+  sortOrder: "desc",
 };
 
 function getStoredSessionToken(): string | null {
@@ -103,8 +127,48 @@ function formatDate(value: string | null): string {
   return value === null ? "未记录" : value.slice(0, 10);
 }
 
+function formatAnswerLabels(labels: string[]): string {
+  return labels.length === 0 ? "未记录" : labels.join("、");
+}
+
+function formatLearnerAnswer(mistakeBook: MistakeBookItemDto): string {
+  if (mistakeBook.latestAnswerSnapshot.selectedLabels.length > 0) {
+    return formatAnswerLabels(mistakeBook.latestAnswerSnapshot.selectedLabels);
+  }
+
+  const textAnswer = mistakeBook.latestAnswerSnapshot.textAnswer?.trim();
+
+  return textAnswer === undefined || textAnswer.length === 0
+    ? "未记录"
+    : textAnswer;
+}
+
 function formatCitationHeadingPath(headingPath: string[]): string {
   return headingPath.length === 0 ? "未标注章节" : headingPath.join(" > ");
+}
+
+function createMistakeBookListPath(
+  filters: MistakeBookFilterState,
+  page: number,
+): string {
+  const searchParams = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+
+  if (filters.questionType !== "all") {
+    searchParams.set("questionType", filters.questionType);
+  }
+
+  if (filters.source !== "all") {
+    searchParams.set("source", filters.source);
+  }
+
+  if (filters.status !== "all") {
+    searchParams.set("status", filters.status);
+  }
+
+  return `/api/v1/mistake-books?${searchParams.toString()}`;
 }
 
 function readQuestionType(
@@ -138,6 +202,32 @@ function readQuestionStem(questionSnapshot: Record<string, unknown>): string {
   }
 
   return "题干内容暂不可见";
+}
+
+function readSnapshotText(
+  questionSnapshot: Record<string, unknown>,
+  keys: string[],
+  fallback: string,
+): string {
+  for (const key of keys) {
+    const value = questionSnapshot[key];
+
+    if (typeof value === "string" && value.trim().length > 0) {
+      return stripRichText(value);
+    }
+  }
+
+  return fallback;
+}
+
+function isSourceQuestionDisabled(
+  questionSnapshot: Record<string, unknown>,
+): boolean {
+  return (
+    questionSnapshot.questionStatus === "disabled" ||
+    questionSnapshot.status === "disabled" ||
+    questionSnapshot.isDisabled === true
+  );
 }
 
 function StudentMistakeBookStatus({
@@ -213,6 +303,124 @@ function StudentMistakeBookEmpty() {
   );
 }
 
+function StudentMistakeBookFilters({
+  disabled,
+  filters,
+  onChangeFilters,
+}: {
+  disabled: boolean;
+  filters: MistakeBookFilterState;
+  onChangeFilters: (filters: MistakeBookFilterState) => void;
+}) {
+  return (
+    <section
+      aria-label="错题筛选"
+      className="border-border bg-surface grid gap-3 rounded-xl border p-3 sm:grid-cols-3"
+    >
+      <label className="text-text-secondary flex flex-col gap-1 text-xs font-medium">
+        题型
+        <select
+          className="border-border bg-background text-text-primary h-10 rounded-lg border px-3 text-sm"
+          disabled={disabled}
+          value={filters.questionType}
+          onChange={(event) =>
+            onChangeFilters({
+              ...filters,
+              questionType: event.target
+                .value as MistakeBookFilterState["questionType"],
+            })
+          }
+        >
+          <option value="all">全部题型</option>
+          <option value="single_choice">单选题</option>
+          <option value="multi_choice">多选题</option>
+          <option value="true_false">判断题</option>
+          <option value="fill_blank">填空题</option>
+        </select>
+      </label>
+      <label className="text-text-secondary flex flex-col gap-1 text-xs font-medium">
+        来源
+        <select
+          className="border-border bg-background text-text-primary h-10 rounded-lg border px-3 text-sm"
+          disabled={disabled}
+          value={filters.source}
+          onChange={(event) =>
+            onChangeFilters({
+              ...filters,
+              source: event.target.value as MistakeBookFilterState["source"],
+            })
+          }
+        >
+          <option value="all">全部来源</option>
+          <option value="wrong_answer">答错记录</option>
+          <option value="favorite">主动收藏</option>
+        </select>
+      </label>
+      <label className="text-text-secondary flex flex-col gap-1 text-xs font-medium">
+        掌握状态
+        <select
+          className="border-border bg-background text-text-primary h-10 rounded-lg border px-3 text-sm"
+          disabled={disabled}
+          value={filters.status}
+          onChange={(event) =>
+            onChangeFilters({
+              ...filters,
+              status: event.target.value as MistakeBookFilterState["status"],
+            })
+          }
+        >
+          <option value="all">全部状态</option>
+          <option value="unmastered">未掌握</option>
+          <option value="mastered">已掌握</option>
+        </select>
+      </label>
+    </section>
+  );
+}
+
+function StudentMistakeBookPagination({
+  disabled,
+  onChangePage,
+  pagination,
+}: {
+  disabled: boolean;
+  onChangePage: (page: number) => void;
+  pagination: ApiPagination;
+}) {
+  const totalPages = Math.max(1, Math.ceil(pagination.total / pageSize));
+  const canGoPrevious = pagination.page > 1;
+  const canGoNext = pagination.page < totalPages;
+
+  return (
+    <nav
+      aria-label="错题分页"
+      className="border-border bg-surface flex items-center justify-between gap-3 rounded-xl border p-3"
+    >
+      <p className="text-text-secondary text-sm">
+        第 {pagination.page} / {totalPages} 页，共 {pagination.total} 条
+      </p>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={disabled || !canGoPrevious}
+          onClick={() => onChangePage(pagination.page - 1)}
+        >
+          上一页
+        </button>
+        <button
+          type="button"
+          className="border-border text-text-primary hover:bg-muted h-9 rounded-lg border bg-transparent px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={disabled || !canGoNext}
+          onClick={() => onChangePage(pagination.page + 1)}
+        >
+          下一页
+        </button>
+      </div>
+    </nav>
+  );
+}
+
 function StudentMistakeBookCard({
   actionState,
   aiExplanation,
@@ -234,6 +442,20 @@ function StudentMistakeBookCard({
   const isSubmitting = actionState === "submitting";
   const isMastered = mistakeBook.mistakeBookStatus === "mastered";
   const favoriteLabel = mistakeBook.isFavorite ? "取消收藏" : "收藏";
+  const isDisabledSourceQuestion = isSourceQuestionDisabled(
+    mistakeBook.questionSnapshot,
+  );
+  const learnerAnswer = formatLearnerAnswer(mistakeBook);
+  const standardAnswer = readSnapshotText(
+    mistakeBook.questionSnapshot,
+    ["standardAnswer", "standardAnswerRichText"],
+    "标准答案暂不可见",
+  );
+  const analysis = readSnapshotText(
+    mistakeBook.questionSnapshot,
+    ["analysis", "analysisRichText"],
+    "老师解析暂不可见",
+  );
 
   return (
     <article
@@ -259,6 +481,9 @@ function StudentMistakeBookCard({
           <h2 className="font-heading text-text-primary text-base leading-6 font-semibold">
             {readQuestionStem(mistakeBook.questionSnapshot)}
           </h2>
+          {isDisabledSourceQuestion ? (
+            <p className="text-warning text-xs font-medium">该题目已停用</p>
+          ) : null}
         </div>
         <span
           className={`shrink-0 rounded-lg px-2 py-1 text-xs font-medium ${
@@ -289,6 +514,21 @@ function StudentMistakeBookCard({
           <dd className="text-text-primary mt-1 font-medium">
             {formatDate(mistakeBook.latestWrongAt)}
           </dd>
+        </div>
+      </dl>
+
+      <dl className="border-border bg-background grid gap-3 rounded-xl border p-3 text-sm sm:grid-cols-3">
+        <div className="space-y-1">
+          <dt className="text-text-secondary text-xs font-medium">我的作答</dt>
+          <dd className="text-text-primary leading-6">{learnerAnswer}</dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="text-text-secondary text-xs font-medium">标准答案</dt>
+          <dd className="text-text-primary leading-6">{standardAnswer}</dd>
+        </div>
+        <div className="space-y-1">
+          <dt className="text-text-secondary text-xs font-medium">老师解析</dt>
+          <dd className="text-text-primary leading-6">{analysis}</dd>
         </div>
       </dl>
 
@@ -387,6 +627,10 @@ export function StudentMistakeBookPage() {
   const [actionState, setActionState] = useState<ActionState>("idle");
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [mistakeBooks, setMistakeBooks] = useState<MistakeBookItemDto[]>([]);
+  const [filters, setFilters] =
+    useState<MistakeBookFilterState>(defaultFilters);
+  const [pagination, setPagination] = useState<ApiPagination>(emptyPagination);
+  const [currentPage, setCurrentPage] = useState(1);
   const [aiExplanationByPublicId, setAiExplanationByPublicId] =
     useState<AiExplanationByPublicId>({});
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
@@ -411,7 +655,7 @@ export function StudentMistakeBookPage() {
 
       try {
         const listPayload = await fetchApi<MistakeBookListResultDto>(
-          "/api/v1/mistake-books?page=1&pageSize=20",
+          createMistakeBookListPath(filters, currentPage),
           token,
         );
 
@@ -431,6 +675,7 @@ export function StudentMistakeBookPage() {
 
         setSessionToken(token);
         setMistakeBooks(listPayload.data.mistakeBooks);
+        setPagination(listPayload.pagination ?? emptyPagination);
         setLoadState("ready");
       } catch {
         if (isActive) {
@@ -444,7 +689,13 @@ export function StudentMistakeBookPage() {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [currentPage, filters]);
+
+  function handleChangeFilters(nextFilters: MistakeBookFilterState) {
+    setFilters(nextFilters);
+    setCurrentPage(1);
+    setFeedbackMessage(null);
+  }
 
   async function handleMistakeBookAction(
     mistakeBook: MistakeBookItemDto,
@@ -487,6 +738,14 @@ export function StudentMistakeBookPage() {
               : currentMistakeBook,
           )
           .filter((currentMistakeBook) => !currentMistakeBook.isRemoved),
+      );
+      setPagination((currentPagination) =>
+        updatedMistakeBook.isRemoved
+          ? {
+              ...currentPagination,
+              total: Math.max(0, currentPagination.total - 1),
+            }
+          : currentPagination,
       );
     } catch {
       setFeedbackMessage("操作失败，请稍后重试");
@@ -588,10 +847,16 @@ export function StudentMistakeBookPage() {
             </p>
           </div>
           <span className="bg-secondary text-secondary-foreground shrink-0 rounded-lg px-3 py-1 text-sm font-medium">
-            共 {activeMistakeBooks.length} 题
+            共 {pagination.total} 题
           </span>
         </div>
       </section>
+
+      <StudentMistakeBookFilters
+        disabled={actionState === "submitting"}
+        filters={filters}
+        onChangeFilters={handleChangeFilters}
+      />
 
       {feedbackMessage === null ? null : (
         <div className="border-border text-error bg-surface rounded-xl border px-4 py-3 text-sm">
@@ -630,6 +895,15 @@ export function StudentMistakeBookPage() {
           ))}
         </section>
       )}
+
+      <StudentMistakeBookPagination
+        disabled={actionState === "submitting"}
+        pagination={pagination}
+        onChangePage={(page) => {
+          setCurrentPage(page);
+          setFeedbackMessage(null);
+        }}
+      />
     </main>
   );
 }

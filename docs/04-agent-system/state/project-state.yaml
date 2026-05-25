@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-repair-local-resource-lifecycle
+  id: phase-12-repair-student-mistake-book-ac-coverage
   status: closed
   sourceStory: user-request-2026-05-25-mvp-requirements-ssot-three-full-independent-audits
-  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-local-resource-lifecycle.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-local-resource-lifecycle.md
-  branch: codex/phase-12-local-resource-lifecycle
-  commitSha: 1ec9287
+  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-student-mistake-book-ac-coverage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-student-mistake-book-ac-coverage.md
+  branch: codex/phase-12-student-mistake-book-ac-coverage
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Continue from clean master to phase-12-repair-student-mistake-book-ac-coverage
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-local-resource-lifecycle.md
+  nextRecommendedAction: Continue from clean master to phase-12-repair-ai-rag-citation-local-integration
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-student-mistake-book-ac-coverage.md
