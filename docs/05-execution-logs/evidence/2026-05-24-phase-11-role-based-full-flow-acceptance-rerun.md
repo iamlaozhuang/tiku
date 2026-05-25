@@ -71,6 +71,17 @@ Review correction validation:
 - `Test-NamingConventions.ps1`: Pass.
 - `Invoke-QualityGate.ps1`: Pass: lint, typecheck, 119 unit test files / 447 tests, format check.
 
+Merge closeout validation on `master`:
+
+- Merged branch: `codex/phase-11-role-based-full-flow-acceptance-queue-planning`.
+- Merge commit: `521131f merge: role based acceptance queue planning`.
+- `Test-TaskClaimReadiness.ps1 -TaskId phase-11-role-based-full-flow-acceptance-rerun`: Expected protected-branch refusal on `master`; task claim readiness remains a short-branch gate and had passed before merge.
+- `Select-String` for `Role Data Readiness Matrix`, `Execution Order`, `Preflight Data Inventory`, `System Ops Data Readiness`, `Content Ops Readiness`, `Student Positive Flow`, `Student Negative Flow`, and `Oversight Flow`: Pass on `master`.
+- `Test-AgentSystemReadiness.ps1`: Pass on `master`.
+- `Test-NamingConventions.ps1`: Pass on `master`.
+- `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: Inventory completed; `master` ahead before push as expected.
+- `Invoke-QualityGate.ps1`: Pass on `master`: lint, typecheck, 119 unit test files / 447 tests, format check.
+
 Pending for next session acceptance execution:
 
 - `Test-TaskClaimReadiness.ps1 -TaskId phase-11-role-based-full-flow-acceptance-rerun`
