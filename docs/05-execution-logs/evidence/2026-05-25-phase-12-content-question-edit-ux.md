@@ -5,7 +5,8 @@
 - id: `phase-12-repair-content-question-edit-ux`
 - branch: `codex/phase-12-content-question-edit-ux`
 - source: Phase 12 SSOT audit repair queue
-- status: closed pending commit/merge closeout
+- status: closed
+- featureCommit: `3e64df9`
 
 ## Boundary
 
@@ -54,6 +55,7 @@
 - Evidence created: yes.
 - Queue state updated: `phase-12-repair-content-question-edit-ux` closed.
 - Project state updated: current task points to this closeout.
+- Feature commit created: `3e64df9 fix(content): improve question edit context`.
 - Package/lockfile changed: no.
 - Schema/migration/script changed: no.
 - Cloud/staging/prod/deploy touched: no.
