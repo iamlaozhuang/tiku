@@ -15,6 +15,13 @@ import {
   createPostgresPaperDraftRepository,
   type PaperDraftRepository,
 } from "../repositories/paper-draft-repository";
+import {
+  paperAttachmentUsageValues,
+  professionValues,
+  type PaperAttachmentUsage,
+  type Profession,
+} from "../models/paper";
+import { storeLocalPaperAssetFile } from "./local-paper-asset-storage";
 import { createPaperAssetService } from "./paper-asset-service";
 import { createPaperDraftService } from "./paper-draft-service";
 import type { SessionService } from "./session-service";
@@ -50,6 +57,7 @@ export type PaperCompositionLifecycleRuntimeRepositories = {
 };
 
 export type PaperCompositionLifecycleRuntimeOptions = {
+  localPaperAssetStorageRoot?: string;
   repositories?: PaperCompositionLifecycleRuntimeRepositories;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
@@ -122,6 +130,97 @@ async function readRequestJson(request: Request): Promise<unknown> {
   } catch {
     return null;
   }
+}
+
+function isMultipartFormData(request: Request): boolean {
+  return (
+    request.headers.get("content-type")?.includes("multipart/form-data") ??
+    false
+  );
+}
+
+function readRequiredFormText(formData: FormData, key: string): string | null {
+  const value = formData.get(key);
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmedValue = value.trim();
+
+  return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
+function readPaperAttachmentUsage(
+  value: string | null,
+): PaperAttachmentUsage | null {
+  if (
+    value === null ||
+    !paperAttachmentUsageValues.includes(value as PaperAttachmentUsage)
+  ) {
+    return null;
+  }
+
+  return value as PaperAttachmentUsage;
+}
+
+function readProfession(value: string | null): Profession | null {
+  if (value === null || !professionValues.includes(value as Profession)) {
+    return null;
+  }
+
+  return value as Profession;
+}
+
+function isUploadedFile(value: FormDataEntryValue | null): value is File {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "name" in value &&
+    typeof value.name === "string" &&
+    "arrayBuffer" in value &&
+    typeof value.arrayBuffer === "function" &&
+    "type" in value &&
+    typeof value.type === "string"
+  );
+}
+
+async function readPaperAssetMutationInput(
+  request: Request,
+  storageRoot: string | undefined,
+): Promise<unknown> {
+  if (!isMultipartFormData(request)) {
+    return readRequestJson(request);
+  }
+
+  const formData = await request.formData();
+  const paperPublicId = readRequiredFormText(formData, "paperPublicId");
+  const paperAttachmentUsage = readPaperAttachmentUsage(
+    readRequiredFormText(formData, "paperAttachmentUsage"),
+  );
+  const profession = readProfession(
+    readRequiredFormText(formData, "profession"),
+  );
+  const fileName = readRequiredFormText(formData, "fileName") ?? undefined;
+  const file = formData.get("file");
+
+  if (
+    paperPublicId === null ||
+    paperAttachmentUsage === null ||
+    profession === null ||
+    !isUploadedFile(file)
+  ) {
+    return null;
+  }
+
+  return storeLocalPaperAssetFile({
+    file,
+    fileName,
+    paperAttachmentUsage,
+    paperPublicId,
+    profession,
+    storageRoot,
+  });
 }
 
 function readPaperQuery(request: Request): Record<string, unknown> {
@@ -599,7 +698,10 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
 
           const service = createPaperAssetServiceForActor(actorOrError);
           const response = await service.createPaperAsset(
-            await readRequestJson(request),
+            await readPaperAssetMutationInput(
+              request,
+              options.localPaperAssetStorageRoot,
+            ),
           );
 
           await auditPaperMutation(

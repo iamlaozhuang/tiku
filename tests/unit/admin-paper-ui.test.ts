@@ -216,6 +216,8 @@ function mockWritablePaperFetch() {
       }
 
       if (path === "/api/v1/paper-assets" && method === "POST") {
+        expect(init?.body).toBeInstanceOf(FormData);
+
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -511,15 +513,18 @@ describe("AdminPaperManagement", () => {
     );
     expect(
       screen.getByText(
-        "本地仅登记文件 metadata，不上传文件正文、OCR 或公开 URL。",
+        "本地会把文件写入 ignored runtime 目录；不会创建 COS、OCR 或公开 URL。",
       ),
     ).toBeInTheDocument();
-    expect(document.querySelector('input[type="file"]')).toBeNull();
-    fireEvent.change(screen.getByLabelText("文件名"), {
-      target: { value: "local-paper-source.pdf" },
-    });
-    fireEvent.change(screen.getByLabelText("文件哈希"), {
-      target: { value: "abc123def4567890abc123def4567890" },
+    expect(document.querySelector('input[type="file"]')).not.toBeNull();
+    fireEvent.change(screen.getByLabelText("本地文件"), {
+      target: {
+        files: [
+          new File(["controlled local upload"], "local-paper-source.txt", {
+            type: "text/plain",
+          }),
+        ],
+      },
     });
     fireEvent.click(screen.getByRole("button", { name: "保存附件" }));
 

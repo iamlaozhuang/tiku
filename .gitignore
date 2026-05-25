@@ -5,6 +5,7 @@
 # Agent/AI generated temporary outputs
 .agent/
 .worktrees/
+.runtime/
 docs/05-execution-logs/pending-tasks/temp*
 docs/05-execution-logs/audits-reviews/temp*
 
