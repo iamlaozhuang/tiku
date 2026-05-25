@@ -509,6 +509,12 @@ describe("AdminPaperManagement", () => {
         name: "绑定原始文件 paper-logistics-2026-practice",
       }),
     );
+    expect(
+      screen.getByText(
+        "本地仅登记文件 metadata，不上传文件正文、OCR 或公开 URL。",
+      ),
+    ).toBeInTheDocument();
+    expect(document.querySelector('input[type="file"]')).toBeNull();
     fireEvent.change(screen.getByLabelText("文件名"), {
       target: { value: "local-paper-source.pdf" },
     });
@@ -518,7 +524,7 @@ describe("AdminPaperManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存附件" }));
 
     expect(
-      await screen.findByText("附件 paper-asset-created-001 已绑定"),
+      await screen.findByText("附件 paper-asset-created-001 metadata 已登记"),
     ).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/paper-assets",
