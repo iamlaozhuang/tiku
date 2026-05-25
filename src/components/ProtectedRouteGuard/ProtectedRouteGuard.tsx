@@ -18,14 +18,6 @@ type ProtectedRouteGuardProps = {
 
 const localSessionTokenKey = "tiku.localSessionToken";
 
-function getInitialGuardStatus(): ProtectedRouteGuardStatus {
-  if (typeof window === "undefined") {
-    return "checking";
-  }
-
-  return readLocalSessionToken() === null ? "unauthorized" : "checking";
-}
-
 function readLocalSessionToken(): string | null {
   const sessionToken = localStorage.getItem(localSessionTokenKey)?.trim();
 
@@ -98,16 +90,21 @@ export function ProtectedRouteGuard({
 }: ProtectedRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [status, setStatus] = useState<ProtectedRouteGuardStatus>(
-    getInitialGuardStatus,
-  );
+  const [status, setStatus] = useState<ProtectedRouteGuardStatus>("checking");
 
   useEffect(() => {
     let isCurrentCheck = true;
     const sessionToken = readLocalSessionToken();
 
     if (sessionToken === null) {
-      router.replace("/login");
+      queueMicrotask(() => {
+        if (!isCurrentCheck) {
+          return;
+        }
+
+        setStatus("unauthorized");
+        router.replace("/login");
+      });
       return () => {
         isCurrentCheck = false;
       };
