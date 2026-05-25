@@ -42,7 +42,7 @@ currentTask:
   planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md
   branch: codex/phase-12-ops-org-auth-redeem-ui-closure
-  commitSha: null
+  commitSha: aa34bb6
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Close phase-12-repair-ops-org-auth-redeem-ui-closure against existing protected APIs, then continue from clean master to phase-12-repair-local-resource-lifecycle
+  nextRecommendedAction: Register and run three full independent SSOT-driven audits before continuing repair implementation
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-ops-org-auth-redeem-ui-closure.md

@@ -2,7 +2,7 @@
 
 ## Status
 
-`validated`
+`closed`
 
 ## Boundary
 
@@ -53,16 +53,33 @@ This task targets local/dev operations admin UI closure for existing `org_auth` 
 
 ## Repository Hygiene
 
-| Item                            | Result                                                         |
-| ------------------------------- | -------------------------------------------------------------- |
-| Package/lockfile changes        | none                                                           |
-| Schema/migration/script changes | none                                                           |
-| Secret/env access               | no `.env.local` content read or output                         |
-| Staging/prod/cloud/deploy       | not touched                                                    |
-| Generated redeem_code evidence  | no generated plaintext code recorded in evidence               |
-| Changed runtime scope           | admin org_auth/redeem_code UI and tests only                   |
-| Next task after closeout        | `phase-12-repair-local-resource-lifecycle` from clean `master` |
+| Item                            | Result                                                          |
+| ------------------------------- | --------------------------------------------------------------- |
+| Package/lockfile changes        | none                                                            |
+| Schema/migration/script changes | none                                                            |
+| Secret/env access               | no `.env.local` content read or output                          |
+| Staging/prod/cloud/deploy       | not touched                                                     |
+| Generated redeem_code evidence  | no generated plaintext code recorded in evidence                |
+| Changed runtime scope           | admin org_auth/redeem_code UI and tests only                    |
+| Next task after closeout        | Register three full independent SSOT audits from clean `master` |
 
 ## Notes
 
 - Evidence must not include generated plaintext `redeem_code` values, secrets, tokens, Authorization headers, raw request payloads, or private customer-like data.
+
+## Master Merge Validation
+
+| Item                | Result                                                                 |
+| ------------------- | ---------------------------------------------------------------------- |
+| Feature commit      | `aa34bb6 fix(ops): close org auth redeem ui actions`                   |
+| Merge strategy      | fast-forward into `master`                                             |
+| Local DB recovery   | restarted local Docker Compose `tiku-postgres`; no schema/data changes |
+| Unit validation     | pass: 3 files, 16 tests                                                |
+| E2E validation      | pass: 7 Playwright tests                                               |
+| Build validation    | pass: `npm.cmd run build`                                              |
+| Readiness gate      | pass: `Test-AgentSystemReadiness`                                      |
+| Naming gate         | pass: `Test-NamingConventions`                                         |
+| Git inventory gate  | pass: clean `master`, ahead of `origin/master` by this task commit     |
+| Whitespace gate     | pass: `git diff --check`                                               |
+| Push authorization  | user authorized per-task submit, merge, push, and cleanup              |
+| Next mechanism step | pause further repair work; register three full independent SSOT audits |
