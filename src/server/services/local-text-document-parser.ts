@@ -13,6 +13,7 @@ export type LocalTextDocumentEvidenceSummary = {
   objectKey: string;
   fileName: string;
   extension: string;
+  contentType?: string;
   parserMode: "local_only";
   markdownContentHash: string;
   charLength: number;
