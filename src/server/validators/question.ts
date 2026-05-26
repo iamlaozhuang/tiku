@@ -154,6 +154,16 @@ function isQuestionType(
   );
 }
 
+function isSubjectiveTextQuestionType(
+  questionType: (typeof questionTypeValues)[number],
+): boolean {
+  return (
+    questionType === "short_answer" ||
+    questionType === "case_analysis" ||
+    questionType === "calculation"
+  );
+}
+
 function isQuestionStatus(
   value: unknown,
 ): value is (typeof questionStatusValues)[number] {
@@ -290,6 +300,16 @@ export function normalizeCreateQuestionInput(
     materialPublicId === undefined ||
     questionOptions === null ||
     scoringPoints === null
+  ) {
+    return {
+      success: false,
+      message: INVALID_QUESTION_INPUT_MESSAGE,
+    };
+  }
+
+  if (
+    isSubjectiveTextQuestionType(input.questionType) &&
+    questionOptions.length > 0
   ) {
     return {
       success: false,

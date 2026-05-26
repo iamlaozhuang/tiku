@@ -37,7 +37,9 @@ function createIdFactory(): MockExamPublicIdFactory {
   };
 }
 
-function createPaperSnapshot(): Record<string, unknown> {
+function createPaperSnapshot(
+  questionType = "short_answer",
+): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
     name: "2024年专卖三级理论真题",
@@ -64,7 +66,7 @@ function createPaperSnapshot(): Record<string, unknown> {
           {
             paperQuestionPublicId: "paper_question_public_456",
             questionPublicId: "question_public_456",
-            questionType: "short_answer",
+            questionType,
             stemRichText: "<p>主观题</p>",
             standardAnswerLabels: [],
             standardAnswerRichText: "<p>标准答案</p>",
@@ -932,6 +934,121 @@ describe("mock exam service", () => {
       }),
     ]);
   });
+
+  it.each(["case_analysis", "calculation"] as const)(
+    "preserves %s snapshots while sending text answers to AI scoring",
+    async (questionType) => {
+      const scoringContexts: unknown[] = [];
+      const service = createMockExamService(
+        createRepository({
+          async findMockExamByPublicId(input) {
+            return createMockExam({
+              public_id: input.publicId,
+              paper_snapshot: createPaperSnapshot(questionType),
+            });
+          },
+          async listMockExamAnswerRecords() {
+            return [
+              {
+                public_id: "answer_record_public_objective",
+                exam_mode: "mock_exam",
+                paper_question_public_id: "paper_question_public_123",
+                question_public_id: "question_public_123",
+                answer_snapshot: {
+                  selectedLabels: ["A"],
+                  textAnswer: null,
+                  savedFromClientAt: null,
+                },
+                answer_record_status: "saved",
+                is_correct: null,
+                score: null,
+                max_score: "1.0",
+                answered_at: now,
+                submitted_at: null,
+              },
+              {
+                public_id: "answer_record_public_subjective",
+                exam_mode: "mock_exam",
+                paper_question_public_id: "paper_question_public_456",
+                question_public_id: "question_public_456",
+                answer_snapshot: {
+                  selectedLabels: [],
+                  textAnswer: "Synthetic subjective answer.",
+                  savedFromClientAt: null,
+                },
+                answer_record_status: "saved",
+                is_correct: null,
+                score: null,
+                max_score: "5.0",
+                answered_at: now,
+                submitted_at: null,
+              },
+            ];
+          },
+          async submitMockExam(input) {
+            return createMockExam({
+              public_id: input.publicId,
+              exam_status: input.examStatus,
+              submitted_at: input.submittedAt,
+              subjective_score: input.subjectiveScore,
+              total_score: input.totalScore,
+              paper_snapshot: createPaperSnapshot(questionType),
+              answered_count: 1,
+            });
+          },
+        }),
+        clock,
+        createIdFactory(),
+        {
+          aiScoringRuntime: {
+            async scoreSubjectiveAnswer(context) {
+              scoringContexts.push(context);
+
+              return {
+                answerRecordPublicId: context.answerRecordPublicId,
+                scoringStatus: "scored",
+                score: "4.0",
+                maxScore: "5.0",
+                scoringSnapshot: {
+                  promptTemplateKey: "dev_ai_scoring_v1",
+                  promptTemplateVersion: 1,
+                  scoringPoints: [],
+                  overallComment: "Synthetic scoring completed.",
+                  improvementSuggestion: "Synthetic improvement.",
+                  citations: [],
+                  evidenceStatus: "none",
+                },
+                failureReason: null,
+              };
+            },
+          },
+        },
+      );
+
+      await expect(
+        service.submitMockExam(userContext, "mock_exam_public_existing", {}),
+      ).resolves.toMatchObject({
+        code: 0,
+        data: {
+          mockExam: {
+            examStatus: "completed",
+          },
+          unansweredCount: 0,
+        },
+      });
+      expect(scoringContexts).toEqual([
+        expect.objectContaining({
+          questionSnapshot: expect.objectContaining({
+            questionType,
+          }),
+          answerSnapshot: expect.objectContaining({
+            selectedLabels: [],
+          }),
+          studentAnswer: "Synthetic subjective answer.",
+        }),
+      ]);
+    },
+  );
 
   it("scores unanswered subjective questions as zero without invoking AI", async () => {
     const submitInputs: unknown[] = [];

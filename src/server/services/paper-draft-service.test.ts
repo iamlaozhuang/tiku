@@ -771,6 +771,65 @@ describe("paper draft service", () => {
     });
   });
 
+  it.each(["case_analysis", "calculation"] as const)(
+    "validates %s scoring_point totals as subjective paper questions",
+    async (questionType) => {
+      const publishedInputs: unknown[] = [];
+      const service = createPaperDraftService(
+        createRepository({
+          async findPaperByPublicId(publicId) {
+            return createPaper({
+              public_id: publicId,
+              paper_sections: [
+                {
+                  id: 201,
+                  title: "Synthetic paper_section",
+                  description: "Synthetic subjective question",
+                  sort_order: 1,
+                  total_score: "5.0",
+                  paper_questions: [
+                    createPaperQuestion({
+                      question_snapshot: {
+                        ...createPaperQuestion().question_snapshot,
+                        questionType,
+                        questionOptions: [],
+                        scoringMethod: "auto_match",
+                      },
+                      score: "5.0",
+                      scoring_points: [
+                        {
+                          source_scoring_point_id: 501,
+                          description: "Synthetic scoring point",
+                          score: "2.5",
+                          sort_order: 1,
+                        },
+                      ],
+                    }),
+                  ],
+                },
+              ],
+            });
+          },
+          async publishPaper(input) {
+            publishedInputs.push(input);
+
+            return createPaper({
+              paper_status: "published",
+              published_at: new Date("2026-05-19T08:00:00.000Z"),
+            });
+          },
+        }),
+      );
+
+      await expect(service.publishPaper("paper_public_123")).resolves.toEqual({
+        code: 422204,
+        message: "Paper publish validation failed.",
+        data: null,
+      });
+      expect(publishedInputs).toEqual([]);
+    },
+  );
+
   it("keeps existing paper question snapshots immutable while publishing", async () => {
     const sourcePaperQuestion = createPaperQuestion();
     const service = createPaperDraftService(

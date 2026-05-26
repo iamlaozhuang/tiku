@@ -333,6 +333,8 @@ function isObjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
 function isSubjectiveQuestion(question: PracticeQuestionSnapshot): boolean {
   return (
     question.questionType === "short_answer" ||
+    question.questionType === "case_analysis" ||
+    question.questionType === "calculation" ||
     question.questionType === "subjective"
   );
 }
