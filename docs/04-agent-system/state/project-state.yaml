@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-question-type-student-report
+  id: phase-12-plan-model-config-secret-crud
   status: closed
-  sourceStory: user-request-2026-05-26-case-analysis-calculation-mvp
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-question-type-student-report.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-student-report.md
-  branch: codex/phase-12-question-type-student-report
-  commitSha: null
+  sourceStory: user-request-2026-05-26-model-config-secret-crud-safe-planning
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-model-config-secret-crud-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-secret-crud-planning.md
+  branch: codex/phase-12-model-config-secret-crud-planning
+  commitSha: ba610ca
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 12 case_analysis/calculation MVP subtasks are closed; select the next pending queue task from task-queue.yaml.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-student-report.md
+  nextRecommendedAction: Model config secret CRUD is planned as a safe planning-only boundary; implementation remains blocked until separate explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-secret-crud-planning.md
