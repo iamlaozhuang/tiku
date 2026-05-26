@@ -268,7 +268,7 @@ function AdminUnauthorizedState() {
   return (
     <AdminSurfaceStatus
       title="请先登录后台"
-      description="企业授权与卡密运营数据需要有效的管理员会话，请登录后再查看。"
+      description="后台数据需要有效的管理员会话，请登录后再查看。"
       icon={<AlertCircle className="size-5" aria-hidden="true" />}
       action={
         <Link
@@ -378,7 +378,7 @@ function SystemOpsRequiredRoleEntry({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <p className="text-brand-primary text-xs font-medium">
-            系统运营 staging 必验
+            系统运营本地验收
           </p>
           <h2 className="text-text-primary text-base font-semibold">{title}</h2>
           <p className="text-text-secondary text-sm leading-6">{description}</p>
@@ -752,13 +752,18 @@ function RedeemCodeConfirmationDialog({
 
 function OrgAuthActionPanel({
   disabled,
+  id,
   onCreateOrgAuth,
 }: {
   disabled: boolean;
+  id?: string;
   onCreateOrgAuth: () => void;
 }) {
   return (
-    <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+    <section
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      id={id}
+    >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <p className="text-brand-primary text-xs font-medium">org_auth</p>
@@ -783,12 +788,14 @@ function OrgAuthActionPanel({
 }
 
 function RedeemCodeActionPanel({
+  id,
   keyword,
   onGenerateRedeemCode,
   onKeywordChange,
   onStatusChange,
   status,
 }: {
+  id?: string;
   keyword: string;
   onGenerateRedeemCode: () => void;
   onKeywordChange: (value: string) => void;
@@ -796,7 +803,10 @@ function RedeemCodeActionPanel({
   status: RedeemCodeStatus | "all";
 }) {
   return (
-    <section className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm">
+    <section
+      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
+      id={id}
+    >
       <label className="flex min-w-44 flex-col gap-2 text-sm font-medium">
         <span className="text-text-secondary">卡密状态</span>
         <select
@@ -1178,15 +1188,16 @@ export function AdminOrgAuthPage() {
       />
 
       <SystemOpsRequiredRoleEntry
-        actionHref="/ops/users"
+        actionHref="#org-auth-create-panel"
         actionLabel="新增企业授权"
-        description="企业授权新增入口目前集中在运营后台闭环页；从这里跳转后由二次确认保护写操作，并继续只提交 publicId。"
+        description="企业授权新增入口在本页下方，点击后定位到内联表单；提交前仍由二次确认保护写操作，并继续只提交 publicId。"
         testId="system-ops-org-auth-create-entry"
         title="新增企业授权入口"
       />
 
       <OrgAuthActionPanel
         disabled={data.organizations.length === 0}
+        id="org-auth-create-panel"
         onCreateOrgAuth={() => setConfirmationState({ kind: "createOrgAuth" })}
       />
 
@@ -1345,14 +1356,15 @@ export function AdminRedeemCodePage() {
       />
 
       <SystemOpsRequiredRoleEntry
-        actionHref="/ops/users"
+        actionHref="#redeem-code-generate-panel"
         actionLabel="生成卡密"
-        description="卡密生成入口目前集中在运营后台闭环页；从这里跳转后必须经过二次确认，页面仍不会展示卡密明文或哈希。"
+        description="卡密生成入口在本页筛选区旁，点击后定位到内联操作；生成前必须经过二次确认，页面仍不会展示卡密哈希。"
         testId="system-ops-redeem-code-generate-entry"
         title="生成卡密入口"
       />
 
       <RedeemCodeActionPanel
+        id="redeem-code-generate-panel"
         keyword={redeemCodeKeyword}
         status={redeemCodeStatus}
         onGenerateRedeemCode={() =>

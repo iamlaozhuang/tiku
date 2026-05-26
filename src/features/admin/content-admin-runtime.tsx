@@ -137,7 +137,7 @@ export function AdminUnauthorizedState() {
           前往登录
         </Link>
       }
-      description="内容后台数据需要有效的管理员会话，请登录后再查看。"
+      description="后台数据需要有效的管理员会话，请登录后再查看。"
       icon={<AlertCircle aria-hidden="true" className="size-5" />}
       title="请先登录后台"
     />
@@ -245,7 +245,7 @@ export function ContentOpsStagingRoleArrangement() {
     >
       <div className="space-y-2">
         <p className="text-brand-primary text-xs font-medium">
-          内容运营 staging 必验
+          内容运营本地验收
         </p>
         <h2 className="text-text-primary text-base font-semibold">
           内容运营体验安排
