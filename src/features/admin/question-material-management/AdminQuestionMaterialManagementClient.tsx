@@ -100,6 +100,9 @@ type ScoringPointFormValue = {
 type MaterialFormValues = {
   title: string;
   contentRichText: string;
+  profession: Profession;
+  level: string;
+  subject: Subject;
 };
 
 type ActiveContentForm =
@@ -164,6 +167,7 @@ const optionQuestionTypes = new Set<QuestionType>([
   "true_false",
 ]);
 const MAX_QUESTION_RICH_TEXT_LENGTH = 10000;
+const MAX_MATERIAL_RICH_TEXT_LENGTH = 30000;
 
 function readQuestionSummary(question: QuestionDto): string {
   return stripRichText(question.stemRichText);
@@ -211,6 +215,16 @@ function createDefaultQuestionFormValues(): QuestionFormValues {
   };
 }
 
+function createDefaultMaterialFormValues(): MaterialFormValues {
+  return {
+    contentRichText: "新建材料正文",
+    level: "3",
+    profession: "monopoly",
+    subject: "skill",
+    title: "新建案例材料",
+  };
+}
+
 function createQuestionFormValuesFromQuestion(
   question: QuestionDto,
 ): QuestionFormValues {
@@ -240,6 +254,18 @@ function createQuestionFormValuesFromQuestion(
     standardAnswerRichText: stripRichText(question.standardAnswerRichText),
     stemRichText: stripRichText(question.stemRichText),
     subject: question.subject,
+  };
+}
+
+function createMaterialFormValuesFromMaterial(
+  material: MaterialDto,
+): MaterialFormValues {
+  return {
+    contentRichText: stripRichText(material.contentRichText),
+    level: String(material.level),
+    profession: material.profession,
+    subject: material.subject,
+    title: material.title,
   };
 }
 
@@ -283,10 +309,40 @@ function useQuestionMaterialData(activeView: ViewMode) {
           activeView === "questions"
             ? `/api/v1/questions?${DEFAULT_CONTENT_LIST_QUERY}`
             : `/api/v1/materials?${DEFAULT_CONTENT_LIST_QUERY}`;
-        const contentResponse =
-          activeView === "questions"
-            ? await fetchAdminApi<QuestionDto[]>(path, sessionToken)
-            : await fetchAdminApi<MaterialDto[]>(path, sessionToken);
+
+        if (activeView === "materials") {
+          const [materialResponse, questionResponse] = await Promise.all([
+            fetchAdminApi<MaterialDto[]>(path, sessionToken),
+            fetchAdminApi<QuestionDto[]>(
+              `/api/v1/questions?${DEFAULT_CONTENT_LIST_QUERY}`,
+              sessionToken,
+            ),
+          ]);
+
+          if (!isActive) {
+            return;
+          }
+
+          if (
+            materialResponse.code !== 0 ||
+            materialResponse.data === null ||
+            questionResponse.code !== 0 ||
+            questionResponse.data === null
+          ) {
+            setLoadState("error");
+            return;
+          }
+
+          setMaterials(materialResponse.data);
+          setQuestions(questionResponse.data);
+          setLoadState(materialResponse.data.length === 0 ? "empty" : "ready");
+          return;
+        }
+
+        const contentResponse = await fetchAdminApi<QuestionDto[]>(
+          path,
+          sessionToken,
+        );
 
         if (!isActive) {
           return;
@@ -297,13 +353,7 @@ function useQuestionMaterialData(activeView: ViewMode) {
           return;
         }
 
-        if (activeView === "questions") {
-          setQuestions(contentResponse.data as QuestionDto[]);
-          setLoadState(contentResponse.data.length === 0 ? "empty" : "ready");
-          return;
-        }
-
-        setMaterials(contentResponse.data as MaterialDto[]);
+        setQuestions(contentResponse.data);
         setLoadState(contentResponse.data.length === 0 ? "empty" : "ready");
       } catch {
         if (isActive) {
@@ -409,9 +459,9 @@ function createMaterialInput(values: MaterialFormValues) {
   return {
     title: values.title,
     contentRichText: values.contentRichText,
-    profession: "monopoly",
-    level: 3,
-    subject: "skill",
+    profession: values.profession,
+    level: Number(values.level),
+    subject: values.subject,
   };
 }
 
@@ -515,6 +565,24 @@ export function AdminQuestionMaterialManagement({
       }),
     [keyword, levelFilter, materials, profession, status, subject],
   );
+  const referencedQuestionPublicIdsByMaterialPublicId = useMemo(() => {
+    return questions.reduce<Record<string, string[]>>(
+      (referencedQuestions, question) => {
+        if (question.materialPublicId === null) {
+          return referencedQuestions;
+        }
+
+        return {
+          ...referencedQuestions,
+          [question.materialPublicId]: [
+            ...(referencedQuestions[question.materialPublicId] ?? []),
+            question.publicId,
+          ],
+        };
+      },
+      {},
+    );
+  }, [questions]);
   const selectedQuestionPublicId =
     activeForm?.kind === "question" ? activeForm.publicId : null;
   const selectedMaterialPublicId =
@@ -809,10 +877,7 @@ export function AdminQuestionMaterialManagement({
                     kind: "material",
                     mode: "create",
                     publicId: null,
-                    values: {
-                      contentRichText: "新建材料正文",
-                      title: "新建案例材料",
-                    },
+                    values: createDefaultMaterialFormValues(),
                   },
             );
           }}
@@ -915,6 +980,9 @@ export function AdminQuestionMaterialManagement({
             />
           ) : (
             <MaterialList
+              referencedQuestionPublicIdsByMaterialPublicId={
+                referencedQuestionPublicIdsByMaterialPublicId
+              }
               rows={filteredMaterials}
               selectedPublicId={selectedMaterialPublicId}
               onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
@@ -928,10 +996,7 @@ export function AdminQuestionMaterialManagement({
                   kind: "material",
                   mode: "edit",
                   publicId: material.publicId,
-                  values: {
-                    contentRichText: stripRichText(material.contentRichText),
-                    title: material.title,
-                  },
+                  values: createMaterialFormValuesFromMaterial(material),
                 });
               }}
             />
@@ -1401,9 +1466,12 @@ function MaterialWriteForm({
   onSubmit: (values: MaterialFormValues) => void;
 }) {
   const [formValues, setFormValues] = useState(values);
+  const materialLengthExceeded =
+    formValues.contentRichText.length > MAX_MATERIAL_RICH_TEXT_LENGTH;
 
   return (
     <form
+      aria-label="材料表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -1426,8 +1494,52 @@ function MaterialWriteForm({
           }
         />
       </label>
+      <div className="grid gap-3 md:grid-cols-3">
+        <QuestionFormSelect
+          label="专业"
+          options={Object.entries(professionLabels)}
+          value={formValues.profession}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              profession: value as Profession,
+            })
+          }
+        />
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">等级</span>
+          <Input
+            aria-label="等级"
+            min={1}
+            type="number"
+            value={formValues.level}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                level: event.target.value,
+              })
+            }
+          />
+        </label>
+        <QuestionFormSelect
+          label="科目"
+          options={Object.entries(subjectLabels)}
+          value={formValues.subject}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              subject: value as Subject,
+            })
+          }
+        />
+      </div>
       <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">材料正文</span>
+        <span className="text-text-secondary">
+          材料正文
+          <span className="text-text-muted ml-2 font-normal">
+            {formValues.contentRichText.length}/{MAX_MATERIAL_RICH_TEXT_LENGTH}
+          </span>
+        </span>
         <textarea
           aria-label="材料正文"
           className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-24 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
@@ -1439,9 +1551,40 @@ function MaterialWriteForm({
             })
           }
         />
+        {materialLengthExceeded ? (
+          <span className="text-destructive text-xs">
+            材料正文超过 30000 字符，不能保存。
+          </span>
+        ) : null}
       </label>
+      <div className="flex flex-wrap gap-2" aria-label="材料富文本辅助工具">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            setFormValues({
+              ...formValues,
+              contentRichText: `${formValues.contentRichText}\n\n<img src="local-image-placeholder" alt="材料图片" />`,
+            })
+          }
+        >
+          插入图片占位
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            setFormValues({
+              ...formValues,
+              contentRichText: `${formValues.contentRichText}\n\n<table><tr><th>项目</th><th>内容</th></tr><tr><td>示例</td><td>填写内容</td></tr></table>`,
+            })
+          }
+        >
+          插入表格模板
+        </Button>
+      </div>
       <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting} type="submit">
+        <Button disabled={isSubmitting || materialLengthExceeded} type="submit">
           保存材料
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
@@ -1863,12 +2006,14 @@ function KnowledgeRecommendationReviewPanel({
 }
 
 function MaterialList({
+  referencedQuestionPublicIdsByMaterialPublicId,
   rows,
   selectedPublicId,
   onCopy,
   onDisable,
   onEdit,
 }: {
+  referencedQuestionPublicIdsByMaterialPublicId: Record<string, string[]>;
   rows: MaterialDto[];
   selectedPublicId: string | null;
   onCopy: (publicId: string) => void;
@@ -1883,6 +2028,9 @@ function MaterialList({
     <div className="grid gap-3">
       {rows.map((material) => {
         const isSelected = material.publicId === selectedPublicId;
+        const referencedQuestionPublicIds =
+          referencedQuestionPublicIdsByMaterialPublicId[material.publicId] ??
+          [];
 
         return (
           <article
@@ -1915,6 +2063,8 @@ function MaterialList({
             <div className="mt-4 flex flex-wrap gap-2">
               <Button
                 aria-label={`编辑材料 ${material.publicId}`}
+                data-testid={`material-edit-${material.publicId}`}
+                disabled={material.isLocked}
                 size="sm"
                 type="button"
                 variant="outline"
@@ -1923,6 +2073,11 @@ function MaterialList({
                 <Pencil aria-hidden="true" data-icon="inline-start" />
                 编辑
               </Button>
+              {material.isLocked ? (
+                <span className="text-text-muted self-center text-xs">
+                  已锁定材料只能复制新材料后编辑
+                </span>
+              ) : null}
               <Button
                 aria-label={`停用材料 ${material.publicId}`}
                 size="sm"
@@ -1947,6 +2102,18 @@ function MaterialList({
             <ReferenceBlock
               label="材料锁定"
               value={material.isLocked ? "已被发布试卷锁定" : "未锁定"}
+            />
+            <ReferenceBlock
+              label="关联题目"
+              value={
+                referencedQuestionPublicIds.length === 0
+                  ? "当前没有题目引用"
+                  : referencedQuestionPublicIds.join(", ")
+              }
+            />
+            <ReferenceBlock
+              label="关联试卷"
+              value="当前 runtime DTO 未提供试卷引用列表"
             />
           </article>
         );
