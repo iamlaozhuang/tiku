@@ -53,6 +53,7 @@ type ViewMode = "questions" | "materials";
 type StatusFilter = "all" | QuestionStatus | MaterialStatus;
 type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
+type QuestionTypeFilter = "all" | QuestionType;
 type QuestionFormMode = "create" | "edit";
 type MaterialFormMode = "create" | "edit";
 type RecommendationReviewStatus = "accepted" | "discarded";
@@ -162,6 +163,7 @@ const optionQuestionTypes = new Set<QuestionType>([
   "multi_choice",
   "true_false",
 ]);
+const MAX_QUESTION_RICH_TEXT_LENGTH = 10000;
 
 function readQuestionSummary(question: QuestionDto): string {
   return stripRichText(question.stemRichText);
@@ -352,7 +354,10 @@ function createQuestionInput(values: QuestionFormValues) {
     subject: values.subject,
     stemRichText: values.stemRichText,
     analysisRichText: values.analysisRichText,
-    standardAnswerRichText: values.standardAnswerRichText,
+    standardAnswerRichText: normalizeStandardAnswerForQuestionType(
+      values.questionType,
+      values.standardAnswerRichText,
+    ),
     multiChoiceRule: values.multiChoiceRule,
     scoringMethod: values.scoringMethod,
     materialPublicId:
@@ -375,6 +380,29 @@ function createQuestionInput(values: QuestionFormValues) {
           sortOrder: pointIndex + 1,
         })),
   };
+}
+
+function normalizeStandardAnswerForQuestionType(
+  questionType: QuestionType,
+  standardAnswerRichText: string,
+) {
+  if (questionType !== "true_false") {
+    return standardAnswerRichText;
+  }
+
+  const normalizedAnswer = stripRichText(standardAnswerRichText)
+    .trim()
+    .toUpperCase();
+
+  if (normalizedAnswer === "A") {
+    return "正确";
+  }
+
+  if (normalizedAnswer === "B") {
+    return "错误";
+  }
+
+  return standardAnswerRichText;
 }
 
 function createMaterialInput(values: MaterialFormValues) {
@@ -405,9 +433,13 @@ export function AdminQuestionMaterialManagement({
 }: AdminQuestionMaterialManagementProps) {
   const [activeView, setActiveView] = useState<ViewMode>(defaultView);
   const [keyword, setKeyword] = useState("");
+  const [knowledgeNodeFilter, setKnowledgeNodeFilter] = useState("");
+  const [levelFilter, setLevelFilter] = useState("");
   const [profession, setProfession] = useState<ProfessionFilter>("all");
+  const [questionType, setQuestionType] = useState<QuestionTypeFilter>("all");
   const [subject, setSubject] = useState<SubjectFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
+  const [tagFilter, setTagFilter] = useState("");
   const [activeForm, setActiveForm] = useState<ActiveContentForm | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -435,12 +467,32 @@ export function AdminQuestionMaterialManagement({
 
         return (
           includesKeyword(searchableText, keyword) &&
+          includesKeyword(String(question.level), levelFilter) &&
+          includesKeyword(
+            question.knowledgeNodePublicIds.join(" ").toLowerCase(),
+            knowledgeNodeFilter,
+          ) &&
+          includesKeyword(
+            question.tagPublicIds.join(" ").toLowerCase(),
+            tagFilter,
+          ) &&
           matchesFilter(question.profession, profession) &&
+          matchesFilter(question.questionType, questionType) &&
           matchesFilter(question.subject, subject) &&
           matchesFilter(question.status, status)
         );
       }),
-    [keyword, profession, questions, status, subject],
+    [
+      keyword,
+      knowledgeNodeFilter,
+      levelFilter,
+      profession,
+      questionType,
+      questions,
+      status,
+      subject,
+      tagFilter,
+    ],
   );
   const filteredMaterials = useMemo(
     () =>
@@ -455,12 +507,13 @@ export function AdminQuestionMaterialManagement({
 
         return (
           includesKeyword(searchableText, keyword) &&
+          includesKeyword(String(material.level), levelFilter) &&
           matchesFilter(material.profession, profession) &&
           matchesFilter(material.subject, subject) &&
           matchesFilter(material.status, status)
         );
       }),
-    [keyword, materials, profession, status, subject],
+    [keyword, levelFilter, materials, profession, status, subject],
   );
   const selectedQuestionPublicId =
     activeForm?.kind === "question" ? activeForm.publicId : null;
@@ -769,14 +822,23 @@ export function AdminQuestionMaterialManagement({
       <ContentOpsStagingRoleArrangement />
 
       <FilterPanel
+        activeView={activeView}
         keyword={keyword}
+        knowledgeNodeFilter={knowledgeNodeFilter}
+        levelFilter={levelFilter}
         profession={profession}
+        questionType={questionType}
         status={status}
         subject={subject}
+        tagFilter={tagFilter}
         onKeywordChange={setKeyword}
+        onKnowledgeNodeFilterChange={setKnowledgeNodeFilter}
+        onLevelFilterChange={setLevelFilter}
         onProfessionChange={setProfession}
+        onQuestionTypeChange={setQuestionType}
         onStatusChange={setStatus}
         onSubjectChange={setSubject}
+        onTagFilterChange={setTagFilter}
       />
 
       {actionMessage === null ? null : (
@@ -961,6 +1023,11 @@ function QuestionWriteForm({
 }) {
   const [formValues, setFormValues] = useState(values);
   const isOptionQuestion = optionQuestionTypes.has(formValues.questionType);
+  const stemLengthExceeded =
+    formValues.stemRichText.length > MAX_QUESTION_RICH_TEXT_LENGTH;
+  const analysisLengthExceeded =
+    formValues.analysisRichText.length > MAX_QUESTION_RICH_TEXT_LENGTH;
+  const isFormInvalid = stemLengthExceeded || analysisLengthExceeded;
 
   return (
     <form
@@ -986,6 +1053,10 @@ function QuestionWriteForm({
               ...formValues,
               questionOptions: createDefaultQuestionOptions(questionType),
               questionType,
+              standardAnswerRichText:
+                questionType === "true_false"
+                  ? "A"
+                  : formValues.standardAnswerRichText,
             });
           }}
         />
@@ -1065,7 +1136,12 @@ function QuestionWriteForm({
         </label>
       </div>
       <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">题干</span>
+        <span className="text-text-secondary">
+          题干
+          <span className="text-text-muted ml-2 font-normal">
+            {formValues.stemRichText.length}/{MAX_QUESTION_RICH_TEXT_LENGTH}
+          </span>
+        </span>
         <textarea
           aria-label="题干"
           className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
@@ -1077,6 +1153,11 @@ function QuestionWriteForm({
             })
           }
         />
+        {stemLengthExceeded ? (
+          <span className="text-destructive text-xs">
+            题干超过 10000 字符，不能保存。
+          </span>
+        ) : null}
       </label>
       <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">标准答案</span>
@@ -1092,7 +1173,12 @@ function QuestionWriteForm({
         />
       </label>
       <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">老师解析</span>
+        <span className="text-text-secondary">
+          老师解析
+          <span className="text-text-muted ml-2 font-normal">
+            {formValues.analysisRichText.length}/{MAX_QUESTION_RICH_TEXT_LENGTH}
+          </span>
+        </span>
         <textarea
           aria-label="老师解析"
           className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-20 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
@@ -1104,7 +1190,38 @@ function QuestionWriteForm({
             })
           }
         />
+        {analysisLengthExceeded ? (
+          <span className="text-destructive text-xs">
+            解析超过 10000 字符，不能保存。
+          </span>
+        ) : null}
       </label>
+      <div className="flex flex-wrap gap-2" aria-label="富文本辅助工具">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            setFormValues({
+              ...formValues,
+              stemRichText: `${formValues.stemRichText}\n\n<img src=\"local-image-placeholder\" alt=\"题目图片\" />`,
+            })
+          }
+        >
+          插入图片占位
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            setFormValues({
+              ...formValues,
+              stemRichText: `${formValues.stemRichText}\n\n<table><tr><th>项目</th><th>内容</th></tr><tr><td>示例</td><td>填写内容</td></tr></table>`,
+            })
+          }
+        >
+          插入表格模板
+        </Button>
+      </div>
       {isOptionQuestion ? (
         <fieldset className="border-border grid gap-3 rounded-md border p-3">
           <legend className="text-text-secondary px-1 text-sm font-medium">
@@ -1146,12 +1263,20 @@ function QuestionWriteForm({
                         ...formValues,
                         questionOptions: formValues.questionOptions.map(
                           (currentOption, currentIndex) =>
-                            currentIndex === optionIndex
+                            formValues.questionType === "single_choice"
                               ? {
                                   ...currentOption,
-                                  isCorrect: event.target.checked,
+                                  isCorrect:
+                                    currentIndex === optionIndex
+                                      ? event.target.checked
+                                      : false,
                                 }
-                              : currentOption,
+                              : currentIndex === optionIndex
+                                ? {
+                                    ...currentOption,
+                                    isCorrect: event.target.checked,
+                                  }
+                                : currentOption,
                         ),
                       })
                     }
@@ -1221,7 +1346,7 @@ function QuestionWriteForm({
         </fieldset>
       )}
       <div className="flex flex-wrap gap-2">
-        <Button disabled={isSubmitting} type="submit">
+        <Button disabled={isSubmitting || isFormInvalid} type="submit">
           保存题目
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
@@ -1328,23 +1453,41 @@ function MaterialWriteForm({
 }
 
 function FilterPanel({
+  activeView,
   keyword,
+  knowledgeNodeFilter,
+  levelFilter,
   profession,
+  questionType,
   status,
   subject,
+  tagFilter,
   onKeywordChange,
+  onKnowledgeNodeFilterChange,
+  onLevelFilterChange,
   onProfessionChange,
+  onQuestionTypeChange,
   onStatusChange,
   onSubjectChange,
+  onTagFilterChange,
 }: {
+  activeView: ViewMode;
   keyword: string;
+  knowledgeNodeFilter: string;
+  levelFilter: string;
   profession: ProfessionFilter;
+  questionType: QuestionTypeFilter;
   status: StatusFilter;
   subject: SubjectFilter;
+  tagFilter: string;
   onKeywordChange: (value: string) => void;
+  onKnowledgeNodeFilterChange: (value: string) => void;
+  onLevelFilterChange: (value: string) => void;
   onProfessionChange: (value: ProfessionFilter) => void;
+  onQuestionTypeChange: (value: QuestionTypeFilter) => void;
   onStatusChange: (value: StatusFilter) => void;
   onSubjectChange: (value: SubjectFilter) => void;
+  onTagFilterChange: (value: string) => void;
 }) {
   return (
     <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
@@ -1376,6 +1519,15 @@ function FilterPanel({
           value={profession}
           onChange={(value) => onProfessionChange(value as ProfessionFilter)}
         />
+        <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
+          <span className="text-text-secondary">等级</span>
+          <Input
+            aria-label="等级筛选"
+            placeholder="全部等级"
+            value={levelFilter}
+            onChange={(event) => onLevelFilterChange(event.target.value)}
+          />
+        </label>
         <FilterSelect
           label="科目"
           options={[
@@ -1386,6 +1538,19 @@ function FilterPanel({
           value={subject}
           onChange={(value) => onSubjectChange(value as SubjectFilter)}
         />
+        {activeView === "questions" ? (
+          <FilterSelect
+            label="题型"
+            options={[
+              ["all", "全部题型"],
+              ...Object.entries(questionTypeLabels),
+            ]}
+            value={questionType}
+            onChange={(value) =>
+              onQuestionTypeChange(value as QuestionTypeFilter)
+            }
+          />
+        ) : null}
         <FilterSelect
           label="状态"
           options={[
@@ -1397,6 +1562,30 @@ function FilterPanel({
           onChange={(value) => onStatusChange(value as StatusFilter)}
         />
       </div>
+      {activeView === "questions" ? (
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">知识点筛选</span>
+            <Input
+              aria-label="知识点筛选"
+              placeholder="知识点 publicId"
+              value={knowledgeNodeFilter}
+              onChange={(event) =>
+                onKnowledgeNodeFilterChange(event.target.value)
+              }
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">标签筛选</span>
+            <Input
+              aria-label="标签筛选"
+              placeholder="标签 publicId"
+              value={tagFilter}
+              onChange={(event) => onTagFilterChange(event.target.value)}
+            />
+          </label>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1486,6 +1675,7 @@ function QuestionList({
               <Button
                 aria-label={`编辑题目 ${question.publicId}`}
                 data-testid={`question-edit-${question.publicId}`}
+                disabled={question.isLocked}
                 size="sm"
                 type="button"
                 variant="outline"
@@ -1494,6 +1684,11 @@ function QuestionList({
                 <Pencil aria-hidden="true" data-icon="inline-start" />
                 编辑
               </Button>
+              {question.isLocked ? (
+                <span className="text-text-muted self-center text-xs">
+                  已锁定题目只能复制新题后编辑
+                </span>
+              ) : null}
               <Button
                 aria-label={`停用题目 ${question.publicId}`}
                 size="sm"
