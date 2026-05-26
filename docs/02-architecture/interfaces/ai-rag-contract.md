@@ -179,6 +179,24 @@ Secret-like input may appear only in create or explicit rotate/update request pa
 
 Implementation tests may use synthetic fake values only. Test names, snapshots, and evidence must not include realistic keys or tokens.
 
+### Future Real Provider Approval Boundary
+
+Phase 12 local/dev work does not authorize real provider calls, real provider quota, secret manager integration, staging/prod env injection, or deployment.
+
+A future task that enables a real provider must remain blocked until it records all approval evidence listed in `docs/02-architecture/interfaces/phase-11-staging-secret-and-env-plan.md#phase-12-real-provider-approval-runbook`.
+
+The future task must name:
+
+- environment: `staging` or `prod`;
+- provider and model allowlist;
+- secret storage owner and injection mechanism;
+- quota, cost alert, and kill-switch owner;
+- logging allowlist and retention window;
+- rollback path;
+- staging acceptance plan using synthetic inputs only.
+
+Even after approval, the future task must not record raw prompts, raw answers, raw model responses, raw provider payloads, provider Authorization headers, database URLs, tokens, or secret values in evidence, logs, snapshots, tests, or UI.
+
 ### Fallback And Snapshot Rules
 
 Fallback order is a project-owned policy, not provider behavior. It must be explicit per `functionType`, deterministic, and auditable.

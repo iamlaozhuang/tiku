@@ -128,6 +128,67 @@ Before any secret/env implementation task starts, evidence must show:
 - approved AI provider budget and logging policy if provider calls are enabled;
 - explicit human approval for secret/env creation or modification.
 
+## Phase 12 Real Provider Approval Runbook
+
+Status: blocked until a separate future implementation task receives explicit human approval. This runbook is documentation only and does not create, read, rotate, inject, validate, or store any secret or environment value.
+
+### Owner Matrix
+
+| Decision area                  | Required owner                        | Approval evidence allowed in docs                                   | Still blocked until approval |
+| ------------------------------ | ------------------------------------- | ------------------------------------------------------------------- | ---------------------------- |
+| Provider selection             | Product owner + release owner         | Provider name, intended AI function types, and business rationale   | Real provider calls          |
+| Secret storage location        | Infrastructure owner + security owner | Secret manager product name or deployment secret store class only   | Secret creation or import    |
+| Env injection target           | Infrastructure owner                  | Runtime target name and environment class                           | Staging/prod env mutation    |
+| Provider quota and budget      | Product owner + finance/contact owner | Daily budget, per-user limit, alert threshold, and kill-switch SLA  | Paid quota usage             |
+| Logging and redaction policy   | Security owner + release owner        | Field allowlist, redaction rules, retention window, review owner    | Raw payload/prompt retention |
+| Rollback and kill switch       | Release owner + infrastructure owner  | Disable path, rollback trigger, owner, and expected recovery window | Deployment or traffic shift  |
+| Rotation and revocation        | Infrastructure owner + security owner | Rotation cadence, emergency trigger, approver, and revocation path  | Key rotation execution       |
+| Staging acceptance before prod | Release owner + product owner         | Staging checklist result with no secret values                      | Production enablement        |
+
+### Required Approval Checklist
+
+A future real-provider task must include evidence for all items below before implementation:
+
+- Approved provider name and model allowlist for each `ai_func_type`.
+- Approved secret storage responsibility and access control owner.
+- Approved separation between `staging` and `prod` credentials.
+- Approved env injection mechanism that does not use committed files.
+- Approved provider quota, cost alerting, per-user limits, and emergency disable process.
+- Approved logging allowlist that excludes raw provider payloads, raw prompts, raw answers, raw model responses, Authorization headers, tokens, database URLs, and secret values.
+- Approved rollback plan that can disable provider calls without data migration.
+- Approved incident response path for suspected key exposure or quota abuse.
+- Approved staging smoke plan using synthetic inputs only.
+- Explicit human approval statement naming the environment, provider, quota boundary, and owner.
+
+### Secret Handling Rules
+
+- Secret values must be created or imported only by the approved infrastructure owner.
+- The application may store only redaction-safe secret metadata such as `secretStatus`, `maskedSecret`, `lastRotatedAt`, and public owner metadata.
+- Evidence may record variable names, owner roles, environment names, and policy numbers after approval.
+- Evidence must never record the secret value, a reversible hash, a database URL, a provider Authorization header, raw provider payload, raw prompt, raw answer, or raw model response.
+
+### Rollback And Kill Switch
+
+Any future implementation must keep a provider disable path that works without schema changes:
+
+- Disable provider globally through approved runtime config or `model_provider` status.
+- Disable individual `model_config` records by public identifier.
+- Fall back only for function types with an explicit approved fallback policy.
+- Preserve local mock/deterministic provider behavior for development and emergency verification.
+- Record only redaction-safe audit metadata when disabling or rolling back.
+
+### Blocked Future Tasks
+
+The following remain blocked after Phase 12 local/dev work:
+
+- Real provider credential creation, storage, rotation, or revocation.
+- Cloud secret manager setup.
+- Staging/prod env injection.
+- Provider quota activation or paid traffic.
+- Deployment or production traffic switch.
+- Raw provider payload, raw prompt, raw answer, raw model response, or full content retention.
+- Any `.env.local` or `.env.example` read/write/change by an agent.
+
 ## Non-Goals
 
 - No `.env.local` read or write.
