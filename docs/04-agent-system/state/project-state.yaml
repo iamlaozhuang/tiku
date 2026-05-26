@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-14-local-human-experience-verification
-  updatedAt: "2026-05-26T18:45:00-07:00"
+  currentPhase: phase-14-local-runtime-baseline
+  updatedAt: "2026-05-26T10:20:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-14-local-human-experience-verification
+  id: phase-14-local-runtime-baseline
   status: closed
-  sourceStory: user-request-2026-05-26-local-human-experience-verification
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-14-local-human-experience-verification.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-human-experience-verification.md
-  branch: codex/phase-14-local-human-experience-verification
+  sourceStory: user-request-2026-05-26-local-runtime-baseline
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-14-local-runtime-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-runtime-baseline.md
+  branch: codex/phase-14-local-runtime-baseline-e2e-followup
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 14 local human experience verification is closed locally with one practice submit gap and one report generation placeholder observation recorded. Push remains blocked until explicit user approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-human-experience-verification.md
+  nextRecommendedAction: Return to phase-14-org-auth-full-scope-management and finish the enterprise authorization task against the repaired local runtime baseline.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-runtime-baseline.md

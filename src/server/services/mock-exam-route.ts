@@ -2,6 +2,7 @@ import {
   createErrorResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
 import type { MockExamService, MockExamUserContext } from "./mock-exam-service";
 
 type MockExamRouteContext = {
@@ -91,54 +92,58 @@ export function createMockExamRouteHandlers(
       },
     },
     answers: {
-      async POST(
-        request: Request,
-        context: MockExamRouteContext,
-      ): Promise<Response> {
-        const userContext = await resolveRequiredUserContext(
-          request,
-          resolveUserContext,
-        );
+      POST: createRouteHandlerWithErrorEnvelope(
+        async (
+          request: Request,
+          context: MockExamRouteContext,
+        ): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
 
-        if (!isMockExamUserContext(userContext)) {
-          return createJsonResponse(userContext);
-        }
+          if (!isMockExamUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
 
-        const { publicId } = await context.params;
+          const { publicId } = await context.params;
 
-        return createJsonResponse(
-          await mockExamService.saveMockExamAnswer(
-            userContext,
-            publicId,
-            await readRequestJson(request),
-          ),
-        );
-      },
+          return createJsonResponse(
+            await mockExamService.saveMockExamAnswer(
+              userContext,
+              publicId,
+              await readRequestJson(request),
+            ),
+          );
+        },
+      ),
     },
     submit: {
-      async POST(
-        request: Request,
-        context: MockExamRouteContext,
-      ): Promise<Response> {
-        const userContext = await resolveRequiredUserContext(
-          request,
-          resolveUserContext,
-        );
+      POST: createRouteHandlerWithErrorEnvelope(
+        async (
+          request: Request,
+          context: MockExamRouteContext,
+        ): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
 
-        if (!isMockExamUserContext(userContext)) {
-          return createJsonResponse(userContext);
-        }
+          if (!isMockExamUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
 
-        const { publicId } = await context.params;
+          const { publicId } = await context.params;
 
-        return createJsonResponse(
-          await mockExamService.submitMockExam(
-            userContext,
-            publicId,
-            await readRequestJson(request),
-          ),
-        );
-      },
+          return createJsonResponse(
+            await mockExamService.submitMockExam(
+              userContext,
+              publicId,
+              await readRequestJson(request),
+            ),
+          );
+        },
+      ),
     },
     retryScoring: {
       async POST(

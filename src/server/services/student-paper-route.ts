@@ -6,6 +6,7 @@ import type {
   StudentPaperService,
   StudentPaperUserContext,
 } from "./student-paper-service";
+import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
 
 type StudentPaperRouteContext = {
   params: Promise<{
@@ -60,60 +61,66 @@ export function createStudentPaperRouteHandlers(
 ) {
   return {
     scopes: {
-      async GET(request: Request): Promise<Response> {
-        const userContext = await resolveRequiredUserContext(
-          request,
-          resolveUserContext,
-        );
+      GET: createRouteHandlerWithErrorEnvelope(
+        async (request: Request): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
 
-        if (!isStudentPaperUserContext(userContext)) {
-          return createJsonResponse(userContext);
-        }
+          if (!isStudentPaperUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
 
-        return createJsonResponse(
-          await studentPaperService.listScopes(userContext),
-        );
-      },
+          return createJsonResponse(
+            await studentPaperService.listScopes(userContext),
+          );
+        },
+      ),
     },
     collection: {
-      async GET(request: Request): Promise<Response> {
-        const userContext = await resolveRequiredUserContext(
-          request,
-          resolveUserContext,
-        );
+      GET: createRouteHandlerWithErrorEnvelope(
+        async (request: Request): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
 
-        if (!isStudentPaperUserContext(userContext)) {
-          return createJsonResponse(userContext);
-        }
+          if (!isStudentPaperUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
 
-        return createJsonResponse(
-          await studentPaperService.listStudentPapers(
-            userContext,
-            readStudentPaperQuery(request),
-          ),
-        );
-      },
+          return createJsonResponse(
+            await studentPaperService.listStudentPapers(
+              userContext,
+              readStudentPaperQuery(request),
+            ),
+          );
+        },
+      ),
     },
     detail: {
-      async GET(
-        request: Request,
-        context: StudentPaperRouteContext,
-      ): Promise<Response> {
-        const userContext = await resolveRequiredUserContext(
-          request,
-          resolveUserContext,
-        );
+      GET: createRouteHandlerWithErrorEnvelope(
+        async (
+          request: Request,
+          context: StudentPaperRouteContext,
+        ): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
 
-        if (!isStudentPaperUserContext(userContext)) {
-          return createJsonResponse(userContext);
-        }
+          if (!isStudentPaperUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
 
-        const { publicId } = await context.params;
+          const { publicId } = await context.params;
 
-        return createJsonResponse(
-          await studentPaperService.getStudentPaper(userContext, publicId),
-        );
-      },
+          return createJsonResponse(
+            await studentPaperService.getStudentPaper(userContext, publicId),
+          );
+        },
+      ),
     },
   };
 }

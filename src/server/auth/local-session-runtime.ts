@@ -5,7 +5,6 @@ import { resolve } from "node:path";
 import { and, eq, isNotNull } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { hashPassword, verifyPassword } from "better-auth/crypto";
-import postgres from "postgres";
 
 import * as authSchema from "@/db/schema/auth";
 import type { AuthSessionSnapshot } from "./auth-boundary";
@@ -36,6 +35,7 @@ import type {
   SessionUserRepository,
 } from "../repositories/session-repository";
 import type { UserRegistrationRepository } from "../repositories/user-registration-repository";
+import { getSharedRuntimePostgresClient } from "../repositories/runtime-database";
 import { createAuthService } from "../services/auth-service";
 import {
   createSessionService,
@@ -761,7 +761,7 @@ function createLocalRuntimeDatabase(): LocalSessionRuntimeDatabase {
     throw new Error("DATABASE_URL is required for session runtime.");
   }
 
-  const client = postgres(databaseUrl, { max: 5 });
+  const client = getSharedRuntimePostgresClient(databaseUrl);
 
   return drizzle(client, {
     schema: authSchema,

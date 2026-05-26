@@ -17,7 +17,6 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
 import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
@@ -38,6 +37,7 @@ import type {
   NormalizedCreateOrganizationInput,
   NormalizedUpdateOrganizationInput,
 } from "../validators/organization";
+import { getSharedRuntimePostgresClient } from "./runtime-database";
 
 type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
   typeof databaseSchema
@@ -1237,7 +1237,7 @@ function createLocalRuntimeDatabase(): AdminOrganizationOrgAuthRuntimeDatabase {
     );
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
 }

@@ -4,7 +4,6 @@ import { resolve } from "node:path";
 
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
 import * as databaseSchema from "@/db/schema";
 import type {
@@ -17,6 +16,7 @@ import type {
   RedeemCodeAuthorizationRepository,
   RedeemCodeForUserInput,
 } from "./redeem-code-authorization-repository";
+import { getSharedRuntimePostgresClient } from "./runtime-database";
 
 type StudentAuthorizationRedeemRuntimeDatabase = PostgresJsDatabase<
   typeof databaseSchema
@@ -304,7 +304,7 @@ function createLocalRuntimeDatabase(): StudentAuthorizationRedeemRuntimeDatabase
     );
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
 }
