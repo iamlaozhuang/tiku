@@ -9614,3 +9614,56 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-runtime-baseline.md
     status: closed
     retryCount: 0
+  - id: phase-14-org-auth-full-scope-management
+    title: Phase 14 Org Auth Full Scope Management
+    phase: phase-14-org-auth-full-scope-management
+    sourceStory: user-request-2026-05-26-org-auth-full-scope-management
+    dependencies:
+      - phase-14-local-human-experience-verification
+      - phase-14-local-runtime-baseline
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved implementing full enterprise authorization management according to requirements, including cross-checking coverage against province/city/district organization hierarchy, org_auth scope types, overlap validation, quota, cancellation, UI, and tests. This task must stay local-only and must not change dependencies, schema, migrations, env files, scripts, staging/prod/cloud/real provider, or deployment.
+    allowedFiles:
+      - src/features/admin/org-auth-redeem/**
+      - src/server/contracts/organization-auth-contract.ts
+      - src/server/services/organization-auth-service.ts
+      - src/server/services/organization-auth-service.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/validators/org-auth.ts
+      - src/server/validators/org-auth.test.ts
+      - e2e/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - auth_permission_model
+      - admin_ui
+      - org_auth
+      - browser_runtime
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-org-auth-full-scope-management.md
+    status: closed
+    retryCount: 1

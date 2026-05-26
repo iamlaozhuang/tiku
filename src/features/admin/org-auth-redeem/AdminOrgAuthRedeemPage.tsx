@@ -44,11 +44,36 @@ type AdminOrgAuthData = {
   employees: EmployeeListDto["employees"];
 };
 
+type CreateOrgAuthInput = {
+  accountQuota: number;
+  authScopeType: AuthScopeType;
+  expiresAt: string;
+  level: number;
+  name: string;
+  organizationPublicIds: string[];
+  profession: Profession;
+  purchaserOrganizationPublicId: string;
+  startsAt: string;
+};
+
+type OrgAuthFormState = {
+  accountQuota: string;
+  authScopeType: AuthScopeType;
+  expiresAt: string;
+  level: string;
+  name: string;
+  organizationPublicIds: string[];
+  profession: Profession;
+  purchaserOrganizationPublicId: string;
+  startsAt: string;
+};
+
 type AdminRedeemCodeData = RedeemCodeListDto;
 
 type OrgAuthConfirmationState =
   | {
       kind: "createOrgAuth";
+      input: CreateOrgAuthInput;
     }
   | {
       kind: "cancelOrgAuth";
@@ -104,6 +129,25 @@ const userStatusLabels = {
   active: "正常",
   disabled: "已禁用",
 } satisfies Record<UserStatus, string>;
+
+const defaultOrgAuthFormState: OrgAuthFormState = {
+  accountQuota: "100",
+  authScopeType: "current_and_descendants",
+  expiresAt: "2027-05-25",
+  level: "3",
+  name: "本地验证企业授权",
+  organizationPublicIds: [],
+  profession: "monopoly",
+  purchaserOrganizationPublicId: "",
+  startsAt: "2026-05-25",
+};
+
+const organizationDepthPaddingClassNames = [
+  "pl-3",
+  "pl-6",
+  "pl-9",
+  "pl-12",
+] as const;
 
 function getStoredSessionToken(): string | null {
   const sessionToken = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY)?.trim();
@@ -185,23 +229,132 @@ function createRedeemCodeListQuery(input: {
   return searchParams.toString();
 }
 
-function createDefaultOrgAuthInput(
+function toStartOfDayIso(dateValue: string): string {
+  return `${dateValue}T00:00:00.000Z`;
+}
+
+function findFirstOrganizationPublicId(
   organizations: AdminOrgAuthData["organizations"],
-) {
-  const organizationPublicId = organizations[0]?.publicId ?? "";
+): string {
+  return organizations[0]?.publicId ?? "";
+}
+
+function createOrganizationDepthMap(
+  organizations: AdminOrgAuthData["organizations"],
+): Map<string, number> {
+  const organizationByPublicId = new Map(
+    organizations.map((organization) => [organization.publicId, organization]),
+  );
+
+  function readOrganizationDepth(
+    publicId: string,
+    visited: Set<string>,
+  ): number {
+    const organization = organizationByPublicId.get(publicId);
+
+    if (
+      organization === undefined ||
+      organization.parentOrganizationPublicId === null ||
+      visited.has(publicId)
+    ) {
+      return 0;
+    }
+
+    return (
+      readOrganizationDepth(
+        organization.parentOrganizationPublicId,
+        new Set([...visited, publicId]),
+      ) + 1
+    );
+  }
+
+  return new Map(
+    organizations.map((organization) => [
+      organization.publicId,
+      readOrganizationDepth(organization.publicId, new Set()),
+    ]),
+  );
+}
+
+function buildOrgAuthInput(
+  formState: OrgAuthFormState,
+  organizations: AdminOrgAuthData["organizations"],
+): { input: CreateOrgAuthInput | null; message: string | null } {
+  const purchaserOrganizationPublicId =
+    formState.purchaserOrganizationPublicId ||
+    findFirstOrganizationPublicId(organizations);
+  const name = formState.name.trim();
+  const accountQuota = Number(formState.accountQuota);
+  const level = Number(formState.level);
+  const organizationPublicIds =
+    formState.authScopeType === "specified_nodes"
+      ? formState.organizationPublicIds
+      : purchaserOrganizationPublicId.length === 0
+        ? []
+        : [purchaserOrganizationPublicId];
+
+  if (name.length === 0) {
+    return { input: null, message: "请填写授权名称。" };
+  }
+
+  if (purchaserOrganizationPublicId.length === 0) {
+    return { input: null, message: "请选择购买主体。" };
+  }
+
+  if (!Number.isInteger(accountQuota) || accountQuota <= 0) {
+    return { input: null, message: "账号额度必须为正整数。" };
+  }
+
+  if (!Number.isInteger(level) || level <= 0) {
+    return { input: null, message: "等级必须为正整数。" };
+  }
+
+  if (
+    formState.startsAt.length === 0 ||
+    formState.expiresAt.length === 0 ||
+    formState.expiresAt <= formState.startsAt
+  ) {
+    return { input: null, message: "到期日期必须晚于开始日期。" };
+  }
+
+  if (
+    formState.authScopeType === "specified_nodes" &&
+    organizationPublicIds.length === 0
+  ) {
+    return { input: null, message: "请选择至少一个覆盖企业。" };
+  }
 
   return {
-    accountQuota: 100,
-    authScopeType: "current_and_descendants",
-    expiresAt: "2027-05-25T00:00:00.000Z",
-    level: 3,
-    name: "本地验证企业授权",
-    organizationPublicIds:
-      organizationPublicId.length === 0 ? [] : [organizationPublicId],
-    profession: "monopoly",
-    purchaserOrganizationPublicId: organizationPublicId,
-    startsAt: "2026-05-25T00:00:00.000Z",
+    input: {
+      accountQuota,
+      authScopeType: formState.authScopeType,
+      expiresAt: toStartOfDayIso(formState.expiresAt),
+      level,
+      name,
+      organizationPublicIds,
+      profession: formState.profession,
+      purchaserOrganizationPublicId,
+      startsAt: toStartOfDayIso(formState.startsAt),
+    },
+    message: null,
   };
+}
+
+function formatOrgAuthErrorMessage(message: string): string {
+  return message === "Org auth scope overlaps an existing active authorization."
+    ? "所选专业/等级、有效期和企业范围已存在生效企业授权，请调整覆盖范围或取消旧授权。"
+    : message;
+}
+
+function getOrganizationDepthPaddingClassName(organizationDepth: number) {
+  return (
+    organizationDepthPaddingClassNames[
+      Math.min(
+        Math.max(organizationDepth, 0),
+        organizationDepthPaddingClassNames.length - 1,
+      )
+    ] ?? organizationDepthPaddingClassNames[0]
+  );
 }
 
 function createDefaultRedeemCodeInput() {
@@ -752,36 +905,245 @@ function RedeemCodeConfirmationDialog({
 
 function OrgAuthActionPanel({
   disabled,
+  formState,
   id,
+  organizations,
   onCreateOrgAuth,
+  onFormChange,
 }: {
   disabled: boolean;
+  formState: OrgAuthFormState;
   id?: string;
   onCreateOrgAuth: () => void;
+  onFormChange: (formState: OrgAuthFormState) => void;
+  organizations: AdminOrgAuthData["organizations"];
 }) {
+  const selectedPurchaserPublicId =
+    formState.purchaserOrganizationPublicId ||
+    findFirstOrganizationPublicId(organizations);
+  const organizationDepthByPublicId = createOrganizationDepthMap(organizations);
+  const formValidation = buildOrgAuthInput(formState, organizations);
+  const isCreateDisabled = disabled || formValidation.input === null;
+
+  function updateFormState(nextFields: Partial<OrgAuthFormState>) {
+    onFormChange({
+      ...formState,
+      ...nextFields,
+    });
+  }
+
+  function toggleOrganizationPublicId(organizationPublicId: string) {
+    updateFormState({
+      organizationPublicIds: formState.organizationPublicIds.includes(
+        organizationPublicId,
+      )
+        ? formState.organizationPublicIds.filter(
+            (selectedOrganizationPublicId) =>
+              selectedOrganizationPublicId !== organizationPublicId,
+          )
+        : [...formState.organizationPublicIds, organizationPublicId],
+    });
+  }
+
   return (
     <section
       className="bg-surface border-border rounded-md border p-4 shadow-sm"
       id={id}
     >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="space-y-4">
         <div className="space-y-1">
           <p className="text-brand-primary text-xs font-medium">org_auth</p>
           <h2 className="text-text-primary text-base font-semibold">
-            本页创建企业授权
+            创建企业授权
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            使用第一条企业组织作为购买主体和覆盖范围，提交后由后端校验重叠范围与权限。
+            选择购买主体、授权范围、专业等级、额度和有效期；提交后后端会展开企业范围并校验重叠授权。
           </p>
         </div>
-        <button
-          type="button"
-          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={disabled}
-          onClick={onCreateOrgAuth}
+
+        <div
+          className="grid gap-3 lg:grid-cols-4"
+          data-testid="org-auth-create-form"
         >
-          创建企业授权
-        </button>
+          <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+            <span className="text-text-secondary">授权名称</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={formState.name}
+              onChange={(event) =>
+                updateFormState({ name: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+            <span className="text-text-secondary">购买主体</span>
+            <select
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={selectedPurchaserPublicId}
+              onChange={(event) =>
+                updateFormState({
+                  purchaserOrganizationPublicId: event.target.value,
+                })
+              }
+            >
+              {organizations.map((organization) => (
+                <option
+                  key={organization.publicId}
+                  value={organization.publicId}
+                >
+                  {organization.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">授权范围类型</span>
+            <select
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={formState.authScopeType}
+              onChange={(event) =>
+                updateFormState({
+                  authScopeType: event.target.value as AuthScopeType,
+                })
+              }
+            >
+              <option value="current_and_descendants">本企业及下级</option>
+              <option value="specified_nodes">指定企业列表</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">专业</span>
+            <select
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={formState.profession}
+              onChange={(event) =>
+                updateFormState({
+                  profession: event.target.value as Profession,
+                })
+              }
+            >
+              <option value="monopoly">专卖</option>
+              <option value="marketing">营销</option>
+              <option value="logistics">物流</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">等级</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              min="1"
+              type="number"
+              value={formState.level}
+              onChange={(event) =>
+                updateFormState({ level: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">账号额度</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              min="1"
+              type="number"
+              value={formState.accountQuota}
+              onChange={(event) =>
+                updateFormState({ accountQuota: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">开始日期</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              type="date"
+              value={formState.startsAt}
+              onChange={(event) =>
+                updateFormState({ startsAt: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">到期日期</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              type="date"
+              value={formState.expiresAt}
+              onChange={(event) =>
+                updateFormState({ expiresAt: event.target.value })
+              }
+            />
+          </label>
+        </div>
+
+        <div className="border-border bg-background rounded-md border p-3">
+          <div className="flex flex-col gap-1">
+            <p className="text-text-primary text-sm font-medium">覆盖企业</p>
+            <p className="text-text-muted text-xs leading-5">
+              选择“本企业及下级”时，后端按购买主体自动展开下级；选择“指定企业列表”时，只覆盖勾选的企业节点。
+            </p>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            {organizations.map((organization) => {
+              const organizationDepth =
+                organizationDepthByPublicId.get(organization.publicId) ?? 0;
+              const isChecked =
+                formState.authScopeType === "specified_nodes"
+                  ? formState.organizationPublicIds.includes(
+                      organization.publicId,
+                    )
+                  : organization.publicId === selectedPurchaserPublicId;
+
+              return (
+                <label
+                  key={organization.publicId}
+                  className={`border-border bg-surface flex items-start gap-2 rounded-md border py-2 pr-3 text-sm ${getOrganizationDepthPaddingClassName(organizationDepth)}`}
+                >
+                  <input
+                    aria-label={organization.name}
+                    checked={isChecked}
+                    className="mt-1"
+                    disabled={formState.authScopeType !== "specified_nodes"}
+                    type="checkbox"
+                    onChange={() =>
+                      toggleOrganizationPublicId(organization.publicId)
+                    }
+                  />
+                  <span className="min-w-0">
+                    <span className="text-text-primary block font-medium">
+                      {organization.name}
+                    </span>
+                    <span className="text-text-muted block text-xs">
+                      {orgTierLabels[organization.orgTier]} /{" "}
+                      {organization.publicId}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {formValidation.message === null ? null : (
+          <p className="text-destructive text-sm">{formValidation.message}</p>
+        )}
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isCreateDisabled}
+            onClick={onCreateOrgAuth}
+          >
+            创建企业授权
+          </button>
+        </div>
       </div>
     </section>
   );
@@ -1073,6 +1435,9 @@ export function AdminOrgAuthPage() {
   const { data, loadState, setData, setLoadState } = useAdminOrgAuthData();
   const [confirmationState, setConfirmationState] =
     useState<OrgAuthConfirmationState>(null);
+  const [orgAuthFormState, setOrgAuthFormState] = useState<OrgAuthFormState>(
+    defaultOrgAuthFormState,
+  );
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const totalEmployeeCount = useMemo(
     () =>
@@ -1097,14 +1462,14 @@ export function AdminOrgAuthPage() {
       const createResponse = await postAdminApi<OrgAuthResultDto>(
         "/api/v1/org-auths",
         sessionToken,
-        createDefaultOrgAuthInput(data.organizations),
+        confirmationState.input,
       );
 
       setConfirmationState(null);
 
       if (createResponse.code !== 0 || createResponse.data === null) {
         setToastMessage({
-          message: createResponse.message,
+          message: formatOrgAuthErrorMessage(createResponse.message),
           tone: "error",
         });
         return;
@@ -1197,8 +1562,29 @@ export function AdminOrgAuthPage() {
 
       <OrgAuthActionPanel
         disabled={data.organizations.length === 0}
+        formState={orgAuthFormState}
         id="org-auth-create-panel"
-        onCreateOrgAuth={() => setConfirmationState({ kind: "createOrgAuth" })}
+        organizations={data.organizations}
+        onCreateOrgAuth={() => {
+          const orgAuthDraft = buildOrgAuthInput(
+            orgAuthFormState,
+            data.organizations,
+          );
+
+          if (orgAuthDraft.input === null) {
+            setToastMessage({
+              message: orgAuthDraft.message ?? "企业授权输入无效。",
+              tone: "error",
+            });
+            return;
+          }
+
+          setConfirmationState({
+            kind: "createOrgAuth",
+            input: orgAuthDraft.input,
+          });
+        }}
+        onFormChange={setOrgAuthFormState}
       />
 
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">

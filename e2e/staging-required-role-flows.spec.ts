@@ -48,6 +48,19 @@ test.describe("staging required role flows", () => {
       page.getByRole("button", { name: "取消授权" }).first(),
     ).toBeVisible();
 
+    const orgAuthCreateForm = page.getByTestId("org-auth-create-form");
+    await expect(orgAuthCreateForm).toBeVisible();
+    await expect(orgAuthCreateForm.locator("select")).toHaveCount(3);
+    await expect(orgAuthCreateForm.locator('input[type="number"]')).toHaveCount(
+      2,
+    );
+    await expect(orgAuthCreateForm.locator('input[type="date"]')).toHaveCount(
+      2,
+    );
+    await expect(
+      page.locator('input[type="checkbox"][aria-label]').first(),
+    ).toBeVisible();
+
     await page.goto("/content/questions");
     const questionArrangement = page.getByTestId(
       "content-ops-staging-required-role-arrangement",
