@@ -5,6 +5,8 @@ export type NormalizedModelProviderInput = {
   providerKey: string;
   displayName: string;
   apiKeyLastFour: string | null;
+  secretStatus: "not_configured" | "configured";
+  maskedSecret: string | null;
   baseUrl: string | null;
   isEnabled: boolean;
 };
@@ -13,21 +15,35 @@ export type NormalizedModelConfigInput = {
   modelProviderPublicId: string;
   aiFuncType: AiFuncType;
   modelName: string;
+  modelAlias: string;
   displayName: string;
   configVersion: number;
   timeoutSecond: number;
   maxRetryCount: number;
   fallbackModelConfigPublicId: string | null;
   isEnabled: boolean;
+  status: "enabled" | "disabled" | "draft";
+  fallbackPriority: number;
+  snapshotPolicy: "redacted_metadata";
 };
 
 export type NormalizedPromptTemplateInput = {
   promptTemplateKey: string;
   aiFuncType: AiFuncType;
   version: number;
-  templateContent: string;
-  templateHash: string;
+  title: string | null;
+  description: string | null;
+  bodyDigest: string;
+  bodyPreviewMasked: string;
+  status: "draft" | "active" | "disabled";
   isActive: boolean;
+};
+
+export type NormalizedModelConfigFallbackOrderInput = {
+  items: {
+    publicId: string;
+    fallbackPriority: number;
+  }[];
 };
 
 export type NormalizedModelConfigListQuery = {
@@ -111,6 +127,10 @@ function normalizeApiKeyLastFour(value: unknown): string | null {
   return apiKey.slice(-4);
 }
 
+function createMaskedSecret(lastFour: string | null): string | null {
+  return lastFour === null ? null : `****${lastFour}`;
+}
+
 function normalizeTimeoutSecond(value: unknown): number | null {
   const timeoutSecond = normalizePositiveInteger(value);
 
@@ -131,6 +151,32 @@ function normalizeMaxRetryCount(value: unknown): number | null {
   return maxRetryCount;
 }
 
+function normalizeModelConfigStatus(
+  value: unknown,
+  isEnabled: boolean,
+): "enabled" | "disabled" | "draft" {
+  const status = normalizeOptionalString(value);
+
+  if (status === "enabled" || status === "disabled" || status === "draft") {
+    return status;
+  }
+
+  return isEnabled ? "enabled" : "disabled";
+}
+
+function normalizePromptTemplateStatus(
+  value: unknown,
+  isActive: boolean,
+): "draft" | "active" | "disabled" {
+  const status = normalizeOptionalString(value);
+
+  if (status === "draft" || status === "active" || status === "disabled") {
+    return status;
+  }
+
+  return isActive ? "active" : "draft";
+}
+
 export function normalizeModelProviderInput(
   input: unknown,
 ): NormalizedModelProviderInput | null {
@@ -140,6 +186,9 @@ export function normalizeModelProviderInput(
 
   const providerKey = normalizeRequiredString(input.providerKey);
   const displayName = normalizeRequiredString(input.displayName);
+  const apiKeyLastFour = normalizeApiKeyLastFour(
+    input.secretValue ?? input.apiKey,
+  );
 
   if (providerKey === null || displayName === null) {
     return null;
@@ -148,7 +197,9 @@ export function normalizeModelProviderInput(
   return {
     providerKey,
     displayName,
-    apiKeyLastFour: normalizeApiKeyLastFour(input.apiKey),
+    apiKeyLastFour,
+    secretStatus: apiKeyLastFour === null ? "not_configured" : "configured",
+    maskedSecret: createMaskedSecret(apiKeyLastFour),
     baseUrl: normalizeOptionalString(input.baseUrl),
     isEnabled: normalizeBoolean(input.isEnabled, false),
   };
@@ -166,6 +217,8 @@ export function normalizeModelConfigInput(
   );
   const aiFuncType = normalizeAiFuncType(input.aiFuncType);
   const modelName = normalizeRequiredString(input.modelName);
+  const modelAlias =
+    normalizeOptionalString(input.modelAlias) ?? modelName ?? null;
   const displayName = normalizeRequiredString(input.displayName);
   const configVersion = normalizePositiveInteger(input.configVersion);
   const timeoutSecond = normalizeTimeoutSecond(input.timeoutSecond);
@@ -173,15 +226,19 @@ export function normalizeModelConfigInput(
   const fallbackModelConfigPublicId = normalizeOptionalString(
     input.fallbackModelConfigPublicId,
   );
+  const fallbackPriority = normalizeNonNegativeInteger(input.fallbackPriority);
+  const isEnabled = normalizeBoolean(input.isEnabled, false);
 
   if (
     modelProviderPublicId === null ||
     aiFuncType === null ||
     modelName === null ||
+    modelAlias === null ||
     displayName === null ||
     configVersion === null ||
     timeoutSecond === null ||
-    maxRetryCount === null
+    maxRetryCount === null ||
+    fallbackPriority === null
   ) {
     return null;
   }
@@ -194,12 +251,16 @@ export function normalizeModelConfigInput(
     modelProviderPublicId,
     aiFuncType,
     modelName,
+    modelAlias,
     displayName,
     configVersion,
     timeoutSecond,
     maxRetryCount,
     fallbackModelConfigPublicId,
-    isEnabled: normalizeBoolean(input.isEnabled, false),
+    isEnabled,
+    status: normalizeModelConfigStatus(input.status, isEnabled),
+    fallbackPriority,
+    snapshotPolicy: "redacted_metadata",
   };
 }
 
@@ -213,15 +274,18 @@ export function normalizePromptTemplateInput(
   const promptTemplateKey = normalizeRequiredString(input.promptTemplateKey);
   const aiFuncType = normalizeAiFuncType(input.aiFuncType);
   const version = normalizePositiveInteger(input.version);
-  const templateContent = normalizeRequiredString(input.templateContent);
-  const templateHash = normalizeRequiredString(input.templateHash);
+  const bodyDigest = normalizeRequiredString(
+    input.bodyDigest ?? input.templateHash,
+  );
+  const bodyPreviewMasked = normalizeRequiredString(input.bodyPreviewMasked);
+  const isActive = normalizeBoolean(input.isActive, false);
 
   if (
     promptTemplateKey === null ||
     aiFuncType === null ||
     version === null ||
-    templateContent === null ||
-    templateHash === null
+    bodyDigest === null ||
+    bodyPreviewMasked === null
   ) {
     return null;
   }
@@ -230,10 +294,49 @@ export function normalizePromptTemplateInput(
     promptTemplateKey,
     aiFuncType,
     version,
-    templateContent,
-    templateHash,
-    isActive: normalizeBoolean(input.isActive, false),
+    title: normalizeOptionalString(input.title),
+    description: normalizeOptionalString(input.description),
+    bodyDigest,
+    bodyPreviewMasked,
+    status: normalizePromptTemplateStatus(input.status, isActive),
+    isActive,
   };
+}
+
+export function normalizeModelConfigFallbackOrderInput(
+  input: unknown,
+): NormalizedModelConfigFallbackOrderInput | null {
+  if (!isRecord(input) || !Array.isArray(input.items)) {
+    return null;
+  }
+
+  const items = input.items
+    .map((item) => {
+      if (!isRecord(item)) {
+        return null;
+      }
+
+      const publicId = normalizeRequiredString(item.publicId);
+      const fallbackPriority = normalizeNonNegativeInteger(
+        item.fallbackPriority,
+      );
+
+      return publicId === null || fallbackPriority === null
+        ? null
+        : { publicId, fallbackPriority };
+    })
+    .filter(
+      (
+        item,
+      ): item is {
+        publicId: string;
+        fallbackPriority: number;
+      } => item !== null,
+    );
+
+  return items.length === input.items.length && items.length > 0
+    ? { items }
+    : null;
 }
 
 export function normalizeModelConfigListQuery(

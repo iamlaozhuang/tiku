@@ -34,6 +34,20 @@ export type AdminAiFunctionType =
 
 export type AdminAuditResultStatus = "success" | "failed";
 
+export type ModelProviderSecretStatus =
+  | "not_configured"
+  | "configured"
+  | "expired"
+  | "rotation_required";
+
+export type ModelConfigStatus = "enabled" | "disabled" | "draft";
+
+export type ModelConfigSnapshotPolicy = "redacted_metadata";
+
+export type PromptTemplateStatus = "draft" | "active" | "disabled";
+
+export type RedactedMetadata = Record<string, string | number | boolean | null>;
+
 const adminAiFunctionTypes = [
   "ai_scoring",
   "ai_explanation",
@@ -71,8 +85,13 @@ export type ModelConfigSummaryDto = {
   displayName: string;
   aiFuncType: AdminAiFunctionType;
   apiKeyDisplay: string | null;
+  secretStatus: ModelProviderSecretStatus;
+  maskedSecret: string | null;
   fallbackModelConfigPublicId: string | null;
   isEnabled: boolean;
+  status: ModelConfigStatus;
+  fallbackPriority: number;
+  snapshotPolicy: ModelConfigSnapshotPolicy;
   configVersion: number;
   timeoutSecond: number;
   maxRetryCount: number;
@@ -81,6 +100,40 @@ export type ModelConfigSummaryDto = {
 
 export type ModelConfigListDto = {
   modelConfigs: ModelConfigSummaryDto[];
+};
+
+export type ModelProviderSummaryDto = {
+  publicId: string;
+  providerKey: string;
+  displayName: string;
+  baseUrl: string | null;
+  isEnabled: boolean;
+  secretStatus: ModelProviderSecretStatus;
+  maskedSecret: string | null;
+  providerMetadata: RedactedMetadata;
+  updatedAt: string;
+};
+
+export type ModelProviderListDto = {
+  modelProviders: ModelProviderSummaryDto[];
+};
+
+export type PromptTemplateSummaryDto = {
+  publicId: string;
+  promptTemplateKey: string;
+  aiFuncType: AdminAiFunctionType;
+  version: number;
+  title: string | null;
+  description: string | null;
+  bodyDigest: string;
+  bodyPreviewMasked: string;
+  status: PromptTemplateStatus;
+  isActive: boolean;
+  updatedAt: string;
+};
+
+export type PromptTemplateListDto = {
+  promptTemplates: PromptTemplateSummaryDto[];
 };
 
 export type AuditLogSummaryDto = {

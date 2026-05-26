@@ -12,6 +12,9 @@ import {
   type AdminAiAuditLogPageSize,
   type AiCallLogListDto,
   type AiCallLogSummaryListDto,
+  type ModelConfigSummaryDto,
+  type ModelProviderSummaryDto,
+  type PromptTemplateSummaryDto,
 } from "../contracts/admin-ai-audit-log-ops-contract";
 import {
   createPostgresAdminAiAuditLogRuntimeRepositories,
@@ -19,6 +22,12 @@ import {
   type AdminAiAuditLogRuntimeRepositoryOptions,
   type AppendModelConfigAuditLogInput,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
+import {
+  normalizeModelConfigFallbackOrderInput,
+  normalizeModelConfigInput,
+  normalizeModelProviderInput,
+  normalizePromptTemplateInput,
+} from "../validators/ai-rag";
 import type { SessionService } from "./session-service";
 
 export type { AdminAiAuditLogRuntimeRepositories };
@@ -54,9 +63,25 @@ const modelConfigNotFoundResponse = createErrorResponse(
   ADMIN_AI_AUDIT_LOG_ERROR_CODES.resourceNotFound,
   "Model config does not exist.",
 );
+const validationFailedResponse = createErrorResponse(
+  ADMIN_AI_AUDIT_LOG_ERROR_CODES.validationFailed,
+  "Request validation failed.",
+);
+const mutationNotAvailableResponse = createErrorResponse(
+  ADMIN_AI_AUDIT_LOG_ERROR_CODES.resourceNotFound,
+  "Requested admin AI resource does not exist.",
+);
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
+}
+
+async function readJsonBody(request: Request): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
 }
 
 function isAdminAiAuditLogRole(role: string): role is AdminAiAuditLogRole {
@@ -321,6 +346,66 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     return actor;
   }
 
+  async function resolveMutationAdminActor(input: {
+    request: Request;
+    actionType: string;
+    targetResourceType: string;
+    targetPublicId: string | null;
+  }): Promise<AdminAiAuditLogActor | ApiResponse<null>> {
+    const actor = await resolveAdminActor(input.request, sessionService);
+
+    if (actor === null) {
+      return adminSessionRequiredResponse;
+    }
+
+    if (!canManageModelConfig(actor)) {
+      await appendModelConfigAuditLog(input.request, actor, {
+        actionType: input.actionType,
+        targetResourceType: input.targetResourceType,
+        targetPublicId: input.targetPublicId,
+        resultStatus: "failed",
+        metadataSummary: `redacted ${input.targetResourceType} permission denial metadata`,
+      });
+
+      return adminPermissionDeniedResponse;
+    }
+
+    return actor;
+  }
+
+  async function appendMutationAuditLog(input: {
+    request: Request;
+    actor: AdminAiAuditLogActor;
+    actionType: string;
+    targetResourceType: string;
+    targetPublicId: string | null;
+    resultStatus: "success" | "failed";
+  }): Promise<void> {
+    await appendModelConfigAuditLog(input.request, input.actor, {
+      actionType: input.actionType,
+      targetResourceType: input.targetResourceType,
+      targetPublicId: input.targetPublicId,
+      resultStatus: input.resultStatus,
+      metadataSummary: `redacted ${input.targetResourceType} mutation metadata`,
+    });
+  }
+
+  function emptyPage<TData extends Record<string, unknown>>(
+    data: TData,
+    query: AdminAiAuditLogListQuery,
+  ) {
+    return {
+      ...data,
+      pagination: {
+        page: query.page,
+        pageSize: query.pageSize,
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+        total: 0,
+      },
+    };
+  }
+
   async function updateModelConfigEnabled(input: {
     request: Request;
     context: RouteContext;
@@ -354,7 +439,170 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     return createJsonResponse(response);
   }
 
+  async function updateResourceEnabled(input: {
+    request: Request;
+    context: RouteContext;
+    actionType:
+      | "model_provider.enable"
+      | "model_provider.disable"
+      | "prompt_template.enable"
+      | "prompt_template.disable";
+    targetResourceType: "model_provider" | "prompt_template";
+    update: (publicId: string) => Promise<boolean>;
+  }): Promise<Response> {
+    const { publicId } = await input.context.params;
+    const actorOrError = await resolveMutationAdminActor({
+      request: input.request,
+      actionType: input.actionType,
+      targetResourceType: input.targetResourceType,
+      targetPublicId: publicId,
+    });
+
+    if ("code" in actorOrError) {
+      return createJsonResponse(actorOrError);
+    }
+
+    const didUpdate = await input.update(publicId);
+
+    await appendMutationAuditLog({
+      request: input.request,
+      actor: actorOrError,
+      actionType: input.actionType,
+      targetResourceType: input.targetResourceType,
+      targetPublicId: publicId,
+      resultStatus: didUpdate ? "success" : "failed",
+    });
+
+    return createJsonResponse(
+      didUpdate ? createSuccessResponse(null) : mutationNotAvailableResponse,
+    );
+  }
+
   return {
+    modelProviders: {
+      async GET(request: Request): Promise<Response> {
+        const authError = await requireReadableAdminActor(request);
+
+        if (authError !== null) {
+          return createJsonResponse(authError);
+        }
+
+        const query = readAdminAiAuditLogListQuery(request);
+        const result =
+          repositories.listModelProviders === undefined
+            ? emptyPage({ modelProviders: [] }, query)
+            : await repositories.listModelProviders(query);
+
+        return createJsonResponse(
+          createPaginatedResponse(
+            { modelProviders: result.modelProviders },
+            result.pagination,
+          ),
+        );
+      },
+      async POST(request: Request): Promise<Response> {
+        const actorOrError = await resolveMutationAdminActor({
+          request,
+          actionType: "model_provider.create",
+          targetResourceType: "model_provider",
+          targetPublicId: null,
+        });
+
+        if ("code" in actorOrError) {
+          return createJsonResponse(actorOrError);
+        }
+
+        const input = normalizeModelProviderInput(await readJsonBody(request));
+
+        if (input === null || repositories.createModelProvider === undefined) {
+          return createJsonResponse(validationFailedResponse);
+        }
+
+        const modelProvider = await repositories.createModelProvider(input);
+
+        await appendMutationAuditLog({
+          request,
+          actor: actorOrError,
+          actionType: "model_provider.create",
+          targetResourceType: "model_provider",
+          targetPublicId: modelProvider.publicId,
+          resultStatus: "success",
+        });
+
+        return createJsonResponse(
+          createSuccessResponse<{ modelProvider: ModelProviderSummaryDto }>({
+            modelProvider,
+          }),
+        );
+      },
+      async PATCH(request: Request, context: RouteContext): Promise<Response> {
+        const { publicId } = await context.params;
+        const actorOrError = await resolveMutationAdminActor({
+          request,
+          actionType: "model_provider.update",
+          targetResourceType: "model_provider",
+          targetPublicId: publicId,
+        });
+
+        if ("code" in actorOrError) {
+          return createJsonResponse(actorOrError);
+        }
+
+        const input = normalizeModelProviderInput(await readJsonBody(request));
+
+        if (input === null || repositories.updateModelProvider === undefined) {
+          return createJsonResponse(validationFailedResponse);
+        }
+
+        const modelProvider = await repositories.updateModelProvider(
+          publicId,
+          input,
+        );
+
+        await appendMutationAuditLog({
+          request,
+          actor: actorOrError,
+          actionType: "model_provider.update",
+          targetResourceType: "model_provider",
+          targetPublicId: publicId,
+          resultStatus: modelProvider === null ? "failed" : "success",
+        });
+
+        return createJsonResponse(
+          modelProvider === null
+            ? mutationNotAvailableResponse
+            : createSuccessResponse<{ modelProvider: ModelProviderSummaryDto }>(
+                { modelProvider },
+              ),
+        );
+      },
+      enable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          return updateResourceEnabled({
+            request,
+            context,
+            actionType: "model_provider.enable",
+            targetResourceType: "model_provider",
+            update: (publicId) =>
+              repositories.setModelProviderEnabled?.(publicId, true) ??
+              Promise.resolve(false),
+          });
+        },
+      },
+      disable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          return updateResourceEnabled({
+            request,
+            context,
+            actionType: "model_provider.disable",
+            targetResourceType: "model_provider",
+            update: (publicId) =>
+              repositories.setModelProviderEnabled?.(publicId, false) ??
+              Promise.resolve(false),
+          });
+        },
+      },
+    },
     modelConfigs: {
       async GET(request: Request): Promise<Response> {
         const authError = await requireReadableAdminActor(request);
@@ -374,6 +622,125 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           ),
         );
       },
+      async POST(request: Request): Promise<Response> {
+        const actorOrError = await resolveMutationAdminActor({
+          request,
+          actionType: "model_config.create",
+          targetResourceType: "model_config",
+          targetPublicId: null,
+        });
+
+        if ("code" in actorOrError) {
+          return createJsonResponse(actorOrError);
+        }
+
+        const input = normalizeModelConfigInput(await readJsonBody(request));
+
+        if (input === null || repositories.createModelConfig === undefined) {
+          return createJsonResponse(validationFailedResponse);
+        }
+
+        const modelConfig = await repositories.createModelConfig(input);
+
+        await appendMutationAuditLog({
+          request,
+          actor: actorOrError,
+          actionType: "model_config.create",
+          targetResourceType: "model_config",
+          targetPublicId: modelConfig.publicId,
+          resultStatus: "success",
+        });
+
+        return createJsonResponse(
+          createSuccessResponse<{ modelConfig: ModelConfigSummaryDto }>({
+            modelConfig,
+          }),
+        );
+      },
+      async PATCH(request: Request, context: RouteContext): Promise<Response> {
+        const { publicId } = await context.params;
+        const actorOrError = await resolveMutationAdminActor({
+          request,
+          actionType: "model_config.update",
+          targetResourceType: "model_config",
+          targetPublicId: publicId,
+        });
+
+        if ("code" in actorOrError) {
+          return createJsonResponse(actorOrError);
+        }
+
+        const input = normalizeModelConfigInput(await readJsonBody(request));
+
+        if (input === null || repositories.updateModelConfig === undefined) {
+          return createJsonResponse(validationFailedResponse);
+        }
+
+        const modelConfig = await repositories.updateModelConfig(
+          publicId,
+          input,
+        );
+
+        await appendMutationAuditLog({
+          request,
+          actor: actorOrError,
+          actionType: "model_config.update",
+          targetResourceType: "model_config",
+          targetPublicId: publicId,
+          resultStatus: modelConfig === null ? "failed" : "success",
+        });
+
+        return createJsonResponse(
+          modelConfig === null
+            ? modelConfigNotFoundResponse
+            : createSuccessResponse<{ modelConfig: ModelConfigSummaryDto }>({
+                modelConfig,
+              }),
+        );
+      },
+      reorderFallback: {
+        async POST(request: Request): Promise<Response> {
+          const actorOrError = await resolveMutationAdminActor({
+            request,
+            actionType: "model_config.reorder_fallback",
+            targetResourceType: "model_config",
+            targetPublicId: null,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const input = normalizeModelConfigFallbackOrderInput(
+            await readJsonBody(request),
+          );
+
+          if (
+            input === null ||
+            repositories.reorderModelConfigFallback === undefined
+          ) {
+            return createJsonResponse(validationFailedResponse);
+          }
+
+          const didUpdate =
+            await repositories.reorderModelConfigFallback(input);
+
+          await appendMutationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "model_config.reorder_fallback",
+            targetResourceType: "model_config",
+            targetPublicId: null,
+            resultStatus: didUpdate ? "success" : "failed",
+          });
+
+          return createJsonResponse(
+            didUpdate
+              ? createSuccessResponse(null)
+              : modelConfigNotFoundResponse,
+          );
+        },
+      },
       enable: {
         async POST(request: Request, context: RouteContext): Promise<Response> {
           return updateModelConfigEnabled({
@@ -391,6 +758,130 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
             context,
             actionType: "model_config.disable",
             update: repositories.disableModelConfig ?? (async () => false),
+          });
+        },
+      },
+    },
+    promptTemplates: {
+      async GET(request: Request): Promise<Response> {
+        const authError = await requireReadableAdminActor(request);
+
+        if (authError !== null) {
+          return createJsonResponse(authError);
+        }
+
+        const query = readAdminAiAuditLogListQuery(request);
+        const result =
+          repositories.listPromptTemplates === undefined
+            ? emptyPage({ promptTemplates: [] }, query)
+            : await repositories.listPromptTemplates(query);
+
+        return createJsonResponse(
+          createPaginatedResponse(
+            { promptTemplates: result.promptTemplates },
+            result.pagination,
+          ),
+        );
+      },
+      async POST(request: Request): Promise<Response> {
+        const actorOrError = await resolveMutationAdminActor({
+          request,
+          actionType: "prompt_template.create",
+          targetResourceType: "prompt_template",
+          targetPublicId: null,
+        });
+
+        if ("code" in actorOrError) {
+          return createJsonResponse(actorOrError);
+        }
+
+        const input = normalizePromptTemplateInput(await readJsonBody(request));
+
+        if (input === null || repositories.createPromptTemplate === undefined) {
+          return createJsonResponse(validationFailedResponse);
+        }
+
+        const promptTemplate = await repositories.createPromptTemplate(input);
+
+        await appendMutationAuditLog({
+          request,
+          actor: actorOrError,
+          actionType: "prompt_template.create",
+          targetResourceType: "prompt_template",
+          targetPublicId: promptTemplate.publicId,
+          resultStatus: "success",
+        });
+
+        return createJsonResponse(
+          createSuccessResponse<{ promptTemplate: PromptTemplateSummaryDto }>({
+            promptTemplate,
+          }),
+        );
+      },
+      async PATCH(request: Request, context: RouteContext): Promise<Response> {
+        const { publicId } = await context.params;
+        const actorOrError = await resolveMutationAdminActor({
+          request,
+          actionType: "prompt_template.update",
+          targetResourceType: "prompt_template",
+          targetPublicId: publicId,
+        });
+
+        if ("code" in actorOrError) {
+          return createJsonResponse(actorOrError);
+        }
+
+        const input = normalizePromptTemplateInput(await readJsonBody(request));
+
+        if (input === null || repositories.updatePromptTemplate === undefined) {
+          return createJsonResponse(validationFailedResponse);
+        }
+
+        const promptTemplate = await repositories.updatePromptTemplate(
+          publicId,
+          input,
+        );
+
+        await appendMutationAuditLog({
+          request,
+          actor: actorOrError,
+          actionType: "prompt_template.update",
+          targetResourceType: "prompt_template",
+          targetPublicId: publicId,
+          resultStatus: promptTemplate === null ? "failed" : "success",
+        });
+
+        return createJsonResponse(
+          promptTemplate === null
+            ? mutationNotAvailableResponse
+            : createSuccessResponse<{
+                promptTemplate: PromptTemplateSummaryDto;
+              }>({ promptTemplate }),
+        );
+      },
+      enable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          return updateResourceEnabled({
+            request,
+            context,
+            actionType: "prompt_template.enable",
+            targetResourceType: "prompt_template",
+            update: (publicId) =>
+              repositories.setPromptTemplateEnabled?.(publicId, true) ??
+              Promise.resolve(false),
+          });
+        },
+      },
+      disable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          return updateResourceEnabled({
+            request,
+            context,
+            actionType: "prompt_template.disable",
+            targetResourceType: "prompt_template",
+            update: (publicId) =>
+              repositories.setPromptTemplateEnabled?.(publicId, false) ??
+              Promise.resolve(false),
           });
         },
       },

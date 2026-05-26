@@ -17,13 +17,28 @@ import type {
   AiCallLogSummaryDto,
   AiCallLogSummaryListDto,
   ModelConfigListDto,
+  ModelConfigSnapshotPolicy,
+  ModelConfigStatus,
   ModelConfigSummaryDto,
+  ModelProviderListDto,
+  ModelProviderSecretStatus,
+  ModelProviderSummaryDto,
+  PromptTemplateListDto,
+  PromptTemplateStatus,
+  PromptTemplateSummaryDto,
+  RedactedMetadata,
 } from "../contracts/admin-ai-audit-log-ops-contract";
 import type {
   AiCallStatus,
   ModelConfigSnapshot,
   RedactedJsonObject,
 } from "../models/ai-rag";
+import type {
+  NormalizedModelConfigFallbackOrderInput,
+  NormalizedModelConfigInput,
+  NormalizedModelProviderInput,
+  NormalizedPromptTemplateInput,
+} from "../validators/ai-rag";
 
 type AdminAiAuditLogRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
@@ -63,9 +78,47 @@ export type AppendModelConfigAuditLogInput = Omit<
 >;
 
 export type AdminAiAuditLogRuntimeRepositories = {
+  listModelProviders?(
+    query: AdminAiAuditLogListQuery,
+  ): Promise<AdminAiAuditLogRuntimePage<ModelProviderListDto>>;
+  createModelProvider?(
+    input: NormalizedModelProviderInput,
+  ): Promise<ModelProviderSummaryDto>;
+  updateModelProvider?(
+    publicId: string,
+    input: NormalizedModelProviderInput,
+  ): Promise<ModelProviderSummaryDto | null>;
+  setModelProviderEnabled?(
+    publicId: string,
+    isEnabled: boolean,
+  ): Promise<boolean>;
   listModelConfigs(
     query: AdminAiAuditLogListQuery,
   ): Promise<AdminAiAuditLogRuntimePage<ModelConfigListDto>>;
+  createModelConfig?(
+    input: NormalizedModelConfigInput,
+  ): Promise<ModelConfigSummaryDto>;
+  updateModelConfig?(
+    publicId: string,
+    input: NormalizedModelConfigInput,
+  ): Promise<ModelConfigSummaryDto | null>;
+  reorderModelConfigFallback?(
+    input: NormalizedModelConfigFallbackOrderInput,
+  ): Promise<boolean>;
+  listPromptTemplates?(
+    query: AdminAiAuditLogListQuery,
+  ): Promise<AdminAiAuditLogRuntimePage<PromptTemplateListDto>>;
+  createPromptTemplate?(
+    input: NormalizedPromptTemplateInput,
+  ): Promise<PromptTemplateSummaryDto>;
+  updatePromptTemplate?(
+    publicId: string,
+    input: NormalizedPromptTemplateInput,
+  ): Promise<PromptTemplateSummaryDto | null>;
+  setPromptTemplateEnabled?(
+    publicId: string,
+    isActive: boolean,
+  ): Promise<boolean>;
   appendAiCallLog(input: AppendAiCallLogInput): Promise<AiCallLogSummaryDto>;
   enableModelConfig?(publicId: string): Promise<boolean>;
   disableModelConfig?(publicId: string): Promise<boolean>;
@@ -84,14 +137,46 @@ type ModelConfigDatabaseRow = {
   provider_display_name: string;
   provider_key: string;
   api_key_last_four: string | null;
+  secret_status: string | null;
   model_name: string;
+  model_alias: string | null;
   display_name: string;
   ai_func_type: string;
   config_version: number;
   is_enabled: boolean;
+  status: string | null;
+  fallback_priority: number | null;
+  snapshot_policy: string | null;
   timeout_second: number;
   max_retry_count: number;
   fallback_model_config_public_id: string | null;
+  updated_at: Date | string;
+};
+
+type ModelProviderDatabaseRow = {
+  public_id: string;
+  provider_key: string;
+  display_name: string;
+  api_key_last_four: string | null;
+  base_url: string | null;
+  secret_status: string | null;
+  provider_metadata: unknown;
+  is_enabled: boolean;
+  updated_at: Date | string;
+};
+
+type PromptTemplateDatabaseRow = {
+  public_id: string;
+  prompt_template_key: string;
+  ai_func_type: string;
+  version: number;
+  title: string | null;
+  description: string | null;
+  body_digest: string | null;
+  body_preview_masked: string | null;
+  template_hash: string;
+  status: string | null;
+  is_active: boolean;
   updated_at: Date | string;
 };
 
@@ -160,6 +245,150 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
   );
 
   return {
+    async listModelProviders(query) {
+      const database = getDatabase();
+      const keywordCondition =
+        query.keyword === null
+          ? sql`true`
+          : sql`(
+              public_id ilike ${`%${query.keyword}%`}
+              or provider_key ilike ${`%${query.keyword}%`}
+              or display_name ilike ${`%${query.keyword}%`}
+            )`;
+
+      try {
+        const rows = await executeSql<ModelProviderDatabaseRow>(
+          database,
+          sql`
+            select
+              public_id,
+              provider_key,
+              display_name,
+              api_key_last_four,
+              base_url,
+              secret_status,
+              provider_metadata,
+              is_enabled,
+              updated_at
+            from model_provider
+            where ${keywordCondition}
+            order by updated_at desc
+            limit ${query.pageSize}
+            offset ${(query.page - 1) * query.pageSize}
+          `,
+        );
+        const [totalRow] = await executeSql<CountDatabaseRow>(
+          database,
+          sql`
+            select count(*)::int as value
+            from model_provider
+            where ${keywordCondition}
+          `,
+        );
+
+        return {
+          modelProviders: rows.map(mapModelProviderRow),
+          pagination: createPagination(query, totalRow?.value ?? 0),
+        };
+      } catch (error) {
+        if (!isUndefinedTableError(error)) {
+          throw error;
+        }
+
+        return {
+          modelProviders: [],
+          pagination: createPagination(query, 0),
+        };
+      }
+    },
+
+    async createModelProvider(input) {
+      const database = getDatabase();
+      const publicId = `model-provider-${randomUUID()}`;
+
+      const rows = await executeSql<ModelProviderDatabaseRow>(
+        database,
+        sql`
+          insert into model_provider (
+            public_id,
+            provider_key,
+            display_name,
+            api_key_last_four,
+            base_url,
+            secret_status,
+            provider_metadata,
+            is_enabled,
+            created_at,
+            updated_at
+          )
+          values (
+            ${publicId},
+            ${input.providerKey},
+            ${input.displayName},
+            ${input.apiKeyLastFour},
+            ${input.baseUrl},
+            ${input.secretStatus},
+            ${JSON.stringify({ secretStorage: "external_ref_required" })}::jsonb,
+            ${input.isEnabled},
+            now(),
+            now()
+          )
+          returning
+            public_id,
+            provider_key,
+            display_name,
+            api_key_last_four,
+            base_url,
+            secret_status,
+            provider_metadata,
+            is_enabled,
+            updated_at
+        `,
+      );
+
+      return mapModelProviderRow(rows[0] as ModelProviderDatabaseRow);
+    },
+
+    async updateModelProvider(publicId, input) {
+      const database = getDatabase();
+      const rows = await executeSql<ModelProviderDatabaseRow>(
+        database,
+        sql`
+          update model_provider
+          set
+            provider_key = ${input.providerKey},
+            display_name = ${input.displayName},
+            api_key_last_four = ${input.apiKeyLastFour},
+            base_url = ${input.baseUrl},
+            secret_status = ${input.secretStatus},
+            is_enabled = ${input.isEnabled},
+            updated_at = now()
+          where public_id = ${publicId}
+          returning
+            public_id,
+            provider_key,
+            display_name,
+            api_key_last_four,
+            base_url,
+            secret_status,
+            provider_metadata,
+            is_enabled,
+            updated_at
+        `,
+      );
+
+      return rows[0] === undefined ? null : mapModelProviderRow(rows[0]);
+    },
+
+    async setModelProviderEnabled(publicId, isEnabled) {
+      return updateBooleanStatus(
+        getDatabase(),
+        "model_provider",
+        publicId,
+        isEnabled,
+      );
+    },
+
     async listModelConfigs(query) {
       const database = getDatabase();
       const keywordCondition =
@@ -183,11 +412,16 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
               mp.display_name as provider_display_name,
               mp.provider_key,
               mp.api_key_last_four,
+              mp.secret_status,
               mc.model_name,
+              mc.model_alias,
               mc.display_name,
               mc.ai_func_type,
               mc.config_version,
               mc.is_enabled,
+              mc.status,
+              mc.fallback_priority,
+              mc.snapshot_policy,
               mc.timeout_second,
               mc.max_retry_count,
               fallback.public_id as fallback_model_config_public_id,
@@ -225,6 +459,317 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           pagination: createPagination(query, 0),
         };
       }
+    },
+
+    async createModelConfig(input) {
+      const database = getDatabase();
+      const publicId = `model-config-${randomUUID()}`;
+      const rows = await executeSql<ModelConfigDatabaseRow>(
+        database,
+        sql`
+          insert into model_config (
+            public_id,
+            model_provider_id,
+            ai_func_type,
+            model_name,
+            model_alias,
+            display_name,
+            config_version,
+            status,
+            is_enabled,
+            timeout_second,
+            max_retry_count,
+            fallback_priority,
+            snapshot_policy,
+            fallback_model_config_id,
+            created_at,
+            updated_at
+          )
+          select
+            ${publicId},
+            mp.id,
+            ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
+            ${input.modelName},
+            ${input.modelAlias},
+            ${input.displayName},
+            ${input.configVersion},
+            ${input.status},
+            ${input.isEnabled},
+            ${input.timeoutSecond},
+            ${input.maxRetryCount},
+            ${input.fallbackPriority},
+            ${input.snapshotPolicy},
+            fallback.id,
+            now(),
+            now()
+          from model_provider mp
+          left join model_config fallback
+            on fallback.public_id = ${input.fallbackModelConfigPublicId}
+          where mp.public_id = ${input.modelProviderPublicId}
+          returning
+            public_id,
+            (select public_id from model_provider where id = model_provider_id) as provider_public_id,
+            (select display_name from model_provider where id = model_provider_id) as provider_display_name,
+            (select provider_key from model_provider where id = model_provider_id) as provider_key,
+            (select api_key_last_four from model_provider where id = model_provider_id) as api_key_last_four,
+            (select secret_status from model_provider where id = model_provider_id) as secret_status,
+            model_name,
+            model_alias,
+            display_name,
+            ai_func_type,
+            config_version,
+            is_enabled,
+            status,
+            fallback_priority,
+            snapshot_policy,
+            timeout_second,
+            max_retry_count,
+            (select public_id from model_config where id = fallback_model_config_id) as fallback_model_config_public_id,
+            updated_at
+        `,
+      );
+
+      if (rows[0] === undefined) {
+        throw new Error("model_provider public id is required.");
+      }
+
+      return mapModelConfigRow(rows[0]);
+    },
+
+    async updateModelConfig(publicId, input) {
+      const database = getDatabase();
+      const rows = await executeSql<ModelConfigDatabaseRow>(
+        database,
+        sql`
+          update model_config
+          set
+            model_provider_id = mp.id,
+            ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
+            model_name = ${input.modelName},
+            model_alias = ${input.modelAlias},
+            display_name = ${input.displayName},
+            config_version = ${input.configVersion},
+            status = ${input.status},
+            is_enabled = ${input.isEnabled},
+            timeout_second = ${input.timeoutSecond},
+            max_retry_count = ${input.maxRetryCount},
+            fallback_priority = ${input.fallbackPriority},
+            snapshot_policy = ${input.snapshotPolicy},
+            fallback_model_config_id = fallback.id,
+            updated_at = now()
+          from model_provider mp
+          left join model_config fallback
+            on fallback.public_id = ${input.fallbackModelConfigPublicId}
+          where model_config.public_id = ${publicId}
+            and mp.public_id = ${input.modelProviderPublicId}
+          returning
+            model_config.public_id,
+            mp.public_id as provider_public_id,
+            mp.display_name as provider_display_name,
+            mp.provider_key,
+            mp.api_key_last_four,
+            mp.secret_status,
+            model_config.model_name,
+            model_config.model_alias,
+            model_config.display_name,
+            model_config.ai_func_type,
+            model_config.config_version,
+            model_config.is_enabled,
+            model_config.status,
+            model_config.fallback_priority,
+            model_config.snapshot_policy,
+            model_config.timeout_second,
+            model_config.max_retry_count,
+            fallback.public_id as fallback_model_config_public_id,
+            model_config.updated_at
+        `,
+      );
+
+      return rows[0] === undefined ? null : mapModelConfigRow(rows[0]);
+    },
+
+    async reorderModelConfigFallback(input) {
+      const database = getDatabase();
+
+      for (const item of input.items) {
+        await executeSql(
+          database,
+          sql`
+            update model_config
+            set
+              fallback_priority = ${item.fallbackPriority},
+              updated_at = now()
+            where public_id = ${item.publicId}
+          `,
+        );
+      }
+
+      return true;
+    },
+
+    async listPromptTemplates(query) {
+      const database = getDatabase();
+      const keywordCondition =
+        query.keyword === null
+          ? sql`true`
+          : sql`(
+              public_id ilike ${`%${query.keyword}%`}
+              or prompt_template_key ilike ${`%${query.keyword}%`}
+              or title ilike ${`%${query.keyword}%`}
+            )`;
+
+      try {
+        const rows = await executeSql<PromptTemplateDatabaseRow>(
+          database,
+          sql`
+            select
+              public_id,
+              prompt_template_key,
+              ai_func_type,
+              version,
+              title,
+              description,
+              body_digest,
+              body_preview_masked,
+              template_hash,
+              status,
+              is_active,
+              updated_at
+            from prompt_template
+            where ${keywordCondition}
+            order by updated_at desc
+            limit ${query.pageSize}
+            offset ${(query.page - 1) * query.pageSize}
+          `,
+        );
+        const [totalRow] = await executeSql<CountDatabaseRow>(
+          database,
+          sql`
+            select count(*)::int as value
+            from prompt_template
+            where ${keywordCondition}
+          `,
+        );
+
+        return {
+          promptTemplates: rows.map(mapPromptTemplateRow),
+          pagination: createPagination(query, totalRow?.value ?? 0),
+        };
+      } catch (error) {
+        if (!isUndefinedTableError(error)) {
+          throw error;
+        }
+
+        return {
+          promptTemplates: [],
+          pagination: createPagination(query, 0),
+        };
+      }
+    },
+
+    async createPromptTemplate(input) {
+      const database = getDatabase();
+      const publicId = `prompt-template-${randomUUID()}`;
+      const rows = await executeSql<PromptTemplateDatabaseRow>(
+        database,
+        sql`
+          insert into prompt_template (
+            public_id,
+            prompt_template_key,
+            ai_func_type,
+            version,
+            title,
+            description,
+            template_content,
+            template_hash,
+            body_digest,
+            body_preview_masked,
+            status,
+            is_active,
+            created_at,
+            updated_at
+          )
+          values (
+            ${publicId},
+            ${input.promptTemplateKey},
+            ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
+            ${input.version},
+            ${input.title},
+            ${input.description},
+            ${input.bodyPreviewMasked},
+            ${input.bodyDigest},
+            ${input.bodyDigest},
+            ${input.bodyPreviewMasked},
+            ${input.status},
+            ${input.isActive},
+            now(),
+            now()
+          )
+          returning
+            public_id,
+            prompt_template_key,
+            ai_func_type,
+            version,
+            title,
+            description,
+            body_digest,
+            body_preview_masked,
+            template_hash,
+            status,
+            is_active,
+            updated_at
+        `,
+      );
+
+      return mapPromptTemplateRow(rows[0] as PromptTemplateDatabaseRow);
+    },
+
+    async updatePromptTemplate(publicId, input) {
+      const database = getDatabase();
+      const rows = await executeSql<PromptTemplateDatabaseRow>(
+        database,
+        sql`
+          update prompt_template
+          set
+            prompt_template_key = ${input.promptTemplateKey},
+            ai_func_type = ${toDatabaseAiFuncType(input.aiFuncType)}::ai_func_type,
+            version = ${input.version},
+            title = ${input.title},
+            description = ${input.description},
+            template_content = ${input.bodyPreviewMasked},
+            template_hash = ${input.bodyDigest},
+            body_digest = ${input.bodyDigest},
+            body_preview_masked = ${input.bodyPreviewMasked},
+            status = ${input.status},
+            is_active = ${input.isActive},
+            updated_at = now()
+          where public_id = ${publicId}
+          returning
+            public_id,
+            prompt_template_key,
+            ai_func_type,
+            version,
+            title,
+            description,
+            body_digest,
+            body_preview_masked,
+            template_hash,
+            status,
+            is_active,
+            updated_at
+        `,
+      );
+
+      return rows[0] === undefined ? null : mapPromptTemplateRow(rows[0]);
+    },
+
+    async setPromptTemplateEnabled(publicId, isActive) {
+      return updateBooleanStatus(
+        getDatabase(),
+        "prompt_template",
+        publicId,
+        isActive,
+      );
     },
 
     async appendAiCallLog(input) {
@@ -486,6 +1031,65 @@ async function updateModelConfigEnabled(
   }
 }
 
+async function updateBooleanStatus(
+  database: AdminAiAuditLogRuntimeDatabase,
+  tableName: "model_provider" | "prompt_template",
+  publicId: string,
+  value: boolean,
+): Promise<boolean> {
+  const query =
+    tableName === "model_provider"
+      ? sql`
+          update model_provider
+          set
+            is_enabled = ${value},
+            updated_at = now()
+          where public_id = ${publicId}
+          returning public_id
+        `
+      : sql`
+          update prompt_template
+          set
+            is_active = ${value},
+            status = ${value ? "active" : "disabled"},
+            disabled_at = ${value ? null : new Date().toISOString()},
+            updated_at = now()
+          where public_id = ${publicId}
+          returning public_id
+        `;
+
+  try {
+    const rows = await executeSql<{ public_id: string }>(database, query);
+
+    return rows.length > 0;
+  } catch (error) {
+    if (!isUndefinedTableError(error)) {
+      throw error;
+    }
+
+    return false;
+  }
+}
+
+function mapModelProviderRow(
+  row: ModelProviderDatabaseRow,
+): ModelProviderSummaryDto {
+  const maskedSecret =
+    row.api_key_last_four === null ? null : `****${row.api_key_last_four}`;
+
+  return {
+    publicId: row.public_id,
+    providerKey: row.provider_key,
+    displayName: row.display_name,
+    baseUrl: row.base_url,
+    isEnabled: row.is_enabled,
+    secretStatus: toModelProviderSecretStatus(row.secret_status),
+    maskedSecret,
+    providerMetadata: toRedactedMetadata(row.provider_metadata),
+    updatedAt: toIsoString(row.updated_at),
+  };
+}
+
 function mapModelConfigRow(row: ModelConfigDatabaseRow): ModelConfigSummaryDto {
   return {
     publicId: row.public_id,
@@ -493,16 +1097,40 @@ function mapModelConfigRow(row: ModelConfigDatabaseRow): ModelConfigSummaryDto {
     providerDisplayName: row.provider_display_name,
     providerKey: row.provider_key,
     modelName: row.model_name,
-    modelAlias: row.model_name,
+    modelAlias: row.model_alias ?? row.model_name,
     displayName: row.display_name,
     aiFuncType: toAdminAiFuncType(row.ai_func_type),
     apiKeyDisplay:
       row.api_key_last_four === null ? null : `****${row.api_key_last_four}`,
+    secretStatus: toModelProviderSecretStatus(row.secret_status),
+    maskedSecret:
+      row.api_key_last_four === null ? null : `****${row.api_key_last_four}`,
     fallbackModelConfigPublicId: row.fallback_model_config_public_id,
     isEnabled: row.is_enabled,
+    status: toModelConfigStatus(row.status, row.is_enabled),
+    fallbackPriority: row.fallback_priority ?? 0,
+    snapshotPolicy: toModelConfigSnapshotPolicy(row.snapshot_policy),
     configVersion: row.config_version,
     timeoutSecond: row.timeout_second,
     maxRetryCount: row.max_retry_count,
+    updatedAt: toIsoString(row.updated_at),
+  };
+}
+
+function mapPromptTemplateRow(
+  row: PromptTemplateDatabaseRow,
+): PromptTemplateSummaryDto {
+  return {
+    publicId: row.public_id,
+    promptTemplateKey: row.prompt_template_key,
+    aiFuncType: toAdminAiFuncType(row.ai_func_type),
+    version: row.version,
+    title: row.title,
+    description: row.description,
+    bodyDigest: row.body_digest ?? row.template_hash,
+    bodyPreviewMasked: row.body_preview_masked ?? "[redacted]",
+    status: toPromptTemplateStatus(row.status, row.is_active),
+    isActive: row.is_active,
     updatedAt: toIsoString(row.updated_at),
   };
 }
@@ -629,7 +1257,9 @@ function toAdminAiFuncType(value: string): AdminAiFunctionType {
   return "learning_suggestion";
 }
 
-function toDatabaseAiFuncType(value: AdminAiFunctionType): string {
+function toDatabaseAiFuncType(
+  value: AdminAiFunctionType | "scoring" | "explanation" | "hint",
+): string {
   if (value === "ai_scoring") {
     return "scoring";
   }
@@ -643,6 +1273,69 @@ function toDatabaseAiFuncType(value: AdminAiFunctionType): string {
   }
 
   return value;
+}
+
+function toModelProviderSecretStatus(
+  value: string | null,
+): ModelProviderSecretStatus {
+  if (
+    value === "configured" ||
+    value === "expired" ||
+    value === "rotation_required"
+  ) {
+    return value;
+  }
+
+  return "not_configured";
+}
+
+function toModelConfigStatus(
+  value: string | null,
+  isEnabled: boolean,
+): ModelConfigStatus {
+  if (value === "enabled" || value === "disabled" || value === "draft") {
+    return value;
+  }
+
+  return isEnabled ? "enabled" : "disabled";
+}
+
+function toModelConfigSnapshotPolicy(
+  value: string | null,
+): ModelConfigSnapshotPolicy {
+  return value === "redacted_metadata" ? value : "redacted_metadata";
+}
+
+function toPromptTemplateStatus(
+  value: string | null,
+  isActive: boolean,
+): PromptTemplateStatus {
+  if (value === "draft" || value === "active" || value === "disabled") {
+    return value;
+  }
+
+  return isActive ? "active" : "disabled";
+}
+
+function toRedactedMetadata(value: unknown): RedactedMetadata {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return {};
+  }
+
+  const metadata: RedactedMetadata = {};
+
+  for (const [key, item] of Object.entries(value)) {
+    if (
+      typeof item === "string" ||
+      typeof item === "number" ||
+      typeof item === "boolean" ||
+      item === null
+    ) {
+      metadata[key] = item;
+    }
+  }
+
+  return metadata;
 }
 
 function toIsoString(value: Date | string): string {
