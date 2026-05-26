@@ -16,7 +16,6 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
 import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
@@ -27,6 +26,7 @@ import type {
   RedeemCodeListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type { Profession, RedeemCodeStatus } from "../models/auth";
+import { getSharedRuntimePostgresClient } from "./runtime-database";
 
 type AdminRedeemCodeRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
@@ -397,7 +397,7 @@ function createLocalRuntimeDatabase(): AdminRedeemCodeRuntimeDatabase {
     throw new Error("DATABASE_URL is required for admin redeem code runtime.");
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
 }

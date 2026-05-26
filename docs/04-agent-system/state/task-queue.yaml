@@ -9561,3 +9561,55 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-e2e-baseline-diagnostics.md
     status: closed
     retryCount: 0
+  - id: phase-14-local-runtime-baseline
+    title: Phase 14 Local Runtime Baseline
+    phase: phase-14-local-runtime-baseline
+    sourceStory: user-request-2026-05-26-local-runtime-baseline
+    dependencies:
+      - phase-14-local-e2e-baseline-diagnostics
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized fixing the local runtime baseline after diagnostics found Postgres connection exhaustion. This task may modify local runtime database connection management, targeted route error envelope handling, tests, docs, state, and queue. It must not modify dependencies, package manifests, lockfiles, schema, migrations, scripts, env files, staging/prod/cloud/real provider, or deployment.
+    allowedFiles:
+      - src/server/repositories/runtime-database.ts
+      - src/server/repositories/**/*runtime*repository.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/*route*.ts
+      - src/server/services/**/*runtime*.ts
+      - tests/unit/**
+      - src/server/**/*.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - local_runtime
+      - database_connection_pool
+      - route_error_envelope
+      - e2e_baseline
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/runtime-database-baseline.test.ts
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts
+      - npm.cmd run test:e2e -- e2e/student-practice-mock-entry.spec.ts
+      - npm.cmd run test:e2e -- e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-runtime-baseline.md
+    status: in_progress
+    retryCount: 0

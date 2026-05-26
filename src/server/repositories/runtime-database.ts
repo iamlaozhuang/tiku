@@ -7,10 +7,20 @@ import postgres from "postgres";
 import * as databaseSchema from "@/db/schema";
 
 export type RuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
+export type RuntimePostgresClient = ReturnType<typeof postgres>;
+export type RuntimePostgresClientFactory = (
+  databaseUrl: string,
+) => RuntimePostgresClient;
 
 export type RuntimeDatabaseOptions = {
   createDatabase?: () => RuntimeDatabase;
 };
+
+type SharedRuntimePostgresState = {
+  clients: Map<string, RuntimePostgresClient>;
+};
+
+const sharedRuntimePostgresStateKey = Symbol.for("tiku.runtimePostgresState");
 
 export function createLazyRuntimeDatabaseGetter(
   options: RuntimeDatabaseOptions,
@@ -27,6 +37,29 @@ export function createLazyRuntimeDatabaseGetter(
   };
 }
 
+export function getSharedRuntimePostgresClient(
+  databaseUrl: string,
+  options: {
+    cacheKey?: string;
+    createClient?: RuntimePostgresClientFactory;
+  } = {},
+): RuntimePostgresClient {
+  const state = getSharedRuntimePostgresState();
+  const cacheKey = options.cacheKey ?? databaseUrl;
+  let client = state.clients.get(cacheKey);
+
+  if (client === undefined) {
+    client = (options.createClient ?? createRuntimePostgresClient)(databaseUrl);
+    state.clients.set(cacheKey, client);
+  }
+
+  return client;
+}
+
+export function resetSharedRuntimePostgresClientsForTest(): void {
+  getSharedRuntimePostgresState().clients.clear();
+}
+
 function createLocalRuntimeDatabase(
   missingDatabaseUrlMessage: string,
 ): RuntimeDatabase {
@@ -38,9 +71,27 @@ function createLocalRuntimeDatabase(
     throw new Error(missingDatabaseUrlMessage);
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
+}
+
+function createRuntimePostgresClient(
+  databaseUrl: string,
+): RuntimePostgresClient {
+  return postgres(databaseUrl, { max: 5 });
+}
+
+function getSharedRuntimePostgresState(): SharedRuntimePostgresState {
+  const runtimeGlobal = globalThis as typeof globalThis & {
+    [sharedRuntimePostgresStateKey]?: SharedRuntimePostgresState;
+  };
+
+  runtimeGlobal[sharedRuntimePostgresStateKey] ??= {
+    clients: new Map(),
+  };
+
+  return runtimeGlobal[sharedRuntimePostgresStateKey];
 }
 
 function loadLocalEnv(): void {

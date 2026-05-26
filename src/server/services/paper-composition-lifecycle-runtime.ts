@@ -24,6 +24,7 @@ import {
 import { storeLocalPaperAssetFile } from "./local-paper-asset-storage";
 import { createPaperAssetService } from "./paper-asset-service";
 import { createPaperDraftService } from "./paper-draft-service";
+import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
 import type { SessionService } from "./session-service";
 
 type RouteContext = {
@@ -384,33 +385,35 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
             await service.listPapers(readPaperQuery(request)),
           );
         },
-        async POST(request: Request): Promise<Response> {
-          const actorOrError = await requireContentAdminActor(request, {
-            actionType: "paper.create",
-            targetResourceType: "paper",
-            targetPublicId: null,
-          });
+        POST: createRouteHandlerWithErrorEnvelope(
+          async (request: Request): Promise<Response> => {
+            const actorOrError = await requireContentAdminActor(request, {
+              actionType: "paper.create",
+              targetResourceType: "paper",
+              targetPublicId: null,
+            });
 
-          if ("code" in actorOrError) {
-            return createJsonResponse(actorOrError);
-          }
+            if ("code" in actorOrError) {
+              return createJsonResponse(actorOrError);
+            }
 
-          const service = createPaperServiceForActor(actorOrError);
-          const response = await service.createPaper(
-            await readRequestJson(request),
-          );
+            const service = createPaperServiceForActor(actorOrError);
+            const response = await service.createPaper(
+              await readRequestJson(request),
+            );
 
-          await auditPaperMutation(
-            request,
-            actorOrError,
-            "paper.create",
-            "paper",
-            null,
-            response,
-          );
+            await auditPaperMutation(
+              request,
+              actorOrError,
+              "paper.create",
+              "paper",
+              null,
+              response,
+            );
 
-          return createJsonResponse(response);
-        },
+            return createJsonResponse(response);
+          },
+        ),
       },
       detail: {
         async GET(request: Request, context: RouteContext): Promise<Response> {

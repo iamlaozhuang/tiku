@@ -15,7 +15,6 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
 import * as databaseSchema from "@/db/schema";
 import type { AuthorizationType } from "../contracts/effective-authorization-contract";
@@ -35,6 +34,7 @@ import type {
   PracticeRepository,
   PracticeRow,
 } from "./practice-repository";
+import { getSharedRuntimePostgresClient } from "./runtime-database";
 import type {
   StudentPaperAuthorizationScopeRow,
   StudentPaperRepository,
@@ -97,7 +97,7 @@ function createLocalRuntimeDatabase(): StudentFlowRuntimeDatabase {
     throw new Error("DATABASE_URL is required for student flow runtime.");
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
 }

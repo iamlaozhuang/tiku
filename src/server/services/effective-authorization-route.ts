@@ -6,6 +6,7 @@ import type {
   EffectiveAuthorizationService,
   EffectiveAuthorizationUserContext,
 } from "./effective-authorization-service";
+import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
 
 export type EffectiveAuthorizationUserResolver = (
   request: Request,
@@ -39,22 +40,24 @@ export function createEffectiveAuthorizationRouteHandlers(
   resolveUserContext: EffectiveAuthorizationUserResolver,
 ) {
   return {
-    async GET(request: Request): Promise<Response> {
-      const userContext = await resolveRequiredUserContext(
-        request,
-        resolveUserContext,
-      );
+    GET: createRouteHandlerWithErrorEnvelope(
+      async (request: Request): Promise<Response> => {
+        const userContext = await resolveRequiredUserContext(
+          request,
+          resolveUserContext,
+        );
 
-      if (!isEffectiveAuthorizationUserContext(userContext)) {
-        return createJsonResponse(userContext);
-      }
+        if (!isEffectiveAuthorizationUserContext(userContext)) {
+          return createJsonResponse(userContext);
+        }
 
-      return createJsonResponse(
-        await effectiveAuthorizationService.listEffectiveAuthorizations(
-          userContext,
-        ),
-      );
-    },
+        return createJsonResponse(
+          await effectiveAuthorizationService.listEffectiveAuthorizations(
+            userContext,
+          ),
+        );
+      },
+    ),
   };
 }
 
