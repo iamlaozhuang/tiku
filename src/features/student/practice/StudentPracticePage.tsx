@@ -49,7 +49,9 @@ type PracticeQuestionType =
   | "multi_choice"
   | "true_false"
   | "fill_blank"
-  | "short_answer";
+  | "short_answer"
+  | "case_analysis"
+  | "calculation";
 
 type PracticePaperQuestion = {
   paperQuestionPublicId: string;
@@ -343,6 +345,8 @@ function normalizePracticeQuestionType(
     case "true_false":
     case "fill_blank":
     case "short_answer":
+    case "case_analysis":
+    case "calculation":
       return value;
     case "multiple_choice":
       return "multi_choice";
@@ -370,7 +374,11 @@ function isFillBlankPracticeQuestion(
 function isSubjectivePracticeQuestion(
   questionType: PracticeQuestionType,
 ): boolean {
-  return questionType === "short_answer";
+  return (
+    questionType === "short_answer" ||
+    questionType === "case_analysis" ||
+    questionType === "calculation"
+  );
 }
 
 function mapPracticeQuestion(

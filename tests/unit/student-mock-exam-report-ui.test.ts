@@ -430,6 +430,109 @@ describe("StudentMockExamPage", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
   });
+
+  it.each(["case_analysis", "calculation"] as const)(
+    "saves %s mock exam snapshots as text answers",
+    async (questionType) => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+      const mockExam = {
+        ...studentMockExamFixture.mockExams[0].mockExam,
+        publicId: `mock-exam-${questionType}-runtime`,
+        paperPublicId: `paper-${questionType}-mock-runtime`,
+        paperSnapshot: {
+          name: `Synthetic ${questionType} mock_exam`,
+          paperSections: [
+            {
+              title: "Synthetic subjective paper_section",
+              paperQuestions: [
+                {
+                  paperQuestionPublicId: `paper-question-${questionType}-001`,
+                  questionPublicId: `question-${questionType}-001`,
+                  questionType,
+                  stemRichText: `Synthetic ${questionType} stem`,
+                  score: "10.0",
+                },
+              ],
+            },
+          ],
+        },
+      };
+      const fetchMock = vi.fn(
+        async (url: RequestInfo | URL, init?: RequestInit) => {
+          if (String(url) === "/api/v1/mock-exams") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => ({
+                code: 0,
+                message: "ok",
+                data: { mockExam },
+              }),
+            };
+          }
+
+          if (
+            String(url) ===
+            `/api/v1/mock-exams/mock-exam-${questionType}-runtime/answers`
+          ) {
+            expect(JSON.parse(String(init?.body))).toMatchObject({
+              paperQuestionPublicId: `paper-question-${questionType}-001`,
+              selectedLabels: [],
+              textAnswer: `Synthetic ${questionType} answer`,
+            });
+
+            return {
+              ok: true,
+              status: 200,
+              json: async () => ({
+                code: 0,
+                message: "ok",
+                data: {
+                  answerRecord: {
+                    publicId: "answer-record-synthetic",
+                  },
+                },
+              }),
+            };
+          }
+
+          return {
+            ok: false,
+            status: 404,
+            json: async () => ({
+              code: 404001,
+              message: "missing",
+              data: null,
+            }),
+          };
+        },
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(
+        createElement(StudentMockExamPage, {
+          paperPublicId: `paper-${questionType}-mock-runtime`,
+        }),
+      );
+
+      expect(
+        await screen.findByRole("heading", {
+          name: `Synthetic ${questionType} mock_exam`,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(`Synthetic ${questionType} stem`),
+      ).toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText("文字答案"), {
+        target: { value: `Synthetic ${questionType} answer` },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "保存本题作答" }));
+
+      expect(await screen.findByText("本题作答已保存")).toBeInTheDocument();
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    },
+  );
 });
 
 describe("StudentExamReportPage", () => {
@@ -463,6 +566,66 @@ describe("StudentExamReportPage", () => {
     );
     expect(reportSurface).not.toHaveAttribute("data-id");
     expect(reportSurface).not.toHaveTextContent("2001");
+  });
+
+  it("renders subjective question type and paper_section statistics from report snapshots", () => {
+    const report = {
+      ...studentExamReportFixture.examReports[0],
+      publicId: "exam-report-subjective-statistics",
+      reportSnapshot: {
+        totalScoreText: "总分 8.0",
+        accuracyText: "得分率 80%",
+        scoreSummaryText: "得分 8.0 / 10",
+        questionTypeSummaryText: "案例分析题 1 题，计算题 1 题",
+        paperSectionSummaryText: "案例模块 得分率 80%",
+        questionResults: [
+          {
+            paperQuestionPublicId: "paper-question-case-analysis-001",
+            questionPublicId: "question-case-analysis-001",
+            questionType: "case_analysis",
+            title: "Synthetic case_analysis report item",
+            isCorrect: null,
+            score: "4.0",
+            maxScore: "5.0",
+            selectedAnswer: "Synthetic selected answer",
+            standardAnswer: "Synthetic reference",
+            mistakeBookPublicId: null,
+          },
+          {
+            paperQuestionPublicId: "paper-question-calculation-001",
+            questionPublicId: "question-calculation-001",
+            questionType: "calculation",
+            title: "Synthetic calculation report item",
+            isCorrect: null,
+            score: "4.0",
+            maxScore: "5.0",
+            selectedAnswer: "Synthetic selected answer",
+            standardAnswer: "Synthetic reference",
+            mistakeBookPublicId: null,
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-subjective-statistics",
+        examReports: [report],
+      }),
+    );
+
+    expect(
+      screen.getByText("案例分析题 1 题，计算题 1 题"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("案例模块 得分率 80%")).toBeInTheDocument();
+    expect(screen.getByText("案例分析题")).toBeInTheDocument();
+    expect(screen.getByText("计算题")).toBeInTheDocument();
+    expect(
+      screen.getByText("Synthetic case_analysis report item"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Synthetic calculation report item"),
+    ).toBeInTheDocument();
   });
 
   it("renders scoring, scoring partial failed, completed, loading, error, authorization expired, and empty report states", () => {
