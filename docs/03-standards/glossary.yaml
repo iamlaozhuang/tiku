@@ -353,9 +353,8 @@ enums:
       - { key: true_false, chinese: 判断题 }
       - { key: fill_blank, chinese: 填空题 }
       - { key: short_answer, chinese: 简答题 }
-      # 二期规划范围
-      # - { key: case_analysis,  chinese: 案例分析题 }
-      # - { key: calculation,    chinese: 计算题 }
+      - { key: case_analysis, chinese: 案例分析题 }
+      - { key: calculation, chinese: 计算题 }
 
   paper_status:
     db_column: paper_status
