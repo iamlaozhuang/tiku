@@ -54,13 +54,27 @@ type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
 type PaperLoadState = "loading" | "ready" | "empty" | "unauthorized" | "error";
 type PaperFormValues = {
+  durationMinute: string;
+  level: string;
   name: string;
+  paperType: PaperType;
+  profession: Profession;
+  source: string;
+  subject: Subject;
   totalScore: string;
+  year: string;
 };
 type PaperQuestionFormValues = {
+  materialPublicId: string;
   paperPublicId: string;
+  paperSectionDescription: string;
+  paperSectionSortOrder: string;
+  paperSectionTitle: string;
   questionPublicId: string;
+  questionGroupSortOrder: string;
+  questionGroupTitle: string;
   score: string;
+  sortOrder: string;
 };
 type PaperAssetFormValues = {
   paperPublicId: string;
@@ -257,13 +271,16 @@ function mapPaperDraftToSummary(
 function createPaperInput(values: PaperFormValues) {
   return {
     name: values.name,
-    profession: "marketing",
-    level: 3,
-    subject: "theory",
-    paperType: "mock_paper",
-    year: 2026,
-    source: null,
-    durationMinute: 90,
+    profession: values.profession,
+    level: Number(values.level),
+    subject: values.subject,
+    paperType: values.paperType,
+    year: values.year.trim().length === 0 ? null : Number(values.year),
+    source: values.source.trim().length === 0 ? null : values.source,
+    durationMinute:
+      values.durationMinute.trim().length === 0
+        ? null
+        : Number(values.durationMinute),
     totalScore: values.totalScore,
   };
 }
@@ -272,13 +289,26 @@ function createPaperQuestionInput(values: PaperQuestionFormValues) {
   return {
     questionPublicId: values.questionPublicId,
     score: values.score,
-    sortOrder: 1,
+    sortOrder: Number(values.sortOrder),
     paperSection: {
-      title: "默认大题",
-      description: null,
-      sortOrder: 1,
+      title: values.paperSectionTitle,
+      description:
+        values.paperSectionDescription.trim().length === 0
+          ? null
+          : values.paperSectionDescription,
+      sortOrder: Number(values.paperSectionSortOrder),
     },
-    questionGroup: null,
+    questionGroup:
+      values.materialPublicId.trim().length === 0
+        ? null
+        : {
+            title:
+              values.questionGroupTitle.trim().length === 0
+                ? values.paperSectionTitle
+                : values.questionGroupTitle,
+            materialPublicId: values.materialPublicId,
+            sortOrder: Number(values.questionGroupSortOrder),
+          },
   };
 }
 
@@ -299,6 +329,8 @@ function createPaperAssetFormData(values: PaperAssetFormValues) {
 
 export function AdminPaperManagement() {
   const [keyword, setKeyword] = useState("");
+  const [levelFilter, setLevelFilter] = useState("");
+  const [yearFilter, setYearFilter] = useState("");
   const [profession, setProfession] = useState<ProfessionFilter>("all");
   const [subject, setSubject] = useState<SubjectFilter>("all");
   const [paperStatus, setPaperStatus] = useState<PaperStatusFilter>("all");
@@ -317,6 +349,7 @@ export function AdminPaperManagement() {
           paper.name,
           paper.sourceFileName,
           paper.publishValidationSummary,
+          paper.year,
         ]
           .filter(Boolean)
           .join(" ")
@@ -324,13 +357,24 @@ export function AdminPaperManagement() {
 
         return (
           includesKeyword(searchableText, keyword) &&
+          includesKeyword(String(paper.level), levelFilter) &&
+          includesKeyword(String(paper.year ?? ""), yearFilter) &&
           matchesFilter(paper.profession, profession) &&
           matchesFilter(paper.subject, subject) &&
           matchesFilter(paper.paperStatus, paperStatus) &&
           matchesNullableFilter(paper.paperType, paperType)
         );
       }),
-    [keyword, paperStatus, paperType, papers, profession, subject],
+    [
+      keyword,
+      levelFilter,
+      paperStatus,
+      paperType,
+      papers,
+      profession,
+      subject,
+      yearFilter,
+    ],
   );
 
   if (loadState === "loading") {
@@ -590,6 +634,13 @@ export function AdminPaperManagement() {
               kind: "paper",
               values: {
                 name: "新建本地组卷",
+                profession: "marketing",
+                level: "3",
+                subject: "theory",
+                paperType: "mock_paper",
+                year: "2026",
+                source: "",
+                durationMinute: "90",
                 totalScore: "5.0",
               },
             });
@@ -601,15 +652,19 @@ export function AdminPaperManagement() {
 
       <FilterPanel
         keyword={keyword}
+        levelFilter={levelFilter}
         paperStatus={paperStatus}
         paperType={paperType}
         profession={profession}
         subject={subject}
+        yearFilter={yearFilter}
         onKeywordChange={setKeyword}
+        onLevelFilterChange={setLevelFilter}
         onPaperStatusChange={setPaperStatus}
         onPaperTypeChange={setPaperType}
         onProfessionChange={setProfession}
         onSubjectChange={setSubject}
+        onYearFilterChange={setYearFilter}
       />
 
       <SummaryRail rows={filteredPapers} />
@@ -678,9 +733,16 @@ export function AdminPaperManagement() {
             setActiveForm({
               kind: "paperQuestion",
               values: {
+                materialPublicId: "",
                 paperPublicId: publicId,
+                paperSectionDescription: "",
+                paperSectionSortOrder: "1",
+                paperSectionTitle: "默认大题",
                 questionPublicId: "question-marketing-001",
+                questionGroupSortOrder: "1",
+                questionGroupTitle: "",
                 score: "5.0",
+                sortOrder: "1",
               },
             });
           }}
@@ -771,6 +833,7 @@ function PaperWriteForm({
 
   return (
     <form
+      aria-label="试卷表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -788,16 +851,112 @@ function PaperWriteForm({
           }
         />
       </label>
-      <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">总分</span>
-        <Input
-          aria-label="总分"
-          value={formValues.totalScore}
-          onChange={(event) =>
-            setFormValues({ ...formValues, totalScore: event.target.value })
+      <div className="grid gap-3 md:grid-cols-4">
+        <FilterSelect
+          label="专业"
+          options={[
+            ["marketing", "营销"],
+            ["logistics", "物流"],
+            ["monopoly", "专卖"],
+          ]}
+          value={formValues.profession}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              profession: value as Profession,
+            })
           }
         />
-      </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">等级</span>
+          <Input
+            aria-label="等级"
+            min={1}
+            type="number"
+            value={formValues.level}
+            onChange={(event) =>
+              setFormValues({ ...formValues, level: event.target.value })
+            }
+          />
+        </label>
+        <FilterSelect
+          label="科目"
+          options={[
+            ["theory", "理论"],
+            ["skill", "技能"],
+          ]}
+          value={formValues.subject}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              subject: value as Subject,
+            })
+          }
+        />
+        <FilterSelect
+          label="类型"
+          options={[
+            ["mock_paper", "模拟卷"],
+            ["past_paper", "历年真题"],
+          ]}
+          value={formValues.paperType}
+          onChange={(value) =>
+            setFormValues({
+              ...formValues,
+              paperType: value as PaperType,
+            })
+          }
+        />
+      </div>
+      <div className="grid gap-3 md:grid-cols-4">
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">年份</span>
+          <Input
+            aria-label="年份"
+            type="number"
+            value={formValues.year}
+            onChange={(event) =>
+              setFormValues({ ...formValues, year: event.target.value })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">考试时长</span>
+          <Input
+            aria-label="考试时长"
+            max={300}
+            min={10}
+            type="number"
+            value={formValues.durationMinute}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                durationMinute: event.target.value,
+              })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">总分</span>
+          <Input
+            aria-label="总分"
+            value={formValues.totalScore}
+            onChange={(event) =>
+              setFormValues({ ...formValues, totalScore: event.target.value })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">来源说明</span>
+          <Input
+            aria-label="来源说明"
+            value={formValues.source}
+            onChange={(event) =>
+              setFormValues({ ...formValues, source: event.target.value })
+            }
+          />
+        </label>
+      </div>
       <div className="flex flex-wrap gap-2">
         <Button disabled={isSubmitting} type="submit">
           保存草稿
@@ -825,6 +984,7 @@ function PaperQuestionWriteForm({
 
   return (
     <form
+      aria-label="组卷表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -845,16 +1005,116 @@ function PaperQuestionWriteForm({
           }
         />
       </label>
-      <label className="grid gap-2 text-sm font-medium">
-        <span className="text-text-secondary">题目分值</span>
-        <Input
-          aria-label="题目分值"
-          value={formValues.score}
-          onChange={(event) =>
-            setFormValues({ ...formValues, score: event.target.value })
-          }
-        />
-      </label>
+      <div className="grid gap-3 md:grid-cols-3">
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">题目分值</span>
+          <Input
+            aria-label="题目分值"
+            value={formValues.score}
+            onChange={(event) =>
+              setFormValues({ ...formValues, score: event.target.value })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">题目顺序</span>
+          <Input
+            aria-label="题目顺序"
+            min={1}
+            type="number"
+            value={formValues.sortOrder}
+            onChange={(event) =>
+              setFormValues({ ...formValues, sortOrder: event.target.value })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">大题顺序</span>
+          <Input
+            aria-label="大题顺序"
+            min={1}
+            type="number"
+            value={formValues.paperSectionSortOrder}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                paperSectionSortOrder: event.target.value,
+              })
+            }
+          />
+        </label>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">大题名称</span>
+          <Input
+            aria-label="大题名称"
+            value={formValues.paperSectionTitle}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                paperSectionTitle: event.target.value,
+              })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">大题说明</span>
+          <Input
+            aria-label="大题说明"
+            value={formValues.paperSectionDescription}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                paperSectionDescription: event.target.value,
+              })
+            }
+          />
+        </label>
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">材料 publicId</span>
+          <Input
+            aria-label="材料 publicId"
+            value={formValues.materialPublicId}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                materialPublicId: event.target.value,
+              })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">题组名称</span>
+          <Input
+            aria-label="题组名称"
+            value={formValues.questionGroupTitle}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                questionGroupTitle: event.target.value,
+              })
+            }
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-text-secondary">题组顺序</span>
+          <Input
+            aria-label="题组顺序"
+            min={1}
+            type="number"
+            value={formValues.questionGroupSortOrder}
+            onChange={(event) =>
+              setFormValues({
+                ...formValues,
+                questionGroupSortOrder: event.target.value,
+              })
+            }
+          />
+        </label>
+      </div>
       <div className="flex flex-wrap gap-2">
         <Button disabled={isSubmitting} type="submit">
           加入试卷
@@ -882,6 +1142,7 @@ function PaperAssetWriteForm({
 
   return (
     <form
+      aria-label="附件表单"
       className="bg-surface border-border grid gap-4 rounded-md border p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
@@ -922,26 +1183,34 @@ function PaperAssetWriteForm({
 
 function FilterPanel({
   keyword,
+  levelFilter,
   paperStatus,
   paperType,
   profession,
   subject,
+  yearFilter,
   onKeywordChange,
+  onLevelFilterChange,
   onPaperStatusChange,
   onPaperTypeChange,
   onProfessionChange,
   onSubjectChange,
+  onYearFilterChange,
 }: {
   keyword: string;
+  levelFilter: string;
   paperStatus: PaperStatusFilter;
   paperType: PaperTypeFilter;
   profession: ProfessionFilter;
   subject: SubjectFilter;
+  yearFilter: string;
   onKeywordChange: (value: string) => void;
+  onLevelFilterChange: (value: string) => void;
   onPaperStatusChange: (value: PaperStatusFilter) => void;
   onPaperTypeChange: (value: PaperTypeFilter) => void;
   onProfessionChange: (value: ProfessionFilter) => void;
   onSubjectChange: (value: SubjectFilter) => void;
+  onYearFilterChange: (value: string) => void;
 }) {
   return (
     <div className="bg-surface border-border rounded-md border p-4 shadow-sm">
@@ -983,6 +1252,24 @@ function FilterPanel({
           value={subject}
           onChange={(value) => onSubjectChange(value as SubjectFilter)}
         />
+        <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
+          <span className="text-text-secondary">等级</span>
+          <Input
+            aria-label="等级筛选"
+            placeholder="全部等级"
+            value={levelFilter}
+            onChange={(event) => onLevelFilterChange(event.target.value)}
+          />
+        </label>
+        <label className="flex w-full flex-col gap-2 text-sm font-medium xl:w-28">
+          <span className="text-text-secondary">年份</span>
+          <Input
+            aria-label="年份筛选"
+            placeholder="全部年份"
+            value={yearFilter}
+            onChange={(event) => onYearFilterChange(event.target.value)}
+          />
+        </label>
         <FilterSelect
           label="状态"
           options={[
@@ -1060,110 +1347,122 @@ function PaperList({
 }) {
   return (
     <div className="grid gap-3">
-      {rows.map((paper) => (
-        <article
-          className="bg-surface border-border rounded-md border p-4 shadow-sm"
-          data-public-id={paper.publicId}
-          data-testid={`paper-row-${paper.publicId}`}
-          key={paper.publicId}
-        >
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={paper.paperStatus} />
-                <span className="text-text-muted text-xs">
-                  {paperTypeLabels[paper.paperType]}
-                </span>
-                <span className="text-text-muted text-xs">
-                  {formatScope(paper)}
-                </span>
-                {paper.year === null ? null : (
-                  <span className="text-text-muted text-xs">{paper.year}</span>
-                )}
-              </div>
-              <h2 className="text-text-primary text-base font-semibold">
-                {paper.name}
-              </h2>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <MetricBadge label="总分" value={paper.totalScore} />
-                <MetricBadge label="题目" value={`${paper.questionCount}`} />
-                <MetricBadge
-                  label="模拟记录"
-                  value={`${paper.mockExamCount}`}
-                />
-              </div>
-            </div>
-            <PublicId value={paper.publicId} />
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              aria-label={`组卷 ${paper.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onCompose(paper.publicId)}
-            >
-              <Layers3 aria-hidden="true" data-icon="inline-start" />
-              组卷
-            </Button>
-            <Button
-              aria-label={`发布 ${paper.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onPublish(paper.publicId)}
-            >
-              <FileCheck aria-hidden="true" data-icon="inline-start" />
-              发布
-            </Button>
-            <Button
-              aria-label={`下架 ${paper.publicId}`}
-              size="sm"
-              type="button"
-              variant="outline"
-              onClick={() => onArchive(paper.publicId)}
-            >
-              <Archive aria-hidden="true" data-icon="inline-start" />
-              下架
-            </Button>
-            <Button
-              aria-label={`复制 ${paper.publicId}`}
-              size="sm"
-              type="button"
-              variant="secondary"
-              onClick={() => onCopy(paper.publicId)}
-            >
-              <Copy aria-hidden="true" data-icon="inline-start" />
-              复制
-            </Button>
-            <Button
-              aria-label={`绑定原始文件 ${paper.publicId}`}
-              size="sm"
-              type="button"
-              variant="secondary"
-              onClick={() => onBindAsset(paper.publicId)}
-            >
-              <Upload aria-hidden="true" data-icon="inline-start" />
-              绑定原始文件
-            </Button>
-          </div>
+      {rows.map((paper) => {
+        const isDraft = paper.paperStatus === "draft";
+        const isPublished = paper.paperStatus === "published";
+        const canCopy = paper.paperStatus !== "draft";
 
-          <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-3">
-            <InfoBlock
-              label="原始文件"
-              value={paper.sourceFileName ?? "暂未绑定"}
-            />
-            <InfoBlock
-              label="发布校验"
-              value={paper.publishValidationSummary ?? "暂无校验结果"}
-            />
-            <InfoBlock
-              label="更新时间"
-              value={formatDateTime(paper.updatedAt)}
-            />
-          </div>
-        </article>
-      ))}
+        return (
+          <article
+            className="bg-surface border-border rounded-md border p-4 shadow-sm"
+            data-public-id={paper.publicId}
+            data-testid={`paper-row-${paper.publicId}`}
+            key={paper.publicId}
+          >
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge status={paper.paperStatus} />
+                  <span className="text-text-muted text-xs">
+                    {paperTypeLabels[paper.paperType]}
+                  </span>
+                  <span className="text-text-muted text-xs">
+                    {formatScope(paper)}
+                  </span>
+                  {paper.year === null ? null : (
+                    <span className="text-text-muted text-xs">
+                      {paper.year}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-text-primary text-base font-semibold">
+                  {paper.name}
+                </h2>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <MetricBadge label="总分" value={paper.totalScore} />
+                  <MetricBadge label="题目" value={`${paper.questionCount}`} />
+                  <MetricBadge
+                    label="模拟记录"
+                    value={`${paper.mockExamCount}`}
+                  />
+                </div>
+              </div>
+              <PublicId value={paper.publicId} />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                aria-label={`组卷 ${paper.publicId}`}
+                disabled={!isDraft}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onCompose(paper.publicId)}
+              >
+                <Layers3 aria-hidden="true" data-icon="inline-start" />
+                组卷
+              </Button>
+              <Button
+                aria-label={`发布 ${paper.publicId}`}
+                disabled={!isDraft}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onPublish(paper.publicId)}
+              >
+                <FileCheck aria-hidden="true" data-icon="inline-start" />
+                发布
+              </Button>
+              <Button
+                aria-label={`下架 ${paper.publicId}`}
+                disabled={!isPublished}
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => onArchive(paper.publicId)}
+              >
+                <Archive aria-hidden="true" data-icon="inline-start" />
+                下架
+              </Button>
+              <Button
+                aria-label={`复制 ${paper.publicId}`}
+                disabled={!canCopy}
+                size="sm"
+                type="button"
+                variant="secondary"
+                onClick={() => onCopy(paper.publicId)}
+              >
+                <Copy aria-hidden="true" data-icon="inline-start" />
+                复制
+              </Button>
+              <Button
+                aria-label={`绑定原始文件 ${paper.publicId}`}
+                size="sm"
+                type="button"
+                variant="secondary"
+                onClick={() => onBindAsset(paper.publicId)}
+              >
+                <Upload aria-hidden="true" data-icon="inline-start" />
+                绑定原始文件
+              </Button>
+            </div>
+
+            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-3">
+              <InfoBlock
+                label="原始文件"
+                value={paper.sourceFileName ?? "暂未绑定"}
+              />
+              <InfoBlock
+                label="发布校验"
+                value={paper.publishValidationSummary ?? "暂无校验结果"}
+              />
+              <InfoBlock
+                label="更新时间"
+                value={formatDateTime(paper.updatedAt)}
+              />
+            </div>
+          </article>
+        );
+      })}
     </div>
   );
 }
