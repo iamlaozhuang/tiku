@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
+  ArrowDownUp,
   ClipboardList,
   Copy,
   FileCheck,
@@ -52,6 +53,7 @@ type PaperStatusFilter = "all" | PaperStatus;
 type PaperTypeFilter = "all" | PaperType;
 type ProfessionFilter = "all" | Profession;
 type SubjectFilter = "all" | Subject;
+type AdminCommonSortOrder = "asc" | "desc";
 type PaperLoadState = "loading" | "ready" | "empty" | "unauthorized" | "error";
 type PaperFormValues = {
   durationMinute: string;
@@ -93,6 +95,16 @@ type ActivePaperForm =
   | {
       kind: "paperAsset";
       values: PaperAssetFormValues;
+    };
+
+type PendingPaperAction =
+  | {
+      kind: "publish";
+      publicId: string;
+    }
+  | {
+      kind: "archive";
+      publicId: string;
     };
 
 type PaperListDto = {
@@ -338,6 +350,10 @@ export function AdminPaperManagement() {
   const [activeForm, setActiveForm] = useState<ActivePaperForm | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState("20");
+  const [sortOrder, setSortOrder] = useState<AdminCommonSortOrder>("desc");
+  const [pendingPaperAction, setPendingPaperAction] =
+    useState<PendingPaperAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { loadState, papers, setPapers } = usePaperData();
 
@@ -375,6 +391,14 @@ export function AdminPaperManagement() {
       subject,
       yearFilter,
     ],
+  );
+  const displayedPapers = useMemo(
+    () =>
+      sortItemsByUpdatedAt(filteredPapers, sortOrder).slice(
+        0,
+        Number(pageSize),
+      ),
+    [filteredPapers, pageSize, sortOrder],
   );
 
   if (loadState === "loading") {
@@ -611,6 +635,22 @@ export function AdminPaperManagement() {
     setActionMessage(`试卷 ${copiedPaper.publicId} 已复制`);
   }
 
+  async function handleConfirmPendingPaperAction() {
+    if (pendingPaperAction === null) {
+      return;
+    }
+
+    const currentAction = pendingPaperAction;
+    setPendingPaperAction(null);
+
+    if (currentAction.kind === "publish") {
+      await handlePublishPaper(currentAction.publicId);
+      return;
+    }
+
+    await handleArchivePaper(currentAction.publicId);
+  }
+
   return (
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -667,7 +707,18 @@ export function AdminPaperManagement() {
         onYearFilterChange={setYearFilter}
       />
 
-      <SummaryRail rows={filteredPapers} />
+      <AdminCommonListControls
+        pageSize={pageSize}
+        sortOrder={sortOrder}
+        onPageSizeChange={setPageSize}
+        onToggleSortOrder={() =>
+          setSortOrder((currentSortOrder) =>
+            currentSortOrder === "desc" ? "asc" : "desc",
+          )
+        }
+      />
+
+      <SummaryRail rows={displayedPapers} />
 
       {actionMessage === null ? null : (
         <p className="text-brand-primary text-sm" role="status">
@@ -710,8 +761,10 @@ export function AdminPaperManagement() {
 
       {filteredPapers.length > 0 ? (
         <PaperList
-          rows={filteredPapers}
-          onArchive={(publicId) => void handleArchivePaper(publicId)}
+          rows={displayedPapers}
+          onArchive={(publicId) =>
+            setPendingPaperAction({ kind: "archive", publicId })
+          }
           onBindAsset={(publicId) => {
             setActionError(null);
             setActionMessage(null);
@@ -747,12 +800,114 @@ export function AdminPaperManagement() {
             });
           }}
           onCopy={(publicId) => void handleCopyPaper(publicId)}
-          onPublish={(publicId) => void handlePublishPaper(publicId)}
+          onPublish={(publicId) =>
+            setPendingPaperAction({ kind: "publish", publicId })
+          }
         />
       ) : (
         <FilteredEmptyState />
       )}
+
+      {pendingPaperAction === null ? null : (
+        <PaperConfirmationDialog
+          action={pendingPaperAction}
+          onCancel={() => setPendingPaperAction(null)}
+          onConfirm={() => void handleConfirmPendingPaperAction()}
+        />
+      )}
     </section>
+  );
+}
+
+function sortItemsByUpdatedAt<TItem extends { updatedAt: string }>(
+  items: TItem[],
+  sortOrder: AdminCommonSortOrder,
+) {
+  return [...items].sort((leftItem, rightItem) => {
+    const leftTime = new Date(leftItem.updatedAt).getTime();
+    const rightTime = new Date(rightItem.updatedAt).getTime();
+
+    return sortOrder === "desc" ? rightTime - leftTime : leftTime - rightTime;
+  });
+}
+
+function AdminCommonListControls({
+  pageSize,
+  sortOrder,
+  onPageSizeChange,
+  onToggleSortOrder,
+}: {
+  pageSize: string;
+  sortOrder: AdminCommonSortOrder;
+  onPageSizeChange: (value: string) => void;
+  onToggleSortOrder: () => void;
+}) {
+  return (
+    <section
+      aria-label="列表通用控制"
+      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
+    >
+      <FilterSelect
+        label="每页条数"
+        options={[
+          ["20", "20"],
+          ["50", "50"],
+          ["100", "100"],
+        ]}
+        value={pageSize}
+        onChange={onPageSizeChange}
+      />
+      <Button type="button" variant="outline" onClick={onToggleSortOrder}>
+        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
+        更新时间排序
+      </Button>
+      <p className="text-text-secondary text-xs">
+        当前{sortOrder === "desc" ? "降序" : "升序"}
+        ，筛选变更会自动刷新当前结果。
+      </p>
+    </section>
+  );
+}
+
+function PaperConfirmationDialog({
+  action,
+  onCancel,
+  onConfirm,
+}: {
+  action: PendingPaperAction;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const isArchive = action.kind === "archive";
+
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <h2 className="text-text-primary text-base font-semibold">
+          {isArchive ? "确认下架试卷？" : "确认发布试卷？"}
+        </h2>
+        <p className="text-text-secondary text-sm">
+          将提交 {action.publicId} 的{isArchive ? "下架" : "发布"}
+          操作；操作只使用 publicId。
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant={isArchive ? "destructive" : "default"}
+            onClick={onConfirm}
+          >
+            {isArchive ? "确认下架" : "确认发布"}
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1417,7 +1572,7 @@ function PaperList({
                 disabled={!isPublished}
                 size="sm"
                 type="button"
-                variant="outline"
+                variant="destructive"
                 onClick={() => onArchive(paper.publicId)}
               >
                 <Archive aria-hidden="true" data-icon="inline-start" />

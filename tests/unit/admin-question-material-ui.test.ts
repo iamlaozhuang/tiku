@@ -494,6 +494,27 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(row).not.toHaveAttribute("data-id");
   });
 
+  it("renders common pagination and updated-at sorting controls for question lists", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+
+    expect(screen.getByLabelText("每页条数")).toHaveValue("20");
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "50" },
+    });
+    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+
+    fireEvent.click(screen.getByRole("button", { name: "更新时间排序" }));
+    const rows = screen.getAllByTestId(/question-row-/);
+
+    expect(rows[0]).toHaveAttribute("data-public-id", "question-logistics-002");
+    expect(rows[1]).toHaveAttribute("data-public-id", "question-marketing-001");
+  });
+
   it("filters questions by level, question type, knowledge_node, and tag", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockContentFetch();
@@ -674,6 +695,8 @@ describe("AdminQuestionMaterialManagement", () => {
         name: "停用题目 question-marketing-001",
       }),
     );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认停用题目？");
+    fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
     fireEvent.click(
       screen.getByRole("button", {
         name: "复制题目 question-marketing-001",
@@ -1140,6 +1163,8 @@ describe("AdminQuestionMaterialManagement", () => {
         name: "停用材料 material-marketing-001",
       }),
     );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认停用材料？");
+    fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
     fireEvent.click(
       screen.getByRole("button", {
         name: "复制材料 material-marketing-001",
