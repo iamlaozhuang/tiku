@@ -32,25 +32,25 @@
 
 首期题型：
 
-- 单选题
-- 多选题
-- 判断题
-- 填空题
-- 简答题
-- 案例分析题
-- 计算题
+- 单选题（`single_choice`）
+- 多选题（`multi_choice`）
+- 判断题（`true_false`）
+- 填空题（`fill_blank`）
+- 简答题（`short_answer`）
+- 案例分析题（`case_analysis`）
+- 计算题（`calculation`）
 
 材料题组/组合题不是题型，而是结构容器。
 
 材料题组下允许混合题型：
 
-- 单选
-- 多选
-- 判断
-- 填空
-- 简答
-- 案例分析
-- 计算题
+- 单选题（`single_choice`）
+- 多选题（`multi_choice`）
+- 判断题（`true_false`）
+- 填空题（`fill_blank`）
+- 简答题（`short_answer`）
+- 案例分析题（`case_analysis`）
+- 计算题（`calculation`）
 
 操作实务题首期不单独作为题型，可作为题目标签或业务分类。
 
