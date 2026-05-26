@@ -100,6 +100,106 @@ Minimum contract boundaries:
 - Prompt template changes do not rewrite historical `ai_call_log`, `exam_report`, or answer results.
 - Prompt templates must distinguish trusted system instructions from untrusted user answer, question content, retrieved chunks, and model output.
 
+## Phase 12 Model Configuration Admin Boundary
+
+Phase 12 may implement local/dev redaction-safe management for `model_provider`, `model_config`, and `prompt_template` only inside the existing REST and service layering.
+
+Allowed surfaces:
+
+- `model_provider` metadata CRUD, enable, disable, and credential rotation request shape.
+- `model_config` CRUD, enable, disable, explicit function mapping, fallback ordering, and redaction-safe snapshot metadata.
+- `prompt_template` metadata, version, function mapping, status, and digest management.
+- Local deterministic/mock provider selection and fallback verification.
+
+Blocked surfaces without a later approval:
+
+- No real provider call.
+- No `.env.local` or `.env.example` read or write.
+- No staging/prod/cloud/provider connection.
+- No secret generation, rotation, injection, or cloud secret manager integration.
+- No raw prompt, raw answer, raw model response, raw provider payload, raw retrieved chunk, full paper, full textbook, OCR full text, or customer-like private data in evidence, logs, DTOs, or snapshots.
+
+### Redaction-Safe DTO Rules
+
+External DTOs must use public identifiers and camelCase fields.
+
+`ModelProviderSummaryDto` and `ModelProviderDetailDto` may include:
+
+- `publicId`
+- `providerKey`
+- `displayName`
+- `status`
+- `isEnabled`
+- `secretStatus`
+- `maskedSecret`
+- `lastRotatedAt`
+- `createdAt`
+- `updatedAt`
+
+They must not include credential values, environment variable values, provider headers, provider payloads, numeric ids, or internal secret references that can be dereferenced by a client.
+
+`ModelConfigSummaryDto` and `ModelConfigDetailDto` may include:
+
+- `publicId`
+- `providerPublicId`
+- `providerDisplayName`
+- `modelName`
+- `modelAlias`
+- `functionType`
+- `status`
+- `isEnabled`
+- `fallbackPriority`
+- `timeoutMs`
+- `retryLimit`
+- `configVersion`
+- `snapshotPolicy`
+- `createdAt`
+- `updatedAt`
+
+`PromptTemplateSummaryDto` and `PromptTemplateDetailDto` may include:
+
+- `publicId`
+- `templateKey`
+- `version`
+- `functionType`
+- `status`
+- `isEnabled`
+- `title`
+- `description`
+- `bodyDigest`
+- `bodyPreviewMasked`
+- `createdAt`
+- `updatedAt`
+
+`bodyPreviewMasked` is a UI-safe marker, not a prompt preview. Full prompt body storage or display remains separately gated until a task defines a safe retention and review policy.
+
+### Secret Input And Masking Rules
+
+Secret-like input may appear only in create or explicit rotate/update request payloads and only as short-lived server input. The value must be discarded after server-side validation/storage handling and must not appear in API responses, logs, evidence, snapshots, tests, or frontend persisted state.
+
+Implementation tests may use synthetic fake values only. Test names, snapshots, and evidence must not include realistic keys or tokens.
+
+### Fallback And Snapshot Rules
+
+Fallback order is a project-owned policy, not provider behavior. It must be explicit per `functionType`, deterministic, and auditable.
+
+`ai_scoring` must not silently fallback. It may use fallback only when the selected `model_config` version enables an explicit ordered policy and records the redaction-safe fallback chain.
+
+Every AI call that uses `model_config` must snapshot:
+
+- `modelConfigPublicId`
+- `configVersion`
+- `providerPublicId`
+- `providerDisplayName`
+- `modelName` or `modelAlias`
+- `functionType`
+- `fallbackPriority`
+- `promptTemplatePublicId`
+- `promptTemplateKey`
+- `promptTemplateVersion`
+
+Snapshots must not include secret values, raw prompt bodies, raw answers, raw model responses, raw provider payloads, or raw retrieved chunks.
+
 ## AI Call Log Contract
 
 `ai_call_log` exists for auditability, troubleshooting, and repeatability. It must not become a raw sensitive data sink.
