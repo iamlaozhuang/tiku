@@ -8308,6 +8308,8 @@ tasks:
       - drizzle/*_add_question_type_case_analysis_calculation.sql
       - drizzle/meta/_journal.json
       - drizzle/meta/*_snapshot.json
+      - src/components/admin/QuestionMaterialManagement/AdminQuestionMaterialManagement.tsx
+      - src/features/admin/question-material-management/AdminQuestionMaterialManagementClient.tsx
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/**
@@ -8335,7 +8337,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-schema-migration.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: phase-12-question-type-server-runtime
     title: Phase 12 Question Type Server Runtime

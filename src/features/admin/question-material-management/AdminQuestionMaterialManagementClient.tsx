@@ -145,6 +145,8 @@ const statusLabels: Record<QuestionStatus | MaterialStatus, string> = {
 };
 
 const questionTypeLabels: Record<QuestionDto["questionType"], string> = {
+  case_analysis: "案例分析题",
+  calculation: "计算题",
   fill_blank: "填空题",
   multi_choice: "多选题",
   short_answer: "简答题",
