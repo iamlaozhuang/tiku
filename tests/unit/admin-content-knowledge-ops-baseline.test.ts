@@ -658,11 +658,16 @@ describe("admin content and knowledge ops baseline", () => {
     const firstNode = screen.getByTestId(
       "knowledge-node-row-knowledge-node-public-001",
     );
+    const marketingTree = screen.getByRole("tree", {
+      name: "营销知识点树",
+    });
 
     expect(firstNode).toHaveAttribute(
       "data-public-id",
       "knowledge-node-public-001",
     );
+    expect(firstNode).toHaveAttribute("data-depth", "1");
+    expect(marketingTree).toContainElement(firstNode);
     expect(firstNode).not.toHaveAttribute("data-id");
     expect(within(firstNode).getByText("营销/市场调研")).toBeInTheDocument();
     expect(within(firstNode).getByText("绑定题目 18")).toBeInTheDocument();
@@ -732,6 +737,22 @@ describe("admin content and knowledge ops baseline", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "新增节点" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("新增知识点节点");
+    const createDialog = within(screen.getByRole("alertdialog"));
+    fireEvent.change(createDialog.getByLabelText("节点名称"), {
+      target: { value: "客户分层" },
+    });
+    fireEvent.change(createDialog.getByLabelText("专业"), {
+      target: { value: "marketing" },
+    });
+    fireEvent.change(createDialog.getByLabelText("适用等级"), {
+      target: { value: "2,3" },
+    });
+    fireEvent.change(createDialog.getByLabelText("父级 publicId"), {
+      target: { value: "knowledge-node-public-001" },
+    });
+    fireEvent.change(createDialog.getByLabelText("排序"), {
+      target: { value: "40" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "确认新增" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "知识点节点已新增",
@@ -741,11 +762,11 @@ describe("admin content and knowledge ops baseline", () => {
       "/api/v1/knowledge-nodes",
       expect.objectContaining({
         body: JSON.stringify({
-          parentKnowledgeNodePublicId: null,
+          parentKnowledgeNodePublicId: "knowledge-node-public-001",
           profession: "marketing",
-          levelList: [3],
-          name: "新增知识点",
-          sortOrder: 30,
+          levelList: [2, 3],
+          name: "客户分层",
+          sortOrder: 40,
         }),
         headers: expect.objectContaining({
           authorization: "Bearer unit-test-admin-token",
@@ -756,6 +777,17 @@ describe("admin content and knowledge ops baseline", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "编辑节点" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("编辑知识点节点");
+    const editDialog = within(screen.getByRole("alertdialog"));
+    expect(editDialog.getByLabelText("节点名称")).toHaveValue("市场调研");
+    fireEvent.change(editDialog.getByLabelText("节点名称"), {
+      target: { value: "市场调研（新版）" },
+    });
+    fireEvent.change(editDialog.getByLabelText("适用等级"), {
+      target: { value: "3,4" },
+    });
+    fireEvent.change(editDialog.getByLabelText("排序"), {
+      target: { value: "15" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "确认更新" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "知识点节点已更新",
@@ -764,7 +796,11 @@ describe("admin content and knowledge ops baseline", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/knowledge-nodes/knowledge-node-public-001",
       expect.objectContaining({
-        body: JSON.stringify({ name: "市场调研（已更新）" }),
+        body: JSON.stringify({
+          levelList: [3, 4],
+          name: "市场调研（新版）",
+          sortOrder: 15,
+        }),
         headers: expect.objectContaining({
           authorization: "Bearer unit-test-admin-token",
         }),
@@ -808,6 +844,13 @@ describe("admin content and knowledge ops baseline", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "移动节点" }));
     expect(screen.getByRole("alertdialog")).toHaveTextContent("移动知识点节点");
+    const moveDialog = within(screen.getByRole("alertdialog"));
+    fireEvent.change(moveDialog.getByLabelText("新父级 publicId"), {
+      target: { value: "knowledge-node-public-002" },
+    });
+    fireEvent.change(moveDialog.getByLabelText("新排序"), {
+      target: { value: "45" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "确认移动" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(
@@ -819,7 +862,7 @@ describe("admin content and knowledge ops baseline", () => {
       expect.objectContaining({
         body: JSON.stringify({
           parentKnowledgeNodePublicId: "knowledge-node-public-002",
-          sortOrder: 30,
+          sortOrder: 45,
         }),
         headers: expect.objectContaining({
           authorization: "Bearer unit-test-admin-token",

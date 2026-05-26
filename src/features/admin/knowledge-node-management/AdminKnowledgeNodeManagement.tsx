@@ -46,24 +46,45 @@ type KnowledgeNodeResultDto = {
   knowledgeNode: AdminKnowledgeNodeOpsSummaryDto;
 };
 
+type KnowledgeNodeFormValues = {
+  levelListText: string;
+  name: string;
+  parentKnowledgeNodePublicId: string;
+  profession: Profession;
+  sortOrder: string;
+};
+
+type KnowledgeNodeMoveValues = {
+  parentKnowledgeNodePublicId: string;
+  sortOrder: string;
+};
+
 type KnowledgeNodeAction =
   | {
       status: "idle";
     }
   | {
-      status: "create" | "edit" | "disable";
+      formValues: KnowledgeNodeFormValues;
+      status: "create" | "edit";
       target: AdminKnowledgeNodeOpsSummaryDto | null;
     }
   | {
-      status: "move";
+      status: "disable";
+      target: AdminKnowledgeNodeOpsSummaryDto | null;
+    }
+  | {
       parentTarget: AdminKnowledgeNodeOpsSummaryDto | null;
+      status: "move";
       target: AdminKnowledgeNodeOpsSummaryDto | null;
+      values: KnowledgeNodeMoveValues;
     }
   | {
+      formValues?: KnowledgeNodeFormValues;
       parentTarget?: AdminKnowledgeNodeOpsSummaryDto | null;
       status: "submitting";
       target: AdminKnowledgeNodeOpsSummaryDto | null;
       type: "create" | "edit" | "disable" | "move";
+      values?: KnowledgeNodeMoveValues;
     };
 
 type RunnableKnowledgeNodeAction = Extract<
@@ -200,6 +221,15 @@ export function AdminKnowledgeNodeManagement() {
           ) ?? null),
     [activeKnowledgeNode, filteredKnowledgeNodes],
   );
+  const suggestedMoveSortOrder =
+    activeKnowledgeNode === null || moveParentCandidate === null
+      ? "10"
+      : String(
+          Math.max(
+            activeKnowledgeNode.sortOrder,
+            moveParentCandidate.sortOrder,
+          ) + 10,
+        );
 
   async function handleConfirmAction() {
     if (
@@ -223,10 +253,15 @@ export function AdminKnowledgeNodeManagement() {
     }
 
     setAction({
+      formValues:
+        action.status === "create" || action.status === "edit"
+          ? action.formValues
+          : undefined,
       parentTarget: action.status === "move" ? action.parentTarget : undefined,
       status: "submitting",
       target: action.target,
       type: action.status,
+      values: action.status === "move" ? action.values : undefined,
     });
 
     try {
@@ -317,7 +352,11 @@ export function AdminKnowledgeNodeManagement() {
           <Button
             onClick={() => {
               setToastMessage(null);
-              setAction({ status: "create", target: null });
+              setAction({
+                formValues: createDefaultKnowledgeNodeFormValues(),
+                status: "create",
+                target: null,
+              });
             }}
           >
             <Plus aria-hidden="true" data-icon="inline-start" />
@@ -328,7 +367,12 @@ export function AdminKnowledgeNodeManagement() {
             variant="outline"
             onClick={() => {
               setToastMessage(null);
-              setAction({ status: "edit", target: activeKnowledgeNode });
+              setAction({
+                formValues:
+                  createDefaultKnowledgeNodeFormValues(activeKnowledgeNode),
+                status: "edit",
+                target: activeKnowledgeNode,
+              });
             }}
           >
             <Pencil aria-hidden="true" data-icon="inline-start" />
@@ -345,6 +389,11 @@ export function AdminKnowledgeNodeManagement() {
                 parentTarget: moveParentCandidate,
                 status: "move",
                 target: activeKnowledgeNode,
+                values: {
+                  parentKnowledgeNodePublicId:
+                    moveParentCandidate?.publicId ?? "",
+                  sortOrder: suggestedMoveSortOrder,
+                },
               });
             }}
           >
@@ -447,6 +496,21 @@ export function AdminKnowledgeNodeManagement() {
           action={action}
           onCancel={() => setAction({ status: "idle" })}
           onConfirm={handleConfirmAction}
+          onUpdateFormValues={(formValues) => {
+            setAction((currentAction) =>
+              currentAction.status === "create" ||
+              currentAction.status === "edit"
+                ? { ...currentAction, formValues }
+                : currentAction,
+            );
+          }}
+          onUpdateMoveValues={(values) => {
+            setAction((currentAction) =>
+              currentAction.status === "move"
+                ? { ...currentAction, values }
+                : currentAction,
+            );
+          }}
         />
       ) : null}
 
@@ -470,13 +534,21 @@ async function runKnowledgeNodeAction({
   };
 
   if (action.status === "create") {
+    const parentKnowledgeNodePublicId = normalizeOptionalPublicId(
+      action.formValues.parentKnowledgeNodePublicId,
+    );
+
+    if (parentKnowledgeNodePublicId === undefined) {
+      return null;
+    }
+
     return requestKnowledgeNode("/api/v1/knowledge-nodes", {
       body: JSON.stringify({
-        parentKnowledgeNodePublicId: null,
-        profession: "marketing",
-        levelList: [3],
-        name: "新增知识点",
-        sortOrder: 30,
+        parentKnowledgeNodePublicId,
+        profession: action.formValues.profession,
+        levelList: parseLevelList(action.formValues.levelListText),
+        name: action.formValues.name.trim(),
+        sortOrder: parseSortOrder(action.formValues.sortOrder),
       }),
       headers,
       method: "POST",
@@ -491,7 +563,11 @@ async function runKnowledgeNodeAction({
     return requestKnowledgeNode(
       `/api/v1/knowledge-nodes/${action.target.publicId}`,
       {
-        body: JSON.stringify({ name: `${action.target.name}（已更新）` }),
+        body: JSON.stringify({
+          levelList: parseLevelList(action.formValues.levelListText),
+          name: action.formValues.name.trim(),
+          sortOrder: parseSortOrder(action.formValues.sortOrder),
+        }),
         headers,
         method: "PATCH",
       },
@@ -499,8 +575,16 @@ async function runKnowledgeNodeAction({
   }
 
   if (action.status === "move") {
+    const parentKnowledgeNodePublicId = normalizeOptionalPublicId(
+      action.values.parentKnowledgeNodePublicId,
+    );
+
+    if (parentKnowledgeNodePublicId === undefined) {
+      return null;
+    }
+
     if (
-      action.parentTarget === null ||
+      action.parentTarget !== null &&
       !isSafePublicId(action.parentTarget.publicId)
     ) {
       return null;
@@ -510,10 +594,8 @@ async function runKnowledgeNodeAction({
       `/api/v1/knowledge-nodes/${action.target.publicId}`,
       {
         body: JSON.stringify({
-          parentKnowledgeNodePublicId: action.parentTarget.publicId,
-          sortOrder:
-            Math.max(action.target.sortOrder, action.parentTarget.sortOrder) +
-            10,
+          parentKnowledgeNodePublicId,
+          sortOrder: parseSortOrder(action.values.sortOrder),
         }),
         headers,
         method: "PATCH",
@@ -549,14 +631,54 @@ function isSafePublicId(value: string) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 }
 
+function createDefaultKnowledgeNodeFormValues(
+  knowledgeNode?: AdminKnowledgeNodeOpsSummaryDto | null,
+): KnowledgeNodeFormValues {
+  return {
+    levelListText: knowledgeNode?.levelList.join(",") ?? "3",
+    name: knowledgeNode?.name ?? "新增知识点",
+    parentKnowledgeNodePublicId:
+      knowledgeNode?.parentKnowledgeNodePublicId ?? "",
+    profession: knowledgeNode?.profession ?? "marketing",
+    sortOrder: String(knowledgeNode?.sortOrder ?? 30),
+  };
+}
+
+function normalizeOptionalPublicId(value: string): string | null | undefined {
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.length === 0) {
+    return null;
+  }
+
+  return isSafePublicId(trimmedValue) ? trimmedValue : undefined;
+}
+
+function parseLevelList(value: string) {
+  return value
+    .split(",")
+    .map((levelText) => Number.parseInt(levelText.trim(), 10))
+    .filter((level) => Number.isInteger(level) && level > 0);
+}
+
+function parseSortOrder(value: string) {
+  const sortOrder = Number.parseInt(value.trim(), 10);
+
+  return Number.isInteger(sortOrder) ? sortOrder : 0;
+}
+
 function KnowledgeNodeActionDialog({
   action,
   onCancel,
   onConfirm,
+  onUpdateFormValues,
+  onUpdateMoveValues,
 }: {
   action: Exclude<KnowledgeNodeAction, { status: "idle" }>;
   onCancel: () => void;
   onConfirm: () => void;
+  onUpdateFormValues: (formValues: KnowledgeNodeFormValues) => void;
+  onUpdateMoveValues: (values: KnowledgeNodeMoveValues) => void;
 }) {
   const actionType =
     action.status === "submitting" ? action.type : action.status;
@@ -577,6 +699,18 @@ function KnowledgeNodeActionDialog({
         : actionType === "move"
           ? "确认移动"
           : "确认停用";
+  const formValues =
+    action.status === "create" || action.status === "edit"
+      ? action.formValues
+      : action.status === "submitting"
+        ? action.formValues
+        : undefined;
+  const moveValues =
+    action.status === "move"
+      ? action.values
+      : action.status === "submitting"
+        ? action.values
+        : undefined;
 
   return (
     <div
@@ -590,11 +724,25 @@ function KnowledgeNodeActionDialog({
         </h2>
         <p className="text-text-secondary text-sm">
           {actionType === "create"
-            ? "将创建一个营销 3级示例节点，用于验证运行时新增边界。"
+            ? "按专业、父级、等级和排序创建知识点节点。"
             : actionType === "move"
-              ? "将目标节点移动到当前结果中的另一个 publicId 父节点下，并同步提交排序值。"
+              ? "将目标节点移动到指定 publicId 父节点下，并同步提交排序值。"
               : "操作仅提交 publicId 和允许的 JSON 字段，不提交内部自增 id。"}
         </p>
+        {formValues === undefined ? null : (
+          <KnowledgeNodeForm
+            disabled={isSubmitting}
+            values={formValues}
+            onChange={onUpdateFormValues}
+          />
+        )}
+        {moveValues === undefined ? null : (
+          <KnowledgeNodeMoveForm
+            disabled={isSubmitting}
+            values={moveValues}
+            onChange={onUpdateMoveValues}
+          />
+        )}
         <div className="flex gap-2">
           <Button
             disabled={isSubmitting}
@@ -608,6 +756,132 @@ function KnowledgeNodeActionDialog({
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function KnowledgeNodeForm({
+  disabled,
+  onChange,
+  values,
+}: {
+  disabled: boolean;
+  onChange: (values: KnowledgeNodeFormValues) => void;
+  values: KnowledgeNodeFormValues;
+}) {
+  return (
+    <div className="grid gap-3">
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        <span className="text-text-secondary">节点名称</span>
+        <Input
+          aria-label="节点名称"
+          disabled={disabled}
+          value={values.name}
+          onChange={(event) =>
+            onChange({ ...values, name: event.target.value })
+          }
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        <span className="text-text-secondary">专业</span>
+        <select
+          aria-label="专业"
+          className="border-input bg-background rounded-md border px-3 py-2 text-sm"
+          disabled={disabled}
+          value={values.profession}
+          onChange={(event) =>
+            onChange({
+              ...values,
+              profession: event.target.value as Profession,
+            })
+          }
+        >
+          <option value="marketing">营销</option>
+          <option value="logistics">物流</option>
+          <option value="monopoly">专卖</option>
+        </select>
+      </label>
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        <span className="text-text-secondary">适用等级</span>
+        <Input
+          aria-label="适用等级"
+          disabled={disabled}
+          placeholder="例如 2,3"
+          value={values.levelListText}
+          onChange={(event) =>
+            onChange({ ...values, levelListText: event.target.value })
+          }
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        <span className="text-text-secondary">父级 publicId</span>
+        <Input
+          aria-label="父级 publicId"
+          disabled={disabled}
+          placeholder="根节点留空"
+          value={values.parentKnowledgeNodePublicId}
+          onChange={(event) =>
+            onChange({
+              ...values,
+              parentKnowledgeNodePublicId: event.target.value,
+            })
+          }
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        <span className="text-text-secondary">排序</span>
+        <Input
+          aria-label="排序"
+          disabled={disabled}
+          inputMode="numeric"
+          value={values.sortOrder}
+          onChange={(event) =>
+            onChange({ ...values, sortOrder: event.target.value })
+          }
+        />
+      </label>
+    </div>
+  );
+}
+
+function KnowledgeNodeMoveForm({
+  disabled,
+  onChange,
+  values,
+}: {
+  disabled: boolean;
+  onChange: (values: KnowledgeNodeMoveValues) => void;
+  values: KnowledgeNodeMoveValues;
+}) {
+  return (
+    <div className="grid gap-3">
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        <span className="text-text-secondary">新父级 publicId</span>
+        <Input
+          aria-label="新父级 publicId"
+          disabled={disabled}
+          placeholder="移到根节点可留空"
+          value={values.parentKnowledgeNodePublicId}
+          onChange={(event) =>
+            onChange({
+              ...values,
+              parentKnowledgeNodePublicId: event.target.value,
+            })
+          }
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm font-medium">
+        <span className="text-text-secondary">新排序</span>
+        <Input
+          aria-label="新排序"
+          disabled={disabled}
+          inputMode="numeric"
+          value={values.sortOrder}
+          onChange={(event) =>
+            onChange({ ...values, sortOrder: event.target.value })
+          }
+        />
+      </label>
     </div>
   );
 }
@@ -641,57 +915,88 @@ function KnowledgeNodeList({
 }: {
   rows: AdminKnowledgeNodeOpsSummaryDto[];
 }) {
+  const groupedRows = Object.entries(professionLabels)
+    .map(([profession, label]) => ({
+      label,
+      profession: profession as Profession,
+      rows: rows.filter(
+        (knowledgeNode) => knowledgeNode.profession === profession,
+      ),
+    }))
+    .filter((group) => group.rows.length > 0);
+
   return (
-    <div className="grid gap-3">
-      {rows.map((knowledgeNode) => (
-        <article
-          className="bg-surface border-border rounded-md border p-4 shadow-sm"
-          data-public-id={knowledgeNode.publicId}
-          data-testid={`knowledge-node-row-${knowledgeNode.publicId}`}
-          key={knowledgeNode.publicId}
+    <div className="grid gap-4">
+      {groupedRows.map((group) => (
+        <section
+          aria-label={`${group.label}知识点树`}
+          className="grid gap-3"
+          key={group.profession}
+          role="tree"
         >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
-                  {knStatusLabels[knowledgeNode.knStatus]}
-                </span>
-                <span className="text-text-muted text-xs">
-                  {professionLabels[knowledgeNode.profession]}
-                </span>
-                <span className="text-text-muted text-xs">
-                  等级 {formatLevelList(knowledgeNode.levelList)}
-                </span>
+          <h2 className="text-text-primary text-base font-semibold">
+            {group.label}知识点树
+          </h2>
+          {group.rows.map((knowledgeNode) => (
+            <article
+              aria-selected="false"
+              className="bg-surface border-border rounded-md border p-4 shadow-sm"
+              data-depth={String(getKnowledgeNodeDepth(knowledgeNode))}
+              data-public-id={knowledgeNode.publicId}
+              data-testid={`knowledge-node-row-${knowledgeNode.publicId}`}
+              key={knowledgeNode.publicId}
+              role="treeitem"
+            >
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="bg-secondary text-secondary-foreground rounded-md px-2 py-1 text-xs font-medium">
+                      {knStatusLabels[knowledgeNode.knStatus]}
+                    </span>
+                    <span className="text-text-muted text-xs">
+                      {professionLabels[knowledgeNode.profession]}
+                    </span>
+                    <span className="text-text-muted text-xs">
+                      等级 {formatLevelList(knowledgeNode.levelList)}
+                    </span>
+                  </div>
+                  <h3 className="text-text-primary flex items-center gap-2 text-base font-semibold">
+                    <GitBranch aria-hidden="true" className="size-4" />
+                    {knowledgeNode.pathName}
+                  </h3>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <MetricBadge
+                      label="绑定题目"
+                      value={`${knowledgeNode.questionCount}`}
+                    />
+                    <MetricBadge
+                      label="排序"
+                      value={`${knowledgeNode.sortOrder}`}
+                    />
+                    <MetricBadge
+                      label="推荐"
+                      value={
+                        knowledgeNode.isRecommendable ? "可推荐" : "不推荐"
+                      }
+                    />
+                  </div>
+                </div>
+                <PublicId value={knowledgeNode.publicId} />
               </div>
-              <h2 className="text-text-primary flex items-center gap-2 text-base font-semibold">
-                <GitBranch aria-hidden="true" className="size-4" />
-                {knowledgeNode.pathName}
-              </h2>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <MetricBadge
-                  label="绑定题目"
-                  value={`${knowledgeNode.questionCount}`}
-                />
-                <MetricBadge
-                  label="排序"
-                  value={`${knowledgeNode.sortOrder}`}
-                />
-                <MetricBadge
-                  label="推荐"
-                  value={knowledgeNode.isRecommendable ? "可推荐" : "不推荐"}
-                />
-              </div>
-            </div>
-            <PublicId value={knowledgeNode.publicId} />
-          </div>
-          <p className="text-text-muted border-border mt-4 border-t pt-4 text-xs">
-            父级 {knowledgeNode.parentKnowledgeNodePublicId ?? "无"} / 更新时间{" "}
-            {formatDateTime(knowledgeNode.updatedAt)}
-          </p>
-        </article>
+              <p className="text-text-muted border-border mt-4 border-t pt-4 text-xs">
+                父级 {knowledgeNode.parentKnowledgeNodePublicId ?? "无"} /
+                更新时间 {formatDateTime(knowledgeNode.updatedAt)}
+              </p>
+            </article>
+          ))}
+        </section>
       ))}
     </div>
   );
+}
+
+function getKnowledgeNodeDepth(knowledgeNode: AdminKnowledgeNodeOpsSummaryDto) {
+  return Math.max(knowledgeNode.pathName.split("/").length - 1, 1);
 }
 
 function MetricBadge({ label, value }: { label: string; value: string }) {
