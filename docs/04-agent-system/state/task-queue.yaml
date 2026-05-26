@@ -9079,5 +9079,390 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-experience-gap-closeout-plan.md
+    status: closed
+    retryCount: 0
+  - id: phase-13-student-rich-text-rendering-ui
+    title: Phase 13 Student Rich Text Rendering UI
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gaps STU-GAP-001 and STU-GAP-002
+    dependencies:
+      - phase-12-experience-gap-closeout-plan
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim and must not read env files, add dependencies, change package/lockfiles, or record raw paper/customer content.
+    allowedFiles:
+      - src/features/student/**
+      - src/components/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - student_experience
+      - rich_text_rendering
+      - redaction_boundary
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-student-rich-text-rendering-ui.md
     status: pending
+    retryCount: 0
+  - id: phase-13-student-browser-ux-e2e-coverage
+    title: Phase 13 Student Browser UX E2E Coverage
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gap STU-GAP-003
+    dependencies:
+      - phase-13-student-rich-text-rendering-ui
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim and must use synthetic/local data only.
+    allowedFiles:
+      - e2e/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - browser_runtime
+      - student_experience
+      - test_coverage
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:e2e
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-student-browser-ux-e2e-coverage.md
+    status: pending
+    retryCount: 0
+  - id: phase-13-admin-copy-and-cta-cleanup
+    title: Phase 13 Admin Copy And CTA Cleanup
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gaps ADM-GAP-001, ADM-GAP-002, ADM-GAP-004, AUTH-GAP-003
+    dependencies:
+      - phase-12-experience-gap-closeout-plan
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim.
+    allowedFiles:
+      - src/features/admin/**
+      - src/components/admin/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - admin_ui
+      - copy_cleanup
+      - browser_runtime
+    securityReviewRequired: false
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-admin-copy-and-cta-cleanup.md
+    status: pending
+    retryCount: 0
+  - id: phase-13-content-media-attachment-workflow
+    title: Phase 13 Content Media Attachment Workflow
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gap ADM-GAP-003
+    dependencies:
+      - phase-12-experience-gap-closeout-plan
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim and must not expose object keys or raw full paper/OCR content.
+    allowedFiles:
+      - src/features/admin/**
+      - src/app/api/v1/paper-assets/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - content_workflow
+      - paper_asset
+      - redaction_boundary
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-content-media-attachment-workflow.md
+    status: pending
+    retryCount: 0
+  - id: phase-13-auth-route-guard-negative-e2e
+    title: Phase 13 Auth Route Guard Negative E2E
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gaps AUTH-GAP-001 and AUTH-GAP-002
+    dependencies:
+      - phase-12-experience-gap-closeout-plan
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim and must use synthetic/local data only.
+    allowedFiles:
+      - e2e/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - auth_permission_model
+      - browser_runtime
+      - test_coverage
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:e2e
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-auth-route-guard-negative-e2e.md
+    status: pending
+    retryCount: 0
+  - id: phase-13-admin-role-denial-browser-e2e
+    title: Phase 13 Admin Role Denial Browser E2E
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gap AUTH-GAP-004
+    dependencies:
+      - phase-13-auth-route-guard-negative-e2e
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim and must not change the permission model unless separately approved.
+    allowedFiles:
+      - e2e/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - auth_permission_model
+      - admin_ui
+      - browser_runtime
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:e2e
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-admin-role-denial-browser-e2e.md
+    status: pending
+    retryCount: 0
+  - id: phase-13-ai-audit-model-config-runtime-ui
+    title: Phase 13 AI Audit Model Config Runtime UI
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gaps AI-GAP-001 and AI-GAP-002
+    dependencies:
+      - phase-12-experience-gap-closeout-plan
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim and must not call real providers or read env files.
+    allowedFiles:
+      - src/app/(admin)/ops/ai-audit-logs/**
+      - src/features/admin/model-config-management/**
+      - src/features/admin/**
+      - src/app/api/v1/model-providers/**
+      - src/app/api/v1/model-configs/**
+      - src/app/api/v1/prompt-templates/**
+      - src/app/api/v1/audit-logs/**
+      - src/app/api/v1/ai-call-logs/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - admin_ui
+      - ai_call_log
+      - provider_config
+      - redaction_boundary
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-ai-audit-model-config-runtime-ui.md
+    status: pending
+    retryCount: 0
+  - id: phase-13-ai-redaction-shape-and-management-e2e
+    title: Phase 13 AI Redaction Shape And Management E2E
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: phase-12 gaps AI-GAP-003 and AI-GAP-004
+    dependencies:
+      - phase-13-ai-audit-model-config-runtime-ui
+    taskPlanPolicy: required
+    humanApproval: User authorized local follow-up task seeding only. Implementation requires a separate task claim and must use synthetic/local inputs only.
+    allowedFiles:
+      - e2e/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - ai_call_log
+      - redaction_boundary
+      - browser_runtime
+      - test_coverage
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:e2e
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-ai-redaction-shape-and-management-e2e.md
+    status: pending
+    retryCount: 0
+  - id: phase-13-real-provider-staging-redaction-approval-gate
+    title: Phase 13 Real Provider Staging Redaction Approval Gate
+    phase: phase-13-experience-gap-follow-up
+    sourceStory: future approval gate from Phase 12 AI/redaction closeout
+    dependencies:
+      - phase-12-experience-gap-closeout-plan
+    taskPlanPolicy: required
+    humanApproval: Blocked until explicit future human approval for real provider, secret/env handling, staging/prod/cloud access, deployment boundary, quota/cost/kill-switch owner, logging retention policy, and rollback plan.
+    allowedFiles:
+      - docs/02-architecture/interfaces/phase-11-staging-secret-and-env-plan.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - secret_or_env_change
+      - external_service_config
+      - deploy
+      - approval_gate
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-real-provider-staging-redaction-approval-gate.md
+    status: blocked
     retryCount: 0
