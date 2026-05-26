@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { StudentRichText } from "@/components/StudentRichText/StudentRichText";
 import type {
   ApiPagination,
   ApiResponse,
@@ -183,14 +184,9 @@ function readQuestionType(
     : null;
 }
 
-function stripRichText(value: string): string {
-  return value
-    .replace(/<[^>]*>/gu, "")
-    .replace(/\s+/gu, " ")
-    .trim();
-}
-
-function readQuestionStem(questionSnapshot: Record<string, unknown>): string {
+function readQuestionStemRichText(
+  questionSnapshot: Record<string, unknown>,
+): string {
   const stemText = questionSnapshot.stemText;
 
   if (typeof stemText === "string" && stemText.trim().length > 0) {
@@ -200,13 +196,13 @@ function readQuestionStem(questionSnapshot: Record<string, unknown>): string {
   const stemRichText = questionSnapshot.stemRichText;
 
   if (typeof stemRichText === "string" && stemRichText.trim().length > 0) {
-    return stripRichText(stemRichText);
+    return stemRichText;
   }
 
   return "题干内容暂不可见";
 }
 
-function readSnapshotText(
+function readSnapshotRichText(
   questionSnapshot: Record<string, unknown>,
   keys: string[],
   fallback: string,
@@ -215,7 +211,7 @@ function readSnapshotText(
     const value = questionSnapshot[key];
 
     if (typeof value === "string" && value.trim().length > 0) {
-      return stripRichText(value);
+      return value;
     }
   }
 
@@ -448,12 +444,12 @@ function StudentMistakeBookCard({
     mistakeBook.questionSnapshot,
   );
   const learnerAnswer = formatLearnerAnswer(mistakeBook);
-  const standardAnswer = readSnapshotText(
+  const standardAnswer = readSnapshotRichText(
     mistakeBook.questionSnapshot,
     ["standardAnswer", "standardAnswerRichText"],
     "标准答案暂不可见",
   );
-  const analysis = readSnapshotText(
+  const analysis = readSnapshotRichText(
     mistakeBook.questionSnapshot,
     ["analysis", "analysisRichText"],
     "老师解析暂不可见",
@@ -480,9 +476,12 @@ function StudentMistakeBookCard({
                 : questionTypeLabels[questionType]}
             </span>
           </div>
-          <h2 className="font-heading text-text-primary text-base leading-6 font-semibold">
-            {readQuestionStem(mistakeBook.questionSnapshot)}
-          </h2>
+          <StudentRichText
+            as="h2"
+            className="font-heading text-text-primary text-base leading-6 font-semibold"
+            mode="inline"
+            value={readQuestionStemRichText(mistakeBook.questionSnapshot)}
+          />
           {isDisabledSourceQuestion ? (
             <p className="text-warning text-xs font-medium">该题目已停用</p>
           ) : null}
@@ -526,11 +525,15 @@ function StudentMistakeBookCard({
         </div>
         <div className="space-y-1">
           <dt className="text-text-secondary text-xs font-medium">标准答案</dt>
-          <dd className="text-text-primary leading-6">{standardAnswer}</dd>
+          <dd className="text-text-primary leading-6">
+            <StudentRichText value={standardAnswer} />
+          </dd>
         </div>
         <div className="space-y-1">
           <dt className="text-text-secondary text-xs font-medium">老师解析</dt>
-          <dd className="text-text-primary leading-6">{analysis}</dd>
+          <dd className="text-text-primary leading-6">
+            <StudentRichText value={analysis} />
+          </dd>
         </div>
       </dl>
 

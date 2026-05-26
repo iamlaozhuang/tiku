@@ -192,6 +192,50 @@ describe("StudentMistakeBookPage", () => {
     },
   );
 
+  it("renders mistake_book rich text safely without exposing literal markup or blocked script content", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      expect(String(url)).toBe("/api/v1/mistake-books?page=1&pageSize=20");
+
+      return createJsonResponse({
+        ...mistakeBookPayload,
+        data: {
+          mistakeBooks: [
+            {
+              ...mistakeBookPayload.data.mistakeBooks[0],
+              publicId: "mistake-book-rich-text-001",
+              questionSnapshot: {
+                ...mistakeBookPayload.data.mistakeBooks[0].questionSnapshot,
+                stemRichText:
+                  "<p>监管 <strong>重点</strong></p><script>do-not-render</script>",
+                standardAnswerRichText:
+                  "<table><tbody><tr><td>许可</td><td>监管</td></tr></tbody></table>",
+                analysisRichText:
+                  "<p>先核验 <em>主体</em></p><script>do-not-render</script>",
+              },
+            },
+          ],
+        },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentMistakeBookPage));
+
+    const item = await screen.findByTestId(
+      "mistake-book-item-mistake-book-rich-text-001",
+    );
+
+    expect(within(item).getAllByText("监管").length).toBeGreaterThanOrEqual(2);
+    expect(within(item).getByText("重点")).toBeInTheDocument();
+    expect(within(item).getByText("许可")).toBeInTheDocument();
+    expect(within(item).getByText("先核验")).toBeInTheDocument();
+    expect(within(item).getByText("主体")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("<table>");
+    expect(document.body.textContent).not.toContain("<script>");
+    expect(document.body.textContent).not.toContain("do-not-render");
+  });
+
   it("requests and renders a redacted AI explanation for a mistake_book item", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(
