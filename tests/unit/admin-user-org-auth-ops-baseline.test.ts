@@ -72,6 +72,42 @@ const organizationPayload = {
   },
 };
 
+const organizationTreePayload = {
+  code: 0,
+  message: "ok",
+  data: {
+    organizations: [
+      {
+        publicId: "org-province-001",
+        name: "浙江省烟草公司",
+        orgTier: "province",
+        parentOrganizationPublicId: null,
+        status: "active",
+        employeeCount: 0,
+        authSummary: null,
+      },
+      {
+        publicId: "org-city-001",
+        name: "杭州市烟草公司",
+        orgTier: "city",
+        parentOrganizationPublicId: "org-province-001",
+        status: "active",
+        employeeCount: 3,
+        authSummary: null,
+      },
+      {
+        publicId: "org-district-001",
+        name: "西湖区烟草公司",
+        orgTier: "district",
+        parentOrganizationPublicId: "org-city-001",
+        status: "active",
+        employeeCount: 2,
+        authSummary: null,
+      },
+    ],
+  },
+};
+
 const orgAuthPayload = {
   code: 0,
   message: "ok",
@@ -233,6 +269,76 @@ function mockSystemOpsFetch() {
 
       if (path === "/api/v1/redeem-codes") {
         return createJsonResponse(generatedRedeemCodePayload);
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    },
+  );
+
+  vi.stubGlobal("fetch", fetchMock);
+
+  return fetchMock;
+}
+
+function mockSystemOpsFetchWithOrganizationTree() {
+  const fetchMock = vi.fn(
+    async (url: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse(adminSessionPayload);
+      }
+
+      if (path === "/api/v1/organizations?page=1&pageSize=20") {
+        return createJsonResponse(organizationTreePayload);
+      }
+
+      if (path === "/api/v1/org-auths?page=1&pageSize=20") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: { orgAuths: [] },
+        });
+      }
+
+      if (path === "/api/v1/employees?page=1&pageSize=20") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: { employees: [] },
+        });
+      }
+
+      if (path === "/api/v1/org-auths") {
+        const body = JSON.parse(String(init?.body));
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            orgAuth: {
+              publicId: "org-auth-public-created-tree",
+              name: body.name,
+              purchaserOrganizationPublicId: body.purchaserOrganizationPublicId,
+              authScopeType: body.authScopeType,
+              profession: body.profession,
+              level: body.level,
+              accountQuota: body.accountQuota,
+              usedQuota: 0,
+              startsAt: body.startsAt,
+              expiresAt: body.expiresAt,
+              status: "active",
+              cancelledAt: null,
+              organizationPublicIds: body.organizationPublicIds,
+              createdAt: "2026-05-26T00:00:00.000Z",
+              updatedAt: "2026-05-26T00:00:00.000Z",
+            },
+          },
+        });
       }
 
       return createJsonResponse({
@@ -540,6 +646,66 @@ describe("admin user organization authorization ops baseline", () => {
         method: "POST",
       }),
     );
+  });
+
+  it("submits full org_auth scope fields for specified organization nodes", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByRole("heading", { name: "企业授权运营" });
+
+    fireEvent.change(screen.getByLabelText("授权名称"), {
+      target: { value: "杭州市县区联合授权" },
+    });
+    fireEvent.change(screen.getByLabelText("购买主体"), {
+      target: { value: "org-city-001" },
+    });
+    fireEvent.change(screen.getByLabelText("授权范围类型"), {
+      target: { value: "specified_nodes" },
+    });
+    fireEvent.click(screen.getByLabelText("西湖区烟草公司"));
+    fireEvent.change(screen.getByLabelText("专业"), {
+      target: { value: "logistics" },
+    });
+    fireEvent.change(screen.getByLabelText("等级"), {
+      target: { value: "5" },
+    });
+    fireEvent.change(screen.getByLabelText("账号额度"), {
+      target: { value: "30" },
+    });
+    fireEvent.change(screen.getByLabelText("开始日期"), {
+      target: { value: "2026-06-01" },
+    });
+    fireEvent.change(screen.getByLabelText("到期日期"), {
+      target: { value: "2027-06-01" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "创建企业授权" }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "确认创建企业授权？",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认创建" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "企业授权已创建",
+    );
+
+    const createCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/org-auths",
+    );
+    expect(JSON.parse(String(createCall?.[1]?.body))).toEqual({
+      accountQuota: 30,
+      authScopeType: "specified_nodes",
+      expiresAt: "2027-06-01T00:00:00.000Z",
+      level: 5,
+      name: "杭州市县区联合授权",
+      organizationPublicIds: ["org-district-001"],
+      profession: "logistics",
+      purchaserOrganizationPublicId: "org-city-001",
+      startsAt: "2026-06-01T00:00:00.000Z",
+    });
   });
 
   it("closes redeem_code generation and filtering on the redeem code page", async () => {
