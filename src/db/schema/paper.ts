@@ -45,6 +45,8 @@ export const questionTypeValues = [
   "true_false",
   "fill_blank",
   "short_answer",
+  "case_analysis",
+  "calculation",
 ] as const;
 export const questionStatusValues = ["available", "disabled"] as const;
 export const materialStatusValues = ["available", "disabled"] as const;

@@ -15,6 +15,13 @@
       "when": 1779380681502,
       "tag": "20260522002400_add_audit_log",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779840060000,
+      "tag": "20260526000100_add_question_type_case_analysis_calculation",
+      "breakpoints": true
     }
   ]
 }
