@@ -82,6 +82,9 @@ export const modelProvider = pgTable(
     api_key_secret_ref: text("api_key_secret_ref"),
     api_key_last_four: text("api_key_last_four"),
     base_url: text("base_url"),
+    secret_status: text("secret_status").default("not_configured").notNull(),
+    last_rotated_at: nullableTimestampColumn("last_rotated_at"),
+    provider_metadata: jsonb("provider_metadata"),
     is_enabled: boolean("is_enabled").default(false).notNull(),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
@@ -90,6 +93,7 @@ export const modelProvider = pgTable(
     uniqueIndex("udx_model_provider_public_id").on(table.public_id),
     uniqueIndex("udx_model_provider_provider_key").on(table.provider_key),
     index("idx_model_provider_is_enabled").on(table.is_enabled),
+    index("idx_model_provider_secret_status").on(table.secret_status),
   ],
 );
 
@@ -104,10 +108,16 @@ export const modelConfig = pgTable(
     ai_func_type: aiFuncTypeEnum("ai_func_type").notNull(),
     model_name: text("model_name").notNull(),
     display_name: text("display_name").notNull(),
+    model_alias: text("model_alias"),
     config_version: integer("config_version").notNull(),
+    status: text("status").default("disabled").notNull(),
     is_enabled: boolean("is_enabled").default(false).notNull(),
     timeout_second: integer("timeout_second").notNull(),
     max_retry_count: integer("max_retry_count").default(0).notNull(),
+    fallback_priority: integer("fallback_priority").default(0).notNull(),
+    snapshot_policy: text("snapshot_policy")
+      .default("redacted_metadata")
+      .notNull(),
     fallback_model_config_id: bigint("fallback_model_config_id", {
       mode: "number",
     }).references((): AnyPgColumn => modelConfig.id, { onDelete: "set null" }),
@@ -120,6 +130,10 @@ export const modelConfig = pgTable(
     index("idx_model_config_ai_func_type_is_enabled").on(
       table.ai_func_type,
       table.is_enabled,
+    ),
+    index("idx_model_config_ai_func_type_fallback_priority").on(
+      table.ai_func_type,
+      table.fallback_priority,
     ),
     index("idx_model_config_fallback_model_config_id").on(
       table.fallback_model_config_id,
@@ -135,12 +149,18 @@ export const promptTemplate = pgTable(
     prompt_template_key: text("prompt_template_key").notNull(),
     ai_func_type: aiFuncTypeEnum("ai_func_type").notNull(),
     version: integer("version").notNull(),
+    status: text("status").default("draft").notNull(),
+    title: text("title"),
+    description: text("description"),
     template_content: text("template_content").notNull(),
     template_hash: text("template_hash").notNull(),
+    body_digest: text("body_digest"),
+    body_preview_masked: text("body_preview_masked"),
     is_active: boolean("is_active").default(false).notNull(),
     created_at: createdAtColumn(),
     updated_at: updatedAtColumn(),
     archived_at: nullableTimestampColumn("archived_at"),
+    disabled_at: nullableTimestampColumn("disabled_at"),
   },
   (table) => [
     uniqueIndex("udx_prompt_template_public_id").on(table.public_id),
@@ -152,6 +172,7 @@ export const promptTemplate = pgTable(
       table.ai_func_type,
       table.is_active,
     ),
+    index("idx_prompt_template_status").on(table.status),
   ],
 );
 

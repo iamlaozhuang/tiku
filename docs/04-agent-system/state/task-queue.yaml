@@ -8575,6 +8575,7 @@ tasks:
       - src/db/schema/**
       - drizzle/**
       - src/db/schema/*.test.ts
+      - src/server/models/ai-rag.test.ts
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/**
@@ -8594,6 +8595,8 @@ tasks:
     securityReviewRequired: true
     validationCommands:
       - npm.cmd run test:unit -- src/db/schema/*.test.ts
+      - npm.cmd run test:unit -- src/db/schema
+      - npm.cmd run test:unit -- src/server/models/ai-rag.test.ts
       - rg -n "DROP|DELETE|TRUNCATE|model_provider|model_config|prompt_template|secret" drizzle src/db/schema
       - npm.cmd run lint
       - npm.cmd run typecheck
@@ -8602,7 +8605,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-schema-migration.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: phase-12-model-config-server-runtime
     title: Phase 12 Model Config Server Runtime

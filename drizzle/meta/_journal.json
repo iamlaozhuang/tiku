@@ -22,6 +22,13 @@
       "when": 1779840060000,
       "tag": "20260526000100_add_question_type_case_analysis_calculation",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779843120000,
+      "tag": "20260526005200_add_model_config_redaction_metadata",
+      "breakpoints": true
     }
   ]
 }
