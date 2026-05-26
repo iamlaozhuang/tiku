@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-question-type-server-runtime
+  id: phase-12-question-type-admin-ui
   status: closed
   sourceStory: user-request-2026-05-26-case-analysis-calculation-mvp
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-question-type-server-runtime.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-server-runtime.md
-  branch: codex/phase-12-question-type-server-runtime
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-question-type-admin-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-admin-ui.md
+  branch: codex/phase-12-question-type-admin-ui
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Start phase-12-question-type-admin-ui from clean master after server runtime closeout; admin UI task must account for the labels already added as a typecheck bridge and the server validator now rejects options for case_analysis/calculation.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-server-runtime.md
+  nextRecommendedAction: Start phase-12-question-type-student-report from clean master after admin UI closeout.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-admin-ui.md

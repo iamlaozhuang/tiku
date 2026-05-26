@@ -194,6 +194,10 @@ function stripRichText(value: string): string {
 function createDefaultQuestionOptions(
   questionType: QuestionType,
 ): QuestionOptionFormValue[] {
+  if (!optionQuestionTypes.has(questionType)) {
+    return [];
+  }
+
   if (questionType === "true_false") {
     return [
       { contentRichText: "正确", isCorrect: true, label: "A" },
