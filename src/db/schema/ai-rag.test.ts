@@ -97,6 +97,9 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "api_key_secret_ref",
         "api_key_last_four",
         "base_url",
+        "secret_status",
+        "last_rotated_at",
+        "provider_metadata",
         "is_enabled",
         "created_at",
         "updated_at",
@@ -107,6 +110,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "udx_model_provider_public_id",
         "udx_model_provider_provider_key",
         "idx_model_provider_is_enabled",
+        "idx_model_provider_secret_status",
       ]),
     );
   });
@@ -120,10 +124,14 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "ai_func_type",
         "model_name",
         "display_name",
+        "model_alias",
         "config_version",
+        "status",
         "is_enabled",
         "timeout_second",
         "max_retry_count",
+        "fallback_priority",
+        "snapshot_policy",
         "fallback_model_config_id",
         "created_at",
         "updated_at",
@@ -134,6 +142,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "udx_model_config_public_id",
         "idx_model_config_model_provider_id",
         "idx_model_config_ai_func_type_is_enabled",
+        "idx_model_config_ai_func_type_fallback_priority",
         "idx_model_config_fallback_model_config_id",
       ]),
     );
@@ -147,11 +156,17 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "prompt_template_key",
         "ai_func_type",
         "version",
+        "status",
+        "title",
+        "description",
         "template_content",
         "template_hash",
+        "body_digest",
+        "body_preview_masked",
         "is_active",
         "created_at",
         "updated_at",
+        "disabled_at",
       ]),
     );
     expect(getIndexNames(promptTemplate)).toEqual(
@@ -159,6 +174,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "udx_prompt_template_public_id",
         "udx_prompt_template_key_version",
         "idx_prompt_template_ai_func_type_is_active",
+        "idx_prompt_template_status",
       ]),
     );
   });
