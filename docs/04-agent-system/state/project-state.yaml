@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-13-experience-gap-follow-up
-  updatedAt: "2026-05-26T15:30:00-07:00"
+  updatedAt: "2026-05-26T15:55:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-13-content-media-attachment-workflow
+  id: phase-13-auth-route-guard-negative-e2e
   status: closed
-  sourceStory: phase-12 gap ADM-GAP-003
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-13-content-media-attachment-workflow.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-content-media-attachment-workflow.md
-  branch: codex/phase-13-content-media-attachment-workflow
-  commitSha: 331e21d
+  sourceStory: phase-12 gaps AUTH-GAP-001 and AUTH-GAP-002
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-13-auth-route-guard-negative-e2e.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-auth-route-guard-negative-e2e.md
+  branch: codex/phase-13-auth-route-guard-negative-e2e
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 13 content media attachment workflow is closed locally. Next executable queue candidate after merge closeout is phase-13-auth-route-guard-negative-e2e; future real provider, secret, staging, and prod tasks remain blocked pending explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-13-content-media-attachment-workflow.md
+  nextRecommendedAction: Phase 13 auth route guard negative e2e is closed locally. Next executable queue candidate after merge closeout is phase-13-admin-role-denial-browser-e2e; future real provider, secret, staging, and prod tasks remain blocked pending explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-13-auth-route-guard-negative-e2e.md
