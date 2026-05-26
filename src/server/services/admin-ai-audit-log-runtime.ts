@@ -4,6 +4,7 @@ import {
   createPaginatedResponse,
   createSuccessResponse,
   type ApiResponse,
+  type ApiPagination,
 } from "../contracts/api-response";
 import {
   ADMIN_AI_AUDIT_LOG_ERROR_CODES,
@@ -49,6 +50,10 @@ type RouteContext = {
   params: Promise<{
     publicId: string;
   }>;
+};
+
+type AdminRuntimePage<TData extends Record<string, unknown>> = TData & {
+  pagination: ApiPagination;
 };
 
 const adminSessionRequiredResponse = createErrorResponse(
@@ -406,6 +411,18 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     };
   }
 
+  async function readRuntimePage<TData extends Record<string, unknown>>(input: {
+    fallbackData: TData;
+    loadPage: () => Promise<AdminRuntimePage<TData>>;
+    query: AdminAiAuditLogListQuery;
+  }) {
+    try {
+      return await input.loadPage();
+    } catch {
+      return emptyPage(input.fallbackData, input.query);
+    }
+  }
+
   async function updateModelConfigEnabled(input: {
     request: Request;
     context: RouteContext;
@@ -488,10 +505,14 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
         }
 
         const query = readAdminAiAuditLogListQuery(request);
-        const result =
-          repositories.listModelProviders === undefined
-            ? emptyPage({ modelProviders: [] }, query)
-            : await repositories.listModelProviders(query);
+        const result = await readRuntimePage({
+          fallbackData: { modelProviders: [] as ModelProviderSummaryDto[] },
+          loadPage: () =>
+            repositories.listModelProviders === undefined
+              ? Promise.resolve(emptyPage({ modelProviders: [] }, query))
+              : repositories.listModelProviders(query),
+          query,
+        });
 
         return createJsonResponse(
           createPaginatedResponse(
@@ -611,9 +632,12 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           return createJsonResponse(authError);
         }
 
-        const result = await repositories.listModelConfigs(
-          readAdminAiAuditLogListQuery(request),
-        );
+        const query = readAdminAiAuditLogListQuery(request);
+        const result = await readRuntimePage({
+          fallbackData: { modelConfigs: [] as ModelConfigSummaryDto[] },
+          loadPage: () => repositories.listModelConfigs(query),
+          query,
+        });
 
         return createJsonResponse(
           createPaginatedResponse(
@@ -771,10 +795,16 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
         }
 
         const query = readAdminAiAuditLogListQuery(request);
-        const result =
-          repositories.listPromptTemplates === undefined
-            ? emptyPage({ promptTemplates: [] }, query)
-            : await repositories.listPromptTemplates(query);
+        const result = await readRuntimePage({
+          fallbackData: {
+            promptTemplates: [] as PromptTemplateSummaryDto[],
+          },
+          loadPage: () =>
+            repositories.listPromptTemplates === undefined
+              ? Promise.resolve(emptyPage({ promptTemplates: [] }, query))
+              : repositories.listPromptTemplates(query),
+          query,
+        });
 
         return createJsonResponse(
           createPaginatedResponse(
@@ -895,10 +925,15 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
         }
 
         const query = readAdminAiAuditLogListQuery(request);
-        const result = filterAiCallLogsForQuery(
-          await repositories.listAiCallLogs(query),
+        const result = await readRuntimePage({
+          fallbackData: { aiCallLogs: [] as AiCallLogListDto["aiCallLogs"] },
+          loadPage: async () =>
+            filterAiCallLogsForQuery(
+              await repositories.listAiCallLogs(query),
+              query,
+            ),
           query,
-        );
+        });
 
         return createJsonResponse(
           createPaginatedResponse(
@@ -917,10 +952,17 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
         }
 
         const query = readAdminAiAuditLogListQuery(request);
-        const result = filterAiCallLogSummariesForQuery(
-          await repositories.summarizeAiCallLogs(query),
+        const result = await readRuntimePage({
+          fallbackData: {
+            dailySummaries: [] as AiCallLogSummaryListDto["dailySummaries"],
+          },
+          loadPage: async () =>
+            filterAiCallLogSummariesForQuery(
+              await repositories.summarizeAiCallLogs(query),
+              query,
+            ),
           query,
-        );
+        });
 
         return createJsonResponse(
           createPaginatedResponse(

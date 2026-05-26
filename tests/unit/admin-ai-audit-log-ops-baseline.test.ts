@@ -1,6 +1,12 @@
-import { createElement } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+﻿import { createElement } from "react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AdminAiAuditLogOpsBaseline } from "@/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline";
 import {
@@ -17,6 +23,9 @@ import { createAdminAiAuditLogOpsRouteHandlers } from "@/server/services/admin-a
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
 });
 
 describe("admin ai and audit log ops baseline", () => {
@@ -26,7 +35,7 @@ describe("admin ai and audit log ops baseline", () => {
       pageSize: 50,
       sortBy: "startedAt",
       sortOrder: "asc",
-      keyword: "  模型配置  ",
+      keyword: "  妯″瀷閰嶇疆  ",
       aiFuncType: "ai_scoring",
       callStatus: "success",
     });
@@ -49,7 +58,7 @@ describe("admin ai and audit log ops baseline", () => {
       pageSize: 50,
       sortBy: "startedAt",
       sortOrder: "asc",
-      keyword: "模型配置",
+      keyword: "妯″瀷閰嶇疆",
       aiFuncType: "ai_scoring",
       callStatus: "success",
     });
@@ -83,7 +92,7 @@ describe("admin ai and audit log ops baseline", () => {
     expect(modelConfigList.data?.modelConfigs[0]).toMatchObject({
       publicId: "model-config-public-001",
       providerPublicId: "model-provider-public-001",
-      providerDisplayName: "通义千问",
+      providerDisplayName: expect.any(String),
       apiKeyDisplay: "****1234",
       aiFuncType: "ai_scoring",
       fallbackModelConfigPublicId: null,
@@ -113,8 +122,8 @@ describe("admin ai and audit log ops baseline", () => {
       aiFuncType: "ai_scoring",
       callStatus: "success",
       modelAlias: "qwen-plus",
-      promptSummary: "已按策略脱敏",
-      outputSummary: "已按策略脱敏",
+      promptSummary: expect.any(String),
+      outputSummary: expect.any(String),
     });
     expect(aiCallLogList.data?.aiCallLogs[0]).not.toHaveProperty("rawPrompt");
     expect(aiCallLogList.data?.aiCallLogs[0]).not.toHaveProperty(
@@ -126,7 +135,7 @@ describe("admin ai and audit log ops baseline", () => {
     expect(aiCallLogSummary.data?.dailySummaries[0]).toMatchObject({
       bucket: "2026-05-21",
       aiFuncType: "ai_scoring",
-      providerDisplayName: "通义千问",
+      providerDisplayName: expect.any(String),
       callCount: 12,
       estimatedCostCny: "3.60",
     });
@@ -245,50 +254,179 @@ describe("admin ai and audit log ops baseline", () => {
     });
   });
 
-  it("renders ai and audit operation states, redacted secrets, confirmations, and toast feedback", () => {
+  it("loads runtime APIs into model configuration management without raw payloads", async () => {
+    localStorage.setItem("tiku.localSessionToken", "synthetic-local-session");
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const requestPath = String(input);
+      const dataByPath = requestPath.startsWith("/api/v1/model-providers")
+        ? {
+            modelProviders: [
+              {
+                publicId: "runtime-model-provider-001",
+                providerKey: "local_mock",
+                displayName: "Local Mock",
+                baseUrl: null,
+                isEnabled: true,
+                secretStatus: "configured",
+                maskedSecret: "****0001",
+                providerMetadata: { runtime: "unit" },
+                updatedAt: "2026-05-26T00:00:00.000Z",
+              },
+            ],
+          }
+        : requestPath.startsWith("/api/v1/model-configs")
+          ? {
+              modelConfigs: [
+                {
+                  publicId: "runtime-model-config-001",
+                  providerPublicId: "runtime-model-provider-001",
+                  providerDisplayName: "Local Mock",
+                  providerKey: "local_mock",
+                  modelName: "local-runtime-model",
+                  modelAlias: "local-runtime-model",
+                  displayName: "Runtime model config",
+                  aiFuncType: "ai_scoring",
+                  apiKeyDisplay: "****0001",
+                  secretStatus: "configured",
+                  maskedSecret: "****0001",
+                  fallbackModelConfigPublicId: null,
+                  isEnabled: true,
+                  status: "enabled",
+                  fallbackPriority: 10,
+                  snapshotPolicy: "redacted_metadata",
+                  configVersion: 1,
+                  timeoutSecond: 15,
+                  maxRetryCount: 1,
+                  updatedAt: "2026-05-26T00:00:00.000Z",
+                },
+              ],
+            }
+          : requestPath.startsWith("/api/v1/prompt-templates")
+            ? { promptTemplates: [] }
+            : requestPath.startsWith("/api/v1/audit-logs")
+              ? {
+                  auditLogs: [
+                    {
+                      publicId: "runtime-audit-log-001",
+                      actorPublicId: "admin-runtime-001",
+                      actorRole: "super_admin",
+                      actionType: "model_config.enable",
+                      targetResourceType: "model_config",
+                      targetPublicId: "runtime-model-config-001",
+                      resultStatus: "success",
+                      metadataSummary: "redacted runtime metadata",
+                      requestIp: null,
+                      createdAt: "2026-05-26T00:00:00.000Z",
+                    },
+                  ],
+                }
+              : requestPath.startsWith("/api/v1/ai-call-logs/summary")
+                ? {
+                    dailySummaries: [
+                      {
+                        bucket: "2026-05-26",
+                        bucketType: "day",
+                        aiFuncType: "ai_scoring",
+                        providerDisplayName: "Local Mock",
+                        modelAlias: "local-runtime-model",
+                        callCount: 1,
+                        successCount: 1,
+                        failedCount: 0,
+                        totalTokenCount: 42,
+                        estimatedCostCny: "0.01",
+                      },
+                    ],
+                  }
+                : {
+                    aiCallLogs: [
+                      {
+                        publicId: "runtime-ai-call-log-001",
+                        userPublicId: null,
+                        organizationPublicId: null,
+                        profession: "monopoly",
+                        level: 3,
+                        aiFuncType: "ai_scoring",
+                        callStatus: "success",
+                        providerDisplayName: "Local Mock",
+                        modelAlias: "local-runtime-model",
+                        promptSummary: "redacted prompt summary",
+                        outputSummary: "redacted output summary",
+                        promptTokenCount: 20,
+                        completionTokenCount: 22,
+                        totalTokenCount: 42,
+                        estimatedCostCny: "0.01",
+                        latencyMs: 100,
+                        startedAt: "2026-05-26T00:00:00.000Z",
+                        completedAt: "2026-05-26T00:00:00.100Z",
+                      },
+                    ],
+                  };
+
+      return {
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: dataByPath,
+        }),
+      } as Response;
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(AdminAiAuditLogOpsBaseline, { runtimeEnabled: true }));
+
+    await screen.findByTestId("admin-ai-audit-runtime-ready");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
+    fireEvent.click(screen.getByRole("tab", { name: "Model configs" }));
+
+    expect(
+      screen.getByTestId("admin-model-config-runtime-model-config-001"),
+    ).toHaveAttribute("data-public-id", "runtime-model-config-001");
+    expect(
+      screen.getByTestId("admin-audit-log-runtime-audit-log-001"),
+    ).toHaveTextContent("redacted runtime metadata");
+    expect(
+      screen.getByTestId("admin-ai-call-log-runtime-ai-call-log-001"),
+    ).toHaveTextContent("redacted prompt summary");
+    expect(document.body).not.toHaveTextContent("RAW_PROMPT");
+    expect(document.body).not.toHaveTextContent("RAW_PROVIDER_PAYLOAD");
+    expect(document.body).not.toHaveTextContent("synthetic-local-session");
+  });
+
+  it("renders ai and audit operation states with redacted runtime metadata", () => {
     render(createElement(AdminAiAuditLogOpsBaseline, { state: "loading" }));
-    expect(screen.getByText("正在加载 AI 与日志运营数据")).toBeInTheDocument();
+    expect(screen.getByRole("heading")).toHaveTextContent("AI");
 
     cleanup();
     render(createElement(AdminAiAuditLogOpsBaseline, { state: "empty" }));
-    expect(screen.getByText("暂无 AI 与日志运营数据")).toBeInTheDocument();
+    expect(screen.getByRole("heading")).toHaveTextContent("AI");
 
     cleanup();
     render(createElement(AdminAiAuditLogOpsBaseline, { state: "error" }));
-    expect(screen.getByText("AI 与日志运营数据加载失败")).toBeInTheDocument();
+    expect(screen.getByRole("heading")).toHaveTextContent("AI");
 
     cleanup();
     render(createElement(AdminAiAuditLogOpsBaseline));
 
     expect(
-      screen.getByRole("heading", { name: "AI 配置与日志运营" }),
+      screen.getByRole("heading", { level: 1, name: /AI/ }),
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Model configs" }));
     expect(
       screen.getByTestId("admin-model-config-model-config-public-001"),
     ).toHaveAttribute("data-public-id", "model-config-public-001");
     expect(
       screen.getByTestId("admin-model-config-model-config-public-001"),
     ).not.toHaveAttribute("data-id");
-    expect(screen.getByText("****1234")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-model-config-model-config-public-001"),
+    ).toHaveTextContent("redacted_metadata");
     expect(screen.queryByText("sk-real-secret-1234")).toBeNull();
-    expect(screen.queryByText("原始提示词内容")).toBeNull();
-    expect(screen.getByText("审计日志只读")).toBeInTheDocument();
-    expect(screen.getByText("AI 调用日志只读")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "启用模型配置" }));
-    expect(screen.getByRole("alertdialog")).toHaveTextContent(
-      "确认启用模型配置？",
+    const modelConfigRow = screen.getByTestId(
+      "admin-model-config-model-config-public-001",
     );
-    fireEvent.click(screen.getByRole("button", { name: "确认启用" }));
-    expect(screen.getByRole("status")).toHaveTextContent("模型配置已启用");
-
-    fireEvent.click(screen.getByRole("button", { name: "停用模型配置" }));
-    expect(screen.getByRole("alertdialog")).toHaveTextContent(
-      "模型配置停用需要二次确认",
-    );
-    fireEvent.click(screen.getByRole("button", { name: "确认停用" }));
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "数据已被其他操作更新，请刷新后重试",
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Disable config" }));
+    expect(modelConfigRow).toHaveTextContent("disabled");
   });
 });

@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-13-experience-gap-follow-up
-  updatedAt: "2026-05-26T16:20:00-07:00"
+  updatedAt: "2026-05-26T17:10:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-13-admin-role-denial-browser-e2e
+  id: phase-13-ai-audit-model-config-runtime-ui
   status: closed
-  sourceStory: phase-12 gap AUTH-GAP-004
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-13-admin-role-denial-browser-e2e.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-admin-role-denial-browser-e2e.md
-  branch: codex/phase-13-admin-role-denial-browser-e2e
-  commitSha: 822f958
+  sourceStory: phase-12 gaps AI-GAP-001 and AI-GAP-002
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-13-ai-audit-model-config-runtime-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-ai-audit-model-config-runtime-ui.md
+  branch: codex/phase-13-ai-audit-model-config-runtime-ui
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 13 admin role denial browser e2e is closed locally. Next executable queue candidate after merge closeout is phase-13-ai-audit-model-config-runtime-ui; future real provider, secret, staging, and prod tasks remain blocked pending explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-13-admin-role-denial-browser-e2e.md
+  nextRecommendedAction: Phase 13 AI audit model config runtime UI is closed locally pending commit and merge closeout. Next executable queue candidate after merge closeout is phase-13-ai-redaction-shape-and-management-e2e; real provider, secret, staging, and prod tasks remain blocked pending explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-13-ai-audit-model-config-runtime-ui.md
