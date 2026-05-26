@@ -8186,10 +8186,10 @@ tasks:
     dependencies:
       - phase-12-mvp-full-requirements-audit-summary-and-repair-queue
     taskPlanPolicy: required
-    humanApproval: Not yet approved. This is a blocked planning gate for provider/model_config/prompt CRUD and secret/env handling. Explicit human approval is required before reading, changing, outputting, or configuring secrets/env/provider/cloud/staging/prod resources.
+    humanApproval: User explicitly authorized converting this blocked gate into a safe planning-only task on 2026-05-26. Approval covers only docs/state/queue/task-plan/evidence planning work. It does not authorize reading, changing, outputting, or configuring secrets, `.env.local`, `.env.example`, provider credentials, provider payloads, raw prompts, raw answers, raw model responses, cloud resources, staging/prod resources, deployment, schema, migration, runtime, UI, package, or lockfile changes.
     allowedFiles:
-      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-model-config-secret-crud.md
-      - docs/05-execution-logs/evidence/2026-05-25-phase-12-model-config-secret-crud.md
+      - docs/05-execution-logs/task-plans/2026-05-26-phase-12-model-config-secret-crud-planning.md
+      - docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-secret-crud-planning.md
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
     blockedFiles:
@@ -8210,13 +8210,12 @@ tasks:
       - evidence_integrity
     securityReviewRequired: true
     validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-plan-model-config-secret-crud
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
-    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-model-config-secret-crud.md
-    status: blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-secret-crud-planning.md
+    status: closed
     retryCount: 0
   - id: phase-12-question-type-task-registration
     title: Phase 12 Question Type Task Registration
