@@ -27,16 +27,29 @@ test.describe("content action closures", () => {
     await expect(
       page.getByTestId("content-action-runtime-ready"),
     ).toBeVisible();
-    const firstQuestionRow = page
-      .locator('[data-testid^="question-row-"]')
+    const editableQuestionEdit = page
+      .locator('button[data-testid^="question-edit-"]:not([disabled])')
       .first();
+    await expect(editableQuestionEdit).toBeEnabled();
+    const firstQuestionRow = editableQuestionEdit.locator(
+      "xpath=ancestor::article[1]",
+    );
     await expect(firstQuestionRow).toBeVisible();
-    await firstQuestionRow.locator('[data-testid^="question-edit-"]').click();
+    await editableQuestionEdit.click();
     await expect(page.getByTestId("content-edit-context-panel")).toBeVisible();
     await expect(firstQuestionRow).toHaveAttribute("data-selected", "true");
     await expect(
       page.getByTestId("content-edit-context-panel").getByRole("form"),
     ).toBeVisible();
+    const lockedQuestionEdit = page
+      .locator('button[data-testid^="question-edit-"][disabled]')
+      .first();
+    if ((await lockedQuestionEdit.count()) > 0) {
+      await expect(lockedQuestionEdit).toBeDisabled();
+      await expect(
+        page.getByText("已锁定题目只能复制新题后编辑").first(),
+      ).toBeVisible();
+    }
 
     await page.goto("/content/materials");
     await expect(

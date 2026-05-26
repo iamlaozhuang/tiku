@@ -480,6 +480,69 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(row).not.toHaveAttribute("data-id");
   });
 
+  it("filters questions by level, question type, knowledge_node, and tag", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+
+    fireEvent.change(screen.getByLabelText("等级筛选"), {
+      target: { value: "2" },
+    });
+    fireEvent.change(screen.getByLabelText("题型"), {
+      target: { value: "short_answer" },
+    });
+    fireEvent.change(screen.getByLabelText("知识点筛选"), {
+      target: { value: "knowledge-node-costing" },
+    });
+
+    expect(
+      screen.getByText("物流成本核算适用于哪类场景？"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("市场调研抽样方法的核心目标是什么？")).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("等级筛选"), {
+      target: { value: "3" },
+    });
+    fireEvent.change(screen.getByLabelText("题型"), {
+      target: { value: "single_choice" },
+    });
+    fireEvent.change(screen.getByLabelText("知识点筛选"), {
+      target: { value: "" },
+    });
+    fireEvent.change(screen.getByLabelText("标签筛选"), {
+      target: { value: "tag-research" },
+    });
+
+    expect(
+      screen.getByText("市场调研抽样方法的核心目标是什么？"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
+  });
+
+  it("keeps locked questions copy-only in the content admin list", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-logistics-002");
+
+    expect(
+      screen.getByTestId("question-edit-question-logistics-002"),
+    ).toBeDisabled();
+    expect(
+      screen.getByText("已锁定题目只能复制新题后编辑"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "复制题目 question-logistics-002",
+      }),
+    ).toBeEnabled();
+  });
+
   it("renders material management with runtime loading and an empty filtered state", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockContentFetch();
@@ -681,6 +744,118 @@ describe("AdminQuestionMaterialManagement", () => {
       },
     ]);
     expect(requestBody.scoringPoints).toEqual([]);
+  });
+
+  it("normalizes true_false A/B authoring into correct and incorrect answers", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fireEvent.change(questionForm.getByLabelText("题型"), {
+      target: { value: "true_false" },
+    });
+
+    expect(questionForm.getByLabelText("标准答案")).toHaveValue("A");
+    expect(questionForm.getByLabelText("选项 A")).toHaveValue("正确");
+    expect(questionForm.getByLabelText("选项 B")).toHaveValue("错误");
+    expect(questionForm.queryByLabelText("选项 C")).toBeNull();
+
+    fireEvent.change(questionForm.getByLabelText("题干"), {
+      target: { value: "判断题题干" },
+    });
+    fireEvent.change(questionForm.getByLabelText("标准答案"), {
+      target: { value: "B" },
+    });
+    fireEvent.change(questionForm.getByLabelText("老师解析"), {
+      target: { value: "判断题解析" },
+    });
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+    expect(
+      await screen.findByText("题目 question-created-001 已保存"),
+    ).toBeInTheDocument();
+
+    const requestBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/questions",
+      "POST",
+    );
+
+    expect(requestBody).toMatchObject({
+      questionType: "true_false",
+      standardAnswerRichText: "错误",
+    });
+    expect(requestBody.questionOptions).toEqual([
+      {
+        contentRichText: "正确",
+        isCorrect: true,
+        label: "A",
+        sortOrder: 1,
+      },
+      {
+        contentRichText: "错误",
+        isCorrect: false,
+        label: "B",
+        sortOrder: 2,
+      },
+    ]);
+  });
+
+  it("prevents saving question rich text above the SSOT 10000 character limit", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fireEvent.change(questionForm.getByLabelText("题干"), {
+      target: { value: "题".repeat(10001) },
+    });
+
+    expect(questionForm.getByText("10001/10000")).toBeInTheDocument();
+    expect(
+      questionForm.getByText("题干超过 10000 字符，不能保存。"),
+    ).toBeInTheDocument();
+    expect(
+      questionForm.getByRole("button", { name: "保存题目" }),
+    ).toBeDisabled();
+
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/questions" &&
+          requestInit?.method === "POST",
+      ),
+    ).toBe(false);
+  });
+
+  it("offers bounded rich text helpers for local image placeholder and table markup", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByText("市场调研抽样方法的核心目标是什么？");
+    fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+    fireEvent.click(questionForm.getByRole("button", { name: "插入图片占位" }));
+    fireEvent.click(questionForm.getByRole("button", { name: "插入表格模板" }));
+
+    const stemInput = questionForm.getByLabelText(
+      "题干",
+    ) as HTMLTextAreaElement;
+
+    expect(stemInput.value).toContain("<img");
+    expect(stemInput.value).toContain("<table>");
   });
 
   it("posts non-option existing question type scoring points without option rows", async () => {
