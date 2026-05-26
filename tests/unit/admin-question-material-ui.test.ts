@@ -92,6 +92,58 @@ const questionPayload = {
   },
 };
 
+const caseAnalysisQuestionPayload = {
+  ...questionPayload.data[0],
+  publicId: "question-case-analysis-001",
+  questionType: "case_analysis",
+  profession: "logistics",
+  level: 4,
+  subject: "skill",
+  stemRichText: "Synthetic case_analysis stem",
+  analysisRichText: "Synthetic case_analysis analysis",
+  standardAnswerRichText: "Synthetic case_analysis reference",
+  scoringMethod: "ai_scoring",
+  materialPublicId: "material-marketing-001",
+  questionOptions: [],
+  scoringPoints: [
+    {
+      description: "Synthetic case_analysis scoring_point",
+      score: "2.0",
+      sortOrder: 1,
+    },
+  ],
+  knowledgeNodePublicIds: ["knowledge-node-case-analysis"],
+  tagPublicIds: ["tag-case-analysis"],
+  createdAt: "2026-05-19T06:25:00.000Z",
+  updatedAt: "2026-05-19T06:25:00.000Z",
+};
+
+const calculationQuestionPayload = {
+  ...questionPayload.data[0],
+  publicId: "question-calculation-001",
+  questionType: "calculation",
+  profession: "logistics",
+  level: 4,
+  subject: "skill",
+  stemRichText: "Synthetic calculation stem",
+  analysisRichText: "Synthetic calculation analysis",
+  standardAnswerRichText: "Synthetic calculation reference",
+  scoringMethod: "ai_scoring",
+  materialPublicId: "material-marketing-001",
+  questionOptions: [],
+  scoringPoints: [
+    {
+      description: "Synthetic calculation scoring_point",
+      score: "2.0",
+      sortOrder: 1,
+    },
+  ],
+  knowledgeNodePublicIds: ["knowledge-node-calculation"],
+  tagPublicIds: ["tag-calculation"],
+  createdAt: "2026-05-19T06:26:00.000Z",
+  updatedAt: "2026-05-19T06:26:00.000Z",
+};
+
 const materialPayload = {
   code: 0,
   message: "ok",
@@ -142,7 +194,22 @@ function createJsonResponse(payload: unknown) {
   };
 }
 
-function mockContentFetch() {
+function createQuestionListPayload(
+  data: Array<Record<string, unknown>> = questionPayload.data,
+) {
+  return {
+    ...questionPayload,
+    data,
+    pagination: {
+      ...questionPayload.pagination,
+      total: data.length,
+    },
+  };
+}
+
+function mockContentFetch(
+  data: Array<Record<string, unknown>> = questionPayload.data,
+) {
   const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
     const path = String(url);
 
@@ -151,7 +218,7 @@ function mockContentFetch() {
     }
 
     if (path.startsWith("/api/v1/questions?")) {
-      return createJsonResponse(questionPayload);
+      return createJsonResponse(createQuestionListPayload(data));
     }
 
     if (path.startsWith("/api/v1/materials?")) {
@@ -166,7 +233,9 @@ function mockContentFetch() {
   return fetchMock;
 }
 
-function mockWritableContentFetch() {
+function mockWritableContentFetch(
+  data: Array<Record<string, unknown>> = questionPayload.data,
+) {
   const fetchMock = vi.fn(
     async (url: RequestInfo | URL, init?: RequestInit) => {
       const path = String(url);
@@ -177,7 +246,7 @@ function mockWritableContentFetch() {
       }
 
       if (path.startsWith("/api/v1/questions?")) {
-        return createJsonResponse(questionPayload);
+        return createJsonResponse(createQuestionListPayload(data));
       }
 
       if (path.startsWith("/api/v1/materials?")) {
@@ -555,6 +624,40 @@ describe("AdminQuestionMaterialManagement", () => {
       screen.getByText("市场调研抽样方法的核心目标是什么？"),
     ).toBeInTheDocument();
     expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
+  });
+
+  it("lists and filters case_analysis and calculation question types", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch([caseAnalysisQuestionPayload, calculationQuestionPayload]);
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    expect(
+      await screen.findByText("Synthetic case_analysis stem"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Synthetic calculation stem")).toBeInTheDocument();
+    expect(screen.getAllByText("案例分析题").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("计算题").length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getByText("knowledge-node-case-analysis"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("tag-calculation")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("题型"), {
+      target: { value: "case_analysis" },
+    });
+
+    expect(
+      screen.getByText("Synthetic case_analysis stem"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Synthetic calculation stem")).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("题型"), {
+      target: { value: "calculation" },
+    });
+
+    expect(screen.getByText("Synthetic calculation stem")).toBeInTheDocument();
+    expect(screen.queryByText("Synthetic case_analysis stem")).toBeNull();
   });
 
   it("keeps locked questions copy-only in the content admin list", async () => {
@@ -972,6 +1075,77 @@ describe("AdminQuestionMaterialManagement", () => {
       },
     ]);
   });
+
+  it.each(["case_analysis", "calculation"] as const)(
+    "posts %s through the subjective authoring path",
+    async (questionType) => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+      const fetchMock = mockWritableContentFetch();
+
+      render(createElement(AdminQuestionMaterialManagement));
+
+      await screen.findByText("市场调研抽样方法的核心目标是什么？");
+      fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
+      const questionForm = within(
+        screen.getByRole("form", { name: "题目表单" }),
+      );
+      fireEvent.change(questionForm.getByLabelText("题型"), {
+        target: { value: questionType },
+      });
+
+      expect(questionForm.queryByLabelText("选项 A")).toBeNull();
+      expect(questionForm.getByLabelText("评分点 1")).toBeInTheDocument();
+      expect(questionForm.getByLabelText("标准答案")).toBeInTheDocument();
+
+      fireEvent.change(questionForm.getByLabelText("评分方式"), {
+        target: { value: "ai_scoring" },
+      });
+      fireEvent.change(questionForm.getByLabelText("关联材料 publicId"), {
+        target: { value: "material-marketing-001" },
+      });
+      fireEvent.change(questionForm.getByLabelText("题干"), {
+        target: { value: `Synthetic ${questionType} stem` },
+      });
+      fireEvent.change(questionForm.getByLabelText("标准答案"), {
+        target: { value: `Synthetic ${questionType} reference` },
+      });
+      fireEvent.change(questionForm.getByLabelText("老师解析"), {
+        target: { value: `Synthetic ${questionType} analysis` },
+      });
+      fireEvent.change(questionForm.getByLabelText("评分点 1"), {
+        target: { value: `Synthetic ${questionType} scoring_point` },
+      });
+      fireEvent.change(questionForm.getByLabelText("评分点 1 分值"), {
+        target: { value: "3.0" },
+      });
+      fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+      expect(
+        await screen.findByText("题目 question-created-001 已保存"),
+      ).toBeInTheDocument();
+
+      const requestBody = readJsonRequestBody(
+        fetchMock,
+        "/api/v1/questions",
+        "POST",
+      );
+
+      expect(requestBody).toMatchObject({
+        materialPublicId: "material-marketing-001",
+        questionType,
+        scoringMethod: "ai_scoring",
+        standardAnswerRichText: `Synthetic ${questionType} reference`,
+      });
+      expect(requestBody.questionOptions).toEqual([]);
+      expect(requestBody.scoringPoints).toEqual([
+        {
+          description: `Synthetic ${questionType} scoring_point`,
+          score: "3.0",
+          sortOrder: 1,
+        },
+      ]);
+    },
+  );
 
   it("opens question edit in a contextual panel tied to the selected row", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
