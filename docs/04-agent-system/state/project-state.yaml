@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-13-experience-gap-follow-up
-  updatedAt: "2026-05-26T17:35:00-07:00"
+  currentPhase: phase-14-local-human-experience-verification
+  updatedAt: "2026-05-26T18:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-13-ai-redaction-shape-and-management-e2e
+  id: phase-14-local-human-experience-verification
   status: closed
-  sourceStory: phase-12 gaps AI-GAP-003 and AI-GAP-004
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-13-ai-redaction-shape-and-management-e2e.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-ai-redaction-shape-and-management-e2e.md
-  branch: codex/phase-13-ai-redaction-shape-and-management-e2e
+  sourceStory: user-request-2026-05-26-local-human-experience-verification
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-14-local-human-experience-verification.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-human-experience-verification.md
+  branch: codex/phase-14-local-human-experience-verification
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 13 AI redaction shape and management e2e is closed locally pending commit and merge closeout. Remaining Phase 13 real provider/staging redaction task is blocked pending explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-13-ai-redaction-shape-and-management-e2e.md
+  nextRecommendedAction: Phase 14 local human experience verification is closed locally with one practice submit gap and one report generation placeholder observation recorded. Push remains blocked until explicit user approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-14-local-human-experience-verification.md
