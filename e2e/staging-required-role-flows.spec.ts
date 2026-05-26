@@ -24,10 +24,11 @@ test.describe("staging required role flows", () => {
       "system-ops-redeem-code-generate-entry",
     );
     await expect(redeemCodeEntry).toBeVisible();
-    await expect(redeemCodeEntry).toContainText("系统运营 staging 必验");
+    await expect(redeemCodeEntry).toContainText("系统运营本地验收");
+    await expect(redeemCodeEntry).not.toContainText("staging 必验");
     await expect(
       redeemCodeEntry.getByRole("link", { name: "生成卡密" }),
-    ).toHaveAttribute("href", "/ops/users");
+    ).toHaveAttribute("href", "#redeem-code-generate-panel");
     await expect(page.getByRole("button", { name: "生成卡密" })).toBeVisible();
     await expect(page.getByLabel("卡密状态")).toBeVisible();
     await expect(page.getByLabel("卡密搜索")).toBeVisible();
@@ -35,10 +36,11 @@ test.describe("staging required role flows", () => {
     await page.goto("/ops/organizations");
     const orgAuthEntry = page.getByTestId("system-ops-org-auth-create-entry");
     await expect(orgAuthEntry).toBeVisible();
-    await expect(orgAuthEntry).toContainText("系统运营 staging 必验");
+    await expect(orgAuthEntry).toContainText("系统运营本地验收");
+    await expect(orgAuthEntry).not.toContainText("staging 必验");
     await expect(
       orgAuthEntry.getByRole("link", { name: "新增企业授权" }),
-    ).toHaveAttribute("href", "/ops/users");
+    ).toHaveAttribute("href", "#org-auth-create-panel");
     await expect(
       page.getByRole("button", { name: "创建企业授权" }),
     ).toBeVisible();
@@ -51,7 +53,8 @@ test.describe("staging required role flows", () => {
       "content-ops-staging-required-role-arrangement",
     );
     await expect(questionArrangement).toBeVisible();
-    await expect(questionArrangement).toContainText("内容运营 staging 必验");
+    await expect(questionArrangement).toContainText("内容运营本地验收");
+    await expect(questionArrangement).not.toContainText("staging 必验");
     await expect(questionArrangement).toContainText(
       "题目、材料、试卷先验只读筛选",
     );
@@ -64,6 +67,7 @@ test.describe("staging required role flows", () => {
       "content-ops-staging-required-role-arrangement",
     );
     await expect(paperArrangement).toBeVisible();
+    await expect(paperArrangement).not.toContainText("staging 必验");
     await expect(paperArrangement).toContainText(
       "不可用写操作必须显示原因和下一步",
     );

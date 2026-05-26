@@ -465,8 +465,9 @@ describe("admin user organization authorization ops baseline", () => {
     );
     expect(
       within(redeemCodeEntry).getByRole("link", { name: "生成卡密" }),
-    ).toHaveAttribute("href", "/ops/users");
-    expect(redeemCodeEntry).toHaveTextContent("系统运营 staging 必验");
+    ).toHaveAttribute("href", "#redeem-code-generate-panel");
+    expect(redeemCodeEntry).toHaveTextContent("系统运营本地验收");
+    expect(redeemCodeEntry).not.toHaveTextContent("staging 必验");
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -479,8 +480,9 @@ describe("admin user organization authorization ops baseline", () => {
     );
     expect(
       within(orgAuthEntry).getByRole("link", { name: "新增企业授权" }),
-    ).toHaveAttribute("href", "/ops/users");
-    expect(orgAuthEntry).toHaveTextContent("系统运营 staging 必验");
+    ).toHaveAttribute("href", "#org-auth-create-panel");
+    expect(orgAuthEntry).toHaveTextContent("系统运营本地验收");
+    expect(orgAuthEntry).not.toHaveTextContent("staging 必验");
   });
 
   it("closes org_auth create and cancel actions on the organization page", async () => {

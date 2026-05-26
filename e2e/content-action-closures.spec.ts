@@ -65,19 +65,19 @@ test.describe("content action closures", () => {
     await expect(page.getByRole("button", { name: "新建草稿" })).toBeEnabled();
     await expect(
       page.getByRole("button", { name: "组卷", exact: true }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "发布", exact: true }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "下架", exact: true }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "复制", exact: true }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "绑定原始文件", exact: true }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await expect(page.getByTestId("paper-action-unavailable")).toBeVisible();
   });
 });

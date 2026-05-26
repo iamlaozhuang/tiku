@@ -301,11 +301,11 @@ describe("AdminPaperManagement", () => {
       await screen.findByRole("heading", { name: "试卷管理" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "新建草稿" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "组卷" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "发布" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "下架" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "复制" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "绑定原始文件" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "组卷" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "发布" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "下架" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "复制" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "绑定原始文件" })).toBeNull();
     expect(screen.getByTestId("paper-action-unavailable")).toBeInTheDocument();
 
     const firstRow = screen.getByTestId(

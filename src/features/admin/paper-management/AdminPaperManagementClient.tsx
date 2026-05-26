@@ -919,46 +919,6 @@ function ActionBar({ onCreate }: { onCreate: () => void }) {
           <FilePlus2 aria-hidden="true" data-icon="inline-start" />
           新建草稿
         </Button>
-        <Button
-          disabled
-          aria-describedby="paper-action-unavailable"
-          variant="outline"
-        >
-          <Layers3 aria-hidden="true" data-icon="inline-start" />
-          组卷
-        </Button>
-        <Button
-          disabled
-          aria-describedby="paper-action-unavailable"
-          variant="outline"
-        >
-          <FileCheck aria-hidden="true" data-icon="inline-start" />
-          发布
-        </Button>
-        <Button
-          disabled
-          aria-describedby="paper-action-unavailable"
-          variant="outline"
-        >
-          <Archive aria-hidden="true" data-icon="inline-start" />
-          下架
-        </Button>
-        <Button
-          disabled
-          aria-describedby="paper-action-unavailable"
-          variant="secondary"
-        >
-          <Copy aria-hidden="true" data-icon="inline-start" />
-          复制
-        </Button>
-        <Button
-          disabled
-          aria-describedby="paper-action-unavailable"
-          variant="secondary"
-        >
-          <Upload aria-hidden="true" data-icon="inline-start" />
-          绑定原始文件
-        </Button>
       </div>
       <p
         className="text-text-secondary text-xs leading-5"
@@ -966,8 +926,8 @@ function ActionBar({ onCreate }: { onCreate: () => void }) {
         id="paper-action-unavailable"
         role="status"
       >
-        草稿新建和行内组卷、发布、下架、复制、附件 metadata
-        登记已接入本地运行时；未选择试卷时请使用行内操作。
+        草稿新建已接入本地运行时；组卷、发布、下架、复制和附件 metadata
+        登记请在对应试卷行内操作。
       </p>
     </div>
   );

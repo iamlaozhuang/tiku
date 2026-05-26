@@ -606,7 +606,8 @@ describe("admin content and knowledge ops baseline", () => {
     const requiredRoleArrangement = screen.getByTestId(
       "content-ops-staging-required-role-arrangement",
     );
-    expect(requiredRoleArrangement).toHaveTextContent("内容运营 staging 必验");
+    expect(requiredRoleArrangement).toHaveTextContent("内容运营本地验收");
+    expect(requiredRoleArrangement).not.toHaveTextContent("staging 必验");
     expect(requiredRoleArrangement).toHaveTextContent(
       "知识点节点新增、编辑、停用",
     );
