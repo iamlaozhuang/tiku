@@ -7920,6 +7920,263 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-question-type-schema-expansion.md
     status: blocked
     retryCount: 0
+  - id: phase-12-content-ssot-ac-coverage-queue
+    title: Phase 12 Content SSOT AC Coverage Queue
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-25-content-admin-ssot-ac-coverage-repair
+    dependencies:
+      - phase-12-repair-content-question-edit-ux
+    taskPlanPolicy: required
+    humanApproval: User approved registering and executing AC-driven content admin repair tasks under the semi-automation mechanism until SSOT acceptance standards are reached. This approval does not allow dependency/package/lockfile changes, schema/migration/script changes, secret/env changes, cloud/staging/prod/deployment work, provider calls, destructive data operations, or recording sensitive/raw content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-ssot-ac-coverage-queue.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-content-ssot-ac-coverage-queue.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - automation_state
+      - ssot_ac_coverage
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-ssot-ac-coverage-queue.md
+    status: closed
+    retryCount: 0
+  - id: phase-12-repair-content-question-bank-ssot-ac
+    title: Phase 12 Repair Content Question Bank SSOT AC Coverage
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#us-02-01-us-02-03 and docs/01-requirements/stories/epic-06-admin-ops.md#us-06-08
+    dependencies:
+      - phase-12-content-ssot-ac-coverage-queue
+    taskPlanPolicy: required
+    humanApproval: User approved executing AC-driven content admin repair tasks under the semi-automation mechanism. This task may improve existing-schema question authoring, list, filter, browser evidence, and tests. It does not approve adding `case_analysis` or `calculation`, schema/migration/script changes, dependency/package/lockfile changes, secret/env changes, cloud/staging/prod/deployment work, destructive data operations, or recording sensitive/raw content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-question-bank-ssot-ac.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-bank-ssot-ac.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/question-material-management/**
+      - src/server/validators/question.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - src/server/services/question-service.test.ts
+      - src/server/services/question-route.test.ts
+      - e2e/content-action-closures.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - content_question_authoring
+      - ssot_ac_coverage
+      - schema_boundary
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-content-question-bank-ssot-ac
+      - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts src/server/services/question-service.test.ts src/server/services/question-route.test.ts
+      - npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-question-bank-ssot-ac.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-content-paper-composition-ssot-ac
+    title: Phase 12 Repair Content Paper Composition SSOT AC Coverage
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#us-02-07-us-02-11 and docs/01-requirements/stories/epic-06-admin-ops.md#us-06-09
+    dependencies:
+      - phase-12-repair-content-question-bank-ssot-ac
+    taskPlanPolicy: required
+    humanApproval: User approved executing AC-driven content admin repair tasks under the semi-automation mechanism. This task may improve local paper metadata, composition UI, score/structure controls, original-file metadata UI, tests, and redacted evidence. It does not approve schema/migration/script changes, dependency/package/lockfile changes, secret/env changes, cloud/staging/prod/deployment work, real storage URLs, destructive data operations, or recording sensitive/raw content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-paper-composition-ssot-ac.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-content-paper-composition-ssot-ac.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/paper-management/**
+      - tests/unit/admin-paper-ui.test.ts
+      - src/server/services/paper-draft-service.test.ts
+      - e2e/content-action-closures.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - paper_composition
+      - content_admin_runtime
+      - ssot_ac_coverage
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-content-paper-composition-ssot-ac
+      - npm.cmd run test:unit -- tests/unit/admin-paper-ui.test.ts src/server/services/paper-draft-service.test.ts
+      - npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-paper-composition-ssot-ac.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-content-material-management-ssot-ac
+    title: Phase 12 Repair Content Material Management SSOT AC Coverage
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/01-requirements/stories/epic-02-question-paper.md#us-02-06 and docs/01-requirements/stories/epic-06-admin-ops.md#content-material-management
+    dependencies:
+      - phase-12-repair-content-paper-composition-ssot-ac
+    taskPlanPolicy: required
+    humanApproval: User approved executing AC-driven content admin repair tasks under the semi-automation mechanism. This task may improve existing-schema material UI, search/filter, reference visibility from existing runtime data, tests, and redacted evidence. It does not approve schema/migration/script changes, dependency/package/lockfile changes, secret/env changes, cloud/staging/prod/deployment work, file storage changes, destructive data operations, or recording sensitive/raw content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-material-management-ssot-ac.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-content-material-management-ssot-ac.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/question-material-management/**
+      - tests/unit/admin-question-material-ui.test.ts
+      - src/server/services/material-service.test.ts
+      - e2e/content-action-closures.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - content_material_management
+      - ssot_ac_coverage
+      - storage_boundary
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-content-material-management-ssot-ac
+      - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts src/server/services/material-service.test.ts
+      - npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-material-management-ssot-ac.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-content-knowledge-tree-ssot-ac
+    title: Phase 12 Repair Content Knowledge Tree SSOT AC Coverage
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-10 and docs/01-requirements/modules/05-rag-knowledge.md#knowledge-node-management
+    dependencies:
+      - phase-12-repair-content-material-management-ssot-ac
+    taskPlanPolicy: required
+    humanApproval: User approved executing AC-driven content admin repair tasks under the semi-automation mechanism. This task may improve knowledge_node create/edit/move/disable form UX, local tests, and redacted evidence. It does not approve schema/migration/script changes, dependency/package/lockfile changes, secret/env changes, cloud/staging/prod/deployment work, provider calls, destructive data operations, or recording sensitive/raw content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-knowledge-tree-ssot-ac.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-content-knowledge-tree-ssot-ac.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/knowledge-node-management/**
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts
+      - e2e/local-business-flow.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - knowledge_node_management
+      - ssot_ac_coverage
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-content-knowledge-tree-ssot-ac
+      - npm.cmd run test:unit -- tests/unit/admin-content-knowledge-ops-baseline.test.ts tests/unit/phase-11-knowledge-node-tree-management-loop.test.ts
+      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-knowledge-tree-ssot-ac.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-repair-admin-common-interaction-ssot-ac
+    title: Phase 12 Repair Admin Common Interaction SSOT AC Coverage
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-01
+    dependencies:
+      - phase-12-repair-content-knowledge-tree-ssot-ac
+    taskPlanPolicy: required
+    humanApproval: User approved executing AC-driven content admin repair tasks under the semi-automation mechanism. This task may improve shared admin interaction consistency for pagination, sorting, confirmation, and toast coverage within existing dependencies. It does not approve dependency/package/lockfile changes, schema/migration/script changes, secret/env changes, cloud/staging/prod/deployment work, destructive data operations, or recording sensitive/raw content.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-25-phase-12-admin-common-interaction-ssot-ac.md
+      - docs/05-execution-logs/evidence/2026-05-25-phase-12-admin-common-interaction-ssot-ac.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/**
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/admin-paper-ui.test.ts
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - e2e/content-action-closures.spec.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - admin_common_interaction
+      - ssot_ac_coverage
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-12-repair-admin-common-interaction-ssot-ac
+      - npm.cmd run test:unit -- tests/unit/admin-question-material-ui.test.ts tests/unit/admin-paper-ui.test.ts tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-admin-common-interaction-ssot-ac.md
+    status: pending
+    retryCount: 0
   - id: phase-12-plan-model-config-secret-crud
     title: Phase 12 Plan Model Config Secret CRUD
     phase: phase-12-mvp-requirements-runtime-repair
