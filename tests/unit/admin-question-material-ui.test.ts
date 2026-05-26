@@ -110,11 +110,25 @@ const materialPayload = {
       updatedAt: "2026-05-19T06:00:00.000Z",
       id: 201,
     },
+    {
+      publicId: "material-locked-002",
+      title: "已锁定物流材料 B",
+      contentRichText: "已发布试卷快照引用的材料正文。",
+      profession: "logistics",
+      level: 2,
+      subject: "skill",
+      status: "available",
+      isLocked: true,
+      lockedAt: "2026-05-19T07:00:00.000Z",
+      createdAt: "2026-05-19T05:00:00.000Z",
+      updatedAt: "2026-05-19T07:00:00.000Z",
+      id: 202,
+    },
   ],
   pagination: {
     page: 1,
     pageSize: 20,
-    total: 1,
+    total: 2,
     sortBy: "updatedAt",
     sortOrder: "desc",
   },
@@ -579,6 +593,31 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.getByText("没有匹配的材料")).toBeInTheDocument();
   });
 
+  it("keeps locked materials copy-only and exposes their lock boundary", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    await screen.findByTestId("material-row-material-locked-002");
+
+    expect(
+      screen.getByTestId("material-edit-material-locked-002"),
+    ).toBeDisabled();
+    expect(
+      screen.getByText("已锁定材料只能复制新材料后编辑"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "复制材料 material-locked-002",
+      }),
+    ).toBeEnabled();
+  });
+
   it("creates, edits, disables, and copies questions through the protected runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockWritableContentFetch();
@@ -1015,13 +1054,27 @@ describe("AdminQuestionMaterialManagement", () => {
 
     await screen.findByText("营销案例材料 A");
     fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
+    const createMaterialForm = within(
+      screen.getByRole("form", { name: "材料表单" }),
+    );
     fireEvent.change(screen.getByLabelText("材料标题"), {
       target: { value: "新建案例材料" },
     });
-    fireEvent.change(screen.getByLabelText("材料正文"), {
+    fireEvent.change(createMaterialForm.getByLabelText("专业"), {
+      target: { value: "marketing" },
+    });
+    fireEvent.change(createMaterialForm.getByLabelText("等级"), {
+      target: { value: "4" },
+    });
+    fireEvent.change(createMaterialForm.getByLabelText("科目"), {
+      target: { value: "theory" },
+    });
+    fireEvent.change(createMaterialForm.getByLabelText("材料正文"), {
       target: { value: "新建材料正文" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "保存材料" }));
+    fireEvent.click(
+      createMaterialForm.getByRole("button", { name: "保存材料" }),
+    );
 
     expect(
       await screen.findByText("材料 material-created-001 已保存"),
@@ -1036,16 +1089,31 @@ describe("AdminQuestionMaterialManagement", () => {
         }),
       }),
     );
+    expect(
+      readJsonRequestBody(fetchMock, "/api/v1/materials", "POST"),
+    ).toMatchObject({
+      contentRichText: "新建材料正文",
+      level: 4,
+      profession: "marketing",
+      subject: "theory",
+      title: "新建案例材料",
+    });
 
     fireEvent.click(
       screen.getByRole("button", {
         name: "编辑材料 material-marketing-001",
       }),
     );
-    fireEvent.change(screen.getByLabelText("材料标题"), {
+    const editMaterialForm = within(
+      screen.getByRole("form", { name: "材料表单" }),
+    );
+    fireEvent.change(editMaterialForm.getByLabelText("材料标题"), {
       target: { value: "编辑后的材料" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "保存材料" }));
+    fireEvent.change(editMaterialForm.getByLabelText("等级"), {
+      target: { value: "5" },
+    });
+    fireEvent.click(editMaterialForm.getByRole("button", { name: "保存材料" }));
 
     expect(
       await screen.findByText("材料 material-marketing-001 已保存"),
@@ -1054,6 +1122,18 @@ describe("AdminQuestionMaterialManagement", () => {
       "/api/v1/materials/material-marketing-001",
       expect.objectContaining({ method: "PATCH" }),
     );
+    expect(
+      readJsonRequestBody(
+        fetchMock,
+        "/api/v1/materials/material-marketing-001",
+        "PATCH",
+      ),
+    ).toMatchObject({
+      level: 5,
+      profession: "marketing",
+      status: "available",
+      subject: "theory",
+    });
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -1075,5 +1155,64 @@ describe("AdminQuestionMaterialManagement", () => {
       expect.objectContaining({ method: "POST" }),
     );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
+  });
+
+  it("prevents saving material rich text above the SSOT 30000 character limit", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    await screen.findByText("营销案例材料 A");
+    fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
+
+    const materialForm = within(screen.getByRole("form", { name: "材料表单" }));
+    fireEvent.change(materialForm.getByLabelText("材料正文"), {
+      target: { value: "材".repeat(30001) },
+    });
+
+    expect(materialForm.getByText("30001/30000")).toBeInTheDocument();
+    expect(
+      materialForm.getByText("材料正文超过 30000 字符，不能保存。"),
+    ).toBeInTheDocument();
+    expect(
+      materialForm.getByRole("button", { name: "保存材料" }),
+    ).toBeDisabled();
+    expect(
+      fetchMock.mock.calls.some(
+        ([requestUrl, requestInit]) =>
+          String(requestUrl) === "/api/v1/materials" &&
+          requestInit?.method === "POST",
+      ),
+    ).toBe(false);
+  });
+
+  it("offers bounded rich text helpers for material image placeholder and table markup", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockWritableContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        defaultView: "materials",
+      }),
+    );
+
+    await screen.findByText("营销案例材料 A");
+    fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
+
+    const materialForm = within(screen.getByRole("form", { name: "材料表单" }));
+    fireEvent.click(materialForm.getByRole("button", { name: "插入图片占位" }));
+    fireEvent.click(materialForm.getByRole("button", { name: "插入表格模板" }));
+
+    const contentInput = materialForm.getByLabelText(
+      "材料正文",
+    ) as HTMLTextAreaElement;
+
+    expect(contentInput.value).toContain("<img");
+    expect(contentInput.value).toContain("<table>");
   });
 });
