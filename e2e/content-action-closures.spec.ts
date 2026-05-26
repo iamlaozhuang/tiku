@@ -27,20 +27,18 @@ test.describe("content action closures", () => {
     await expect(
       page.getByTestId("content-action-runtime-ready"),
     ).toBeVisible();
-    const editableQuestionEdit = page
-      .locator('button[data-testid^="question-edit-"]:not([disabled])')
-      .first();
-    await expect(editableQuestionEdit).toBeEnabled();
-    const firstQuestionRow = editableQuestionEdit.locator(
-      "xpath=ancestor::article[1]",
+    await page.getByRole("button", { name: "新建题目" }).click();
+    const questionForm = page.getByRole("form", { name: "题目表单" });
+    await expect(questionForm).toBeVisible();
+    await questionForm
+      .getByRole("button", { name: "插入受管图片引用" })
+      .click();
+    await expect(questionForm.getByLabel("题干")).toHaveValue(
+      /data-paper-asset-public-id="paper-asset-local-question-image"/,
     );
-    await expect(firstQuestionRow).toBeVisible();
-    await editableQuestionEdit.click();
-    await expect(page.getByTestId("content-edit-context-panel")).toBeVisible();
-    await expect(firstQuestionRow).toHaveAttribute("data-selected", "true");
-    await expect(
-      page.getByTestId("content-edit-context-panel").getByRole("form"),
-    ).toBeVisible();
+    await expect(questionForm.getByLabel("题干")).not.toHaveValue(
+      /local-image-placeholder|dev\/paper-asset/,
+    );
     const lockedQuestionEdit = page
       .locator('button[data-testid^="question-edit-"][disabled]')
       .first();

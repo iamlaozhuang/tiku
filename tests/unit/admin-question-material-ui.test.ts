@@ -1002,7 +1002,7 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBe(false);
   });
 
-  it("offers bounded rich text helpers for local image placeholder and table markup", async () => {
+  it("offers bounded rich text helpers for managed paper_asset image references and table markup", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockWritableContentFetch();
 
@@ -1012,7 +1012,9 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "新建题目" }));
 
     const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
-    fireEvent.click(questionForm.getByRole("button", { name: "插入图片占位" }));
+    fireEvent.click(
+      questionForm.getByRole("button", { name: "插入受管图片引用" }),
+    );
     fireEvent.click(questionForm.getByRole("button", { name: "插入表格模板" }));
 
     const stemInput = questionForm.getByLabelText(
@@ -1020,6 +1022,12 @@ describe("AdminQuestionMaterialManagement", () => {
     ) as HTMLTextAreaElement;
 
     expect(stemInput.value).toContain("<img");
+    expect(stemInput.value).toContain(
+      'data-paper-asset-public-id="paper-asset-local-question-image"',
+    );
+    expect(stemInput.value).toContain("/api/v1/paper-assets/");
+    expect(stemInput.value).not.toContain("local-image-placeholder");
+    expect(stemInput.value).not.toContain("dev/paper-asset");
     expect(stemInput.value).toContain("<table>");
   });
 
@@ -1390,7 +1398,7 @@ describe("AdminQuestionMaterialManagement", () => {
     ).toBe(false);
   });
 
-  it("offers bounded rich text helpers for material image placeholder and table markup", async () => {
+  it("offers bounded rich text helpers for managed material paper_asset image references and table markup", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockWritableContentFetch();
 
@@ -1404,7 +1412,9 @@ describe("AdminQuestionMaterialManagement", () => {
     fireEvent.click(screen.getByRole("button", { name: "新建材料" }));
 
     const materialForm = within(screen.getByRole("form", { name: "材料表单" }));
-    fireEvent.click(materialForm.getByRole("button", { name: "插入图片占位" }));
+    fireEvent.click(
+      materialForm.getByRole("button", { name: "插入受管图片引用" }),
+    );
     fireEvent.click(materialForm.getByRole("button", { name: "插入表格模板" }));
 
     const contentInput = materialForm.getByLabelText(
@@ -1412,6 +1422,12 @@ describe("AdminQuestionMaterialManagement", () => {
     ) as HTMLTextAreaElement;
 
     expect(contentInput.value).toContain("<img");
+    expect(contentInput.value).toContain(
+      'data-paper-asset-public-id="paper-asset-local-material-image"',
+    );
+    expect(contentInput.value).toContain("/api/v1/paper-assets/");
+    expect(contentInput.value).not.toContain("local-image-placeholder");
+    expect(contentInput.value).not.toContain("dev/paper-asset");
     expect(contentInput.value).toContain("<table>");
   });
 });
