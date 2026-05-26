@@ -37,6 +37,7 @@ import type {
   NormalizedCreateOrganizationInput,
   NormalizedUpdateOrganizationInput,
 } from "../validators/organization";
+import { validateOrganizationTierParent } from "../validators/organization";
 import { getSharedRuntimePostgresClient } from "./runtime-database";
 
 type AdminOrganizationOrgAuthRuntimeDatabase = PostgresJsDatabase<
@@ -350,12 +351,24 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
     },
     async createOrganization(input) {
       const database = getDatabase();
-      const parentOrganizationId = await findParentOrganizationId(
+      const parentOrganization = await findParentOrganization(
         database,
         input.parentOrganizationPublicId,
       );
 
-      if (parentOrganizationId === undefined) {
+      if (parentOrganization === undefined) {
+        return null;
+      }
+
+      const tierParentValidation = validateOrganizationTierParent({
+        orgTier: input.orgTier,
+        parentOrganization:
+          parentOrganization === null
+            ? null
+            : { orgTier: parentOrganization.org_tier },
+      });
+
+      if (!tierParentValidation.success) {
         return null;
       }
 
@@ -366,7 +379,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           public_id: `organization-${randomUUID()}`,
           name: input.name,
           org_tier: input.orgTier,
-          parent_organization_id: parentOrganizationId,
+          parent_organization_id: parentOrganization?.id ?? null,
           status: "active",
           contact_name: input.contactName,
           contact_phone: input.contactPhone,
@@ -382,12 +395,27 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
     },
     async updateOrganization(publicId, input) {
       const database = getDatabase();
-      const parentOrganizationId = await findParentOrganizationId(
+      const parentOrganization = await findParentOrganization(
         database,
         input.parentOrganizationPublicId,
       );
 
-      if (parentOrganizationId === undefined) {
+      if (
+        parentOrganization === undefined ||
+        input.parentOrganizationPublicId === publicId
+      ) {
+        return null;
+      }
+
+      const tierParentValidation = validateOrganizationTierParent({
+        orgTier: input.orgTier,
+        parentOrganization:
+          parentOrganization === null
+            ? null
+            : { orgTier: parentOrganization.org_tier },
+      });
+
+      if (!tierParentValidation.success) {
         return null;
       }
 
@@ -396,7 +424,7 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         .set({
           name: input.name,
           org_tier: input.orgTier,
-          parent_organization_id: parentOrganizationId,
+          parent_organization_id: parentOrganization?.id ?? null,
           status: input.status,
           contact_name: input.contactName,
           contact_phone: input.contactPhone,
@@ -918,21 +946,23 @@ async function listParentOrganizationPublicIds(
   return new Map(rows.map((row) => [row.id, row.public_id]));
 }
 
-async function findParentOrganizationId(
+async function findParentOrganization(
   database: AdminOrganizationOrgAuthRuntimeDatabase,
   parentOrganizationPublicId: string | null,
-): Promise<number | null | undefined> {
+): Promise<
+  Pick<OrganizationMutationRow, "id" | "org_tier"> | null | undefined
+> {
   if (parentOrganizationPublicId === null) {
     return null;
   }
 
   const [parentOrganization] = await database
-    .select({ id: organization.id })
+    .select({ id: organization.id, org_tier: organization.org_tier })
     .from(organization)
     .where(eq(organization.public_id, parentOrganizationPublicId))
     .limit(1);
 
-  return parentOrganization?.id;
+  return parentOrganization;
 }
 
 async function mapOrganizationMutationRowToDto(

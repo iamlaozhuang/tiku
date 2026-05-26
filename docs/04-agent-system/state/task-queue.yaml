@@ -9667,3 +9667,58 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-org-auth-full-scope-management.md
     status: closed
     retryCount: 1
+  - id: phase-14-organization-tree-management-ui-validation
+    title: Phase 14 Organization Tree Management UI Validation
+    phase: phase-14-organization-tree-management-ui-validation
+    sourceStory: user-request-2026-05-26-organization-tree-management-ui-validation
+    dependencies:
+      - phase-14-org-auth-full-scope-management
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved creating and executing an independent local task for enterprise organization tree maintenance UI, validation, and e2e coverage. Scope is local-only and must not change dependencies, schema, migrations, env files, scripts, staging/prod/cloud/real provider, or deployment.
+    allowedFiles:
+      - src/features/admin/org-auth-redeem/**
+      - src/server/contracts/organization-auth-contract.ts
+      - src/server/services/organization-auth-service.ts
+      - src/server/services/organization-auth-service.test.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+      - src/server/repositories/admin-organization-org-auth-runtime-repository.ts
+      - src/server/validators/organization.ts
+      - src/server/validators/organization.test.ts
+      - e2e/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - auth_permission_model
+      - admin_ui
+      - organization_tree
+      - browser_runtime
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-user-org-auth-ops-baseline.test.ts
+      - npm.cmd run test:unit -- src/server/validators/organization.test.ts
+      - npm.cmd run test:e2e -- e2e/staging-required-role-flows.spec.ts
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-organization-tree-management-ui-validation.md
+    status: closed
+    retryCount: 0

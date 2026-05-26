@@ -341,6 +341,71 @@ function mockSystemOpsFetchWithOrganizationTree() {
         });
       }
 
+      if (path === "/api/v1/organizations") {
+        const body = JSON.parse(String(init?.body));
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            organization: {
+              publicId: "org-province-created",
+              name: body.name,
+              orgTier: body.orgTier,
+              parentOrganizationPublicId: body.parentOrganizationPublicId,
+              status: "active",
+              contactName: body.contactName,
+              contactPhone: body.contactPhone,
+              remark: body.remark,
+              createdAt: "2026-05-26T00:00:00.000Z",
+              updatedAt: "2026-05-26T00:00:00.000Z",
+            },
+          },
+        });
+      }
+
+      if (path === "/api/v1/organizations/org-city-001") {
+        const body = JSON.parse(String(init?.body));
+
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            organization: {
+              publicId: "org-city-001",
+              name: body.name,
+              orgTier: body.orgTier,
+              parentOrganizationPublicId: body.parentOrganizationPublicId,
+              status: body.status,
+              contactName: body.contactName,
+              contactPhone: body.contactPhone,
+              remark: body.remark,
+              createdAt: "2026-05-26T00:00:00.000Z",
+              updatedAt: "2026-05-26T00:10:00.000Z",
+            },
+          },
+        });
+      }
+
+      if (path === "/api/v1/organizations/org-city-001/disable") {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            organization: {
+              ...organizationTreePayload.data.organizations[1],
+              status: "disabled",
+              contactName: null,
+              contactPhone: null,
+              remark: null,
+              createdAt: "2026-05-26T00:00:00.000Z",
+              updatedAt: "2026-05-26T00:20:00.000Z",
+            },
+            affectedOrganizationPublicIds: ["org-city-001"],
+          },
+        });
+      }
+
       return createJsonResponse({
         code: 404001,
         message: "missing",
@@ -706,6 +771,92 @@ describe("admin user organization authorization ops baseline", () => {
       purchaserOrganizationPublicId: "org-city-001",
       startsAt: "2026-06-01T00:00:00.000Z",
     });
+  });
+
+  it("creates, edits, and disables organization tree nodes from the organization page", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("organization-tree-management-form");
+
+    fireEvent.change(screen.getByTestId("organization-name-input"), {
+      target: { value: "Fujian Test Tobacco" },
+    });
+    fireEvent.change(screen.getByTestId("organization-tier-select"), {
+      target: { value: "province" },
+    });
+    fireEvent.click(screen.getByTestId("organization-submit-button"));
+    fireEvent.click(screen.getByTestId("organization-confirm-action"));
+
+    const createCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/organizations",
+    );
+    expect(JSON.parse(String(createCall?.[1]?.body))).toMatchObject({
+      name: "Fujian Test Tobacco",
+      orgTier: "province",
+      parentOrganizationPublicId: null,
+    });
+
+    fireEvent.click(screen.getByTestId("organization-edit-org-city-001"));
+    fireEvent.change(screen.getByTestId("organization-name-input"), {
+      target: { value: "Quanzhou Test Tobacco" },
+    });
+    fireEvent.change(screen.getByTestId("organization-parent-select"), {
+      target: { value: "org-province-001" },
+    });
+    fireEvent.click(screen.getByTestId("organization-submit-button"));
+    fireEvent.click(screen.getByTestId("organization-confirm-action"));
+
+    const updateCall = fetchMock.mock.calls.find(
+      ([url]) => String(url) === "/api/v1/organizations/org-city-001",
+    );
+    expect(JSON.parse(String(updateCall?.[1]?.body))).toMatchObject({
+      name: "Quanzhou Test Tobacco",
+      orgTier: "city",
+      parentOrganizationPublicId: "org-province-001",
+      status: "active",
+    });
+
+    fireEvent.click(screen.getByTestId("organization-disable-org-city-001"));
+    fireEvent.click(screen.getByTestId("organization-confirm-action"));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/organizations/org-city-001/disable",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
+  });
+
+  it("blocks organization tree mutations with invalid tier parent selection", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockSystemOpsFetchWithOrganizationTree();
+
+    render(createElement(AdminOrgAuthPage));
+
+    await screen.findByTestId("organization-tree-management-form");
+
+    fireEvent.change(screen.getByTestId("organization-name-input"), {
+      target: { value: "Invalid District Test" },
+    });
+    fireEvent.change(screen.getByTestId("organization-tier-select"), {
+      target: { value: "district" },
+    });
+    fireEvent.change(screen.getByTestId("organization-parent-select"), {
+      target: { value: "org-province-001" },
+    });
+
+    expect(screen.getByTestId("organization-form-error")).toHaveTextContent(
+      /./,
+    );
+    expect(screen.getByTestId("organization-submit-button")).toBeDisabled();
+    expect(
+      fetchMock.mock.calls.some(
+        ([url]) => String(url) === "/api/v1/organizations",
+      ),
+    ).toBe(false);
   });
 
   it("closes redeem_code generation and filtering on the redeem code page", async () => {

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-14-org-auth-full-scope-management
-  updatedAt: "2026-05-26T10:35:00-07:00"
+  currentPhase: phase-14-organization-tree-management-ui-validation
+  updatedAt: "2026-05-26T15:22:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-14-org-auth-full-scope-management
+  id: phase-14-organization-tree-management-ui-validation
   status: closed
-  sourceStory: user-request-2026-05-26-org-auth-full-scope-management
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-14-org-auth-full-scope-management.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-org-auth-full-scope-management.md
-  branch: codex/phase-14-org-auth-full-scope-management
+  sourceStory: user-request-2026-05-26-organization-tree-management-ui-validation
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-14-organization-tree-management-ui-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-14-organization-tree-management-ui-validation.md
+  branch: codex/phase-14-organization-tree-management-ui-validation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 14 enterprise authorization management is locally validated and ready for merge closeout.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-14-org-auth-full-scope-management.md
+  nextRecommendedAction: Phase 14 organization tree management UI, validation, and e2e coverage completed locally; await/perform closeout merge and push cleanup.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-14-organization-tree-management-ui-validation.md
