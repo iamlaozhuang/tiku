@@ -17,6 +17,24 @@ export type ModelConfigRuntimeRecord = {
   priority: number;
 };
 
+export type RedactedModelConfigRuntimeSnapshot = {
+  providerPublicId: string;
+  providerKey: string;
+  providerDisplayName: string;
+  modelConfigPublicId: string;
+  aiFuncType: AiFuncType;
+  modelName: string;
+  displayName: string;
+  configVersion: number;
+  timeoutSecond: number;
+  maxRetryCount: number;
+  fallbackModelConfigPublicId: string | null;
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+  snapshotPolicy: "redacted_metadata";
+  providerMode: "local_mock";
+};
+
 export type ModelConfigRuntimeCatalog = {
   records: ModelConfigRuntimeRecord[];
 };
@@ -36,6 +54,7 @@ export type ModelConfigRuntimeSelection =
       selectionReason: "primary" | "fallback";
       fallbackFromModelConfigPublicId: string | null;
       modelConfigSnapshot: ModelConfigSnapshot;
+      redactedModelConfigMetadata: RedactedModelConfigRuntimeSnapshot;
       promptTemplate: ModelConfigRuntimePromptTemplate;
     }
   | {
@@ -105,6 +124,28 @@ function createLocalRecord(input: {
     },
     isEnabled: input.isEnabled,
     priority: input.priority,
+  };
+}
+
+export function createRedactedModelConfigRuntimeSnapshot(
+  snapshot: ModelConfigSnapshot,
+): RedactedModelConfigRuntimeSnapshot {
+  return {
+    providerPublicId: snapshot.providerPublicId,
+    providerKey: snapshot.providerKey,
+    providerDisplayName: snapshot.providerDisplayName,
+    modelConfigPublicId: snapshot.modelConfigPublicId,
+    aiFuncType: snapshot.aiFuncType,
+    modelName: snapshot.modelName,
+    displayName: snapshot.displayName,
+    configVersion: snapshot.configVersion,
+    timeoutSecond: snapshot.timeoutSecond,
+    maxRetryCount: snapshot.maxRetryCount,
+    fallbackModelConfigPublicId: snapshot.fallbackModelConfigPublicId,
+    promptTemplateKey: snapshot.promptTemplateKey,
+    promptTemplateVersion: snapshot.promptTemplateVersion,
+    snapshotPolicy: "redacted_metadata",
+    providerMode: "local_mock",
   };
 }
 
@@ -275,6 +316,9 @@ function selectRecord(
     selectionReason: input.selectionReason,
     fallbackFromModelConfigPublicId: input.fallbackFromModelConfigPublicId,
     modelConfigSnapshot: record.modelConfigSnapshot,
+    redactedModelConfigMetadata: createRedactedModelConfigRuntimeSnapshot(
+      record.modelConfigSnapshot,
+    ),
     promptTemplate: record.promptTemplate,
   };
 }

@@ -8,6 +8,7 @@ import {
   type RedactedJsonObject,
 } from "../models/ai-rag";
 import type { KnowledgeNodeSnapshot } from "../models/ai-rag";
+import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
 
 export type KnowledgeRecommendationStatus =
   | "recommended"
@@ -218,6 +219,9 @@ function createAiCallLogDraft(input: {
     promptTemplateKey: input.context.promptTemplate.promptTemplateKey,
     promptTemplateVersion: input.context.promptTemplate.version,
     requestRedactedSnapshot: {
+      modelConfig: createRedactedModelConfigRuntimeSnapshot(
+        input.context.modelConfigSnapshot,
+      ),
       prompt: redactedSnapshots.prompt,
       question: redactedSnapshots.userAnswer,
       providerRequestPayload: redactedSnapshots.providerRequestPayload,

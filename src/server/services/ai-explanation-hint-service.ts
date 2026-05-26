@@ -9,6 +9,7 @@ import {
   type ModelConfigSnapshot,
   type RedactedJsonObject,
 } from "../models/ai-rag";
+import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
 
 export type AiExplanationStatus = "explained" | "explanation_unavailable";
 
@@ -222,9 +223,15 @@ function createAiCallLogDraft(input: {
     userAnswer: input.userAnswer,
     modelOutput: input.modelOutput,
     citations: input.citations,
-    providerRequestPayload: input.providerRequestPayload,
-    providerResponsePayload: input.providerResponsePayload,
-    providerErrorPayload: input.providerErrorPayload,
+    providerRequestPayload: {
+      requestBody: JSON.stringify(input.providerRequestPayload),
+    },
+    providerResponsePayload: {
+      responseBody: JSON.stringify(input.providerResponsePayload),
+    },
+    providerErrorPayload: {
+      errorBody: JSON.stringify(input.providerErrorPayload),
+    },
   });
   const redactedRequestContext = createAiCallLogRedactedSnapshots({
     prompt: null,
@@ -242,6 +249,9 @@ function createAiCallLogDraft(input: {
     promptTemplateKey: input.promptTemplateKey,
     promptTemplateVersion: input.promptTemplateVersion,
     requestRedactedSnapshot: {
+      modelConfig: createRedactedModelConfigRuntimeSnapshot(
+        input.modelConfigSnapshot,
+      ),
       prompt: redactedSnapshots.prompt,
       userAnswer: redactedSnapshots.userAnswer,
       providerRequestPayload: redactedSnapshots.providerRequestPayload,

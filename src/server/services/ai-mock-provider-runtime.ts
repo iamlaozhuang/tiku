@@ -7,6 +7,7 @@ import type {
   AdminAiAuditLogRuntimeRepositories,
   AppendAiCallLogInput,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
+import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
 
 export type AiMockProviderPromptTemplateSnapshot = {
   promptTemplateKey: string;
@@ -59,8 +60,12 @@ export function createAiMockProviderRuntime(
           learningSuggestion: providerResult.learningSuggestion,
         },
         citations: [],
-        providerRequestPayload: providerResult.providerRequestPayload,
-        providerResponsePayload: providerResult.providerResponsePayload,
+        providerRequestPayload: {
+          requestBody: JSON.stringify(providerResult.providerRequestPayload),
+        },
+        providerResponsePayload: {
+          responseBody: JSON.stringify(providerResult.providerResponsePayload),
+        },
         providerErrorPayload: null,
       });
       const aiCallLogInput = {
@@ -74,6 +79,9 @@ export function createAiMockProviderRuntime(
         promptTemplateKey: context.promptTemplate.promptTemplateKey,
         promptTemplateVersion: context.promptTemplate.version,
         requestRedactedSnapshot: {
+          modelConfig: createRedactedModelConfigRuntimeSnapshot(
+            context.modelConfigSnapshot,
+          ),
           prompt: redactedSnapshots.prompt,
           userAnswer: redactedSnapshots.userAnswer,
           providerRequestPayload: redactedSnapshots.providerRequestPayload,
