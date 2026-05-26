@@ -38,6 +38,9 @@ This task is local-only. It does not connect to staging, production, cloud, or a
   - effective authorization `GET`;
   - redeem code create/list endpoints;
   - student paper scope/list/detail endpoints.
+- Post-merge e2e follow-up fixed two residual baseline issues:
+  - `local-business-flow.spec.ts` now treats AI config page GET aborts as expected transition aborts when navigation cancels in-flight requests.
+  - `role-based-full-flow.spec.ts` now uses a run-scoped no-auth student phone to avoid local dirty database collisions with an older fixed phone/password.
 
 ## Command Results
 
@@ -65,19 +68,45 @@ Worktree-local commands:
 - `git diff --check`
   - Passed.
 
+Final master rerun after local merge:
+
+- Branch: `master`.
+- Head before amend: `0714ef4`.
+- `npm.cmd run test:e2e`: passed, 25 tests.
+- `npm.cmd run test:unit`: passed, 131 files / 524 tests.
+- `npm.cmd run lint`: passed.
+- `npm.cmd run typecheck`: passed.
+- `npm.cmd run build`: passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: completed repository readiness inventory on `master`, ahead of `origin/master` by the expected local runtime baseline commits.
+- `git diff --check`: passed.
+
 Post-merge primary-checkout commands:
 
-- `npm.cmd run test:unit`: pending.
-- `npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts`: pending.
-- `npm.cmd run test:e2e -- e2e/student-practice-mock-entry.spec.ts`: pending.
-- `npm.cmd run test:e2e -- e2e/role-based-acceptance/role-based-full-flow.spec.ts`: pending.
-- `npm.cmd run test:e2e`: pending.
-- `npm.cmd run build`: pending.
-- `npm.cmd run lint`: pending.
-- `npm.cmd run typecheck`: pending.
-- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pending.
-- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pending.
-- `git diff --check`: pending.
+- `npm.cmd run test:unit`
+  - Passed after merge in the primary checkout: 131 files / 524 tests.
+- `npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts`
+  - First post-merge run failed on expected transition abort classification for AI config GET requests.
+  - After follow-up test hardening, rerun passed: 1 test.
+- `npm.cmd run test:e2e -- e2e/student-practice-mock-entry.spec.ts`
+  - Passed: 1 test.
+- `npm.cmd run test:e2e -- e2e/role-based-acceptance/role-based-full-flow.spec.ts`
+  - First post-merge run failed because a fixed no-auth student phone already existed locally with a different password.
+  - After switching to a run-scoped phone, rerun passed: 6 tests.
+- `npm.cmd run test:e2e`
+  - Passed: 25 tests.
+- `npm.cmd run build`
+  - Passed in the primary checkout.
+- `npm.cmd run lint`
+  - Passed.
+- `npm.cmd run typecheck`
+  - Passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Completed repository readiness inventory. It reported the current follow-up branch changes and the unpushed runtime merge commits as expected before final merge/push.
+- `git diff --check`
+  - Passed.
 
 ## Forbidden Scope Self-Check
 

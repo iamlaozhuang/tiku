@@ -31,7 +31,8 @@ type RuntimeInventory = {
   studentToken: string;
 };
 
-const acceptanceRunLabel = `acceptance-20260524-role-flow-${Date.now()}`;
+const acceptanceRunSuffix = String(Date.now()).slice(-8);
+const acceptanceRunLabel = `acceptance-20260524-role-flow-${acceptanceRunSuffix}`;
 const devSeedPaperPublicId = "paper-dev-theory";
 const devSeedPaperQuestionPublicId = "paper-question-dev-single-choice";
 const localSessionStorageKey = "tiku.localSessionToken";
@@ -42,13 +43,13 @@ const adminCredential = {
 };
 
 const authorizedStudentCredential = {
-  phone: `139${String(Date.now()).slice(-8)}`,
+  phone: `139${acceptanceRunSuffix}`,
   password: "Acceptance2026",
   name: "acceptance-20260524-authorized-student",
 };
 
 const noAuthStudentCredential = {
-  phone: "13900000924",
+  phone: `138${acceptanceRunSuffix}`,
   password: "Acceptance2026",
   name: "acceptance-20260524-no-auth-student",
 };
