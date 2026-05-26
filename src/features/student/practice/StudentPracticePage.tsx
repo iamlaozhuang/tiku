@@ -18,6 +18,10 @@ import {
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
+import {
+  StudentRichText,
+  getStudentRichTextPlainText,
+} from "@/components/StudentRichText/StudentRichText";
 import type {
   PracticeAnswerFeedbackDto,
   PracticeAnswerFeedbackResultDto,
@@ -551,6 +555,9 @@ function ObjectiveQuestionPanel({
             <button
               key={questionOption.label}
               type="button"
+              aria-label={`${questionOption.label}. ${getStudentRichTextPlainText(
+                questionOption.content,
+              )}`}
               disabled={hasFeedback}
               onClick={() => onToggleLabel(questionOption.label)}
               className={`flex min-h-11 w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed ${
@@ -559,8 +566,14 @@ function ObjectiveQuestionPanel({
                   : "border-border bg-surface text-text-primary border"
               }`}
             >
-              <span>
-                {questionOption.label}. {questionOption.content}
+              <span className="flex items-center gap-1">
+                <span>{questionOption.label}.</span>
+                <span> </span>
+                <StudentRichText
+                  as="span"
+                  mode="inline"
+                  value={questionOption.content}
+                />
               </span>
               {isSelected ? (
                 <CheckCircle2 className="size-4" aria-hidden="true" />
@@ -595,14 +608,16 @@ function ObjectiveQuestionPanel({
             </p>
           </div>
           {feedback.standardAnswerRichText === null ? null : (
-            <p className="text-text-primary text-sm leading-6">
-              {feedback.standardAnswerRichText}
-            </p>
+            <StudentRichText
+              className="text-text-primary space-y-2 text-sm leading-6"
+              value={feedback.standardAnswerRichText}
+            />
           )}
           {feedback.analysisRichText === null ? null : (
-            <p className="text-text-secondary text-sm leading-6">
-              {feedback.analysisRichText}
-            </p>
+            <StudentRichText
+              className="text-text-secondary space-y-2 text-sm leading-6"
+              value={feedback.analysisRichText}
+            />
           )}
           {feedback.mistakeBookPublicId === null ? null : (
             <p className="text-warning text-sm font-medium">
@@ -678,14 +693,16 @@ function FillBlankQuestionPanel({
             </p>
           </div>
           {feedback.standardAnswerRichText === null ? null : (
-            <p className="text-text-secondary text-sm">
-              正确答案：{feedback.standardAnswerRichText}
-            </p>
+            <div className="text-text-secondary space-y-1 text-sm">
+              <p>正确答案：</p>
+              <StudentRichText value={feedback.standardAnswerRichText} />
+            </div>
           )}
           {feedback.analysisRichText === null ? null : (
-            <p className="text-text-secondary text-sm">
-              解析：{feedback.analysisRichText}
-            </p>
+            <div className="text-text-secondary space-y-1 text-sm">
+              <p>解析：</p>
+              <StudentRichText value={feedback.analysisRichText} />
+            </div>
           )}
           {hasNextQuestion ? (
             <button
@@ -740,9 +757,10 @@ function SubjectiveQuestionPanel({
           )}
         </button>
         {isMaterialOpen && question.materialRichText !== null ? (
-          <p className="text-text-secondary mt-3 text-sm leading-6">
-            {question.materialRichText}
-          </p>
+          <StudentRichText
+            className="text-text-secondary mt-3 space-y-2 text-sm leading-6"
+            value={question.materialRichText}
+          />
         ) : null}
       </div>
 
@@ -1229,8 +1247,8 @@ export function StudentPracticePage({
         </div>
         <div>
           <p className="text-text-secondary text-xs">练习</p>
-          <p className="text-text-primary mt-1 text-xs font-semibold break-all">
-            {practice.publicId}
+          <p className="text-text-primary mt-1 text-sm font-semibold">
+            练习模式
           </p>
         </div>
         <div>
@@ -1250,9 +1268,10 @@ export function StudentPracticePage({
               <span>{currentQuestion.questionGroupTitle}</span>
             )}
           </div>
-          <p className="font-heading text-text-primary text-lg leading-7 font-semibold">
-            {currentQuestion.stemRichText}
-          </p>
+          <StudentRichText
+            className="font-heading text-text-primary space-y-2 text-lg leading-7 font-semibold"
+            value={currentQuestion.stemRichText}
+          />
           <p className="text-text-secondary text-sm">
             本题 {currentQuestion.score} 分
           </p>

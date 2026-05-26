@@ -34,9 +34,10 @@ describe("StudentPracticePage", () => {
       screen.getByRole("heading", { name: "营销理论冲刺卷 B" }),
     ).toBeInTheDocument();
     expect(screen.getByText("第 1 / 2 题")).toBeInTheDocument();
+    expect(screen.getByText("练习模式")).toBeInTheDocument();
     expect(
-      screen.getByText("practice-marketing-theory-001"),
-    ).toBeInTheDocument();
+      screen.queryByText("practice-marketing-theory-001"),
+    ).not.toBeInTheDocument();
 
     const practiceSurface = screen.getByTestId(
       "practice-surface-practice-marketing-theory-001",
@@ -100,6 +101,90 @@ describe("StudentPracticePage", () => {
     expect(
       screen.getByRole("button", { name: "A. runtime option" }),
     ).toBeInTheDocument();
+  });
+
+  it("renders safe rich text for practice stems, options, and feedback without exposing markup", () => {
+    const runtimePractice = {
+      ...studentPracticeFixture.practices[0].practice,
+      publicId: "practice-rich-text-snapshot",
+      paperPublicId: "paper-rich-text-snapshot",
+      paperSnapshot: {
+        name: "Rich text practice paper",
+        paperSections: [
+          {
+            title: "Rich text section",
+            paperQuestions: [
+              {
+                paperQuestionPublicId: "paper-question-rich-text-001",
+                questionPublicId: "question-rich-text-001",
+                questionType: "single_choice",
+                stemRichText:
+                  "<p>Runtime <strong>rich stem</strong></p><script>do-not-render</script>",
+                questionOptions: [
+                  {
+                    label: "A",
+                    contentRichText:
+                      "<p><em>rich option</em></p><script>do-not-render</script>",
+                  },
+                ],
+                standardAnswerRichText:
+                  "<p>Correct <strong>answer</strong></p>",
+                analysisRichText:
+                  "<p>Teacher <em>analysis</em></p><script>do-not-render</script>",
+                score: "1.0",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-rich-text-snapshot",
+        practices: [
+          {
+            practice: runtimePractice,
+            feedbackByPaperQuestionPublicId: {
+              "paper-question-rich-text-001": {
+                ...studentPracticeFixture.practices[0]
+                  .feedbackByPaperQuestionPublicId[
+                  "paper-question-marketing-002"
+                ],
+                answerRecordPublicId: "answer-rich-text-001",
+                isCorrect: true,
+                score: "1.0",
+                maxScore: "1.0",
+                standardAnswerRichText:
+                  "<p>Correct <strong>answer</strong></p>",
+                analysisRichText:
+                  "<p>Teacher <em>analysis</em></p><script>do-not-render</script>",
+                mistakeBookPublicId: null,
+                aiExplanationStatus: null,
+                aiHintStatus: null,
+              },
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(screen.getByText("Runtime")).toBeInTheDocument();
+    expect(screen.getByText("rich stem")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "A. rich option" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "A. rich option" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(screen.getByText("Correct")).toBeInTheDocument();
+    expect(screen.getByText("answer")).toBeInTheDocument();
+    expect(screen.getByText("Teacher")).toBeInTheDocument();
+    expect(screen.getByText("analysis")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("<p>");
+    expect(document.body.textContent).not.toContain("<script>");
+    expect(document.body.textContent).not.toContain("do-not-render");
   });
 
   it("renders local seed paper snapshots that store objective choices as options", () => {
@@ -849,15 +934,18 @@ describe("StudentPracticePage", () => {
       }),
     );
 
+    expect(await screen.findByText("练习模式")).toBeInTheDocument();
     expect(
-      await screen.findByText("practice-marketing-theory-001"),
-    ).toBeInTheDocument();
+      screen.queryByText("practice-marketing-theory-001"),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("practice-restart-button"));
 
-    expect(
-      await screen.findByText("practice-marketing-theory-restarted"),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByText("practice-marketing-theory-restarted"),
+      ).not.toBeInTheDocument(),
+    );
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 });
