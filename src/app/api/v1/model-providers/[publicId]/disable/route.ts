@@ -3,5 +3,5 @@ import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/adm
 const adminAiAuditLogRuntimeRouteHandlers =
   createAdminAiAuditLogRuntimeRouteHandlers();
 
-export const GET = adminAiAuditLogRuntimeRouteHandlers.modelConfigs.GET;
-export const POST = adminAiAuditLogRuntimeRouteHandlers.modelConfigs.POST;
+export const POST =
+  adminAiAuditLogRuntimeRouteHandlers.modelProviders.disable.POST;

@@ -11,15 +11,17 @@ describe("AI/RAG model config and prompt template validators", () => {
     expect(
       normalizeModelProviderInput({
         providerKey: " qwen ",
-        displayName: " 通义千问 ",
+        displayName: " Qwen ",
         apiKey: " sk-test-123456 ",
         baseUrl: "",
         isEnabled: true,
       }),
     ).toEqual({
       providerKey: "qwen",
-      displayName: "通义千问",
+      displayName: "Qwen",
       apiKeyLastFour: "3456",
+      secretStatus: "configured",
+      maskedSecret: "****3456",
       baseUrl: null,
       isEnabled: true,
     });
@@ -37,6 +39,7 @@ describe("AI/RAG model config and prompt template validators", () => {
         maxRetryCount: 0,
         fallbackModelConfigPublicId: "fallback_public_id",
         isEnabled: true,
+        fallbackPriority: 0,
       }),
     ).toBeNull();
 
@@ -51,36 +54,46 @@ describe("AI/RAG model config and prompt template validators", () => {
         maxRetryCount: 2,
         fallbackModelConfigPublicId: "fallback_public_id",
         isEnabled: true,
+        fallbackPriority: 0,
       }),
     ).toEqual({
       modelProviderPublicId: "provider_public_id",
       aiFuncType: "explanation",
       modelName: "qwen-plus",
+      modelAlias: "qwen-plus",
       displayName: "Qwen Plus Explanation",
       configVersion: 1,
       timeoutSecond: 20,
       maxRetryCount: 2,
       fallbackModelConfigPublicId: "fallback_public_id",
       isEnabled: true,
+      status: "enabled",
+      fallbackPriority: 0,
+      snapshotPolicy: "redacted_metadata",
     });
   });
 
-  it("normalizes prompt template input with a versioned key", () => {
+  it("normalizes prompt template metadata with a versioned key", () => {
     expect(
       normalizePromptTemplateInput({
         promptTemplateKey: " ai_hint_v1 ",
         aiFuncType: "hint",
         version: 1,
-        templateContent: " Give a hint without revealing the answer. ",
-        templateHash: " hash-value ",
+        title: " Hint ",
+        description: " Metadata only ",
+        bodyDigest: " hash-value ",
+        bodyPreviewMasked: "Give a hint [redacted].",
         isActive: true,
       }),
     ).toEqual({
       promptTemplateKey: "ai_hint_v1",
       aiFuncType: "hint",
       version: 1,
-      templateContent: "Give a hint without revealing the answer.",
-      templateHash: "hash-value",
+      title: "Hint",
+      description: "Metadata only",
+      bodyDigest: "hash-value",
+      bodyPreviewMasked: "Give a hint [redacted].",
+      status: "active",
       isActive: true,
     });
   });
