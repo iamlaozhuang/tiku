@@ -162,7 +162,9 @@ function createFillBlankPaperSnapshot(): Record<string, unknown> {
   };
 }
 
-function createSubjectivePaperSnapshot(): Record<string, unknown> {
+function createSubjectivePaperSnapshot(
+  questionType = "short_answer",
+): Record<string, unknown> {
   return {
     paperPublicId: "paper_public_123",
     name: "2024年专卖三级技能案例",
@@ -173,7 +175,7 @@ function createSubjectivePaperSnapshot(): Record<string, unknown> {
           {
             paperQuestionPublicId: "paper_question_subjective_123",
             questionPublicId: "question_subjective_123",
-            questionType: "short_answer",
+            questionType,
             stemRichText: "<p>请说明检查处置步骤。</p>",
             standardAnswerRichText: "<p>先核验事实，再依法处置并跟进闭环。</p>",
             analysisRichText: "<p>按事实、依据、处置、复盘展开。</p>",
@@ -950,6 +952,42 @@ describe("practice service", () => {
       },
     });
   });
+
+  it.each(["case_analysis", "calculation"] as const)(
+    "treats %s practice answers as subjective text answers",
+    async (questionType) => {
+      const service = createPracticeService(
+        createRepository({
+          async findPracticeByPublicId() {
+            return createPractice({
+              subject: "skill",
+              paper_snapshot: createSubjectivePaperSnapshot(questionType),
+            });
+          },
+        }),
+        clock,
+        createIdFactory(),
+      );
+
+      await expect(
+        service.submitPracticeAnswer(userContext, "practice_public_123", {
+          paperQuestionPublicId: "paper_question_subjective_123",
+          textAnswer: "Synthetic subjective answer.",
+        }),
+      ).resolves.toMatchObject({
+        code: 0,
+        data: {
+          feedback: {
+            isCorrect: null,
+            score: null,
+            maxScore: "10.0",
+            aiHintStatus: "hinted",
+            retryRemainingCount: 1,
+          },
+        },
+      });
+    },
+  );
 
   it("enforces the subjective practice retry limit without exposing the raw answer", async () => {
     const retryService = createPracticeService(

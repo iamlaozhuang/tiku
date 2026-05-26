@@ -358,6 +358,92 @@ describe("question service", () => {
     });
   });
 
+  it.each(["case_analysis", "calculation"] as const)(
+    "creates %s as a subjective question without options",
+    async (questionType) => {
+      const createdInputs: unknown[] = [];
+      const service = createQuestionService(
+        createRepository({
+          async createQuestion(input) {
+            createdInputs.push(input);
+
+            return createQuestion({
+              question_type: input.questionType,
+              profession: input.profession,
+              level: input.level,
+              subject: input.subject,
+              stem_rich_text: input.stemRichText,
+              analysis_rich_text: input.analysisRichText,
+              standard_answer_rich_text: input.standardAnswerRichText,
+              multi_choice_rule: input.multiChoiceRule,
+              scoring_method: input.scoringMethod,
+              material_public_id: input.materialPublicId,
+              question_options: [],
+              scoring_points: input.scoringPoints.map(
+                (scoringPoint, index) => ({
+                  id: 501 + index,
+                  question_id: 201,
+                  description: scoringPoint.description,
+                  score: scoringPoint.score,
+                  sort_order: scoringPoint.sortOrder,
+                  created_at: createdAt,
+                  updated_at: createdAt,
+                }),
+              ),
+            });
+          },
+        }),
+      );
+
+      await expect(
+        service.createQuestion({
+          questionType,
+          profession: "logistics",
+          level: 4,
+          subject: "skill",
+          stemRichText: "<p>Synthetic stem.</p>",
+          analysisRichText: "<p>Synthetic analysis.</p>",
+          standardAnswerRichText: "<p>Synthetic reference.</p>",
+          multiChoiceRule: "all_correct_only",
+          scoringMethod: "ai_scoring",
+          materialPublicId: "material_public_123",
+          questionOptions: [],
+          scoringPoints: [
+            {
+              description: "Synthetic scoring point",
+              score: "2.0",
+              sortOrder: 1,
+            },
+          ],
+        }),
+      ).resolves.toMatchObject({
+        code: 0,
+        data: {
+          question: {
+            questionType,
+            materialPublicId: "material_public_123",
+            questionOptions: [],
+            scoringMethod: "ai_scoring",
+            scoringPoints: [
+              {
+                description: "Synthetic scoring point",
+                score: "2.0",
+                sortOrder: 1,
+              },
+            ],
+          },
+        },
+      });
+      expect(createdInputs).toEqual([
+        expect.objectContaining({
+          questionType,
+          questionOptions: [],
+          scoringMethod: "ai_scoring",
+        }),
+      ]);
+    },
+  );
+
   it("rejects invalid input, missing question, and locked question update", async () => {
     const service = createQuestionService(
       createRepository({

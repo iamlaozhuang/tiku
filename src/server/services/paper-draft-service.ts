@@ -165,6 +165,8 @@ function isSubjectivePaperQuestion(
 ): boolean {
   return (
     paperQuestion.question_snapshot.questionType === "short_answer" ||
+    paperQuestion.question_snapshot.questionType === "case_analysis" ||
+    paperQuestion.question_snapshot.questionType === "calculation" ||
     paperQuestion.question_snapshot.scoringMethod === "ai_scoring"
   );
 }
