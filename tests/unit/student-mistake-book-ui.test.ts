@@ -138,6 +138,60 @@ describe("StudentMistakeBookPage", () => {
     );
   });
 
+  it.each(["case_analysis", "calculation"] as const)(
+    "safely renders %s mistake_book entries without objective filter expansion",
+    async (questionType) => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+      const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+        expect(String(url)).toBe("/api/v1/mistake-books?page=1&pageSize=20");
+
+        return createJsonResponse({
+          ...mistakeBookPayload,
+          data: {
+            mistakeBooks: [
+              {
+                ...mistakeBookPayload.data.mistakeBooks[0],
+                publicId: `mistake-book-${questionType}-001`,
+                questionSnapshot: {
+                  ...mistakeBookPayload.data.mistakeBooks[0].questionSnapshot,
+                  questionType,
+                  stemRichText: `<p>Synthetic ${questionType} stem</p>`,
+                  standardAnswerRichText: "<p>Synthetic reference</p>",
+                },
+                latestAnswerSnapshot: {
+                  selectedLabels: [],
+                  textAnswer: `Synthetic ${questionType} answer`,
+                  savedFromClientAt: "2026-05-21T05:10:00.000Z",
+                },
+              },
+            ],
+          },
+        });
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(createElement(StudentMistakeBookPage));
+
+      const item = await screen.findByTestId(
+        `mistake-book-item-mistake-book-${questionType}-001`,
+      );
+
+      expect(
+        within(item).getByText(`Synthetic ${questionType} stem`),
+      ).toBeInTheDocument();
+      expect(
+        within(item).getByText(`Synthetic ${questionType} answer`),
+      ).toBeInTheDocument();
+      expect(
+        within(item).getByText(
+          questionType === "case_analysis" ? "案例分析题" : "计算题",
+        ),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("option", { name: "案例分析题" })).toBeNull();
+      expect(screen.queryByRole("option", { name: "计算题" })).toBeNull();
+    },
+  );
+
   it("requests and renders a redacted AI explanation for a mistake_book item", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(

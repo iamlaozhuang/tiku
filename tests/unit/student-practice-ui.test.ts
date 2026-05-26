@@ -569,6 +569,119 @@ describe("StudentPracticePage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
+  it.each(["case_analysis", "calculation"] as const)(
+    "submits %s practice snapshots as subjective text answers",
+    async (questionType) => {
+      localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+      const practice = {
+        ...studentPracticeFixture.practices[0].practice,
+        publicId: `practice-${questionType}-runtime`,
+        paperPublicId: `paper-${questionType}-runtime`,
+        paperSnapshot: {
+          name: `Synthetic ${questionType} practice`,
+          paperSections: [
+            {
+              title: "Synthetic subjective paper_section",
+              paperQuestions: [
+                {
+                  paperQuestionPublicId: `paper-question-${questionType}-001`,
+                  questionPublicId: `question-${questionType}-001`,
+                  questionType,
+                  stemRichText: `Synthetic ${questionType} stem`,
+                  standardAnswerRichText: `Synthetic ${questionType} reference`,
+                  analysisRichText: `Synthetic ${questionType} analysis`,
+                  score: "10.0",
+                },
+              ],
+            },
+          ],
+        },
+      };
+      const feedback = {
+        ...studentPracticeFixture.practices[1].feedbackByPaperQuestionPublicId[
+          "paper-question-skill-001"
+        ],
+        aiHintStatus: "hinted" as const,
+        aiHintText: "Synthetic hint",
+        retryRemainingCount: 1,
+      };
+      const fetchMock = vi.fn(
+        async (url: RequestInfo | URL, init?: RequestInit) => {
+          if (String(url) === "/api/v1/practices") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => ({
+                code: 0,
+                message: "ok",
+                data: {
+                  practice,
+                  answerRecords: [],
+                },
+              }),
+            };
+          }
+
+          if (
+            String(url) ===
+            `/api/v1/practices/practice-${questionType}-runtime/answers`
+          ) {
+            expect(JSON.parse(String(init?.body))).toMatchObject({
+              paperQuestionPublicId: `paper-question-${questionType}-001`,
+              selectedLabels: [],
+              textAnswer: `Synthetic ${questionType} answer`,
+            });
+
+            return {
+              ok: true,
+              status: 200,
+              json: async () => ({
+                code: 0,
+                message: "ok",
+                data: { feedback },
+              }),
+            };
+          }
+
+          return {
+            ok: false,
+            status: 404,
+            json: async () => ({
+              code: 404001,
+              message: "missing",
+              data: null,
+            }),
+          };
+        },
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(
+        createElement(StudentPracticePage, {
+          paperPublicId: `paper-${questionType}-runtime`,
+        }),
+      );
+
+      expect(
+        await screen.findByRole("heading", {
+          name: `Synthetic ${questionType} practice`,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(`Synthetic ${questionType} stem`),
+      ).toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText("主观题答案"), {
+        target: { value: `Synthetic ${questionType} answer` },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+      expect(await screen.findByText("主观题答案已保存")).toBeInTheDocument();
+      expect(screen.getByText("Synthetic hint")).toBeInTheDocument();
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    },
+  );
+
   it("renders subjective AI hint feedback and allows one retry from the session runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const practice = studentPracticeFixture.practices[1].practice;

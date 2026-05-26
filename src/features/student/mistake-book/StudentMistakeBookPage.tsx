@@ -65,6 +65,8 @@ const sourceLabels: Record<MistakeBookSource, string> = {
 };
 
 const questionTypeLabels: Partial<Record<QuestionType, string>> = {
+  case_analysis: "案例分析题",
+  calculation: "计算题",
   fill_blank: "填空题",
   multi_choice: "多选题",
   single_choice: "单选题",

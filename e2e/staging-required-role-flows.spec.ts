@@ -42,7 +42,9 @@ test.describe("staging required role flows", () => {
     await expect(
       page.getByRole("button", { name: "创建企业授权" }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: "取消授权" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "取消授权" }).first(),
+    ).toBeVisible();
 
     await page.goto("/content/questions");
     const questionArrangement = page.getByTestId(

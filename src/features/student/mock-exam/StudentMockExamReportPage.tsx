@@ -68,7 +68,9 @@ type MockExamQuestionType =
   | "multi_choice"
   | "true_false"
   | "fill_blank"
-  | "short_answer";
+  | "short_answer"
+  | "case_analysis"
+  | "calculation";
 
 type MockExamPaperQuestion = {
   paperQuestionPublicId: string;
@@ -92,6 +94,7 @@ type MockExamPaperSection = {
 type ReportQuestionResult = {
   paperQuestionPublicId: string;
   questionPublicId: string;
+  questionType: MockExamQuestionType | null;
   title: string;
   isCorrect: boolean | null;
   score: string | null;
@@ -105,6 +108,8 @@ type ParsedReportSnapshot = {
   totalScoreText: string;
   accuracyText: string;
   scoreSummaryText: string;
+  questionTypeSummaryText: string | null;
+  paperSectionSummaryText: string | null;
   questionResults: ReportQuestionResult[];
 };
 
@@ -114,6 +119,16 @@ const examStatusLabels: Record<ExamStatus, string> = {
   scoring: "评分中",
   scoring_partial_failed: "评分部分失败",
   terminated: "已终止",
+};
+
+const questionTypeLabels: Partial<Record<MockExamQuestionType, string>> = {
+  case_analysis: "案例分析题",
+  calculation: "计算题",
+  fill_blank: "填空题",
+  multi_choice: "多选题",
+  short_answer: "简答题",
+  single_choice: "单选题",
+  true_false: "判断题",
 };
 
 const emptyAnswerSelections: Record<string, string[]> = {};
@@ -342,6 +357,8 @@ function normalizeMockExamQuestionType(
     case "true_false":
     case "fill_blank":
     case "short_answer":
+    case "case_analysis":
+    case "calculation":
       return value;
     case "multiple_choice":
       return "multi_choice";
@@ -361,7 +378,12 @@ function isOptionMockExamQuestion(questionType: MockExamQuestionType): boolean {
 }
 
 function isTextMockExamQuestion(questionType: MockExamQuestionType): boolean {
-  return questionType === "fill_blank" || questionType === "short_answer";
+  return (
+    questionType === "fill_blank" ||
+    questionType === "short_answer" ||
+    questionType === "case_analysis" ||
+    questionType === "calculation"
+  );
 }
 
 function mapMockExamQuestion(
@@ -640,23 +662,63 @@ function parseReportSnapshot(
       typeof reportSnapshot.scoreSummaryText === "string"
         ? reportSnapshot.scoreSummaryText
         : "得分生成中",
-    questionResults: questionResults.filter(
-      (questionResult): questionResult is ReportQuestionResult =>
-        isRecord(questionResult) &&
-        typeof questionResult.paperQuestionPublicId === "string" &&
-        typeof questionResult.questionPublicId === "string" &&
-        typeof questionResult.title === "string" &&
-        (typeof questionResult.isCorrect === "boolean" ||
-          questionResult.isCorrect === null) &&
-        (typeof questionResult.score === "string" ||
-          questionResult.score === null) &&
-        typeof questionResult.maxScore === "string" &&
-        (typeof questionResult.selectedAnswer === "string" ||
-          questionResult.selectedAnswer === null) &&
-        (typeof questionResult.standardAnswer === "string" ||
-          questionResult.standardAnswer === null) &&
-        (typeof questionResult.mistakeBookPublicId === "string" ||
-          questionResult.mistakeBookPublicId === null),
+    questionTypeSummaryText:
+      typeof reportSnapshot.questionTypeSummaryText === "string"
+        ? reportSnapshot.questionTypeSummaryText
+        : null,
+    paperSectionSummaryText:
+      typeof reportSnapshot.paperSectionSummaryText === "string"
+        ? reportSnapshot.paperSectionSummaryText
+        : null,
+    questionResults: questionResults.flatMap(
+      (questionResult): ReportQuestionResult[] => {
+        if (
+          !isRecord(questionResult) ||
+          typeof questionResult.paperQuestionPublicId !== "string" ||
+          typeof questionResult.questionPublicId !== "string" ||
+          typeof questionResult.title !== "string" ||
+          !(
+            typeof questionResult.isCorrect === "boolean" ||
+            questionResult.isCorrect === null
+          ) ||
+          !(
+            typeof questionResult.score === "string" ||
+            questionResult.score === null
+          ) ||
+          typeof questionResult.maxScore !== "string" ||
+          !(
+            typeof questionResult.selectedAnswer === "string" ||
+            questionResult.selectedAnswer === null
+          ) ||
+          !(
+            typeof questionResult.standardAnswer === "string" ||
+            questionResult.standardAnswer === null
+          ) ||
+          !(
+            typeof questionResult.mistakeBookPublicId === "string" ||
+            questionResult.mistakeBookPublicId === null
+          )
+        ) {
+          return [];
+        }
+
+        return [
+          {
+            paperQuestionPublicId: questionResult.paperQuestionPublicId,
+            questionPublicId: questionResult.questionPublicId,
+            questionType: normalizeMockExamQuestionType(
+              getStringField(questionResult, "questionType"),
+            ),
+            title: questionResult.title,
+            isCorrect: questionResult.isCorrect,
+            score: questionResult.score,
+            maxScore: questionResult.maxScore,
+            selectedAnswer: questionResult.selectedAnswer,
+            standardAnswer: questionResult.standardAnswer,
+            mistakeBookPublicId: questionResult.mistakeBookPublicId,
+          },
+        ];
+      },
     ),
   };
 }
@@ -1396,6 +1458,22 @@ export function StudentExamReportPage({
         </div>
       </div>
 
+      {parsedReportSnapshot.questionTypeSummaryText === null &&
+      parsedReportSnapshot.paperSectionSummaryText === null ? null : (
+        <div className="bg-surface ring-border grid gap-2 rounded-xl p-3 text-sm shadow-sm ring-1 sm:grid-cols-2">
+          {parsedReportSnapshot.questionTypeSummaryText === null ? null : (
+            <p className="text-text-secondary">
+              {parsedReportSnapshot.questionTypeSummaryText}
+            </p>
+          )}
+          {parsedReportSnapshot.paperSectionSummaryText === null ? null : (
+            <p className="text-text-secondary">
+              {parsedReportSnapshot.paperSectionSummaryText}
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="bg-surface ring-border space-y-3 rounded-xl p-4 shadow-sm ring-1">
         <div className="flex items-center gap-2">
           <FileCheck2
@@ -1416,9 +1494,16 @@ export function StudentExamReportPage({
                 className="border-border bg-background space-y-2 rounded-lg border p-3"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-text-primary text-sm font-semibold">
-                    {questionResult.title}
-                  </p>
+                  <div className="space-y-1">
+                    {questionResult.questionType === null ? null : (
+                      <p className="text-text-muted text-xs">
+                        {questionTypeLabels[questionResult.questionType]}
+                      </p>
+                    )}
+                    <p className="text-text-primary text-sm font-semibold">
+                      {questionResult.title}
+                    </p>
+                  </div>
                   <p className="text-text-secondary text-xs">
                     {questionResult.score ?? "待评分"} /{" "}
                     {questionResult.maxScore}
