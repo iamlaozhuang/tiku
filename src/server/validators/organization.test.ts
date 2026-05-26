@@ -4,6 +4,7 @@ import {
   normalizeCreateOrganizationInput,
   normalizeDisableOrganizationInput,
   normalizeUpdateOrganizationInput,
+  validateOrganizationTierParent,
 } from "./organization";
 
 describe("organization validators", () => {
@@ -72,6 +73,52 @@ describe("organization validators", () => {
       value: {
         isCascade: true,
       },
+    });
+  });
+
+  it("validates organization tier and parent tier rules", () => {
+    expect(
+      validateOrganizationTierParent({
+        orgTier: "province",
+        parentOrganization: null,
+      }),
+    ).toEqual({ success: true });
+    expect(
+      validateOrganizationTierParent({
+        orgTier: "city",
+        parentOrganization: { orgTier: "province" },
+      }),
+    ).toEqual({ success: true });
+    expect(
+      validateOrganizationTierParent({
+        orgTier: "district",
+        parentOrganization: { orgTier: "city" },
+      }),
+    ).toEqual({ success: true });
+    expect(
+      validateOrganizationTierParent({
+        orgTier: "station",
+        parentOrganization: { orgTier: "district" },
+      }),
+    ).toEqual({ success: true });
+
+    expect(
+      validateOrganizationTierParent({
+        orgTier: "province",
+        parentOrganization: { orgTier: "city" },
+      }),
+    ).toEqual({
+      success: false,
+      message: "Province organization cannot have a parent organization.",
+    });
+    expect(
+      validateOrganizationTierParent({
+        orgTier: "district",
+        parentOrganization: { orgTier: "province" },
+      }),
+    ).toEqual({
+      success: false,
+      message: "District organization parent must be a city organization.",
     });
   });
 });

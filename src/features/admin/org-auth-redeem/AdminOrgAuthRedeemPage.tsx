@@ -3,11 +3,14 @@
 import Link from "next/link";
 import {
   AlertCircle,
+  Ban,
   Building2,
   CheckCircle2,
   Clock3,
   KeyRound,
   LoaderCircle,
+  Pencil,
+  PlusCircle,
   ShieldCheck,
   Ticket,
   UsersRound,
@@ -24,8 +27,10 @@ import type {
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/server/contracts/contact-config-contract";
 import type {
+  DisableOrganizationResultDto,
   OrgAuthListDto,
   OrgAuthResultDto,
+  OrganizationResultDto,
 } from "@/server/contracts/organization-auth-contract";
 import type {
   AuthScopeType,
@@ -68,6 +73,18 @@ type OrgAuthFormState = {
   startsAt: string;
 };
 
+type OrganizationFormState = {
+  contactName: string;
+  contactPhone: string;
+  mode: "create" | "update";
+  name: string;
+  orgTier: OrgTier;
+  parentOrganizationPublicId: string;
+  publicId: string | null;
+  remark: string;
+  status: "active" | "disabled";
+};
+
 type AdminRedeemCodeData = RedeemCodeListDto;
 
 type OrgAuthConfirmationState =
@@ -81,9 +98,31 @@ type OrgAuthConfirmationState =
     }
   | null;
 
+type OrganizationConfirmationState =
+  | {
+      kind: "createOrganization" | "updateOrganization";
+      input: OrganizationMutationInput;
+      publicId: string | null;
+    }
+  | {
+      kind: "disableOrganization";
+      publicId: string;
+    }
+  | null;
+
 type RedeemCodeConfirmationState = {
   kind: "generateRedeemCode";
 } | null;
+
+type OrganizationMutationInput = {
+  contactName: string | null;
+  contactPhone: string | null;
+  name: string;
+  orgTier: OrgTier;
+  parentOrganizationPublicId: string | null;
+  remark: string | null;
+  status: "active" | "disabled";
+};
 
 type ToastMessage = {
   message: string;
@@ -142,6 +181,25 @@ const defaultOrgAuthFormState: OrgAuthFormState = {
   startsAt: "2026-05-25",
 };
 
+const defaultOrganizationFormState: OrganizationFormState = {
+  contactName: "",
+  contactPhone: "",
+  mode: "create",
+  name: "",
+  orgTier: "province",
+  parentOrganizationPublicId: "",
+  publicId: null,
+  remark: "",
+  status: "active",
+};
+
+const expectedParentTierByOrgTier = {
+  city: "province",
+  district: "city",
+  province: null,
+  station: "district",
+} satisfies Record<OrgTier, OrgTier | null>;
+
 const organizationDepthPaddingClassNames = [
   "pl-3",
   "pl-6",
@@ -184,6 +242,23 @@ async function postAdminApi<TData>(
       "content-type": "application/json",
     },
     method: "POST",
+  });
+
+  return (await response.json()) as ApiResponse<TData | null>;
+}
+
+async function patchAdminApi<TData>(
+  path: string,
+  sessionToken: string,
+  body: unknown,
+): Promise<ApiResponse<TData | null>> {
+  const response = await fetch(path, {
+    body: JSON.stringify(body),
+    headers: {
+      ...createAdminAuthHeaders(sessionToken),
+      "content-type": "application/json",
+    },
+    method: "PATCH",
   });
 
   return (await response.json()) as ApiResponse<TData | null>;
@@ -337,6 +412,82 @@ function buildOrgAuthInput(
       startsAt: toStartOfDayIso(formState.startsAt),
     },
     message: null,
+  };
+}
+
+function normalizeOptionalOrganizationText(value: string): string | null {
+  const text = value.trim();
+
+  return text.length === 0 ? null : text;
+}
+
+function buildOrganizationInput(
+  formState: OrganizationFormState,
+  organizations: AdminOrgAuthData["organizations"],
+): { input: OrganizationMutationInput | null; message: string | null } {
+  const name = formState.name.trim();
+  const parentOrganizationPublicId =
+    formState.parentOrganizationPublicId.trim() || null;
+  const expectedParentTier = expectedParentTierByOrgTier[formState.orgTier];
+  const parentOrganization =
+    parentOrganizationPublicId === null
+      ? null
+      : (organizations.find(
+          (organization) =>
+            organization.publicId === parentOrganizationPublicId,
+        ) ?? null);
+
+  if (name.length === 0) {
+    return { input: null, message: "请填写企业名称。" };
+  }
+
+  if (
+    formState.publicId !== null &&
+    parentOrganizationPublicId === formState.publicId
+  ) {
+    return { input: null, message: "父级组织不能选择当前企业。" };
+  }
+
+  if (expectedParentTier === null && parentOrganizationPublicId !== null) {
+    return { input: null, message: "省公司不能设置父级组织。" };
+  }
+
+  if (
+    expectedParentTier !== null &&
+    parentOrganization?.orgTier !== expectedParentTier
+  ) {
+    return {
+      input: null,
+      message: `${orgTierLabels[formState.orgTier]}必须选择${orgTierLabels[expectedParentTier]}作为父级。`,
+    };
+  }
+
+  return {
+    input: {
+      contactName: normalizeOptionalOrganizationText(formState.contactName),
+      contactPhone: normalizeOptionalOrganizationText(formState.contactPhone),
+      name,
+      orgTier: formState.orgTier,
+      parentOrganizationPublicId,
+      remark: normalizeOptionalOrganizationText(formState.remark),
+      status: formState.status,
+    },
+    message: null,
+  };
+}
+
+function mapOrganizationResultToListItem(
+  organization: OrganizationResultDto["organization"],
+  currentOrganization?: AdminOrgAuthData["organizations"][number],
+): AdminOrgAuthData["organizations"][number] {
+  return {
+    authSummary: currentOrganization?.authSummary ?? null,
+    employeeCount: currentOrganization?.employeeCount ?? 0,
+    name: organization.name,
+    orgTier: organization.orgTier,
+    parentOrganizationPublicId: organization.parentOrganizationPublicId,
+    publicId: organization.publicId,
+    status: organization.status,
   };
 }
 
@@ -605,8 +756,14 @@ function AdminDataRow({
 }
 
 function OrganizationList({
+  onDisableOrganization,
+  onEditOrganization,
   organizations,
 }: {
+  onDisableOrganization: (publicId: string) => void;
+  onEditOrganization: (
+    organization: AdminOrgAuthData["organizations"][number],
+  ) => void;
   organizations: AdminOrgAuthData["organizations"];
 }) {
   return (
@@ -630,9 +787,31 @@ function OrganizationList({
               {organization.authSummary ?? "暂无授权摘要"}
             </p>
           </div>
-          <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-            {organization.status === "active" ? "启用" : "停用"}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+              {organization.status === "active" ? "启用" : "停用"}
+            </span>
+            <button
+              type="button"
+              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+              data-testid={`organization-edit-${organization.publicId}`}
+              onClick={() => onEditOrganization(organization)}
+            >
+              <Pencil className="size-3.5" aria-hidden="true" />
+              编辑
+            </button>
+            {organization.status === "active" ? (
+              <button
+                type="button"
+                className="bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                data-testid={`organization-disable-${organization.publicId}`}
+                onClick={() => onDisableOrganization(organization.publicId)}
+              >
+                <Ban className="size-3.5" aria-hidden="true" />
+                停用
+              </button>
+            ) : null}
+          </div>
         </AdminDataRow>
       ))}
     </AdminPanel>
@@ -852,6 +1031,266 @@ function OrgAuthConfirmationDialog({
         </div>
       </div>
     </div>
+  );
+}
+
+function OrganizationConfirmationDialog({
+  confirmationState,
+  onCancel,
+  onConfirm,
+}: {
+  confirmationState: Exclude<OrganizationConfirmationState, null>;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const titleByKind = {
+    createOrganization: "确认新增企业组织？",
+    disableOrganization: "确认停用企业组织？",
+    updateOrganization: "确认更新企业组织？",
+  } satisfies Record<
+    Exclude<OrganizationConfirmationState, null>["kind"],
+    string
+  >;
+  const isDestructive = confirmationState.kind === "disableOrganization";
+
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <AlertCircle
+            className="text-brand-primary size-4"
+            aria-hidden="true"
+          />
+          <h2 className="text-text-primary text-base font-semibold">
+            {titleByKind[confirmationState.kind]}
+          </h2>
+        </div>
+        <p className="text-text-muted text-sm leading-6">
+          组织树写操作只提交企业 publicId、层级、父级 publicId
+          和必要维护字段；后端继续记录脱敏审计日志。
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={
+              isDestructive
+                ? "bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                : "bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            }
+            data-testid="organization-confirm-action"
+            onClick={onConfirm}
+          >
+            确认
+          </button>
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onCancel}
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrganizationTreeActionPanel({
+  disabled,
+  formState,
+  organizations,
+  onFormChange,
+  onReset,
+  onSubmit,
+}: {
+  disabled: boolean;
+  formState: OrganizationFormState;
+  onFormChange: (formState: OrganizationFormState) => void;
+  onReset: () => void;
+  onSubmit: () => void;
+  organizations: AdminOrgAuthData["organizations"];
+}) {
+  const formValidation = buildOrganizationInput(formState, organizations);
+  const isSubmitDisabled = disabled || formValidation.input === null;
+
+  function updateFormState(nextFields: Partial<OrganizationFormState>) {
+    onFormChange({
+      ...formState,
+      ...nextFields,
+    });
+  }
+
+  return (
+    <section
+      className="bg-surface border-border rounded-md border p-4 shadow-sm"
+      data-testid="organization-tree-management-form"
+      id="organization-tree-management-panel"
+    >
+      <div className="space-y-4">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            <p className="text-brand-primary text-xs font-medium">
+              organization
+            </p>
+            <h2 className="text-text-primary text-base font-semibold">
+              企业组织树维护
+            </h2>
+            <p className="text-text-secondary text-sm leading-6">
+              维护省公司、地市公司、县区公司及站点层级；层级和父级关系会在提交前校验。
+            </p>
+          </div>
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onReset}
+          >
+            <PlusCircle className="size-3.5" aria-hidden="true" />
+            新增模式
+          </button>
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-4">
+          <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-2">
+            <span className="text-text-secondary">企业名称</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              data-testid="organization-name-input"
+              value={formState.name}
+              onChange={(event) =>
+                updateFormState({ name: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">企业层级</span>
+            <select
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              data-testid="organization-tier-select"
+              value={formState.orgTier}
+              onChange={(event) =>
+                updateFormState({
+                  orgTier: event.target.value as OrgTier,
+                  parentOrganizationPublicId:
+                    event.target.value === "province"
+                      ? ""
+                      : formState.parentOrganizationPublicId,
+                })
+              }
+            >
+              <option value="province">省公司</option>
+              <option value="city">地市公司</option>
+              <option value="district">县区公司</option>
+              <option value="station">站点</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">父级组织</span>
+            <select
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              data-testid="organization-parent-select"
+              disabled={formState.orgTier === "province"}
+              value={formState.parentOrganizationPublicId}
+              onChange={(event) =>
+                updateFormState({
+                  parentOrganizationPublicId: event.target.value,
+                })
+              }
+            >
+              <option value="">无</option>
+              {organizations
+                .filter(
+                  (organization) =>
+                    organization.publicId !== formState.publicId,
+                )
+                .map((organization) => (
+                  <option
+                    key={organization.publicId}
+                    value={organization.publicId}
+                  >
+                    {organization.name} / {orgTierLabels[organization.orgTier]}
+                  </option>
+                ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">联系人</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={formState.contactName}
+              onChange={(event) =>
+                updateFormState({ contactName: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">联系电话</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={formState.contactPhone}
+              onChange={(event) =>
+                updateFormState({ contactPhone: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">状态</span>
+            <select
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={formState.status}
+              onChange={(event) =>
+                updateFormState({
+                  status: event.target.value as OrganizationFormState["status"],
+                })
+              }
+            >
+              <option value="active">启用</option>
+              <option value="disabled">停用</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium lg:col-span-4">
+            <span className="text-text-secondary">备注</span>
+            <input
+              className="border-border bg-background h-9 rounded-md border px-3 text-sm"
+              value={formState.remark}
+              onChange={(event) =>
+                updateFormState({ remark: event.target.value })
+              }
+            />
+          </label>
+        </div>
+
+        {formValidation.message === null ? null : (
+          <p
+            className="text-destructive text-sm"
+            data-testid="organization-form-error"
+          >
+            {formValidation.message}
+          </p>
+        )}
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            data-testid="organization-submit-button"
+            disabled={isSubmitDisabled}
+            onClick={onSubmit}
+          >
+            {formState.mode === "create" ? "新增企业组织" : "更新企业组织"}
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1435,9 +1874,13 @@ export function AdminOrgAuthPage() {
   const { data, loadState, setData, setLoadState } = useAdminOrgAuthData();
   const [confirmationState, setConfirmationState] =
     useState<OrgAuthConfirmationState>(null);
+  const [organizationConfirmationState, setOrganizationConfirmationState] =
+    useState<OrganizationConfirmationState>(null);
   const [orgAuthFormState, setOrgAuthFormState] = useState<OrgAuthFormState>(
     defaultOrgAuthFormState,
   );
+  const [organizationFormState, setOrganizationFormState] =
+    useState<OrganizationFormState>(defaultOrganizationFormState);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const totalEmployeeCount = useMemo(
     () =>
@@ -1518,6 +1961,153 @@ export function AdminOrgAuthPage() {
     setToastMessage({ message: "企业授权已取消", tone: "success" });
   }
 
+  function handleEditOrganization(
+    organization: AdminOrgAuthData["organizations"][number],
+  ) {
+    setOrganizationFormState({
+      contactName: "",
+      contactPhone: "",
+      mode: "update",
+      name: organization.name,
+      orgTier: organization.orgTier,
+      parentOrganizationPublicId: organization.parentOrganizationPublicId ?? "",
+      publicId: organization.publicId,
+      remark: "",
+      status: organization.status,
+    });
+  }
+
+  function handleSubmitOrganization() {
+    const organizationDraft = buildOrganizationInput(
+      organizationFormState,
+      data.organizations,
+    );
+
+    if (organizationDraft.input === null) {
+      setToastMessage({
+        message: organizationDraft.message ?? "企业组织输入无效。",
+        tone: "error",
+      });
+      return;
+    }
+
+    setOrganizationConfirmationState({
+      kind:
+        organizationFormState.mode === "create"
+          ? "createOrganization"
+          : "updateOrganization",
+      input: organizationDraft.input,
+      publicId: organizationFormState.publicId,
+    });
+  }
+
+  async function handleConfirmOrganizationAction() {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || organizationConfirmationState === null) {
+      setOrganizationConfirmationState(null);
+      setLoadState("unauthorized");
+      return;
+    }
+
+    if (organizationConfirmationState.kind === "disableOrganization") {
+      const disableResponse = await postAdminApi<DisableOrganizationResultDto>(
+        `/api/v1/organizations/${organizationConfirmationState.publicId}/disable`,
+        sessionToken,
+        { isCascade: false },
+      );
+
+      setOrganizationConfirmationState(null);
+
+      if (disableResponse.code !== 0 || disableResponse.data === null) {
+        setToastMessage({
+          message: disableResponse.message,
+          tone: "error",
+        });
+        return;
+      }
+
+      const disabledOrganization = disableResponse.data.organization;
+
+      setData((currentData) => ({
+        ...currentData,
+        organizations: currentData.organizations.map((organization) =>
+          organization.publicId === disabledOrganization.publicId
+            ? mapOrganizationResultToListItem(
+                disabledOrganization,
+                organization,
+              )
+            : organization,
+        ),
+      }));
+      setToastMessage({ message: "企业组织已停用。", tone: "success" });
+      return;
+    }
+
+    const mutationInput = organizationConfirmationState.input;
+    const mutationResponse =
+      organizationConfirmationState.kind === "createOrganization"
+        ? await postAdminApi<OrganizationResultDto>(
+            "/api/v1/organizations",
+            sessionToken,
+            mutationInput,
+          )
+        : organizationConfirmationState.publicId === null
+          ? null
+          : await patchAdminApi<OrganizationResultDto>(
+              `/api/v1/organizations/${organizationConfirmationState.publicId}`,
+              sessionToken,
+              mutationInput,
+            );
+
+    setOrganizationConfirmationState(null);
+
+    if (
+      mutationResponse === null ||
+      mutationResponse.code !== 0 ||
+      mutationResponse.data === null
+    ) {
+      setToastMessage({
+        message: mutationResponse?.message ?? "企业组织输入无效。",
+        tone: "error",
+      });
+      return;
+    }
+
+    const updatedOrganization = mutationResponse.data.organization;
+
+    setData((currentData) => {
+      const currentOrganization = currentData.organizations.find(
+        (organization) =>
+          organization.publicId === updatedOrganization.publicId,
+      );
+      const nextOrganization = mapOrganizationResultToListItem(
+        updatedOrganization,
+        currentOrganization,
+      );
+
+      return {
+        ...currentData,
+        organizations:
+          currentOrganization === undefined
+            ? [nextOrganization, ...currentData.organizations]
+            : currentData.organizations.map((organization) =>
+                organization.publicId === updatedOrganization.publicId
+                  ? nextOrganization
+                  : organization,
+              ),
+      };
+    });
+    setOrganizationFormState(defaultOrganizationFormState);
+    setToastMessage({
+      message:
+        organizationConfirmationState.kind === "createOrganization"
+          ? "企业组织已新增。"
+          : "企业组织已更新。",
+      tone: "success",
+    });
+  }
+
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载企业授权运营数据" />;
   }
@@ -1587,6 +2177,15 @@ export function AdminOrgAuthPage() {
         onFormChange={setOrgAuthFormState}
       />
 
+      <OrganizationTreeActionPanel
+        disabled={data.organizations.length === 0}
+        formState={organizationFormState}
+        organizations={data.organizations}
+        onFormChange={setOrganizationFormState}
+        onReset={() => setOrganizationFormState(defaultOrganizationFormState)}
+        onSubmit={handleSubmitOrganization}
+      />
+
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
         <SummaryTile
           icon={<Building2 className="size-4" aria-hidden="true" />}
@@ -1606,7 +2205,16 @@ export function AdminOrgAuthPage() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-3">
-        <OrganizationList organizations={data.organizations} />
+        <OrganizationList
+          organizations={data.organizations}
+          onDisableOrganization={(publicId) =>
+            setOrganizationConfirmationState({
+              kind: "disableOrganization",
+              publicId,
+            })
+          }
+          onEditOrganization={handleEditOrganization}
+        />
         <OrgAuthList
           orgAuths={data.orgAuths}
           onCancelOrgAuth={(publicId) =>
@@ -1621,6 +2229,14 @@ export function AdminOrgAuthPage() {
           confirmationState={confirmationState}
           onCancel={() => setConfirmationState(null)}
           onConfirm={() => void handleConfirmOrgAuthAction()}
+        />
+      )}
+
+      {organizationConfirmationState === null ? null : (
+        <OrganizationConfirmationDialog
+          confirmationState={organizationConfirmationState}
+          onCancel={() => setOrganizationConfirmationState(null)}
+          onConfirm={() => void handleConfirmOrganizationAction()}
         />
       )}
 

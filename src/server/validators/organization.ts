@@ -1,10 +1,11 @@
 import { orgTierValues } from "../models/auth";
 
 export type OrgStatus = "active" | "disabled";
+type OrgTier = (typeof orgTierValues)[number];
 
 export type NormalizedCreateOrganizationInput = {
   name: string;
-  orgTier: (typeof orgTierValues)[number];
+  orgTier: OrgTier;
   parentOrganizationPublicId: string | null;
   contactName: string | null;
   contactPhone: string | null;
@@ -31,6 +32,12 @@ type ValidationResult<TValue> =
     };
 
 const INVALID_ORGANIZATION_INPUT_MESSAGE = "Invalid organization input.";
+const expectedParentTierByOrgTier = {
+  city: "province",
+  district: "city",
+  province: null,
+  station: "district",
+} satisfies Record<OrgTier, OrgTier | null>;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -143,5 +150,33 @@ export function normalizeDisableOrganizationInput(
     value: {
       isCascade: input.isCascade === true,
     },
+  };
+}
+
+export function validateOrganizationTierParent(input: {
+  orgTier: OrgTier;
+  parentOrganization: { orgTier: OrgTier } | null;
+}): { success: true } | { success: false; message: string } {
+  const expectedParentTier = expectedParentTierByOrgTier[input.orgTier];
+
+  if (expectedParentTier === null) {
+    return input.parentOrganization === null
+      ? { success: true }
+      : {
+          success: false,
+          message: "Province organization cannot have a parent organization.",
+        };
+  }
+
+  if (input.parentOrganization?.orgTier === expectedParentTier) {
+    return { success: true };
+  }
+
+  const orgTierLabel =
+    input.orgTier.charAt(0).toUpperCase() + input.orgTier.slice(1);
+
+  return {
+    success: false,
+    message: `${orgTierLabel} organization parent must be a ${expectedParentTier} organization.`,
   };
 }

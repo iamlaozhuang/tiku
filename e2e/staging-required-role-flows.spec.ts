@@ -60,6 +60,17 @@ test.describe("staging required role flows", () => {
     await expect(
       page.locator('input[type="checkbox"][aria-label]').first(),
     ).toBeVisible();
+    const organizationTreeForm = page.getByTestId(
+      "organization-tree-management-form",
+    );
+    await expect(organizationTreeForm).toBeVisible();
+    await expect(page.getByTestId("organization-name-input")).toBeVisible();
+    await expect(page.getByTestId("organization-tier-select")).toBeVisible();
+    await expect(page.getByTestId("organization-parent-select")).toBeVisible();
+    await expect(page.getByTestId("organization-submit-button")).toBeVisible();
+    await expect(
+      page.locator('[data-testid^="organization-edit-"]').first(),
+    ).toBeVisible();
 
     await page.goto("/content/questions");
     const questionArrangement = page.getByTestId(
