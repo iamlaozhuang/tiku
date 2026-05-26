@@ -20,9 +20,23 @@ type AdminModelConfigManagementProps = {
   initialModelProviders?: ModelProviderSummaryDto[];
   initialModelConfigs?: ModelConfigSummaryDto[];
   initialPromptTemplates?: PromptTemplateSummaryDto[];
+  onSaveProvider?: (
+    form: ModelProviderFormInput,
+  ) => Promise<ModelProviderSummaryDto>;
+  onSaveConfig?: (form: ModelConfigFormInput) => Promise<ModelConfigSummaryDto>;
+  onSaveTemplate?: (
+    form: PromptTemplateFormInput,
+  ) => Promise<PromptTemplateSummaryDto>;
+  onToggleProvider?: (publicId: string, isEnabled: boolean) => Promise<void>;
+  onToggleConfig?: (publicId: string, isEnabled: boolean) => Promise<void>;
+  onToggleTemplate?: (publicId: string, isActive: boolean) => Promise<void>;
 };
 
 type ActiveTab = "model_provider" | "model_config" | "prompt_template";
+
+const emptyModelProviders: ModelProviderSummaryDto[] = [];
+const emptyModelConfigs: ModelConfigSummaryDto[] = [];
+const emptyPromptTemplates: PromptTemplateSummaryDto[] = [];
 
 const emptyProviderForm = {
   providerKey: "",
@@ -30,6 +44,8 @@ const emptyProviderForm = {
   secretValue: "",
   baseUrl: "",
 };
+
+export type ModelProviderFormInput = typeof emptyProviderForm;
 
 const emptyConfigForm = {
   modelProviderPublicId: "",
@@ -41,6 +57,8 @@ const emptyConfigForm = {
   fallbackPriority: "0",
 };
 
+export type ModelConfigFormInput = typeof emptyConfigForm;
+
 const emptyTemplateForm = {
   promptTemplateKey: "",
   title: "",
@@ -48,11 +66,19 @@ const emptyTemplateForm = {
   bodyPreviewMasked: "",
 };
 
+export type PromptTemplateFormInput = typeof emptyTemplateForm;
+
 export function AdminModelConfigManagement({
   state = "ready",
-  initialModelProviders = [],
-  initialModelConfigs = [],
-  initialPromptTemplates = [],
+  initialModelProviders = emptyModelProviders,
+  initialModelConfigs = emptyModelConfigs,
+  initialPromptTemplates = emptyPromptTemplates,
+  onSaveConfig,
+  onSaveProvider,
+  onSaveTemplate,
+  onToggleConfig,
+  onToggleProvider,
+  onToggleTemplate,
 }: AdminModelConfigManagementProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>("model_provider");
   const [modelProviders, setModelProviders] = useState(initialModelProviders);
@@ -63,6 +89,7 @@ export function AdminModelConfigManagement({
   const [providerForm, setProviderForm] = useState(emptyProviderForm);
   const [configForm, setConfigForm] = useState(emptyConfigForm);
   const [templateForm, setTemplateForm] = useState(emptyTemplateForm);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const hasAnyData = useMemo(
     () =>
@@ -86,7 +113,7 @@ export function AdminModelConfigManagement({
     );
   }
 
-  function handleSaveProvider() {
+  async function handleSaveProvider() {
     const providerKey = providerForm.providerKey.trim();
     const displayName = providerForm.displayName.trim();
 
@@ -94,26 +121,21 @@ export function AdminModelConfigManagement({
       return;
     }
 
-    const lastFour = readLastFour(providerForm.secretValue);
-    const provider: ModelProviderSummaryDto = {
-      publicId: `model-provider-${providerKey}`,
-      providerKey,
-      displayName,
-      baseUrl: readOptionalText(providerForm.baseUrl),
-      isEnabled: true,
-      secretStatus: lastFour === null ? "not_configured" : "configured",
-      maskedSecret: lastFour === null ? null : `****${lastFour}`,
-      providerMetadata: {
-        source: "admin_ui",
-      },
-      updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
-    };
+    try {
+      const provider =
+        onSaveProvider === undefined
+          ? createLocalProvider(providerForm)
+          : await onSaveProvider(providerForm);
 
-    setModelProviders((current) => [...current, provider]);
-    setProviderForm(emptyProviderForm);
+      setModelProviders((current) => [...current, provider]);
+      setProviderForm(emptyProviderForm);
+      setActionMessage("Model provider saved.");
+    } catch {
+      setActionMessage("Model provider save failed.");
+    }
   }
 
-  function handleSaveConfig() {
+  async function handleSaveConfig() {
     const modelName = configForm.modelName.trim();
     const displayName = configForm.displayName.trim();
 
@@ -121,47 +143,21 @@ export function AdminModelConfigManagement({
       return;
     }
 
-    const selectedProvider = modelProviders[0] ?? null;
-    const modelProviderPublicId =
-      readOptionalText(configForm.modelProviderPublicId) ??
-      selectedProvider?.publicId ??
-      "model-provider-local";
-    const providerDisplayName = selectedProvider?.displayName ?? "Local Mock";
-    const providerKey = selectedProvider?.providerKey ?? "local_mock";
-    const maskedSecret = selectedProvider?.maskedSecret ?? null;
-    const secretStatus =
-      selectedProvider?.secretStatus ?? ("not_configured" as const);
+    try {
+      const modelConfig =
+        onSaveConfig === undefined
+          ? createLocalModelConfig(configForm, modelProviders)
+          : await onSaveConfig(configForm);
 
-    const modelConfig: ModelConfigSummaryDto = {
-      publicId: `model-config-${modelName}`,
-      providerPublicId: modelProviderPublicId,
-      providerDisplayName,
-      providerKey,
-      modelName,
-      modelAlias: configForm.modelAlias.trim() || modelName,
-      displayName,
-      aiFuncType: configForm.aiFuncType,
-      apiKeyDisplay: maskedSecret,
-      secretStatus,
-      maskedSecret,
-      fallbackModelConfigPublicId: readOptionalText(
-        configForm.fallbackModelConfigPublicId,
-      ),
-      isEnabled: true,
-      status: "enabled",
-      fallbackPriority: Number.parseInt(configForm.fallbackPriority, 10) || 0,
-      snapshotPolicy: "redacted_metadata",
-      configVersion: 1,
-      timeoutSecond: 15,
-      maxRetryCount: 1,
-      updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
-    };
-
-    setModelConfigs((current) => [...current, modelConfig]);
-    setConfigForm(emptyConfigForm);
+      setModelConfigs((current) => [...current, modelConfig]);
+      setConfigForm(emptyConfigForm);
+      setActionMessage("Model config saved.");
+    } catch {
+      setActionMessage("Model config save failed.");
+    }
   }
 
-  function handleSaveTemplate() {
+  async function handleSaveTemplate() {
     const promptTemplateKey = templateForm.promptTemplateKey.trim();
     const title = templateForm.title.trim();
     const bodyDigest = templateForm.bodyDigest.trim();
@@ -176,22 +172,18 @@ export function AdminModelConfigManagement({
       return;
     }
 
-    const promptTemplate: PromptTemplateSummaryDto = {
-      publicId: `prompt-template-${promptTemplateKey}`,
-      promptTemplateKey,
-      aiFuncType: "ai_explanation",
-      version: 1,
-      title,
-      description: "Metadata only",
-      bodyDigest,
-      bodyPreviewMasked,
-      status: "active",
-      isActive: true,
-      updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
-    };
+    try {
+      const promptTemplate =
+        onSaveTemplate === undefined
+          ? createLocalPromptTemplate(templateForm)
+          : await onSaveTemplate(templateForm);
 
-    setPromptTemplates((current) => [...current, promptTemplate]);
-    setTemplateForm(emptyTemplateForm);
+      setPromptTemplates((current) => [...current, promptTemplate]);
+      setTemplateForm(emptyTemplateForm);
+      setActionMessage("Prompt template saved.");
+    } catch {
+      setActionMessage("Prompt template save failed.");
+    }
   }
 
   return (
@@ -237,19 +229,27 @@ export function AdminModelConfigManagement({
           form={providerForm}
           modelProviders={modelProviders}
           onChange={setProviderForm}
-          onSave={handleSaveProvider}
-          onToggle={(publicId) =>
+          onSave={() => void handleSaveProvider()}
+          onToggle={(publicId) => {
+            const targetProvider = modelProviders.find(
+              (provider) => provider.publicId === publicId,
+            );
+            const nextEnabled = !(targetProvider?.isEnabled ?? false);
+
             setModelProviders((current) =>
               current.map((provider) =>
                 provider.publicId === publicId
                   ? {
                       ...provider,
-                      isEnabled: !provider.isEnabled,
+                      isEnabled: nextEnabled,
                     }
                   : provider,
               ),
-            )
-          }
+            );
+            void onToggleProvider?.(publicId, nextEnabled).catch(() => {
+              setActionMessage("Model provider status update failed.");
+            });
+          }}
         />
       ) : null}
 
@@ -258,20 +258,28 @@ export function AdminModelConfigManagement({
           form={configForm}
           modelConfigs={modelConfigs}
           onChange={setConfigForm}
-          onSave={handleSaveConfig}
-          onToggle={(publicId) =>
+          onSave={() => void handleSaveConfig()}
+          onToggle={(publicId) => {
+            const targetConfig = modelConfigs.find(
+              (modelConfig) => modelConfig.publicId === publicId,
+            );
+            const nextEnabled = !(targetConfig?.isEnabled ?? false);
+
             setModelConfigs((current) =>
               current.map((modelConfig) =>
                 modelConfig.publicId === publicId
                   ? {
                       ...modelConfig,
-                      isEnabled: !modelConfig.isEnabled,
-                      status: modelConfig.isEnabled ? "disabled" : "enabled",
+                      isEnabled: nextEnabled,
+                      status: nextEnabled ? "enabled" : "disabled",
                     }
                   : modelConfig,
               ),
-            )
-          }
+            );
+            void onToggleConfig?.(publicId, nextEnabled).catch(() => {
+              setActionMessage("Model config status update failed.");
+            });
+          }}
         />
       ) : null}
 
@@ -280,22 +288,36 @@ export function AdminModelConfigManagement({
           form={templateForm}
           promptTemplates={promptTemplates}
           onChange={setTemplateForm}
-          onSave={handleSaveTemplate}
-          onToggle={(publicId) =>
+          onSave={() => void handleSaveTemplate()}
+          onToggle={(publicId) => {
+            const targetTemplate = promptTemplates.find(
+              (promptTemplate) => promptTemplate.publicId === publicId,
+            );
+            const nextActive = !(targetTemplate?.isActive ?? false);
+
             setPromptTemplates((current) =>
               current.map((promptTemplate) =>
                 promptTemplate.publicId === publicId
                   ? {
                       ...promptTemplate,
-                      isActive: !promptTemplate.isActive,
-                      status: promptTemplate.isActive ? "disabled" : "active",
+                      isActive: nextActive,
+                      status: nextActive ? "active" : "disabled",
                     }
                   : promptTemplate,
               ),
-            )
-          }
+            );
+            void onToggleTemplate?.(publicId, nextActive).catch(() => {
+              setActionMessage("Prompt template status update failed.");
+            });
+          }}
         />
       ) : null}
+
+      {actionMessage === null ? null : (
+        <p className="text-text-secondary text-sm" role="status">
+          {actionMessage}
+        </p>
+      )}
     </section>
   );
 }
@@ -306,6 +328,89 @@ function AdminModelConfigStatePanel({ title }: { title: string }) {
       <h1 className="text-text-primary text-base font-semibold">{title}</h1>
     </section>
   );
+}
+
+function createLocalProvider(
+  form: ModelProviderFormInput,
+): ModelProviderSummaryDto {
+  const providerKey = form.providerKey.trim();
+  const lastFour = readLastFour(form.secretValue);
+
+  return {
+    publicId: `model-provider-${providerKey}`,
+    providerKey,
+    displayName: form.displayName.trim(),
+    baseUrl: readOptionalText(form.baseUrl),
+    isEnabled: true,
+    secretStatus: lastFour === null ? "not_configured" : "configured",
+    maskedSecret: lastFour === null ? null : `****${lastFour}`,
+    providerMetadata: {
+      source: "admin_ui",
+    },
+    updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
+  };
+}
+
+function createLocalModelConfig(
+  form: ModelConfigFormInput,
+  modelProviders: ModelProviderSummaryDto[],
+): ModelConfigSummaryDto {
+  const modelName = form.modelName.trim();
+  const selectedProvider = modelProviders[0] ?? null;
+  const modelProviderPublicId =
+    readOptionalText(form.modelProviderPublicId) ??
+    selectedProvider?.publicId ??
+    "model-provider-local";
+  const providerDisplayName = selectedProvider?.displayName ?? "Local Mock";
+  const providerKey = selectedProvider?.providerKey ?? "local_mock";
+  const maskedSecret = selectedProvider?.maskedSecret ?? null;
+  const secretStatus =
+    selectedProvider?.secretStatus ?? ("not_configured" as const);
+
+  return {
+    publicId: `model-config-${modelName}`,
+    providerPublicId: modelProviderPublicId,
+    providerDisplayName,
+    providerKey,
+    modelName,
+    modelAlias: form.modelAlias.trim() || modelName,
+    displayName: form.displayName.trim(),
+    aiFuncType: form.aiFuncType,
+    apiKeyDisplay: maskedSecret,
+    secretStatus,
+    maskedSecret,
+    fallbackModelConfigPublicId: readOptionalText(
+      form.fallbackModelConfigPublicId,
+    ),
+    isEnabled: true,
+    status: "enabled",
+    fallbackPriority: Number.parseInt(form.fallbackPriority, 10) || 0,
+    snapshotPolicy: "redacted_metadata",
+    configVersion: 1,
+    timeoutSecond: 15,
+    maxRetryCount: 1,
+    updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
+  };
+}
+
+function createLocalPromptTemplate(
+  form: PromptTemplateFormInput,
+): PromptTemplateSummaryDto {
+  const promptTemplateKey = form.promptTemplateKey.trim();
+
+  return {
+    publicId: `prompt-template-${promptTemplateKey}`,
+    promptTemplateKey,
+    aiFuncType: "ai_explanation",
+    version: 1,
+    title: form.title.trim(),
+    description: "Metadata only",
+    bodyDigest: form.bodyDigest.trim(),
+    bodyPreviewMasked: form.bodyPreviewMasked.trim(),
+    status: "active",
+    isActive: true,
+    updatedAt: new Date("2026-05-26T00:00:00.000Z").toISOString(),
+  };
 }
 
 function AdminModelConfigTab({
