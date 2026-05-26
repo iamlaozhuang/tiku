@@ -209,21 +209,47 @@ Rules:
 
 ### Model Configuration Operations
 
+- `GET /api/v1/model-providers`
+- `POST /api/v1/model-providers`
+- `GET /api/v1/model-providers/{publicId}`
+- `PATCH /api/v1/model-providers/{publicId}`
+- `POST /api/v1/model-providers/{publicId}/enable`
+- `POST /api/v1/model-providers/{publicId}/disable`
 - `GET /api/v1/model-configs`
 - `POST /api/v1/model-configs`
 - `GET /api/v1/model-configs/{publicId}`
 - `PATCH /api/v1/model-configs/{publicId}`
 - `POST /api/v1/model-configs/{publicId}/enable`
 - `POST /api/v1/model-configs/{publicId}/disable`
+- `POST /api/v1/model-configs/reorder-fallback`
+- `GET /api/v1/prompt-templates`
+- `POST /api/v1/prompt-templates`
+- `GET /api/v1/prompt-templates/{publicId}`
+- `PATCH /api/v1/prompt-templates/{publicId}`
+- `POST /api/v1/prompt-templates/{publicId}/enable`
+- `POST /api/v1/prompt-templates/{publicId}/disable`
 
 Rules:
 
-- Model provider credentials remain server-side only.
-- API key display must be redacted, for example only last four characters.
-- Full API keys are accepted only on create or explicit rotate/update operations and must never be returned.
+- `super_admin` is required for every create, update, enable, disable, rotate, and fallback-order mutation.
+- `super_admin` may read all model configuration metadata. Other admin roles may read only redaction-safe summaries when a later task explicitly needs them for operations views.
+- `model_provider` credentials remain server-side only.
+- Secret input is accepted only in short-lived request payload fields for create or explicit rotation/update. It must never be returned, written to evidence, logged, or exposed in UI state.
+- API key display must be redacted, for example only a masked status and last four characters when the storage policy allows that metadata.
+- Provider DTOs expose `publicId`, `providerKey`, `displayName`, `status`, `isEnabled`, `secretStatus`, `maskedSecret`, `lastRotatedAt`, `createdAt`, and `updatedAt`. They do not expose raw credential values, environment variable values, provider payloads, or numeric ids.
+- `secretStatus` values are redaction-safe strings such as `not_configured`, `configured`, `rotation_required`, and `disabled`.
+- `maskedSecret` is either `null` or a display-only mask such as `****1234`; it is not a reversible credential and is never used for provider calls.
 - Each AI function mapping must be explicit: `ai_scoring`, `ai_explanation`, `ai_hint`, `kn_recommendation`, and `learning_suggestion`.
-- Fallback policy must be explicit per function type and recorded in redaction-safe audit metadata.
-- Later scoring calls must snapshot redaction-safe `model_config` metadata when work starts.
+- `model_config` DTOs expose `publicId`, `providerPublicId`, `providerDisplayName`, `modelName`, `modelAlias`, `functionType`, `status`, `isEnabled`, `fallbackPriority`, `timeoutMs`, `retryLimit`, `configVersion`, `snapshotPolicy`, `createdAt`, and `updatedAt`.
+- Fallback policy must be explicit per function type and recorded in redaction-safe audit metadata. Reordering fallback is a state-changing action and must write `audit_log`.
+- `ai_scoring` fallback remains disabled unless a specific `model_config` version enables an explicit ordered fallback policy. Explanation, hint, recommendation, and learning suggestion may use fallback only when the enabled configs and ordered priorities are recorded.
+- Later AI calls must snapshot redaction-safe `model_config` metadata when work starts. Snapshots must not include secret values or provider-specific raw request/response shapes.
+- `prompt_template` admin DTOs expose `publicId`, `templateKey`, `version`, `functionType`, `status`, `isEnabled`, `title`, `description`, `bodyDigest`, `bodyPreviewMasked`, `createdAt`, and `updatedAt`.
+- `bodyPreviewMasked` must not contain raw prompt content. Full prompt body editing, if introduced later, requires a separate approved retention and evidence-redaction policy.
+- Prompt template version changes do not rewrite historical `ai_call_log`, exam reports, scoring results, or snapshots.
+- All model-provider, model-config, and prompt-template APIs return the standard `{ code, message, data, pagination? }` envelope.
+- API JSON fields use camelCase and route params use `publicId`; numeric auto-increment ids remain internal.
+- Audit metadata may include public references, action type, status before/after, fallback priorities, config version, and masked secret status. It must not include secret values, raw prompt body, raw answer, raw model response, raw provider payload, Authorization headers, tokens, or database URLs.
 
 ### Audit Log Operations
 
@@ -267,6 +293,10 @@ Implementation tasks should define DTOs in `src/server/contracts`. Names below a
 - `RedeemCodeDetailDto`
 - `ModelConfigSummaryDto`
 - `ModelConfigDetailDto`
+- `ModelProviderSummaryDto`
+- `ModelProviderDetailDto`
+- `PromptTemplateSummaryDto`
+- `PromptTemplateDetailDto`
 - `AuditLogSummaryDto`
 - `AuditLogDetailDto`
 - `AiCallLogSummaryDto`
