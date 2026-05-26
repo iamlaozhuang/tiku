@@ -4,7 +4,6 @@ import { resolve } from "node:path";
 
 import { sql, type SQL } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
 import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
@@ -33,6 +32,7 @@ import type {
   ModelConfigSnapshot,
   RedactedJsonObject,
 } from "../models/ai-rag";
+import { getSharedRuntimePostgresClient } from "./runtime-database";
 import type {
   NormalizedModelConfigFallbackOrderInput,
   NormalizedModelConfigInput,
@@ -1438,7 +1438,7 @@ function createLocalRuntimeDatabase(): AdminAiAuditLogRuntimeDatabase {
     throw new Error("DATABASE_URL is required for AI audit log runtime.");
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
 }

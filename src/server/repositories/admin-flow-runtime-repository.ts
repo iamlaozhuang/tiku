@@ -17,7 +17,6 @@ import {
 } from "drizzle-orm";
 import { hashPassword } from "better-auth/crypto";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
 import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
@@ -34,6 +33,7 @@ import type {
   AdminAuthOperationListQuery,
   AdminUserListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import { getSharedRuntimePostgresClient } from "./runtime-database";
 
 type AdminFlowRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
@@ -721,7 +721,7 @@ function createLocalRuntimeDatabase(): AdminFlowRuntimeDatabase {
     throw new Error("DATABASE_URL is required for admin flow runtime.");
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
 }

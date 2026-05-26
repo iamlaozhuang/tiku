@@ -6,6 +6,7 @@ import type {
   AuthorizationUserContext,
   RedeemCodeAuthorizationService,
 } from "./redeem-code-authorization-service";
+import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
 
 export type AuthorizationUserResolver = (
   request: Request,
@@ -47,22 +48,24 @@ export function createRedeemCodeRouteHandlers(
   resolveUserContext: AuthorizationUserResolver,
 ) {
   return {
-    async POST(request: Request): Promise<Response> {
-      const userContext = await resolveRequiredUserContext(
-        request,
-        resolveUserContext,
-      );
+    POST: createRouteHandlerWithErrorEnvelope(
+      async (request: Request): Promise<Response> => {
+        const userContext = await resolveRequiredUserContext(
+          request,
+          resolveUserContext,
+        );
 
-      if (!isAuthorizationUserContext(userContext)) {
-        return createJsonResponse(userContext);
-      }
+        if (!isAuthorizationUserContext(userContext)) {
+          return createJsonResponse(userContext);
+        }
 
-      const input = await readRequestJson(request);
+        const input = await readRequestJson(request);
 
-      return createJsonResponse(
-        await authorizationService.redeemCode(input, userContext),
-      );
-    },
+        return createJsonResponse(
+          await authorizationService.redeemCode(input, userContext),
+        );
+      },
+    ),
   };
 }
 
@@ -71,20 +74,22 @@ export function createPersonalAuthRouteHandlers(
   resolveUserContext: AuthorizationUserResolver,
 ) {
   return {
-    async GET(request: Request): Promise<Response> {
-      const userContext = await resolveRequiredUserContext(
-        request,
-        resolveUserContext,
-      );
+    GET: createRouteHandlerWithErrorEnvelope(
+      async (request: Request): Promise<Response> => {
+        const userContext = await resolveRequiredUserContext(
+          request,
+          resolveUserContext,
+        );
 
-      if (!isAuthorizationUserContext(userContext)) {
-        return createJsonResponse(userContext);
-      }
+        if (!isAuthorizationUserContext(userContext)) {
+          return createJsonResponse(userContext);
+        }
 
-      return createJsonResponse(
-        await authorizationService.listPersonalAuths(userContext),
-      );
-    },
+        return createJsonResponse(
+          await authorizationService.listPersonalAuths(userContext),
+        );
+      },
+    ),
   };
 }
 

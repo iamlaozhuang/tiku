@@ -3,7 +3,6 @@ import { resolve } from "node:path";
 
 import { and, asc, count, desc, eq, gt, lte, type SQL } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
 import * as databaseSchema from "@/db/schema";
 import type { AuthorizationType } from "../contracts/effective-authorization-contract";
@@ -14,6 +13,7 @@ import type {
   MistakeBookSource,
   MistakeBookStatus,
 } from "../models/student-experience";
+import { getSharedRuntimePostgresClient } from "./runtime-database";
 
 export type MistakeBookAuthorizationScopeRow = {
   profession: Profession;
@@ -379,7 +379,7 @@ function createLocalRuntimeDatabase(): MistakeBookRuntimeDatabase {
     throw new Error("DATABASE_URL is required for mistake book runtime.");
   }
 
-  return drizzle(postgres(databaseUrl, { max: 5 }), {
+  return drizzle(getSharedRuntimePostgresClient(databaseUrl), {
     schema: databaseSchema,
   });
 }
