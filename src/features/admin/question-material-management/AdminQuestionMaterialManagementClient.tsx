@@ -62,6 +62,27 @@ type AdminCommonSortOrder = "asc" | "desc";
 type QuestionKnowledgeRecommendationDto =
   QuestionKnowledgeRecommendationResultDto["recommendation"];
 
+const managedMediaReferences = {
+  material: {
+    altText: "材料图片",
+    paperAssetPublicId: "paper-asset-local-material-image",
+  },
+  question: {
+    altText: "题目图片",
+    paperAssetPublicId: "paper-asset-local-question-image",
+  },
+} as const;
+
+function createManagedPaperAssetImageMarkup({
+  altText,
+  paperAssetPublicId,
+}: {
+  altText: string;
+  paperAssetPublicId: string;
+}) {
+  return `<img src="/api/v1/paper-assets/${paperAssetPublicId}" data-paper-asset-boundary="metadata-only" data-paper-asset-public-id="${paperAssetPublicId}" alt="${altText}" />`;
+}
+
 type ContentLoadState =
   | "loading"
   | "ready"
@@ -1428,11 +1449,13 @@ function QuestionWriteForm({
           onClick={() =>
             setFormValues({
               ...formValues,
-              stemRichText: `${formValues.stemRichText}\n\n<img src=\"local-image-placeholder\" alt=\"题目图片\" />`,
+              stemRichText: `${formValues.stemRichText}\n\n${createManagedPaperAssetImageMarkup(
+                managedMediaReferences.question,
+              )}`,
             })
           }
         >
-          插入图片占位
+          插入受管图片引用
         </Button>
         <Button
           type="button"
@@ -1447,6 +1470,10 @@ function QuestionWriteForm({
           插入表格模板
         </Button>
       </div>
+      <p className="text-text-muted text-xs leading-5">
+        图片 helper 仅插入本地 paper_asset metadata 引用，不写入 object key、OCR
+        文本或完整文件内容。
+      </p>
       {isOptionQuestion ? (
         <fieldset className="border-border grid gap-3 rounded-md border p-3">
           <legend className="text-text-secondary px-1 text-sm font-medium">
@@ -1724,11 +1751,13 @@ function MaterialWriteForm({
           onClick={() =>
             setFormValues({
               ...formValues,
-              contentRichText: `${formValues.contentRichText}\n\n<img src="local-image-placeholder" alt="材料图片" />`,
+              contentRichText: `${formValues.contentRichText}\n\n${createManagedPaperAssetImageMarkup(
+                managedMediaReferences.material,
+              )}`,
             })
           }
         >
-          插入图片占位
+          插入受管图片引用
         </Button>
         <Button
           type="button"
@@ -1743,6 +1772,10 @@ function MaterialWriteForm({
           插入表格模板
         </Button>
       </div>
+      <p className="text-text-muted text-xs leading-5">
+        图片 helper 仅插入本地 paper_asset metadata 引用，不写入 object key、OCR
+        文本或完整文件内容。
+      </p>
       <div className="flex flex-wrap gap-2">
         <Button disabled={isSubmitting || materialLengthExceeded} type="submit">
           保存材料

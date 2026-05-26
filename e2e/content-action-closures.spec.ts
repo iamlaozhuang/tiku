@@ -41,6 +41,18 @@ test.describe("content action closures", () => {
     await expect(
       page.getByTestId("content-edit-context-panel").getByRole("form"),
     ).toBeVisible();
+    const questionForm = page
+      .getByTestId("content-edit-context-panel")
+      .getByRole("form");
+    await questionForm
+      .getByRole("button", { name: "插入受管图片引用" })
+      .click();
+    await expect(questionForm.getByLabel("题干")).toHaveValue(
+      /data-paper-asset-public-id="paper-asset-local-question-image"/,
+    );
+    await expect(questionForm.getByLabel("题干")).not.toHaveValue(
+      /local-image-placeholder|dev\/paper-asset/,
+    );
     const lockedQuestionEdit = page
       .locator('button[data-testid^="question-edit-"][disabled]')
       .first();
