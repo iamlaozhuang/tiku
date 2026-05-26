@@ -450,6 +450,10 @@ export function createPostgresAdminAiAuditLogRuntimeRepositories(
           pagination: createPagination(query, totalRow?.value ?? 0),
         };
       } catch (error) {
+        if (isUndefinedColumnError(error)) {
+          return listLegacyModelConfigs(database, query, keywordCondition);
+        }
+
         if (!isUndefinedTableError(error)) {
           throw error;
         }
@@ -1031,6 +1035,59 @@ async function updateModelConfigEnabled(
   }
 }
 
+async function listLegacyModelConfigs(
+  database: AdminAiAuditLogRuntimeDatabase,
+  query: AdminAiAuditLogListQuery,
+  keywordCondition: SQL,
+): Promise<AdminAiAuditLogRuntimePage<ModelConfigListDto>> {
+  const rows = await executeSql<ModelConfigDatabaseRow>(
+    database,
+    sql`
+      select
+        mc.public_id,
+        mp.public_id as provider_public_id,
+        mp.display_name as provider_display_name,
+        mp.provider_key,
+        mp.api_key_last_four,
+        null::text as secret_status,
+        mc.model_name,
+        null::text as model_alias,
+        mc.display_name,
+        mc.ai_func_type,
+        mc.config_version,
+        mc.is_enabled,
+        null::text as status,
+        null::int as fallback_priority,
+        null::text as snapshot_policy,
+        mc.timeout_second,
+        mc.max_retry_count,
+        fallback.public_id as fallback_model_config_public_id,
+        mc.updated_at
+      from model_config mc
+      inner join model_provider mp on mp.id = mc.model_provider_id
+      left join model_config fallback on fallback.id = mc.fallback_model_config_id
+      where ${keywordCondition}
+      order by mc.updated_at desc
+      limit ${query.pageSize}
+      offset ${(query.page - 1) * query.pageSize}
+    `,
+  );
+  const [totalRow] = await executeSql<CountDatabaseRow>(
+    database,
+    sql`
+      select count(*)::int as value
+      from model_config mc
+      inner join model_provider mp on mp.id = mc.model_provider_id
+      where ${keywordCondition}
+    `,
+  );
+
+  return {
+    modelConfigs: rows.map(mapModelConfigRow),
+    pagination: createPagination(query, totalRow?.value ?? 0),
+  };
+}
+
 async function updateBooleanStatus(
   database: AdminAiAuditLogRuntimeDatabase,
   tableName: "model_provider" | "prompt_template",
@@ -1356,6 +1413,20 @@ function isUndefinedTableError(error: unknown): boolean {
   }
 
   return isUndefinedTableError((error as { cause?: unknown }).cause);
+}
+
+function isUndefinedColumnError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  const errorCode = (error as { code?: unknown }).code;
+
+  if (errorCode === "42703") {
+    return true;
+  }
+
+  return isUndefinedColumnError((error as { cause?: unknown }).cause);
 }
 
 function createLocalRuntimeDatabase(): AdminAiAuditLogRuntimeDatabase {

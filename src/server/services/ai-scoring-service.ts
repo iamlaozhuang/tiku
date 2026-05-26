@@ -9,6 +9,7 @@ import {
   type ModelConfigSnapshot,
   type RedactedJsonObject,
 } from "../models/ai-rag";
+import { createRedactedModelConfigRuntimeSnapshot } from "./model-config-runtime";
 
 export type AiScoringStatus =
   | "scored"
@@ -196,9 +197,15 @@ function createAiCallLogDraft(input: {
     userAnswer: input.context.studentAnswer,
     modelOutput: input.modelOutput,
     citations: input.citations,
-    providerRequestPayload: input.providerRequestPayload,
-    providerResponsePayload: input.providerResponsePayload,
-    providerErrorPayload: input.providerErrorPayload,
+    providerRequestPayload: {
+      requestBody: JSON.stringify(input.providerRequestPayload),
+    },
+    providerResponsePayload: {
+      responseBody: JSON.stringify(input.providerResponsePayload),
+    },
+    providerErrorPayload: {
+      errorBody: JSON.stringify(input.providerErrorPayload),
+    },
   });
 
   return {
@@ -207,6 +214,9 @@ function createAiCallLogDraft(input: {
     promptTemplateKey: input.context.promptTemplate.promptTemplateKey,
     promptTemplateVersion: input.context.promptTemplate.version,
     requestRedactedSnapshot: {
+      modelConfig: createRedactedModelConfigRuntimeSnapshot(
+        input.context.modelConfigSnapshot,
+      ),
       prompt: redactedSnapshots.prompt,
       userAnswer: redactedSnapshots.userAnswer,
       providerRequestPayload: redactedSnapshots.providerRequestPayload,
