@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { GitBranch, Move, Pencil, Plus, Search, ShieldOff } from "lucide-react";
+import {
+  ArrowDownUp,
+  GitBranch,
+  Move,
+  Pencil,
+  Plus,
+  Search,
+  ShieldOff,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +45,7 @@ type KnowledgeNodeLoadState =
   | "error";
 type KnowledgeNodeStatusFilter = "all" | KnStatus;
 type ProfessionFilter = "all" | Profession;
+type AdminCommonSortOrder = "asc" | "desc";
 
 type KnowledgeNodeListDto = {
   knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[];
@@ -183,6 +192,8 @@ export function AdminKnowledgeNodeManagement() {
   const [keyword, setKeyword] = useState("");
   const [profession, setProfession] = useState<ProfessionFilter>("all");
   const [status, setStatus] = useState<KnowledgeNodeStatusFilter>("all");
+  const [pageSize, setPageSize] = useState("20");
+  const [sortOrder, setSortOrder] = useState<AdminCommonSortOrder>("desc");
   const [action, setAction] = useState<KnowledgeNodeAction>({
     status: "idle",
   });
@@ -211,6 +222,14 @@ export function AdminKnowledgeNodeManagement() {
     [keyword, knowledgeNodes, profession, status],
   );
   const activeKnowledgeNode = filteredKnowledgeNodes[0] ?? null;
+  const displayedKnowledgeNodes = useMemo(
+    () =>
+      sortKnowledgeNodesByUpdatedAt(filteredKnowledgeNodes, sortOrder).slice(
+        0,
+        Number(pageSize),
+      ),
+    [filteredKnowledgeNodes, pageSize, sortOrder],
+  );
   const moveParentCandidate = useMemo(
     () =>
       activeKnowledgeNode === null
@@ -461,11 +480,11 @@ export function AdminKnowledgeNodeManagement() {
       <section className="grid gap-3 md:grid-cols-3" aria-label="知识点摘要">
         <SummaryItem
           label="当前结果"
-          value={`${filteredKnowledgeNodes.length} 个`}
+          value={`${displayedKnowledgeNodes.length} 个`}
         />
         <SummaryItem
           label="绑定题目"
-          value={`${filteredKnowledgeNodes.reduce(
+          value={`${displayedKnowledgeNodes.reduce(
             (questionCount, knowledgeNode) =>
               questionCount + knowledgeNode.questionCount,
             0,
@@ -474,15 +493,26 @@ export function AdminKnowledgeNodeManagement() {
         <SummaryItem
           label="可推荐"
           value={`${
-            filteredKnowledgeNodes.filter(
+            displayedKnowledgeNodes.filter(
               (knowledgeNode) => knowledgeNode.isRecommendable,
             ).length
           } 个`}
         />
       </section>
 
-      {filteredKnowledgeNodes.length > 0 ? (
-        <KnowledgeNodeList rows={filteredKnowledgeNodes} />
+      <AdminCommonListControls
+        pageSize={pageSize}
+        sortOrder={sortOrder}
+        onPageSizeChange={setPageSize}
+        onToggleSortOrder={() =>
+          setSortOrder((currentSortOrder) =>
+            currentSortOrder === "desc" ? "asc" : "desc",
+          )
+        }
+      />
+
+      {displayedKnowledgeNodes.length > 0 ? (
+        <KnowledgeNodeList rows={displayedKnowledgeNodes} />
       ) : (
         <FilteredEmptyState />
       )}
@@ -665,6 +695,56 @@ function parseSortOrder(value: string) {
   const sortOrder = Number.parseInt(value.trim(), 10);
 
   return Number.isInteger(sortOrder) ? sortOrder : 0;
+}
+
+function sortKnowledgeNodesByUpdatedAt(
+  knowledgeNodes: AdminKnowledgeNodeOpsSummaryDto[],
+  sortOrder: AdminCommonSortOrder,
+) {
+  return [...knowledgeNodes].sort((leftNode, rightNode) => {
+    const leftTime = new Date(leftNode.updatedAt).getTime();
+    const rightTime = new Date(rightNode.updatedAt).getTime();
+
+    return sortOrder === "desc" ? rightTime - leftTime : leftTime - rightTime;
+  });
+}
+
+function AdminCommonListControls({
+  pageSize,
+  sortOrder,
+  onPageSizeChange,
+  onToggleSortOrder,
+}: {
+  pageSize: string;
+  sortOrder: AdminCommonSortOrder;
+  onPageSizeChange: (value: string) => void;
+  onToggleSortOrder: () => void;
+}) {
+  return (
+    <section
+      aria-label="列表通用控制"
+      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
+    >
+      <FilterSelect
+        label="每页条数"
+        options={[
+          ["20", "20"],
+          ["50", "50"],
+          ["100", "100"],
+        ]}
+        value={pageSize}
+        onChange={onPageSizeChange}
+      />
+      <Button type="button" variant="outline" onClick={onToggleSortOrder}>
+        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
+        更新时间排序
+      </Button>
+      <p className="text-text-secondary text-xs">
+        当前{sortOrder === "desc" ? "降序" : "升序"}
+        ，筛选变更会自动刷新当前结果。
+      </p>
+    </section>
+  );
 }
 
 function KnowledgeNodeActionDialog({

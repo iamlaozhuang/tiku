@@ -725,6 +725,24 @@ describe("admin content and knowledge ops baseline", () => {
     expect(await screen.findByText("知识点树加载失败")).toBeInTheDocument();
   });
 
+  it("renders common pagination and updated-at sorting controls for knowledge_node lists", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockKnowledgeNodeFetch();
+
+    render(createElement(AdminKnowledgeNodeManagement));
+
+    await screen.findByText("营销/市场调研");
+
+    expect(screen.getByLabelText("每页条数")).toHaveValue("20");
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "50" },
+    });
+    expect(screen.getByLabelText("每页条数")).toHaveValue("50");
+    expect(
+      screen.getByRole("button", { name: "更新时间排序" }),
+    ).toBeInTheDocument();
+  });
+
   it("creates, edits, and disables knowledge_node rows through publicId-safe runtime actions", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = mockKnowledgeNodeFetch();

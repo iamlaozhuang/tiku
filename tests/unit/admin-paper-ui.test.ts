@@ -410,6 +410,33 @@ describe("AdminPaperManagement", () => {
     expect(screen.queryByText("2026 春季营销理论模拟卷")).toBeNull();
   });
 
+  it("renders common pagination and updated-at sorting controls for paper lists", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockPaperFetch();
+
+    render(createElement(AdminPaperManagement));
+
+    await screen.findByText("2026 春季营销理论模拟卷");
+
+    expect(screen.getByLabelText("每页条数")).toHaveValue("20");
+    fireEvent.change(screen.getByLabelText("每页条数"), {
+      target: { value: "100" },
+    });
+    expect(screen.getByLabelText("每页条数")).toHaveValue("100");
+
+    fireEvent.click(screen.getByRole("button", { name: "更新时间排序" }));
+    const rows = screen.getAllByTestId(/paper-row-/);
+
+    expect(rows[0]).toHaveAttribute(
+      "data-public-id",
+      "paper-logistics-2026-practice",
+    );
+    expect(rows[1]).toHaveAttribute(
+      "data-public-id",
+      "paper-marketing-2026-spring",
+    );
+  });
+
   it("shows source file summaries, validation issues, empty, loading, and error states", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockPaperFetch();
@@ -616,6 +643,8 @@ describe("AdminPaperManagement", () => {
         name: "发布 paper-logistics-2026-practice",
       }),
     );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认发布试卷？");
+    fireEvent.click(screen.getByRole("button", { name: "确认发布" }));
     expect(
       await screen.findByText("试卷 paper-logistics-2026-practice 已发布"),
     ).toBeInTheDocument();
@@ -629,6 +658,8 @@ describe("AdminPaperManagement", () => {
         name: "下架 paper-marketing-2026-spring",
       }),
     );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent("确认下架试卷？");
+    fireEvent.click(screen.getByRole("button", { name: "确认下架" }));
     fireEvent.click(
       screen.getByRole("button", {
         name: "复制 paper-marketing-2026-spring",

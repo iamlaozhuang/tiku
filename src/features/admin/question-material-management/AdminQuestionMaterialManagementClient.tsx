@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  ArrowDownUp,
   Ban,
   Check,
   Copy,
@@ -57,6 +58,7 @@ type QuestionTypeFilter = "all" | QuestionType;
 type QuestionFormMode = "create" | "edit";
 type MaterialFormMode = "create" | "edit";
 type RecommendationReviewStatus = "accepted" | "discarded";
+type AdminCommonSortOrder = "asc" | "desc";
 type QuestionKnowledgeRecommendationDto =
   QuestionKnowledgeRecommendationResultDto["recommendation"];
 
@@ -117,6 +119,16 @@ type ActiveContentForm =
       mode: MaterialFormMode;
       publicId: string | null;
       values: MaterialFormValues;
+    };
+
+type PendingContentAction =
+  | {
+      kind: "questionDisable";
+      publicId: string;
+    }
+  | {
+      kind: "materialDisable";
+      publicId: string;
     };
 
 type KnowledgeRecommendationReviewState = {
@@ -493,6 +505,10 @@ export function AdminQuestionMaterialManagement({
   const [activeForm, setActiveForm] = useState<ActiveContentForm | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState("20");
+  const [sortOrder, setSortOrder] = useState<AdminCommonSortOrder>("desc");
+  const [pendingContentAction, setPendingContentAction] =
+    useState<PendingContentAction | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [
     recommendationsByQuestionPublicId,
@@ -587,6 +603,22 @@ export function AdminQuestionMaterialManagement({
     activeForm?.kind === "question" ? activeForm.publicId : null;
   const selectedMaterialPublicId =
     activeForm?.kind === "material" ? activeForm.publicId : null;
+  const displayedQuestions = useMemo(
+    () =>
+      sortItemsByUpdatedAt(filteredQuestions, sortOrder).slice(
+        0,
+        Number(pageSize),
+      ),
+    [filteredQuestions, pageSize, sortOrder],
+  );
+  const displayedMaterials = useMemo(
+    () =>
+      sortItemsByUpdatedAt(filteredMaterials, sortOrder).slice(
+        0,
+        Number(pageSize),
+      ),
+    [filteredMaterials, pageSize, sortOrder],
+  );
 
   if (loadState === "loading") {
     return (
@@ -845,6 +877,22 @@ export function AdminQuestionMaterialManagement({
     setActionMessage(`材料 ${updatedMaterial.publicId} 已更新`);
   }
 
+  async function handleConfirmPendingContentAction() {
+    if (pendingContentAction === null) {
+      return;
+    }
+
+    const currentAction = pendingContentAction;
+    setPendingContentAction(null);
+
+    if (currentAction.kind === "questionDisable") {
+      await handleQuestionAction(currentAction.publicId, "disable");
+      return;
+    }
+
+    await handleMaterialAction(currentAction.publicId, "disable");
+  }
+
   return (
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -906,6 +954,17 @@ export function AdminQuestionMaterialManagement({
         onTagFilterChange={setTagFilter}
       />
 
+      <AdminCommonListControls
+        pageSize={pageSize}
+        sortOrder={sortOrder}
+        onPageSizeChange={setPageSize}
+        onToggleSortOrder={() =>
+          setSortOrder((currentSortOrder) =>
+            currentSortOrder === "desc" ? "asc" : "desc",
+          )
+        }
+      />
+
       {actionMessage === null ? null : (
         <p className="text-brand-primary text-sm" role="status">
           {actionMessage}
@@ -957,11 +1016,11 @@ export function AdminQuestionMaterialManagement({
               recommendationByQuestionPublicId={
                 recommendationsByQuestionPublicId
               }
-              rows={filteredQuestions}
+              rows={displayedQuestions}
               selectedPublicId={selectedQuestionPublicId}
               onCopy={(publicId) => void handleQuestionAction(publicId, "copy")}
               onDisable={(publicId) =>
-                void handleQuestionAction(publicId, "disable")
+                setPendingContentAction({ kind: "questionDisable", publicId })
               }
               onEdit={(question) => {
                 setActionError(null);
@@ -983,11 +1042,11 @@ export function AdminQuestionMaterialManagement({
               referencedQuestionPublicIdsByMaterialPublicId={
                 referencedQuestionPublicIdsByMaterialPublicId
               }
-              rows={filteredMaterials}
+              rows={displayedMaterials}
               selectedPublicId={selectedMaterialPublicId}
               onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
               onDisable={(publicId) =>
-                void handleMaterialAction(publicId, "disable")
+                setPendingContentAction({ kind: "materialDisable", publicId })
               }
               onEdit={(material) => {
                 setActionError(null);
@@ -1041,7 +1100,102 @@ export function AdminQuestionMaterialManagement({
           </aside>
         )}
       </div>
+
+      {pendingContentAction === null ? null : (
+        <ContentDangerConfirmationDialog
+          action={pendingContentAction}
+          onCancel={() => setPendingContentAction(null)}
+          onConfirm={() => void handleConfirmPendingContentAction()}
+        />
+      )}
     </section>
+  );
+}
+
+function sortItemsByUpdatedAt<TItem extends { updatedAt: string }>(
+  items: TItem[],
+  sortOrder: AdminCommonSortOrder,
+) {
+  return [...items].sort((leftItem, rightItem) => {
+    const leftTime = new Date(leftItem.updatedAt).getTime();
+    const rightTime = new Date(rightItem.updatedAt).getTime();
+
+    return sortOrder === "desc" ? rightTime - leftTime : leftTime - rightTime;
+  });
+}
+
+function AdminCommonListControls({
+  pageSize,
+  sortOrder,
+  onPageSizeChange,
+  onToggleSortOrder,
+}: {
+  pageSize: string;
+  sortOrder: AdminCommonSortOrder;
+  onPageSizeChange: (value: string) => void;
+  onToggleSortOrder: () => void;
+}) {
+  return (
+    <section
+      aria-label="列表通用控制"
+      className="bg-surface border-border flex flex-wrap items-end gap-3 rounded-md border p-4 shadow-sm"
+    >
+      <FilterSelect
+        label="每页条数"
+        options={[
+          ["20", "20"],
+          ["50", "50"],
+          ["100", "100"],
+        ]}
+        value={pageSize}
+        onChange={onPageSizeChange}
+      />
+      <Button type="button" variant="outline" onClick={onToggleSortOrder}>
+        <ArrowDownUp aria-hidden="true" data-icon="inline-start" />
+        更新时间排序
+      </Button>
+      <p className="text-text-secondary text-xs">
+        当前{sortOrder === "desc" ? "降序" : "升序"}
+        ，筛选变更会自动刷新当前结果。
+      </p>
+    </section>
+  );
+}
+
+function ContentDangerConfirmationDialog({
+  action,
+  onCancel,
+  onConfirm,
+}: {
+  action: PendingContentAction;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const noun = action.kind === "questionDisable" ? "题目" : "材料";
+
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <h2 className="text-text-primary text-base font-semibold">
+          确认停用{noun}？
+        </h2>
+        <p className="text-text-secondary text-sm">
+          将提交 {action.publicId} 的停用操作；操作只使用 publicId。
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="destructive" onClick={onConfirm}>
+            确认停用
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1836,7 +1990,7 @@ function QuestionList({
                 aria-label={`停用题目 ${question.publicId}`}
                 size="sm"
                 type="button"
-                variant="outline"
+                variant="destructive"
                 onClick={() => onDisable(question.publicId)}
               >
                 <ShieldOff aria-hidden="true" data-icon="inline-start" />
@@ -2082,7 +2236,7 @@ function MaterialList({
                 aria-label={`停用材料 ${material.publicId}`}
                 size="sm"
                 type="button"
-                variant="outline"
+                variant="destructive"
                 onClick={() => onDisable(material.publicId)}
               >
                 <ShieldOff aria-hidden="true" data-icon="inline-start" />

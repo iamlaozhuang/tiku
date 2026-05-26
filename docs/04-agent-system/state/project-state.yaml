@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-repair-content-knowledge-tree-ssot-ac
+  id: phase-12-repair-admin-common-interaction-ssot-ac
   status: closed
-  sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-10 and docs/01-requirements/modules/05-rag-knowledge.md#knowledge-node-management
-  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-content-knowledge-tree-ssot-ac.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-knowledge-tree-ssot-ac.md
-  branch: codex/phase-12-content-knowledge-tree-ssot-ac
+  sourceStory: docs/01-requirements/stories/epic-06-admin-ops.md#us-06-01
+  planPath: docs/05-execution-logs/task-plans/2026-05-25-phase-12-admin-common-interaction-ssot-ac.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-admin-common-interaction-ssot-ac.md
+  branch: codex/phase-12-admin-common-interaction-ssot-ac
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Claim and execute phase-12-repair-admin-common-interaction-ssot-ac
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-content-knowledge-tree-ssot-ac.md
+  nextRecommendedAction: Review blocked Phase 12 planning gates that require explicit approval for provider, secret/env, schema, migration, or server-side AC-7 work
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-25-phase-12-admin-common-interaction-ssot-ac.md
