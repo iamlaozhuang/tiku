@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-question-type-task-registration
+  id: phase-12-question-type-ssot-contract
   status: closed
   sourceStory: user-request-2026-05-26-case-analysis-calculation-mvp
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-question-type-task-registration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-task-registration.md
-  branch: codex/phase-12-question-type-task-registration
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-question-type-ssot-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-ssot-contract.md
+  branch: codex/phase-12-question-type-ssot-contract
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Start phase-12-question-type-ssot-contract from clean master; remaining model_config secret CRUD gate is still blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-task-registration.md
+  nextRecommendedAction: Start phase-12-question-type-schema-migration from clean master.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-ssot-contract.md

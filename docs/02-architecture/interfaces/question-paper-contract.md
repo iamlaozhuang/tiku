@@ -62,18 +62,18 @@ This document is a contract and approval artifact. It does not create schema, ge
 
 Use values already registered in `docs/03-standards/glossary.yaml`.
 
-| Concept                  | Database enum       | Values                                                                      |
-| ------------------------ | ------------------- | --------------------------------------------------------------------------- |
-| `profession`             | `profession`        | `monopoly`, `marketing`, `logistics`                                        |
-| `subject`                | `subject`           | `theory`, `skill`                                                           |
-| `question_type`          | `question_type`     | `single_choice`, `multi_choice`, `true_false`, `fill_blank`, `short_answer` |
-| `question_status`        | `question_status`   | `available`, `disabled`                                                     |
-| `material_status`        | `material_status`   | `available`, `disabled`                                                     |
-| `paper_status`           | `paper_status`      | `draft`, `published`, `archived`                                            |
-| `multi_choice_rule`      | `multi_choice_rule` | `all_correct_only`, `partial_credit`                                        |
-| `scoring_method`         | `scoring_method`    | `auto_match`, `ai_scoring`                                                  |
-| `paper_type`             | `paper_type`        | `past_paper`, `mock_paper`                                                  |
-| `paper_attachment_usage` | `usage_type`        | `paper_source`, `answer_analysis`, `answer_sheet`, `other`                  |
+| Concept                  | Database enum       | Values                                                                                                      |
+| ------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `profession`             | `profession`        | `monopoly`, `marketing`, `logistics`                                                                        |
+| `subject`                | `subject`           | `theory`, `skill`                                                                                           |
+| `question_type`          | `question_type`     | `single_choice`, `multi_choice`, `true_false`, `fill_blank`, `short_answer`, `case_analysis`, `calculation` |
+| `question_status`        | `question_status`   | `available`, `disabled`                                                                                     |
+| `material_status`        | `material_status`   | `available`, `disabled`                                                                                     |
+| `paper_status`           | `paper_status`      | `draft`, `published`, `archived`                                                                            |
+| `multi_choice_rule`      | `multi_choice_rule` | `all_correct_only`, `partial_credit`                                                                        |
+| `scoring_method`         | `scoring_method`    | `auto_match`, `ai_scoring`                                                                                  |
+| `paper_type`             | `paper_type`        | `past_paper`, `mock_paper`                                                                                  |
+| `paper_attachment_usage` | `usage_type`        | `paper_source`, `answer_analysis`, `answer_sheet`, `other`                                                  |
 
 ## Database Contract
 
