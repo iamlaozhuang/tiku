@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-11-staging-release-planning
-  updatedAt: "2026-05-25T00:00:00-07:00"
+  currentPhase: phase-12-mvp-requirements-runtime-repair
+  updatedAt: "2026-05-26T00:29:17-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,13 +36,13 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-plan-model-config-secret-crud
+  id: phase-12-model-config-task-registration
   status: closed
-  sourceStory: user-request-2026-05-26-model-config-secret-crud-safe-planning
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-model-config-secret-crud-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-secret-crud-planning.md
-  branch: codex/phase-12-model-config-secret-crud-planning
-  commitSha: ba610ca
+  sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-model-config-task-registration.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-task-registration.md
+  branch: codex/phase-12-model-config-task-registration
+  commitSha: 002bbd8
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Model config secret CRUD is planned as a safe planning-only boundary; implementation remains blocked until separate explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-secret-crud-planning.md
+  nextRecommendedAction: Phase 12 model_config queue is registered; next claimable task is phase-12-model-config-contract-plan.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-task-registration.md

@@ -8486,3 +8486,307 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-question-type-student-report.md
     status: closed
     retryCount: 0
+  - id: phase-12-model-config-task-registration
+    title: Phase 12 Model Config Task Registration
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+    dependencies:
+      - phase-12-plan-model-config-secret-crud
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized creating the model_provider/model_config/prompt_template/secret approval task group in this turn. This registration task may only update queue/state/task-plan/evidence and does not approve contract, schema, migration, runtime, UI, provider, secret/env, package, lockfile, cloud, staging, prod, deployment, or destructive data changes.
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-05-26-phase-12-model-config-task-registration.md
+      - docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-task-registration.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - automation_state
+      - evidence_integrity
+      - approval_gate
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-task-registration.md
+    status: closed
+    retryCount: 0
+  - id: phase-12-model-config-contract-plan
+    title: Phase 12 Model Config Contract Plan
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+    dependencies:
+      - phase-12-model-config-task-registration
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized local dev docs/queue/state/task-plan/evidence/interface contract planning for redaction-safe model_provider, model_config, prompt_template, fallback, audit, masking, and API envelope boundaries. This task must not modify runtime, schema, migration, provider, secret/env, package, lockfile, cloud, staging, prod, or deployment surfaces.
+    allowedFiles:
+      - docs/02-architecture/interfaces/admin-ops-contract.md
+      - docs/02-architecture/interfaces/ai-rag-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - data_contract
+      - api_contract
+      - approval_gate
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-contract-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-model-config-schema-migration
+    title: Phase 12 Model Config Schema Migration
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+    dependencies:
+      - phase-12-model-config-contract-plan
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized local dev schema, Drizzle migration, Drizzle meta, schema tests, docs, queue, evidence, and task plan work for redaction-safe model_provider, model_config, prompt_template, and ai_call_log metadata in this turn. Migration must be reviewable and must not contain destructive data operations or real secrets.
+    allowedFiles:
+      - src/db/schema/**
+      - drizzle/**
+      - src/db/schema/*.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - scripts/**
+    riskTypes:
+      - database_migration
+      - schema_change
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/db/schema/*.test.ts
+      - rg -n "DROP|DELETE|TRUNCATE|model_provider|model_config|prompt_template|secret" drizzle src/db/schema
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-schema-migration.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-model-config-server-runtime
+    title: Phase 12 Model Config Server Runtime
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+    dependencies:
+      - phase-12-model-config-schema-migration
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized local dev server contract, validator, model, mapper, repository, service, API route, unit test, docs, queue, evidence, and task plan work for redaction-safe CRUD, enable/disable, fallback ordering, and prompt_template metadata/version/status management. This does not authorize real provider calls, secret/env reads, raw prompt/model response logging, package/lockfile changes, cloud, staging, prod, or deployment work.
+    allowedFiles:
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/models/**
+      - src/server/mappers/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/app/api/v1/model-configs/**
+      - src/app/api/v1/model-providers/**
+      - src/app/api/v1/prompt-templates/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - drizzle/**
+      - src/db/schema/**
+      - scripts/**
+    riskTypes:
+      - server_runtime
+      - api_contract
+      - provider_config
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/*model* src/server/services/*model*test.ts src/server/services/*prompt*test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-server-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-model-config-admin-ui
+    title: Phase 12 Model Config Admin UI
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+    dependencies:
+      - phase-12-model-config-server-runtime
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized local dev admin UI, unit test, E2E, docs, queue, evidence, and task plan work for model_provider, model_config, and prompt_template list/create/edit/enable/disable/fallback display. UI may accept short-lived synthetic secret input for submission controls only and must show masked state after save.
+    allowedFiles:
+      - src/features/admin/**
+      - src/components/admin/**
+      - tests/unit/*admin*model*
+      - tests/unit/**
+      - e2e/content-action-closures.spec.ts
+      - e2e/*model*
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - admin_ui
+      - provider_config
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/*admin*model*
+      - npm.cmd run test:e2e -- e2e/content-action-closures.spec.ts
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-admin-ui.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-model-config-local-mock-runtime
+    title: Phase 12 Model Config Local Mock Runtime
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+    dependencies:
+      - phase-12-model-config-admin-ui
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized local mock provider/deterministic provider configuration selection, enable/disable, fallback, snapshot, redacted ai_call_log compatibility, tests, docs, queue, evidence, and task plan work. This task must not call real providers, read env, store real secrets, or record raw prompts, raw answers, raw model responses, raw provider payloads, or customer-like private data.
+    allowedFiles:
+      - src/server/services/*ai*
+      - src/server/services/*model*
+      - src/server/services/*mock*
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - tests/unit/**
+      - e2e/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - local_mock_runtime
+      - ai_call_log
+      - provider_config
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/*ai* tests/unit/*model* src/server/services/*ai*test.ts src/server/services/*model*test.ts
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-model-config-local-mock-runtime.md
+    status: pending
+    retryCount: 0
+  - id: phase-12-secret-env-provider-approval-plan
+    title: Phase 12 Secret Env Provider Approval Plan
+    phase: phase-12-mvp-requirements-runtime-repair
+    sourceStory: user-request-2026-05-26-model-config-secret-crud-implementation-queue
+    dependencies:
+      - phase-12-model-config-local-mock-runtime
+    taskPlanPolicy: required
+    humanApproval: User explicitly authorized docs-only approval runbook planning for future real provider, staging, prod, secret env enablement. This task does not authorize secret/env creation, reading, rotation, injection, cloud/staging/prod/provider connection, deployment, package/lockfile changes, schema/migration changes, or raw provider/prompt/answer/model response recording.
+    allowedFiles:
+      - docs/02-architecture/interfaces/phase-11-staging-secret-and-env-plan.md
+      - docs/02-architecture/interfaces/ai-rag-contract.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - secret_or_env_change
+      - external_service_config
+      - approval_gate
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-secret-env-provider-approval-plan.md
+    status: pending
+    retryCount: 0
