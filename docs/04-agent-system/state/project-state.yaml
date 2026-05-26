@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-12-role-scenario-experience-gap-scan
-  updatedAt: "2026-05-26T03:31:02-07:00"
+  updatedAt: "2026-05-26T03:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,12 +36,12 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 currentTask:
-  id: phase-12-role-scenario-experience-registration
+  id: phase-12-role-scenario-script-plan
   status: closed
   sourceStory: user-request-2026-05-26-role-scenario-experience-gap-scan
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-role-scenario-experience-registration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-role-scenario-experience-registration.md
-  branch: codex/phase-12-role-scenario-experience-registration
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-12-role-scenario-script-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-12-role-scenario-script-plan.md
+  branch: codex/phase-12-role-scenario-script-plan
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +78,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Claim phase-12-role-scenario-script-plan from clean master, then create the multi-role experience scripts before browser/runtime gap scans. Future real provider, secret, staging, and prod tasks remain blocked pending explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-role-scenario-experience-registration.md
+  nextRecommendedAction: Claim one of the split gap scans from clean master. Recommended order is phase-12-student-experience-gap-scan, then admin, auth/organization boundary, AI redaction, and final closeout. Future real provider, secret, staging, and prod tasks remain blocked pending explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-12-role-scenario-script-plan.md
