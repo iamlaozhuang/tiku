@@ -71,3 +71,7 @@ export type PracticeResultDto = {
 export type PracticeAnswerFeedbackResultDto = {
   feedback: PracticeAnswerFeedbackDto;
 };
+
+export type PracticeQuestionFavoriteResultDto = {
+  mistakeBookPublicId: string;
+};

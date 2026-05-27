@@ -498,6 +498,72 @@ function createPostgresPracticeRepository(
 
       return row;
     },
+    async upsertMistakeBookFromFavorite(input) {
+      const database = getDatabase();
+      const userId = await getRequiredUserId(database, input.userPublicId);
+      const [existingRow] = await database
+        .select({
+          public_id: mistakeBook.public_id,
+          mistake_book_status: mistakeBook.mistake_book_status,
+        })
+        .from(mistakeBook)
+        .where(
+          and(
+            eq(mistakeBook.user_id, userId),
+            eq(mistakeBook.question_public_id, input.questionPublicId),
+          ),
+        )
+        .limit(1);
+
+      if (existingRow !== undefined) {
+        const nextStatus =
+          existingRow.mistake_book_status === "removed"
+            ? "unmastered"
+            : existingRow.mistake_book_status;
+        const [updatedRow] = await database
+          .update(mistakeBook)
+          .set({
+            mistake_book_status: nextStatus,
+            is_favorite: true,
+            is_removed: false,
+            updated_at: input.favoritedAt,
+          })
+          .where(eq(mistakeBook.public_id, existingRow.public_id))
+          .returning({ public_id: mistakeBook.public_id });
+
+        return updatedRow ?? { public_id: existingRow.public_id };
+      }
+
+      const [row] = await database
+        .insert(mistakeBook)
+        .values({
+          public_id: input.publicId,
+          user_id: userId,
+          question_public_id: input.questionPublicId,
+          paper_question_public_id: input.paperQuestionPublicId,
+          profession: input.profession,
+          level: input.level,
+          subject: input.subject,
+          question_snapshot: input.questionSnapshot,
+          latest_answer_snapshot: input.latestAnswerSnapshot,
+          mistake_book_source: "favorite",
+          mistake_book_status: "unmastered",
+          wrong_count: 0,
+          is_favorite: true,
+          is_removed: false,
+          mastered_at: null,
+          latest_wrong_at: null,
+          created_at: input.favoritedAt,
+          updated_at: input.favoritedAt,
+        })
+        .returning({ public_id: mistakeBook.public_id });
+
+      if (row === undefined) {
+        throw new Error("Mistake book favorite insert did not return a row.");
+      }
+
+      return row;
+    },
   };
 }
 

@@ -114,6 +114,19 @@ export type UpsertMistakeBookInput = {
   latestWrongAt: Date;
 };
 
+export type UpsertMistakeBookFromFavoriteInput = {
+  publicId: string;
+  userPublicId: string;
+  questionPublicId: string;
+  paperQuestionPublicId: string;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  questionSnapshot: Record<string, unknown>;
+  latestAnswerSnapshot: PracticeAnswerSnapshotDto;
+  favoritedAt: Date;
+};
+
 export type PracticeRepository = {
   listEffectiveAuthorizationScopes(query: {
     userPublicId: string;
@@ -155,5 +168,8 @@ export type PracticeRepository = {
   }): Promise<void>;
   upsertMistakeBookFromWrongAnswer(
     input: UpsertMistakeBookInput,
+  ): Promise<{ public_id: string }>;
+  upsertMistakeBookFromFavorite(
+    input: UpsertMistakeBookFromFavoriteInput,
   ): Promise<{ public_id: string }>;
 };
