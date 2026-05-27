@@ -55,7 +55,15 @@
 
 ## Closeout Status
 
-- commit: pending.
-- merge: pending.
+- implementationCommit: `dcf9c8da0e32217b4cfc533218e149552d683215` (`fix(paper): terminate sessions on archive`).
+- merge: `4dd539e443d86fef9f2eb7f303b2f48683939acd` (`merge: phase-20 fix ra-02-09 paper archive termination`) merged into local `master`.
+- post-merge master validation before pause:
+  - `npm.cmd run test:unit` - pass, 134 test files and 548 tests.
+  - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
+  - `npm.cmd run build` - fail twice on ignored generated file `.next/dev/types/routes.d.ts` with invalid `turn Response.json({ id })`.
+  - root-cause investigation found the invalid snippet only in ignored `.next/` generated output, not in tracked source.
+  - deleting the single damaged `routes.d.ts` changed the error to `.next/dev/types/validator.ts` missing `./routes.js`, indicating a stale/inconsistent `.next` generated cache group rather than a tracked source syntax issue.
+- pausedAt: `2026-05-27T15:30:31-07:00`.
+- pauseReason: user requested pause before cleaning the entire ignored `.next` cache.
 - push: pending.
 - cleanup: pending.
