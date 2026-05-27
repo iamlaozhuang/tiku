@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-16-full-requirement-audit-execution
-  updatedAt: "2026-05-26T23:25:00-07:00"
+  currentPhase: phase-17-prerequisite-readiness
+  updatedAt: "2026-05-26T23:40:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 1d98bf9b11c5e2ecf659abbcb52233fd5af4fa87
-  lastKnownOriginMasterSha: 1d98bf9b11c5e2ecf659abbcb52233fd5af4fa87
+  lastKnownMasterSha: 931cb3d507075f7a53a47154cbe06ae4271f9d9f
+  lastKnownOriginMasterSha: 931cb3d507075f7a53a47154cbe06ae4271f9d9f
 currentTask:
-  id: phase-16-full-requirement-audit-planning
+  id: phase-17-prerequisite-readiness-planning
   status: closed
-  sourceStory: user-request-2026-05-27-full-requirement-audit-planning
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-16-full-requirement-audit-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-full-requirement-audit-planning.md
-  branch: codex/phase-16-full-requirement-audit-planning
-  commitSha: f79ede7027ee0e379f3d63378941be9fb72c5539
+  sourceStory: user-request-2026-05-27-phase-17-prerequisite-readiness
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-17-prerequisite-readiness-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-17-prerequisite-readiness-planning.md
+  branch: codex/phase-17-prerequisite-readiness-planning
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Next executable task is phase-16-audit-user-auth-authorization. Do not auto-start the audit execution tasks until the user asks to continue; audit tasks must record findings only and must not fix bugs.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-16-full-requirement-audit-planning.md
+  nextRecommendedAction: Next executable task is phase-17-local-e2e-prerequisite-readiness-audit. Run it before starting Phase 16 requirement audit execution tasks.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-17-prerequisite-readiness-planning.md
