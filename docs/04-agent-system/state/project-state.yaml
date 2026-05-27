@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-17-prerequisite-readiness
-  updatedAt: "2026-05-26T23:40:00-07:00"
+  updatedAt: "2026-05-27T00:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 931cb3d507075f7a53a47154cbe06ae4271f9d9f
-  lastKnownOriginMasterSha: 931cb3d507075f7a53a47154cbe06ae4271f9d9f
+  lastKnownMasterSha: 53082e30c75e68fbed3df785e37b2640912a2b45
+  lastKnownOriginMasterSha: 53082e30c75e68fbed3df785e37b2640912a2b45
 currentTask:
-  id: phase-17-prerequisite-readiness-planning
+  id: phase-17-local-e2e-prerequisite-readiness-audit
   status: closed
-  sourceStory: user-request-2026-05-27-phase-17-prerequisite-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-17-prerequisite-readiness-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-17-prerequisite-readiness-planning.md
-  branch: codex/phase-17-prerequisite-readiness-planning
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-17-prerequisite-readiness-checklist.md
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-17-local-e2e-prerequisite-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-17-local-e2e-prerequisite-readiness-audit.md
+  branch: codex/phase-17-local-e2e-prerequisite-readiness-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Next executable task is phase-17-local-e2e-prerequisite-readiness-audit. Run it before starting Phase 16 requirement audit execution tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-17-prerequisite-readiness-planning.md
+  nextRecommendedAction: Run phase-18-prerequisite-local-role-account-fixture-baseline before browser-based Phase 16 role audit; static Phase 16 audit can proceed with the Phase 17 readiness caveats.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-17-local-e2e-prerequisite-readiness-audit.md
