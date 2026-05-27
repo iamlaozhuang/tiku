@@ -44,6 +44,17 @@ Second batch:
 - Final `node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-26-phase-15-agent-mechanism-upgrade-plan.md docs\05-execution-logs\evidence\2026-05-26-phase-15-agent-mechanism-upgrade-plan.md`
   - Result: pass.
 
+## Closeout
+
+- Implementation commit: `f1b359b docs(agent): seed phase 15 mechanism upgrade`.
+- Local merge commit: `3591267 merge: phase 15 mechanism upgrade plan`.
+- Post-merge branch: `master`.
+- Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+- Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` ahead of `origin/master` by the expected planning and merge commits before closeout evidence update.
+- Post-merge `git diff --check`: pass.
+- Push target: `origin master`, approved by the user for the Phase 15 mechanism upgrade batch.
+- Branch cleanup target: delete `codex/phase-15-agent-mechanism-upgrade-plan` after push.
+
 ## Forbidden Scope Self-Check
 
 - No dependency was added, removed, or upgraded.
