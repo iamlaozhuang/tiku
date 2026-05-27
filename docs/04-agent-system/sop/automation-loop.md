@@ -137,6 +137,25 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\A
 
 Manual evidence is still required for judgment, accepted gaps, security conclusions, and unusual failures.
 
+## Evidence Summary
+
+New task evidence should start with a short `Summary` section before detailed implementation notes. The summary is for fast human review and cross-session recovery; it does not replace command evidence.
+
+Use this shape when applicable:
+
+```markdown
+## Summary
+
+- Result: pass/fail/blocked/pending validation.
+- Scope: read_only/docs_only/implementation/local_verification/closeout/blocked_gate.
+- Changed surfaces: short list of files or areas.
+- Gates: lint/typecheck/test/build/e2e/readiness/git inventory pass/fail/skipped with reason.
+- Forbidden scope (`forbiddenScope`): env/dependency/schema/migration/staging/prod/cloud/deploy/real provider status.
+- Residual gaps (`residualGaps`): none, or gap ids with evidence path.
+```
+
+Keep the summary factual and bounded. Do not record secrets, tokens, raw prompts, raw answers, raw model responses, provider payloads, database URLs, full papers, full textbooks, OCR full text, or customer/customer-like private data.
+
 ## Commit Barrier
 
 - A task is not ready for handoff until its validation output, evidence file, and Git inventory all agree on the changed file set.

@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: addc9be02a0c8292fe69558493ffd22b68a0e27e
-  lastKnownOriginMasterSha: addc9be02a0c8292fe69558493ffd22b68a0e27e
+  lastKnownMasterSha: efb34f64ef40f115ccd2309cb557192fc0ee54c7
+  lastKnownOriginMasterSha: efb34f64ef40f115ccd2309cb557192fc0ee54c7
 currentTask:
-  id: phase-15-blocked-gates-registry
+  id: phase-15-evidence-summary-template
   status: closed
   sourceStory: user-request-2026-05-26-agent-mechanism-upgrade
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-blocked-gates-registry.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-blocked-gates-registry.md
-  branch: codex/phase-15-blocked-gates-registry
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-evidence-summary-template.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-evidence-summary-template.md
+  branch: codex/phase-15-evidence-summary-template
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Blocked gates registry added; continue with phase-15-evidence-summary-template.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-blocked-gates-registry.md
+  nextRecommendedAction: Evidence summary template added; continue with phase-15-task-kind-lightweight-labels.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-evidence-summary-template.md
