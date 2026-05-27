@@ -9,6 +9,7 @@ export function mapExamReportSummaryToApi(
 ): ExamReportSummaryDto {
   return {
     publicId: examReport.public_id,
+    examReportPublicId: examReport.exam_report_public_id,
     mockExamPublicId: examReport.mock_exam_public_id,
     paperPublicId: examReport.paper_public_id,
     paperName: examReport.paper_name,
@@ -20,6 +21,7 @@ export function mapExamReportSummaryToApi(
     subjectiveScore: examReport.subjective_score,
     totalScore: examReport.total_score,
     durationSecond: examReport.duration_second,
+    startedAt: examReport.started_at.toISOString(),
     generatedAt: examReport.generated_at.toISOString(),
   };
 }

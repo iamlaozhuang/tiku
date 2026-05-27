@@ -10,6 +10,7 @@ const userContext = {
 function createExamReportDto(publicId: string) {
   return {
     publicId,
+    examReportPublicId: publicId,
     mockExamPublicId: "mock_exam_public_123",
     paperPublicId: "paper_public_123",
     paperName: "2024年专卖三级理论真题",
@@ -21,6 +22,7 @@ function createExamReportDto(publicId: string) {
     subjectiveScore: null,
     totalScore: "1.0",
     durationSecond: 2700,
+    startedAt: "2026-05-19T08:00:00.000Z",
     generatedAt: "2026-05-19T09:00:00.000Z",
     reportSnapshot: {
       paperName: "2024年专卖三级理论真题",

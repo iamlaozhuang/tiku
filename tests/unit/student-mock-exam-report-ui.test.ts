@@ -748,7 +748,9 @@ describe("StudentExamReportListPage", () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
-        expect(String(url)).toBe("/api/v1/exam-reports?page=1&pageSize=20");
+        expect(String(url)).toBe(
+          "/api/v1/exam-reports?page=1&pageSize=20&sortBy=startedAt",
+        );
         expect(init?.headers).toMatchObject({
           authorization: "Bearer unit-test-session-token",
         });
@@ -764,10 +766,14 @@ describe("StudentExamReportListPage", () => {
                 studentExamReportFixture.examReports[0],
                 {
                   ...studentExamReportFixture.examReports[0],
-                  publicId: "exam-report-terminated-001",
+                  publicId: "mock-exam-terminated-001",
+                  examReportPublicId: null,
+                  mockExamPublicId: "mock-exam-terminated-001",
                   paperName: "营销理论终止记录",
                   examStatus: "terminated",
                   totalScore: null,
+                  startedAt: "2026-05-18T08:00:00.000Z",
+                  generatedAt: "2026-05-26T08:00:00.000Z",
                 },
               ],
             },
@@ -775,7 +781,7 @@ describe("StudentExamReportListPage", () => {
               page: 1,
               pageSize: 20,
               total: 2,
-              sortBy: "generatedAt",
+              sortBy: "startedAt",
               sortOrder: "desc",
             },
           }),
@@ -796,6 +802,8 @@ describe("StudentExamReportListPage", () => {
     fireEvent.change(screen.getByLabelText("按状态筛选"), {
       target: { value: "terminated" },
     });
+
+    expect(screen.getByText(/2026-05-18/)).toBeInTheDocument();
 
     expect(screen.getByText("营销理论终止记录")).toBeInTheDocument();
     expect(screen.queryByText("营销理论模考卷 A")).toBeNull();

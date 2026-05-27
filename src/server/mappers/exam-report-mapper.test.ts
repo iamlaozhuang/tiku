@@ -7,6 +7,7 @@ import {
 import type { ExamReportRow } from "../repositories/exam-report-repository";
 
 const generatedAt = new Date("2026-05-19T09:00:00.000Z");
+const startedAt = new Date("2026-05-19T08:00:00.000Z");
 const createdAt = new Date("2026-05-19T09:00:01.000Z");
 const updatedAt = new Date("2026-05-19T09:00:02.000Z");
 
@@ -16,6 +17,7 @@ function createExamReportRow(
   return {
     id: 3001,
     public_id: "exam_report_public_123",
+    exam_report_public_id: "exam_report_public_123",
     mock_exam_public_id: "mock_exam_public_123",
     paper_public_id: "paper_public_123",
     paper_name: "2024年专卖三级理论真题",
@@ -38,6 +40,7 @@ function createExamReportRow(
     },
     learning_suggestion_snapshot: null,
     generated_at: generatedAt,
+    started_at: startedAt,
     created_at: createdAt,
     updated_at: updatedAt,
     ...overrides,
@@ -50,6 +53,7 @@ describe("exam report mapper", () => {
 
     expect(summary).toEqual({
       publicId: "exam_report_public_123",
+      examReportPublicId: "exam_report_public_123",
       mockExamPublicId: "mock_exam_public_123",
       paperPublicId: "paper_public_123",
       paperName: "2024年专卖三级理论真题",
@@ -61,6 +65,7 @@ describe("exam report mapper", () => {
       subjectiveScore: null,
       totalScore: "12.0",
       durationSecond: 3600,
+      startedAt: "2026-05-19T08:00:00.000Z",
       generatedAt: "2026-05-19T09:00:00.000Z",
     });
     expect(JSON.stringify(summary)).not.toContain("3001");
@@ -69,6 +74,7 @@ describe("exam report mapper", () => {
   it("maps exam_report row to detail dto with immutable report snapshot", () => {
     expect(mapExamReportDetailToApi(createExamReportRow())).toEqual({
       publicId: "exam_report_public_123",
+      examReportPublicId: "exam_report_public_123",
       mockExamPublicId: "mock_exam_public_123",
       paperPublicId: "paper_public_123",
       paperName: "2024年专卖三级理论真题",
@@ -80,6 +86,7 @@ describe("exam report mapper", () => {
       subjectiveScore: null,
       totalScore: "12.0",
       durationSecond: 3600,
+      startedAt: "2026-05-19T08:00:00.000Z",
       generatedAt: "2026-05-19T09:00:00.000Z",
       reportSnapshot: {
         paperName: "2024年专卖三级理论真题",

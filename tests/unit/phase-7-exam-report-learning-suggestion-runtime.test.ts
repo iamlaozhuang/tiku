@@ -9,6 +9,7 @@ import type {
 import type { LearningSuggestionMockContext } from "@/server/services/ai-mock-provider-runtime";
 
 const now = new Date("2026-05-22T00:30:00.000Z");
+const startedAt = new Date("2026-05-22T00:25:00.000Z");
 const expiresAt = new Date("2027-05-21T00:00:00.000Z");
 const modelConfigSnapshot = createModelConfigSnapshot({
   providerPublicId: "model-provider-dev-mock",
@@ -70,6 +71,7 @@ function createRepository(): ExamReportRepository {
       return {
         id: 3001,
         public_id: "exam-report-dev-learning-suggestion",
+        exam_report_public_id: "exam-report-dev-learning-suggestion",
         mock_exam_public_id: "mock-exam-dev-learning-suggestion",
         paper_public_id: "paper-dev-theory",
         paper_name: "Local theory mock paper",
@@ -86,6 +88,7 @@ function createRepository(): ExamReportRepository {
         },
         learning_suggestion_snapshot: null,
         generated_at: now,
+        started_at: startedAt,
         created_at: now,
         updated_at: now,
       };

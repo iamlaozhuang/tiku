@@ -804,10 +804,19 @@ function createPostgresExamReportRepository(
         return { rows: [], total: 0 };
       }
 
-      const conditions: SQL[] = [eq(examReport.user_id, userId)];
+      const conditions: SQL[] = [eq(mockExam.user_id, userId)];
 
       if (query.status !== null) {
-        conditions.push(eq(examReport.exam_status, query.status));
+        conditions.push(eq(mockExam.exam_status, query.status));
+      } else {
+        conditions.push(
+          inArray(mockExam.exam_status, [
+            "scoring",
+            "scoring_partial_failed",
+            "completed",
+            "terminated",
+          ]),
+        );
       }
 
       if (query.search !== null) {
@@ -817,29 +826,30 @@ function createPostgresExamReportRepository(
       const rows = await database
         .select({
           report: examReport,
+          attempt: mockExam,
           mock_exam_public_id: mockExam.public_id,
           paper_name: paper.name,
         })
-        .from(examReport)
-        .innerJoin(mockExam, eq(mockExam.id, examReport.mock_exam_id))
-        .innerJoin(paper, eq(paper.id, examReport.paper_id))
+        .from(mockExam)
+        .leftJoin(examReport, eq(examReport.mock_exam_id, mockExam.id))
+        .innerJoin(paper, eq(paper.id, mockExam.paper_id))
         .where(and(...conditions))
         .orderBy(
           query.sortOrder === "asc"
-            ? asc(examReport.generated_at)
-            : desc(examReport.generated_at),
+            ? asc(mockExam.started_at)
+            : desc(mockExam.started_at),
         )
         .limit(query.pageSize)
         .offset((query.page - 1) * query.pageSize);
       const [totalRow] = await database
         .select({ value: count() })
-        .from(examReport)
-        .innerJoin(paper, eq(paper.id, examReport.paper_id))
+        .from(mockExam)
+        .innerJoin(paper, eq(paper.id, mockExam.paper_id))
         .where(and(...conditions));
 
       return {
         rows: rows.map((row) =>
-          mapExamReportRow(row.report, row.mock_exam_public_id, row.paper_name),
+          mapExamReportListRow(row.report, row.attempt, row.paper_name),
         ),
         total: totalRow?.value ?? 0,
       };
@@ -856,6 +866,7 @@ function createPostgresExamReportRepository(
         .select({
           report: examReport,
           mock_exam_public_id: mockExam.public_id,
+          mock_exam_started_at: mockExam.started_at,
           paper_name: paper.name,
         })
         .from(examReport)
@@ -871,7 +882,12 @@ function createPostgresExamReportRepository(
 
       return row === undefined
         ? null
-        : mapExamReportRow(row.report, row.mock_exam_public_id, row.paper_name);
+        : mapExamReportRow(
+            row.report,
+            row.mock_exam_public_id,
+            row.paper_name,
+            row.mock_exam_started_at,
+          );
     },
     async findExamReportByMockExamPublicId(query) {
       const database = getDatabase();
@@ -885,6 +901,7 @@ function createPostgresExamReportRepository(
         .select({
           report: examReport,
           mock_exam_public_id: mockExam.public_id,
+          mock_exam_started_at: mockExam.started_at,
           paper_name: paper.name,
         })
         .from(examReport)
@@ -900,7 +917,12 @@ function createPostgresExamReportRepository(
 
       return row === undefined
         ? null
-        : mapExamReportRow(row.report, row.mock_exam_public_id, row.paper_name);
+        : mapExamReportRow(
+            row.report,
+            row.mock_exam_public_id,
+            row.paper_name,
+            row.mock_exam_started_at,
+          );
     },
     async findSubmittedMockExamByPublicId(query) {
       const row = await findOwnedMockExamTableRow(
@@ -967,7 +989,12 @@ function createPostgresExamReportRepository(
         throw new Error("Exam report insert did not return a row.");
       }
 
-      return mapExamReportRow(row, input.mockExamPublicId, input.paperName);
+      return mapExamReportRow(
+        row,
+        input.mockExamPublicId,
+        input.paperName,
+        mockExamLink.started_at,
+      );
     },
   };
 }
@@ -1274,9 +1301,13 @@ async function getRequiredPracticeLink(
 async function getRequiredMockExamLink(
   database: StudentFlowRuntimeDatabase,
   publicId: string,
-): Promise<{ id: number; paper_id: number }> {
+): Promise<{ id: number; paper_id: number; started_at: Date }> {
   const [row] = await database
-    .select({ id: mockExam.id, paper_id: mockExam.paper_id })
+    .select({
+      id: mockExam.id,
+      paper_id: mockExam.paper_id,
+      started_at: mockExam.started_at,
+    })
     .from(mockExam)
     .where(eq(mockExam.public_id, publicId))
     .limit(1);
@@ -1448,14 +1479,54 @@ function mapMockExamAnswerRecordRow(
   };
 }
 
+function mapExamReportListRow(
+  row: typeof examReport.$inferSelect | null,
+  attempt: typeof mockExam.$inferSelect,
+  paperName: string,
+): ExamReportRow {
+  if (row !== null) {
+    return mapExamReportRow(
+      row,
+      attempt.public_id,
+      paperName,
+      attempt.started_at,
+    );
+  }
+
+  return {
+    id: attempt.id,
+    public_id: attempt.public_id,
+    exam_report_public_id: null,
+    mock_exam_public_id: attempt.public_id,
+    paper_public_id: attempt.paper_public_id,
+    paper_name: paperName,
+    profession: attempt.profession,
+    level: attempt.level,
+    subject: attempt.subject,
+    exam_status: attempt.exam_status,
+    objective_score: attempt.objective_score,
+    subjective_score: attempt.subjective_score,
+    total_score: attempt.total_score,
+    duration_second: calculateMockExamRecordDurationSecond(attempt),
+    report_snapshot: {},
+    learning_suggestion_snapshot: null,
+    generated_at: getMockExamRecordGeneratedAt(attempt),
+    started_at: attempt.started_at,
+    created_at: attempt.created_at,
+    updated_at: attempt.updated_at,
+  };
+}
+
 function mapExamReportRow(
   row: typeof examReport.$inferSelect,
   mockExamPublicId: string,
   paperName: string,
+  startedAt: Date,
 ): ExamReportRow {
   return {
     id: row.id,
     public_id: row.public_id,
+    exam_report_public_id: row.public_id,
     mock_exam_public_id: mockExamPublicId,
     paper_public_id: row.paper_public_id,
     paper_name: paperName,
@@ -1473,9 +1544,29 @@ function mapExamReportRow(
         ? null
         : asRecord(row.learning_suggestion_snapshot),
     generated_at: row.generated_at,
+    started_at: startedAt,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
+}
+
+function getMockExamRecordGeneratedAt(row: typeof mockExam.$inferSelect): Date {
+  return row.submitted_at ?? row.terminated_at ?? row.started_at;
+}
+
+function calculateMockExamRecordDurationSecond(
+  row: typeof mockExam.$inferSelect,
+): number {
+  const endedAt = row.submitted_at ?? row.terminated_at;
+
+  if (endedAt === null) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Math.floor((endedAt.getTime() - row.started_at.getTime()) / 1000),
+  );
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

@@ -328,6 +328,7 @@ function createExamReportRepository(): ExamReportRepository {
       return {
         id: 3001,
         public_id: "exam-report-dev-smoke",
+        exam_report_public_id: "exam-report-dev-smoke",
         mock_exam_public_id: "mock-exam-dev-smoke",
         paper_public_id: "paper-dev-theory",
         paper_name: "Phase 7 student smoke paper",
@@ -342,6 +343,7 @@ function createExamReportRepository(): ExamReportRepository {
         report_snapshot: { paperPublicId: "paper-dev-theory" },
         learning_suggestion_snapshot: null,
         generated_at: now,
+        started_at: new Date("2026-05-21T07:55:00.000Z"),
         created_at: now,
         updated_at: now,
       };
@@ -392,6 +394,7 @@ function createExamReportRepository(): ExamReportRepository {
       return {
         id: 3001,
         public_id: input.publicId,
+        exam_report_public_id: input.publicId,
         mock_exam_public_id: input.mockExamPublicId,
         paper_public_id: input.paperPublicId,
         paper_name: input.paperName,
@@ -406,6 +409,7 @@ function createExamReportRepository(): ExamReportRepository {
         report_snapshot: input.reportSnapshot,
         learning_suggestion_snapshot: input.learningSuggestionSnapshot,
         generated_at: input.generatedAt,
+        started_at: new Date("2026-05-21T07:55:00.000Z"),
         created_at: input.generatedAt,
         updated_at: input.generatedAt,
       };

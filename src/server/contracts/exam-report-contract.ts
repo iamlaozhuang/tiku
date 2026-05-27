@@ -7,6 +7,7 @@ export type LearningSuggestionSnapshotDto = Record<string, unknown> | null;
 
 export type ExamReportSummaryDto = {
   publicId: string;
+  examReportPublicId: string | null;
   mockExamPublicId: string;
   paperPublicId: string;
   paperName: string;
@@ -18,6 +19,7 @@ export type ExamReportSummaryDto = {
   subjectiveScore: string | null;
   totalScore: string | null;
   durationSecond: number;
+  startedAt: string;
   generatedAt: string;
 };
 

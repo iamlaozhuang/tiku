@@ -566,7 +566,7 @@ export function createUnavailableExamReportService(): ExamReportService {
           page: 1,
           pageSize: 20,
           total: 0,
-          sortBy: "generatedAt",
+          sortBy: "startedAt",
           sortOrder: "desc",
         },
         "Exam report runtime is not configured.",

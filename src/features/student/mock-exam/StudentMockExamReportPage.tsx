@@ -222,6 +222,7 @@ const marketingTheoryMockExam = createMockExamDto({
 
 const completedMarketingReport: ExamReportDetailDto = {
   publicId: "exam-report-marketing-theory-001",
+  examReportPublicId: "exam-report-marketing-theory-001",
   mockExamPublicId: "mock-exam-marketing-theory-001",
   paperPublicId: "paper-marketing-theory-mock-001",
   paperName: "营销理论模考卷 A",
@@ -233,6 +234,7 @@ const completedMarketingReport: ExamReportDetailDto = {
   subjectiveScore: null,
   totalScore: "86.0",
   durationSecond: 2700,
+  startedAt: "2026-05-20T00:00:00.000Z",
   generatedAt: "2026-05-20T01:35:00.000Z",
   reportSnapshot: {
     totalScoreText: "总分 86.0",
@@ -1583,7 +1585,7 @@ export function StudentExamReportListPage({
 
       try {
         const reportPayload = await fetchStudentApi<ExamReportListResultDto>(
-          "/api/v1/exam-reports?page=1&pageSize=20",
+          "/api/v1/exam-reports?page=1&pageSize=20&sortBy=startedAt",
           token,
         );
 
@@ -1724,7 +1726,7 @@ export function StudentExamReportListPage({
                     {examReport.paperName}
                   </h2>
                   <p className="text-text-secondary text-sm">
-                    {formatDate(examReport.generatedAt)} ·{" "}
+                    {formatDate(examReport.startedAt)} ·{" "}
                     {examReport.subject === "theory" ? "理论" : "技能"}
                   </p>
                 </div>
@@ -1749,7 +1751,7 @@ export function StudentExamReportListPage({
                 </p>
               ) : (
                 <Link
-                  href={`/exam-report?examReportPublicId=${examReport.publicId}`}
+                  href={`/exam-report?examReportPublicId=${examReport.examReportPublicId ?? examReport.publicId}`}
                   className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
                 >
                   查看报告

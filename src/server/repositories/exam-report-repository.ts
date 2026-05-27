@@ -20,6 +20,7 @@ export type ExamReportAuthorizationScopeRow = {
 export type ExamReportRow = {
   id: number;
   public_id: string;
+  exam_report_public_id: string | null;
   mock_exam_public_id: string;
   paper_public_id: string;
   paper_name: string;
@@ -34,6 +35,7 @@ export type ExamReportRow = {
   report_snapshot: ExamReportSnapshotDto;
   learning_suggestion_snapshot: LearningSuggestionSnapshotDto;
   generated_at: Date;
+  started_at: Date;
   created_at: Date;
   updated_at: Date;
 };
@@ -79,7 +81,7 @@ export type ExamReportListQuery = {
   pageSize: number;
   status: ExamStatus | null;
   search: string | null;
-  sortBy: "generatedAt";
+  sortBy: "startedAt";
   sortOrder: SortOrder;
 };
 

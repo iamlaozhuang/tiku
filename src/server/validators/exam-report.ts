@@ -6,7 +6,7 @@ export type NormalizedExamReportListQuery = {
   pageSize: number;
   status: ExamStatus | null;
   search: string | null;
-  sortBy: "generatedAt";
+  sortBy: "startedAt";
   sortOrder: SortOrder;
 };
 
@@ -22,6 +22,7 @@ const reportStatusValues = new Set<ExamStatus>([
   "scoring",
   "scoring_partial_failed",
   "completed",
+  "terminated",
 ]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -83,7 +84,7 @@ export function normalizeExamReportListQuery(
     pageSize: normalizePageSize(query.pageSize),
     status: normalizeStatus(query.status),
     search: normalizeOptionalString(query.search),
-    sortBy: "generatedAt",
+    sortBy: "startedAt",
     sortOrder: "desc",
   };
 }

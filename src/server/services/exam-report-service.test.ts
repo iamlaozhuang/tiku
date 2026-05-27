@@ -86,6 +86,7 @@ function createExamReportRow(
   return {
     id: 3001,
     public_id: "exam_report_public_123",
+    exam_report_public_id: "exam_report_public_123",
     mock_exam_public_id: "mock_exam_public_123",
     paper_public_id: "paper_public_123",
     paper_name: "2024年专卖三级理论真题",
@@ -103,6 +104,7 @@ function createExamReportRow(
     },
     learning_suggestion_snapshot: null,
     generated_at: now,
+    started_at: startedAt,
     created_at: now,
     updated_at: now,
     ...overrides,
@@ -219,6 +221,62 @@ describe("exam report service", () => {
         total: 1,
       },
     });
+  });
+
+  it("passes terminated status and startedAt sort semantics to the repository", async () => {
+    const receivedQueries: unknown[] = [];
+    const service = createExamReportService(
+      createRepository({
+        async listExamReports(query) {
+          receivedQueries.push(query);
+
+          return {
+            rows: [
+              createExamReportRow({
+                public_id: "mock_exam_public_terminated",
+                exam_report_public_id: null,
+                mock_exam_public_id: "mock_exam_public_terminated",
+                exam_status: "terminated",
+                total_score: null,
+                generated_at: startedAt,
+                started_at: startedAt,
+              }),
+            ],
+            total: 1,
+          };
+        },
+      }),
+      clock,
+    );
+
+    await expect(
+      service.listExamReports(userContext, {
+        status: "terminated",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        examReports: [
+          {
+            publicId: "mock_exam_public_terminated",
+            examReportPublicId: null,
+            mockExamPublicId: "mock_exam_public_terminated",
+            examStatus: "terminated",
+            startedAt: "2026-05-19T08:00:00.000Z",
+          },
+        ],
+      },
+      pagination: {
+        sortBy: "startedAt",
+      },
+    });
+    expect(receivedQueries).toEqual([
+      expect.objectContaining({
+        status: "terminated",
+        sortBy: "startedAt",
+        sortOrder: "desc",
+      }),
+    ]);
   });
 
   it("hides report detail when current authorization no longer covers its scope", async () => {

@@ -19,12 +19,12 @@ describe("exam report validators", () => {
       pageSize: 50,
       status: "completed",
       search: "专卖",
-      sortBy: "generatedAt",
+      sortBy: "startedAt",
       sortOrder: "desc",
     });
   });
 
-  it("uses safe defaults for invalid list query values", () => {
+  it("keeps terminated list status and uses safe defaults for invalid pagination", () => {
     expect(
       normalizeExamReportListQuery({
         page: "0",
@@ -35,9 +35,9 @@ describe("exam report validators", () => {
     ).toEqual({
       page: 1,
       pageSize: 20,
-      status: null,
+      status: "terminated",
       search: null,
-      sortBy: "generatedAt",
+      sortBy: "startedAt",
       sortOrder: "desc",
     });
   });
