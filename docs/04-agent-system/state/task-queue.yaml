@@ -12016,3 +12016,306 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker.md
     status: pending
     retryCount: 0
+  - id: phase-18-audit-ra-05-rag-knowledge
+    title: Phase 18 Audit RA-05 RAG And Knowledge
+    phase: phase-18-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-05
+    dependencies:
+      - phase-18-audit-ra-04-ai-scoring-explanation-hint-model
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested Phase 18 requirement audit execution by six blocks and authorized commit, merge into master, push origin/master, and short-lived branch cleanup after each completed block. Audit must record facts and findings only; no business bug fixes, dependency changes, env reads, staging/prod/cloud/deploy, real provider calls, destructive data operations, source, test, e2e, schema, drizzle, or script changes are allowed.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - rag_runtime
+      - ai_runtime
+      - resource_lifecycle
+      - knowledge_node
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+      - approval_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-27-phase-18-audit-ra-05-rag-knowledge.md docs\05-execution-logs\evidence\2026-05-27-phase-18-audit-ra-05-rag-knowledge.md docs\05-execution-logs\audits-reviews\2026-05-27-phase-18-audit-ra-05-rag-knowledge.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-audit-catalog.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-traceability-matrix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md
+    status: closed
+    retryCount: 0
+  - id: phase-20-fix-ra-05-01-hybrid-rerank-retrieval
+    title: Phase 20 Fix RA-05-01 Hybrid Rerank Retrieval
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+    dependencies:
+      - phase-18-audit-ra-05-rag-knowledge
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-01-001. Real provider/vector cloud and dependency changes remain blocked unless separately approved.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - rag_runtime
+      - ai_runtime
+      - dependency_change
+      - external_service_config
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-01-hybrid-rerank-retrieval.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-05-03-resource-conversion-formats
+    title: Phase 20 Fix RA-05-03 Resource Conversion Formats
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+    dependencies:
+      - phase-18-audit-ra-05-rag-knowledge
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-03-001. Converter dependency or storage work requires separate human approval before implementation.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - dependency_change
+      - cloud_storage
+      - resource_lifecycle
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-03-resource-conversion-formats.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-05-04-markdown-chapter-review
+    title: Phase 20 Fix RA-05-04 Markdown Chapter Review
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+    dependencies:
+      - phase-18-audit-ra-05-rag-knowledge
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-04-001.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - resource_lifecycle
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-04-markdown-chapter-review.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-05-05-resource-enable-restore-state
+    title: Phase 20 Fix RA-05-05 Resource Enable Restore State
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+    dependencies:
+      - phase-18-audit-ra-05-rag-knowledge
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-05-001.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - resource_lifecycle
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-05-resource-enable-restore-state.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-05-06-vector-rebuild-stale-marker
+    title: Phase 20 Fix RA-05-06 Vector Rebuild Stale Marker
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+    dependencies:
+      - phase-18-audit-ra-05-rag-knowledge
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-06-001. Real provider/vector cloud and dependency changes remain blocked unless separately approved.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - rag_runtime
+      - resource_lifecycle
+      - external_service_config
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-05-09-report-knowledge-analysis
+    title: Phase 20 Fix RA-05-09 Report Knowledge Analysis
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+    dependencies:
+      - phase-18-audit-ra-05-rag-knowledge
+      - phase-20-fix-ra-02-01-question-knowledge-tag-binding
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-09-001. Database/schema work may require separate human approval before implementation.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - database_migration
+      - exam_report
+      - knowledge_node
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-09-report-knowledge-analysis.md
+    status: pending
+    retryCount: 0
