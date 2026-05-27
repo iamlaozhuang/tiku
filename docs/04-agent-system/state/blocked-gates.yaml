@@ -1,0 +1,100 @@
+schemaVersion: 1
+updatedAt: "2026-05-26T17:15:00-07:00"
+purpose: Long-lived approval gates that must remain blocked until explicit human approval records the required evidence.
+gates:
+  - id: real-provider-staging-redaction
+    title: Real Provider Staging Redaction Approval Gate
+    status: blocked
+    linkedTaskId: phase-13-real-provider-staging-redaction-approval-gate
+    blockedActions:
+      - real_provider_call
+      - staging_connection
+      - prod_connection
+      - cloud_resource_change
+      - secret_or_env_change
+      - deploy
+    requiredApprovalEvidence:
+      - target environment: staging or prod
+      - provider name and model scope
+      - secret handling owner and storage plan
+      - quota/cost limit and kill-switch owner
+      - synthetic-only acceptance input plan
+      - redaction verification commands
+      - logging retention policy
+      - rollback and disable plan
+    currentEvidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-real-provider-staging-redaction-approval-gate.md
+    notes: Local mock and deterministic provider verification may continue; real provider or staging/prod use remains blocked.
+  - id: dependency-change
+    title: Dependency Change Approval Gate
+    status: blocked_by_default
+    linkedSopPath: docs/04-agent-system/sop/dependency-introduction-gate.md
+    blockedActions:
+      - add_dependency
+      - remove_dependency
+      - upgrade_dependency
+      - package_manifest_change
+      - lockfile_change
+    requiredApprovalEvidence:
+      - package name and version range
+      - change type
+      - purpose and import boundary
+      - license compatibility
+      - alternatives considered
+      - security and maintenance risk
+      - validation command
+      - explicit human approval
+    notes: Dependency work must stay isolated from business implementation commits.
+  - id: secret-env-change
+    title: Secret And Environment Change Approval Gate
+    status: blocked_by_default
+    linkedAdrPath: docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md
+    blockedActions:
+      - read_env_local
+      - modify_env_local
+      - modify_env_example
+      - create_secret
+      - rotate_secret
+      - expose_secret_value
+    requiredApprovalEvidence:
+      - environment
+      - secret owner
+      - storage location
+      - rotation or rollback plan
+      - evidence redaction plan
+      - explicit human approval
+    notes: Framework logs that mention `.env.local` may be recorded as existence-only observations; contents must not be opened or copied without approval.
+  - id: deploy-and-cloud-change
+    title: Deployment And Cloud Resource Approval Gate
+    status: blocked_by_default
+    linkedAdrPath: docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md
+    blockedActions:
+      - deploy
+      - create_cloud_resource
+      - modify_cloud_resource
+      - change_domain
+      - change_object_storage
+      - change_database_instance
+    requiredApprovalEvidence:
+      - target environment
+      - resource inventory
+      - migration and rollback boundary
+      - owner acceptance plan
+      - monitoring and incident owner
+      - explicit human approval
+    notes: Local validation, docs, and synthetic evidence do not authorize deployment.
+  - id: destructive-data-operation
+    title: Destructive Data Operation Approval Gate
+    status: blocked_by_default
+    blockedActions:
+      - delete_data
+      - truncate_data
+      - reset_seed
+      - destructive_migration
+      - force_schema_push
+    requiredApprovalEvidence:
+      - exact target
+      - backup or restore point
+      - rollback owner
+      - validation command
+      - explicit human approval
+    notes: Drizzle kit push remains forbidden. Use reviewed migration flow only when separately approved.
