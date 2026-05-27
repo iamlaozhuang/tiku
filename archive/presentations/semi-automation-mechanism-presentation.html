@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tiku 半自动化推进机制介绍</title>
+    <style>
+      :root {
+        --brand-green: #087443;
+        --brand-green-deep: #14532d;
+        --brand-green-soft: #ecfdf5;
+        --accent-gold: #d97706;
+        --accent-blue: #2563eb;
+        --accent-red: #dc2626;
+        --accent-teal: #0f766e;
+        --ink: #1f2937;
+        --ink-soft: #4b5563;
+        --ink-muted: #6b7280;
+        --paper: #f8fafc;
+        --surface: #ffffff;
+        --surface-warm: #fffbeb;
+        --line: #e5e7eb;
+        --line-strong: #cbd5e1;
+        --shadow: 0 18px 45px rgba(31, 41, 55, 0.12);
+        --font-main: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+        --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-main);
+        line-height: 1.68;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 292px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: #172033;
+        color: #e5e7eb;
+        padding: 28px 22px;
+        border-right: 1px solid #334155;
+      }
+
+      .sidebar h1 {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      .sidebar .caption {
+        margin: 10px 0 26px;
+        color: #cbd5e1;
+        font-size: 13px;
+      }
+
+      .nav {
+        display: grid;
+        gap: 6px;
+      }
+
+      .nav a {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 10px;
+        border-radius: 8px;
+        color: #dbeafe;
+        font-size: 14px;
+        text-decoration: none;
+      }
+
+      .nav a:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .nav span {
+        color: #93c5fd;
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      main {
+        min-width: 0;
+      }
+
+      .hero {
+        background:
+          radial-gradient(circle at 20% 20%, rgba(217, 119, 6, 0.16), transparent 28%),
+          linear-gradient(135deg, #123524 0%, #172033 60%, #0f2f2f 100%);
+        color: #f8fafc;
+        padding: 64px 56px 48px;
+      }
+
+      .hero-inner {
+        max-width: 1120px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 8px;
+        color: #fde68a;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .hero h2 {
+        max-width: 980px;
+        margin: 22px 0 18px;
+        font-size: 46px;
+        line-height: 1.16;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 900px;
+        margin: 0;
+        color: #d1d5db;
+        font-size: 18px;
+      }
+
+      .hero-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 32px;
+      }
+
+      .metric {
+        min-height: 104px;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .metric strong {
+        display: block;
+        color: #ffffff;
+        font-size: 26px;
+        line-height: 1.1;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 8px;
+        color: #cbd5e1;
+        font-size: 13px;
+      }
+
+      .content {
+        max-width: 1180px;
+        padding: 36px 56px 72px;
+      }
+
+      section {
+        margin: 0 0 42px;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .section-num {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: var(--brand-green);
+        color: #ffffff;
+        font-family: var(--font-mono);
+        font-weight: 800;
+      }
+
+      h3 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 28px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        margin: 8px 0 0;
+        color: var(--ink-soft);
+        font-size: 16px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .panel-body {
+        padding: 24px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .callout {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-left: 5px solid var(--brand-green);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .callout.gold {
+        border-left-color: var(--accent-gold);
+        background: var(--surface-warm);
+      }
+
+      .callout.blue {
+        border-left-color: var(--accent-blue);
+      }
+
+      .callout.red {
+        border-left-color: var(--accent-red);
+      }
+
+      .callout h4,
+      .card h4 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        line-height: 1.35;
+      }
+
+      .callout p,
+      .card p,
+      .step p {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      .card {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        padding: 3px 8px;
+        border-radius: 8px;
+        background: var(--brand-green-soft);
+        color: var(--brand-green-deep);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .tag.gold {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .tag.red {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .tag.blue {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .principles {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .principle {
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .principle b {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--brand-green-deep);
+      }
+
+      .principle span {
+        color: var(--ink-soft);
+        font-size: 13px;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 10px;
+        align-items: stretch;
+      }
+
+      .flow-node {
+        position: relative;
+        min-height: 116px;
+        padding: 14px 12px;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .flow-node::after {
+        content: "→";
+        position: absolute;
+        top: 38px;
+        right: -13px;
+        color: var(--ink-muted);
+        font-weight: 800;
+      }
+
+      .flow-node:last-child::after {
+        content: "";
+      }
+
+      .flow-node strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--brand-green-deep);
+        font-size: 15px;
+      }
+
+      .flow-node span {
+        color: var(--ink-soft);
+        font-size: 12px;
+      }
+
+      .state-machine {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .state {
+        padding: 10px 8px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #334155;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .diagram-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+        gap: 20px;
+        align-items: center;
+      }
+
+      .svg-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 12px;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 8px;
+        background: var(--surface);
+        font-size: 14px;
+      }
+
+      .table th {
+        background: #e2e8f0;
+        color: #334155;
+        text-align: left;
+        font-size: 13px;
+      }
+
+      .table th,
+      .table td {
+        border: 1px solid var(--line);
+        padding: 12px;
+        vertical-align: top;
+      }
+
+      .table td {
+        color: var(--ink-soft);
+      }
+
+      .mono {
+        font-family: var(--font-mono);
+      }
+
+      .checklist {
+        display: grid;
+        gap: 10px;
+      }
+
+      .check {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+        align-items: start;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .check mark {
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        background: var(--brand-green-soft);
+        color: var(--brand-green-deep);
+        font-weight: 900;
+      }
+
+      .check strong {
+        display: block;
+        margin-bottom: 2px;
+      }
+
+      .check span {
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      .quote {
+        margin: 0;
+        padding: 20px 22px;
+        border-left: 5px solid var(--accent-gold);
+        border-radius: 8px;
+        background: #fffbeb;
+        color: #3f3f46;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .footer-note {
+        margin-top: 42px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        color: var(--ink-muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 1040px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: relative;
+          width: auto;
+          height: auto;
+        }
+
+        .nav {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .hero,
+        .content {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+
+        .hero-metrics,
+        .grid-4,
+        .principles,
+        .flow,
+        .state-machine {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .flow-node::after {
+          display: none;
+        }
+
+        .diagram-shell,
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero h2 {
+          font-size: 34px;
+        }
+
+        .nav,
+        .hero-metrics,
+        .grid-4,
+        .principles,
+        .state-machine {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media print {
+        .layout {
+          display: block;
+        }
+
+        .sidebar {
+          display: none;
+        }
+
+        section {
+          break-inside: avoid;
+        }
+
+        .hero {
+          padding: 34px;
+        }
+
+        .content {
+          padding: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>Tiku 半自动化推进机制</h1>
+        <p class="caption">团队介绍版 · Phase 15 更新后机制</p>
+        <nav class="nav" aria-label="页面目录">
+          <a href="#overview"><span>01</span>一页讲明白</a>
+          <a href="#why"><span>02</span>为什么这样设计</a>
+          <a href="#principles"><span>03</span>设计思路</a>
+          <a href="#implementation"><span>04</span>实现方式</a>
+          <a href="#lifecycle"><span>05</span>任务生命周期</a>
+          <a href="#files"><span>06</span>关键文件</a>
+          <a href="#gates"><span>07</span>风险门禁</a>
+          <a href="#evidence"><span>08</span>证据体系</a>
+          <a href="#collaboration"><span>09</span>人机协作</a>
+          <a href="#playbook"><span>10</span>团队落地手册</a>
+        </nav>
+      </aside>
+
+      <main>
+        <header class="hero">
+          <div class="hero-inner">
+            <div class="eyebrow">Tiku Agent Operating Model</div>
+            <h2>把 AI 开发从“会聊天”变成“可恢复、可审查、可交付”的工程流程</h2>
+            <p>
+              这套半自动化推进机制不是让 Agent 自由发挥，而是给它装上任务队列、分支隔离、风险门禁、本地验证、证据记录和人工决策点。简单说：让 AI 帮团队持续推进，但每一步都能被人看懂、复查、接手和回滚。
+            </p>
+            <div class="hero-metrics" aria-label="机制关键数字">
+              <div class="metric">
+                <strong>1</strong>
+                <span>一个任务默认对应一个可审查提交</span>
+              </div>
+              <div class="metric">
+                <strong>7</strong>
+                <span>Phase 15 已补强的机制模块</span>
+              </div>
+              <div class="metric">
+                <strong>0</strong>
+                <span>默认不碰 env、依赖、云、prod、真实 provider</span>
+              </div>
+              <div class="metric">
+                <strong>3</strong>
+                <span>同一任务失败三次即熔断并转 blocked</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <section id="overview">
+            <div class="section-head">
+              <div class="section-num">01</div>
+              <div>
+                <h3>一页讲明白：这套机制到底是什么</h3>
+                <p class="lead">它是一个“队列驱动 + Git 隔离 + 本地门禁 + evidence 审计 + 人工高风险审批”的协作系统。</p>
+              </div>
+            </div>
+
+            <div class="diagram-shell panel">
+              <div class="svg-wrap" aria-label="半自动化推进闭环图">
+                <svg viewBox="0 0 760 360" width="100%" height="360" role="img" aria-label="半自动化推进闭环">
+                  <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4b5563"></path>
+                    </marker>
+                  </defs>
+                  <rect x="30" y="32" width="170" height="76" rx="8" fill="#ecfdf5" stroke="#087443"></rect>
+                  <text x="115" y="62" text-anchor="middle" fill="#14532d" font-size="17" font-weight="700">任务队列</text>
+                  <text x="115" y="88" text-anchor="middle" fill="#4b5563" font-size="13">task-queue.yaml</text>
+
+                  <rect x="290" y="32" width="180" height="76" rx="8" fill="#eff6ff" stroke="#2563eb"></rect>
+                  <text x="380" y="62" text-anchor="middle" fill="#1d4ed8" font-size="17" font-weight="700">短分支执行</text>
+                  <text x="380" y="88" text-anchor="middle" fill="#4b5563" font-size="13">codex/* / feat/* / fix/*</text>
+
+                  <rect x="560" y="32" width="170" height="76" rx="8" fill="#fffbeb" stroke="#d97706"></rect>
+                  <text x="645" y="62" text-anchor="middle" fill="#92400e" font-size="17" font-weight="700">本地门禁</text>
+                  <text x="645" y="88" text-anchor="middle" fill="#4b5563" font-size="13">lint / typecheck / test</text>
+
+                  <rect x="560" y="230" width="170" height="76" rx="8" fill="#fef2f2" stroke="#dc2626"></rect>
+                  <text x="645" y="260" text-anchor="middle" fill="#991b1b" font-size="17" font-weight="700">风险门禁</text>
+                  <text x="645" y="286" text-anchor="middle" fill="#4b5563" font-size="13">blocked-gates.yaml</text>
+
+                  <rect x="290" y="230" width="180" height="76" rx="8" fill="#f8fafc" stroke="#64748b"></rect>
+                  <text x="380" y="260" text-anchor="middle" fill="#334155" font-size="17" font-weight="700">Evidence</text>
+                  <text x="380" y="286" text-anchor="middle" fill="#4b5563" font-size="13">命令输出与结论依据</text>
+
+                  <rect x="30" y="230" width="170" height="76" rx="8" fill="#f0fdfa" stroke="#0f766e"></rect>
+                  <text x="115" y="260" text-anchor="middle" fill="#115e59" font-size="17" font-weight="700">人工决策</text>
+                  <text x="115" y="286" text-anchor="middle" fill="#4b5563" font-size="13">批准高风险动作</text>
+
+                  <path d="M 202 70 L 286 70" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)"></path>
+                  <path d="M 472 70 L 556 70" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)"></path>
+                  <path d="M 645 112 L 645 226" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)"></path>
+                  <path d="M 558 268 L 474 268" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)"></path>
+                  <path d="M 288 268 L 204 268" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)"></path>
+                  <path d="M 115 226 L 115 112" stroke="#4b5563" stroke-width="2.5" marker-end="url(#arrow)"></path>
+                  <text x="380" y="176" text-anchor="middle" fill="#1f2937" font-size="22" font-weight="800">证据先于结论</text>
+                  <text x="380" y="204" text-anchor="middle" fill="#6b7280" font-size="14">任何“完成”“通过”“可推送”都必须能回到文件和命令输出</text>
+                </svg>
+              </div>
+              <div class="panel-body">
+                <blockquote class="quote">半自动化不是“少管一点”，而是“把该管的地方固化成流程”。</blockquote>
+                <div class="grid-2" style="margin-top: 18px">
+                  <div class="callout">
+                    <h4>AI 负责推进</h4>
+                    <p>读取规范、领取任务、开分支、实现、验证、写 evidence、准备交付。</p>
+                  </div>
+                  <div class="callout gold">
+                    <h4>人负责决策</h4>
+                    <p>定义方向、批准高风险动作、判断产品体验、决定是否 push、deploy 或连接真实环境。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="why">
+            <div class="section-head">
+              <div class="section-num">02</div>
+              <div>
+                <h3>为什么要这样设计</h3>
+                <p class="lead">项目越往后，真正的风险不是 Agent 不会写代码，而是它把上下文、边界、验证和责任混在一起。</p>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="callout red">
+                <h4>防上下文漂移</h4>
+                <p>不能靠聊天记忆继续开发。会话恢复必须读 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan。</p>
+              </div>
+              <div class="callout blue">
+                <h4>防范围扩散</h4>
+                <p>每个任务声明 `allowedFiles` / `blockedFiles`，避免把依赖、格式化噪声、业务代码、部署动作混进同一个提交。</p>
+              </div>
+              <div class="callout gold">
+                <h4>防不可审查</h4>
+                <p>所有关键结论都要有命令输出、文件路径、分支状态和 evidence。团队成员不需要猜 Agent 做过什么。</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="principles">
+            <div class="section-head">
+              <div class="section-num">03</div>
+              <div>
+                <h3>设计思路：五条底层原则</h3>
+                <p class="lead">这些原则决定了机制为什么看起来“有点严格”，也解释了它为什么能跨会话、跨任务继续推进。</p>
+              </div>
+            </div>
+
+            <div class="principles">
+              <div class="principle">
+                <b>1. 状态外置</b>
+                <span>关键上下文写进仓库文件，而不是留在对话里。</span>
+              </div>
+              <div class="principle">
+                <b>2. 小步可审</b>
+                <span>一个任务、一个边界、一个 evidence，必要时一个提交。</span>
+              </div>
+              <div class="principle">
+                <b>3. 风险前置</b>
+                <span>依赖、env、云、prod、provider、破坏性操作默认先 blocked。</span>
+              </div>
+              <div class="principle">
+                <b>4. 证据闭环</b>
+                <span>先运行门禁和记录输出，再得出结论。</span>
+              </div>
+              <div class="principle">
+                <b>5. 人机分权</b>
+                <span>Agent 推进确定性工作，人保留高风险决策权。</span>
+              </div>
+            </div>
+          </section>
+
+          <section id="implementation">
+            <div class="section-head">
+              <div class="section-num">04</div>
+              <div>
+                <h3>实现方式：用仓库文件搭出一个“任务操作系统”</h3>
+                <p class="lead">它没有引入新平台，核心就是一组约定清晰的 Markdown、YAML、PowerShell 脚本和 Git 操作。</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>控制面</h4>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>文件</th>
+                        <th>作用</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="mono">AGENTS.md</td>
+                        <td>全局命名、Git、AI 执行纪律和半自动化硬流程。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">automation-loop.md</td>
+                        <td>Agent 每次启动、领取、执行、验证、提交、closeout 的 SOP。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">project-state.yaml</td>
+                        <td>当前阶段、当前任务、仓库 SHA、质量门禁和 handoff。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">task-queue.yaml</td>
+                        <td>任务队列、依赖、允许文件、阻断文件、验证命令和状态。</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>证据面</h4>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>文件</th>
+                        <th>作用</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="mono">task-plans/*.md</td>
+                        <td>做之前先写清楚读了什么、要改什么、风险怎么防。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">evidence/*.md</td>
+                        <td>做之后记录命令、输出摘要、结论、缺口和禁区自检。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">blocked-gates.yaml</td>
+                        <td>长期高风险门禁登记表，直到人明确批准才解除。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">local-ci.md</td>
+                        <td>本地质量门禁标准：lint、typecheck、test、format、readiness。</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="lifecycle">
+            <div class="section-head">
+              <div class="section-num">05</div>
+              <div>
+                <h3>任务生命周期：从 pending 到 closed</h3>
+                <p class="lead">每个任务都像一张有边界的工单。Agent 不能跳过状态，也不能在 master 上直接开发。</p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-body">
+                <div class="flow">
+                  <div class="flow-node">
+                    <strong>恢复上下文</strong>
+                    <span>读规范、ADR、project-state、queue、latest evidence。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>领取任务</strong>
+                    <span>只处理 pending 且依赖完成的任务。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>开短分支</strong>
+                    <span>使用 codex/、feat/ 或 fix/ 前缀。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>写方案</strong>
+                    <span>task plan 记录范围、读源、方案和风险。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>执行验证</strong>
+                    <span>按 validationCommands 和本地门禁跑。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>记录证据</strong>
+                    <span>evidence 写命令、结果、禁区和残余缺口。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>提交收口</strong>
+                    <span>commit、merge、push、cleanup 分开决策。</span>
+                  </div>
+                </div>
+
+                <div class="state-machine" aria-label="任务状态机">
+                  <div class="state">pending</div>
+                  <div class="state">claimed</div>
+                  <div class="state">implemented</div>
+                  <div class="state">validated</div>
+                  <div class="state">committed</div>
+                  <div class="state">merged</div>
+                  <div class="state">pushed</div>
+                  <div class="state">closed</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="files">
+            <div class="section-head">
+              <div class="section-num">06</div>
+              <div>
+                <h3>落地细节：团队成员每天实际看什么</h3>
+                <p class="lead">新成员不需要先读完整历史，只要掌握这几个入口，就能判断当前项目是否可继续、下一步做什么。</p>
+              </div>
+            </div>
+
+            <div class="grid-4">
+              <div class="card">
+                <span class="tag">入口 1</span>
+                <h4>先看状态</h4>
+                <p><span class="mono">project-state.yaml</span> 告诉你当前阶段、任务、上次 evidence 和下一步建议。</p>
+              </div>
+              <div class="card">
+                <span class="tag blue">入口 2</span>
+                <h4>再看队列</h4>
+                <p><span class="mono">task-queue.yaml</span> 告诉你任务是否 pending、依赖是否满足、哪些文件能动。</p>
+              </div>
+              <div class="card">
+                <span class="tag gold">入口 3</span>
+                <h4>核对证据</h4>
+                <p><span class="mono">evidence/*.md</span> 是判断“是否真的通过”的唯一依据，不以口头描述为准。</p>
+              </div>
+              <div class="card">
+                <span class="tag red">入口 4</span>
+                <h4>检查门禁</h4>
+                <p><span class="mono">blocked-gates.yaml</span> 告诉你哪些动作现在默认不能做，需要人明确批准。</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="gates">
+            <div class="section-head">
+              <div class="section-num">07</div>
+              <div>
+                <h3>风险门禁：什么事 Agent 不能自作主张</h3>
+                <p class="lead">这套机制最大的价值之一，是把“以后可能出事”的动作提前变成显式审批点。</p>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>门禁</th>
+                  <th>默认状态</th>
+                  <th>为什么危险</th>
+                  <th>解除条件</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tag red">real provider / staging / prod</span></td>
+                  <td>blocked</td>
+                  <td>可能产生费用、泄漏数据、污染环境或误触生产。</td>
+                  <td>明确目标环境、provider、额度、脱敏、日志、回滚和人工批准。</td>
+                </tr>
+                <tr>
+                  <td><span class="tag red">dependency change</span></td>
+                  <td>blocked_by_default</td>
+                  <td>依赖变更会影响供应链、构建、许可证、锁文件和运行面。</td>
+                  <td>按 dependency gate 写清包名、版本、用途、替代方案、风险和批准证据。</td>
+                </tr>
+                <tr>
+                  <td><span class="tag red">secret / env</span></td>
+                  <td>blocked_by_default</td>
+                  <td>环境文件和密钥一旦被读出或写入 evidence，就会变成长期泄漏风险。</td>
+                  <td>明确环境、secret owner、存储位置、脱敏策略、回滚和人工批准。</td>
+                </tr>
+                <tr>
+                  <td><span class="tag red">deploy / cloud</span></td>
+                  <td>blocked_by_default</td>
+                  <td>部署和云资源动作会改变外部世界，不是本地代码验证能覆盖的。</td>
+                  <td>独立部署计划、资源清单、回滚边界、监控责任和人工批准。</td>
+                </tr>
+                <tr>
+                  <td><span class="tag red">destructive data</span></td>
+                  <td>blocked_by_default</td>
+                  <td>删除、重置、迁移、schema push 可能造成不可逆数据损坏。</td>
+                  <td>精确目标、备份/恢复点、验证命令、回滚责任和人工批准。</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section id="evidence">
+            <div class="section-head">
+              <div class="section-num">08</div>
+              <div>
+                <h3>证据体系：为什么说“证据先于结论”</h3>
+                <p class="lead">evidence 不是流水账。它是团队复盘、接手、审查和判断风险的最小事实集合。</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>每份 evidence 应该先给摘要</h4>
+                  <div class="checklist">
+                    <div class="check">
+                      <mark>✓</mark>
+                      <div><strong>Result</strong><span>pass / fail / blocked / pending validation。</span></div>
+                    </div>
+                    <div class="check">
+                      <mark>✓</mark>
+                      <div><strong>Scope</strong><span>read_only / docs_only / implementation / local_verification / closeout / blocked_gate。</span></div>
+                    </div>
+                    <div class="check">
+                      <mark>✓</mark>
+                      <div><strong>Changed surfaces</strong><span>列出实际变更面，避免“顺手改了别的”。</span></div>
+                    </div>
+                    <div class="check">
+                      <mark>✓</mark>
+                      <div><strong>Gates</strong><span>记录 lint、typecheck、test、build、e2e、readiness、git inventory 的结果。</span></div>
+                    </div>
+                    <div class="check">
+                      <mark>✓</mark>
+                      <div><strong>Forbidden scope</strong><span>明确 env、依赖、schema、migration、staging/prod/cloud、deploy、real provider 没碰或为什么 blocked。</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>常用本地门禁</h4>
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <td class="mono">Test-AgentSystemReadiness.ps1</td>
+                        <td>检查机制文件、脚本、技能路径和基础能力是否存在。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">Test-GitCompletionReadiness.ps1</td>
+                        <td>输出分支、改动、ahead/behind、untracked 和 compare 文件清单。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">npm run lint</td>
+                        <td>代码风格和静态规则。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">npm run typecheck</td>
+                        <td>TypeScript 类型完整性。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">npm run test:unit / test:e2e</td>
+                        <td>按任务声明覆盖单元或端到端验证。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">git diff --check</td>
+                        <td>空白、行尾、补丁基本健康检查。</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="collaboration">
+            <div class="section-head">
+              <div class="section-num">09</div>
+              <div>
+                <h3>人机协作：适配当前团队习惯的工作方式</h3>
+                <p class="lead">这套机制承认一个现实：人希望 Agent 主动推进，但不能越过关键边界。</p>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="card">
+                <span class="tag">你可以这样说</span>
+                <h4>“继续队列”</h4>
+                <p>Agent 应先恢复状态、报告分支/队列/blocked gates/latest evidence，再按 pending 任务推进。</p>
+              </div>
+              <div class="card">
+                <span class="tag blue">你可以这样说</span>
+                <h4>“先报告再等我”</h4>
+                <p>Agent 只能输出 startup report，不得开分支、改文件、启动服务、push 或接触外部服务。</p>
+              </div>
+              <div class="card">
+                <span class="tag gold">你可以这样说</span>
+                <h4>“本地真人体验验证”</h4>
+                <p>Agent 只能使用 localhost / 127.0.0.1，按角色和路由矩阵陪跑，不能触碰 staging/prod/provider/env。</p>
+              </div>
+            </div>
+
+            <div class="callout" style="margin-top: 18px">
+              <h4>Phase 15 的关键升级</h4>
+              <p>
+                增加了启动报告协议、closeout 对账、本地真人体验验证 SOP、blocked gates 注册表、evidence 摘要模板和 `taskKind` 轻量标签。它们共同解决的是：会话恢复看不清、任务关闭后状态滞后、高风险门禁散落、证据太长难读、任务类型不够直观这些问题。
+              </p>
+            </div>
+          </section>
+
+          <section id="playbook">
+            <div class="section-head">
+              <div class="section-num">10</div>
+              <div>
+                <h3>团队落地手册：成员按这张清单执行</h3>
+                <p class="lead">这部分可以直接作为团队协作约定使用。</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>开始一个任务前</h4>
+                  <div class="checklist">
+                    <div class="check"><mark>1</mark><div><strong>确认 Git 状态</strong><span>当前分支、master 是否 clean、是否与 origin/master 对齐。</span></div></div>
+                    <div class="check"><mark>2</mark><div><strong>确认任务来源</strong><span>任务是否在 queue，依赖是否完成，是否有 blocked gate。</span></div></div>
+                    <div class="check"><mark>3</mark><div><strong>确认可改文件</strong><span>只动 allowedFiles，不碰 blockedFiles。</span></div></div>
+                    <div class="check"><mark>4</mark><div><strong>确认风险审批</strong><span>依赖、env、云、provider、deploy、破坏性动作必须先有人批。</span></div></div>
+                    <div class="check"><mark>5</mark><div><strong>确认执行方案</strong><span>task plan 写清实现思路和风险防御后再改实际内容。</span></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>结束一个任务前</h4>
+                  <div class="checklist">
+                    <div class="check"><mark>1</mark><div><strong>跑任务门禁</strong><span>按 validationCommands 和 local-ci 执行，未跑必须说明原因。</span></div></div>
+                    <div class="check"><mark>2</mark><div><strong>写 evidence</strong><span>摘要、命令结果、禁区自检、残余缺口都要落文件。</span></div></div>
+                    <div class="check"><mark>3</mark><div><strong>做 Git inventory</strong><span>确认实际变更文件和任务范围一致。</span></div></div>
+                    <div class="check"><mark>4</mark><div><strong>分开决策</strong><span>commit、merge、push、PR、deploy、cleanup 是不同动作，不互相默认授权。</span></div></div>
+                    <div class="check"><mark>5</mark><div><strong>更新状态</strong><span>closeout 后 project-state 不应保留“待 push/待清理”等过期 handoff。</span></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout gold" style="margin-top: 18px">
+              <h4>给团队的一句话版本</h4>
+              <p>
+                Tiku 的半自动化推进机制，本质是把 Agent 的执行力装进工程化轨道：任务从队列来，改动在分支里，风险先拦住，结论看证据，推送和部署由人决定。
+              </p>
+            </div>
+          </section>
+
+          <div class="footer-note">
+            <strong>资料来源：</strong>
+            `AGENTS.md`、`docs/04-agent-system/sop/automation-loop.md`、`docs/04-agent-system/sop/local-human-verification.md`、`docs/04-agent-system/state/blocked-gates.yaml`、`docs/03-standards/local-ci.md`、Phase 15 task plan/evidence。
+            本 HTML 是静态展示材料，不依赖外部网络、CDN、云服务或真实 provider。
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

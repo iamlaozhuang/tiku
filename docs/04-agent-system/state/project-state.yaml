@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-15-agent-mechanism-upgrade
-  updatedAt: "2026-05-26T16:45:00-07:00"
+  updatedAt: "2026-05-26T22:34:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: e87b94ae056368db2985429d5eebcbf0b9df6c51
-  lastKnownOriginMasterSha: e87b94ae056368db2985429d5eebcbf0b9df6c51
+  lastKnownMasterSha: 53aa4a6687a594c5ad95461adeaa761aaa3ee5d2
+  lastKnownOriginMasterSha: 53aa4a6687a594c5ad95461adeaa761aaa3ee5d2
 currentTask:
-  id: phase-15-task-kind-lightweight-labels
+  id: phase-15-mechanism-presentation
   status: closed
-  sourceStory: user-request-2026-05-26-agent-mechanism-upgrade
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-task-kind-lightweight-labels.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-task-kind-lightweight-labels.md
-  branch: codex/phase-15-task-kind-lightweight-labels
+  sourceStory: user-request-2026-05-26-mechanism-presentation
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-mechanism-presentation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-mechanism-presentation.md
+  branch: codex/phase-15-mechanism-presentation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 15 mechanism upgrade queue closed; no executable pending mechanism upgrade task remains.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-task-kind-lightweight-labels.md
+  nextRecommendedAction: Phase 15 mechanism presentation artifact created and validated; await user review and explicit push/merge direction if desired.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-mechanism-presentation.md

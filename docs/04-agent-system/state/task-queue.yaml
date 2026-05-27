@@ -9998,3 +9998,44 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-task-kind-lightweight-labels.md
     status: closed
     retryCount: 0
+  - id: phase-15-mechanism-presentation
+    title: Phase 15 Semi-Automation Mechanism Presentation
+    phase: phase-15-agent-mechanism-upgrade
+    sourceStory: user-request-2026-05-26-mechanism-presentation
+    dependencies:
+      - phase-15-task-kind-lightweight-labels
+    taskPlanPolicy: required
+    humanApproval: User requested an HTML presentation artifact explaining the updated semi-automation mechanism for team onboarding. Scope is documentation/presentation only and must not change dependencies, schema, migrations, env files, scripts, staging/prod/cloud, real provider, deployment, source, tests, or e2e.
+    taskKind: docs_only
+    allowedFiles:
+      - archive/presentations/semi-automation-mechanism-presentation.html
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-05-26-phase-15-mechanism-presentation.md
+      - docs/05-execution-logs/evidence/2026-05-26-phase-15-mechanism-presentation.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - .env.example
+      - .env.local
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - automation_policy
+      - onboarding_material
+      - evidence_integrity
+    validationCommands:
+      - Test-Path 'archive\presentations\semi-automation-mechanism-presentation.html'
+      - Select-String -Path 'archive\presentations\semi-automation-mechanism-presentation.html' -Pattern '设计思路|实现方式|落地细节|证据先于结论|blocked gate|taskKind'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-mechanism-presentation.md
+    status: closed
+    retryCount: 0
