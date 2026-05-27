@@ -10039,3 +10039,285 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-mechanism-presentation.md
     status: closed
     retryCount: 0
+  - id: phase-16-full-requirement-audit-planning
+    title: Phase 16 Full Requirement Audit Planning
+    phase: phase-16-full-requirement-audit-planning
+    sourceStory: user-request-2026-05-27-full-requirement-audit-planning
+    dependencies:
+      - phase-15-mechanism-presentation
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested Phase 16 full requirement audit planning, allowed commit, merge, push, and cleanup for this planning task, and limited scope to state, queue, task plan, evidence, and audits-reviews documents. The task must not modify env files, dependencies, source, tests, e2e, schema, migrations, scripts, staging/prod/cloud/provider/deploy surfaces, or implement bug fixes.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - automation_state
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-27-phase-16-full-requirement-audit-planning.md docs\05-execution-logs\evidence\2026-05-27-phase-16-full-requirement-audit-planning.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-audit-catalog.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-traceability-matrix.md docs\05-execution-logs\audits-reviews\2026-05-27-full-audit-prerequisites.md
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-full-requirement-audit-planning.md
+    status: validated
+    retryCount: 0
+  - id: phase-16-audit-user-auth-authorization
+    title: Phase 16 Audit User Auth And Authorization
+    phase: phase-16-full-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-01
+    dependencies:
+      - phase-16-full-requirement-audit-planning
+    taskPlanPolicy: required
+    humanApproval: User requested Phase 16 audit execution be split by six requirement blocks after planning. This task audits RA-01-01 through RA-01-14 only and must not fix bugs.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - auth_permission_model
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-user-auth-authorization.md
+    status: pending
+    retryCount: 0
+  - id: phase-16-audit-question-paper-content
+    title: Phase 16 Audit Question Paper And Content
+    phase: phase-16-full-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-02
+    dependencies:
+      - phase-16-full-requirement-audit-planning
+    taskPlanPolicy: required
+    humanApproval: User requested Phase 16 audit execution be split by six requirement blocks after planning. This task audits RA-02-01 through RA-02-11 only and must not fix bugs.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - content_management
+      - browser_runtime
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-question-paper-content.md
+    status: pending
+    retryCount: 0
+  - id: phase-16-audit-student-experience
+    title: Phase 16 Audit Student Experience
+    phase: phase-16-full-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-03
+    dependencies:
+      - phase-16-full-requirement-audit-planning
+    taskPlanPolicy: required
+    humanApproval: User requested Phase 16 audit execution be split by six requirement blocks after planning. This task audits RA-03-01 through RA-03-09 only and must not fix bugs.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - student_experience
+      - browser_runtime
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-student-experience.md
+    status: pending
+    retryCount: 0
+  - id: phase-16-audit-ai-scoring-explanation
+    title: Phase 16 Audit AI Scoring Explanation Hint And Model
+    phase: phase-16-full-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-04
+    dependencies:
+      - phase-16-full-requirement-audit-planning
+    taskPlanPolicy: required
+    humanApproval: User requested Phase 16 audit execution be split by six requirement blocks after planning. This task audits RA-04-01 through RA-04-08 only and must not fix bugs or call real providers.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - ai_scoring
+      - evidence_integrity
+      - approval_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-ai-scoring-explanation.md
+    status: pending
+    retryCount: 0
+  - id: phase-16-audit-rag-knowledge
+    title: Phase 16 Audit RAG And Knowledge
+    phase: phase-16-full-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-05
+    dependencies:
+      - phase-16-full-requirement-audit-planning
+    taskPlanPolicy: required
+    humanApproval: User requested Phase 16 audit execution be split by six requirement blocks after planning. This task audits RA-05-01 through RA-05-09 only and must not fix bugs, call real providers, change dependencies, or use staging/prod/cloud.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - rag
+      - browser_runtime
+      - evidence_integrity
+      - approval_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-rag-knowledge.md
+    status: pending
+    retryCount: 0
+  - id: phase-16-audit-admin-ops-logs
+    title: Phase 16 Audit Admin Ops Logs And Permissions
+    phase: phase-16-full-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-06
+    dependencies:
+      - phase-16-full-requirement-audit-planning
+    taskPlanPolicy: required
+    humanApproval: User requested Phase 16 audit execution be split by six requirement blocks after planning. This task audits RA-06-01 through RA-06-13 only and must not fix bugs.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - admin_ui
+      - audit_log
+      - ai_call_log
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-admin-ops-logs.md
+    status: pending
+    retryCount: 0
