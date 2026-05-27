@@ -23,6 +23,27 @@
 - AI/RAG、secret/env、真实 provider、staging/prod/cloud/deploy 的实现验证受 blocked gates 限制；本目录将这些标记为审计前置条件或 blocked gate 关联。
 - 发现缺失、部分实现或行为偏差时，只登记 finding，不在审计任务中修复。
 
+## Phase 18 RA-01 Execution Update
+
+This section supersedes the original RA-01 placeholder cells in the Phase 16 catalog table. Evidence is recorded in `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md`.
+
+| auditId  | traceability status | findingId      | evidence                                                                                                        |
+| -------- | ------------------- | -------------- | --------------------------------------------------------------------------------------------------------------- |
+| RA-01-01 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-02 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-03 | partial             | F-RA-01-03-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-04 | missing             | F-RA-01-04-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-05 | partial             | F-RA-01-05-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-06 | partial             | F-RA-01-06-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-07 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-08 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-09 | partial             | F-RA-01-09-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-10 | partial             | F-RA-01-10-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-11 | partial             | F-RA-01-11-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-12 | missing             | F-RA-01-12-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-13 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+| RA-01-14 | missing             | F-RA-01-14-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
+
 ## Audit Items
 
 | auditId  | 所属大块             | 需求原文位置                                                                                                | 用户角色   | 用户故事/需求摘要                                    | 验收标准                        | 预期页面/路由                                                                                                     | 预期服务/API/数据模型                                                                       | 代码审计范围                                                                                         | 浏览器/e2e 验证方式                                           | 前置条件                                                               | blocked gate 关联                                                                             | evidence 预期                                                           | 审计结果占位 | findingId 占位 |
