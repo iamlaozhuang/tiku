@@ -38,6 +38,19 @@
 - Final Prettier check on the same file set
   - Result: pass. All matched files use Prettier code style.
 
+## Closeout
+
+- Implementation commit: `84ebcdd docs(agent): add task kind labels`.
+- Merge commit on `master`: `442d268 merge: phase 15 task kind labels`.
+- Post-merge `Test-AgentSystemReadiness.ps1`
+  - Result: pass.
+- Post-merge `Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: pass. `master` was ahead of `origin/master` by the implementation and merge commits before closeout evidence commit.
+- Post-merge `git diff --check`
+  - Result: pass.
+- Push target: `origin/master`, approved by user for the Phase 15 mechanism upgrade queue.
+- Cleanup target: delete merged local branch `codex/phase-15-task-kind-lightweight-labels` after push.
+
 ## Forbidden Scope Self-Check
 
 - No dependency was added, removed, or upgraded.
