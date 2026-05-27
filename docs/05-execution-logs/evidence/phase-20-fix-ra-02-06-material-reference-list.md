@@ -67,7 +67,17 @@
 
 ## Closeout
 
-- implementationCommit: pending.
-- merge: pending.
+- implementationCommit: `633b4e38e258bab6e7f7a3a4ff0f74e29c4e8bb3` (`fix(material): expose API backed material references`).
+- merge: fast-forward merged into `master`, `08b95ec..633b4e3`.
+- post-merge master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; master ahead of `origin/master` by one implementation commit before closeout evidence commit.
+  - `git diff --check` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - Changed-file Prettier check - pass after sandbox EPERM retry with approval.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (131 files, 531 tests), and `format:check` passed.
+  - `npm.cmd run test:e2e` - pass; 25/25 tests.
+  - `npm.cmd run build` - pass. Build log mentioned `.env.local` existence via framework environment loading only; contents were not inspected, copied, or modified.
+- closeoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
