@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T05:44:44-07:00"
+  updatedAt: "2026-05-27T06:06:49-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 633b4e38e258bab6e7f7a3a4ff0f74e29c4e8bb3
-  lastKnownOriginMasterSha: 08b95ec0d56e64d9f538549516ff85881155a84e
+  lastKnownMasterSha: dd127e938dbdb068990a77ca9c8fd4fea15f3d49
+  lastKnownOriginMasterSha: dd127e938dbdb068990a77ca9c8fd4fea15f3d49
 currentTask:
-  id: phase-20-fix-ra-02-06-material-reference-list
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-02-06-material-reference-list.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-06-material-reference-list.md
-  branch: codex/phase-20-fix-ra-02-06-material-reference-list
-  commitSha: 633b4e38e258bab6e7f7a3a4ff0f74e29c4e8bb3
+  id: phase-20-fix-ra-01-14-auth-expiry-reminder
+  status: done
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-01-14-auth-expiry-reminder.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-14-auth-expiry-reminder.md
+  branch: codex/phase-20-fix-ra-01-14-auth-expiry-reminder
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "master has phase-20-fix-ra-02-06-material-reference-list merged and validated; after push and branch cleanup, next eligible low-risk 22-A task is phase-20-fix-ra-01-14-auth-expiry-reminder."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-06-material-reference-list.md
+  nextRecommendedAction: "Commit phase-20-fix-ra-01-14-auth-expiry-reminder, merge to master, validate on master, push origin/master, and clean up the short-lived branch before claiming another task."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-14-auth-expiry-reminder.md

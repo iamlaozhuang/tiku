@@ -19,6 +19,7 @@ afterEach(() => {
   localStorage.clear();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
+  vi.useRealTimers();
 });
 
 describe("StudentHomePage", () => {
@@ -242,5 +243,72 @@ describe("StudentHomePage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
+  it("shows an authorization expiry reminder for scopes expiring within 15 days", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-27T12:00:00.000Z"));
+
+    render(
+      createElement(StudentHomePage, {
+        rememberedScope: {
+          profession: "marketing",
+          level: 3,
+        },
+        scopes: [
+          {
+            ...studentHomeFixture.scopes[0],
+            expiresAt: "2026-06-12T12:00:00.000Z",
+          },
+          {
+            ...studentHomeFixture.scopes[1],
+            expiresAt: "2026-06-11T12:00:00.000Z",
+          },
+        ],
+        papers: studentHomeFixture.papers,
+      }),
+    );
+
+    const reminder = screen.getByTestId("auth-expiry-reminder");
+
+    expect(reminder).toHaveTextContent("15");
+    expect(reminder).toHaveTextContent("2026-06-11");
+    expect(reminder).not.toHaveTextContent("2026-06-12");
+  });
+
+  it("suppresses a dismissed authorization expiry reminder only for the current local day", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-27T09:00:00.000Z"));
+
+    const expiringScopes = [
+      {
+        ...studentHomeFixture.scopes[1],
+        expiresAt: "2026-06-01T12:00:00.000Z",
+      },
+    ];
+    const renderProps = {
+      rememberedScope: {
+        profession: "marketing" as const,
+        level: 3,
+      },
+      scopes: expiringScopes,
+      papers: studentHomeFixture.papers,
+    };
+    const { rerender } = render(createElement(StudentHomePage, renderProps));
+
+    expect(screen.getByTestId("auth-expiry-reminder")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("dismiss-auth-expiry-reminder"));
+
+    expect(screen.queryByTestId("auth-expiry-reminder")).toBeNull();
+
+    rerender(createElement(StudentHomePage, renderProps));
+
+    expect(screen.queryByTestId("auth-expiry-reminder")).toBeNull();
+
+    vi.setSystemTime(new Date("2026-05-28T09:00:00.000Z"));
+    rerender(createElement(StudentHomePage, renderProps));
+
+    expect(screen.getByTestId("auth-expiry-reminder")).toBeInTheDocument();
   });
 });

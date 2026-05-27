@@ -11,6 +11,7 @@ import {
   PlayCircle,
   Ticket,
   UserRound,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -49,6 +50,13 @@ type SubjectGroup = {
 type StudentPaperScopePayload = StudentPaperScopesDto | StudentPaperScopeDto[];
 type StudentPaperListPayload = StudentPaperListDto | StudentPaperSummaryDto[];
 
+type AuthExpiryReminder = {
+  scope: StudentPaperScopeDto;
+  daysUntilExpiry: number;
+  expiresAtDate: string;
+  reminderKey: string;
+};
+
 const professionLabels: Record<Profession, string> = {
   logistics: "物流",
   marketing: "营销",
@@ -63,6 +71,10 @@ const subjectLabels: Record<Subject, string> = {
 const subjectOrder: Subject[] = ["theory", "skill"];
 
 const selectedScopeSeparator = ":";
+const authExpiryReminderWindowDays = 15;
+const millisecondsPerDay = 24 * 60 * 60 * 1000;
+const authExpiryReminderDismissalStorageKey =
+  "tiku.studentHome.authExpiryReminder.dismissedDates";
 
 export const studentHomeFixture = {
   scopes: [
@@ -180,6 +192,113 @@ function formatPublishedAt(publishedAt: string | null): string {
 
 function formatDuration(durationMinute: number | null): string {
   return durationMinute === null ? "不限时" : `${durationMinute} 分钟`;
+}
+
+function createAuthExpiryReminderKey(scope: StudentPaperScopeDto): string {
+  return `${scope.profession}:${scope.level}:${scope.expiresAt}`;
+}
+
+function formatLocalDateKey(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function readAuthExpiryReminderDismissals(): Record<string, string> {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  const storedValue = window.localStorage.getItem(
+    authExpiryReminderDismissalStorageKey,
+  );
+
+  if (storedValue === null) {
+    return {};
+  }
+
+  try {
+    const parsedValue: unknown = JSON.parse(storedValue);
+
+    if (parsedValue === null || typeof parsedValue !== "object") {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsedValue).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      ),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writeAuthExpiryReminderDismissals(
+  dismissalDatesByKey: Record<string, string>,
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    authExpiryReminderDismissalStorageKey,
+    JSON.stringify(dismissalDatesByKey),
+  );
+}
+
+function getDaysUntilExpiry(expiresAt: string, now: Date): number | null {
+  const expiresAtDate = new Date(expiresAt);
+
+  if (Number.isNaN(expiresAtDate.getTime())) {
+    return null;
+  }
+
+  return Math.ceil(
+    (expiresAtDate.getTime() - now.getTime()) / millisecondsPerDay,
+  );
+}
+
+function selectAuthExpiryReminder(
+  scopes: StudentPaperScopeDto[],
+  dismissalDatesByKey: Record<string, string>,
+  now = new Date(),
+): AuthExpiryReminder | null {
+  const todayKey = formatLocalDateKey(now);
+
+  return (
+    scopes
+      .map((scope) => {
+        const daysUntilExpiry = getDaysUntilExpiry(scope.expiresAt, now);
+
+        if (
+          daysUntilExpiry === null ||
+          daysUntilExpiry < 0 ||
+          daysUntilExpiry > authExpiryReminderWindowDays
+        ) {
+          return null;
+        }
+
+        const reminderKey = createAuthExpiryReminderKey(scope);
+
+        if (dismissalDatesByKey[reminderKey] === todayKey) {
+          return null;
+        }
+
+        return {
+          scope,
+          daysUntilExpiry,
+          expiresAtDate: scope.expiresAt.slice(0, 10),
+          reminderKey,
+        } satisfies AuthExpiryReminder;
+      })
+      .filter((reminder): reminder is AuthExpiryReminder => reminder !== null)
+      .toSorted(
+        (leftReminder, rightReminder) =>
+          leftReminder.daysUntilExpiry - rightReminder.daysUntilExpiry,
+      )[0] ?? null
+  );
 }
 
 function selectSubjectGroups(
@@ -333,6 +452,61 @@ function StudentPaperCard({ paper }: { paper: StudentPaperSummaryDto }) {
   );
 }
 
+function AuthExpiryReminderBanner({
+  reminder,
+  onDismiss,
+}: {
+  reminder: AuthExpiryReminder;
+  onDismiss: (reminderKey: string) => void;
+}) {
+  return (
+    <section
+      data-testid="auth-expiry-reminder"
+      className="bg-warning/10 ring-warning/20 flex flex-col gap-3 rounded-xl p-4 ring-1 sm:flex-row sm:items-center sm:justify-between"
+      role="status"
+    >
+      <div className="flex min-w-0 gap-3">
+        <div className="bg-warning/15 text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <AlertCircle className="size-5" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 space-y-1">
+          <h2 className="font-heading text-text-primary text-base font-semibold">
+            {"\u6388\u6743\u5373\u5c06\u5230\u671f"}
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            {formatScopeLabel(reminder.scope)}
+            {"\u6388\u6743\u8fd8\u5269 "}
+            <span className="text-warning font-semibold">
+              {reminder.daysUntilExpiry}
+            </span>
+            {" \u5929\uff0c\u5230\u671f\u65e5 "}
+            {reminder.expiresAtDate}
+            {"\u3002"}
+          </p>
+        </div>
+      </div>
+      <div className="flex shrink-0 gap-2">
+        <Link
+          href="/redeem-code"
+          className="bg-primary text-primary-foreground flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+        >
+          <Ticket className="size-4" aria-hidden="true" />
+          {"\u53bb\u5151\u6362\u5361\u5bc6"}
+        </Link>
+        <button
+          type="button"
+          data-testid="dismiss-auth-expiry-reminder"
+          aria-label="\u4eca\u65e5\u4e0d\u518d\u63d0\u9192"
+          onClick={() => onDismiss(reminder.reminderKey)}
+          className="border-border text-text-secondary hover:bg-muted flex size-9 items-center justify-center rounded-lg border bg-transparent transition-transform active:scale-[0.98]"
+        >
+          <X className="size-4" aria-hidden="true" />
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export function StudentHomePage({
   state = "ready",
   scopes,
@@ -348,6 +522,8 @@ export function StudentHomePage({
   const [runtimePapers, setRuntimePapers] = useState<StudentPaperSummaryDto[]>(
     [],
   );
+  const [authExpiryReminderDismissals, setAuthExpiryReminderDismissals] =
+    useState(readAuthExpiryReminderDismissals);
   const displayState =
     isRuntimeMode && state === "ready" ? runtimeState : state;
   const displayScopes = scopes ?? runtimeScopes;
@@ -366,6 +542,10 @@ export function StudentHomePage({
   const visiblePaperCount = subjectGroups.reduce(
     (paperCount, group) => paperCount + group.papers.length,
     0,
+  );
+  const authExpiryReminder = selectAuthExpiryReminder(
+    displayScopes,
+    authExpiryReminderDismissals,
   );
 
   useEffect(() => {
@@ -495,6 +675,16 @@ export function StudentHomePage({
     }
   }
 
+  function handleDismissAuthExpiryReminder(reminderKey: string) {
+    const nextDismissals = {
+      ...authExpiryReminderDismissals,
+      [reminderKey]: formatLocalDateKey(new Date()),
+    };
+
+    writeAuthExpiryReminderDismissals(nextDismissals);
+    setAuthExpiryReminderDismissals(nextDismissals);
+  }
+
   if (displayState === "loading") {
     return <StudentHomeLoading />;
   }
@@ -587,6 +777,13 @@ export function StudentHomePage({
           </Link>
         </nav>
       </div>
+
+      {authExpiryReminder === null ? null : (
+        <AuthExpiryReminderBanner
+          reminder={authExpiryReminder}
+          onDismiss={handleDismissAuthExpiryReminder}
+        />
+      )}
 
       <div className="flex gap-2 overflow-x-auto pb-1" aria-label="授权范围">
         {displayScopes.map((scope) => {
