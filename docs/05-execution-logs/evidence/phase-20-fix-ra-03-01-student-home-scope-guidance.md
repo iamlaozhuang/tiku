@@ -2,12 +2,12 @@
 
 ## Summary
 
-- Result: merged to `master` and validated locally; push and cleanup pending.
+- Result: pushed to `origin/master` and short-lived branch cleaned up.
 - Scope: student home runtime scope persistence and no-authorization redeem redirect guidance.
 - Changed surfaces: `src/features/student/home/StudentHomePage.tsx`, `tests/unit/student-home-ui.test.ts`, `e2e/role-based-acceptance/role-based-full-flow.spec.ts`, task plan/evidence/state/queue.
-- Gates: task branch and master validation passed; push and cleanup pending.
+- Gates: task branch and master validation passed; push and cleanup completed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/auth permission model work.
-- Residual gaps (`residualGaps`): push and branch cleanup pending.
+- Residual gaps (`residualGaps`): none for this task.
 
 ## Task
 
@@ -78,5 +78,6 @@
 
 - implementationCommit: `b59b8f85185987028be604a40b57d3d3096cc477`.
 - merge: fast-forwarded into `master`.
-- push: pending.
-- cleanup: pending.
+- closeoutCommit: `8d8e54e8e848c93b808ca8eb9068231893cbb205`.
+- push: `git push origin master` passed, `c219a29..8d8e54e master -> master`.
+- cleanup: `git branch -d codex/phase-20-fix-ra-03-01-student-home-scope-guidance` passed after merged-branch confirmation; branch was `b59b8f8`.

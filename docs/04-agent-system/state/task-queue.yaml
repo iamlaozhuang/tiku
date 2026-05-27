@@ -10985,7 +10985,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-01-student-home-scope-guidance.md
-    status: done
+    status: pushed
     retryCount: 0
   - id: phase-20-fix-ra-03-02-practice-objective-ai-explanation
     title: Phase 20 Fix RA-03-02 Practice Objective AI Explanation
