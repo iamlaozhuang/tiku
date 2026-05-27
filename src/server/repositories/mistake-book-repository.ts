@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { and, asc, count, desc, eq, gt, lte, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, lte, sql, type SQL } from "drizzle-orm";
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 import * as databaseSchema from "@/db/schema";
@@ -99,6 +99,14 @@ const {
   user,
 } = databaseSchema;
 
+export function createMistakeBookQuestionTypeCondition(
+  questionType: QuestionType | null,
+): SQL | null {
+  return questionType === null
+    ? null
+    : sql`${mistakeBook.question_snapshot}->>'questionType' = ${questionType}`;
+}
+
 function createLazyDatabaseGetter(
   createDatabase: () => MistakeBookRuntimeDatabase,
 ): () => MistakeBookRuntimeDatabase {
@@ -145,6 +153,13 @@ export function createPostgresMistakeBookRepository(
       }
 
       const conditions: SQL[] = [eq(mistakeBook.user_id, userId)];
+      const questionTypeCondition = createMistakeBookQuestionTypeCondition(
+        query.questionType,
+      );
+
+      if (questionTypeCondition !== null) {
+        conditions.push(questionTypeCondition);
+      }
 
       if (query.source !== null) {
         conditions.push(eq(mistakeBook.mistake_book_source, query.source));
@@ -175,13 +190,7 @@ export function createPostgresMistakeBookRepository(
         .where(and(...conditions));
 
       return {
-        rows: rows
-          .map(mapMistakeBookRow)
-          .filter((row) =>
-            query.questionType === null
-              ? true
-              : row.question_snapshot.questionType === query.questionType,
-          ),
+        rows: rows.map(mapMistakeBookRow),
         total: totalRow?.value ?? 0,
       };
     },

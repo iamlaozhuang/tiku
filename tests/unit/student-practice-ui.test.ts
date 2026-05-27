@@ -438,6 +438,112 @@ describe("StudentPracticePage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
+  it("lets runtime learners favorite an answered objective question into mistake book", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const practice = studentPracticeFixture.practices[0].practice;
+    const feedback = {
+      ...studentPracticeFixture.practices[0].feedbackByPaperQuestionPublicId[
+        "paper-question-marketing-002"
+      ],
+      isCorrect: true,
+      mistakeBookPublicId: null,
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-marketing-theory-001/answers"
+        ) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { feedback },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-marketing-theory-001/favorite-question"
+        ) {
+          expect(init?.method).toBe("POST");
+          expect(JSON.parse(String(init?.body))).toMatchObject({
+            paperQuestionPublicId: "paper-question-marketing-001",
+            selectedLabels: ["A"],
+            textAnswer: null,
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                mistakeBookPublicId: "mistake-book-manual-favorite-001",
+              },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-theory-002",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论冲刺卷 B" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "A. 市场细分" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "收藏到错题本" }),
+    );
+
+    expect(
+      await screen.findByText("已加入错题本：mistake-book-manual-favorite-001"),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+  });
+
   it("submits canonical multi_choice practice answers with multiple selected labels", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const practice = {

@@ -307,6 +307,11 @@ function createRepository(
         public_id: input.publicId,
       };
     },
+    async upsertMistakeBookFromFavorite(input) {
+      return {
+        public_id: input.publicId,
+      };
+    },
     ...overrides,
   };
 }
@@ -731,6 +736,83 @@ describe("practice service", () => {
         paperQuestionPublicId: "paper_question_public_123",
       }),
     ]);
+  });
+
+  it("favorites an arbitrary objective practice question without submitting an answer", async () => {
+    const favoriteInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async upsertMistakeBookFromFavorite(input) {
+          favoriteInputs.push(input);
+
+          return {
+            public_id: "mistake_book_public_favorite",
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.favoritePracticeQuestion(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_public_123",
+      }),
+    ).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        mistakeBookPublicId: "mistake_book_public_favorite",
+      },
+    });
+    expect(favoriteInputs).toEqual([
+      expect.objectContaining({
+        publicId: "mistake_book_public_1",
+        userPublicId: "user_public_123",
+        questionPublicId: "question_public_123",
+        paperQuestionPublicId: "paper_question_public_123",
+        latestAnswerSnapshot: {
+          selectedLabels: [],
+          textAnswer: null,
+          savedFromClientAt: null,
+        },
+        favoritedAt: now,
+      }),
+    ]);
+  });
+
+  it("rejects manual favorite for subjective practice questions", async () => {
+    const favoriteInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            subject: "skill",
+            paper_snapshot: createSubjectivePaperSnapshot(),
+          });
+        },
+        async upsertMistakeBookFromFavorite(input) {
+          favoriteInputs.push(input);
+
+          return {
+            public_id: input.publicId,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.favoritePracticeQuestion(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_subjective_123",
+      }),
+    ).resolves.toEqual({
+      code: 422304,
+      message: "Practice question cannot be added to mistake book.",
+      data: null,
+    });
+    expect(favoriteInputs).toEqual([]);
   });
 
   it("derives objective feedback correctness from question options when standard labels are absent", async () => {

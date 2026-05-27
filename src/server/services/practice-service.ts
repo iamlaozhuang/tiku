@@ -6,6 +6,7 @@ import {
 import type {
   PracticeAnswerFeedbackResultDto,
   PracticeAnswerSnapshotDto,
+  PracticeQuestionFavoriteResultDto,
   PracticeResultDto,
 } from "../contracts/practice-contract";
 import {
@@ -22,9 +23,13 @@ import type {
 } from "../repositories/practice-repository";
 import {
   normalizePracticeAnswerInput,
+  normalizePracticeQuestionFavoriteInput,
   normalizeStartPracticeInput,
 } from "../validators/practice";
-import type { NormalizedPracticeAnswerInput } from "../validators/practice";
+import type {
+  NormalizedPracticeAnswerInput,
+  NormalizedPracticeQuestionFavoriteInput,
+} from "../validators/practice";
 
 export type PracticeUserContext = {
   userPublicId: string;
@@ -52,6 +57,11 @@ export type PracticeService = {
     publicId: string,
     input: unknown,
   ): Promise<ApiResponse<PracticeAnswerFeedbackResultDto | null>>;
+  favoritePracticeQuestion(
+    userContext: PracticeUserContext,
+    publicId: string,
+    input: unknown,
+  ): Promise<ApiResponse<PracticeQuestionFavoriteResultDto | null>>;
   restartPractice(
     userContext: PracticeUserContext,
     publicId: string,
@@ -495,6 +505,16 @@ function buildAnswerSnapshot(
   };
 }
 
+function buildFavoriteAnswerSnapshot(
+  input: NormalizedPracticeQuestionFavoriteInput,
+): PracticeAnswerSnapshotDto {
+  return {
+    selectedLabels: input.selectedLabels,
+    textAnswer: input.textAnswer,
+    savedFromClientAt: input.savedFromClientAt,
+  };
+}
+
 function createPracticeNotFoundResponse(): ApiResponse<null> {
   return createErrorResponse(404302, "Practice does not exist.");
 }
@@ -852,6 +872,58 @@ export function createPracticeService(
       });
     },
 
+    async favoritePracticeQuestion(userContext, publicId, input) {
+      const normalizedInput = normalizePracticeQuestionFavoriteInput(input);
+
+      if (normalizedInput === null) {
+        return createErrorResponse(
+          422304,
+          "Practice question cannot be added to mistake book.",
+        );
+      }
+
+      const now = clock.now();
+      const practice = await getReadablePractice(
+        repository,
+        userContext,
+        publicId,
+        now,
+      );
+
+      if (!isPracticeRow(practice)) {
+        return practice;
+      }
+
+      const question = findPracticeQuestion(
+        practice.paper_snapshot,
+        normalizedInput.paperQuestionPublicId,
+      );
+
+      if (question === null || !isObjectiveQuestion(question)) {
+        return createErrorResponse(
+          422304,
+          "Practice question cannot be added to mistake book.",
+        );
+      }
+
+      const mistakeBook = await repository.upsertMistakeBookFromFavorite({
+        publicId: publicIdFactory.createPublicId("mistake_book"),
+        userPublicId: userContext.userPublicId,
+        questionPublicId: question.questionPublicId,
+        paperQuestionPublicId: question.paperQuestionPublicId,
+        profession: practice.profession,
+        level: practice.level,
+        subject: practice.subject,
+        questionSnapshot: question.snapshot,
+        latestAnswerSnapshot: buildFavoriteAnswerSnapshot(normalizedInput),
+        favoritedAt: now,
+      });
+
+      return createSuccessResponse({
+        mistakeBookPublicId: mistakeBook.public_id,
+      });
+    },
+
     async restartPractice(userContext, publicId) {
       const now = clock.now();
       const practice = await getReadablePractice(
@@ -934,6 +1006,9 @@ export function createUnavailablePracticeService(): PracticeService {
       return createErrorResponse(503302, "Practice runtime is not configured.");
     },
     async submitPracticeAnswer() {
+      return createErrorResponse(503302, "Practice runtime is not configured.");
+    },
+    async favoritePracticeQuestion() {
       return createErrorResponse(503302, "Practice runtime is not configured.");
     },
     async restartPractice() {

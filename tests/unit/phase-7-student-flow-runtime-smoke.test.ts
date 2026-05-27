@@ -191,6 +191,9 @@ function createPracticeRepository(): PracticeRepository {
     async upsertMistakeBookFromWrongAnswer() {
       return { public_id: "mistake-book-dev-smoke" };
     },
+    async upsertMistakeBookFromFavorite() {
+      return { public_id: "mistake-book-dev-smoke-favorite" };
+    },
   };
 }
 

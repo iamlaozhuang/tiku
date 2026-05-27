@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   AlertCircle,
   BookOpenCheck,
+  Bookmark,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
@@ -26,6 +27,7 @@ import type {
   PracticeAnswerFeedbackDto,
   PracticeAnswerFeedbackResultDto,
   PracticeDto,
+  PracticeQuestionFavoriteResultDto,
   PracticeResultDto,
 } from "@/server/contracts/practice-contract";
 import type { Profession, Subject } from "@/server/models/paper";
@@ -617,16 +619,20 @@ function ObjectiveQuestionPanel({
   feedback,
   onToggleLabel,
   onSubmitAnswer,
+  onFavoriteQuestion,
   onNextQuestion,
   hasNextQuestion,
+  isFavoriteSubmitting,
 }: {
   question: PracticePaperQuestion;
   selectedLabels: string[];
   feedback: PracticeAnswerFeedbackDto | null;
   onToggleLabel(label: string): void;
   onSubmitAnswer(): void;
+  onFavoriteQuestion(): void;
   onNextQuestion(): void;
   hasNextQuestion: boolean;
+  isFavoriteSubmitting: boolean;
 }) {
   const hasFeedback = feedback !== null;
 
@@ -712,6 +718,17 @@ function ObjectiveQuestionPanel({
               已加入错题本：{feedback.mistakeBookPublicId}
             </p>
           )}
+          {feedback.mistakeBookPublicId !== null ? null : (
+            <button
+              type="button"
+              disabled={isFavoriteSubmitting}
+              onClick={onFavoriteQuestion}
+              className="border-border text-text-primary flex h-9 w-full items-center justify-center gap-2 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Bookmark className="size-4" aria-hidden="true" />
+              收藏到错题本
+            </button>
+          )}
           <button
             type="button"
             onClick={onNextQuestion}
@@ -731,15 +748,19 @@ function FillBlankQuestionPanel({
   feedback,
   onChangeTextAnswer,
   onSubmitAnswer,
+  onFavoriteQuestion,
   onNextQuestion,
   hasNextQuestion,
+  isFavoriteSubmitting,
 }: {
   textAnswer: string;
   feedback: PracticeAnswerFeedbackDto | null;
   onChangeTextAnswer(value: string): void;
   onSubmitAnswer(): void;
+  onFavoriteQuestion(): void;
   onNextQuestion(): void;
   hasNextQuestion: boolean;
+  isFavoriteSubmitting: boolean;
 }) {
   const hasFeedback = feedback !== null;
 
@@ -791,6 +812,21 @@ function FillBlankQuestionPanel({
               <p>解析：</p>
               <StudentRichText value={feedback.analysisRichText} />
             </div>
+          )}
+          {feedback.mistakeBookPublicId === null ? (
+            <button
+              type="button"
+              disabled={isFavoriteSubmitting}
+              onClick={onFavoriteQuestion}
+              className="border-border text-text-primary flex h-9 w-full items-center justify-center gap-2 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Bookmark className="size-4" aria-hidden="true" />
+              收藏到错题本
+            </button>
+          ) : (
+            <p className="text-warning text-sm font-medium">
+              已加入错题本：{feedback.mistakeBookPublicId}
+            </p>
           )}
           {hasNextQuestion ? (
             <button
@@ -963,6 +999,10 @@ export function StudentPracticePage({
   const [feedbackByQuestion, setFeedbackByQuestion] = useState(emptyFeedback);
   const [isMaterialOpen, setIsMaterialOpen] = useState(true);
   const [isRestarting, setIsRestarting] = useState(false);
+  const [
+    favoriteSubmittingQuestionPublicId,
+    setFavoriteSubmittingQuestionPublicId,
+  ] = useState<string | null>(null);
   const [isResumeChoiceVisible, setIsResumeChoiceVisible] = useState(false);
 
   useEffect(() => {
@@ -1216,6 +1256,76 @@ export function StudentPracticePage({
     });
   }
 
+  async function handleFavoriteQuestion() {
+    if (practice === null || feedback === null) {
+      return;
+    }
+
+    setFavoriteSubmittingQuestionPublicId(
+      currentQuestion.paperQuestionPublicId,
+    );
+
+    try {
+      let mistakeBookPublicId = `mistake-book-${currentQuestion.paperQuestionPublicId}`;
+
+      if (isRuntimeMode) {
+        const token = getStoredStudentSessionToken();
+
+        if (token === null) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        const favoritePayload =
+          await fetchStudentApi<PracticeQuestionFavoriteResultDto>(
+            `/api/v1/practices/${practice.publicId}/favorite-question`,
+            token,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
+                selectedLabels: isOptionPracticeQuestion(
+                  currentQuestion.questionType,
+                )
+                  ? selectedLabels
+                  : [],
+                textAnswer: isFillBlankPracticeQuestion(
+                  currentQuestion.questionType,
+                )
+                  ? textAnswer
+                  : null,
+                savedFromClientAt: new Date().toISOString(),
+              }),
+            },
+          );
+
+        if (isStudentUnauthorizedResponse(favoritePayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (favoritePayload.code !== 0 || favoritePayload.data === null) {
+          setRuntimeState("error");
+          return;
+        }
+
+        mistakeBookPublicId = favoritePayload.data.mistakeBookPublicId;
+      }
+
+      setFeedbackByQuestion({
+        ...feedbackByQuestion,
+        [currentQuestion.paperQuestionPublicId]: {
+          ...feedback,
+          mistakeBookPublicId,
+        },
+      });
+    } catch {
+      setRuntimeState("error");
+    } finally {
+      setFavoriteSubmittingQuestionPublicId(null);
+    }
+  }
+
   function handleNextQuestion() {
     setCurrentQuestionIndex(
       Math.min(currentQuestionIndex + 1, questions.length - 1),
@@ -1392,8 +1502,13 @@ export function StudentPracticePage({
             feedback={feedback}
             onToggleLabel={handleToggleLabel}
             onSubmitAnswer={() => void handleSubmitAnswer()}
+            onFavoriteQuestion={() => void handleFavoriteQuestion()}
             onNextQuestion={handleNextQuestion}
             hasNextQuestion={hasNextQuestion}
+            isFavoriteSubmitting={
+              favoriteSubmittingQuestionPublicId ===
+              currentQuestion.paperQuestionPublicId
+            }
           />
         ) : isFillBlankPracticeQuestion(currentQuestion.questionType) ? (
           <FillBlankQuestionPanel
@@ -1401,8 +1516,13 @@ export function StudentPracticePage({
             feedback={feedback}
             onChangeTextAnswer={handleChangeTextAnswer}
             onSubmitAnswer={() => void handleSubmitAnswer()}
+            onFavoriteQuestion={() => void handleFavoriteQuestion()}
             onNextQuestion={handleNextQuestion}
             hasNextQuestion={hasNextQuestion}
+            isFavoriteSubmitting={
+              favoriteSubmittingQuestionPublicId ===
+              currentQuestion.paperQuestionPublicId
+            }
           />
         ) : (
           <SubjectiveQuestionPanel

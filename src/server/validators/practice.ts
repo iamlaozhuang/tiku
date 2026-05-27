@@ -9,6 +9,9 @@ export type NormalizedPracticeAnswerInput = {
   savedFromClientAt: string | null;
 };
 
+export type NormalizedPracticeQuestionFavoriteInput =
+  NormalizedPracticeAnswerInput;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -88,5 +91,28 @@ export function normalizePracticeAnswerInput(
     selectedLabels,
     textAnswer,
     savedFromClientAt,
+  };
+}
+
+export function normalizePracticeQuestionFavoriteInput(
+  input: unknown,
+): NormalizedPracticeQuestionFavoriteInput | null {
+  if (!isRecord(input)) {
+    return null;
+  }
+
+  const paperQuestionPublicId = normalizeRequiredString(
+    input.paperQuestionPublicId,
+  );
+
+  if (paperQuestionPublicId === null) {
+    return null;
+  }
+
+  return {
+    paperQuestionPublicId,
+    selectedLabels: normalizeSelectedLabels(input.selectedLabels),
+    textAnswer: normalizeOptionalString(input.textAnswer),
+    savedFromClientAt: normalizeOptionalString(input.savedFromClientAt),
   };
 }

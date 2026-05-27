@@ -98,6 +98,19 @@ function createService(): PracticeService {
         },
       };
     },
+    async favoritePracticeQuestion(receivedUserContext, publicId, input) {
+      return {
+        code: 0,
+        message: `${receivedUserContext.userPublicId}:${publicId}:${String(
+          input && typeof input === "object" && "paperQuestionPublicId" in input
+            ? input.paperQuestionPublicId
+            : null,
+        )}:favorite`,
+        data: {
+          mistakeBookPublicId: "mistake_book_public_favorite",
+        },
+      };
+    },
     async restartPractice(receivedUserContext, publicId) {
       return this.getPractice(receivedUserContext, publicId);
     },
@@ -205,6 +218,39 @@ describe("practice route handlers", () => {
     await expect(response.json()).resolves.toMatchObject({
       code: 0,
       message: "user_public_123:practice_public_123:paper_question_public_123",
+    });
+  });
+
+  it("parses manual favorite question JSON", async () => {
+    const { favoriteQuestion } = createPracticeRouteHandlers(
+      createService(),
+      async () => userContext,
+    );
+
+    const response = await favoriteQuestion.POST(
+      new Request(
+        "http://localhost/api/v1/practices/practice_public_123/favorite-question",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            paperQuestionPublicId: "paper_question_public_123",
+          }),
+        },
+      ),
+      {
+        params: Promise.resolve({
+          publicId: "practice_public_123",
+        }),
+      },
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      message:
+        "user_public_123:practice_public_123:paper_question_public_123:favorite",
+      data: {
+        mistakeBookPublicId: "mistake_book_public_favorite",
+      },
     });
   });
 

@@ -115,6 +115,31 @@ export function createPracticeRouteHandlers(
         );
       },
     },
+    favoriteQuestion: {
+      async POST(
+        request: Request,
+        context: PracticeRouteContext,
+      ): Promise<Response> {
+        const userContext = await resolveRequiredUserContext(
+          request,
+          resolveUserContext,
+        );
+
+        if (!isPracticeUserContext(userContext)) {
+          return createJsonResponse(userContext);
+        }
+
+        const { publicId } = await context.params;
+
+        return createJsonResponse(
+          await practiceService.favoritePracticeQuestion(
+            userContext,
+            publicId,
+            await readRequestJson(request),
+          ),
+        );
+      },
+    },
     restart: {
       async POST(
         request: Request,
