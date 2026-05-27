@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-19-requirement-audit-review
-  updatedAt: "2026-05-27T01:45:00-07:00"
+  updatedAt: "2026-05-27T02:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -39,12 +39,12 @@ repository:
   lastKnownMasterSha: 15f56f7bbc9c684ac16b575262e13cbb1297d8fb
   lastKnownOriginMasterSha: 15f56f7bbc9c684ac16b575262e13cbb1297d8fb
 currentTask:
-  id: phase-19-01-finding-inventory
+  id: phase-19-02-dedup-severity-taxonomy
   status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-total-requirement-audit-report.md
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-19-01-finding-inventory.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-19-01-finding-inventory.md
-  branch: codex/phase-19-01-finding-inventory
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-19-finding-inventory.md
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-19-02-dedup-severity-taxonomy.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-19-02-dedup-severity-taxonomy.md
+  branch: codex/phase-19-02-dedup-severity-taxonomy
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 19-01 finding inventory is complete. Stop and wait for explicit human confirmation before starting phase-19-02-dedup-severity-taxonomy.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-19-01-finding-inventory.md
+  nextRecommendedAction: Phase 19-02 dedup severity taxonomy is complete. Continue with phase-19-03-coverage-matrix-review.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-19-02-dedup-severity-taxonomy.md
