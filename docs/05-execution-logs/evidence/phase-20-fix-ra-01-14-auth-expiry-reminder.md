@@ -2,12 +2,12 @@
 
 ## Summary
 
-- Result: implementation validated on task branch.
+- Result: merged to `master` and validated locally; push and cleanup pending.
 - Scope: student home UI authorization expiry reminder and focused tests.
 - Changed surfaces: `src/features/student/home/StudentHomePage.tsx`, `tests/unit/student-home-ui.test.ts`, task plan/evidence/state/queue.
-- Gates: task branch validation passed; closeout merge/push/cleanup pending.
+- Gates: task branch and master validation passed; push and cleanup pending.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/auth permission model work.
-- Residual gaps (`residualGaps`): implementation commit, master merge verification, push, and branch cleanup pending.
+- Residual gaps (`residualGaps`): push and branch cleanup pending.
 
 ## Task
 
@@ -62,10 +62,21 @@
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - passed.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - passed: lint, typecheck, unit tests, and format check.
 - Standalone `npm.cmd run typecheck` in sandbox hit `EPERM` reading local `node_modules`; the same typecheck passed inside `Invoke-QualityGate.ps1`.
+- Master validation after merge:
+  - `git merge --ff-only codex/phase-20-fix-ra-01-14-auth-expiry-reminder` - passed, fast-forwarded `master` from `dd127e9` to `744bbab`.
+  - `npm.cmd run test:e2e` - passed, 25 tests.
+  - `npm.cmd run build` - passed. Next.js reported `Environments: .env.local`; this was framework auto-loading only, and `.env.local` was not read, copied, or modified by the agent.
+  - First `npm.cmd run test:unit` on `master` had one unrelated `admin-user-org-auth-ops-baseline.test.ts` toast assertion failure. Focused rerun `npm.cmd run test:unit -- admin-user-org-auth-ops-baseline.test.ts` passed, then full rerun `npm.cmd run test:unit` passed with 131 files and 533 tests.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - inventory completed on `master`, ahead of `origin/master` by one implementation commit.
+  - `git diff --check` - passed.
+  - Changed-file Prettier check - passed with approved escalation for local `node_modules` read.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - passed: lint, typecheck, unit tests, and format check.
 
 ## Closeout
 
-- implementationCommit: pending.
-- merge: pending.
+- implementationCommit: `744bbab874b4e11ea862d66ee1a8dee28413fc32`.
+- merge: fast-forwarded into `master`.
 - push: pending.
 - cleanup: pending.
