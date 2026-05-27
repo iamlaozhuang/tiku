@@ -36,6 +36,17 @@
 - Final `node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\sop\automation-loop.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-26-phase-15-session-startup-report-protocol.md docs\05-execution-logs\evidence\2026-05-26-phase-15-session-startup-report-protocol.md`
   - Result: pass.
 
+## Closeout
+
+- Implementation commit: `2536ddb docs(agent): add startup report protocol`.
+- Local merge commit: `1e1998f merge: phase 15 startup report protocol`.
+- Post-merge branch: `master`.
+- Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+- Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory; `master` ahead of `origin/master` by the expected task and merge commits before closeout evidence update.
+- Post-merge `git diff --check`: pass.
+- Push target: `origin master`, approved by the user for the Phase 15 mechanism upgrade batch.
+- Branch cleanup target: delete `codex/phase-15-session-startup-report-protocol` after push.
+
 ## Forbidden Scope Self-Check
 
 - No dependency was added, removed, or upgraded.
