@@ -44,6 +44,24 @@ This section supersedes the original RA-01 placeholder cells in the Phase 16 cat
 | RA-01-13 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
 | RA-01-14 | missing             | F-RA-01-14-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#ra-01-evidence-map` |
 
+## Phase 18 RA-02 Execution Update
+
+This section supersedes the original RA-02 placeholder cells in the Phase 16 catalog table. Evidence is recorded in `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md`.
+
+| auditId  | traceability status | findingId      | evidence                                                                                                       |
+| -------- | ------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
+| RA-02-01 | partial             | F-RA-02-01-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-02 | partial             | F-RA-02-02-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-03 | partial             | F-RA-02-03-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-04 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-05 | partial             | F-RA-02-05-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-06 | partial             | F-RA-02-06-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-07 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-08 | partial             | F-RA-02-08-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-09 | partial             | F-RA-02-09-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-10 | partial             | F-RA-02-10-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+| RA-02-11 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
+
 ## Audit Items
 
 | auditId  | 所属大块             | 需求原文位置                                                                                                | 用户角色   | 用户故事/需求摘要                                    | 验收标准                        | 预期页面/路由                                                                                                     | 预期服务/API/数据模型                                                                       | 代码审计范围                                                                                         | 浏览器/e2e 验证方式                                           | 前置条件                                                               | blocked gate 关联                                                                             | evidence 预期                                                           | 审计结果占位 | findingId 占位 |
