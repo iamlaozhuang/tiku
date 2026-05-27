@@ -570,13 +570,11 @@ test.describe("phase 11 role-based full-flow acceptance rerun", () => {
     await expect(page).toHaveURL(/\/home$/);
     const noAuthStudentToken = await readLocalSessionToken(page);
 
-    await expect(page.locator("body")).toContainText("暂无有效授权");
+    await expect(page).toHaveURL(/\/redeem-code$/);
     await expect(page.locator('[data-testid^="paper-card-"]')).toHaveCount(0);
     await expect(page.locator("body")).not.toContainText("本地专卖理论模拟卷");
     await expect(page.locator("body")).not.toContainText(noAuthStudentToken);
 
-    await page.getByRole("link", { name: "前往兑换卡密" }).click();
-    await expect(page).toHaveURL(/\/redeem-code$/);
     await expect(
       page.getByTestId("student-purchase-guidance-contact-config"),
     ).toContainText("购买支持");

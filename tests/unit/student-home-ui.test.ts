@@ -14,6 +14,14 @@ import {
   studentHomeFixture,
 } from "@/features/student/home/StudentHomePage";
 
+const routerReplaceMock = vi.hoisted(() => vi.fn());
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    replace: routerReplaceMock,
+  }),
+}));
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -124,6 +132,37 @@ describe("StudentHomePage", () => {
     expect(screen.queryByText("专卖理论真题卷")).toBeNull();
   });
 
+  it("persists the selected authorization scope and restores it on remount", () => {
+    const { unmount } = render(
+      createElement(StudentHomePage, {
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+      }),
+    );
+
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    expect(localStorage.getItem("tiku.studentHome.selectedScope")).toContain(
+      "marketing",
+    );
+
+    unmount();
+    render(
+      createElement(StudentHomePage, {
+        scopes: studentHomeFixture.scopes,
+        papers: studentHomeFixture.papers,
+      }),
+    );
+
+    expect(screen.getAllByRole("button")[1]).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(
+      screen.getByTestId("paper-card-paper-marketing-theory-002"),
+    ).toBeInTheDocument();
+  });
+
   it("renders loading, error, empty paper, and no-authorization states", () => {
     render(createElement(StudentHomePage, { state: "loading" }));
     expect(screen.getByText("正在加载授权范围")).toBeInTheDocument();
@@ -143,6 +182,7 @@ describe("StudentHomePage", () => {
 
     cleanup();
     render(createElement(StudentHomePage, { scopes: [], papers: [] }));
+    expect(routerReplaceMock).toHaveBeenCalledWith("/redeem-code");
     expect(screen.getByText("暂无有效授权")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "前往兑换卡密" })).toHaveAttribute(
       "href",

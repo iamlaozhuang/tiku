@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   BookOpen,
@@ -71,6 +72,7 @@ const subjectLabels: Record<Subject, string> = {
 const subjectOrder: Subject[] = ["theory", "skill"];
 
 const selectedScopeSeparator = ":";
+const studentHomeSelectedScopeStorageKey = "tiku.studentHome.selectedScope";
 const authExpiryReminderWindowDays = 15;
 const millisecondsPerDay = 24 * 60 * 60 * 1000;
 const authExpiryReminderDismissalStorageKey =
@@ -155,6 +157,64 @@ export const studentHomeFixture = {
 
 function createScopeKey(scope: StudentHomeScopeSelection): string {
   return `${scope.profession}${selectedScopeSeparator}${scope.level}`;
+}
+
+function isProfession(value: unknown): value is Profession {
+  return value === "logistics" || value === "marketing" || value === "monopoly";
+}
+
+function readStudentHomeSelectedScope(): StudentHomeScopeSelection | undefined {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  const storedValue = window.localStorage.getItem(
+    studentHomeSelectedScopeStorageKey,
+  );
+
+  if (storedValue === null) {
+    return undefined;
+  }
+
+  try {
+    const parsedValue: unknown = JSON.parse(storedValue);
+
+    if (parsedValue === null || typeof parsedValue !== "object") {
+      return undefined;
+    }
+
+    const selectedScope = parsedValue as Partial<StudentHomeScopeSelection>;
+    const level = selectedScope.level;
+
+    if (
+      !isProfession(selectedScope.profession) ||
+      typeof level !== "number" ||
+      !Number.isInteger(level)
+    ) {
+      return undefined;
+    }
+
+    return {
+      profession: selectedScope.profession,
+      level,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function writeStudentHomeSelectedScope(scope: StudentHomeScopeSelection) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    studentHomeSelectedScopeStorageKey,
+    JSON.stringify({
+      profession: scope.profession,
+      level: scope.level,
+    }),
+  );
 }
 
 function findInitialScope(
@@ -513,6 +573,7 @@ export function StudentHomePage({
   papers,
   rememberedScope,
 }: StudentHomePageProps) {
+  const router = useRouter();
   const isRuntimeMode = scopes === undefined || papers === undefined;
   const [runtimeState, setRuntimeState] =
     useState<StudentHomePageState>("loading");
@@ -524,11 +585,16 @@ export function StudentHomePage({
   );
   const [authExpiryReminderDismissals, setAuthExpiryReminderDismissals] =
     useState(readAuthExpiryReminderDismissals);
+  const [storedRememberedScope] = useState(readStudentHomeSelectedScope);
+  const effectiveRememberedScope = rememberedScope ?? storedRememberedScope;
   const displayState =
     isRuntimeMode && state === "ready" ? runtimeState : state;
   const displayScopes = scopes ?? runtimeScopes;
   const displayPapers = papers ?? runtimePapers;
-  const initialScope = findInitialScope(displayScopes, rememberedScope);
+  const initialScope = findInitialScope(
+    displayScopes,
+    effectiveRememberedScope,
+  );
   const [selectedScopeKey, setSelectedScopeKey] = useState(
     initialScope === null ? "" : createScopeKey(initialScope),
   );
@@ -586,7 +652,10 @@ export function StudentHomePage({
         }
 
         const nextScopes = readStudentPaperScopes(scopePayload.data);
-        const nextScope = findInitialScope(nextScopes, rememberedScope);
+        const nextScope = findInitialScope(
+          nextScopes,
+          effectiveRememberedScope,
+        );
 
         setRuntimeScopes(nextScopes);
         setSelectedScopeKey(
@@ -632,11 +701,18 @@ export function StudentHomePage({
     return () => {
       isActive = false;
     };
-  }, [isRuntimeMode, rememberedScope, state]);
+  }, [effectiveRememberedScope, isRuntimeMode, state]);
+
+  useEffect(() => {
+    if (displayState === "ready" && displayScopes.length === 0) {
+      router.replace("/redeem-code");
+    }
+  }, [displayScopes.length, displayState, router]);
 
   async function handleSelectScope(scope: StudentPaperScopeDto) {
     const scopeKey = createScopeKey(scope);
 
+    writeStudentHomeSelectedScope(scope);
     setSelectedScopeKey(scopeKey);
 
     if (!isRuntimeMode) {
