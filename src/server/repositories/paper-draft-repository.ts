@@ -215,6 +215,8 @@ type SourceQuestionLookupInput = {
   requiredStatus?: QuestionStatus;
 };
 
+const PAPER_ARCHIVE_TERMINATION_REASON = "paper_archived";
+
 export function createPostgresPaperDraftRepository(
   options: RuntimeDatabaseOptions = {},
 ): PaperDraftRepository {
@@ -536,20 +538,40 @@ export function createPostgresPaperDraftRepository(
     async archivePaper(input, context) {
       const database = getDatabase();
       const actorAdminId = await resolveActorAdminId(database, context);
-      const [row] = await database
-        .update(paper)
-        .set({
-          archived_at: new Date(),
-          paper_status: "archived",
-          updated_at: new Date(),
-          updated_by_admin_id: actorAdminId,
-        })
-        .where(eq(paper.public_id, input.paperPublicId))
-        .returning({ public_id: paper.public_id });
 
-      return row === undefined
-        ? null
-        : findPaperByPublicId(database, row.public_id);
+      return database.transaction(async (transaction) => {
+        const archivedAt = new Date();
+        const [row] = await transaction
+          .update(paper)
+          .set({
+            archived_at: archivedAt,
+            paper_status: "archived",
+            updated_at: archivedAt,
+            updated_by_admin_id: actorAdminId,
+          })
+          .where(eq(paper.public_id, input.paperPublicId))
+          .returning({ id: paper.id, public_id: paper.public_id });
+
+        if (row === undefined) {
+          return null;
+        }
+
+        await terminateUnfinishedPracticeForArchivedPaper(
+          transaction as RuntimeDatabase,
+          row.id,
+          archivedAt,
+        );
+        await terminateUnfinishedMockExamForArchivedPaper(
+          transaction as RuntimeDatabase,
+          row.id,
+          archivedAt,
+        );
+
+        return findPaperByPublicId(
+          transaction as RuntimeDatabase,
+          row.public_id,
+        );
+      });
     },
 
     async deletePaper(input) {
@@ -797,6 +819,52 @@ async function findPaperByPublicId(
   const [hydratedPaper] = await hydratePapers(database, [row]);
 
   return hydratedPaper ?? null;
+}
+
+async function terminateUnfinishedPracticeForArchivedPaper(
+  database: RuntimeDatabase,
+  paperId: number,
+  terminatedAt: Date,
+): Promise<void> {
+  await database
+    .update(practice)
+    .set({
+      practice_status: "terminated",
+      terminated_at: terminatedAt,
+      termination_reason: PAPER_ARCHIVE_TERMINATION_REASON,
+      updated_at: terminatedAt,
+    })
+    .where(
+      and(
+        eq(practice.paper_id, paperId),
+        eq(practice.practice_status, "in_progress"),
+      ),
+    );
+}
+
+async function terminateUnfinishedMockExamForArchivedPaper(
+  database: RuntimeDatabase,
+  paperId: number,
+  terminatedAt: Date,
+): Promise<void> {
+  await database
+    .update(mockExam)
+    .set({
+      exam_status: "terminated",
+      terminated_at: terminatedAt,
+      termination_reason: PAPER_ARCHIVE_TERMINATION_REASON,
+      updated_at: terminatedAt,
+    })
+    .where(
+      and(
+        eq(mockExam.paper_id, paperId),
+        inArray(mockExam.exam_status, [
+          "in_progress",
+          "scoring",
+          "scoring_partial_failed",
+        ]),
+      ),
+    );
 }
 
 async function hydratePapers(
