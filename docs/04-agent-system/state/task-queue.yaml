@@ -10904,6 +10904,415 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md
     status: closed
     retryCount: 0
+  - id: phase-18-audit-ra-03-student-experience
+    title: Phase 18 Audit RA-03 Student Experience
+    phase: phase-18-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-03
+    dependencies:
+      - phase-18-audit-ra-02-question-paper-content
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested Phase 18 requirement audit execution by six blocks and authorized commit, merge into master, push origin/master, and short-lived branch cleanup after each completed block. Audit must record facts and findings only; no business bug fixes, dependency changes, env reads, staging/prod/cloud/deploy, real provider calls, destructive data operations, source, test, e2e, schema, drizzle, or script changes are allowed.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - student_experience
+      - local_human_verification
+      - browser_runtime
+      - evidence_integrity
+      - approval_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-27-phase-18-audit-ra-03-student-experience.md docs\05-execution-logs\evidence\2026-05-27-phase-18-audit-ra-03-student-experience.md docs\05-execution-logs\audits-reviews\2026-05-27-phase-18-audit-ra-03-student-experience.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-audit-catalog.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-traceability-matrix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md
+    status: closed
+    retryCount: 0
+  - id: phase-20-fix-ra-03-01-student-home-scope-guidance
+    title: Phase 20 Fix RA-03-01 Student Home Scope Guidance
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-01-001.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-01-student-home-scope-guidance.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-02-practice-objective-ai-explanation
+    title: Phase 20 Fix RA-03-02 Practice Objective AI Explanation
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-02-001. Real provider remains blocked; implementation must use local/mock provider unless separately approved.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - ai_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-02-practice-objective-ai-explanation.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-03-skill-practice-final-scoring
+    title: Phase 20 Fix RA-03-03 Skill Practice Final Scoring
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-03-001. Real provider remains blocked; implementation must use local/mock provider unless separately approved.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - ai_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-04-practice-resume-choice
+    title: Phase 20 Fix RA-03-04 Practice Resume Choice
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-04-001.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-04-practice-resume-choice.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-05-mock-exam-offline-recovery
+    title: Phase 20 Fix RA-03-05 Mock Exam Offline Recovery
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-05-001.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-05-mock-exam-offline-recovery.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-06-mock-answer-save-retry
+    title: Phase 20 Fix RA-03-06 Mock Answer Save Retry
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-06-001.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-06-mock-answer-save-retry.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-07-exam-report-analytics-learning-suggestion
+    title: Phase 20 Fix RA-03-07 Exam Report Analytics Learning Suggestion
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-07-001. Real provider remains blocked; implementation must use local/mock provider unless separately approved.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - ai_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-07-exam-report-analytics-learning-suggestion.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-08-mock-exam-record-list
+    title: Phase 20 Fix RA-03-08 Mock Exam Record List
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-08-001.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-08-mock-exam-record-list.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-03-09-mistake-book-completion
+    title: Phase 20 Fix RA-03-09 Mistake Book Completion
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
+    dependencies:
+      - phase-18-audit-ra-03-student-experience
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-03 audit finding F-RA-03-09-001. Real provider remains blocked for AI explanation verification unless separately approved.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - ai_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-09-mistake-book-completion.md
+    status: pending
+    retryCount: 0
   - id: phase-20-fix-ra-02-01-question-knowledge-tag-binding
     title: Phase 20 Fix RA-02-01 Question Knowledge Tag Binding
     phase: phase-20-requirement-gap-fixes

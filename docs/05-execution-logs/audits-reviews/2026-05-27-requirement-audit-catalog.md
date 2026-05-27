@@ -62,6 +62,22 @@ This section supersedes the original RA-02 placeholder cells in the Phase 16 cat
 | RA-02-10 | partial             | F-RA-02-10-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
 | RA-02-11 | implemented         | null           | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#ra-02-evidence-map` |
 
+## Phase 18 RA-03 Execution Update
+
+This section supersedes the original RA-03 placeholder cells in the Phase 16 catalog table. Evidence is recorded in `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md`.
+
+| auditId  | traceability status | findingId      | evidence                                                                                                   |
+| -------- | ------------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| RA-03-01 | partial             | F-RA-03-01-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-02 | partial             | F-RA-03-02-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-03 | partial             | F-RA-03-03-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-04 | partial             | F-RA-03-04-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-05 | partial             | F-RA-03-05-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-06 | partial             | F-RA-03-06-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-07 | partial             | F-RA-03-07-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-08 | partial             | F-RA-03-08-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+| RA-03-09 | partial             | F-RA-03-09-001 | `docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md#ra-03-evidence-map` |
+
 ## Audit Items
 
 | auditId  | 所属大块             | 需求原文位置                                                                                                | 用户角色   | 用户故事/需求摘要                                    | 验收标准                        | 预期页面/路由                                                                                                     | 预期服务/API/数据模型                                                                       | 代码审计范围                                                                                         | 浏览器/e2e 验证方式                                           | 前置条件                                                               | blocked gate 关联                                                                             | evidence 预期                                                           | 审计结果占位 | findingId 占位 |
