@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: pass, merged into `master`; push/cleanup pending.
+- Result: pass.
 - Scope: implementation.
 - Changed surfaces: paper draft repository source-question lookup, repository composition guard unit test, task plan/evidence/state.
 - Gates: task claim readiness, focused unit, full unit, e2e, build, readiness, git inventory, diff, Prettier, naming, and local quality gate passed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-02-02-001`; push/cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-02-02-001`.
 
 ## Startup Recovery
 
@@ -65,6 +65,13 @@
   - changed-file Prettier check - pass; sandbox check hit node_modules EPERM, escalated read-only rerun passed.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit`, and `format:check` passed.
-- closeoutEvidenceCommit: pending.
-- push: pending.
-- cleanup: pending.
+- closeoutEvidenceCommit: `779820f0fb5fec1f764a53708123264fad58b248` (`docs(paper): record disabled question composition closeout`).
+- push: `git push origin master` passed, `1dcab59..779820f master -> master`.
+- cleanup:
+  - initial `git branch -d codex/phase-20-fix-ra-02-02-disabled-question-composition-guard` failed in sandbox with ref lock permission denied.
+  - escalated `git branch -d codex/phase-20-fix-ra-02-02-disabled-question-composition-guard` passed; deleted already-merged branch at `e92789a`.
+- final cleanup verification before this evidence update:
+  - `git status --short --branch` showed `## master...origin/master`.
+  - `git rev-parse HEAD` and `git rev-parse origin/master` both returned `779820f0fb5fec1f764a53708123264fad58b248`.
+  - `git branch --list "codex/*"` returned no branches.
+  - `git worktree list` showed only `D:/tiku  779820f [master]`.
