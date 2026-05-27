@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: pass, pending commit/merge/push/cleanup.
+- Result: pass, merged to master, pending push/cleanup.
 - Scope: implementation.
 - Changed surfaces: admin resource Markdown review dialog, admin resource UI unit tests, task plan/evidence/state.
 - Gates: task claim readiness, focused unit, full unit, e2e, build, readiness, git inventory, diff, Prettier, naming, and local quality gate passed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-05-04-001`; commit/merge/push/cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-05-04-001`; push/cleanup pending.
 
 ## Startup Recovery
 
@@ -54,7 +54,17 @@
 
 ## Closeout Status
 
-- commit: pending.
-- merge: pending.
+- implementationCommit: `d129088ca51660fc3db3bd84286e1c4068ae1da6` (`fix(resource): add markdown chapter review controls`).
+- merge: `c24dec1e04ba29d1cfec47ac8a7eb0000ba2c54f` (`merge: phase-20 fix ra-05-04 markdown chapter review`) merged into `master`.
+- post-merge master validation:
+  - `npm.cmd run test:unit` - pass, 132 test files and 546 tests.
+  - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
+  - `npm.cmd run build` - pass; framework log noted `.env.local` existence only, contents were not read or copied.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; `master` ahead of `origin/master` by implementation and merge commits.
+  - `git diff --check` - pass.
+  - changed-file Prettier check - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit`, and `format:check` passed.
 - push: pending.
 - cleanup: pending.
