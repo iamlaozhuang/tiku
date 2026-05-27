@@ -620,6 +620,7 @@ function ObjectiveQuestionPanel({
   onToggleLabel,
   onSubmitAnswer,
   onFavoriteQuestion,
+  onRequestAiExplanation,
   onNextQuestion,
   hasNextQuestion,
   isFavoriteSubmitting,
@@ -630,6 +631,7 @@ function ObjectiveQuestionPanel({
   onToggleLabel(label: string): void;
   onSubmitAnswer(): void;
   onFavoriteQuestion(): void;
+  onRequestAiExplanation(): void;
   onNextQuestion(): void;
   hasNextQuestion: boolean;
   isFavoriteSubmitting: boolean;
@@ -729,6 +731,10 @@ function ObjectiveQuestionPanel({
               收藏到错题本
             </button>
           )}
+          <AiExplanationFeedback
+            feedback={feedback}
+            onRequestAiExplanation={onRequestAiExplanation}
+          />
           <button
             type="button"
             onClick={onNextQuestion}
@@ -749,6 +755,7 @@ function FillBlankQuestionPanel({
   onChangeTextAnswer,
   onSubmitAnswer,
   onFavoriteQuestion,
+  onRequestAiExplanation,
   onNextQuestion,
   hasNextQuestion,
   isFavoriteSubmitting,
@@ -758,6 +765,7 @@ function FillBlankQuestionPanel({
   onChangeTextAnswer(value: string): void;
   onSubmitAnswer(): void;
   onFavoriteQuestion(): void;
+  onRequestAiExplanation(): void;
   onNextQuestion(): void;
   hasNextQuestion: boolean;
   isFavoriteSubmitting: boolean;
@@ -828,6 +836,10 @@ function FillBlankQuestionPanel({
               已加入错题本：{feedback.mistakeBookPublicId}
             </p>
           )}
+          <AiExplanationFeedback
+            feedback={feedback}
+            onRequestAiExplanation={onRequestAiExplanation}
+          />
           {hasNextQuestion ? (
             <button
               type="button"
@@ -840,6 +852,52 @@ function FillBlankQuestionPanel({
         </div>
       )}
     </div>
+  );
+}
+
+function AiExplanationFeedback({
+  feedback,
+  onRequestAiExplanation,
+}: {
+  feedback: PracticeAnswerFeedbackDto;
+  onRequestAiExplanation(): void;
+}) {
+  if (
+    feedback.aiExplanationStatus !== "explained" &&
+    feedback.aiExplanationStatus !== "available"
+  ) {
+    return null;
+  }
+
+  if (feedback.aiExplanationStatus === "available") {
+    return (
+      <button
+        type="button"
+        onClick={onRequestAiExplanation}
+        className="border-border text-text-primary flex h-9 w-full items-center justify-center rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98]"
+      >
+        Need AI explanation
+      </button>
+    );
+  }
+
+  return (
+    <section className="border-border space-y-2 border-t pt-3">
+      <p className="text-text-primary text-sm font-semibold">AI explanation</p>
+      {feedback.aiExplanationText === null ? null : (
+        <p className="text-text-secondary text-sm leading-6">
+          {feedback.aiExplanationText}
+        </p>
+      )}
+      {feedback.aiExplanationLearningSuggestion === null ? null : (
+        <p className="text-text-secondary text-sm leading-6">
+          {feedback.aiExplanationLearningSuggestion}
+        </p>
+      )}
+      <p className="text-text-muted text-xs">
+        Evidence status: {feedback.aiExplanationEvidenceStatus ?? "none"}
+      </p>
+    </section>
   );
 }
 
@@ -1326,6 +1384,63 @@ export function StudentPracticePage({
     }
   }
 
+  async function handleRequestAiExplanation() {
+    if (practice === null || feedback === null || !isRuntimeMode) {
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("authorization_expired");
+      return;
+    }
+
+    try {
+      const explanationPayload =
+        await fetchStudentApi<PracticeAnswerFeedbackResultDto>(
+          `/api/v1/practices/${practice.publicId}/answers`,
+          token,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
+              selectedLabels: isOptionPracticeQuestion(
+                currentQuestion.questionType,
+              )
+                ? selectedLabels
+                : [],
+              textAnswer: isFillBlankPracticeQuestion(
+                currentQuestion.questionType,
+              )
+                ? textAnswer
+                : null,
+              aiExplanationTrigger: "manual_request",
+              savedFromClientAt: new Date().toISOString(),
+            }),
+          },
+        );
+
+      if (isStudentUnauthorizedResponse(explanationPayload)) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      if (explanationPayload.code !== 0 || explanationPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      setFeedbackByQuestion({
+        ...feedbackByQuestion,
+        [currentQuestion.paperQuestionPublicId]:
+          explanationPayload.data.feedback,
+      });
+    } catch {
+      setRuntimeState("error");
+    }
+  }
+
   function handleNextQuestion() {
     setCurrentQuestionIndex(
       Math.min(currentQuestionIndex + 1, questions.length - 1),
@@ -1503,6 +1618,7 @@ export function StudentPracticePage({
             onToggleLabel={handleToggleLabel}
             onSubmitAnswer={() => void handleSubmitAnswer()}
             onFavoriteQuestion={() => void handleFavoriteQuestion()}
+            onRequestAiExplanation={() => void handleRequestAiExplanation()}
             onNextQuestion={handleNextQuestion}
             hasNextQuestion={hasNextQuestion}
             isFavoriteSubmitting={
@@ -1517,6 +1633,7 @@ export function StudentPracticePage({
             onChangeTextAnswer={handleChangeTextAnswer}
             onSubmitAnswer={() => void handleSubmitAnswer()}
             onFavoriteQuestion={() => void handleFavoriteQuestion()}
+            onRequestAiExplanation={() => void handleRequestAiExplanation()}
             onNextQuestion={handleNextQuestion}
             hasNextQuestion={hasNextQuestion}
             isFavoriteSubmitting={
