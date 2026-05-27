@@ -18,7 +18,7 @@ tasks:
       - Test-Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md'
       - Select-String -Path 'docs\02-architecture\adr\adr-002-runtime-architecture-and-multi-client-contract.md' -Pattern 'Server Actions only|no REST|without API'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: closed
+    status: pushed
     retryCount: 0
   - id: phase-0-adr-workplace-desktop
     title: Workplace Desktop Compatibility ADR

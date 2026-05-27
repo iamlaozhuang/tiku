@@ -2,12 +2,12 @@
 
 ## Summary
 
-- Result: merged to `master` and validated locally; push and cleanup pending.
+- Result: pushed to `origin/master` and short-lived branch cleaned up.
 - Scope: student home UI authorization expiry reminder and focused tests.
 - Changed surfaces: `src/features/student/home/StudentHomePage.tsx`, `tests/unit/student-home-ui.test.ts`, task plan/evidence/state/queue.
-- Gates: task branch and master validation passed; push and cleanup pending.
+- Gates: task branch and master validation passed; push and cleanup completed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/auth permission model work.
-- Residual gaps (`residualGaps`): push and branch cleanup pending.
+- Residual gaps (`residualGaps`): none for this task.
 
 ## Task
 
@@ -78,5 +78,6 @@
 
 - implementationCommit: `744bbab874b4e11ea862d66ee1a8dee28413fc32`.
 - merge: fast-forwarded into `master`.
-- push: pending.
-- cleanup: pending.
+- closeoutCommit: `0d592993e6f4437081d11d51901c0edd688a93c8`.
+- push: `git push origin master` passed, `dd127e9..0d59299 master -> master`.
+- cleanup: `git branch -d codex/phase-20-fix-ra-01-14-auth-expiry-reminder` passed after merged-branch confirmation; branch was `744bbab`.
