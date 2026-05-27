@@ -59,6 +59,7 @@
 - `npm.cmd run typecheck` - sandbox EPERM on local `node_modules` TypeScript binary; approved retry passed.
 - `npm.cmd run lint` - sandbox EPERM on local `node_modules` ESLint binary; approved retry passed.
 - `npm.cmd run build` - passed.
+- Build log mentioned `.env.local` existence via framework environment loading only; contents were not inspected, copied, or modified.
 - `npm.cmd run test:e2e` - first run 24/25 passed with `local-business-flow` returning existing `409311` mock_exam in-progress guard; immediate focused rerun `npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts` passed 1/1; full rerun `npm.cmd run test:e2e` passed 25/25.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - passed.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - inventory completed on task branch.
@@ -69,7 +70,17 @@
 
 ## Closeout
 
-- commit: pending.
-- merge: pending.
+- implementationCommit: `e4af2544d1951fd655c3c17fc4d5fe2084e46e55` (`fix(paper): surface disabled source markers on copy`).
+- merge: fast-forward merged into `master`, `2ec8147..e4af254`.
+- post-merge master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; master ahead of `origin/master` by one implementation commit before closeout evidence commit.
+  - `git diff --check` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - Changed-file Prettier check - pass after sandbox EPERM retry with approval.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (131 files, 531 tests), and `format:check` passed.
+  - `npm.cmd run test:e2e` - pass; 25/25 tests.
+  - `npm.cmd run build` - pass. Build log mentioned `.env.local` existence via framework environment loading only; contents were not inspected, copied, or modified.
+- closeoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
