@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 15 mechanism presentation artifact created and validated; await user review and explicit push/merge direction if desired.
+  nextRecommendedAction: Phase 15 mechanism presentation artifact merged to master; push and local branch cleanup approved by user and in closeout.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-mechanism-presentation.md

@@ -45,6 +45,19 @@
 - `node -e "... require('@playwright/test') ..."`
   - Result: pass. Static HTML rendered from `file:///D:/tiku/archive/presentations/semi-automation-mechanism-presentation.html`; title `Tiku 半自动化推进机制介绍`, 10 sections, 10 navigation links, key terms present, and no horizontal overflow at 1366px viewport.
 
+## Closeout
+
+- Implementation commit: `ce096e6 docs(agent): add mechanism presentation`.
+- Merge commit on `master`: `a70ba56 merge: phase 15 mechanism presentation`.
+- Post-merge `Test-AgentSystemReadiness.ps1`
+  - Result: pass.
+- Post-merge `Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: pass. `master` was ahead of `origin/master` by the implementation and merge commits before closeout evidence commit.
+- Post-merge `git diff --check`
+  - Result: pass.
+- Push target: `origin/master`, approved by user instruction "提交合入推送并清理".
+- Cleanup target: delete merged local branch `codex/phase-15-mechanism-presentation` after push.
+
 ## Forbidden Scope Self-Check
 
 - No dependency was added, removed, or upgraded.
