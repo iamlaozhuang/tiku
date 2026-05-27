@@ -55,6 +55,7 @@
 ## Closeout
 
 - implementationCommit: `7a5ca4085f9869c5b09d2157f00294e3a305eb0f` (`fix(student): add practice resume choice`).
+- closeoutEvidenceCommit: `cc90fcb853352fb56857ea5d7881a1826af9e567` (`docs(audit): record practice resume merge validation`).
 - merge: fast-forward merged into `master`, `2e1c386..7a5ca40`.
 - post-merge master validation:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
@@ -65,5 +66,14 @@
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (131 files, 531 tests), and `format:check` passed.
   - `npm.cmd run test:e2e` - pass; 25/25 tests.
   - `npm.cmd run build` - pass. Build log mentioned `.env.local` existence via framework environment loading only; contents were not read or copied.
-- push: pending.
-- cleanup: pending.
+- push:
+  - pre-push `git fetch origin` - pass.
+  - pre-push `git rev-list --left-right --count master...origin/master` - `2 0`.
+  - `git push origin master` - pass, `2e1c386..cc90fcb master -> master`.
+- cleanup:
+  - initial `git branch -d codex/phase-20-fix-ra-03-04-practice-resume-choice` - failed in sandbox with ref lock permission denied.
+  - escalated `git branch -d codex/phase-20-fix-ra-03-04-practice-resume-choice` - pass; deleted already-merged branch at `7a5ca40`.
+- final inventory before this evidence update:
+  - `git status --short --branch` - `## master...origin/master`.
+  - `git rev-parse master` - `cc90fcb853352fb56857ea5d7881a1826af9e567`.
+  - `git rev-parse origin/master` - `cc90fcb853352fb56857ea5d7881a1826af9e567`.
