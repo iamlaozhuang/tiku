@@ -24,6 +24,40 @@ Every automation session starts by reading these sources in order:
 
 If any required source is missing, stop the loop and record the blocker before changing project files.
 
+## Session Startup Report
+
+After the startup read order and before editing files, each agent session must provide a short startup report when the user asks to continue, resume, verify status, or run the queue. The report is a control surface for the human owner, not a substitute for evidence.
+
+The startup report must include:
+
+- current branch and `git status --short --branch`;
+- whether `master` is clean and whether `master` is aligned with `origin/master`, using a fresh fetch when remote state matters;
+- local short-lived branches that are not merged into `master`;
+- registered worktrees and any obvious task worktree residue;
+- current `project-state.yaml` phase, current task, and handoff path;
+- task queue counts for `pending`, `blocked`, `closed`, `done`, and `pushed`;
+- the next eligible `pending` task, or a statement that no executable pending task exists;
+- current long-lived blocked gates when they are relevant to the requested work;
+- latest evidence file(s) that define the recovery point.
+
+When the user's instruction says to report first or wait for direction, stop after the startup report and wait. Do not create branches, edit files, start servers, run long validation gates, read environment files, push, deploy, or contact external services until the user gives the next instruction.
+
+Use this compact shape unless the user requests more detail:
+
+```text
+branch/status:
+master alignment:
+local branches/worktrees:
+project-state:
+queue summary:
+next eligible task:
+blocked gates:
+latest evidence:
+waiting: yes/no
+```
+
+If the startup report reveals drift between Git reality and `project-state.yaml`, record the drift in the report and resolve it through the closeout reconciliation rules before claiming the task state is current.
+
 ## Readiness Command
 
 Run the readiness check before claiming a task:
