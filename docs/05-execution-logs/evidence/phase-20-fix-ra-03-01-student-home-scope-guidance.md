@@ -2,12 +2,12 @@
 
 ## Summary
 
-- Result: implementation validated on task branch.
+- Result: merged to `master` and validated locally; push and cleanup pending.
 - Scope: student home runtime scope persistence and no-authorization redeem redirect guidance.
 - Changed surfaces: `src/features/student/home/StudentHomePage.tsx`, `tests/unit/student-home-ui.test.ts`, `e2e/role-based-acceptance/role-based-full-flow.spec.ts`, task plan/evidence/state/queue.
-- Gates: task branch validation passed; closeout merge/push/cleanup pending.
+- Gates: task branch and master validation passed; push and cleanup pending.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/auth permission model work.
-- Residual gaps (`residualGaps`): implementation commit, master merge verification, push, and branch cleanup pending.
+- Residual gaps (`residualGaps`): push and branch cleanup pending.
 
 ## Task
 
@@ -64,10 +64,19 @@
 - Changed-file Prettier check - passed after `Prettier --write` formatted `StudentHomePage.tsx`.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - passed.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - passed: lint, typecheck, unit tests, and format check. One earlier QualityGate run failed because ESLint tried to scan a missing generated `test-results` directory; after e2e recreated the directory, rerun passed.
+- Master validation after merge:
+  - `git merge --ff-only codex/phase-20-fix-ra-03-01-student-home-scope-guidance` - passed, fast-forwarded `master` from `c219a29` to `b59b8f8`.
+  - `npm.cmd run test:unit` - passed, 131 files and 534 tests.
+  - `npm.cmd run test:e2e` - final rerun passed, 25 tests. One earlier full run had a transient admin audit loading timeout; focused `admin-audit-navigation.spec.ts` passed before the final full rerun.
+  - `npm.cmd run build` - passed with approved escalation after a prior Google Fonts network/cache failure. Next.js reported `Environments: .env.local`; this was framework auto-loading only, and `.env.local` was not read, copied, or modified by the agent.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - inventory completed on `master`, ahead of `origin/master` by one implementation commit.
+  - `git diff --check` - passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - passed after confirming and deleting corrupted generated `.next/dev/types` under the workspace.
 
 ## Closeout
 
-- implementationCommit: pending.
-- merge: pending.
+- implementationCommit: `b59b8f85185987028be604a40b57d3d3096cc477`.
+- merge: fast-forwarded into `master`.
 - push: pending.
 - cleanup: pending.
