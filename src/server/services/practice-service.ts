@@ -88,6 +88,10 @@ type PracticeQuestionSnapshot = {
 const practiceContractTerm = "practice";
 const answerRecordContractTerm = "answer_record";
 const mistakeBookContractTerm = "mistake_book";
+const objectiveAiExplanationText =
+  "Local AI explanation: compare your answer with the standard answer and teacher analysis.";
+const objectiveAiExplanationLearningSuggestion =
+  "Review this knowledge point and retry a similar objective question.";
 
 void [practiceContractTerm, answerRecordContractTerm, mistakeBookContractTerm];
 
@@ -403,6 +407,47 @@ function createSubjectiveAiHintFeedback(
     ai_hint_citations: [],
     retry_remaining_count: retryRemainingCount,
   };
+}
+
+function createObjectiveAiExplanationFeedback(): Pick<
+  PracticeAnswerFeedbackRow,
+  | "ai_explanation_text"
+  | "ai_explanation_learning_suggestion"
+  | "ai_explanation_evidence_status"
+  | "ai_explanation_citations"
+  | "ai_hint_text"
+  | "ai_hint_improvement_directions"
+  | "ai_hint_evidence_status"
+  | "ai_hint_citations"
+  | "retry_remaining_count"
+> {
+  return {
+    ai_explanation_text: objectiveAiExplanationText,
+    ai_explanation_learning_suggestion:
+      objectiveAiExplanationLearningSuggestion,
+    ai_explanation_evidence_status: "none",
+    ai_explanation_citations: [],
+    ai_hint_text: null,
+    ai_hint_improvement_directions: [],
+    ai_hint_evidence_status: null,
+    ai_hint_citations: [],
+    retry_remaining_count: 0,
+  };
+}
+
+function createObjectiveManualExplanationFeedback(): Pick<
+  PracticeAnswerFeedbackRow,
+  | "ai_explanation_text"
+  | "ai_explanation_learning_suggestion"
+  | "ai_explanation_evidence_status"
+  | "ai_explanation_citations"
+  | "ai_hint_text"
+  | "ai_hint_improvement_directions"
+  | "ai_hint_evidence_status"
+  | "ai_hint_citations"
+  | "retry_remaining_count"
+> {
+  return createEmptyAiFeedback();
 }
 
 function isCorrectObjectiveAnswer(
@@ -781,6 +826,24 @@ export function createPracticeService(
         });
 
       if (existingAnswer !== null && isObjectiveQuestion(question)) {
+        if (normalizedInput.aiExplanationTrigger === "manual_request") {
+          return createSuccessResponse({
+            feedback: mapPracticeAnswerFeedbackToApi({
+              answer_record_public_id: existingAnswer.public_id,
+              is_correct: existingAnswer.is_correct,
+              score: existingAnswer.score,
+              max_score: existingAnswer.max_score,
+              standard_answer_rich_text: question.standardAnswerRichText,
+              analysis_rich_text: question.analysisRichText,
+              mistake_book_public_id: null,
+              ai_explanation_status: "explained",
+              ai_hint_status: null,
+              ...createObjectiveAiExplanationFeedback(),
+              answered_at: existingAnswer.answered_at,
+            }),
+          });
+        }
+
         return createErrorResponse(
           409301,
           "Practice objective question has already been answered.",
@@ -853,7 +916,17 @@ export function createPracticeService(
         : 0;
       const aiFeedback = isSubjectiveQuestion(question)
         ? createSubjectiveAiHintFeedback(retryRemainingCount)
-        : createEmptyAiFeedback();
+        : isObjectiveQuestion(question) && answerRecord.is_correct === false
+          ? createObjectiveAiExplanationFeedback()
+          : isObjectiveQuestion(question) && answerRecord.is_correct === true
+            ? createObjectiveManualExplanationFeedback()
+            : createEmptyAiFeedback();
+      const aiExplanationStatus =
+        isObjectiveQuestion(question) && answerRecord.is_correct === false
+          ? "explained"
+          : isObjectiveQuestion(question) && answerRecord.is_correct === true
+            ? "available"
+            : null;
 
       return createSuccessResponse({
         feedback: mapPracticeAnswerFeedbackToApi({
@@ -864,7 +937,7 @@ export function createPracticeService(
           standard_answer_rich_text: question.standardAnswerRichText,
           analysis_rich_text: question.analysisRichText,
           mistake_book_public_id: mistakeBook?.public_id ?? null,
-          ai_explanation_status: null,
+          ai_explanation_status: aiExplanationStatus,
           ai_hint_status: isSubjectiveQuestion(question) ? "hinted" : null,
           ...aiFeedback,
           answered_at: answerRecord.answered_at,

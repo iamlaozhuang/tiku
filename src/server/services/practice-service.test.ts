@@ -705,10 +705,12 @@ describe("practice service", () => {
           standardAnswerRichText: "<p>A</p>",
           analysisRichText: "<p>解析</p>",
           mistakeBookPublicId: "mistake_book_public_2",
-          aiExplanationStatus: null,
-          aiExplanationText: null,
-          aiExplanationLearningSuggestion: null,
-          aiExplanationEvidenceStatus: null,
+          aiExplanationStatus: "explained",
+          aiExplanationText:
+            "Local AI explanation: compare your answer with the standard answer and teacher analysis.",
+          aiExplanationLearningSuggestion:
+            "Review this knowledge point and retry a similar objective question.",
+          aiExplanationEvidenceStatus: "none",
           aiExplanationCitations: [],
           aiHintStatus: null,
           aiHintText: null,
@@ -736,6 +738,102 @@ describe("practice service", () => {
         paperQuestionPublicId: "paper_question_public_123",
       }),
     ]);
+  });
+
+  it("exposes manual ai_explanation trigger for correct objective answers", async () => {
+    const answerInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async createPracticeAnswerRecord(input) {
+          answerInputs.push(input);
+
+          return {
+            public_id: input.publicId,
+            exam_mode: "practice",
+            paper_question_public_id: input.paperQuestionPublicId,
+            question_public_id: input.questionPublicId,
+            answer_snapshot: input.answerSnapshot,
+            answer_record_status: input.answerRecordStatus,
+            is_correct: input.isCorrect,
+            score: input.score,
+            max_score: input.maxScore,
+            answered_at: input.answeredAt,
+            submitted_at: input.submittedAt,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_public_123",
+        selectedLabels: ["A"],
+        savedFromClientAt: "2026-05-19T08:00:00.000Z",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          isCorrect: true,
+          aiExplanationStatus: "available",
+          aiExplanationText: null,
+        },
+      },
+    });
+    expect(answerInputs).toHaveLength(1);
+
+    const manualService = createPracticeService(
+      createRepository({
+        async findAnswerRecordByPracticeAndQuestion() {
+          return {
+            public_id: "answer_record_public_existing",
+            exam_mode: "practice",
+            paper_question_public_id: "paper_question_public_123",
+            question_public_id: "question_public_123",
+            answer_snapshot: {
+              selectedLabels: ["A"],
+              textAnswer: null,
+              savedFromClientAt: "2026-05-19T08:00:00.000Z",
+            },
+            answer_record_status: "scored",
+            is_correct: true,
+            score: "1.0",
+            max_score: "1.0",
+            answered_at: now,
+            submitted_at: now,
+          };
+        },
+        async createPracticeAnswerRecord() {
+          throw new Error("manual ai_explanation must not create an answer");
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      manualService.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_public_123",
+        selectedLabels: ["A"],
+        aiExplanationTrigger: "manual_request",
+        savedFromClientAt: "2026-05-19T08:00:00.000Z",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          answerRecordPublicId: "answer_record_public_existing",
+          isCorrect: true,
+          score: "1.0",
+          aiExplanationStatus: "explained",
+          aiExplanationText:
+            "Local AI explanation: compare your answer with the standard answer and teacher analysis.",
+          aiExplanationEvidenceStatus: "none",
+        },
+      },
+    });
   });
 
   it("favorites an arbitrary objective practice question without submitting an answer", async () => {

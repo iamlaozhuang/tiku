@@ -187,6 +187,66 @@ describe("StudentPracticePage", () => {
     expect(document.body.textContent).not.toContain("do-not-render");
   });
 
+  it("renders objective ai_explanation feedback and manual trigger entry", () => {
+    const wrongFeedback = {
+      ...studentPracticeFixture.practices[0].feedbackByPaperQuestionPublicId[
+        "paper-question-marketing-001"
+      ],
+      aiExplanationStatus: "explained",
+      aiExplanationText:
+        "Local AI explanation: compare your answer with the standard answer and teacher analysis.",
+      aiExplanationLearningSuggestion:
+        "Review this knowledge point and retry a similar objective question.",
+      aiExplanationEvidenceStatus: "none" as const,
+    };
+    const correctFeedback = {
+      ...studentPracticeFixture.practices[0].feedbackByPaperQuestionPublicId[
+        "paper-question-marketing-002"
+      ],
+      aiExplanationStatus: "available",
+      aiExplanationText: null,
+    };
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-theory-002",
+        practices: [
+          {
+            practice: studentPracticeFixture.practices[0].practice,
+            feedbackByPaperQuestionPublicId: {
+              "paper-question-marketing-001": wrongFeedback,
+              "paper-question-marketing-002": correctFeedback,
+            },
+          },
+        ],
+      }),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /B\./ }));
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(screen.getByText("AI explanation")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Local AI explanation: compare your answer with the standard answer and teacher analysis.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Review this knowledge point and retry a similar objective question.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Evidence status: none")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "下一题" }));
+    fireEvent.click(screen.getByRole("button", { name: /A\./ }));
+    fireEvent.click(screen.getByRole("button", { name: "提交答案" }));
+
+    expect(
+      screen.getByRole("button", { name: "Need AI explanation" }),
+    ).toBeInTheDocument();
+  });
+
   it("renders local seed paper snapshots that store objective choices as options", () => {
     const runtimePractice = {
       ...studentPracticeFixture.practices[0].practice,

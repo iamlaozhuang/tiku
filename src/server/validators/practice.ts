@@ -6,6 +6,7 @@ export type NormalizedPracticeAnswerInput = {
   paperQuestionPublicId: string;
   selectedLabels: string[];
   textAnswer: string | null;
+  aiExplanationTrigger: "manual_request" | null;
   savedFromClientAt: string | null;
 };
 
@@ -77,6 +78,8 @@ export function normalizePracticeAnswerInput(
   );
   const selectedLabels = normalizeSelectedLabels(input.selectedLabels);
   const textAnswer = normalizeOptionalString(input.textAnswer);
+  const aiExplanationTrigger =
+    input.aiExplanationTrigger === "manual_request" ? "manual_request" : null;
   const savedFromClientAt = normalizeOptionalString(input.savedFromClientAt);
 
   if (
@@ -90,6 +93,7 @@ export function normalizePracticeAnswerInput(
     paperQuestionPublicId,
     selectedLabels,
     textAnswer,
+    aiExplanationTrigger,
     savedFromClientAt,
   };
 }
@@ -113,6 +117,7 @@ export function normalizePracticeQuestionFavoriteInput(
     paperQuestionPublicId,
     selectedLabels: normalizeSelectedLabels(input.selectedLabels),
     textAnswer: normalizeOptionalString(input.textAnswer),
+    aiExplanationTrigger: null,
     savedFromClientAt: normalizeOptionalString(input.savedFromClientAt),
   };
 }

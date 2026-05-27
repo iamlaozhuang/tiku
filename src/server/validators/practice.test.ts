@@ -33,7 +33,24 @@ describe("practice validators", () => {
       paperQuestionPublicId: "paper_question_public_123",
       selectedLabels: ["A", "B"],
       textAnswer: null,
+      aiExplanationTrigger: null,
       savedFromClientAt: "2026-05-19T08:05:00.000Z",
+    });
+  });
+
+  it("normalizes manual ai_explanation trigger for answered practice", () => {
+    expect(
+      normalizePracticeAnswerInput({
+        paperQuestionPublicId: "paper_question_public_123",
+        selectedLabels: ["A"],
+        aiExplanationTrigger: "manual_request",
+      }),
+    ).toEqual({
+      paperQuestionPublicId: "paper_question_public_123",
+      selectedLabels: ["A"],
+      textAnswer: null,
+      aiExplanationTrigger: "manual_request",
+      savedFromClientAt: null,
     });
   });
 
