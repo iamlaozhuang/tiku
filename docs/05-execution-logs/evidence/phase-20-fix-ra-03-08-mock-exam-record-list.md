@@ -6,7 +6,7 @@
 
 ## Summary
 
-- Result: pass; merged to master; pending push and branch cleanup.
+- Result: pass; pushed and cleaned.
 - Scope: implementation.
 - Changed surfaces: `exam_report` list DTO/mapper/validator/service repository, student `mock_exam` record-list UI, unit tests, task plan/evidence/state.
 - Gates: task claim readiness, focused RED/GREEN, typecheck, full unit, full e2e, build, readiness, git inventory, diff check, changed-file Prettier, naming, and quality gate passed.
@@ -75,5 +75,8 @@
   - changed-file Prettier check - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (131 files, 535 tests), and `format:check` passed.
-- push: pending.
-- cleanup: pending.
+- closeoutCommit: `d09a917400d8ae30e363935d4431608f28926f65` (`docs(student): record mock exam record list closeout`).
+- push: `git push origin master` - pass; `0953333..d09a917 master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-20-fix-ra-03-08-mock-exam-record-list` - failed in sandbox with ref lock permission denied.
+  - escalated `git branch -d codex/phase-20-fix-ra-03-08-mock-exam-record-list` - pass; deleted already-merged branch at `f0f63f5`.

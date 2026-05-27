@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T07:35:00-07:00"
+  updatedAt: "2026-05-27T07:40:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,11 +36,11 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: f0f63f566f9ebdace7be7f47b4996ec89b172603
-  lastKnownOriginMasterSha: 0953333925580a1daa2758b29cc52bec4e436840
+  lastKnownMasterSha: d09a917400d8ae30e363935d4431608f28926f65
+  lastKnownOriginMasterSha: d09a917400d8ae30e363935d4431608f28926f65
 currentTask:
   id: phase-20-fix-ra-03-08-mock-exam-record-list
-  status: merged
+  status: pushed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-08-mock-exam-record-list.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-08-mock-exam-record-list.md
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Push master, clean the short-lived branch, then record final push and cleanup evidence."
+  nextRecommendedAction: "Confirm master is clean/aligned, then select the next eligible low-risk Phase 21 22-A task."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-08-mock-exam-record-list.md
