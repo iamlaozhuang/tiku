@@ -11974,7 +11974,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-09-paper-archive-termination.md
-    status: validated
+    status: merged
     retryCount: 0
   - id: phase-20-fix-ra-02-10-paper-copy-disabled-question-marker
     title: Phase 20 Fix RA-02-10 Paper Copy Disabled Question Marker

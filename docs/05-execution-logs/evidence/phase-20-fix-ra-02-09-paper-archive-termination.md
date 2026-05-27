@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: pass, pending commit/merge/push/cleanup.
+- Result: pass, pending closeout docs commit, push, and cleanup.
 - Scope: implementation.
 - Changed surfaces: paper draft repository archive mutation, archive termination regression test, task plan/evidence/state.
 - Gates: task claim readiness, focused unit, full unit, e2e, build, readiness, git inventory, diff, Prettier, naming, and local quality gate passed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-02-09-001`; commit/merge/push/cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-02-09-001`; closeout docs commit, push, and cleanup pending.
 
 ## Startup Recovery
 
@@ -65,5 +65,23 @@
   - deleting the single damaged `routes.d.ts` changed the error to `.next/dev/types/validator.ts` missing `./routes.js`, indicating a stale/inconsistent `.next` generated cache group rather than a tracked source syntax issue.
 - pausedAt: `2026-05-27T15:30:31-07:00`.
 - pauseReason: user requested pause before cleaning the entire ignored `.next` cache.
+- resumeAt: `2026-05-27T15:52:19-07:00`.
+- resumed recovery checks:
+  - `git fetch origin` - pass.
+  - `git status --short --branch` - `## master...origin/master [ahead 3]`, clean.
+  - `git rev-list --left-right --count master...origin/master` - `3 0`.
+  - `git log --oneline origin/master..master` - only `dcf9c8d`, `4dd539e`, and `4316ad6`.
+  - `git branch --no-merged master` - none.
+  - `git worktree list` - only `D:/tiku`.
+- resumed post-merge master validation:
+  - `npm.cmd run build` - pass. The prior ignored `.next/` generated-cache error did not recur; no cache deletion was needed. Framework log noted `.env.local` existence only, contents were not read.
+  - `npm.cmd run test:unit` - pass, 134 test files and 548 tests.
+  - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; inventory showed clean `master` ahead of `origin/master` by the 02-09 implementation, merge, and pause commits.
+  - `git diff --check` - pass.
+  - changed-file Prettier check - pass after sandbox EPERM on local `node_modules` was rerun with escalation; all matched files use Prettier style.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 548 tests), and `format:check` passed.
 - push: pending.
 - cleanup: pending.
