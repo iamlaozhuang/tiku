@@ -7,6 +7,7 @@ export type NormalizedPracticeAnswerInput = {
   selectedLabels: string[];
   textAnswer: string | null;
   aiExplanationTrigger: "manual_request" | null;
+  aiScoringTrigger: "manual_request" | null;
   savedFromClientAt: string | null;
 };
 
@@ -80,6 +81,8 @@ export function normalizePracticeAnswerInput(
   const textAnswer = normalizeOptionalString(input.textAnswer);
   const aiExplanationTrigger =
     input.aiExplanationTrigger === "manual_request" ? "manual_request" : null;
+  const aiScoringTrigger =
+    input.aiScoringTrigger === "manual_request" ? "manual_request" : null;
   const savedFromClientAt = normalizeOptionalString(input.savedFromClientAt);
 
   if (
@@ -94,6 +97,7 @@ export function normalizePracticeAnswerInput(
     selectedLabels,
     textAnswer,
     aiExplanationTrigger,
+    aiScoringTrigger,
     savedFromClientAt,
   };
 }
@@ -118,6 +122,7 @@ export function normalizePracticeQuestionFavoriteInput(
     selectedLabels: normalizeSelectedLabels(input.selectedLabels),
     textAnswer: normalizeOptionalString(input.textAnswer),
     aiExplanationTrigger: null,
+    aiScoringTrigger: null,
     savedFromClientAt: normalizeOptionalString(input.savedFromClientAt),
   };
 }

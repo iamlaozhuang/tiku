@@ -540,6 +540,31 @@ function calculateObjectiveScore(
   };
 }
 
+function calculateSubjectiveAiScore(
+  question: PracticeQuestionSnapshot,
+  input: NormalizedPracticeAnswerInput,
+): string {
+  const maxScore = Number.parseFloat(question.score);
+
+  if (!Number.isFinite(maxScore) || maxScore <= 0) {
+    return "0.0";
+  }
+
+  const answerLength = input.textAnswer?.trim().length ?? 0;
+
+  if (answerLength === 0) {
+    return "0.0";
+  }
+
+  const answerLengthRatio = Math.min(1, answerLength / 40);
+  const earnedScore = Math.min(
+    maxScore,
+    Math.max(0.5, maxScore * answerLengthRatio),
+  );
+
+  return formatScore(earnedScore);
+}
+
 function buildAnswerSnapshot(
   input: NormalizedPracticeAnswerInput,
 ): PracticeAnswerSnapshotDto {
@@ -874,6 +899,12 @@ export function createPracticeService(
         question,
         normalizedInput,
       );
+      const subjectiveFinalScore =
+        isSubjectiveQuestion(question) &&
+        (subjectiveAnswerCount >= 1 ||
+          normalizedInput.aiScoringTrigger === "manual_request")
+          ? calculateSubjectiveAiScore(question, normalizedInput)
+          : null;
       const answerSnapshot = buildAnswerSnapshot(normalizedInput);
       const answerRecord = await repository.createPracticeAnswerRecord({
         publicId: publicIdFactory.createPublicId("answer_record"),
@@ -883,9 +914,12 @@ export function createPracticeService(
         questionPublicId: question.questionPublicId,
         questionSnapshot: question.snapshot,
         answerSnapshot,
-        answerRecordStatus: isCorrect === null ? "submitted" : "scored",
+        answerRecordStatus:
+          isCorrect === null && subjectiveFinalScore === null
+            ? "submitted"
+            : "scored",
         isCorrect,
-        score,
+        score: subjectiveFinalScore ?? score,
         maxScore: question.score,
         answeredAt: now,
         submittedAt: now,
@@ -912,10 +946,14 @@ export function createPracticeService(
             })
           : null;
       const retryRemainingCount = isSubjectiveQuestion(question)
-        ? Math.max(0, 1 - subjectiveAnswerCount)
+        ? subjectiveFinalScore === null
+          ? Math.max(0, 1 - subjectiveAnswerCount)
+          : 0
         : 0;
       const aiFeedback = isSubjectiveQuestion(question)
-        ? createSubjectiveAiHintFeedback(retryRemainingCount)
+        ? subjectiveFinalScore === null
+          ? createSubjectiveAiHintFeedback(retryRemainingCount)
+          : createEmptyAiFeedback()
         : isObjectiveQuestion(question) && answerRecord.is_correct === false
           ? createObjectiveAiExplanationFeedback()
           : isObjectiveQuestion(question) && answerRecord.is_correct === true
@@ -938,7 +976,10 @@ export function createPracticeService(
           analysis_rich_text: question.analysisRichText,
           mistake_book_public_id: mistakeBook?.public_id ?? null,
           ai_explanation_status: aiExplanationStatus,
-          ai_hint_status: isSubjectiveQuestion(question) ? "hinted" : null,
+          ai_hint_status:
+            isSubjectiveQuestion(question) && subjectiveFinalScore === null
+              ? "hinted"
+              : null,
           ...aiFeedback,
           answered_at: answerRecord.answered_at,
         }),

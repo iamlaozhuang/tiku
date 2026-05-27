@@ -1032,6 +1032,125 @@ describe("StudentPracticePage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("requests final scoring for subjective practice from the session runtime", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const practice = studentPracticeFixture.practices[1].practice;
+    const hintFeedback = {
+      ...studentPracticeFixture.practices[1].feedbackByPaperQuestionPublicId[
+        "paper-question-skill-001"
+      ],
+      score: null,
+      aiHintStatus: "hinted",
+      aiHintText: "Synthetic subjective hint",
+      retryRemainingCount: 1,
+    };
+    const scoringFeedback = {
+      ...hintFeedback,
+      score: "10.0",
+      aiHintStatus: null,
+      aiHintText: null,
+      aiHintImprovementDirections: [],
+      retryRemainingCount: 0,
+    };
+    const answerBodies: unknown[] = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-marketing-skill-001/answers"
+        ) {
+          const requestBody = JSON.parse(String(init?.body));
+          answerBodies.push(requestBody);
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                feedback:
+                  requestBody.aiScoringTrigger === "manual_request"
+                    ? scoringFeedback
+                    : hintFeedback,
+              },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-skill-001",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId(
+        "practice-surface-practice-marketing-skill-001",
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: {
+        value: "facts, legal basis, handling steps, and follow up.",
+      },
+    });
+    fireEvent.click(screen.getAllByRole("button")[1]);
+
+    expect(
+      await screen.findByText("Synthetic subjective hint"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button")[3]);
+
+    expect(
+      await screen.findByText("Final score: 10.0 / 10.0"),
+    ).toBeInTheDocument();
+    expect(answerBodies).toMatchObject([
+      {
+        paperQuestionPublicId: "paper-question-skill-001",
+        textAnswer: "facts, legal basis, handling steps, and follow up.",
+      },
+      {
+        paperQuestionPublicId: "paper-question-skill-001",
+        textAnswer: "facts, legal basis, handling steps, and follow up.",
+        aiScoringTrigger: "manual_request",
+      },
+    ]);
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
   it("prompts runtime learners to continue or restart saved practice progress", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const practice = {
