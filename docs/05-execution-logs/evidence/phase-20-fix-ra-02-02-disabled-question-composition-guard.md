@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: pass, pending commit/merge/push/cleanup.
+- Result: pass, merged into `master`; push/cleanup pending.
 - Scope: implementation.
 - Changed surfaces: paper draft repository source-question lookup, repository composition guard unit test, task plan/evidence/state.
 - Gates: task claim readiness, focused unit, full unit, e2e, build, readiness, git inventory, diff, Prettier, naming, and local quality gate passed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-02-02-001`; commit/merge/push/cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-02-02-001`; push/cleanup pending.
 
 ## Startup Recovery
 
@@ -53,7 +53,18 @@
 
 ## Closeout Status
 
-- commit: pending.
-- merge: pending.
+- implementationCommit: `e92789a93342fbef443cdce0ad25e68177b2fe4e` (`fix(paper): guard disabled question composition`).
+- merge: `458fe0851f91c812b56b4167ed594114d26a021a` (`merge: phase-20 fix ra-02-02 disabled question composition guard`) merged into `master`.
+- post-merge master validation:
+  - `npm.cmd run test:unit` - pass, 133 test files and 547 tests.
+  - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
+  - `npm.cmd run build` - pass; framework log noted `.env.local` existence only, contents were not read or copied.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; `master` was ahead of `origin/master` by implementation and merge commits only.
+  - `git diff --check` - pass.
+  - changed-file Prettier check - pass; sandbox check hit node_modules EPERM, escalated read-only rerun passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit`, and `format:check` passed.
+- closeoutEvidenceCommit: pending.
 - push: pending.
 - cleanup: pending.
