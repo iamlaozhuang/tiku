@@ -78,6 +78,19 @@ Before declaring a formatting baseline healthy, verify it in a freshly created w
 
 Evidence must record each command that was run and whether it passed, failed, or was intentionally skipped. Use this wording when a gate is not run:
 
+Each new evidence file should also include a compact `Summary` near the top:
+
+```text
+result: pass/fail/blocked/pending validation
+scope: read_only/docs_only/implementation/local_verification/closeout/blocked_gate
+changed surfaces: short list
+gates: lint/typecheck/test/build/e2e/readiness/git inventory
+forbiddenScope: env/dependency/schema/migration/staging/prod/cloud/deploy/real provider
+residualGaps: none or gap ids
+```
+
+The summary is an index for humans and future agents. The detailed command records below it remain the source of truth.
+
 ```text
 lint: pass/fail
 typecheck: pass/fail
