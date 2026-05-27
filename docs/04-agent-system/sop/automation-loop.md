@@ -213,6 +213,28 @@ If Windows leaves a worktree directory behind because of `node_modules` or other
 
 Closeout evidence must name the implementation commit. It does not need to contain the SHA of the closeout evidence commit itself, because that SHA is created after the file is written. Record the closeout evidence commit in the final handoff or `project-state.yaml` when useful instead of creating repeated evidence-only commits.
 
+## Project State Closeout Reconciliation
+
+After a task is merged, pushed, and cleaned up, reconcile `project-state.yaml` with Git reality before claiming the task is closed or starting the next task. This is required when a startup report shows that `master` is clean and aligned with `origin/master` but the handoff still says merge, push, or cleanup is pending.
+
+The reconciliation check must compare:
+
+- `git status --short --branch`;
+- `git rev-list --left-right --count master...origin/master`;
+- `git branch --no-merged master`;
+- `git worktree list`;
+- `project-state.yaml` `currentTask`, `handoff.nextRecommendedAction`, and latest evidence path.
+
+When Git confirms there are no unpushed commits, no unmerged short-lived branches, and no task worktree residue, `project-state.yaml` must not keep a stale handoff such as "await push", "await closeout merge", or "perform cleanup" for an already completed task.
+
+Use these state rules:
+
+- `currentTask` may point to the most recently closed task, but its `status` must be `closed`.
+- `handoff.nextRecommendedAction` must name the next actionable queue task or state that no executable pending task exists.
+- `handoff.lastSummaryPath` must point to the latest evidence that actually describes the recovery point.
+- When useful, record `repository.lastKnownMasterSha` and `repository.lastKnownOriginMasterSha` so future sessions can distinguish Git drift from stale handoff text.
+- Do not rewrite historical evidence only to record the SHA of the evidence commit that contains the record. Put that self-referential closeout detail in the final handoff or `project-state.yaml` instead.
+
 Before Phase 5 AI/RAG work starts, complete a Phase 5 entry gate. The gate must confirm dependency approval, secret and environment strategy, model configuration boundaries, prompt template versioning, AI call log redaction, RAG `evidence_status` behavior, pgvector or embedding verification strategy, and Browser/IAB usage rules.
 
 ## PR Baseline Hygiene
