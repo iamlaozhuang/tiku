@@ -256,6 +256,8 @@ Before Phase 5 AI/RAG work starts, complete a Phase 5 entry gate. The gate must 
 
 When a task needs local UI, browser, or rendered frontend verification, do not declare the built-in browser unavailable until the project evidence shows the discovery path below.
 
+For human-accompanied local product checks, also follow `docs/04-agent-system/sop/local-human-verification.md`. That playbook is required when the user asks for "真人体验验证", local verification accompaniment, local role-play, or a browser-guided readiness pass.
+
 1. Use the Browser skill and the `iab` backend for ordinary local targets such as `localhost`, `127.0.0.1`, `::1`, or `file://` unless the user asks for Chrome-specific state.
 2. Use the Chrome skill and the `extension` backend when the user asks for Chrome, an existing Chrome tab, cookies, logged-in session state, extensions, or another profile-backed browser condition.
 3. If tool discovery does not expose an obvious browser-specific tool, search for the generic Node REPL execution tool in this order: `node_repl js`, `mcp__node_repl__js`, `js`, then `node_repl js JavaScript execution`.
