@@ -94,6 +94,8 @@ git rev-list --left-right --count origin/master...master
 ```
 
 - Only remove the worktree and delete the merged branch after the closeout evidence confirms the target branch gates and Git state.
+- After push and cleanup, reconcile `project-state.yaml` against Git reality. If `master` is clean, aligned with `origin/master`, and has no unmerged task branches or task worktrees, do not leave `handoff.nextRecommendedAction` saying that push, merge, or cleanup is still pending.
+- Prefer recording the next actionable task in `handoff.nextRecommendedAction`. If no executable pending task exists, say that directly instead of repeating a completed closeout action.
 
 ## Stacked PR Rules
 

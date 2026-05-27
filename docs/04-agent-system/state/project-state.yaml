@@ -35,13 +35,16 @@ taskSource:
   queueStrategy: story_to_verifiable_units
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
+repository:
+  lastKnownMasterSha: 8f3f094362984db198d72e2aa56280d30024b89b
+  lastKnownOriginMasterSha: 8f3f094362984db198d72e2aa56280d30024b89b
 currentTask:
-  id: phase-15-session-startup-report-protocol
+  id: phase-15-project-state-closeout-reconciliation
   status: closed
   sourceStory: user-request-2026-05-26-agent-mechanism-upgrade
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-session-startup-report-protocol.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-session-startup-report-protocol.md
-  branch: codex/phase-15-session-startup-report-protocol
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-project-state-closeout-reconciliation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-project-state-closeout-reconciliation.md
+  branch: codex/phase-15-project-state-closeout-reconciliation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -78,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Session startup report protocol added; continue with phase-15-project-state-closeout-reconciliation.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-session-startup-report-protocol.md
+  nextRecommendedAction: Project-state closeout reconciliation rules added; continue with phase-15-local-human-verification-playbook.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-project-state-closeout-reconciliation.md
