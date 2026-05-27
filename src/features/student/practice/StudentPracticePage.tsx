@@ -470,6 +470,17 @@ function getPracticeScopeLabel(practice: PracticeDto): string {
   }`;
 }
 
+function hasPracticeResumeProgress(
+  practice: PracticeDto,
+  answerRecordCount: number,
+): boolean {
+  return (
+    answerRecordCount > 0 ||
+    practice.currentQuestionIndex > 0 ||
+    practice.lastAnsweredAt !== null
+  );
+}
+
 function includesLabel(selectedLabels: string[], label: string): boolean {
   return selectedLabels.includes(label);
 }
@@ -500,6 +511,83 @@ function StudentPracticeStatusMessage({
         <p className="text-text-secondary text-sm leading-6">{description}</p>
       </div>
       {action}
+    </section>
+  );
+}
+
+function PracticeResumeChoicePanel({
+  practice,
+  isRestarting,
+  onContinuePractice,
+  onRestartPractice,
+}: {
+  practice: PracticeDto;
+  isRestarting: boolean;
+  onContinuePractice: () => void;
+  onRestartPractice: () => void;
+}) {
+  return (
+    <section
+      data-testid="practice-resume-choice"
+      data-public-id={practice.publicId}
+      className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <Link
+            href="/home"
+            className="text-brand-primary text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            杩斿洖棣栭〉
+          </Link>
+          <h1 className="font-heading text-text-primary text-2xl font-semibold">
+            {getPaperName(practice)}
+          </h1>
+          <p className="text-text-secondary text-sm leading-6">
+            {getPracticeScopeLabel(practice)}
+          </p>
+        </div>
+        <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
+          <BookOpenCheck className="size-5" aria-hidden="true" />
+        </div>
+      </div>
+
+      <div className="bg-surface ring-border space-y-4 rounded-xl p-4 shadow-sm ring-1">
+        <div className="space-y-2">
+          <p className="text-brand-primary text-sm font-medium">
+            妫€娴嬪埌鏈畬鎴愮殑缁冧範
+          </p>
+          <h2 className="font-heading text-text-primary text-xl font-semibold">
+            缁х画涓婃杩涘害鎴栭噸鏂板紑濮?
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            褰撳墠杩涘害淇濈暀鍒扮 {practice.currentQuestionIndex + 1}{" "}
+            棰橈紝鏈夋晥鏈熻嚦 {practice.expiresAt.slice(0, 10)}銆?
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            data-testid="practice-resume-continue-button"
+            onClick={onContinuePractice}
+            className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            <CheckCircle2 className="size-4" aria-hidden="true" />
+            缁х画缁冧範
+          </button>
+          <button
+            type="button"
+            data-testid="practice-resume-restart-button"
+            disabled={isRestarting}
+            onClick={onRestartPractice}
+            className="border-border text-text-primary flex h-10 items-center justify-center gap-2 rounded-lg border bg-transparent text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RotateCcw className="size-4" aria-hidden="true" />
+            閲嶆柊寮€濮?
+          </button>
+        </div>
+      </div>
     </section>
   );
 }
@@ -875,6 +963,7 @@ export function StudentPracticePage({
   const [feedbackByQuestion, setFeedbackByQuestion] = useState(emptyFeedback);
   const [isMaterialOpen, setIsMaterialOpen] = useState(true);
   const [isRestarting, setIsRestarting] = useState(false);
+  const [isResumeChoiceVisible, setIsResumeChoiceVisible] = useState(false);
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -928,6 +1017,12 @@ export function StudentPracticePage({
             feedbackByPaperQuestionPublicId: {},
           },
         ]);
+        setIsResumeChoiceVisible(
+          hasPracticeResumeProgress(
+            practicePayload.data.practice,
+            practicePayload.data.answerRecords.length,
+          ),
+        );
         setCurrentQuestionIndex(
           Math.min(
             practicePayload.data.practice.currentQuestionIndex,
@@ -1151,6 +1246,7 @@ export function StudentPracticePage({
       setTextAnswerByQuestion(emptyTextAnswers);
       setFeedbackByQuestion(emptyFeedback);
       setIsMaterialOpen(true);
+      setIsResumeChoiceVisible(false);
       return;
     }
 
@@ -1204,12 +1300,24 @@ export function StudentPracticePage({
       setTextAnswerByQuestion(emptyTextAnswers);
       setFeedbackByQuestion(emptyFeedback);
       setIsMaterialOpen(true);
+      setIsResumeChoiceVisible(false);
       setRuntimeState("ready");
     } catch {
       setRuntimeState("error");
     } finally {
       setIsRestarting(false);
     }
+  }
+
+  if (isRuntimeMode && isResumeChoiceVisible) {
+    return (
+      <PracticeResumeChoicePanel
+        practice={practice}
+        isRestarting={isRestarting}
+        onContinuePractice={() => setIsResumeChoiceVisible(false)}
+        onRestartPractice={() => void handleRestartPractice()}
+      />
+    );
   }
 
   return (

@@ -866,6 +866,200 @@ describe("StudentPracticePage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
+  it("prompts runtime learners to continue or restart saved practice progress", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const practice = {
+      ...studentPracticeFixture.practices[0].practice,
+      currentQuestionIndex: 1,
+      lastAnsweredAt: "2026-05-19T08:20:00.000Z",
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice,
+                answerRecords: [
+                  {
+                    publicId: "answer-practice-resume-001",
+                    examMode: "practice",
+                    paperQuestionPublicId: "paper-question-marketing-001",
+                    questionPublicId: "question-marketing-001",
+                    answerSnapshot: {
+                      selectedLabels: ["B"],
+                      textAnswer: null,
+                      savedFromClientAt: "2026-05-19T08:20:00.000Z",
+                    },
+                    answerRecordStatus: "scored",
+                    isCorrect: true,
+                    score: "2.0",
+                    maxScore: "2.0",
+                    answeredAt: "2026-05-19T08:20:00.000Z",
+                    submittedAt: "2026-05-19T08:20:00.000Z",
+                  },
+                ],
+              },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-theory-002",
+      }),
+    );
+
+    const choicePanel = await screen.findByTestId("practice-resume-choice");
+
+    expect(choicePanel).toHaveAttribute(
+      "data-public-id",
+      "practice-marketing-theory-001",
+    );
+    expect(choicePanel).not.toHaveAttribute("data-id");
+    expect(
+      screen.queryByTestId("practice-surface-practice-marketing-theory-001"),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByTestId("practice-resume-continue-button"));
+
+    expect(
+      screen.getByTestId("practice-surface-practice-marketing-theory-001"),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("practice-resume-choice")).toBeNull();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("restarts saved practice progress from the runtime resume choice", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const startedPractice = {
+      ...studentPracticeFixture.practices[0].practice,
+      currentQuestionIndex: 1,
+      lastAnsweredAt: "2026-05-19T08:20:00.000Z",
+    };
+    const restartedPractice = {
+      ...startedPractice,
+      publicId: "practice-marketing-theory-restarted",
+      currentQuestionIndex: 0,
+      lastAnsweredAt: null,
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/practices") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice: startedPractice,
+                answerRecords: [
+                  {
+                    publicId: "answer-practice-resume-001",
+                    examMode: "practice",
+                    paperQuestionPublicId: "paper-question-marketing-001",
+                    questionPublicId: "question-marketing-001",
+                    answerSnapshot: {
+                      selectedLabels: ["B"],
+                      textAnswer: null,
+                      savedFromClientAt: "2026-05-19T08:20:00.000Z",
+                    },
+                    answerRecordStatus: "scored",
+                    isCorrect: true,
+                    score: "2.0",
+                    maxScore: "2.0",
+                    answeredAt: "2026-05-19T08:20:00.000Z",
+                    submittedAt: "2026-05-19T08:20:00.000Z",
+                  },
+                ],
+              },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/practices/practice-marketing-theory-001/restart"
+        ) {
+          expect(init?.method).toBe("POST");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                practice: restartedPractice,
+                answerRecords: [],
+              },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentPracticePage, {
+        paperPublicId: "paper-marketing-theory-002",
+      }),
+    );
+
+    expect(
+      await screen.findByTestId("practice-resume-choice"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("practice-resume-restart-button"));
+
+    await waitFor(() =>
+      expect(
+        screen.getByTestId(
+          "practice-surface-practice-marketing-theory-restarted",
+        ),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByTestId("practice-resume-choice")).toBeNull();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
   it("restarts an active practice through the session runtime", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const startedPractice = studentPracticeFixture.practices[0].practice;

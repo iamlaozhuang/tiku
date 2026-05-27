@@ -48,10 +48,6 @@ test.describe("student practice mock entry", () => {
     ).toBeVisible();
     await page.goto(`/practice?paperPublicId=${stablePaperPublicId}`);
     await expect(page).toHaveURL(/\/practice\?paperPublicId=/);
-    await expect(
-      page.locator('[data-testid^="practice-surface-"]'),
-    ).toBeVisible();
-    await expect(page.locator("body")).not.toContainText("practice-");
 
     const restartResponse = page.waitForResponse((response) => {
       const request = response.request();
@@ -63,8 +59,15 @@ test.describe("student practice mock entry", () => {
         )
       );
     });
-    await page.getByTestId("practice-restart-button").click();
+    const resumeChoice = page.getByTestId("practice-resume-choice");
+    await expect(resumeChoice).toBeVisible();
+    await expect(resumeChoice).not.toHaveAttribute("data-id", /.*/);
+    await page.getByTestId("practice-resume-restart-button").click();
     await expect((await restartResponse).ok()).toBeTruthy();
+    await expect(
+      page.locator('[data-testid^="practice-surface-"]'),
+    ).toBeVisible();
+    await expect(page.locator("body")).not.toContainText("practice-");
 
     await page.getByRole("button", { name: /^A\./ }).first().click();
     const practiceAnswerResponse = page.waitForResponse((response) => {
