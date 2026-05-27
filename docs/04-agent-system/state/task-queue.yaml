@@ -10321,3 +10321,86 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-admin-ops-logs.md
     status: pending
     retryCount: 0
+  - id: phase-17-prerequisite-readiness-planning
+    title: Phase 17 Prerequisite Readiness Planning
+    phase: phase-17-prerequisite-readiness
+    sourceStory: user-request-2026-05-27-phase-17-prerequisite-readiness
+    dependencies:
+      - phase-16-full-requirement-audit-planning
+    taskPlanPolicy: required
+    humanApproval: User authorized Phase 17 planning and allowed commit, merge, push, and cleanup for each independent task before continuing.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - prerequisite_readiness
+      - local_human_verification
+      - automation_state
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-27-phase-17-prerequisite-readiness-planning.md docs\05-execution-logs\evidence\2026-05-27-phase-17-prerequisite-readiness-planning.md docs\05-execution-logs\audits-reviews\2026-05-27-phase-17-prerequisite-readiness-checklist.md
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-17-prerequisite-readiness-planning.md
+    status: closed
+    retryCount: 0
+  - id: phase-17-local-e2e-prerequisite-readiness-audit
+    title: Phase 17 Local E2E Prerequisite Readiness Audit
+    phase: phase-17-prerequisite-readiness
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-17-prerequisite-readiness-checklist.md
+    dependencies:
+      - phase-17-prerequisite-readiness-planning
+    taskPlanPolicy: required
+    humanApproval: User authorized Phase 17 prerequisite audit execution and allowed commit, merge, push, and cleanup for each independent task before continuing; no business fixes are authorized inside this audit.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - prerequisite_readiness
+      - local_human_verification
+      - browser_runtime
+      - e2e_readiness
+      - evidence_integrity
+      - approval_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-17-local-e2e-prerequisite-readiness-audit.md
+    status: pending
+    retryCount: 0
