@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T08:47:57-07:00"
+  updatedAt: "2026-05-27T08:51:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,11 +36,11 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 4bcb97b92a2df91e86d5ddfc5ded803658412ed2
-  lastKnownOriginMasterSha: 6685f4fd353cc80ea14715cacb617f5999a5c05d
+  lastKnownMasterSha: 1c397f742ae73ca832d46c81da1f303527a68b29
+  lastKnownOriginMasterSha: 1c397f742ae73ca832d46c81da1f303527a68b29
 currentTask:
   id: phase-20-fix-ra-04-03-scoring-progress-page
-  status: closed
+  status: pushed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-04-03-scoring-progress-page.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-03-scoring-progress-page.md
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Push master, clean codex/phase-20-fix-ra-04-03-scoring-progress-page, verify master is clean/aligned, then claim the next eligible low-risk task."
+  nextRecommendedAction: "Master is pushed and the short-lived branch is cleaned; claim the next eligible low-risk pending task from the Phase 21 22-A queue."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-03-scoring-progress-page.md

@@ -40,7 +40,7 @@ tasks:
       - Test-Path 'docs\02-architecture\adr\adr-003-workplace-desktop-web-compatibility.md'
       - Select-String -Path 'docs\02-architecture\adr\adr-003-workplace-desktop-web-compatibility.md' -Pattern 'certified|已认证|完全符合|采购合规'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: closed
+    status: pushed
     retryCount: 0
   - id: phase-0-global-db-api-skeleton
     title: Global DB/API Skeleton
