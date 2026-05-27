@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-19-requirement-audit-review
-  updatedAt: "2026-05-27T02:35:00-07:00"
+  currentPhase: phase-20-requirement-gap-fixes
+  updatedAt: "2026-05-27T03:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 15f56f7bbc9c684ac16b575262e13cbb1297d8fb
-  lastKnownOriginMasterSha: 15f56f7bbc9c684ac16b575262e13cbb1297d8fb
+  lastKnownMasterSha: b32831a3817bb7d195514c0750018fa954498097
+  lastKnownOriginMasterSha: b32831a3817bb7d195514c0750018fa954498097
 currentTask:
-  id: phase-19-04-follow-up-queue-alignment
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-19-finding-inventory.md
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-19-04-follow-up-queue-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-19-04-follow-up-queue-alignment.md
-  branch: codex/phase-19-04-follow-up-queue-alignment
+  id: phase-20-reaudit-ra-01-08-redeem-code-generation-coverage
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-19-coverage-matrix-review.md#coverage-caveats-for-phase-19-04
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-reaudit-ra-01-08-redeem-code-generation-coverage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-20-reaudit-ra-01-08-redeem-code-generation-coverage.md
+  branch: codex/phase-20-reaudit-ra-01-08-redeem-code-generation-coverage
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -59,7 +59,7 @@ qualityGates:
     - lint
     - typecheck
   lastRun:
-    date: "2026-05-26"
+    date: "2026-05-27"
     readiness: pass
     lint: pass
     typecheck: pass
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 19 audit report review is complete. Next eligible follow-up is phase-20-reaudit-ra-01-08-redeem-code-generation-coverage or the existing Phase 20 requirement gap fix queue, subject to human prioritization.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-19-04-follow-up-queue-alignment.md
+  nextRecommendedAction: Commit the validated RA-01-08 redeem_code generation coverage re-audit, merge to master, push origin/master, and clean up the short-lived branch.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-20-reaudit-ra-01-08-redeem-code-generation-coverage.md
