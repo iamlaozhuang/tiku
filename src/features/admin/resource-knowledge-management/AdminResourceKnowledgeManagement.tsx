@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  ChevronDown,
+  ChevronUp,
   DatabaseZap,
   Download,
   FileText,
@@ -128,6 +130,14 @@ type ToastMessage = {
   tone: "success" | "error";
 };
 
+type MarkdownHeadingReviewItem = {
+  level: number;
+  lineIndex: number;
+  lineNumber: number;
+  path: string[];
+  title: string;
+};
+
 const resourceStatusLabels: Record<ResourceStatus, string> = {
   conversion_failed: "转换失败",
   converting: "转换中",
@@ -162,6 +172,63 @@ function formatLevel(value: number | null) {
 
 function formatResourceScope(resource: AdminResourceOpsSummaryDto) {
   return `${professionLabels[resource.profession]} ${formatLevel(resource.level)}`;
+}
+
+function collectMarkdownHeadingReviewItems(
+  markdownContent: string,
+): MarkdownHeadingReviewItem[] {
+  const headingCursor: Array<{ level: number; title: string }> = [];
+
+  return markdownContent.split("\n").flatMap((line, lineIndex) => {
+    const headingMatch = /^(#{1,6})\s+(.+?)\s*$/.exec(line);
+
+    if (headingMatch === null) {
+      return [];
+    }
+
+    const level = headingMatch[1].length;
+    const title = headingMatch[2].replace(/#+$/u, "").trim();
+
+    while (
+      headingCursor.length > 0 &&
+      headingCursor[headingCursor.length - 1].level >= level
+    ) {
+      headingCursor.pop();
+    }
+
+    headingCursor.push({ level, title });
+
+    return [
+      {
+        level,
+        lineIndex,
+        lineNumber: lineIndex + 1,
+        path: headingCursor.map((heading) => heading.title),
+        title,
+      },
+    ];
+  });
+}
+
+function updateMarkdownHeadingLevel(
+  markdownContent: string,
+  lineIndex: number,
+  nextLevel: number,
+) {
+  const lines = markdownContent.split("\n");
+  const targetLine = lines[lineIndex];
+
+  if (targetLine === undefined || !/^(#{1,6})\s+/.test(targetLine)) {
+    return markdownContent;
+  }
+
+  return lines
+    .map((line, currentLineIndex) =>
+      currentLineIndex === lineIndex
+        ? line.replace(/^#{1,6}\s+/u, `${"#".repeat(nextLevel)} `)
+        : line,
+    )
+    .join("\n");
 }
 
 function formatDateTime(value: string) {
@@ -1363,25 +1430,119 @@ function MarkdownReviewDialog({
   onConfirm: () => void;
   resource: AdminResourceOpsSummaryDto;
 }) {
+  const headingReviewItems = useMemo(
+    () => collectMarkdownHeadingReviewItems(markdownContent),
+    [markdownContent],
+  );
+
+  function handleChangeHeadingLevel(
+    headingItem: MarkdownHeadingReviewItem,
+    nextLevel: number,
+  ) {
+    if (nextLevel < 1 || nextLevel > 6) {
+      return;
+    }
+
+    onChange(
+      updateMarkdownHeadingLevel(
+        markdownContent,
+        headingItem.lineIndex,
+        nextLevel,
+      ),
+    );
+  }
+
   return (
     <div
       aria-modal="true"
       className="border-border bg-surface fixed top-12 left-1/2 z-50 flex max-h-[80vh] w-[min(960px,calc(100vw-32px))] -translate-x-1/2 flex-col rounded-md border p-4 shadow-lg"
       role="dialog"
     >
-      <div className="space-y-3">
+      <div className="min-h-0 space-y-3 overflow-y-auto">
         <h2 className="text-text-primary text-base font-semibold">
           校对{resource.title}的 Markdown
         </h2>
-        <label className="flex flex-col gap-2 text-sm font-medium">
-          <span className="text-text-secondary">Markdown 草稿</span>
-          <textarea
-            aria-label="Markdown 草稿"
-            className="border-border bg-surface text-text-primary min-h-80 resize-y rounded-md border p-3 font-mono text-sm"
-            value={markdownContent}
-            onChange={(event) => onChange(event.target.value)}
-          />
-        </label>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]">
+          <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <span className="text-text-secondary">Markdown 草稿</span>
+            <textarea
+              aria-label="Markdown 草稿"
+              className="border-border bg-surface text-text-primary min-h-80 resize-y rounded-md border p-3 font-mono text-sm"
+              value={markdownContent}
+              onChange={(event) => onChange(event.target.value)}
+            />
+          </label>
+          <section
+            aria-label="章节层级校对"
+            className="border-border bg-muted/30 rounded-md border p-3"
+          >
+            <div className="space-y-1">
+              <h3 className="text-text-primary text-sm font-semibold">
+                章节层级校对
+              </h3>
+              <p className="text-text-muted text-xs">
+                调整标题级别会同步改写 Markdown 标题符号。
+              </p>
+            </div>
+            {headingReviewItems.length === 0 ? (
+              <p className="text-text-secondary mt-4 text-sm">
+                当前草稿没有可识别的 Markdown 标题。
+              </p>
+            ) : (
+              <div className="mt-3 space-y-2">
+                {headingReviewItems.map((headingItem) => (
+                  <div
+                    className="border-border bg-surface rounded-md border p-3"
+                    key={`${headingItem.lineNumber}-${headingItem.title}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1">
+                        <p className="text-text-muted text-xs">
+                          第 {headingItem.lineNumber} 行 / {headingItem.level}级
+                        </p>
+                        <p className="text-text-primary truncate text-sm font-medium">
+                          {headingItem.path.join(" > ")}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 gap-1">
+                        <Button
+                          aria-label={`提升 ${headingItem.title} 的章节层级`}
+                          disabled={isSubmitting || headingItem.level === 1}
+                          size="icon-sm"
+                          title="提升章节层级"
+                          variant="outline"
+                          onClick={() =>
+                            handleChangeHeadingLevel(
+                              headingItem,
+                              headingItem.level - 1,
+                            )
+                          }
+                        >
+                          <ChevronUp aria-hidden="true" />
+                        </Button>
+                        <Button
+                          aria-label={`降低 ${headingItem.title} 的章节层级`}
+                          disabled={isSubmitting || headingItem.level === 6}
+                          size="icon-sm"
+                          title="降低章节层级"
+                          variant="outline"
+                          onClick={() =>
+                            handleChangeHeadingLevel(
+                              headingItem,
+                              headingItem.level + 1,
+                            )
+                          }
+                        >
+                          <ChevronDown aria-hidden="true" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
         <div className="flex gap-2">
           <Button disabled={isSubmitting} onClick={onConfirm}>
             保存草稿

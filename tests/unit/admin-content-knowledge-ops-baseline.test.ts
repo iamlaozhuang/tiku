@@ -354,7 +354,7 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
           data: {
             resource: resourcePayload.data.resources[0],
             localOnly: true,
-            markdownContent: "# 受控本地草稿\n\n仅用于单元测试",
+            markdownContent: "# 第一章\n\n## 第一节\n\n仅用于单元测试",
           },
         });
       }
@@ -1075,6 +1075,56 @@ describe("admin content and knowledge ops baseline", () => {
     );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("objectStoragePath");
+  });
+
+  it("reviews and adjusts Markdown chapter hierarchy before saving a local resource draft", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockResourceFetch();
+
+    render(createElement(AdminResourceKnowledgeManagement));
+
+    const firstResource = await screen.findByTestId(
+      "resource-row-resource-public-001",
+    );
+
+    fireEvent.click(
+      within(firstResource).getByRole("button", { name: "Markdown 校对" }),
+    );
+
+    const reviewDialog = await screen.findByRole("dialog");
+
+    expect(reviewDialog).toHaveTextContent("章节层级校对");
+    expect(reviewDialog).toHaveTextContent("第 1 行");
+    expect(reviewDialog).toHaveTextContent("1级");
+    expect(reviewDialog).toHaveTextContent("第一章");
+    expect(reviewDialog).toHaveTextContent("第 3 行");
+    expect(reviewDialog).toHaveTextContent("2级");
+    expect(reviewDialog).toHaveTextContent("第一章 > 第一节");
+
+    fireEvent.click(
+      within(reviewDialog).getByRole("button", {
+        name: "提升 第一节 的章节层级",
+      }),
+    );
+
+    expect(screen.getByLabelText("Markdown 草稿")).toHaveValue(
+      "# 第一章\n\n# 第一节\n\n仅用于单元测试",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Markdown 草稿已保存",
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/resources/resource-public-001",
+      expect.objectContaining({
+        body: JSON.stringify({
+          markdownContent: "# 第一章\n\n# 第一节\n\n仅用于单元测试",
+        }),
+        method: "PATCH",
+      }),
+    );
   });
 
   it("renders resource empty, unauthorized, error, filtered-empty, and unsafe publicId boundaries", async () => {
