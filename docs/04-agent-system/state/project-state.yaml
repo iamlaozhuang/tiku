@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T09:20:19-07:00"
+  updatedAt: "2026-05-27T09:24:34-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 5f785e8640efd1d5fe031d00fa918a1e8a73da2a
-  lastKnownOriginMasterSha: 5f785e8640efd1d5fe031d00fa918a1e8a73da2a
+  lastKnownMasterSha: 1dcab599ed1e27f1391fedac8a749857499186fe
+  lastKnownOriginMasterSha: 1dcab599ed1e27f1391fedac8a749857499186fe
 currentTask:
-  id: phase-20-fix-ra-05-04-markdown-chapter-review
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-05-04-markdown-chapter-review.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-04-markdown-chapter-review.md
-  branch: codex/phase-20-fix-ra-05-04-markdown-chapter-review
-  commitSha: d129088ca51660fc3db3bd84286e1c4068ae1da6
+  id: phase-20-fix-ra-02-02-disabled-question-composition-guard
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-02-02-disabled-question-composition-guard.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-02-disabled-question-composition-guard.md
+  branch: codex/phase-20-fix-ra-02-02-disabled-question-composition-guard
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Master is pushed and the short-lived branch is cleaned; claim the next eligible low-risk pending task from the Phase 21 22-A queue."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-04-markdown-chapter-review.md
+  nextRecommendedAction: "Commit phase-20-fix-ra-02-02-disabled-question-composition-guard, merge to master, verify on master, push origin/master, then clean the short-lived branch before claiming the next eligible low-risk task."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-02-disabled-question-composition-guard.md
