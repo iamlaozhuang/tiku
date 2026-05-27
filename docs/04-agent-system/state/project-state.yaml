@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T04:12:43-07:00"
+  updatedAt: "2026-05-27T04:18:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 2e1c38682a4de956fbfe61832e2d48e6d19f0d22
+  lastKnownMasterSha: 7a5ca4085f9869c5b09d2157f00294e3a305eb0f
   lastKnownOriginMasterSha: 2e1c38682a4de956fbfe61832e2d48e6d19f0d22
 currentTask:
   id: phase-20-fix-ra-03-04-practice-resume-choice
-  status: validated
+  status: merged
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-04-practice-resume-choice.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-04-practice-resume-choice.md
   branch: codex/phase-20-fix-ra-03-04-practice-resume-choice
-  commitSha: null
+  commitSha: 7a5ca4085f9869c5b09d2157f00294e3a305eb0f
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "phase-20-fix-ra-03-04-practice-resume-choice is implemented and locally validated on branch codex/phase-20-fix-ra-03-04-practice-resume-choice; commit, merge to master, validate master, push, and clean up."
+  nextRecommendedAction: "phase-20-fix-ra-03-04-practice-resume-choice is merged into master and validated on master; push origin/master, clean up the short-lived branch, then close the task."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-04-practice-resume-choice.md

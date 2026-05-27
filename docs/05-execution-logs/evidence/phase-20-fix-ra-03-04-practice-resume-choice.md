@@ -54,7 +54,16 @@
 
 ## Closeout
 
-- commit: pending.
-- merge: pending.
+- implementationCommit: `7a5ca4085f9869c5b09d2157f00294e3a305eb0f` (`fix(student): add practice resume choice`).
+- merge: fast-forward merged into `master`, `2e1c386..7a5ca40`.
+- post-merge master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; master ahead of origin/master by one implementation commit before closeout evidence commit.
+  - `git diff --check` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - Changed-file Prettier check - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (131 files, 531 tests), and `format:check` passed.
+  - `npm.cmd run test:e2e` - pass; 25/25 tests.
+  - `npm.cmd run build` - pass. Build log mentioned `.env.local` existence via framework environment loading only; contents were not read or copied.
 - push: pending.
 - cleanup: pending.
