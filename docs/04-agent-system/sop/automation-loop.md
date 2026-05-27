@@ -235,6 +235,14 @@ Use these state rules:
 - When useful, record `repository.lastKnownMasterSha` and `repository.lastKnownOriginMasterSha` so future sessions can distinguish Git drift from stale handoff text.
 - Do not rewrite historical evidence only to record the SHA of the evidence commit that contains the record. Put that self-referential closeout detail in the final handoff or `project-state.yaml` instead.
 
+## Blocked Gates Registry
+
+Long-lived approval gates live in `docs/04-agent-system/state/blocked-gates.yaml`. This registry is for cross-task red lines such as real provider access, staging/prod/cloud access, dependency changes, secret/env changes, deployment, and destructive data operations.
+
+The blocked gates registry does not replace `task-queue.yaml`. Use it only for approval gates that remain blocked across many tasks. Ordinary implementation blockers stay in the task queue and evidence.
+
+When a task touches or approaches a long-lived gate, the startup report and evidence must name the relevant gate id and whether it remains blocked. Do not mark a gate unblocked unless the task evidence includes the required human approval fields listed in `blocked-gates.yaml`.
+
 Before Phase 5 AI/RAG work starts, complete a Phase 5 entry gate. The gate must confirm dependency approval, secret and environment strategy, model configuration boundaries, prompt template versioning, AI call log redaction, RAG `evidence_status` behavior, pgvector or embedding verification strategy, and Browser/IAB usage rules.
 
 ## PR Baseline Hygiene
