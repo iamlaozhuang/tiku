@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 4ffdd258a2f42a5c99284cec85fe2f8f83ad1796
-  lastKnownOriginMasterSha: 4ffdd258a2f42a5c99284cec85fe2f8f83ad1796
+  lastKnownMasterSha: 424e89bfaf247dd3b37ece4b530a2504171d801e
+  lastKnownOriginMasterSha: 424e89bfaf247dd3b37ece4b530a2504171d801e
 currentTask:
-  id: phase-18-audit-ra-04-ai-scoring-explanation-hint-model
+  id: phase-18-audit-ra-05-rag-knowledge
   status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-04
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md
-  branch: codex/phase-18-audit-ra-04-ai-scoring-explanation-hint-model
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-05
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md
+  branch: codex/phase-18-audit-ra-05-rag-knowledge
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: After committing, merging, pushing, and cleaning the RA-04 branch, continue Phase 18 with RA-05 RAG and knowledge audit using audit-only docs/state writes.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md
+  nextRecommendedAction: After committing, merging, pushing, and cleaning the RA-05 branch, continue Phase 18 with RA-06 Admin Ops Logs And Permissions audit using audit-only docs/state writes.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md
