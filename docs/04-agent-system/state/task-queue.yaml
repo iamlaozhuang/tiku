@@ -88,7 +88,7 @@ tasks:
       - Test-Path 'docs\04-agent-system\sop\skill-dispatch-matrix.md'
       - Test-Path 'docs\04-agent-system\sop\dependency-introduction-gate.md'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: done
+    status: closed
     retryCount: 0
   - id: phase-0-state-and-roadmap
     title: State, Queue, and Roadmap
