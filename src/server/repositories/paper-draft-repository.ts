@@ -210,6 +210,11 @@ type SourceQuestionSnapshotRow = {
   material_subject: Subject | null;
 };
 
+type SourceQuestionLookupInput = {
+  publicId: string;
+  requiredStatus?: QuestionStatus;
+};
+
 export function createPostgresPaperDraftRepository(
   options: RuntimeDatabaseOptions = {},
 ): PaperDraftRepository {
@@ -318,10 +323,10 @@ export function createPostgresPaperDraftRepository(
         database,
         input.paperPublicId,
       );
-      const sourceQuestion = await findSourceQuestionByPublicId(
-        database,
-        input.questionPublicId,
-      );
+      const sourceQuestion = await findSourceQuestionByPublicId(database, {
+        publicId: input.questionPublicId,
+        requiredStatus: "available",
+      });
 
       if (
         paperRow === null ||
@@ -670,7 +675,9 @@ export function createPostgresPaperDraftRepository(
           for (const sourcePaperQuestion of sourceSection.paper_questions) {
             const sourceQuestion = await findSourceQuestionByPublicId(
               transaction as RuntimeDatabase,
-              sourcePaperQuestion.source_question_public_id,
+              {
+                publicId: sourcePaperQuestion.source_question_public_id,
+              },
             );
 
             if (sourceQuestion === null) {
@@ -920,8 +927,14 @@ async function hydratePapers(
 
 async function findSourceQuestionByPublicId(
   database: RuntimeDatabase,
-  publicId: string,
+  input: SourceQuestionLookupInput,
 ): Promise<SourceQuestionSnapshotRow | null> {
+  const conditions = [eq(question.public_id, input.publicId)];
+
+  if (input.requiredStatus !== undefined) {
+    conditions.push(eq(question.status, input.requiredStatus));
+  }
+
   const [row] = await database
     .select({
       id: question.id,
@@ -946,7 +959,7 @@ async function findSourceQuestionByPublicId(
     })
     .from(question)
     .leftJoin(material, eq(material.id, question.material_id))
-    .where(eq(question.public_id, publicId))
+    .where(and(...conditions))
     .limit(1);
 
   return row ?? null;
