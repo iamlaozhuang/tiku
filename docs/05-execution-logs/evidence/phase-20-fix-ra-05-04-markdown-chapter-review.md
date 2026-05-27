@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: pass, merged to master, pending push/cleanup.
+- Result: pass.
 - Scope: implementation.
 - Changed surfaces: admin resource Markdown review dialog, admin resource UI unit tests, task plan/evidence/state.
 - Gates: task claim readiness, focused unit, full unit, e2e, build, readiness, git inventory, diff, Prettier, naming, and local quality gate passed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-05-04-001`; push/cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-05-04-001`.
 
 ## Startup Recovery
 
@@ -56,6 +56,7 @@
 
 - implementationCommit: `d129088ca51660fc3db3bd84286e1c4068ae1da6` (`fix(resource): add markdown chapter review controls`).
 - merge: `c24dec1e04ba29d1cfec47ac8a7eb0000ba2c54f` (`merge: phase-20 fix ra-05-04 markdown chapter review`) merged into `master`.
+- closeoutEvidenceCommit: `5f785e8640efd1d5fe031d00fa918a1e8a73da2a` (`docs(resource): record markdown chapter review closeout`).
 - post-merge master validation:
   - `npm.cmd run test:unit` - pass, 132 test files and 546 tests.
   - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
@@ -66,5 +67,12 @@
   - changed-file Prettier check - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit`, and `format:check` passed.
-- push: pending.
-- cleanup: pending.
+- push: `git push origin master` passed, `de64fe1..5f785e8 master -> master`.
+- cleanup:
+  - initial `git branch -d codex/phase-20-fix-ra-05-04-markdown-chapter-review` failed in sandbox with ref lock permission denied.
+  - escalated `git branch -d codex/phase-20-fix-ra-05-04-markdown-chapter-review` passed; deleted already-merged branch at `d129088`.
+- final cleanup verification before this evidence update:
+  - `git status --short --branch` showed `## master...origin/master`.
+  - `git rev-parse HEAD` and `git rev-parse origin/master` both returned `5f785e8640efd1d5fe031d00fa918a1e8a73da2a`.
+  - `git branch --list "codex/*"` returned no branches.
+  - `git worktree list` showed only `D:/tiku  5f785e8 [master]`.
