@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import type { MaterialDto } from "../contracts/material-contract";
 import { createMaterialRouteHandlers } from "./material-route";
 import type { MaterialService } from "./material-service";
 
-const materialDto = {
+const materialDto: MaterialDto = {
   publicId: "material_public_123",
   title: "物流案例材料",
   contentRichText: "<p>仓储作业案例</p>",
@@ -13,9 +14,13 @@ const materialDto = {
   status: "available",
   isLocked: false,
   lockedAt: null,
+  references: {
+    questions: [],
+    papers: [],
+  },
   createdAt: "2026-05-19T02:00:00.000Z",
   updatedAt: "2026-05-19T02:00:00.000Z",
-} as const;
+};
 
 function createService(): MaterialService {
   return {

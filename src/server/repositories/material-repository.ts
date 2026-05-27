@@ -1,9 +1,16 @@
 import { randomUUID } from "node:crypto";
 
-import { and, asc, count, desc, eq, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 
-import { admin, material } from "@/db/schema";
-import type { MaterialStatus, Profession, Subject } from "../models/paper";
+import { admin, material, paper, question, questionGroup } from "@/db/schema";
+import type {
+  MaterialStatus,
+  PaperStatus,
+  Profession,
+  QuestionStatus,
+  QuestionType,
+  Subject,
+} from "../models/paper";
 import type {
   NormalizedCreateMaterialInput,
   NormalizedMaterialListInput,
@@ -29,6 +36,26 @@ export type MaterialAccessRow = {
   locked_at: Date | null;
   created_at: Date;
   updated_at: Date;
+  references?: MaterialReferenceRows;
+};
+
+export type MaterialQuestionReferenceRow = {
+  question_public_id: string;
+  question_type: QuestionType;
+  status: QuestionStatus;
+  updated_at: Date;
+};
+
+export type MaterialPaperReferenceRow = {
+  paper_public_id: string;
+  name: string;
+  paper_status: PaperStatus;
+  updated_at: Date;
+};
+
+export type MaterialReferenceRows = {
+  questions: MaterialQuestionReferenceRow[];
+  papers: MaterialPaperReferenceRow[];
 };
 
 export type MaterialListResult = {
@@ -88,7 +115,7 @@ export function createPostgresMaterialRepository(
         .where(and(...conditions));
 
       return {
-        rows,
+        rows: await attachMaterialReferences(database, rows),
         total: totalRow?.value ?? 0,
       };
     },
@@ -118,7 +145,19 @@ export function createPostgresMaterialRepository(
     },
 
     async findMaterialByPublicId(publicId) {
-      return findMaterialByPublicId(getDatabase(), publicId);
+      const database = getDatabase();
+      const row = await findMaterialByPublicId(database, publicId);
+
+      if (row === null) {
+        return null;
+      }
+
+      const [materialWithReferences] = await attachMaterialReferences(
+        database,
+        [row],
+      );
+
+      return materialWithReferences ?? null;
     },
 
     async updateMaterial(input, context) {
@@ -243,6 +282,111 @@ async function findMaterialByPublicId(
     .limit(1);
 
   return row ?? null;
+}
+
+function createEmptyMaterialReferenceRows(): MaterialReferenceRows {
+  return {
+    questions: [],
+    papers: [],
+  };
+}
+
+async function attachMaterialReferences(
+  database: RuntimeDatabase,
+  rows: MaterialAccessRow[],
+): Promise<MaterialAccessRow[]> {
+  const materialIds = rows.map((row) => row.id);
+
+  if (materialIds.length === 0) {
+    return rows;
+  }
+
+  const referencesByMaterialId = await listMaterialReferencesByMaterialId(
+    database,
+    materialIds,
+  );
+
+  return rows.map((row) => ({
+    ...row,
+    references:
+      referencesByMaterialId.get(row.id) ?? createEmptyMaterialReferenceRows(),
+  }));
+}
+
+async function listMaterialReferencesByMaterialId(
+  database: RuntimeDatabase,
+  materialIds: number[],
+): Promise<Map<number, MaterialReferenceRows>> {
+  const referencesByMaterialId = new Map<number, MaterialReferenceRows>();
+  const ensureReferences = (materialId: number): MaterialReferenceRows => {
+    const existing = referencesByMaterialId.get(materialId);
+
+    if (existing !== undefined) {
+      return existing;
+    }
+
+    const references = createEmptyMaterialReferenceRows();
+    referencesByMaterialId.set(materialId, references);
+
+    return references;
+  };
+
+  const questionRows = await database
+    .select({
+      material_id: question.material_id,
+      question_public_id: question.public_id,
+      question_type: question.question_type,
+      status: question.status,
+      updated_at: question.updated_at,
+    })
+    .from(question)
+    .where(inArray(question.material_id, materialIds))
+    .orderBy(asc(question.updated_at));
+
+  for (const row of questionRows) {
+    if (row.material_id === null) {
+      continue;
+    }
+
+    ensureReferences(row.material_id).questions.push({
+      question_public_id: row.question_public_id,
+      question_type: row.question_type,
+      status: row.status,
+      updated_at: row.updated_at,
+    });
+  }
+
+  const seenPaperKeys = new Set<string>();
+  const paperRows = await database
+    .select({
+      material_id: questionGroup.material_id,
+      paper_public_id: paper.public_id,
+      name: paper.name,
+      paper_status: paper.paper_status,
+      updated_at: paper.updated_at,
+    })
+    .from(questionGroup)
+    .innerJoin(paper, eq(paper.id, questionGroup.paper_id))
+    .where(inArray(questionGroup.material_id, materialIds))
+    .orderBy(asc(paper.updated_at));
+
+  for (const row of paperRows) {
+    const paperKey = `${row.material_id}:${row.paper_public_id}`;
+
+    if (seenPaperKeys.has(paperKey)) {
+      continue;
+    }
+
+    seenPaperKeys.add(paperKey);
+    ensureReferences(row.material_id).papers.push({
+      paper_public_id: row.paper_public_id,
+      name: row.name,
+      paper_status: row.paper_status,
+      updated_at: row.updated_at,
+    });
+  }
+
+  return referencesByMaterialId;
 }
 
 async function resolveActorAdminId(

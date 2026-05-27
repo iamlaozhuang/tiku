@@ -608,24 +608,6 @@ export function AdminQuestionMaterialManagement({
       }),
     [keyword, levelFilter, materials, profession, status, subject],
   );
-  const referencedQuestionPublicIdsByMaterialPublicId = useMemo(() => {
-    return questions.reduce<Record<string, string[]>>(
-      (referencedQuestions, question) => {
-        if (question.materialPublicId === null) {
-          return referencedQuestions;
-        }
-
-        return {
-          ...referencedQuestions,
-          [question.materialPublicId]: [
-            ...(referencedQuestions[question.materialPublicId] ?? []),
-            question.publicId,
-          ],
-        };
-      },
-      {},
-    );
-  }, [questions]);
   const selectedQuestionPublicId =
     activeForm?.kind === "question" ? activeForm.publicId : null;
   const selectedMaterialPublicId =
@@ -1066,9 +1048,6 @@ export function AdminQuestionMaterialManagement({
             />
           ) : (
             <MaterialList
-              referencedQuestionPublicIdsByMaterialPublicId={
-                referencedQuestionPublicIdsByMaterialPublicId
-              }
               rows={displayedMaterials}
               selectedPublicId={selectedMaterialPublicId}
               onCopy={(publicId) => void handleMaterialAction(publicId, "copy")}
@@ -2199,14 +2178,12 @@ function KnowledgeRecommendationReviewPanel({
 }
 
 function MaterialList({
-  referencedQuestionPublicIdsByMaterialPublicId,
   rows,
   selectedPublicId,
   onCopy,
   onDisable,
   onEdit,
 }: {
-  referencedQuestionPublicIdsByMaterialPublicId: Record<string, string[]>;
   rows: MaterialDto[];
   selectedPublicId: string | null;
   onCopy: (publicId: string) => void;
@@ -2221,9 +2198,12 @@ function MaterialList({
     <div className="grid gap-3">
       {rows.map((material) => {
         const isSelected = material.publicId === selectedPublicId;
-        const referencedQuestionPublicIds =
-          referencedQuestionPublicIdsByMaterialPublicId[material.publicId] ??
-          [];
+        const referencedQuestionPublicIds = material.references.questions.map(
+          (reference) => reference.questionPublicId,
+        );
+        const referencedPaperPublicIds = material.references.papers.map(
+          (reference) => reference.paperPublicId,
+        );
 
         return (
           <article
@@ -2306,7 +2286,11 @@ function MaterialList({
             />
             <ReferenceBlock
               label="关联试卷"
-              value="当前 runtime DTO 未提供试卷引用列表"
+              value={
+                referencedPaperPublicIds.length === 0
+                  ? "当前没有试卷引用"
+                  : referencedPaperPublicIds.join(", ")
+              }
             />
           </article>
         );

@@ -158,6 +158,24 @@ const materialPayload = {
       status: "available",
       isLocked: false,
       lockedAt: null,
+      references: {
+        questions: [
+          {
+            questionPublicId: "question-marketing-001",
+            questionType: "single_choice",
+            status: "available",
+            updatedAt: "2026-05-19T06:20:00.000Z",
+          },
+        ],
+        papers: [
+          {
+            paperPublicId: "paper-material-ref-001",
+            name: "Material reference paper",
+            paperStatus: "published",
+            updatedAt: "2026-05-19T08:00:00.000Z",
+          },
+        ],
+      },
       createdAt: "2026-05-19T06:00:00.000Z",
       updatedAt: "2026-05-19T06:00:00.000Z",
       id: 201,
@@ -172,6 +190,10 @@ const materialPayload = {
       status: "available",
       isLocked: true,
       lockedAt: "2026-05-19T07:00:00.000Z",
+      references: {
+        questions: [],
+        papers: [],
+      },
       createdAt: "2026-05-19T05:00:00.000Z",
       updatedAt: "2026-05-19T07:00:00.000Z",
       id: 202,
@@ -708,6 +730,8 @@ describe("AdminQuestionMaterialManagement", () => {
       "data-public-id",
       "material-marketing-001",
     );
+    expect(materialRow).toHaveTextContent("question-marketing-001");
+    expect(materialRow).toHaveTextContent("paper-material-ref-001");
     expect(materialRow).toHaveTextContent("营销 / 3级 / 理论");
 
     fireEvent.change(screen.getByLabelText("关键词"), {

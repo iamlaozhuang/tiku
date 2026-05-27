@@ -97,7 +97,28 @@ describe("material service", () => {
 
           return {
             total: 1,
-            rows: [createMaterial()],
+            rows: [
+              createMaterial({
+                references: {
+                  questions: [
+                    {
+                      question_public_id: "question_public_123",
+                      question_type: "single_choice",
+                      status: "available",
+                      updated_at: createdAt,
+                    },
+                  ],
+                  papers: [
+                    {
+                      paper_public_id: "paper_public_123",
+                      name: "物流材料引用试卷",
+                      paper_status: "published",
+                      updated_at: createdAt,
+                    },
+                  ],
+                },
+              }),
+            ],
           };
         },
       }),
@@ -120,6 +141,24 @@ describe("material service", () => {
           contentRichText: "<p>仓储作业案例</p>",
           status: "available",
           isLocked: false,
+          references: {
+            questions: [
+              {
+                questionPublicId: "question_public_123",
+                questionType: "single_choice",
+                status: "available",
+                updatedAt: "2026-05-19T02:00:00.000Z",
+              },
+            ],
+            papers: [
+              {
+                paperPublicId: "paper_public_123",
+                name: "物流材料引用试卷",
+                paperStatus: "published",
+                updatedAt: "2026-05-19T02:00:00.000Z",
+              },
+            ],
+          },
         },
       ],
       pagination: {
@@ -221,6 +260,10 @@ describe("material service", () => {
           status: "available",
           isLocked: false,
           lockedAt: null,
+          references: {
+            questions: [],
+            papers: [],
+          },
           createdAt: "2026-05-19T02:00:00.000Z",
           updatedAt: "2026-05-19T02:00:00.000Z",
         },

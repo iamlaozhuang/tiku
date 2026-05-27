@@ -201,6 +201,10 @@ export const adminQuestionMaterialFixture: AdminQuestionMaterialFixture = {
         status: "available",
         isLocked: false,
         lockedAt: null,
+        references: {
+          questions: [],
+          papers: [],
+        },
         createdAt: "2026-05-19T06:00:00.000Z",
         updatedAt: "2026-05-19T06:00:00.000Z",
       },
@@ -224,6 +228,10 @@ export const adminQuestionMaterialFixture: AdminQuestionMaterialFixture = {
         status: "disabled",
         isLocked: false,
         lockedAt: null,
+        references: {
+          questions: [],
+          papers: [],
+        },
         createdAt: "2026-05-17T02:00:00.000Z",
         updatedAt: "2026-05-18T02:00:00.000Z",
       },

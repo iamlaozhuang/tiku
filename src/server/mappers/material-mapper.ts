@@ -9,6 +9,11 @@ function formatNullableTimestamp(value: Date | null): string | null {
 }
 
 export function mapMaterialToApi(material: MaterialAccessRow): MaterialDto {
+  const references = material.references ?? {
+    questions: [],
+    papers: [],
+  };
+
   return {
     publicId: material.public_id,
     title: material.title,
@@ -19,6 +24,20 @@ export function mapMaterialToApi(material: MaterialAccessRow): MaterialDto {
     status: material.status,
     isLocked: material.is_locked,
     lockedAt: formatNullableTimestamp(material.locked_at),
+    references: {
+      questions: references.questions.map((reference) => ({
+        questionPublicId: reference.question_public_id,
+        questionType: reference.question_type,
+        status: reference.status,
+        updatedAt: reference.updated_at.toISOString(),
+      })),
+      papers: references.papers.map((reference) => ({
+        paperPublicId: reference.paper_public_id,
+        name: reference.name,
+        paperStatus: reference.paper_status,
+        updatedAt: reference.updated_at.toISOString(),
+      })),
+    },
     createdAt: material.created_at.toISOString(),
     updatedAt: material.updated_at.toISOString(),
   };

@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T05:14:00-07:00"
+  updatedAt: "2026-05-27T05:19:34-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: e4af2544d1951fd655c3c17fc4d5fe2084e46e55
-  lastKnownOriginMasterSha: 2ec81479b2c2f548d593b54a0fc81ab846dcc102
+  lastKnownMasterSha: 08b95ec0d56e64d9f538549516ff85881155a84e
+  lastKnownOriginMasterSha: 08b95ec0d56e64d9f538549516ff85881155a84e
 currentTask:
-  id: phase-20-fix-ra-02-10-paper-copy-disabled-question-marker
-  status: closed
+  id: phase-20-fix-ra-02-06-material-reference-list
+  status: in_progress
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-02-10-paper-copy-disabled-question-marker.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker.md
-  branch: codex/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker
-  commitSha: e4af2544d1951fd655c3c17fc4d5fe2084e46e55
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-02-06-material-reference-list.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-06-material-reference-list.md
+  branch: codex/phase-20-fix-ra-02-06-material-reference-list
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "master has phase-20-fix-ra-02-10-paper-copy-disabled-question-marker merged and validated; after push and branch cleanup, next eligible low-risk 22-A task is phase-20-fix-ra-02-06-material-reference-list."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker.md
+  nextRecommendedAction: "Continue phase-20-fix-ra-02-06-material-reference-list on branch codex/phase-20-fix-ra-02-06-material-reference-list."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-06-material-reference-list.md
