@@ -582,6 +582,31 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
 
   await page.goto("/ops/redeem-codes");
   await expect(page.getByRole("heading", { name: "卡密管理" })).toBeVisible();
+  const redeemCodeRow = page
+    .locator('[data-testid^="admin-redeem-code-"]')
+    .first();
+
+  if ((await redeemCodeRow.count()) > 0) {
+    const redeemCodePublicId =
+      (await redeemCodeRow.getAttribute("data-public-id")) ?? "";
+
+    await redeemCodeRow.getByRole("button", { name: "详情" }).click();
+
+    const redeemCodeDetail = page.locator(
+      `[data-testid="admin-redeem-code-detail-${redeemCodePublicId}"]`,
+    );
+
+    await expect(redeemCodeDetail).toBeVisible();
+    await expect(redeemCodeDetail).toHaveAttribute(
+      "data-public-id",
+      redeemCodePublicId,
+    );
+    await expect(redeemCodeDetail).not.toHaveAttribute("data-id", /.*/);
+    await expect(redeemCodeDetail).not.toContainText("code_hash");
+    await expect(redeemCodeDetail).not.toContainText("RC-2026-0001-PLAIN");
+    await expect(redeemCodeDetail).toContainText("卡密详情");
+  }
+
   await expect(page.locator("body")).not.toContainText(adminToken ?? "");
   await expect(page.locator("body")).not.toContainText("code_hash");
   await testInfo.attach("admin-redeem-codes", {

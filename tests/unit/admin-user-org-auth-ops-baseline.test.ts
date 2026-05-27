@@ -164,6 +164,7 @@ const redeemCodePayload = {
         level: 3,
         status: "unused",
         redeemedUserPublicId: null,
+        redeemDeadlineAt: "2026-06-24T15:59:59.999Z",
         createdAt: "2026-05-22T00:00:00.000Z",
       },
     ],
@@ -904,5 +905,45 @@ describe("admin user organization authorization ops baseline", () => {
       durationDay: 365,
       redeemDeadlineDate: "2026-06-24",
     });
+  });
+
+  it("renders a redacted redeem_code detail view from the redeem code page", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockSystemOpsFetch();
+
+    render(createElement(AdminRedeemCodePage));
+
+    await screen.findByRole("heading", { name: "卡密管理" });
+
+    const redeemCodeRow = await screen.findByTestId(
+      "admin-redeem-code-redeem-code-public-001",
+    );
+
+    fireEvent.click(
+      within(redeemCodeRow).getByRole("button", { name: "详情" }),
+    );
+
+    const redeemCodeDetail = await screen.findByTestId(
+      "admin-redeem-code-detail-redeem-code-public-001",
+    );
+
+    expect(redeemCodeDetail).toHaveAttribute(
+      "data-public-id",
+      "redeem-code-public-001",
+    );
+    expect(redeemCodeDetail).not.toHaveAttribute("data-id");
+    expect(redeemCodeDetail).toHaveTextContent("RC-2026-****");
+    expect(redeemCodeDetail).toHaveTextContent("redeem-code-public-001");
+    expect(redeemCodeDetail).toHaveTextContent("未兑换");
+    expect(redeemCodeDetail).toHaveTextContent("2026-06-24");
+    expect(redeemCodeDetail).not.toHaveTextContent("LOCALTST");
+    expect(redeemCodeDetail).not.toHaveTextContent("code_hash");
+
+    fireEvent.click(
+      within(redeemCodeDetail).getByRole("button", { name: "关闭" }),
+    );
+    expect(
+      screen.queryByTestId("admin-redeem-code-detail-redeem-code-public-001"),
+    ).not.toBeInTheDocument();
   });
 });

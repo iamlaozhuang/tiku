@@ -7,6 +7,7 @@ import {
   Building2,
   CheckCircle2,
   Clock3,
+  Eye,
   KeyRound,
   LoaderCircle,
   Pencil,
@@ -905,8 +906,10 @@ function EmployeeList({
 }
 
 function RedeemCodeList({
+  onViewDetail,
   redeemCodes,
 }: {
+  onViewDetail: (publicId: string) => void;
   redeemCodes: AdminRedeemCodeData["redeemCodes"];
 }) {
   return (
@@ -933,12 +936,102 @@ function RedeemCodeList({
               </span>
             </p>
           </div>
-          <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-            {redeemCodeStatusLabels[redeemCode.status]}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+              {redeemCodeStatusLabels[redeemCode.status]}
+            </span>
+            <button
+              type="button"
+              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-transform active:scale-[0.98]"
+              onClick={() => onViewDetail(redeemCode.publicId)}
+            >
+              <Eye className="size-3.5" aria-hidden="true" />
+              详情
+            </button>
+          </div>
         </AdminDataRow>
       ))}
     </AdminPanel>
+  );
+}
+
+function RedeemCodeDetailPanel({
+  onClose,
+  redeemCode,
+}: {
+  onClose: () => void;
+  redeemCode: AdminRedeemCodeData["redeemCodes"][number];
+}) {
+  return (
+    <section
+      aria-label="卡密详情"
+      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
+      data-public-id={redeemCode.publicId}
+      data-testid={`admin-redeem-code-detail-${redeemCode.publicId}`}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">卡密详情</p>
+          <h2 className="text-text-primary font-mono text-base font-semibold">
+            {redeemCode.codeDisplay}
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            详情视图只展示脱敏字段和公开标识，不展示明文卡密或哈希。
+          </p>
+        </div>
+        <button
+          type="button"
+          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+          onClick={onClose}
+        >
+          关闭
+        </button>
+      </div>
+      <dl className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">公开标识</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
+            {redeemCode.publicId}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">状态</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {redeemCodeStatusLabels[redeemCode.status]}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">授权范围</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {formatProfessionLevel(redeemCode)}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">兑换用户</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium break-all">
+            {redeemCode.redeemedUserPublicId ?? "未兑换"}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">兑换截止</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {formatDate(redeemCode.redeemDeadlineAt)}
+          </dd>
+        </div>
+        <div className="bg-background rounded-md p-3">
+          <dt className="text-text-muted text-xs">创建时间</dt>
+          <dd className="text-text-primary mt-1 text-sm font-medium">
+            {formatDate(redeemCode.createdAt)}
+          </dd>
+        </div>
+      </dl>
+      <p className="text-text-muted mt-3 text-xs">
+        明文状态：
+        {redeemCode.canViewPlainText
+          ? "仅本次生成响应允许查看"
+          : "历史列表不可查看"}
+      </p>
+    </section>
   );
 }
 
@@ -2266,10 +2359,20 @@ export function AdminRedeemCodePage() {
     useState<RedeemCodeConfirmationState>(null);
   const [generatedRedeemCode, setGeneratedRedeemCode] =
     useState<GeneratedRedeemCode | null>(null);
+  const [selectedRedeemCodePublicId, setSelectedRedeemCodePublicId] = useState<
+    string | null
+  >(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const hasUnavailablePlainTextCode = data.redeemCodes.some(
     (redeemCode) =>
       redeemCode.status === "unused" && !redeemCode.canViewPlainText,
+  );
+  const selectedRedeemCode = useMemo(
+    () =>
+      data.redeemCodes.find(
+        (redeemCode) => redeemCode.publicId === selectedRedeemCodePublicId,
+      ) ?? null,
+    [data.redeemCodes, selectedRedeemCodePublicId],
   );
 
   async function handleConfirmRedeemCodeAction() {
@@ -2427,7 +2530,17 @@ export function AdminRedeemCodePage() {
         />
       </section>
 
-      <RedeemCodeList redeemCodes={data.redeemCodes} />
+      {selectedRedeemCode === null ? null : (
+        <RedeemCodeDetailPanel
+          redeemCode={selectedRedeemCode}
+          onClose={() => setSelectedRedeemCodePublicId(null)}
+        />
+      )}
+
+      <RedeemCodeList
+        redeemCodes={data.redeemCodes}
+        onViewDetail={setSelectedRedeemCodePublicId}
+      />
 
       {confirmationState === null ? null : (
         <RedeemCodeConfirmationDialog

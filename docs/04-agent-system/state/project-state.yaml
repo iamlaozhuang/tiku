@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-21-implementation-plan-breakdown
-  updatedAt: "2026-05-27T03:05:01-07:00"
+  currentPhase: phase-20-requirement-gap-fixes
+  updatedAt: "2026-05-27T03:44:12-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: fcd883e1fafd120926023b256f14249bc62d0708
-  lastKnownOriginMasterSha: fcd883e1fafd120926023b256f14249bc62d0708
+  lastKnownMasterSha: c0210e7347391428d0ac5caed9101e9fd718ad2a
+  lastKnownOriginMasterSha: c0210e7347391428d0ac5caed9101e9fd718ad2a
 currentTask:
-  id: phase-21-implementation-plan-breakdown
-  status: closed
-  sourceStory: user-request-2026-05-27-phase-21-implementation-plan-breakdown
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-21-implementation-plan-breakdown.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-21-implementation-plan-breakdown.md
-  branch: codex/phase-21-implementation-plan-breakdown
-  commitSha: d8232286141b1ac849d45a68172d6bbd81f03ef1
+  id: phase-20-fix-ra-06-05-redeem-code-detail-view
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-06-05-redeem-code-detail-view.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md
+  branch: codex/phase-20-fix-ra-06-05-redeem-code-detail-view
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 21 implementation plan breakdown is closed. Stop and wait for human confirmation before starting any Phase 20 or Phase 22 fix/test task.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-21-implementation-plan-breakdown.md
+  nextRecommendedAction: Continue claimed task phase-20-fix-ra-06-05-redeem-code-detail-view on branch codex/phase-20-fix-ra-06-05-redeem-code-detail-view; keep high-risk gates blocked and do not read .env.local.
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md
