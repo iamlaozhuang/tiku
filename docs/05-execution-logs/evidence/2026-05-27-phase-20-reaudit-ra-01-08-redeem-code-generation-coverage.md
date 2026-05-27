@@ -131,6 +131,12 @@ Build/e2e were not run because this task made no frontend, runtime, source, test
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; `master` ahead of `origin/master` by `441ad31`
   - `git diff --check` - pass
   - post-merge changed-file Prettier check - pass
-- closeoutEvidenceCommit: pending; this section will be committed after it is written.
-- push: pending after closeout evidence commit.
-- cleanup: pending after push.
+- closeoutEvidenceCommit: `49ddf6e` (`docs(audit): close RA-01-08 coverage reaudit`)
+- push:
+  - pre-push `git fetch origin` - pass
+  - pre-push `git rev-list --left-right --count master...origin/master` - `2 0`
+  - `git push origin master` - pass, `b32831a..49ddf6e master -> master`
+- cleanup:
+  - initial `git branch -d codex/phase-20-reaudit-ra-01-08-redeem-code-generation-coverage` - failed in sandbox with ref lock permission denied
+  - escalated `git branch -d codex/phase-20-reaudit-ra-01-08-redeem-code-generation-coverage` - pass, deleted already-merged branch at `441ad31`
+- final closeout evidence update: this section records the push and cleanup result; the final delivery records the resulting evidence-only commit SHA and clean Git status.
