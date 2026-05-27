@@ -55,7 +55,8 @@
 
 ## Closeout Status
 
-- commit: pending.
-- merge: pending.
+- implementation commit: `1235c46` (`fix(student): complete mistake book favorite flow`).
+- merge: `20024fd` (`merge: phase-20 fix ra-03-09 mistake book completion`) on `master`.
+- post-merge master validation: `Test-AgentSystemReadiness`, `Test-GitCompletionReadiness -BaseBranch master`, `git diff --check`, `Test-NamingConventions`, `npm.cmd run test:e2e`, `npm.cmd run build`, and `Invoke-QualityGate` passed. One parallel `Invoke-QualityGate` attempt failed on a transient `test-results` ENOENT while e2e was running; sequential rerun passed.
 - push: pending.
 - cleanup: pending.
