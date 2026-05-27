@@ -10402,5 +10402,49 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-17-local-e2e-prerequisite-readiness-audit.md
+    status: closed
+    retryCount: 0
+  - id: phase-18-prerequisite-local-role-account-fixture-baseline
+    title: Phase 18 Prerequisite Local Role Account Fixture Baseline
+    phase: phase-18-prerequisite-preparation
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-17-local-e2e-prerequisite-readiness-audit.md#readiness-checklist
+    dependencies:
+      - phase-17-local-e2e-prerequisite-readiness-audit
+    taskPlanPolicy: required
+    humanApproval: Phase 17 readiness audit found persistent local login accounts for ops_admin and content_admin are not present; user instructed missing prerequisites be registered instead of forcing audits.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - e2e/**
+      - tests/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - prerequisite_readiness
+      - auth_permission_model
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-prerequisite-local-role-account-fixture-baseline.md
     status: pending
     retryCount: 0
