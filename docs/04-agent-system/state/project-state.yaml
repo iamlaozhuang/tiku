@@ -36,8 +36,8 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 0d592993e6f4437081d11d51901c0edd688a93c8
-  lastKnownOriginMasterSha: 0d592993e6f4437081d11d51901c0edd688a93c8
+  lastKnownMasterSha: 51c881d4368040313b03ca2b2aa606584265bfac
+  lastKnownOriginMasterSha: 51c881d4368040313b03ca2b2aa606584265bfac
 currentTask:
   id: phase-20-fix-ra-01-14-auth-expiry-reminder
   status: pushed
