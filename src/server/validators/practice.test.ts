@@ -34,6 +34,7 @@ describe("practice validators", () => {
       selectedLabels: ["A", "B"],
       textAnswer: null,
       aiExplanationTrigger: null,
+      aiScoringTrigger: null,
       savedFromClientAt: "2026-05-19T08:05:00.000Z",
     });
   });
@@ -50,6 +51,24 @@ describe("practice validators", () => {
       selectedLabels: ["A"],
       textAnswer: null,
       aiExplanationTrigger: "manual_request",
+      aiScoringTrigger: null,
+      savedFromClientAt: null,
+    });
+  });
+
+  it("normalizes manual ai_scoring trigger for subjective practice", () => {
+    expect(
+      normalizePracticeAnswerInput({
+        paperQuestionPublicId: "paper_question_subjective_123",
+        textAnswer: "second answer",
+        aiScoringTrigger: "manual_request",
+      }),
+    ).toEqual({
+      paperQuestionPublicId: "paper_question_subjective_123",
+      selectedLabels: [],
+      textAnswer: "second answer",
+      aiExplanationTrigger: null,
+      aiScoringTrigger: "manual_request",
       savedFromClientAt: null,
     });
   });

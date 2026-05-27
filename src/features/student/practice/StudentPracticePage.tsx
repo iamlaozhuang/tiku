@@ -910,6 +910,7 @@ function SubjectiveQuestionPanel({
   onChangeTextAnswer,
   onSubmitAnswer,
   onRetryWithHint,
+  onRequestAiScoring,
 }: {
   question: PracticePaperQuestion;
   textAnswer: string;
@@ -919,9 +920,11 @@ function SubjectiveQuestionPanel({
   onChangeTextAnswer(value: string): void;
   onSubmitAnswer(): void;
   onRetryWithHint(): void;
+  onRequestAiScoring(): void;
 }) {
   const canRetryWithHint =
     feedback !== null && feedback.retryRemainingCount > 0;
+  const hasFinalScore = feedback !== null && feedback.score !== null;
 
   return (
     <div className="space-y-4">
@@ -974,7 +977,11 @@ function SubjectiveQuestionPanel({
           <p className="font-heading text-text-primary text-base font-semibold">
             主观题答案已保存
           </p>
-          {feedback.aiHintText === null ? (
+          {hasFinalScore ? (
+            <p className="text-text-primary text-sm font-semibold">
+              Final score: {feedback.score} / {feedback.maxScore}
+            </p>
+          ) : feedback.aiHintText === null ? (
             <p className="text-text-secondary text-sm">AI 提示生成中</p>
           ) : (
             <div className="space-y-2">
@@ -1004,6 +1011,8 @@ function SubjectiveQuestionPanel({
             </button>
             <button
               type="button"
+              onClick={onRequestAiScoring}
+              disabled={hasFinalScore}
               className="bg-secondary text-secondary-foreground flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-transform active:scale-[0.98]"
             >
               直接查看评分
@@ -1441,6 +1450,54 @@ export function StudentPracticePage({
     }
   }
 
+  async function handleRequestAiScoring() {
+    if (practice === null || feedback === null || !isRuntimeMode) {
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("authorization_expired");
+      return;
+    }
+
+    try {
+      const scoringPayload =
+        await fetchStudentApi<PracticeAnswerFeedbackResultDto>(
+          `/api/v1/practices/${practice.publicId}/answers`,
+          token,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
+              selectedLabels: [],
+              textAnswer,
+              aiScoringTrigger: "manual_request",
+              savedFromClientAt: new Date().toISOString(),
+            }),
+          },
+        );
+
+      if (isStudentUnauthorizedResponse(scoringPayload)) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      if (scoringPayload.code !== 0 || scoringPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      setFeedbackByQuestion({
+        ...feedbackByQuestion,
+        [currentQuestion.paperQuestionPublicId]: scoringPayload.data.feedback,
+      });
+    } catch {
+      setRuntimeState("error");
+    }
+  }
+
   function handleNextQuestion() {
     setCurrentQuestionIndex(
       Math.min(currentQuestionIndex + 1, questions.length - 1),
@@ -1651,6 +1708,7 @@ export function StudentPracticePage({
             onChangeTextAnswer={handleChangeTextAnswer}
             onSubmitAnswer={() => void handleSubmitAnswer()}
             onRetryWithHint={handleRetryWithHint}
+            onRequestAiScoring={() => void handleRequestAiScoring()}
           />
         )}
       </article>

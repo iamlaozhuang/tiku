@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T16:32:10-07:00"
+  updatedAt: "2026-05-27T16:46:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 2f463b8b0a8ff398152f88b6b4855d24e57fedb0
-  lastKnownOriginMasterSha: 2f463b8b0a8ff398152f88b6b4855d24e57fedb0
+  lastKnownMasterSha: 7bc2721166344b6dc24d093e32d3f7528060717b
+  lastKnownOriginMasterSha: 7bc2721166344b6dc24d093e32d3f7528060717b
 currentTask:
-  id: phase-20-fix-ra-03-02-practice-objective-ai-explanation
-  status: closed
+  id: phase-20-fix-ra-03-03-skill-practice-final-scoring
+  status: branch_validated_pending_commit
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-02-practice-objective-ai-explanation.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-02-practice-objective-ai-explanation.md
-  branch: codex/phase-20-fix-ra-03-02-practice-objective-ai-explanation
-  commitSha: fed89fefdd17130daea2aeb18be3624ddff2625d
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-03-skill-practice-final-scoring.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md
+  branch: codex/phase-20-fix-ra-03-03-skill-practice-final-scoring
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "phase-20-fix-ra-03-02-practice-objective-ai-explanation is closed: implementation, merge, closeout validation, push, and branch cleanup are complete. Next automation loop may scan the queue for the next pending low-risk Phase 22-D task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-02-practice-objective-ai-explanation.md
+  nextRecommendedAction: "Finish phase-20-fix-ra-03-03-skill-practice-final-scoring closeout: changed-file Prettier was repaired after branch validation; run final format/diff/quality checks as needed, commit the scoped task changes, merge into master, validate on master, push, and clean up the short-lived branch."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md

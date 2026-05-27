@@ -1213,7 +1213,8 @@ describe("practice service", () => {
       code: 0,
       data: {
         feedback: {
-          aiHintStatus: "hinted",
+          score: "6.0",
+          aiHintStatus: null,
           retryRemainingCount: 0,
         },
       },
@@ -1283,6 +1284,144 @@ describe("practice service", () => {
       code: 409302,
       message: "Practice subjective question retry limit reached.",
       data: null,
+    });
+  });
+
+  it("returns final local AI scoring for a subjective practice retry", async () => {
+    const createdAnswerInputs: unknown[] = [];
+    const retryService = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            subject: "skill",
+            paper_snapshot: createSubjectivePaperSnapshot(),
+          });
+        },
+        async listAnswerRecordsByPractice() {
+          return [
+            {
+              public_id: "answer_record_public_first",
+              exam_mode: "practice",
+              paper_question_public_id: "paper_question_subjective_123",
+              question_public_id: "question_subjective_123",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "first answer",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "submitted",
+              is_correct: null,
+              score: null,
+              max_score: "10.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+          ];
+        },
+        async createPracticeAnswerRecord(input) {
+          createdAnswerInputs.push(input);
+
+          return {
+            public_id: input.publicId,
+            exam_mode: "practice",
+            paper_question_public_id: input.paperQuestionPublicId,
+            question_public_id: input.questionPublicId,
+            answer_snapshot: input.answerSnapshot,
+            answer_record_status: input.answerRecordStatus,
+            is_correct: input.isCorrect,
+            score: input.score,
+            max_score: input.maxScore,
+            answered_at: input.answeredAt,
+            submitted_at: input.submittedAt,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      retryService.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_subjective_123",
+        textAnswer:
+          "second answer includes facts, basis, handling steps, and follow up.",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          isCorrect: null,
+          score: "10.0",
+          maxScore: "10.0",
+          aiHintStatus: null,
+          retryRemainingCount: 0,
+        },
+      },
+    });
+    expect(createdAnswerInputs).toMatchObject([
+      {
+        answerRecordStatus: "scored",
+        score: "10.0",
+      },
+    ]);
+  });
+
+  it("returns final local AI scoring from a direct subjective scoring request", async () => {
+    const directScoreService = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            subject: "skill",
+            paper_snapshot: createSubjectivePaperSnapshot(),
+          });
+        },
+        async listAnswerRecordsByPractice() {
+          return [
+            {
+              public_id: "answer_record_public_first",
+              exam_mode: "practice",
+              paper_question_public_id: "paper_question_subjective_123",
+              question_public_id: "question_subjective_123",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "first answer",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "submitted",
+              is_correct: null,
+              score: null,
+              max_score: "10.0",
+              answered_at: now,
+              submitted_at: now,
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      directScoreService.submitPracticeAnswer(
+        userContext,
+        "practice_public_123",
+        {
+          paperQuestionPublicId: "paper_question_subjective_123",
+          textAnswer:
+            "direct final scoring answer includes facts, legal basis, action, and follow up.",
+          aiScoringTrigger: "manual_request",
+        },
+      ),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          score: "10.0",
+          maxScore: "10.0",
+          aiHintStatus: null,
+          retryRemainingCount: 0,
+        },
+      },
     });
   });
 
