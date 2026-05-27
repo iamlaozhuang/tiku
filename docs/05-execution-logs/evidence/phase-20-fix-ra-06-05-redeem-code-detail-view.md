@@ -78,6 +78,7 @@
   - `e2e/local-business-flow.spec.ts`
 - commit: pending.
 - implementationCommit: `4ab7205d8f799c5107287015f7c137f93565735` (`fix(admin): add redeem code detail view`).
+- closeoutEvidenceCommit: `09b328a7d5c18718e99de3ac9c0c01c2c4926c88` (`docs(audit): record redeem code detail merge validation`).
 - merge: fast-forward merged into `master`, `c0210e7..4ab7205`.
 - post-merge master validation:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
@@ -88,5 +89,21 @@
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (131 files, 529 tests), and `format:check` passed.
   - `npm.cmd run test:e2e` - pass; 25/25 tests passed.
   - `npm.cmd run build` - initial post-merge run failed on stale generated `.next/dev/types/routes.d.ts`; after resolving and deleting only `D:\tiku\.next\dev`, rerun passed.
-- push: pending.
-- cleanup: pending.
+- push:
+  - pre-push `git fetch origin` - pass.
+  - pre-push `git rev-list --left-right --count master...origin/master` - `2 0`.
+  - `git push origin master` - pass, `c0210e7..09b328a master -> master`.
+- cleanup:
+  - initial `git branch -d codex/phase-20-fix-ra-06-05-redeem-code-detail-view` - failed in sandbox with ref lock permission denied.
+  - escalated `git branch -d codex/phase-20-fix-ra-06-05-redeem-code-detail-view` - pass; deleted already-merged branch at `4ab7205`.
+- final closeout validation:
+  - `node .\node_modules\prettier\bin\prettier.cjs --write docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md` - pass.
+  - `git diff --check` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; master and origin/master were aligned before final closeout commit.
+  - `node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md` - pass.
+- final inventory before this evidence update:
+  - `git rev-parse master` - `09b328a7d5c18718e99de3ac9c0c01c2c4926c88`.
+  - `git rev-parse origin/master` - `09b328a7d5c18718e99de3ac9c0c01c2c4926c88`.
+  - `git status --short --branch` - `## master...origin/master`.
+  - `git branch --no-merged master` - no output.
+  - `git worktree list` - only `D:/tiku  09b328a [master]`.
