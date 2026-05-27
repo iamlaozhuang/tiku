@@ -6,7 +6,7 @@
 
 ## Summary
 
-- Result: implemented and locally validated on short-lived branch; commit/merge/push/cleanup pending.
+- Result: implemented, merged to `master`, pushed to `origin/master`, and cleaned up.
 - Scope: implementation.
 - Changed surfaces: `practice` API/service/repository/runtime route, student practice UI, mistake_book list repository filtering, focused tests, task plan/evidence/state.
 - Gates: task claim readiness, focused RED/GREEN tests, full unit tests, typecheck, e2e, build, agent readiness, git completion readiness, diff check, changed-file Prettier check, naming scan, and quality gate passed.
@@ -58,5 +58,9 @@
 - implementation commit: `1235c46` (`fix(student): complete mistake book favorite flow`).
 - merge: `20024fd` (`merge: phase-20 fix ra-03-09 mistake book completion`) on `master`.
 - post-merge master validation: `Test-AgentSystemReadiness`, `Test-GitCompletionReadiness -BaseBranch master`, `git diff --check`, `Test-NamingConventions`, `npm.cmd run test:e2e`, `npm.cmd run build`, and `Invoke-QualityGate` passed. One parallel `Invoke-QualityGate` attempt failed on a transient `test-results` ENOENT while e2e was running; sequential rerun passed.
-- push: pending.
-- cleanup: pending.
+- closeout commit: `0f861e9` (`docs(student): record mistake book completion closeout`).
+- push: `git push origin master` succeeded (`8fe435e..0f861e9 master -> master`).
+- cleanup: local branch `codex/phase-20-fix-ra-03-09-mistake-book-completion` deleted after merge; first sandbox delete hit ref lock permission, escalated delete succeeded.
+- cleanup evidence: recorded in `docs(student): record mistake book cleanup`.
+- cleanup push: pending at the time this evidence row is written; final shell verification must confirm `master` and `origin/master` alignment after push.
+- cleanup verification before final response: branch `codex/phase-20-fix-ra-03-09-mistake-book-completion` deleted, no `codex/*` branches remained, and only the root worktree `D:/tiku` was present.

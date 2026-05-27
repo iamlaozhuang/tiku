@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T08:10:00-07:00"
+  updatedAt: "2026-05-27T08:16:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,11 +36,11 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 20024fdd514fbae632dcceb6210d998c43bf3533
-  lastKnownOriginMasterSha: 8fe435ef6f0b869f7fa2d89bf9f8b1370ba06b9a
+  lastKnownMasterSha: 0f861e9cf3403e4f9e6c79c581293bfd2f508cab
+  lastKnownOriginMasterSha: 0f861e9cf3403e4f9e6c79c581293bfd2f508cab
 currentTask:
   id: phase-20-fix-ra-03-09-mistake-book-completion
-  status: done
+  status: pushed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-09-mistake-book-completion.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-09-mistake-book-completion.md
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Push origin/master for phase-20-fix-ra-03-09-mistake-book-completion, clean up the short-lived branch, record cleanup evidence, then resume the next eligible low-risk pending task."
+  nextRecommendedAction: "Resume the automation loop from master and claim the next eligible low-risk pending task from the Phase 21 22-A queue."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-09-mistake-book-completion.md

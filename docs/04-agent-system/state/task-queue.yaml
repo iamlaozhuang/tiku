@@ -63,7 +63,7 @@ tasks:
       - Test-Path 'docs\02-architecture\interfaces\global-db-api-skeleton.md'
       - Select-String -Path 'docs\02-architecture\interfaces\global-db-api-skeleton.md' -Pattern 'license|exam_paper'
     evidencePath: docs/05-execution-logs/evidence/2026-05-15-phase-0-agent-system.md
-    status: done
+    status: pushed
     retryCount: 0
   - id: phase-0-automation-sops
     title: Automation SOP Documents
