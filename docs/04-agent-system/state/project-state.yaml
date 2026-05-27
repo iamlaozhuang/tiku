@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T07:26:00-07:00"
+  updatedAt: "2026-05-27T07:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 0953333925580a1daa2758b29cc52bec4e436840
+  lastKnownMasterSha: f0f63f566f9ebdace7be7f47b4996ec89b172603
   lastKnownOriginMasterSha: 0953333925580a1daa2758b29cc52bec4e436840
 currentTask:
   id: phase-20-fix-ra-03-08-mock-exam-record-list
-  status: validated
+  status: merged
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-08-mock-exam-record-list.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-08-mock-exam-record-list.md
   branch: codex/phase-20-fix-ra-03-08-mock-exam-record-list
-  commitSha: null
+  commitSha: f0f63f566f9ebdace7be7f47b4996ec89b172603
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit phase-20-fix-ra-03-08-mock-exam-record-list, merge to master, verify on master, push origin/master, and clean the short-lived branch."
+  nextRecommendedAction: "Push master, clean the short-lived branch, then record final push and cleanup evidence."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-08-mock-exam-record-list.md

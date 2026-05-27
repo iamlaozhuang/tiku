@@ -6,7 +6,7 @@
 
 ## Summary
 
-- Result: pass; pending git closeout.
+- Result: pass; merged to master; pending push and branch cleanup.
 - Scope: implementation.
 - Changed surfaces: `exam_report` list DTO/mapper/validator/service repository, student `mock_exam` record-list UI, unit tests, task plan/evidence/state.
 - Gates: task claim readiness, focused RED/GREEN, typecheck, full unit, full e2e, build, readiness, git inventory, diff check, changed-file Prettier, naming, and quality gate passed.
@@ -63,7 +63,17 @@
 
 ## Closeout Status
 
-- commit: pending.
-- merge: pending.
+- implementationCommit: `f0f63f566f9ebdace7be7f47b4996ec89b172603` (`fix(student): list mock exam records by attempt start`).
+- merge: fast-forward merged into `master`, `0953333..f0f63f5`.
+- post-merge master validation:
+  - `npm.cmd run test:unit` - pass; 131 files, 535 tests.
+  - `npm.cmd run test:e2e` - pass; 25 Playwright tests.
+  - `npm.cmd run build` - pass; framework reported `.env.local` existence only.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; `master` ahead of `origin/master` by `f0f63f5`.
+  - `git diff --check` - pass.
+  - changed-file Prettier check - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (131 files, 535 tests), and `format:check` passed.
 - push: pending.
 - cleanup: pending.
