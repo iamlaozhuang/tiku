@@ -210,6 +210,47 @@ function mockWritablePaperFetch() {
               publicId: "paper-copy-001",
               name: "2026 春季营销理论模拟卷（副本）",
               paperStatus: "draft",
+              paperSections: [
+                {
+                  title: "Copy section",
+                  description: null,
+                  sortOrder: 1,
+                  totalScore: "2.0",
+                  paperQuestions: [
+                    {
+                      publicId: "paper-question-copy-001",
+                      sourceQuestionPublicId: "question-disabled-001",
+                      paperSectionSortOrder: 1,
+                      questionGroupSortOrder: null,
+                      score: "2.0",
+                      sortOrder: 1,
+                      questionSnapshot: {
+                        questionPublicId: "question-disabled-001",
+                        questionType: "single_choice",
+                        profession: "marketing",
+                        level: 3,
+                        subject: "theory",
+                        stemRichText: "Disabled source question",
+                        questionOptions: [],
+                        standardAnswerRichText: "A",
+                        analysisRichText: "Disabled source analysis",
+                        multiChoiceRule: "all_correct_only",
+                        scoringMethod: "auto_match",
+                        questionStatus: "disabled",
+                      },
+                      materialSnapshot: null,
+                      scoringPoints: [],
+                      createdAt: "2026-05-19T08:20:00.000Z",
+                      updatedAt: "2026-05-19T08:20:00.000Z",
+                    },
+                  ],
+                },
+              ],
+              questionGroups: [],
+              publishedAt: null,
+              archivedAt: null,
+              createdAt: "2026-05-19T08:20:00.000Z",
+              updatedAt: "2026-05-19T08:20:00.000Z",
             },
           },
         });
@@ -673,6 +714,7 @@ describe("AdminPaperManagement", () => {
       "/api/v1/papers/paper-marketing-2026-spring/copy",
       expect.objectContaining({ method: "POST" }),
     );
+    expect(await screen.findByText(/已停用源题.*1/)).toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole("button", {

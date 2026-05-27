@@ -280,6 +280,18 @@ function mapPaperDraftToSummary(
   };
 }
 
+function countDisabledSourceQuestions(paper: PaperDraftDto): number {
+  return paper.paperSections.reduce(
+    (disabledQuestionCount, paperSection) =>
+      disabledQuestionCount +
+      paperSection.paperQuestions.filter(
+        (paperQuestion) =>
+          paperQuestion.questionSnapshot.questionStatus === "disabled",
+      ).length,
+    0,
+  );
+}
+
 function createPaperInput(values: PaperFormValues) {
   return {
     name: values.name,
@@ -630,8 +642,18 @@ export function AdminPaperManagement() {
       return;
     }
 
+    const disabledSourceQuestionCount = countDisabledSourceQuestions(
+      response.data.paper,
+    );
     const copiedPaper = mapPaperDraftToSummary(response.data.paper);
     setPapers((currentPapers) => upsertByPublicId(currentPapers, copiedPaper));
+    if (disabledSourceQuestionCount > 0) {
+      setActionMessage(
+        `试卷 ${copiedPaper.publicId} 已复制；包含已停用源题 ${disabledSourceQuestionCount} 道，请复核后再发布`,
+      );
+      return;
+    }
+
     setActionMessage(`试卷 ${copiedPaper.publicId} 已复制`);
   }
 

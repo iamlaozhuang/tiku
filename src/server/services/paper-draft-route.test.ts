@@ -26,6 +26,7 @@ const paperQuestionDto: PaperQuestionDto = {
   sortOrder: 1,
   questionSnapshot: {
     questionPublicId: "question_public_123",
+    questionStatus: "available",
     questionType: "short_answer",
     profession: "logistics",
     level: 4,

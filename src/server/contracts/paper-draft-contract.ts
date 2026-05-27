@@ -3,6 +3,7 @@ import type {
   PaperStatus,
   PaperType,
   Profession,
+  QuestionStatus,
   QuestionType,
   ScoringMethod,
   Subject,
@@ -19,6 +20,7 @@ export type MaterialSnapshotDto = {
 
 export type QuestionSnapshotDto = {
   questionPublicId: string;
+  questionStatus: QuestionStatus;
   questionType: QuestionType;
   profession: Profession;
   level: number;

@@ -68,6 +68,7 @@ function createPaperQuestion(
     question_group_sort_order: null,
     question_snapshot: {
       questionPublicId: "question-public-001",
+      questionStatus: "available",
       questionType: "single_choice",
       profession: "monopoly",
       level: 3,

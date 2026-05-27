@@ -23,6 +23,7 @@ function createPaperQuestion(
     question_group_sort_order: 1,
     question_snapshot: {
       questionPublicId: "question_public_123",
+      questionStatus: "available",
       questionType: "short_answer",
       profession: "logistics",
       level: 4,
@@ -380,6 +381,7 @@ describe("paper draft service", () => {
           sortOrder: 1,
           questionSnapshot: {
             questionPublicId: "question_public_123",
+            questionStatus: "available",
             questionType: "short_answer",
             profession: "logistics",
             level: 4,
@@ -570,6 +572,7 @@ describe("paper draft service", () => {
                   sortOrder: 1,
                   questionSnapshot: {
                     questionPublicId: "question_public_123",
+                    questionStatus: "available",
                     questionType: "short_answer",
                     profession: "logistics",
                     level: 4,
@@ -861,6 +864,7 @@ describe("paper draft service", () => {
 
     expect(sourcePaperQuestion.question_snapshot).toEqual({
       questionPublicId: "question_public_123",
+      questionStatus: "available",
       questionType: "short_answer",
       profession: "logistics",
       level: 4,

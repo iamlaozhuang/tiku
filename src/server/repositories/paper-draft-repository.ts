@@ -964,6 +964,7 @@ async function buildQuestionSnapshot(
 
   return {
     questionPublicId: sourceQuestion.public_id,
+    questionStatus: sourceQuestion.status,
     questionType: sourceQuestion.question_type,
     profession: sourceQuestion.profession,
     level: sourceQuestion.level,

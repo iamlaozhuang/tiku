@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T04:20:28-07:00"
+  updatedAt: "2026-05-27T04:44:40-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: cc90fcb853352fb56857ea5d7881a1826af9e567
-  lastKnownOriginMasterSha: cc90fcb853352fb56857ea5d7881a1826af9e567
+  lastKnownMasterSha: 2ec81479b2c2f548d593b54a0fc81ab846dcc102
+  lastKnownOriginMasterSha: 2ec81479b2c2f548d593b54a0fc81ab846dcc102
 currentTask:
-  id: phase-20-fix-ra-03-04-practice-resume-choice
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-04-practice-resume-choice.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-04-practice-resume-choice.md
-  branch: codex/phase-20-fix-ra-03-04-practice-resume-choice
-  commitSha: 7a5ca4085f9869c5b09d2157f00294e3a305eb0f
+  id: phase-20-fix-ra-02-10-paper-copy-disabled-question-marker
+  status: in_progress
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-02-10-paper-copy-disabled-question-marker.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker.md
+  branch: codex/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "master is clean/aligned after closing phase-20-fix-ra-03-04-practice-resume-choice. Next eligible low-risk 22-A task: phase-20-fix-ra-02-10-paper-copy-disabled-question-marker."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-04-practice-resume-choice.md
+  nextRecommendedAction: "Continue phase-20-fix-ra-02-10-paper-copy-disabled-question-marker on branch codex/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-10-paper-copy-disabled-question-marker.md
