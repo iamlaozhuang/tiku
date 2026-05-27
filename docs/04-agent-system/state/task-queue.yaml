@@ -12319,3 +12319,301 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-09-report-knowledge-analysis.md
     status: pending
     retryCount: 0
+  - id: phase-18-audit-ra-06-admin-ops-logs-permissions
+    title: Phase 18 Audit RA-06 Admin Ops Logs And Permissions
+    phase: phase-18-requirement-audit-execution
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-requirement-audit-catalog.md#RA-06
+    dependencies:
+      - phase-18-audit-ra-05-rag-knowledge
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested Phase 18 requirement audit execution by six blocks and authorized commit, merge into master, push origin/master, and short-lived branch cleanup after each completed block. Audit must record facts and findings only; no business bug fixes, dependency changes, env reads, staging/prod/cloud/deploy, real provider calls, destructive data operations, source, test, e2e, schema, drizzle, or script changes are allowed.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - requirements_audit
+      - admin_ops
+      - audit_log
+      - ai_call_log
+      - auth_permission_model
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+      - approval_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md docs\05-execution-logs\evidence\2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md docs\05-execution-logs\audits-reviews\2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-audit-catalog.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-traceability-matrix.md
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md
+    status: closed
+    retryCount: 0
+  - id: phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage
+    title: Phase 20 Fix RA-06-01 Admin Common UX Concurrency Coverage
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-01-001.
+    taskKind: implementation
+    allowedFiles: &phase20_ra06_allowed_files
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/**
+      - tests/**
+      - e2e/**
+    blockedFiles: &phase20_ra06_blocked_files
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - admin_ops
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: &phase20_ra06_validation
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-02-user-management-role-detail-alignment
+    title: Phase 20 Fix RA-06-02 User Management Role Detail Alignment
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-02-001.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - auth_permission_model
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-02-user-management-role-detail-alignment.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-03-organization-employee-management-completion
+    title: Phase 20 Fix RA-06-03 Organization Employee Management Completion
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-03-001.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - auth_permission_model
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-03-organization-employee-management-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-04-org-auth-detail-route-alignment
+    title: Phase 20 Fix RA-06-04 Org Auth Detail Route Alignment
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-04-001.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - auth_permission_model
+      - api_contract
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-04-org-auth-detail-route-alignment.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-05-redeem-code-detail-view
+    title: Phase 20 Fix RA-06-05 Redeem Code Detail View
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-05-001. Evidence must redact plaintext redeem_code values unless explicitly validating generated display behavior.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-06-resource-enable-admin-evidence
+    title: Phase 20 Fix RA-06-06 Resource Enable Admin Evidence
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+      - phase-20-fix-ra-05-05-resource-enable-restore-state
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-06-001.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - resource_lifecycle
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-06-resource-enable-admin-evidence.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-07-model-config-runtime-admin-alignment
+    title: Phase 20 Fix RA-06-07 Model Config Runtime Admin Alignment
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+      - phase-20-fix-ra-04-07-persisted-model-config-runtime-selection
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-07-001. Real provider and secret/env gates remain blocked unless separately approved.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - ai_runtime
+      - admin_ops
+      - secret_or_env_change
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-07-model-config-runtime-admin-alignment.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion
+    title: Phase 20 Fix RA-06-08 Question Admin Knowledge Binding Completion
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+      - phase-20-fix-ra-02-01-question-knowledge-tag-binding
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-08-001.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - database_migration
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion
+    title: Phase 20 Fix RA-06-09 Paper Admin Lifecycle Gap Completion
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+      - phase-20-fix-ra-02-08-publish-fill-blank-validation
+      - phase-20-fix-ra-02-09-paper-archive-termination
+      - phase-20-fix-ra-02-10-paper-copy-disabled-question-marker
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-09-001.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - paper_lifecycle
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion
+    title: Phase 20 Fix RA-06-10 Knowledge UI Recommendation Binding Completion
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+      - phase-20-fix-ra-04-06-knowledge-recommendation-confirmed-bindings
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-10-001.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - admin_ops
+      - ai_runtime
+      - knowledge_node
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion.md
+    status: pending
+    retryCount: 0
+  - id: phase-20-fix-ra-06-13-admin-account-security-policy-alignment
+    title: Phase 20 Fix RA-06-13 Admin Account Security Policy Alignment
+    phase: phase-20-requirement-gap-fixes
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+    dependencies:
+      - phase-18-audit-ra-06-admin-ops-logs-permissions
+    taskPlanPolicy: required
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-13-001. Auth/session behavior changes require focused local verification before merge.
+    taskKind: implementation
+    allowedFiles: *phase20_ra06_allowed_files
+    blockedFiles: *phase20_ra06_blocked_files
+    riskTypes:
+      - auth_permission_model
+      - admin_ops
+      - local_human_verification
+      - evidence_integrity
+    validationCommands: *phase20_ra06_validation
+    evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-13-admin-account-security-policy-alignment.md
+    status: pending
+    retryCount: 0
