@@ -10,6 +10,8 @@ import {
   FileCheck2,
   FileText,
   ListChecks,
+  RefreshCw,
+  RotateCcw,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -29,6 +31,7 @@ import type {
   MockExamAnswerRecordResultDto,
   MockExamDto,
   MockExamResultDto,
+  MockExamRetryScoringResultDto,
   MockExamSubmitResultDto,
 } from "@/server/contracts/mock-exam-contract";
 import type { ExamStatus } from "@/server/models/student-experience";
@@ -112,6 +115,11 @@ type ParsedReportSnapshot = {
   paperSectionSummaryText: string | null;
   questionResults: ReportQuestionResult[];
 };
+
+type ScoringProgressStatus = Extract<
+  ExamStatus,
+  "scoring" | "scoring_partial_failed"
+>;
 
 const examStatusLabels: Record<ExamStatus, string> = {
   completed: "已完成",
@@ -725,6 +733,143 @@ function parseReportSnapshot(
   };
 }
 
+function countFailedQuestionDetails(value: unknown): number | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  return value.filter(
+    (questionDetail) =>
+      isRecord(questionDetail) &&
+      questionDetail.answerRecordStatus === "scoring_failed",
+  ).length;
+}
+
+function getFailedScoringCount(
+  reportSnapshot: ExamReportSnapshotDto,
+): number | null {
+  const failedScoringCount = reportSnapshot.failedScoringCount;
+
+  if (
+    typeof failedScoringCount === "number" &&
+    Number.isInteger(failedScoringCount) &&
+    failedScoringCount >= 0
+  ) {
+    return failedScoringCount;
+  }
+
+  return countFailedQuestionDetails(reportSnapshot.questionDetails);
+}
+
+function StudentScoringProgressPanel({
+  publicId,
+  paperName,
+  mockExamPublicId,
+  status,
+  failedScoringCount,
+  completedReportPublicId,
+  onRefresh,
+  onRetryScoring,
+}: {
+  publicId: string;
+  paperName: string;
+  mockExamPublicId: string;
+  status: ScoringProgressStatus | "completed";
+  failedScoringCount: number | null;
+  completedReportPublicId?: string | null;
+  onRefresh(): void;
+  onRetryScoring?(): void;
+}) {
+  const isPartialFailed = status === "scoring_partial_failed";
+  const isCompleted = status === "completed" && completedReportPublicId != null;
+
+  return (
+    <section
+      data-testid="exam-scoring-progress-surface"
+      data-public-id={publicId}
+      className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-5 pb-20"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-2">
+          <Link
+            href="/exam-report"
+            className="text-brand-primary text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            返回模拟考试记录
+          </Link>
+          <h1 className="font-heading text-text-primary text-2xl font-semibold">
+            {paperName}
+          </h1>
+          <p className="text-text-secondary text-sm break-all">{publicId}</p>
+        </div>
+        <div className="bg-secondary text-secondary-foreground flex size-11 shrink-0 items-center justify-center rounded-full">
+          <Clock3 className="size-5" aria-hidden="true" />
+        </div>
+      </div>
+
+      <div className="bg-surface ring-border space-y-4 rounded-xl p-4 shadow-sm ring-1">
+        <div className="flex items-center gap-2">
+          <Clock3 className="text-brand-primary size-4" aria-hidden="true" />
+          <h2 className="font-heading text-text-primary text-base font-semibold">
+            {isPartialFailed
+              ? examStatusLabels.scoring_partial_failed
+              : isCompleted
+                ? "评分已完成"
+                : examStatusLabels.scoring}
+          </h2>
+        </div>
+        <p className="text-text-secondary text-sm leading-6">
+          评分可能需要几分钟，请耐心等待或稍后查看
+        </p>
+        {isPartialFailed ? (
+          <p className="text-warning bg-warning/10 rounded-lg px-3 py-2 text-sm font-medium">
+            {failedScoringCount === null
+              ? "评分失败题目数量待确认"
+              : `${failedScoringCount} 道题评分失败`}
+          </p>
+        ) : null}
+        {isCompleted ? (
+          <Link
+            href={`/exam-report?examReportPublicId=${completedReportPublicId}`}
+            className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          >
+            <FileCheck2 className="size-4" aria-hidden="true" />
+            查看考试报告
+          </Link>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={onRefresh}
+              className="border-border text-text-primary flex h-10 items-center justify-center gap-2 rounded-lg border bg-transparent px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+            >
+              <RefreshCw className="size-4" aria-hidden="true" />
+              刷新结果
+            </button>
+            {isPartialFailed ? (
+              <button
+                type="button"
+                onClick={onRetryScoring}
+                className="bg-primary text-primary-foreground flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+              >
+                <RotateCcw className="size-4" aria-hidden="true" />
+                重试评分
+              </button>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      <Link
+        href={`/mock-exam?mockExamPublicId=${mockExamPublicId}`}
+        className="text-brand-primary text-center text-sm font-medium transition-transform active:scale-[0.98]"
+      >
+        离开页面，稍后从记录列表进入
+      </Link>
+    </section>
+  );
+}
+
 export function StudentMockExamPage({
   state = "ready",
   paperPublicId,
@@ -769,6 +914,14 @@ export function StudentMockExamPage({
   const [runtimeExamReportPublicId, setRuntimeExamReportPublicId] = useState<
     string | null
   >(null);
+  const [runtimeScoringProgress, setRuntimeScoringProgress] = useState<{
+    publicId: string;
+    paperName: string;
+    mockExamPublicId: string;
+    status: ScoringProgressStatus | "completed";
+    failedScoringCount: number | null;
+    completedReportPublicId: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -1003,6 +1156,174 @@ export function StudentMockExamPage({
     });
   }
 
+  async function generateRuntimeExamReport(
+    token: string,
+    targetMockExamPublicId: string,
+  ): Promise<string | null> {
+    const reportPayload = await fetchStudentApi<ExamReportResultDto>(
+      "/api/v1/exam-reports",
+      token,
+      {
+        method: "POST",
+        body: JSON.stringify({ mockExamPublicId: targetMockExamPublicId }),
+      },
+    );
+
+    if (isStudentUnauthorizedResponse(reportPayload)) {
+      setRuntimeState("authorization_expired");
+      return null;
+    }
+
+    if (reportPayload.code !== 0 || reportPayload.data === null) {
+      setRuntimeState("error");
+      return null;
+    }
+
+    return reportPayload.data.examReport.publicId;
+  }
+
+  async function handleRefreshScoringProgress() {
+    if (runtimeScoringProgress === null) {
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("authorization_expired");
+      return;
+    }
+
+    try {
+      const mockExamPayload = await fetchStudentApi<MockExamResultDto>(
+        `/api/v1/mock-exams/${runtimeScoringProgress.mockExamPublicId}`,
+        token,
+      );
+
+      if (isStudentUnauthorizedResponse(mockExamPayload)) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      if (mockExamPayload.code !== 0 || mockExamPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      const refreshedMockExam = mockExamPayload.data.mockExam;
+
+      if (refreshedMockExam.examStatus === "completed") {
+        const completedReportPublicId = await generateRuntimeExamReport(
+          token,
+          refreshedMockExam.publicId,
+        );
+
+        if (completedReportPublicId === null) {
+          return;
+        }
+
+        setRuntimeScoringProgress({
+          publicId: refreshedMockExam.publicId,
+          paperName: getPaperName(refreshedMockExam),
+          mockExamPublicId: refreshedMockExam.publicId,
+          status: "completed",
+          failedScoringCount: null,
+          completedReportPublicId,
+        });
+        return;
+      }
+
+      if (
+        refreshedMockExam.examStatus === "scoring" ||
+        refreshedMockExam.examStatus === "scoring_partial_failed"
+      ) {
+        setRuntimeScoringProgress({
+          publicId: refreshedMockExam.publicId,
+          paperName: getPaperName(refreshedMockExam),
+          mockExamPublicId: refreshedMockExam.publicId,
+          status: refreshedMockExam.examStatus,
+          failedScoringCount: null,
+          completedReportPublicId: null,
+        });
+      }
+    } catch {
+      setRuntimeState("error");
+    }
+  }
+
+  async function handleRetryRuntimeScoring() {
+    if (runtimeScoringProgress === null) {
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("authorization_expired");
+      return;
+    }
+
+    try {
+      const retryPayload = await fetchStudentApi<MockExamRetryScoringResultDto>(
+        `/api/v1/mock-exams/${runtimeScoringProgress.mockExamPublicId}/retry-scoring`,
+        token,
+        { method: "POST" },
+      );
+
+      if (isStudentUnauthorizedResponse(retryPayload)) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      if (retryPayload.code !== 0 || retryPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      const retriedMockExam = retryPayload.data.mockExam;
+
+      if (retriedMockExam.examStatus === "completed") {
+        const completedReportPublicId = await generateRuntimeExamReport(
+          token,
+          retriedMockExam.publicId,
+        );
+
+        if (completedReportPublicId === null) {
+          return;
+        }
+
+        setRuntimeScoringProgress({
+          publicId: retriedMockExam.publicId,
+          paperName: getPaperName(retriedMockExam),
+          mockExamPublicId: retriedMockExam.publicId,
+          status: "completed",
+          failedScoringCount: retryPayload.data.failedCount,
+          completedReportPublicId,
+        });
+        return;
+      }
+
+      if (
+        retriedMockExam.examStatus === "scoring" ||
+        retriedMockExam.examStatus === "scoring_partial_failed"
+      ) {
+        setRuntimeScoringProgress({
+          publicId: retriedMockExam.publicId,
+          paperName: getPaperName(retriedMockExam),
+          mockExamPublicId: retriedMockExam.publicId,
+          status: retriedMockExam.examStatus,
+          failedScoringCount: retryPayload.data.failedCount,
+          completedReportPublicId: null,
+        });
+        return;
+      }
+
+      setRuntimeState("error");
+    } catch {
+      setRuntimeState("error");
+    }
+  }
+
   async function handleSubmitMockExam() {
     if (mockExam === null) {
       return;
@@ -1033,26 +1354,32 @@ export function StudentMockExamPage({
           return;
         }
 
-        const reportPayload = await fetchStudentApi<ExamReportResultDto>(
-          "/api/v1/exam-reports",
+        if (
+          submitPayload.data.mockExam.examStatus === "scoring" ||
+          submitPayload.data.mockExam.examStatus === "scoring_partial_failed"
+        ) {
+          setRuntimeScoringProgress({
+            publicId: submitPayload.data.mockExam.publicId,
+            paperName: getPaperName(submitPayload.data.mockExam),
+            mockExamPublicId: submitPayload.data.mockExam.publicId,
+            status: submitPayload.data.mockExam.examStatus,
+            failedScoringCount: null,
+            completedReportPublicId: null,
+          });
+          setIsSubmitted(true);
+          return;
+        }
+
+        const generatedReportPublicId = await generateRuntimeExamReport(
           token,
-          {
-            method: "POST",
-            body: JSON.stringify({ mockExamPublicId: mockExam.publicId }),
-          },
+          mockExam.publicId,
         );
 
-        if (isStudentUnauthorizedResponse(reportPayload)) {
-          setRuntimeState("authorization_expired");
+        if (generatedReportPublicId === null) {
           return;
         }
 
-        if (reportPayload.code !== 0 || reportPayload.data === null) {
-          setRuntimeState("error");
-          return;
-        }
-
-        setRuntimeExamReportPublicId(reportPayload.data.examReport.publicId);
+        setRuntimeExamReportPublicId(generatedReportPublicId);
       } catch {
         setRuntimeState("error");
         return;
@@ -1063,6 +1390,23 @@ export function StudentMockExamPage({
   }
 
   if (isSubmitted) {
+    if (runtimeScoringProgress !== null) {
+      return (
+        <StudentScoringProgressPanel
+          publicId={runtimeScoringProgress.publicId}
+          paperName={runtimeScoringProgress.paperName}
+          mockExamPublicId={runtimeScoringProgress.mockExamPublicId}
+          status={runtimeScoringProgress.status}
+          failedScoringCount={runtimeScoringProgress.failedScoringCount}
+          completedReportPublicId={
+            runtimeScoringProgress.completedReportPublicId
+          }
+          onRefresh={() => void handleRefreshScoringProgress()}
+          onRetryScoring={() => void handleRetryRuntimeScoring()}
+        />
+      );
+    }
+
     const submittedExamReportPublicId =
       runtimeExamReportPublicId ?? selectedMockExamFixture.examReportPublicId;
 
@@ -1272,6 +1616,7 @@ export function StudentExamReportPage({
   const [runtimeExamReports, setRuntimeExamReports] = useState<
     ExamReportDetailDto[]
   >([]);
+  const [reloadRequestId, setReloadRequestId] = useState(0);
   const displayState =
     isRuntimeMode && state === "ready" ? runtimeState : state;
   const displayExamReports = examReports ?? runtimeExamReports;
@@ -1332,7 +1677,7 @@ export function StudentExamReportPage({
     return () => {
       isActive = false;
     };
-  }, [examReportPublicId, isRuntimeMode, state]);
+  }, [examReportPublicId, isRuntimeMode, reloadRequestId, state]);
 
   if (displayState === "loading") {
     return <StudentExamReportLoading />;
@@ -1406,6 +1751,70 @@ export function StudentExamReportPage({
   }
 
   const parsedReportSnapshot = parseReportSnapshot(examReport.reportSnapshot);
+
+  async function handleRetryScoring() {
+    if (!isRuntimeMode) {
+      return;
+    }
+
+    const targetMockExamPublicId = examReport?.mockExamPublicId;
+
+    if (targetMockExamPublicId === undefined) {
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("authorization_expired");
+      return;
+    }
+
+    try {
+      const retryPayload = await fetchStudentApi<MockExamRetryScoringResultDto>(
+        `/api/v1/mock-exams/${targetMockExamPublicId}/retry-scoring`,
+        token,
+        { method: "POST" },
+      );
+
+      if (isStudentUnauthorizedResponse(retryPayload)) {
+        setRuntimeState("authorization_expired");
+        return;
+      }
+
+      if (retryPayload.code !== 0 || retryPayload.data === null) {
+        setRuntimeState("error");
+        return;
+      }
+
+      setReloadRequestId(
+        (currentReloadRequestId) => currentReloadRequestId + 1,
+      );
+    } catch {
+      setRuntimeState("error");
+    }
+  }
+
+  if (
+    examReport.examStatus === "scoring" ||
+    examReport.examStatus === "scoring_partial_failed"
+  ) {
+    return (
+      <StudentScoringProgressPanel
+        publicId={examReport.publicId}
+        paperName={examReport.paperName}
+        mockExamPublicId={examReport.mockExamPublicId}
+        status={examReport.examStatus}
+        failedScoringCount={getFailedScoringCount(examReport.reportSnapshot)}
+        onRefresh={() =>
+          setReloadRequestId(
+            (currentReloadRequestId) => currentReloadRequestId + 1,
+          )
+        }
+        onRetryScoring={() => void handleRetryScoring()}
+      />
+    );
+  }
 
   return (
     <section

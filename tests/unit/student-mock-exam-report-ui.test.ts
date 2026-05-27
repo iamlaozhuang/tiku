@@ -431,6 +431,79 @@ describe("StudentMockExamPage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
   });
 
+  it("shows the scoring progress surface after runtime submit returns a scoring mock exam", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/mock-exams") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { mockExam },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/mock-exams/mock-exam-marketing-theory-001/submit"
+        ) {
+          expect(init?.method).toBe("POST");
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                mockExam: {
+                  ...mockExam,
+                  examStatus: "scoring",
+                  submittedAt: "2026-05-23T00:30:00.000Z",
+                },
+                unansweredCount: 3,
+              },
+            }),
+          };
+        }
+
+        throw new Error(`Unexpected request: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "营销理论模考卷 A" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "交卷" }));
+    fireEvent.click(screen.getByRole("button", { name: "确认交卷" }));
+
+    expect(
+      await screen.findByText("评分可能需要几分钟，请耐心等待或稍后查看"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("exam-scoring-progress-surface")).toHaveAttribute(
+      "data-public-id",
+      "mock-exam-marketing-theory-001",
+    );
+    expect(screen.queryByRole("link", { name: "查看考试报告" })).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it.each(["case_analysis", "calculation"] as const)(
     "saves %s mock exam snapshots as text answers",
     async (questionType) => {
@@ -677,6 +750,100 @@ describe("StudentExamReportPage", () => {
       }),
     );
     expect(screen.getByText("未找到考试报告")).toBeInTheDocument();
+  });
+
+  it("renders scoring reports as a progress surface without half-finished score details", () => {
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-marketing-scoring-001",
+        examReports: studentExamReportFixture.examReports,
+      }),
+    );
+
+    expect(screen.getByTestId("exam-scoring-progress-surface")).toHaveAttribute(
+      "data-public-id",
+      "exam-report-marketing-scoring-001",
+    );
+    expect(
+      screen.getByText("评分可能需要几分钟，请耐心等待或稍后查看"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "刷新结果" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("总分")).toBeNull();
+    expect(screen.queryByText("题目结果")).toBeNull();
+    expect(screen.queryByText("得分生成中")).toBeNull();
+  });
+
+  it("reloads a runtime scoring report when the student refreshes the result", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: {
+            examReport: studentExamReportFixture.examReports[1],
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 0,
+          message: "ok",
+          data: {
+            examReport: {
+              ...studentExamReportFixture.examReports[0],
+              publicId: "exam-report-marketing-scoring-001",
+              examReportPublicId: "exam-report-marketing-scoring-001",
+            },
+          },
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-marketing-scoring-001",
+      }),
+    );
+
+    expect(
+      await screen.findByText("评分可能需要几分钟，请耐心等待或稍后查看"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "刷新结果" }));
+
+    expect(await screen.findByText("总分 86.0")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows failed scoring count and retry action for partial failed reports", () => {
+    const partialReport = {
+      ...studentExamReportFixture.examReports[2],
+      reportSnapshot: {
+        ...studentExamReportFixture.examReports[2].reportSnapshot,
+        failedScoringCount: 2,
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-marketing-partial-001",
+        examReports: [partialReport],
+      }),
+    );
+
+    expect(screen.getByText("2 道题评分失败")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "重试评分" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("题目结果")).toBeNull();
   });
 
   it("distinguishes a missing runtime exam report from a generic load failure", async () => {
