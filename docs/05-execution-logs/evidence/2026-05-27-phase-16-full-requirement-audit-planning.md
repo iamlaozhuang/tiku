@@ -8,10 +8,10 @@
 
 ## Summary
 
-- Result: pass before commit.
+- Result: pass and closed.
 - Scope: docs_only.
 - Changed surfaces: project state, task queue, task plan, evidence, audit catalog, traceability matrix, prerequisites.
-- Gates: readiness, Git inventory, whitespace, and Prettier passed.
+- Gates: readiness, Git inventory, whitespace, Prettier, pre-commit lint/typecheck, post-merge readiness, post-merge Git inventory, post-merge whitespace, and post-merge Prettier passed.
 - Forbidden scope: no env, dependency, source, test, e2e, schema, migration, script, staging/prod/cloud, deploy, or real provider changes.
 - Residual gaps: audit execution not started; all implementation findings remain future work.
 
@@ -136,6 +136,29 @@
 - `node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-27-phase-16-full-requirement-audit-planning.md docs\05-execution-logs\evidence\2026-05-27-phase-16-full-requirement-audit-planning.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-audit-catalog.md docs\05-execution-logs\audits-reviews\2026-05-27-requirement-traceability-matrix.md docs\05-execution-logs\audits-reviews\2026-05-27-full-audit-prerequisites.md`
   - Result: pass.
   - Note: the first sandboxed Prettier run failed with `EPERM` reading the installed Prettier binary under `node_modules`; rerun with approved elevated access succeeded. Prettier `--write` was then applied to task-scoped docs and the final `--check` passed.
+
+## Closeout
+
+- Implementation commit: `f79ede7027ee0e379f3d63378941be9fb72c5539` (`docs(agent): plan phase 16 requirement audit`).
+- Pre-commit hook during implementation commit:
+  - `lint-staged`: pass.
+  - `npm run lint`: pass.
+  - `npm run typecheck`: pass.
+- Merge commit on `master`: `1d98bf9b11c5e2ecf659abbcb52233fd5af4fa87` (`merge: phase 16 requirement audit planning`).
+- Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Result: pass.
+- Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Result: pass inventory. `master` was ahead of `origin/master` by 2 before first push.
+- Post-merge `git diff --check`
+  - Result: pass.
+- Post-merge Prettier check on changed Markdown/YAML files
+  - Result: pass.
+- First push target: `origin/master`.
+  - Result: pass. `master` advanced from `f5ad9ed` to `1d98bf9`.
+- Cleanup target: local branch `codex/phase-16-full-requirement-audit-planning`.
+  - Result: pass after elevated retry. Initial sandboxed `git branch -d` failed with a ref lock permission error; elevated retry deleted the already-merged local branch.
+- Closeout evidence/state update:
+  - Result: recorded in this evidence update and project/task state before final closeout commit.
 
 ## 品味合规自检 Checklist
 
