@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T03:05:00-07:00"
+  currentPhase: phase-21-implementation-plan-breakdown
+  updatedAt: "2026-05-27T03:05:01-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: b32831a3817bb7d195514c0750018fa954498097
-  lastKnownOriginMasterSha: b32831a3817bb7d195514c0750018fa954498097
+  lastKnownMasterSha: a7f73e34be61a16c625cd5b3aadcca7c23e5e11a
+  lastKnownOriginMasterSha: a7f73e34be61a16c625cd5b3aadcca7c23e5e11a
 currentTask:
-  id: phase-20-reaudit-ra-01-08-redeem-code-generation-coverage
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-19-coverage-matrix-review.md#coverage-caveats-for-phase-19-04
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-reaudit-ra-01-08-redeem-code-generation-coverage.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-20-reaudit-ra-01-08-redeem-code-generation-coverage.md
-  branch: codex/phase-20-reaudit-ra-01-08-redeem-code-generation-coverage
-  commitSha: 441ad31b780b562b8cb4bba83421594ea27f182d
+  id: phase-21-implementation-plan-breakdown
+  status: validated
+  sourceStory: user-request-2026-05-27-phase-21-implementation-plan-breakdown
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-21-implementation-plan-breakdown.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-21-implementation-plan-breakdown.md
+  branch: codex/phase-21-implementation-plan-breakdown
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: RA-01-08 redeem_code generation coverage re-audit is closed. Stop and wait for human confirmation before continuing Phase 20 fix/test tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-20-reaudit-ra-01-08-redeem-code-generation-coverage.md
+  nextRecommendedAction: Complete Phase 21 planning validation, close out the docs-only planning task, then stop and wait for human confirmation before starting any Phase 20 or Phase 22 fix/test task.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-21-implementation-plan-breakdown.md
