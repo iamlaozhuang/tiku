@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 8f3f094362984db198d72e2aa56280d30024b89b
-  lastKnownOriginMasterSha: 8f3f094362984db198d72e2aa56280d30024b89b
+  lastKnownMasterSha: e90347bcd292e460d96519f884469a17cc66c747
+  lastKnownOriginMasterSha: e90347bcd292e460d96519f884469a17cc66c747
 currentTask:
-  id: phase-15-project-state-closeout-reconciliation
+  id: phase-15-local-human-verification-playbook
   status: closed
   sourceStory: user-request-2026-05-26-agent-mechanism-upgrade
-  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-project-state-closeout-reconciliation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-project-state-closeout-reconciliation.md
-  branch: codex/phase-15-project-state-closeout-reconciliation
+  planPath: docs/05-execution-logs/task-plans/2026-05-26-phase-15-local-human-verification-playbook.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-15-local-human-verification-playbook.md
+  branch: codex/phase-15-local-human-verification-playbook
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Project-state closeout reconciliation rules added; continue with phase-15-local-human-verification-playbook.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-project-state-closeout-reconciliation.md
+  nextRecommendedAction: Local human verification playbook added; continue with phase-15-blocked-gates-registry.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-26-phase-15-local-human-verification-playbook.md
