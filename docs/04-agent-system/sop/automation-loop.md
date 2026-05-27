@@ -129,6 +129,19 @@ Every new queue task should declare `taskPlanPolicy: required`, `taskPlanPolicy:
 - Use `evidence_only` for readiness, closeout, and state-only tasks when the queue intentionally does not allow `docs/05-execution-logs/task-plans/**`.
 - Use `skipped_with_reason` only when a human instruction explicitly prevents a plan, and record the reason in evidence.
 
+New queue tasks should also declare a lightweight `taskKind` label. This is an execution hint for startup reports, validation selection, and handoff clarity. It is not a replacement for `allowedFiles`, `blockedFiles`, `riskTypes`, or `validationCommands`.
+
+Allowed `taskKind` values:
+
+- `read_only`: status recovery, inspection, audit, or report-only work with no repository edits.
+- `docs_only`: documentation, state, queue, plan, or evidence changes only.
+- `implementation`: source, test, UI, API, service, repository, validator, or runtime behavior changes.
+- `local_verification`: local browser/e2e/manual verification work, usually localhost-only.
+- `closeout`: merge, push, cleanup, or project-state reconciliation work after implementation.
+- `blocked_gate`: records or updates a long-lived approval gate without executing the blocked action.
+
+Do not backfill `taskKind` across historical tasks just for consistency. Add it to new tasks and to currently touched queue entries when doing so stays inside the task scope.
+
 When appending repetitive command evidence, prefer:
 
 ```powershell
