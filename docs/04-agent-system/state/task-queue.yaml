@@ -12485,7 +12485,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md
-    status: validated
+    status: merged
     retryCount: 0
   - id: phase-20-fix-ra-06-06-resource-enable-admin-evidence
     title: Phase 20 Fix RA-06-06 Resource Enable Admin Evidence

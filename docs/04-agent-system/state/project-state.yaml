@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T03:44:12-07:00"
+  updatedAt: "2026-05-27T03:51:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -40,12 +40,12 @@ repository:
   lastKnownOriginMasterSha: c0210e7347391428d0ac5caed9101e9fd718ad2a
 currentTask:
   id: phase-20-fix-ra-06-05-redeem-code-detail-view
-  status: validated
+  status: merged
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-06-05-redeem-code-detail-view.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md
   branch: codex/phase-20-fix-ra-06-05-redeem-code-detail-view
-  commitSha: null
+  commitSha: 4ab7205d8f799c5107287015f7c137f93565735
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Continue claimed task phase-20-fix-ra-06-05-redeem-code-detail-view on branch codex/phase-20-fix-ra-06-05-redeem-code-detail-view; keep high-risk gates blocked and do not read .env.local.
+  nextRecommendedAction: phase-20-fix-ra-06-05-redeem-code-detail-view is merged into master and validated on master; push origin/master and then clean up the short-lived branch after recording closeout.
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-05-redeem-code-detail-view.md
