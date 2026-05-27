@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: pass, pending closeout docs commit, push, and cleanup.
+- Result: pass.
 - Scope: implementation.
 - Changed surfaces: paper draft repository archive mutation, archive termination regression test, task plan/evidence/state.
 - Gates: task claim readiness, focused unit, full unit, e2e, build, readiness, git inventory, diff, Prettier, naming, and local quality gate passed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-02-09-001`; closeout docs commit, push, and cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-02-09-001`.
 
 ## Startup Recovery
 
@@ -83,5 +83,17 @@
   - changed-file Prettier check - pass after sandbox EPERM on local `node_modules` was rerun with escalation; all matched files use Prettier style.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 548 tests), and `format:check` passed.
-- push: pending.
-- cleanup: pending.
+- closeoutValidationCommit: `27201e4fe42d3332b266cad1ba18a9268d7b0e98` (`docs(paper): record archive termination closeout validation`).
+- push:
+  - `git fetch origin` - pass.
+  - `git rev-list --left-right --count master...origin/master` - `4 0` before push.
+  - `git push origin master` - pass, `ffd145e..27201e4 master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-20-fix-ra-02-09-paper-archive-termination` - initial sandbox attempt failed on Git ref lock permission.
+  - escalated `git branch -d codex/phase-20-fix-ra-02-09-paper-archive-termination` - pass, deleted already-merged branch at `dcf9c8d`.
+- final cleanup verification:
+  - `git status --short --branch` - `## master...origin/master`, clean.
+  - `git rev-parse HEAD` - `27201e4fe42d3332b266cad1ba18a9268d7b0e98`.
+  - `git rev-parse origin/master` - `27201e4fe42d3332b266cad1ba18a9268d7b0e98`.
+  - `git branch --list codex/*` - none.
+  - `git worktree list` - only `D:/tiku 27201e4 [master]`.
