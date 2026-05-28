@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T20:51:50-07:00"
+  updatedAt: "2026-05-27T20:54:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,11 +36,11 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: abcb43ad71e1e92a8a0aa56e1ca0409bfd1e2ba4
-  lastKnownOriginMasterSha: b6c9438384fd3863fe2c67e256a3edaee80e24a5
+  lastKnownMasterSha: e118eb8ca7ed620071e2dca899d60944ce524850
+  lastKnownOriginMasterSha: e118eb8ca7ed620071e2dca899d60944ce524850
 currentTask:
   id: phase-22-status-normalization
-  status: post_merge_validated_pending_push_cleanup
+  status: closed
   sourceStory: user-request-2026-05-27-phase-22-status-normalization
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-22-status-normalization.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-22-status-normalization.md
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit phase-22-status-normalization closeout evidence, push origin/master, delete the already-merged short-lived branch, and record cleanup evidence. After cleanup, continue with the next pending low-risk Phase 22 task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
+  nextRecommendedAction: "phase-22-status-normalization is closed: six legacy completed Phase 20/22 task statuses are normalized to closed, master was pushed, and the short-lived branch was deleted. Next automation loop may scan the queue for the next pending low-risk Phase 22 task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-22-status-normalization.md

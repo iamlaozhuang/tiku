@@ -80,3 +80,20 @@
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 556 tests), and `format:check` passed.
 - push: pending until this closeout evidence is committed.
 - cleanup: pending until `origin/master` is pushed and the already-merged branch is deleted.
+
+## Push And Cleanup
+
+- closeoutEvidenceCommit: `e118eb8ca7ed620071e2dca899d60944ce524850` (`docs(agent): record status normalization closeout`).
+- push:
+  - pre-push `git fetch origin` - pass.
+  - pre-push `git rev-list --left-right --count master...origin/master` - `3 0`.
+  - `git push origin master` - pass, `b6c9438..e118eb8 master -> master`.
+- cleanup:
+  - initial `git branch -d codex/phase-22-status-normalization` failed in sandbox with ref lock permission denied.
+  - escalated `git branch -d codex/phase-22-status-normalization` passed; deleted already-merged branch at `a96b208`.
+- final cleanup verification before this evidence update:
+  - `git status --short --branch` showed `## master...origin/master`.
+  - `git rev-parse HEAD` and `git rev-parse origin/master` both returned `e118eb8ca7ed620071e2dca899d60944ce524850`.
+  - `git branch --list codex/*` returned no branches.
+  - `git worktree list` showed only `D:/tiku  e118eb8 [master]`.
+  - Phase 20/21/22 selected task status count remained `TOTAL=52`, `closed=15`, `pending=37`.
