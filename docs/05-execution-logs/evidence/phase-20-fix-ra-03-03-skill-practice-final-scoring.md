@@ -58,3 +58,20 @@
 | final `git diff --check`                                                                                                            | pass   | No whitespace errors after evidence update.                                                                                                          |
 | final changed-file Prettier check                                                                                                   | pass   | All changed Markdown/YAML/TS/TSX files use Prettier code style.                                                                                      |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                             | pass   | `lint`, `typecheck`, `test:unit` (134 files, 555 tests), and `format:check` passed.                                                                  |
+
+## Closeout Status
+
+- implementationCommit: `06cb3a5f99b391c1d3b1d0707e79292ea7eb7324` (`fix(practice): add subjective final scoring`).
+- merge: `e8fbaf4a25a19a8035ee69d411f4584c751699ab` (`merge: phase-20 fix ra-03-03 skill practice final scoring`) merged into local `master`.
+- post-merge master validation:
+  - `npm.cmd run test:unit` - pass, 134 test files and 555 tests.
+  - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
+  - `npm.cmd run build` - initial fail from ignored `.next/dev/types/routes.d.ts`; confirmed `.next/` is ignored by `.gitignore`, `git ls-files` returned no tracked source, cleaned only `D:\tiku\.next`, then reran build successfully. `.env.local` contents were not read.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; `master` was clean and ahead of `origin/master` by implementation and merge commits.
+  - `git diff --check` - pass.
+  - post-merge changed-file Prettier check - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 555 tests), and `format:check` passed.
+- push: pending.
+- cleanup: pending.
