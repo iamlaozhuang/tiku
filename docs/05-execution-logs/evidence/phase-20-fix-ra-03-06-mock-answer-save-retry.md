@@ -79,4 +79,5 @@
 - base: `master` / `origin/master` at `e102ef4ca46bdd9f0453ea988a2d6fbd68c4372c`
 - changed files: `project-state.yaml`, `task-queue.yaml`, task plan, this evidence file, `StudentMockExamReportPage.tsx`, and `student-mock-exam-report-ui.test.ts`.
 - implementation commit: `edfd2ef49327d3c69064fa28e9a8ebf2b41c46b8`
-- merge/push/cleanup: complete; cleanup evidence commit pending.
+- cleanup evidence commit: `93b2936397ab48c01e924578f9404133b570bdca` (`docs(mock-exam): record answer save retry cleanup`).
+- merge/push/cleanup: complete.
