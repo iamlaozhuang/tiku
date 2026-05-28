@@ -869,6 +869,54 @@ describe("paper draft service", () => {
     ]);
   });
 
+  it("rejects fill_blank publish when per-blank answers are missing", async () => {
+    const publishedInputs: unknown[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            total_score: "2.0",
+            paper_sections: [
+              {
+                id: 201,
+                title: "fill_blank paper_section",
+                description: null,
+                sort_order: 1,
+                total_score: "2.0",
+                paper_questions: [
+                  createFillBlankPaperQuestion({
+                    question_snapshot: {
+                      ...createFillBlankPaperQuestion().question_snapshot,
+                      fillBlankAnswers: [],
+                    },
+                  }),
+                ],
+              },
+            ],
+            question_groups: [],
+          });
+        },
+        async publishPaper(input) {
+          publishedInputs.push(input);
+
+          return createPaper({
+            public_id: input.paperPublicId,
+            paper_status: "published",
+            published_at: new Date("2026-05-19T08:00:00.000Z"),
+          });
+        },
+      }),
+    );
+
+    await expect(service.publishPaper("fill_blank_missing")).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+    expect(publishedInputs).toEqual([]);
+  });
+
   it.each(["case_analysis", "calculation"] as const)(
     "validates %s scoring_point totals as subjective paper questions",
     async (questionType) => {

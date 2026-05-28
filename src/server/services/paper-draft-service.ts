@@ -249,17 +249,18 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
   const fillBlankScoreMismatch = paperQuestions.some((paperQuestion) => {
     const questionScore = convertScoreToHalfPoints(paperQuestion.score);
 
-    if (
-      questionScore === null ||
-      !isFillBlankPaperQuestion(paperQuestion) ||
-      (paperQuestion.question_snapshot.fillBlankAnswers ?? []).length === 0
-    ) {
+    if (questionScore === null || !isFillBlankPaperQuestion(paperQuestion)) {
       return false;
     }
 
-    const fillBlankScores = (
-      paperQuestion.question_snapshot.fillBlankAnswers ?? []
-    ).map(
+    const fillBlankAnswers =
+      paperQuestion.question_snapshot.fillBlankAnswers ?? [];
+
+    if (fillBlankAnswers.length === 0) {
+      return true;
+    }
+
+    const fillBlankScores = fillBlankAnswers.map(
       (fillBlankAnswer) => convertScoreToHalfPoints(fillBlankAnswer.score) ?? 0,
     );
 

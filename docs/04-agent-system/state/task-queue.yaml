@@ -11900,7 +11900,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-02-question-paper-content
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-08-001. Per-blank validation may depend on separately approved scoring model changes.
+    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-08-001. User approved local implementation under database_migration risk on 2026-05-28, limited to reusing the landed fillBlankAnswers/fill_blank_answers model for publish validation. No src/db/schema, drizzle, env file, package/lockfile/dependency, cloud/deploy config, staging/prod/real provider connection, destructive data operation, or drizzle-kit push is approved.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -11932,7 +11932,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-08-publish-fill-blank-validation.md
-    status: pending
+    status: implemented
     retryCount: 0
   - id: phase-20-fix-ra-02-09-paper-archive-termination
     title: Phase 20 Fix RA-02-09 Paper Archive Termination
