@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: pass, pending commit/merge/push/cleanup.
+- Result: pass, committed, merged, pushed, and cleaned up.
 - Scope: implementation.
 - Changed surfaces: `StudentMockExamReportPage`, `student-mock-exam-report-ui.test.ts`, task plan/evidence/state.
 - Gates: focused unit, full unit, build, e2e, readiness, Git inventory, naming, diff, and quality gate passed.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-03-06-001`; commit/merge/push/cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-03-06-001`; no residual branch/worktree cleanup gap remains.
 
 ## Startup and Claim
 
@@ -52,10 +52,31 @@
 | final `npm.cmd run build`                                                                                                           | pass   | Build passed after the lint-driven hook adjustment.                                                       |
 | final `npm.cmd run test:e2e`                                                                                                        | pass   | 25 Playwright tests passed after the lint-driven hook adjustment.                                         |
 
+## Post-Merge Validation and Cleanup
+
+| Command                                                                                                                                    | Result | Notes                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `git merge --ff-only codex/phase-20-fix-ra-03-06-mock-answer-save-retry`                                                                   | pass   | Fast-forwarded `master` to implementation commit `edfd2ef49327d3c69064fa28e9a8ebf2b41c46b8`.                                                              |
+| `git diff --check`                                                                                                                         | pass   | No whitespace errors on `master` after merge.                                                                                                             |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                             | pass   | Required agent-system readiness checks passed on `master`.                                                                                                |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master` | pass   | Inventory showed the expected task files ahead of `origin/master` before push.                                                                            |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                | pass   | Naming convention scan passed on `master`.                                                                                                                |
+| `npm.cmd run build`                                                                                                                        | pass   | Build passed on `master` after merge.                                                                                                                     |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                                    | pass   | `lint`, `typecheck`, `test:unit` (134 files, 557 tests), and `format:check` passed on `master`.                                                           |
+| `npm.cmd run test:e2e`                                                                                                                     | fail   | First post-merge full run hit a `local-business-flow` timeout while reading admin page state.                                                             |
+| `npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts`                                                                                  | fail   | First focused rerun did not reproduce the timeout; it failed on a transient Next font `woff2` `ERR_ABORTED` network failure captured by the test harness. |
+| `npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts`                                                                                  | pass   | Focused rerun passed: 1 Playwright test passed.                                                                                                           |
+| `npm.cmd run test:e2e`                                                                                                                     | pass   | Final full post-merge run passed: 25 Playwright tests passed.                                                                                             |
+| `git push origin master`                                                                                                                   | pass   | Pushed `master` from `e102ef4` to `edfd2ef`.                                                                                                              |
+| `git branch -d codex/phase-20-fix-ra-03-06-mock-answer-save-retry`                                                                         | pass   | Deleted the already merged local short-lived branch.                                                                                                      |
+| `git status --short --branch`                                                                                                              | pass   | `master` clean and aligned with `origin/master` before cleanup evidence edits.                                                                            |
+| `git branch --list "codex/*"`                                                                                                              | pass   | No residual local `codex/*` branch remained before cleanup evidence edits.                                                                                |
+| `git worktree list`                                                                                                                        | pass   | Only root worktree `D:/tiku` remained before cleanup evidence edits.                                                                                      |
+
 ## Closeout Status
 
 - branch: `codex/phase-20-fix-ra-03-06-mock-answer-save-retry`
 - base: `master` / `origin/master` at `e102ef4ca46bdd9f0453ea988a2d6fbd68c4372c`
 - changed files: `project-state.yaml`, `task-queue.yaml`, task plan, this evidence file, `StudentMockExamReportPage.tsx`, and `student-mock-exam-report-ui.test.ts`.
-- implementation commit: pending.
-- merge/push/cleanup: pending.
+- implementation commit: `edfd2ef49327d3c69064fa28e9a8ebf2b41c46b8`
+- merge/push/cleanup: complete; cleanup evidence commit pending.
