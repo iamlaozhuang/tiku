@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-28T01:52:00-07:00"
+  updatedAt: "2026-05-28T01:59:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: d39f377bf998111076d552a9694a835a3d527f1e
-  lastKnownOriginMasterSha: d39f377bf998111076d552a9694a835a3d527f1e
+  lastKnownMasterSha: 2d40b5ca34cc7d9130f244c5f6033fe3b2601269
+  lastKnownOriginMasterSha: 2d40b5ca34cc7d9130f244c5f6033fe3b2601269
 currentTask:
   id: phase-20-fix-ra-02-01-question-knowledge-tag-binding
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-02-01-question-knowledge-tag-binding.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-01-question-knowledge-tag-binding.md
   branch: codex/phase-20-fix-ra-02-01-question-knowledge-tag-binding
-  commitSha: null
+  commitSha: 2d40b5ca34cc7d9130f244c5f6033fe3b2601269
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit, merge, push, and cleanup phase-20-fix-ra-02-01-question-knowledge-tag-binding after validated local gates."
+  nextRecommendedAction: "Phase 20 RA-02-01 is closed. Next executable tasks are high-risk Phase 20 follow-ups and require explicit human approval before implementation."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-01-question-knowledge-tag-binding.md
