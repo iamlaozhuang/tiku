@@ -52,5 +52,22 @@
 
 ## Closeout Status
 
-- implementation commit: pending.
-- merge/push/cleanup: pending.
+- implementation commit: `e8af5b45cbc05d185db6ead79c5c6d5040c09970`.
+- merge: fast-forwarded into `master`.
+- post-merge validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; `master` was ahead of `origin/master` by the single RA-06-06 implementation commit.
+  - `git diff --check` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `npm.cmd run build` - pass.
+  - `npm.cmd run test:e2e` - pass; `25` tests passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (`134` files, `559` tests), and `format:check` passed.
+- push: `origin/master` updated from `2d7ae29` to `e8af5b4`.
+- cleanup:
+  - initial `git branch -d codex/phase-20-fix-ra-06-06-resource-enable-admin-evidence` failed in sandbox with ref lock permission denied.
+  - escalated `git branch -d codex/phase-20-fix-ra-06-06-resource-enable-admin-evidence` passed; deleted already-merged branch at `e8af5b4`.
+- final cleanup verification before this evidence update:
+  - `git status --short --branch` showed `## master...origin/master`.
+  - `git rev-list --left-right --count master...origin/master` returned `0 0`.
+  - `git branch --list codex/*` returned no branches.
+  - `git worktree list --porcelain` showed only root worktree `D:/tiku` on `master` at `e8af5b4`.
