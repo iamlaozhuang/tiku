@@ -78,6 +78,6 @@
 
 - implementationCommit: `b59b8f85185987028be604a40b57d3d3096cc477`.
 - merge: fast-forwarded into `master`.
-- closeoutCommit: `8d8e54e8e848c93b808ca8eb9068231893cbb205`.
+- closeoutCommit: `8d8e54e924914b6f4adb7e7e334c341ed4ce09c5`.
 - push: `git push origin master` passed, `c219a29..8d8e54e master -> master`.
 - cleanup: `git branch -d codex/phase-20-fix-ra-03-01-student-home-scope-guidance` passed after merged-branch confirmation; branch was `b59b8f8`.

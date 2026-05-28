@@ -62,5 +62,5 @@
 - push: `git push origin master` succeeded (`8fe435e..0f861e9 master -> master`).
 - cleanup: local branch `codex/phase-20-fix-ra-03-09-mistake-book-completion` deleted after merge; first sandbox delete hit ref lock permission, escalated delete succeeded.
 - cleanup evidence: recorded in `docs(student): record mistake book cleanup`.
-- cleanup push: pending at the time this evidence row is written; final shell verification must confirm `master` and `origin/master` alignment after push.
+- cleanup push: completed by `6685f4f` (`docs(student): record mistake book cleanup`), which is an ancestor of `origin/master`.
 - cleanup verification before final response: branch `codex/phase-20-fix-ra-03-09-mistake-book-completion` deleted, no `codex/*` branches remained, and only the root worktree `D:/tiku` was present.
