@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T17:04:10-07:00"
+  updatedAt: "2026-05-27T17:13:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 229a9743311a4a11b5453c9f774958da2144527b
-  lastKnownOriginMasterSha: 229a9743311a4a11b5453c9f774958da2144527b
+  lastKnownMasterSha: 38aa6baea293cd23567e30bb09a49ec6f6cf3f22
+  lastKnownOriginMasterSha: 38aa6baea293cd23567e30bb09a49ec6f6cf3f22
 currentTask:
-  id: phase-20-fix-ra-03-03-skill-practice-final-scoring
-  status: closed
+  id: phase-20-fix-ra-03-05-mock-exam-offline-recovery
+  status: branch_validated_pending_commit
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-03-skill-practice-final-scoring.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md
-  branch: codex/phase-20-fix-ra-03-03-skill-practice-final-scoring
-  commitSha: 06cb3a5f99b391c1d3b1d0707e79292ea7eb7324
+  planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-05-mock-exam-offline-recovery.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-05-mock-exam-offline-recovery.md
+  branch: codex/phase-20-fix-ra-03-05-mock-exam-offline-recovery
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "phase-20-fix-ra-03-03-skill-practice-final-scoring is closed: implementation, merge, closeout validation, push, and branch cleanup are complete. Next automation loop may scan the queue for the next pending low-risk Phase 22-D task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md
+  nextRecommendedAction: "Finish phase-20-fix-ra-03-05-mock-exam-offline-recovery closeout: branch validation passed including focused UI, unit, e2e, build, readiness, Git inventory, diff, changed-file Prettier, naming, and quality gate. Commit the scoped task changes, merge into master, validate on master, push, and clean up the short-lived branch."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-05-mock-exam-offline-recovery.md
