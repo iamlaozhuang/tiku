@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-29T23:15:00-07:00"
+  updatedAt: "2026-05-29T23:26:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 93bc91609554e130b1989a56c9de2e70a6e5f8b6
-  lastKnownOriginMasterSha: 93bc91609554e130b1989a56c9de2e70a6e5f8b6
+  lastKnownMasterSha: ae446116d46650e8321222c60c7e58bf386e57f5
+  lastKnownOriginMasterSha: ae446116d46650e8321222c60c7e58bf386e57f5
 currentTask:
   id: phase-20-fix-ra-04-04-practice-ai-explanation-triggers
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-29-phase-20-fix-ra-04-04-practice-ai-explanation-triggers.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-04-practice-ai-explanation-triggers.md
-  branch: codex/phase-20-fix-ra-04-04-practice-ai-explanation-triggers
-  commitSha: null
+  branch: null
+  commitSha: ae446116d46650e8321222c60c7e58bf386e57f5
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit evidence-only closure for phase-20-fix-ra-04-04-practice-ai-explanation-triggers, merge to master, run post-merge validation, push origin/master, then clean up the short-lived branch."
+  nextRecommendedAction: "RA-04-04 is merged, pushed, and cleaned up; claim the next eligible low-risk pending task after verifying master remains clean/aligned and the task preflight passes."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-04-practice-ai-explanation-triggers.md
