@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-28T05:20:15-07:00"
+updatedAt: "2026-05-28T05:59:41-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 89df9c18dceb204f7f6da5513405f77838f5dd17
-  lastKnownOriginMasterSha: 89df9c18dceb204f7f6da5513405f77838f5dd17
+  lastKnownMasterSha: 2ce9d3bffd52b9e17fce479b1573ed7cd8585621
+  lastKnownOriginMasterSha: 2ce9d3bffd52b9e17fce479b1573ed7cd8585621
 currentTask:
-  id: phase-20-fix-ra-04-06-knowledge-recommendation-confirmed-bindings
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-04-06-knowledge-recommendation-confirmed-bindings.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-06-knowledge-recommendation-confirmed-bindings.md
-  branch: codex/phase-20-fix-ra-04-06-knowledge-recommendation-confirmed-bindings
-  commitSha: 89df9c18dceb204f7f6da5513405f77838f5dd17
+  id: phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion.md
+  branch: codex/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Recommend the next pending task after confirming dependencies and high-risk gates; phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion is now a candidate because its RA-04-06 dependency has closed, but it still needs local UI/runtime/test/evidence approval before implementation."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-06-knowledge-recommendation-confirmed-bindings.md
+  nextRecommendedAction: "Commit phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion, merge to master, validate on master, push, delete the short-lived branch, then close task evidence/state."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion.md

@@ -92,6 +92,7 @@ type ContentLoadState =
 
 export type AdminQuestionMaterialManagementProps = {
   defaultView?: ViewMode;
+  initialKnowledgeNodeFilter?: string;
 };
 
 type QuestionFormValues = {
@@ -559,10 +560,13 @@ function upsertByPublicId<TItem extends { publicId: string }>(
 
 export function AdminQuestionMaterialManagement({
   defaultView = "questions",
+  initialKnowledgeNodeFilter = "",
 }: AdminQuestionMaterialManagementProps) {
   const [activeView, setActiveView] = useState<ViewMode>(defaultView);
   const [keyword, setKeyword] = useState("");
-  const [knowledgeNodeFilter, setKnowledgeNodeFilter] = useState("");
+  const [knowledgeNodeFilter, setKnowledgeNodeFilter] = useState(
+    initialKnowledgeNodeFilter,
+  );
   const [levelFilter, setLevelFilter] = useState("");
   const [profession, setProfession] = useState<ProfessionFilter>("all");
   const [questionType, setQuestionType] = useState<QuestionTypeFilter>("all");

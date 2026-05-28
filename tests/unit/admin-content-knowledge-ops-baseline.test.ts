@@ -690,6 +690,14 @@ describe("admin content and knowledge ops baseline", () => {
     expect(firstNode).not.toHaveAttribute("data-id");
     expect(within(firstNode).getByText("营销/市场调研")).toBeInTheDocument();
     expect(within(firstNode).getByText("绑定题目 18")).toBeInTheDocument();
+    expect(
+      within(firstNode).getByRole("link", {
+        name: "Review durable recommendation binding for knowledge-node-public-001",
+      }),
+    ).toHaveAttribute(
+      "href",
+      "/content/questions?knowledgeNodePublicId=knowledge-node-public-001&recommendationMode=durable_question_binding",
+    );
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain('"id"');
     expect(fetchMock).toHaveBeenCalledWith(

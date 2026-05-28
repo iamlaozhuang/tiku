@@ -111,6 +111,8 @@ const knStatusLabels: Record<KnStatus, string> = {
   disabled: "已停用",
 };
 
+const durableRecommendationBindingMode = "durable_question_binding";
+
 function useKnowledgeNodeData() {
   const [loadState, setLoadState] = useState<KnowledgeNodeLoadState>("loading");
   const [knowledgeNodes, setKnowledgeNodes] = useState<
@@ -1063,6 +1065,18 @@ function KnowledgeNodeList({
                 </div>
                 <PublicId value={knowledgeNode.publicId} />
               </div>
+              {knowledgeNode.isRecommendable ? (
+                <a
+                  aria-label={`Review durable recommendation binding for ${knowledgeNode.publicId}`}
+                  className="border-border text-text-secondary hover:bg-muted hover:text-foreground mt-4 inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium transition-all active:translate-y-px"
+                  href={createRecommendationBindingReviewHref(
+                    knowledgeNode.publicId,
+                  )}
+                >
+                  <GitBranch aria-hidden="true" className="size-3" />
+                  复核推荐绑定
+                </a>
+              ) : null}
               <p className="text-text-muted border-border mt-4 border-t pt-4 text-xs">
                 父级 {knowledgeNode.parentKnowledgeNodePublicId ?? "无"} /
                 更新时间 {formatDateTime(knowledgeNode.updatedAt)}
@@ -1073,6 +1087,15 @@ function KnowledgeNodeList({
       ))}
     </div>
   );
+}
+
+function createRecommendationBindingReviewHref(knowledgeNodePublicId: string) {
+  const searchParams = new URLSearchParams({
+    knowledgeNodePublicId,
+    recommendationMode: durableRecommendationBindingMode,
+  });
+
+  return `/content/questions?${searchParams.toString()}`;
 }
 
 function getKnowledgeNodeDepth(knowledgeNode: AdminKnowledgeNodeOpsSummaryDto) {

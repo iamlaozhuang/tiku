@@ -659,6 +659,24 @@ describe("AdminQuestionMaterialManagement", () => {
     expect(screen.queryByText("物流成本核算适用于哪类场景？")).toBeNull();
   });
 
+  it("starts question review from a knowledge_node durable binding handoff", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    mockContentFetch();
+
+    render(
+      createElement(AdminQuestionMaterialManagement, {
+        initialKnowledgeNodeFilter: "knowledge-node-costing",
+      }),
+    );
+
+    await screen.findByText("物流成本核算适用于哪类场景？");
+
+    expect(
+      screen.getByDisplayValue("knowledge-node-costing"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("市场调研抽样方法的核心目标是什么？")).toBeNull();
+  });
+
   it("lists and filters case_analysis and calculation question types", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     mockContentFetch([caseAnalysisQuestionPayload, calculationQuestionPayload]);
