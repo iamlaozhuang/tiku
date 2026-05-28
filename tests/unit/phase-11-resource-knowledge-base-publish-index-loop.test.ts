@@ -522,6 +522,64 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
         },
       },
     });
+
+    await expect(
+      buildLocalResourceRagRetrievalResult({
+        storageRoot,
+        query: "本地资源验证",
+        profession: "marketing",
+        level: 3,
+        authorizedResourcePublicIds: [resourcePublicId],
+      }),
+    ).resolves.toMatchObject({
+      evidenceStatus: "none",
+      citations: [],
+    });
+
+    const enableResponse = await handlers.resources.enable.POST(
+      new Request(
+        `http://localhost/api/v1/resources/${resourcePublicId}/enable`,
+        {
+          headers: { authorization: "Bearer admin-session-token" },
+          method: "POST",
+        },
+      ),
+      { params: Promise.resolve({ publicId: resourcePublicId }) },
+    );
+    await expect(enableResponse.json()).resolves.toMatchObject({
+      code: 0,
+      data: {
+        resource: {
+          publicId: resourcePublicId,
+          resourceStatus: "rag_ready",
+          isVectorStale: false,
+        },
+      },
+    });
+
+    const restoredRetrievalResult = await buildLocalResourceRagRetrievalResult({
+      storageRoot,
+      query: "本地资源验证",
+      profession: "marketing",
+      level: 3,
+      authorizedResourcePublicIds: [resourcePublicId],
+    });
+
+    expect(restoredRetrievalResult.evidenceStatus).not.toBe("none");
+    expect(restoredRetrievalResult.citations).toEqual([
+      expect.objectContaining({ resourcePublicId }),
+    ]);
+    expect(auditLogEntries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionType: "resource.enable",
+          targetResourceType: "resource",
+          targetPublicId: resourcePublicId,
+          resultStatus: "success",
+          metadataSummary: "redacted local resource enable metadata",
+        }),
+      ]),
+    );
     expect(JSON.stringify(auditLogEntries)).not.toContain(
       "admin-session-token",
     );

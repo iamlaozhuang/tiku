@@ -161,6 +161,10 @@ const resourcePublishConflictResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
   "Resource cannot be published from its current state.",
 );
+const resourceEnableConflictResponse = createErrorResponse(
+  ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
+  "Resource cannot be enabled from its current state.",
+);
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -951,6 +955,65 @@ async function disableLocalResource(input: {
   });
 }
 
+function canRestoreLocalResource(resource: LocalResourceCatalogEntry) {
+  const targetStatus = resource.disabledFromStatus;
+
+  if (
+    resource.resourceStatus !== "disabled" ||
+    targetStatus === null ||
+    !canTransitionResourceStatus("disabled", targetStatus)
+  ) {
+    return false;
+  }
+
+  if (targetStatus === "published") {
+    return (
+      resource.markdownContent !== null && resource.markdownContentHash !== null
+    );
+  }
+
+  return (
+    resource.markdownContent !== null &&
+    resource.markdownContentHash !== null &&
+    resource.chunkCount > 0 &&
+    resource.textHashes.length > 0
+  );
+}
+
+async function enableLocalResource(input: {
+  publicId: string;
+  storageRoot: string;
+}): Promise<ApiResponse<{ resource: AdminResourceOpsSummaryDto } | null>> {
+  const resource = await findLocalResource(input);
+
+  if (resource === null) {
+    return resourceNotFoundResponse;
+  }
+
+  const restoredStatus = resource.disabledFromStatus;
+
+  if (restoredStatus === null || !canRestoreLocalResource(resource)) {
+    return resourceEnableConflictResponse;
+  }
+
+  const now = new Date().toISOString();
+  const nextResource: LocalResourceCatalogEntry = {
+    ...resource,
+    resourceStatus: restoredStatus,
+    disabledFromStatus: null,
+    updatedAt: now,
+  };
+
+  await saveLocalResource({
+    resource: nextResource,
+    storageRoot: input.storageRoot,
+  });
+
+  return createSuccessResponse({
+    resource: mapLocalResourceEntry(nextResource),
+  });
+}
+
 export async function buildLocalResourceRagRetrievalResult({
   authorizedResourcePublicIds,
   level,
@@ -1260,6 +1323,40 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
               targetPublicId: publicId,
               resultStatus: response.code === 0 ? "success" : "failed",
               metadataSummary: "redacted local resource disable metadata",
+            },
+          );
+
+          return createJsonResponse(response);
+        },
+      },
+      enable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireContentAdminActor(request, {
+            actionType: "resource.enable",
+            targetResourceType: "resource",
+            targetPublicId: publicId,
+          });
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          const response = await enableLocalResource({
+            publicId,
+            storageRoot: localResourceStorageRoot,
+          });
+
+          await appendAuditLog(
+            repositories.auditLogRepository,
+            request,
+            actorOrError,
+            {
+              actionType: "resource.enable",
+              targetResourceType: "resource",
+              targetPublicId: publicId,
+              resultStatus: response.code === 0 ? "success" : "failed",
+              metadataSummary: "redacted local resource enable metadata",
             },
           );
 

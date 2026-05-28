@@ -266,17 +266,28 @@ describe("AI/RAG domain models", () => {
     expect(knowledgeNodeRow).not.toHaveProperty("parentKnowledgeNodeId");
   });
 
-  it("guards resource status transitions and RAG eligibility", () => {
-    expect(canTransitionResourceStatus("uploaded", "converting")).toBe(true);
-    expect(canTransitionResourceStatus("converting", "draft")).toBe(true);
-    expect(canTransitionResourceStatus("published", "indexing")).toBe(true);
-    expect(canTransitionResourceStatus("indexing", "rag_ready")).toBe(true);
-    expect(canTransitionResourceStatus("rag_ready", "disabled")).toBe(true);
-    expect(canTransitionResourceStatus("disabled", "rag_ready")).toBe(true);
-    expect(canTransitionResourceStatus("conversion_failed", "published")).toBe(
-      false,
-    );
-    expect(canTransitionResourceStatus("draft", "rag_ready")).toBe(false);
+  it("guards the complete resource status transition matrix and RAG eligibility", () => {
+    const allowedTransitions = {
+      uploaded: ["converting", "disabled"],
+      converting: ["draft", "conversion_failed", "disabled"],
+      conversion_failed: ["converting", "disabled"],
+      draft: ["published", "disabled"],
+      published: ["indexing", "disabled"],
+      indexing: ["rag_ready", "index_failed", "disabled"],
+      index_failed: ["indexing", "disabled"],
+      rag_ready: ["published", "indexing", "disabled"],
+      disabled: ["published", "rag_ready"],
+    } satisfies Record<(typeof resourceStatusValues)[number], string[]>;
+
+    for (const currentStatus of resourceStatusValues) {
+      for (const nextStatus of resourceStatusValues) {
+        expect(
+          canTransitionResourceStatus(currentStatus, nextStatus),
+          `${currentStatus} -> ${nextStatus}`,
+        ).toBe(allowedTransitions[currentStatus].includes(nextStatus));
+      }
+    }
+
     expect(isResourceRagEligible("rag_ready")).toBe(true);
     expect(isResourceRagEligible("published")).toBe(false);
     expect(isResourceRagEligible("conversion_failed")).toBe(false);

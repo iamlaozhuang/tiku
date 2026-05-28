@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-30T00:35:00-07:00"
+  updatedAt: "2026-05-28T00:29:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 4fc3bed8a974c61f758deaff95048bd530c64073
-  lastKnownOriginMasterSha: 4fc3bed8a974c61f758deaff95048bd530c64073
+  lastKnownMasterSha: 9fdaa4c1f9f2a280a4d405a785741aeb523a76ff
+  lastKnownOriginMasterSha: 9fdaa4c1f9f2a280a4d405a785741aeb523a76ff
 currentTask:
-  id: phase-20-fix-ra-04-08-prompt-template-source-of-truth-alignment
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-29-phase-20-fix-ra-04-08-prompt-template-source-of-truth-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-08-prompt-template-source-of-truth-alignment.md
-  branch: null
-  commitSha: 4fc3bed8a974c61f758deaff95048bd530c64073
+  id: phase-20-fix-ra-05-05-resource-enable-restore-state
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-05-05-resource-enable-restore-state.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-05-resource-enable-restore-state.md
+  branch: codex/phase-20-fix-ra-05-05-resource-enable-restore-state
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "RA-04-08 is merged, pushed, and cleaned up; claim the next eligible low-risk pending task after verifying master remains clean/aligned and the task preflight passes."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-08-prompt-template-source-of-truth-alignment.md
+  nextRecommendedAction: "Commit RA-05-05 implementation, merge to master, run post-merge validation, push origin/master, then clean up the short-lived branch."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-05-resource-enable-restore-state.md
