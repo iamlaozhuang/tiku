@@ -32,3 +32,9 @@
 - `local_human_verification`: record command outputs in evidence before closeout.
 - `evidence_integrity`: keep state/evidence updates scoped to this task.
 - High-risk gates not approved: no `database_migration`, `auth_permission_model`, `secret_or_env_change`, `external_service_config`, `dependency_change`, deploy/cloud, or destructive data operation.
+
+## 2026-05-28 Recovery Decision
+
+- Recovery found the implementation and closeout commits already in current `master`, but `task-queue.yaml` still marked the task as `pending`.
+- This resumed pass is limited to state/evidence reconciliation: mark the task `closed`, update `project-state.yaml`, and record the Git-history proof in evidence.
+- No additional business code, tests, schema, dependency, env, provider, cloud, deploy, or destructive data changes are planned for this recovery pass.

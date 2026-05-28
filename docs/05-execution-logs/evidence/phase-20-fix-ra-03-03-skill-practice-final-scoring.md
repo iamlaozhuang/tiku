@@ -6,11 +6,11 @@
 
 ## Summary
 
-- Result: pass, pending commit/merge/push/cleanup.
+- Result: pass; implementation and cleanup were already merged, and 2026-05-28 recovery reconciled the stale pending queue status to closed.
 - Scope: implementation.
-- Changed surfaces: `practice` validator/service, student practice UI, focused unit tests, task plan/evidence/state.
+- Changed surfaces: original implementation changed `practice` validator/service, student practice UI, focused unit tests, task plan/evidence/state; 2026-05-28 recovery changed only state/evidence.
 - Forbidden scope (`forbiddenScope`): no env/dependency/schema/migration/staging/prod/cloud/deploy/real provider/destructive data work.
-- Residual gaps (`residualGaps`): none for `F-RA-03-03-001`; commit/merge/push/cleanup pending.
+- Residual gaps (`residualGaps`): none for `F-RA-03-03-001`; 2026-05-28 reconciliation commit/merge/push/cleanup pending.
 
 ## Startup and Claim
 
@@ -82,3 +82,44 @@
   - `git rev-parse origin/master` - `229a9743311a4a11b5453c9f774958da2144527b`.
   - `git branch --list codex/*` - no output.
   - `git worktree list` - only `D:/tiku  229a974 [master]`.
+
+## 2026-05-28 Recovery Reconciliation
+
+- Started from clean `master` aligned with `origin/master` at `02218cbf8420c268b7d73c74ed1f1ae37036de2b`, then created `codex/phase-20-fix-ra-03-03-skill-practice-final-scoring`.
+- `task-queue.yaml` still listed this task as `pending`, but this evidence file and Git history showed the implementation had already been completed.
+- Verified `06cb3a5f99b391c1d3b1d0707e79292ea7eb7324` (`fix(practice): add subjective final scoring`), `e8fbaf4a25a19a8035ee69d411f4584c751699ab` (`merge: phase-20 fix ra-03-03 skill practice final scoring`), and `229a9743311a4a11b5453c9f774958da2144527b` are all ancestors of current `HEAD`.
+- Reconciled `phase-20-fix-ra-03-03-skill-practice-final-scoring` from `pending` to `closed`; no source, test, schema, dependency, env, provider, cloud, deploy, or destructive data changes were made in this recovery pass.
+
+## 2026-05-28 Recovery Validation
+
+| Command                                                                                                                                                                 | Result | Notes                                                                                                                                    |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `git fetch origin`                                                                                                                                                      | pass   | `master...origin/master` was `0 0`; both resolved to `02218cbf8420c268b7d73c74ed1f1ae37036de2b`.                                         |
+| `git branch --list codex/*` / `git branch --no-merged master` / `git worktree list --porcelain`                                                                         | pass   | No residual `codex/*` branches before claiming; only root worktree existed.                                                              |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-TaskClaimReadiness.ps1 -TaskId phase-20-fix-ra-03-03-skill-practice-final-scoring` | pass   | Task was still `pending` in queue, dependency was complete, and no high-risk gate fired.                                                 |
+| `git merge-base --is-ancestor 06cb3a5f99b391c1d3b1d0707e79292ea7eb7324 HEAD`                                                                                            | pass   | Implementation commit is already in current `HEAD`.                                                                                      |
+| `git merge-base --is-ancestor e8fbaf4a25a19a8035ee69d411f4584c751699ab HEAD`                                                                                            | pass   | Previous merge commit is already in current `HEAD`.                                                                                      |
+| `git merge-base --is-ancestor 229a9743311a4a11b5453c9f774958da2144527b HEAD`                                                                                            | pass   | Previous closeout docs commit is already in current `HEAD`.                                                                              |
+| `git diff --check`                                                                                                                                                      | pass   | No whitespace errors before validation.                                                                                                  |
+| Changed-file Prettier check                                                                                                                                             | pass   | Initial sandbox run failed with EPERM reading local `node_modules`; escalated scoped check passed for changed state/evidence/plan files. |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                          | pass   | Required docs, scripts, npm scripts, skill/plugin anchors, and Phase 7 anchors reported OK.                                              |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                     | pass   | Inventory showed only scoped docs/state changes and no untracked files.                                                                  |
+| `npm.cmd run test:unit`                                                                                                                                                 | fail   | First run failed because local PostgreSQL was not running; connection to `::1/127.0.0.1:5432` was refused.                               |
+| `docker compose ps`                                                                                                                                                     | fail   | Docker Desktop was not running.                                                                                                          |
+| `docker-compose up -d`                                                                                                                                                  | pass   | Started local-only `tiku-postgres-dev`; no staging/prod/cloud/provider/env content was accessed.                                         |
+| `npm.cmd run test:unit`                                                                                                                                                 | pass   | 134 test files and 556 tests passed after local PostgreSQL was available.                                                                |
+| `npm.cmd run test:e2e`                                                                                                                                                  | fail   | First full run had 24/25 pass; `local-business-flow` returned `409311` after a timed mock_exam became not in progress.                   |
+| `npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts`                                                                                                               | pass   | Focused rerun of the failed test passed.                                                                                                 |
+| `npm.cmd run test:e2e`                                                                                                                                                  | pass   | Full rerun passed, 25 Playwright tests.                                                                                                  |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                             | pass   | Banned terms, API route case, and DTO field case checks passed.                                                                          |
+| `npm.cmd run build`                                                                                                                                                     | pass   | Next.js build passed; framework reported `.env.local` existence only, contents were not read.                                            |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                                                                 | pass   | `lint`, `typecheck`, `test:unit` (134 files, 556 tests), and `format:check` passed.                                                      |
+
+## 2026-05-28 Closeout Status
+
+- branch: `codex/phase-20-fix-ra-03-03-skill-practice-final-scoring`
+- base: `master` / `origin/master` at `02218cbf8420c268b7d73c74ed1f1ae37036de2b`
+- changed files: `project-state.yaml`, `task-queue.yaml`, this evidence file, and the existing RA-03-03 task plan.
+- implementation commit: already present as `06cb3a5f99b391c1d3b1d0707e79292ea7eb7324`.
+- recovery reconciliation commit: pending.
+- merge/push/cleanup: pending.
