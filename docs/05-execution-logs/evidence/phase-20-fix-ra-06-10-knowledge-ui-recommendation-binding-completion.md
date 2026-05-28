@@ -6,10 +6,10 @@
 
 ## Summary
 
-- Result: validated; pending commit/merge/push/cleanup.
+- Result: closed.
 - Scope: implementation.
 - Changed surfaces: knowledge node admin UI durable binding handoff, question admin initial knowledge_node review filter, focused UI tests, task plan/evidence, and governance state.
-- Gates: task claim readiness, focused TDD red/green, full quality gate, e2e retry/full pass, build, readiness, naming, diff check, and git inventory passed. In-app Browser/IAB verification failed due local Windows sandbox startup failure.
+- Gates: task claim readiness, focused TDD red/green, full quality gate, e2e retry/full pass, build, master validation, readiness, naming, diff check, git inventory, push, and branch cleanup passed. In-app Browser/IAB verification failed due local Windows sandbox startup failure.
 - Forbidden scope (`forbiddenScope`): `.env.local`, `.env.example`, package/lockfile/dependency, `src/db/schema/**`, `drizzle/**`, schema/migration, auth permission model, staging/prod/cloud/deploy/real provider, external service config, destructive data operation, and `drizzle-kit push` remain blocked.
 - Residual gaps (`residualGaps`): no IAB browser verification due local Windows sandbox startup failure; no staging/prod/cloud/real provider validation by task boundary.
 
@@ -57,6 +57,18 @@
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                                                                                                       | pass   | Final pre-commit quality rerun after evidence formatting: lint, typecheck, full unit (`135` files / `576` tests), and format check passed.                                                                                    |
 | `git diff --check`                                                                                                                                                                                            | pass   | Final pre-commit whitespace check passed.                                                                                                                                                                                     |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                                                           | pass   | Final pre-commit inventory completed; changed files remain task-scoped and unstaged/untracked.                                                                                                                                |
+| `git commit -m "fix(admin): complete knowledge recommendation UI binding"`                                                                                                                                    | pass   | Implementation commit `315ab0e347d0d1358c891a977c477f120b3f1170`; pre-commit hook ran lint-staged, lint, and typecheck.                                                                                                       |
+| `git merge --ff-only codex/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion`                                                                                                              | pass   | Fast-forward merged into `master`.                                                                                                                                                                                            |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                                                                                                       | pass   | Master validation: lint, typecheck, full unit (`135` files / `576` tests), and format check passed.                                                                                                                           |
+| `npm.cmd run test:e2e`                                                                                                                                                                                        | pass   | Master validation: Playwright e2e passed; 25 tests.                                                                                                                                                                           |
+| `npm.cmd run build`                                                                                                                                                                                           | pass   | Master validation build completed. Next reported `.env.local` existence; file contents were not opened, modified, or recorded.                                                                                                |
+| `git diff --check`                                                                                                                                                                                            | pass   | Master validation whitespace check passed.                                                                                                                                                                                    |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                                                                | pass   | Master validation readiness passed.                                                                                                                                                                                           |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                                                                   | pass   | Master validation naming scan completed.                                                                                                                                                                                      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                                                           | pass   | Master validation inventory: `master` was ahead of `origin/master` by implementation commit `315ab0e`; no dirty files.                                                                                                        |
+| `git fetch origin`                                                                                                                                                                                            | pass   | Push preflight confirmed local `master` was ahead of `origin/master` by 1 and not behind.                                                                                                                                     |
+| `git push origin master`                                                                                                                                                                                      | pass   | Pushed `master` from `2ce9d3b` to `315ab0e`.                                                                                                                                                                                  |
+| `git branch -d codex/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion`                                                                                                                    | pass   | Deleted merged short-lived branch.                                                                                                                                                                                            |
 
 ## TDD Log
 
@@ -94,6 +106,11 @@
   - final pre-commit rerun of `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
   - final pre-commit `git diff --check`
   - final pre-commit rerun of `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - master validation rerun of `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - master validation `npm.cmd run test:e2e`
+  - master validation `npm.cmd run build`
+  - master validation `git diff --check`
+  - master validation readiness, naming, and git completion checks
 - Failed then fixed/retried:
   - TDD RED focused unit set failed before implementation.
   - First quality gate failed only at `format:check`; task-scoped Prettier formatting fixed it.
@@ -103,7 +120,8 @@
 
 ## Closeout Status
 
-- Implementation commit: pending.
-- Merged to `master`: pending.
-- Pushed to `origin/master`: pending.
-- Deleted short-lived branch: pending.
+- Implementation commit: `315ab0e347d0d1358c891a977c477f120b3f1170`.
+- Merged to `master`: fast-forward.
+- Pushed to `origin/master`: yes.
+- Deleted short-lived branch: yes.
+- Final cleanup docs commit/push: pending.
