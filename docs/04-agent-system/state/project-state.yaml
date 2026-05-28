@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T16:59:03-07:00"
+  updatedAt: "2026-05-27T17:04:10-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,11 +36,11 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: e8fbaf4a25a19a8035ee69d411f4584c751699ab
-  lastKnownOriginMasterSha: 7bc2721166344b6dc24d093e32d3f7528060717b
+  lastKnownMasterSha: 229a9743311a4a11b5453c9f774958da2144527b
+  lastKnownOriginMasterSha: 229a9743311a4a11b5453c9f774958da2144527b
 currentTask:
   id: phase-20-fix-ra-03-03-skill-practice-final-scoring
-  status: post_merge_validated_pending_push_cleanup
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-03-skill-practice-final-scoring.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Finish phase-20-fix-ra-03-03-skill-practice-final-scoring closeout. Master is clean and ahead of origin/master by implementation and merge commits; post-merge validation passed including build after regenerating ignored .next cache, unit, e2e, readiness, Git inventory, diff, changed-file Prettier, naming, and quality gate. Commit closeout docs, push origin master, delete the merged short-lived branch, then record final cleanup evidence before claiming closure."
+  nextRecommendedAction: "phase-20-fix-ra-03-03-skill-practice-final-scoring is closed: implementation, merge, closeout validation, push, and branch cleanup are complete. Next automation loop may scan the queue for the next pending low-risk Phase 22-D task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md

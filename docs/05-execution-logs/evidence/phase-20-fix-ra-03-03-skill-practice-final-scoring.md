@@ -73,5 +73,12 @@
   - post-merge changed-file Prettier check - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 555 tests), and `format:check` passed.
-- push: pending.
-- cleanup: pending.
+- closeoutDocsCommit: `229a9743311a4a11b5453c9f774958da2144527b` (`docs(practice): record subjective scoring closeout validation`).
+- push: pushed `origin master`; local `master` and `origin/master` both resolved to `229a9743311a4a11b5453c9f774958da2144527b` before final cleanup documentation.
+- cleanup: deleted merged branch `codex/phase-20-fix-ra-03-03-skill-practice-final-scoring`.
+- final cleanup verification:
+  - `git status --short --branch` - clean `## master...origin/master`.
+  - `git rev-parse HEAD` - `229a9743311a4a11b5453c9f774958da2144527b`.
+  - `git rev-parse origin/master` - `229a9743311a4a11b5453c9f774958da2144527b`.
+  - `git branch --list codex/*` - no output.
+  - `git worktree list` - only `D:/tiku  229a974 [master]`.
