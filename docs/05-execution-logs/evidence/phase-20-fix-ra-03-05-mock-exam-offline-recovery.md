@@ -70,5 +70,12 @@
   - post-merge changed-file Prettier check - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 556 tests), and `format:check` passed.
-- push: pending.
-- cleanup: pending.
+- closeoutDocsCommit: `8682c2b3c5d5f90e2acc3ea23f3a812d503c46b5` (`docs(mock): record offline recovery closeout validation`).
+- push: pushed `origin master`; local `master` and `origin/master` both resolved to `8682c2b3c5d5f90e2acc3ea23f3a812d503c46b5` before final cleanup documentation.
+- cleanup: deleted merged branch `codex/phase-20-fix-ra-03-05-mock-exam-offline-recovery`.
+- final cleanup verification:
+  - `git status --short --branch` - clean `## master...origin/master`.
+  - `git rev-parse HEAD` - `8682c2b3c5d5f90e2acc3ea23f3a812d503c46b5`.
+  - `git rev-parse origin/master` - `8682c2b3c5d5f90e2acc3ea23f3a812d503c46b5`.
+  - `git branch --list codex/*` - no output.
+  - `git worktree list` - only `D:/tiku  8682c2b [master]`.
