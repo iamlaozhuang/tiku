@@ -47,5 +47,18 @@
 
 ## Closeout Status
 
-- implementation commit: not applicable; blocked evidence only.
-- merge/push/cleanup: pending.
+- blocked evidence commit: `93bc91609554e130b1989a56c9de2e70a6e5f8b6` (`docs(ai-scoring): block retry persistence on migration gate`).
+- merge: fast-forward merged into `master`, `812b88e..93bc916`.
+- post-merge master validation:
+  - `git status --short --branch` - pass; `## master...origin/master [ahead 1]` before push.
+  - `git diff --check` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master` - pass; only blocked-evidence docs/state files were ahead of `origin/master`.
+- push:
+  - `git push origin master` - pass, `812b88e..93bc916 master -> master`.
+- cleanup:
+  - `git branch -d codex/phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence` - pass; deleted already-merged branch at `93bc916`.
+  - `git status --short --branch` - pass; `## master...origin/master` before cleanup evidence edits.
+  - `git branch --list "codex/*"` - pass; no residual local `codex/*` branch before cleanup evidence edits.
+  - `git worktree list` - pass; only root worktree `D:/tiku` remained before cleanup evidence edits.
+- cleanup evidence commit: pending.
