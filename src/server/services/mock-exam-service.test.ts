@@ -873,7 +873,7 @@ describe("mock exam service", () => {
               score: "4.5",
               maxScore: "5.0",
               scoringSnapshot: {
-                promptTemplateKey: "dev_ai_scoring_v1",
+                promptTemplateKey: "ai_scoring_v1",
                 promptTemplateVersion: 1,
                 scoringPoints: [],
                 overallComment: "本地确定性评分完成。",
@@ -927,7 +927,7 @@ describe("mock exam service", () => {
             answerRecordStatus: "scored",
             score: "4.5",
             aiScoringSnapshot: expect.objectContaining({
-              promptTemplateKey: "dev_ai_scoring_v1",
+              promptTemplateKey: "ai_scoring_v1",
             }),
           }),
         ],
@@ -1010,7 +1010,7 @@ describe("mock exam service", () => {
                 score: "4.0",
                 maxScore: "5.0",
                 scoringSnapshot: {
-                  promptTemplateKey: "dev_ai_scoring_v1",
+                  promptTemplateKey: "ai_scoring_v1",
                   promptTemplateVersion: 1,
                   scoringPoints: [],
                   overallComment: "Synthetic scoring completed.",
@@ -1282,7 +1282,7 @@ describe("mock exam service", () => {
               score: "3.5",
               maxScore: "5.0",
               scoringSnapshot: {
-                promptTemplateKey: "dev_ai_scoring_v1",
+                promptTemplateKey: "ai_scoring_v1",
                 promptTemplateVersion: 1,
                 scoringPoints: [],
                 citations: [],

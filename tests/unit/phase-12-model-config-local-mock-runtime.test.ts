@@ -27,7 +27,7 @@ describe("phase 12 local mock model config runtime", () => {
         providerPublicId: "model-provider-dev-local",
         providerKey: "local_deterministic",
         aiFuncType: "kn_recommendation",
-        promptTemplateKey: "dev_kn_recommendation_v1",
+        promptTemplateKey: "kn_recommendation_v1",
         promptTemplateVersion: 1,
         snapshotPolicy: "redacted_metadata",
         providerMode: "local_mock",
@@ -55,7 +55,7 @@ describe("phase 12 local mock model config runtime", () => {
       maxRetryCount: 0,
       fallbackModelConfigPublicId:
         "model-config-dev-learning-suggestion-fallback",
-      promptTemplateKey: "dev_learning_suggestion",
+      promptTemplateKey: "learning_suggestion_v1",
       promptTemplateVersion: 1,
     });
     const runtime = createAiMockProviderRuntime({
@@ -110,9 +110,9 @@ describe("phase 12 local mock model config runtime", () => {
       rawAnswer,
       modelConfigSnapshot,
       promptTemplate: {
-        promptTemplateKey: "dev_learning_suggestion",
+        promptTemplateKey: "learning_suggestion_v1",
         version: 1,
-        templateHash: "dev-learning-suggestion-template-v1",
+        templateHash: "learning_suggestion_v1_baseline",
       },
     });
 

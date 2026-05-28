@@ -384,7 +384,7 @@ function mockWritableContentFetch(
                 displayName: "Local knowledge recommendation model",
                 aiFuncType: "kn_recommendation",
                 configVersion: 1,
-                promptTemplateKey: "dev_kn_recommendation_v1",
+                promptTemplateKey: "kn_recommendation_v1",
                 promptTemplateVersion: 1,
               },
               failureReason: null,

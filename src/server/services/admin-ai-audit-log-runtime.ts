@@ -27,7 +27,6 @@ import {
   normalizeModelConfigFallbackOrderInput,
   normalizeModelConfigInput,
   normalizeModelProviderInput,
-  normalizePromptTemplateInput,
 } from "../validators/ai-rag";
 import type { SessionService } from "./session-service";
 
@@ -825,28 +824,16 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           return createJsonResponse(actorOrError);
         }
 
-        const input = normalizePromptTemplateInput(await readJsonBody(request));
-
-        if (input === null || repositories.createPromptTemplate === undefined) {
-          return createJsonResponse(validationFailedResponse);
-        }
-
-        const promptTemplate = await repositories.createPromptTemplate(input);
-
         await appendMutationAuditLog({
           request,
           actor: actorOrError,
           actionType: "prompt_template.create",
           targetResourceType: "prompt_template",
-          targetPublicId: promptTemplate.publicId,
-          resultStatus: "success",
+          targetPublicId: null,
+          resultStatus: "failed",
         });
 
-        return createJsonResponse(
-          createSuccessResponse<{ promptTemplate: PromptTemplateSummaryDto }>({
-            promptTemplate,
-          }),
-        );
+        return createJsonResponse(mutationNotAvailableResponse);
       },
       async PATCH(request: Request, context: RouteContext): Promise<Response> {
         const { publicId } = await context.params;
@@ -861,33 +848,16 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           return createJsonResponse(actorOrError);
         }
 
-        const input = normalizePromptTemplateInput(await readJsonBody(request));
-
-        if (input === null || repositories.updatePromptTemplate === undefined) {
-          return createJsonResponse(validationFailedResponse);
-        }
-
-        const promptTemplate = await repositories.updatePromptTemplate(
-          publicId,
-          input,
-        );
-
         await appendMutationAuditLog({
           request,
           actor: actorOrError,
           actionType: "prompt_template.update",
           targetResourceType: "prompt_template",
           targetPublicId: publicId,
-          resultStatus: promptTemplate === null ? "failed" : "success",
+          resultStatus: "failed",
         });
 
-        return createJsonResponse(
-          promptTemplate === null
-            ? mutationNotAvailableResponse
-            : createSuccessResponse<{
-                promptTemplate: PromptTemplateSummaryDto;
-              }>({ promptTemplate }),
-        );
+        return createJsonResponse(mutationNotAvailableResponse);
       },
       enable: {
         async POST(request: Request, context: RouteContext): Promise<Response> {
@@ -896,9 +866,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
             context,
             actionType: "prompt_template.enable",
             targetResourceType: "prompt_template",
-            update: (publicId) =>
-              repositories.setPromptTemplateEnabled?.(publicId, true) ??
-              Promise.resolve(false),
+            update: async () => false,
           });
         },
       },
@@ -909,9 +877,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
             context,
             actionType: "prompt_template.disable",
             targetResourceType: "prompt_template",
-            update: (publicId) =>
-              repositories.setPromptTemplateEnabled?.(publicId, false) ??
-              Promise.resolve(false),
+            update: async () => false,
           });
         },
       },

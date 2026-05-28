@@ -24,13 +24,13 @@ describe("phase 11 model_config fallback runtime", () => {
         aiFuncType: "learning_suggestion",
         fallbackModelConfigPublicId:
           "model-config-dev-learning-suggestion-fallback",
-        promptTemplateKey: "dev_learning_suggestion",
+        promptTemplateKey: "learning_suggestion_v1",
         promptTemplateVersion: 1,
       },
       promptTemplate: {
-        promptTemplateKey: "dev_learning_suggestion",
+        promptTemplateKey: "learning_suggestion_v1",
         version: 1,
-        templateHash: "dev-learning-suggestion-template-v1",
+        templateHash: "learning_suggestion_v1_baseline",
       },
     });
     expect(JSON.stringify(selection)).not.toContain("apiKey");
@@ -60,7 +60,7 @@ describe("phase 11 model_config fallback runtime", () => {
       modelConfigSnapshot: {
         modelConfigPublicId: "model-config-dev-ai-explanation-fallback",
         aiFuncType: "explanation",
-        promptTemplateKey: "dev_ai_explanation_v1",
+        promptTemplateKey: "ai_explanation_v1",
         promptTemplateVersion: 1,
       },
     });

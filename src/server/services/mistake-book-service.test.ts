@@ -368,7 +368,7 @@ describe("mistake book service", () => {
                 score: 0.91,
               },
             ],
-            promptTemplateKey: "dev_ai_explanation_v1",
+            promptTemplateKey: "ai_explanation_v1",
             promptTemplateVersion: 1,
           };
         },
@@ -402,7 +402,7 @@ describe("mistake book service", () => {
               score: 0.91,
             },
           ],
-          promptTemplateKey: "dev_ai_explanation_v1",
+          promptTemplateKey: "ai_explanation_v1",
           promptTemplateVersion: 1,
         },
       },
@@ -431,7 +431,7 @@ describe("mistake book service", () => {
               "RAG evidence is insufficient; no citation is attached.",
             evidenceStatus: "weak",
             citations: [],
-            promptTemplateKey: "dev_ai_explanation_v1",
+            promptTemplateKey: "ai_explanation_v1",
             promptTemplateVersion: 1,
           };
         },

@@ -200,11 +200,11 @@ export function buildDevSeedDataset(passwordHashes: SeedPasswordHashes) {
     promptTemplate: {
       aiFuncType: "learning_suggestion",
       isActive: true,
-      promptTemplateKey: "dev_learning_suggestion",
+      promptTemplateKey: "learning_suggestion_v1",
       publicId: devSeedPublicIds.promptTemplate,
       templateContent:
         "基于本地模拟考试结果生成简短学习建议。禁止调用真实模型。",
-      templateHash: "dev-learning-suggestion-template-v1",
+      templateHash: "learning_suggestion_v1_baseline",
       version: 1,
     },
     question: {

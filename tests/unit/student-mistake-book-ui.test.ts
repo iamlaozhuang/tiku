@@ -279,7 +279,7 @@ describe("StudentMistakeBookPage", () => {
                     score: 0.93,
                   },
                 ],
-                promptTemplateKey: "dev_ai_explanation_v1",
+                promptTemplateKey: "ai_explanation_v1",
                 promptTemplateVersion: 1,
               },
             },

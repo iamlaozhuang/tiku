@@ -23,7 +23,7 @@ const modelConfigSnapshot = createModelConfigSnapshot({
   timeoutSecond: 5,
   maxRetryCount: 0,
   fallbackModelConfigPublicId: null,
-  promptTemplateKey: "dev_learning_suggestion",
+  promptTemplateKey: "learning_suggestion_v1",
   promptTemplateVersion: 1,
 });
 
@@ -149,9 +149,9 @@ describe("phase 7 exam report learning suggestion runtime", () => {
         },
         modelConfigSnapshot,
         promptTemplate: {
-          promptTemplateKey: "dev_learning_suggestion",
+          promptTemplateKey: "learning_suggestion_v1",
           version: 1,
-          templateHash: "dev-learning-suggestion-template-v1",
+          templateHash: "learning_suggestion_v1_baseline",
         },
       },
     );
@@ -177,7 +177,7 @@ describe("phase 7 exam report learning suggestion runtime", () => {
         modelConfigPublicId: "model-config-dev-learning-suggestion",
       },
       promptTemplate: {
-        promptTemplateKey: "dev_learning_suggestion",
+        promptTemplateKey: "learning_suggestion_v1",
       },
     });
 

@@ -339,14 +339,14 @@ const knowledgeRecommendationModelConfig = createModelConfigSnapshot({
   timeoutSecond: 10,
   maxRetryCount: 0,
   fallbackModelConfigPublicId: null,
-  promptTemplateKey: "dev_kn_recommendation_v1",
+  promptTemplateKey: "kn_recommendation_v1",
   promptTemplateVersion: 1,
 });
 
 const knowledgeRecommendationPromptTemplate = {
-  promptTemplateKey: "dev_kn_recommendation_v1",
+  promptTemplateKey: "kn_recommendation_v1",
   version: 1,
-  templateHash: "dev_kn_recommendation_v1_local_deterministic",
+  templateHash: "kn_recommendation_v1_baseline",
 };
 
 const localKnowledgeRecommendationRunner: KnowledgeRecommendationRunner =

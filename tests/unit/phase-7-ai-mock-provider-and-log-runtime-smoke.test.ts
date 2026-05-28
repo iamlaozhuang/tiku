@@ -33,13 +33,13 @@ const modelConfigSnapshot = createModelConfigSnapshot({
   timeoutSecond: 5,
   maxRetryCount: 0,
   fallbackModelConfigPublicId: null,
-  promptTemplateKey: "dev_learning_suggestion",
+  promptTemplateKey: "learning_suggestion_v1",
   promptTemplateVersion: 1,
 });
 const promptTemplate = {
-  promptTemplateKey: "dev_learning_suggestion",
+  promptTemplateKey: "learning_suggestion_v1",
   version: 1,
-  templateHash: "dev-learning-suggestion-template-v1",
+  templateHash: "learning_suggestion_v1_baseline",
 };
 
 function createSessionService(role: AdminRole | null): SessionService {

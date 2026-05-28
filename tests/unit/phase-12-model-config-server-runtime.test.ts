@@ -375,7 +375,7 @@ describe("phase 12 model config server runtime", () => {
     ]);
   });
 
-  it("manages prompt template metadata without returning raw prompt bodies", async () => {
+  it("keeps prompt template metadata read-only without returning raw prompt bodies", async () => {
     const mutationCalls: unknown[] = [];
     const auditLogEntries: unknown[] = [];
     const rawPromptBody = "RAW_PROMPT_BODY_DO_NOT_RETURN";
@@ -408,29 +408,16 @@ describe("phase 12 model config server runtime", () => {
         async listPromptTemplates() {
           return createPage({ promptTemplates: [] });
         },
-        async createPromptTemplate(input) {
-          mutationCalls.push(input);
-
-          return {
-            publicId: "prompt-template-public-001",
-            promptTemplateKey: input.promptTemplateKey,
-            aiFuncType: "ai_hint",
-            version: input.version,
-            title: input.title,
-            description: input.description,
-            bodyDigest: input.bodyDigest,
-            bodyPreviewMasked: input.bodyPreviewMasked,
-            status: input.status,
-            isActive: input.isActive,
-            updatedAt: "2026-05-26T00:00:00.000Z",
-          };
+        async createPromptTemplate() {
+          throw new Error("prompt_template create must stay unavailable");
         },
         async updatePromptTemplate() {
-          throw new Error("not used");
+          throw new Error("prompt_template update must stay unavailable");
         },
-        async setPromptTemplateEnabled(publicId, isActive) {
-          mutationCalls.push({ publicId, isActive });
-          return true;
+        async setPromptTemplateEnabled() {
+          throw new Error(
+            "prompt_template enable/disable must stay unavailable",
+          );
         },
         async listAiCallLogs() {
           return createPage({ aiCallLogs: [] });
@@ -477,43 +464,30 @@ describe("phase 12 model config server runtime", () => {
     const payload = await createResponse.json();
 
     expect(payload).toEqual({
-      code: 0,
-      message: "ok",
-      data: {
-        promptTemplate: {
-          publicId: "prompt-template-public-001",
-          promptTemplateKey: "ai_hint_v1",
-          aiFuncType: "ai_hint",
-          version: 1,
-          title: "Hint V1",
-          description: "Redaction-safe metadata",
-          bodyDigest: "sha256:synthetic",
-          bodyPreviewMasked: "Hint template preview [redacted]",
-          status: "active",
-          isActive: true,
-          updatedAt: "2026-05-26T00:00:00.000Z",
-        },
-      },
+      code: 404641,
+      message: "Requested admin AI resource does not exist.",
+      data: null,
     });
     await expect(disableResponse.json()).resolves.toEqual({
-      code: 0,
-      message: "ok",
+      code: 404641,
+      message: "Requested admin AI resource does not exist.",
       data: null,
     });
     expect(JSON.stringify(payload)).not.toContain(rawPromptBody);
+    expect(mutationCalls).toEqual([]);
     expect(JSON.stringify(mutationCalls)).not.toContain(rawPromptBody);
     expect(auditLogEntries).toEqual([
       expect.objectContaining({
         actionType: "prompt_template.create",
         targetResourceType: "prompt_template",
-        targetPublicId: "prompt-template-public-001",
-        resultStatus: "success",
+        targetPublicId: null,
+        resultStatus: "failed",
       }),
       expect.objectContaining({
         actionType: "prompt_template.disable",
         targetResourceType: "prompt_template",
         targetPublicId: "prompt-template-public-001",
-        resultStatus: "success",
+        resultStatus: "failed",
       }),
     ]);
   });

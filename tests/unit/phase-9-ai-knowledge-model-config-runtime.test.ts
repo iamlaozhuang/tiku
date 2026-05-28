@@ -229,7 +229,7 @@ describe("phase 9 AI knowledge and model config runtime", () => {
           recommendationStatus: "recommended",
           modelConfig: {
             aiFuncType: "kn_recommendation",
-            promptTemplateKey: "dev_kn_recommendation_v1",
+            promptTemplateKey: "kn_recommendation_v1",
             promptTemplateVersion: 1,
           },
           recommendations: [
@@ -261,7 +261,7 @@ describe("phase 9 AI knowledge and model config runtime", () => {
         questionPublicId: "question-public-001",
         aiFuncType: "kn_recommendation",
         callStatus: "success",
-        promptTemplateKey: "dev_kn_recommendation_v1",
+        promptTemplateKey: "kn_recommendation_v1",
         promptTemplateVersion: 1,
       }),
     ]);

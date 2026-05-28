@@ -348,7 +348,7 @@ describe("phase 8 student mistake_book runtime", () => {
       data: {
         aiExplanation: {
           explanationStatus: "explained",
-          promptTemplateKey: "dev_ai_explanation_v1",
+          promptTemplateKey: "ai_explanation_v1",
           promptTemplateVersion: 1,
           citations: [],
         },
@@ -431,7 +431,7 @@ describe("phase 8 student mistake_book runtime", () => {
       data: {
         aiExplanation: {
           explanationStatus: "explained",
-          promptTemplateKey: "dev_ai_explanation_v1",
+          promptTemplateKey: "ai_explanation_v1",
           promptTemplateVersion: 1,
         },
       },
@@ -442,7 +442,7 @@ describe("phase 8 student mistake_book runtime", () => {
         modelConfigSnapshot: expect.objectContaining({
           modelConfigPublicId: "model-config-dev-ai-explanation-fallback",
           aiFuncType: "explanation",
-          promptTemplateKey: "dev_ai_explanation_v1",
+          promptTemplateKey: "ai_explanation_v1",
           promptTemplateVersion: 1,
         }),
       }),
