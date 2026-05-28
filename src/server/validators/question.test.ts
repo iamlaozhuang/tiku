@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   normalizeCreateQuestionInput,
+  normalizeQuestionListInput,
   normalizeUpdateQuestionInput,
 } from "./question";
 
@@ -126,6 +127,28 @@ describe("question validator", () => {
     ).toEqual({
       success: false,
       message: "Invalid question input.",
+    });
+  });
+
+  it("normalizes knowledge_node and tag public identifier list filters", () => {
+    expect(
+      normalizeQuestionListInput({
+        knowledgeNodePublicId: " knowledge_node_public_1 ",
+        tagPublicId: " tag_public_1 ",
+      }),
+    ).toMatchObject({
+      knowledgeNodePublicId: "knowledge_node_public_1",
+      tagPublicId: "tag_public_1",
+    });
+
+    expect(
+      normalizeQuestionListInput({
+        knowledgeNodePublicId: "",
+        tagPublicId: 123,
+      }),
+    ).toMatchObject({
+      knowledgeNodePublicId: null,
+      tagPublicId: null,
     });
   });
 });

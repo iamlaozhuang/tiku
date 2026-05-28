@@ -8,6 +8,7 @@ import {
   eq,
   ilike,
   inArray,
+  sql,
   type SQL,
 } from "drizzle-orm";
 
@@ -413,7 +414,53 @@ function createQuestionConditions(
     conditions.push(ilike(question.stem_rich_text, `%${queryInput.keyword}%`));
   }
 
+  const knowledgeNodePublicIdCondition =
+    createQuestionKnowledgeNodePublicIdCondition(
+      queryInput.knowledgeNodePublicId,
+    );
+  const tagPublicIdCondition = createQuestionTagPublicIdCondition(
+    queryInput.tagPublicId,
+  );
+
+  if (knowledgeNodePublicIdCondition !== null) {
+    conditions.push(knowledgeNodePublicIdCondition);
+  }
+
+  if (tagPublicIdCondition !== null) {
+    conditions.push(tagPublicIdCondition);
+  }
+
   return conditions;
+}
+
+export function createQuestionKnowledgeNodePublicIdCondition(
+  publicId: string | null,
+): SQL | null {
+  return publicId === null
+    ? null
+    : sql`exists (
+        select 1
+        from ${questionKnowledgeNode}
+        inner join ${knowledgeNode}
+          on ${knowledgeNode.id} = ${questionKnowledgeNode.knowledge_node_id}
+        where ${questionKnowledgeNode.question_id} = ${question.id}
+          and ${knowledgeNode.public_id} = ${publicId}
+      )`;
+}
+
+export function createQuestionTagPublicIdCondition(
+  publicId: string | null,
+): SQL | null {
+  return publicId === null
+    ? null
+    : sql`exists (
+        select 1
+        from ${questionTag}
+        inner join ${tag}
+          on ${tag.id} = ${questionTag.tag_id}
+        where ${questionTag.question_id} = ${question.id}
+          and ${tag.public_id} = ${publicId}
+      )`;
 }
 
 function createQuestionOrderBy(queryInput: NormalizedQuestionListInput): SQL {

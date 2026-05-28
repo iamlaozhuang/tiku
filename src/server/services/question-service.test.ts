@@ -169,6 +169,8 @@ describe("question service", () => {
         subject: "theory",
         questionType: "single_choice",
         status: "available",
+        knowledgeNodePublicId: " knowledge_node_public_storage ",
+        tagPublicId: " tag_public_storage ",
         keyword: "仓储",
       }),
     ).resolves.toMatchObject({
@@ -223,6 +225,8 @@ describe("question service", () => {
         subject: "theory",
         questionType: "single_choice",
         status: "available",
+        knowledgeNodePublicId: "knowledge_node_public_storage",
+        tagPublicId: "tag_public_storage",
         keyword: "仓储",
       },
     ]);

@@ -118,6 +118,42 @@ function createService(): QuestionService {
 }
 
 describe("question route handlers", () => {
+  it("passes knowledge_node and tag filters from query params into the list service", async () => {
+    const receivedQueries: unknown[] = [];
+    const handlers = createQuestionRouteHandlers({
+      ...createService(),
+      async listQuestions(input) {
+        receivedQueries.push(input);
+
+        return {
+          code: 0,
+          message: "ok",
+          data: [questionDto],
+          pagination: {
+            page: 1,
+            pageSize: 20,
+            total: 1,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+          },
+        };
+      },
+    });
+
+    await handlers.collection.GET(
+      new Request(
+        "http://localhost/api/v1/questions?knowledgeNodePublicId=knowledge_node_public_storage&tagPublicId=tag_public_storage",
+      ),
+    );
+
+    expect(receivedQueries).toEqual([
+      expect.objectContaining({
+        knowledgeNodePublicId: "knowledge_node_public_storage",
+        tagPublicId: "tag_public_storage",
+      }),
+    ]);
+  });
+
   it("returns standard list and create responses", async () => {
     const handlers = createQuestionRouteHandlers(createService());
 

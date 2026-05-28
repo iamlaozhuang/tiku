@@ -50,6 +50,8 @@ export type NormalizedQuestionListInput = NormalizedPagination & {
   questionType: (typeof questionTypeValues)[number] | null;
   status: (typeof questionStatusValues)[number] | null;
   keyword: string | null;
+  knowledgeNodePublicId: string | null;
+  tagPublicId: string | null;
 };
 
 type ValidationResult<TValue> =
@@ -141,6 +143,16 @@ function normalizeQueryInteger(value: unknown): number | undefined {
   const parsedValue = Number(value);
 
   return Number.isFinite(parsedValue) ? parsedValue : undefined;
+}
+
+function normalizeQueryPublicId(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const publicId = value.trim();
+
+  return publicId.length === 0 ? null : publicId;
 }
 
 function normalizeScore(value: unknown): string | null {
@@ -422,5 +434,7 @@ export function normalizeQuestionListInput(
       : null,
     status: isQuestionStatus(input.status) ? input.status : null,
     keyword,
+    knowledgeNodePublicId: normalizeQueryPublicId(input.knowledgeNodePublicId),
+    tagPublicId: normalizeQueryPublicId(input.tagPublicId),
   };
 }

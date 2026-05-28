@@ -11778,7 +11778,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-02-question-paper-content
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-03-001. Database/schema work may require separate human approval before implementation.
+    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-03-001. User approved local database_migration-boundary implementation on 2026-05-28, limited to reusing already landed question_knowledge_node/question_tag tables for local filters. If new schema or migration is required, stop and request separate approval. No env/secret, staging/prod/cloud/deploy/real provider, dependency, destructive data operation, src/db/schema, drizzle, or drizzle-kit push is approved.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -11810,7 +11810,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-03-question-knowledge-tag-filters.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-02-05-fill-blank-scoring-method-completion
     title: Phase 20 Fix RA-02-05 Fill Blank Scoring Method Completion

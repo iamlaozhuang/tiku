@@ -123,6 +123,12 @@ function createQuestionRepository(): QuestionRepository {
           createQuestionRow({
             profession: query.profession ?? "monopoly",
             level: query.level ?? 3,
+            knowledge_node_public_ids:
+              query.knowledgeNodePublicId === null
+                ? []
+                : [query.knowledgeNodePublicId],
+            tag_public_ids:
+              query.tagPublicId === null ? [] : [query.tagPublicId],
           }),
         ],
         total: 1,
@@ -331,9 +337,12 @@ describe("phase 9 content question material runtime", () => {
     const headers = { authorization: "Bearer admin-session-token" };
 
     const questionsResponse = await handlers.questions.collection.GET(
-      new Request("http://localhost/api/v1/questions?page=2&pageSize=50", {
-        headers,
-      }),
+      new Request(
+        "http://localhost/api/v1/questions?page=2&pageSize=50&knowledgeNodePublicId=knowledge-node-public-001&tagPublicId=tag-public-001",
+        {
+          headers,
+        },
+      ),
     );
     const materialsResponse = await handlers.materials.collection.GET(
       new Request("http://localhost/api/v1/materials?page=1&pageSize=20", {
@@ -359,6 +368,8 @@ describe("phase 9 content question material runtime", () => {
         {
           publicId: "question-public-001",
           materialPublicId: "material-public-001",
+          knowledgeNodePublicIds: ["knowledge-node-public-001"],
+          tagPublicIds: ["tag-public-001"],
         },
       ],
       pagination: {
