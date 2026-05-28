@@ -6,7 +6,7 @@
 
 ## Summary
 
-- Result: pass, pending commit/merge/push closeout.
+- Result: pass.
 - Scope: implementation/local_verification.
 - Changed surfaces: fill_blank per-blank schema/migration, question validator/repository/mapper contracts, paper publish validation, practice scoring, exam_report snapshot/display, focused tests, task plan/evidence/state.
 - Gates: RED/GREEN focused tests, `typecheck`, `lint`, `test:unit`, `test:e2e`, `build`, readiness, naming, git inventory, diff check, format, and quality gate passed.
@@ -110,4 +110,21 @@
 
 ## Closeout Status
 
-- Pending implementation commit, merge to `master`, post-merge validation, push, and short-lived branch cleanup.
+- Implementation commit: `088c50cf48db975be0572a0c56f147c6b2bfbdc8` (`fix(question): complete fill blank scoring`).
+- Merge: fast-forwarded `master` from `68d5b49` to `088c50c`.
+- Post-merge master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass (`lint`, `typecheck`, `test:unit` 135 files/574 tests, `format:check`).
+  - `npm.cmd run test:e2e`: pass (25 tests).
+  - `npm.cmd run build`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass.
+  - `git diff --check`: pass.
+- Push: `git push origin master` succeeded (`68d5b49..088c50c`).
+- Cleanup: deleted merged local branch `codex/phase-20-fix-ra-02-05-fill-blank-scoring-method-completion` after an initial sandbox ref-lock denial and approved rerun.
+- Final repository check after implementation push:
+  - `git status --short --branch`: `## master...origin/master`.
+  - `git rev-list --left-right --count master...origin/master`: `0 0`.
+  - `git branch --list`: only `master`.
+  - `git worktree list`: only `D:/tiku`.
+- Result: closed; cleanup docs/state commit remains separate from the implementation commit.

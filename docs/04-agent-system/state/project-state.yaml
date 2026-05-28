@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-28T03:39:35-07:00"
+updatedAt: "2026-05-28T03:47:20-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 68d5b49d5bc5a41b99340d141e2443e7c78296b4
-  lastKnownOriginMasterSha: 68d5b49d5bc5a41b99340d141e2443e7c78296b4
+  lastKnownMasterSha: 088c50cf48db975be0572a0c56f147c6b2bfbdc8
+  lastKnownOriginMasterSha: 088c50cf48db975be0572a0c56f147c6b2bfbdc8
 currentTask:
   id: phase-20-fix-ra-02-05-fill-blank-scoring-method-completion
-  status: implemented
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-02-05-fill-blank-scoring-method-completion.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-05-fill-blank-scoring-method-completion.md
   branch: codex/phase-20-fix-ra-02-05-fill-blank-scoring-method-completion
-  commitSha: null
+  commitSha: 088c50cf48db975be0572a0c56f147c6b2bfbdc8
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit phase-20-fix-ra-02-05-fill-blank-scoring-method-completion, merge to master, run post-merge validation, push origin/master, clean the short-lived branch, and then update closeout evidence/state."
+  nextRecommendedAction: "Recommend the next pending task after validating the queue and high-risk approval needs; do not start implementation until the next task is selected and any required approval is recorded."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-05-fill-blank-scoring-method-completion.md
