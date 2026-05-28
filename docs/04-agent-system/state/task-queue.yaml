@@ -11698,7 +11698,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-02-question-paper-content
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-01-001. Database/schema work likely requires separate human approval before implementation.
+    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-01-001. User approved local database_migration implementation for this task on 2026-05-28, limited to local schema, reviewed SQL migration, and repository/service/validator/mapper/test work. No env/secret, staging/prod/cloud/deploy/real provider, dependency, destructive data operation, or drizzle-kit push is approved.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -11716,8 +11716,6 @@ tasks:
       - pnpm-lock.yaml
       - package-lock.yaml
       - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
       - scripts/**
     riskTypes:
       - database_migration
@@ -11730,7 +11728,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-01-question-knowledge-tag-binding.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-02-02-disabled-question-composition-guard
     title: Phase 20 Fix RA-02-02 Disabled Question Composition Guard

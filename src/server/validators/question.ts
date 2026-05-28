@@ -35,6 +35,8 @@ export type NormalizedCreateQuestionInput = {
   materialPublicId: string | null;
   questionOptions: NormalizedQuestionOptionInput[];
   scoringPoints: NormalizedScoringPointInput[];
+  knowledgeNodePublicIds: string[];
+  tagPublicIds: string[];
 };
 
 export type NormalizedUpdateQuestionInput = NormalizedCreateQuestionInput & {
@@ -91,6 +93,32 @@ function normalizeOptionalPublicId(value: unknown): string | null | undefined {
   const publicId = value.trim();
 
   return publicId.length === 0 ? undefined : publicId;
+}
+
+function normalizePublicIdList(value: unknown): string[] | null {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const publicIds = value.map((item) => {
+    if (typeof item !== "string") {
+      return null;
+    }
+
+    const publicId = item.trim();
+
+    return publicId.length === 0 ? null : publicId;
+  });
+
+  if (publicIds.some((publicId) => publicId === null)) {
+    return null;
+  }
+
+  return Array.from(new Set(publicIds as string[]));
 }
 
 function normalizePositiveInteger(value: unknown): number | null {
@@ -286,6 +314,10 @@ export function normalizeCreateQuestionInput(
   const materialPublicId = normalizeOptionalPublicId(input.materialPublicId);
   const questionOptions = normalizeQuestionOptions(input.questionOptions);
   const scoringPoints = normalizeScoringPoints(input.scoringPoints);
+  const knowledgeNodePublicIds = normalizePublicIdList(
+    input.knowledgeNodePublicIds,
+  );
+  const tagPublicIds = normalizePublicIdList(input.tagPublicIds);
 
   if (
     !isQuestionType(input.questionType) ||
@@ -299,7 +331,9 @@ export function normalizeCreateQuestionInput(
     !isScoringMethod(input.scoringMethod) ||
     materialPublicId === undefined ||
     questionOptions === null ||
-    scoringPoints === null
+    scoringPoints === null ||
+    knowledgeNodePublicIds === null ||
+    tagPublicIds === null
   ) {
     return {
       success: false,
@@ -332,6 +366,8 @@ export function normalizeCreateQuestionInput(
       materialPublicId,
       questionOptions,
       scoringPoints,
+      knowledgeNodePublicIds,
+      tagPublicIds,
     },
   };
 }

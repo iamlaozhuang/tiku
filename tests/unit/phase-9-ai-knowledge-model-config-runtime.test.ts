@@ -68,6 +68,8 @@ function createQuestionRow(
     material_public_id: null,
     question_options: [],
     scoring_points: [],
+    knowledge_node_public_ids: [],
+    tag_public_ids: [],
     created_at: createdAt,
     updated_at: createdAt,
     ...overrides,

@@ -35,8 +35,8 @@ export function mapQuestionToApi(question: QuestionAccessRow): QuestionDto {
       score: scoringPoint.score,
       sortOrder: scoringPoint.sort_order,
     })),
-    knowledgeNodePublicIds: [],
-    tagPublicIds: [],
+    knowledgeNodePublicIds: question.knowledge_node_public_ids,
+    tagPublicIds: question.tag_public_ids,
     createdAt: question.created_at.toISOString(),
     updatedAt: question.updated_at.toISOString(),
   };

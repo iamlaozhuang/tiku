@@ -62,6 +62,8 @@ function createQuestion(
         updated_at: createdAt,
       },
     ],
+    knowledge_node_public_ids: ["knowledge_node_public_storage"],
+    tag_public_ids: ["tag_public_storage"],
     created_at: createdAt,
     updated_at: createdAt,
     ...overrides,
@@ -96,6 +98,8 @@ function createRepository(
         multi_choice_rule: input.multiChoiceRule,
         scoring_method: input.scoringMethod,
         material_public_id: input.materialPublicId,
+        knowledge_node_public_ids: input.knowledgeNodePublicIds,
+        tag_public_ids: input.tagPublicIds,
       });
     },
     async findQuestionByPublicId(publicId) {
@@ -117,6 +121,8 @@ function createRepository(
         multi_choice_rule: input.multiChoiceRule,
         scoring_method: input.scoringMethod,
         material_public_id: input.materialPublicId,
+        knowledge_node_public_ids: input.knowledgeNodePublicIds,
+        tag_public_ids: input.tagPublicIds,
       });
     },
     async disableQuestion(publicId) {
@@ -175,6 +181,8 @@ describe("question service", () => {
           analysisRichText: "<p>老师解析内容</p>",
           standardAnswerRichText: "<p>A</p>",
           materialPublicId: "material_public_123",
+          knowledgeNodePublicIds: ["knowledge_node_public_storage"],
+          tagPublicIds: ["tag_public_storage"],
           questionOptions: [
             {
               label: "A",
@@ -248,6 +256,8 @@ describe("question service", () => {
           sortOrder: 1,
         },
       ],
+      knowledgeNodePublicIds: ["knowledge_node_public_1"],
+      tagPublicIds: ["tag_public_1"],
     };
 
     await expect(service.createQuestion(input)).resolves.toMatchObject({
@@ -256,6 +266,8 @@ describe("question service", () => {
         question: {
           publicId: "question_public_123",
           materialPublicId: "material_public_123",
+          knowledgeNodePublicIds: ["knowledge_node_public_1"],
+          tagPublicIds: ["tag_public_1"],
         },
       },
     });
@@ -267,6 +279,8 @@ describe("question service", () => {
       data: {
         question: {
           publicId: "question_public_123",
+          knowledgeNodePublicIds: ["knowledge_node_public_storage"],
+          tagPublicIds: ["tag_public_storage"],
           questionOptions: [
             {
               label: "A",
@@ -349,8 +363,8 @@ describe("question service", () => {
               sortOrder: 1,
             },
           ],
-          knowledgeNodePublicIds: [],
-          tagPublicIds: [],
+          knowledgeNodePublicIds: ["knowledge_node_public_storage"],
+          tagPublicIds: ["tag_public_storage"],
           createdAt: "2026-05-19T04:00:00.000Z",
           updatedAt: "2026-05-19T04:00:00.000Z",
         },
@@ -378,6 +392,8 @@ describe("question service", () => {
               multi_choice_rule: input.multiChoiceRule,
               scoring_method: input.scoringMethod,
               material_public_id: input.materialPublicId,
+              knowledge_node_public_ids: input.knowledgeNodePublicIds,
+              tag_public_ids: input.tagPublicIds,
               question_options: [],
               scoring_points: input.scoringPoints.map(
                 (scoringPoint, index) => ({
@@ -415,6 +431,8 @@ describe("question service", () => {
               sortOrder: 1,
             },
           ],
+          knowledgeNodePublicIds: [],
+          tagPublicIds: [],
         }),
       ).resolves.toMatchObject({
         code: 0,
@@ -439,6 +457,8 @@ describe("question service", () => {
           questionType,
           questionOptions: [],
           scoringMethod: "ai_scoring",
+          knowledgeNodePublicIds: [],
+          tagPublicIds: [],
         }),
       ]);
     },
@@ -502,6 +522,8 @@ describe("question service", () => {
             sortOrder: 1,
           },
         ],
+        knowledgeNodePublicIds: [],
+        tagPublicIds: [],
       }),
     ).resolves.toEqual({
       code: 409202,

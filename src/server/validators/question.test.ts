@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeCreateQuestionInput } from "./question";
+import {
+  normalizeCreateQuestionInput,
+  normalizeUpdateQuestionInput,
+} from "./question";
 
 function createSubjectiveQuestionInput(
   overrides: Record<string, unknown> = {},
@@ -24,6 +27,8 @@ function createSubjectiveQuestionInput(
         sortOrder: 1,
       },
     ],
+    knowledgeNodePublicIds: [],
+    tagPublicIds: [],
     ...overrides,
   };
 }
@@ -77,4 +82,50 @@ describe("question validator", () => {
       });
     },
   );
+
+  it("accepts knowledge_node and tag public identifier arrays for create and update", () => {
+    const input = createSubjectiveQuestionInput({
+      knowledgeNodePublicIds: ["knowledge_node_public_1"],
+      tagPublicIds: ["tag_public_1", "tag_public_2"],
+      status: "available",
+    });
+
+    expect(normalizeCreateQuestionInput(input)).toMatchObject({
+      success: true,
+      value: {
+        knowledgeNodePublicIds: ["knowledge_node_public_1"],
+        tagPublicIds: ["tag_public_1", "tag_public_2"],
+      },
+    });
+    expect(normalizeUpdateQuestionInput(input)).toMatchObject({
+      success: true,
+      value: {
+        knowledgeNodePublicIds: ["knowledge_node_public_1"],
+        tagPublicIds: ["tag_public_1", "tag_public_2"],
+      },
+    });
+  });
+
+  it("rejects malformed knowledge_node and tag public identifier arrays", () => {
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          knowledgeNodePublicIds: ["knowledge_node_public_1", ""],
+        }),
+      ),
+    ).toEqual({
+      success: false,
+      message: "Invalid question input.",
+    });
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          tagPublicIds: "tag_public_1",
+        }),
+      ),
+    ).toEqual({
+      success: false,
+      message: "Invalid question input.",
+    });
+  });
 });

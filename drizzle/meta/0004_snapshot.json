@@ -1,6 +1,6 @@
 {
-  "id": "04b96511-e433-4330-babe-889254cc0dc9",
-  "prevId": "9e561dbd-b605-4476-bced-5834a993f927",
+  "id": "0ed4a03b-08ed-4d22-9575-543f16df17de",
+  "prevId": "a4b2fc90-5f75-410c-aae1-6dc24125fdca",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -62,7 +62,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027active\u0027"
+          "default": "'active'"
         },
         "created_at": {
           "name": "created_at",
@@ -820,7 +820,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027active\u0027"
+          "default": "'active'"
         },
         "cancelled_at": {
           "name": "cancelled_at",
@@ -1115,7 +1115,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027active\u0027"
+          "default": "'active'"
         },
         "contact_name": {
           "name": "contact_name",
@@ -1299,7 +1299,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027active\u0027"
+          "default": "'active'"
         },
         "created_at": {
           "name": "created_at",
@@ -1510,7 +1510,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027unused\u0027"
+          "default": "'unused'"
         },
         "used_by_user_id": {
           "name": "used_by_user_id",
@@ -1788,7 +1788,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027active\u0027"
+          "default": "'active'"
         },
         "login_failed_count": {
           "name": "login_failed_count",
@@ -2409,7 +2409,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027active\u0027"
+          "default": "'active'"
         },
         "is_recommendable": {
           "name": "is_recommendable",
@@ -2720,11 +2720,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "model_alias": {
+          "name": "model_alias",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "config_version": {
           "name": "config_version",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'disabled'"
         },
         "is_enabled": {
           "name": "is_enabled",
@@ -2745,6 +2758,20 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "fallback_priority": {
+          "name": "fallback_priority",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "snapshot_policy": {
+          "name": "snapshot_policy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'redacted_metadata'"
         },
         "fallback_model_config_id": {
           "name": "fallback_model_config_id",
@@ -2809,6 +2836,27 @@
             },
             {
               "expression": "is_enabled",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_model_config_ai_func_type_fallback_priority": {
+          "name": "idx_model_config_ai_func_type_fallback_priority",
+          "columns": [
+            {
+              "expression": "ai_func_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "fallback_priority",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2918,6 +2966,25 @@
           "primaryKey": false,
           "notNull": false
         },
+        "secret_status": {
+          "name": "secret_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'not_configured'"
+        },
+        "last_rotated_at": {
+          "name": "last_rotated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_metadata": {
+          "name": "provider_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
         "is_enabled": {
           "name": "is_enabled",
           "type": "boolean",
@@ -2985,6 +3052,21 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "idx_model_provider_secret_status": {
+          "name": "idx_model_provider_secret_status",
+          "columns": [
+            {
+              "expression": "secret_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -3040,6 +3122,25 @@
           "primaryKey": false,
           "notNull": true
         },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "template_content": {
           "name": "template_content",
           "type": "text",
@@ -3051,6 +3152,18 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "body_digest": {
+          "name": "body_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "body_preview_masked": {
+          "name": "body_preview_masked",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "is_active": {
           "name": "is_active",
@@ -3075,6 +3188,12 @@
         },
         "archived_at": {
           "name": "archived_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "disabled_at": {
+          "name": "disabled_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -3128,6 +3247,21 @@
             },
             {
               "expression": "is_active",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_prompt_template_status": {
+          "name": "idx_prompt_template_status",
+          "columns": [
+            {
+              "expression": "status",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -3192,7 +3326,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027uploaded\u0027"
+          "default": "'uploaded'"
         },
         "title": {
           "name": "title",
@@ -3466,7 +3600,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027available\u0027"
+          "default": "'available'"
         },
         "is_locked": {
           "name": "is_locked",
@@ -3667,7 +3801,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027draft\u0027"
+          "default": "'draft'"
         },
         "paper_type": {
           "name": "paper_type",
@@ -4441,7 +4575,7 @@
           "type": "numeric(8, 1)",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u00270\u0027"
+          "default": "'0'"
         },
         "created_at": {
           "name": "created_at",
@@ -4585,7 +4719,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027available\u0027"
+          "default": "'available'"
         },
         "is_locked": {
           "name": "is_locked",
@@ -4606,7 +4740,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027all_correct_only\u0027"
+          "default": "'all_correct_only'"
         },
         "scoring_method": {
           "name": "scoring_method",
@@ -4614,7 +4748,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027auto_match\u0027"
+          "default": "'auto_match'"
         },
         "material_id": {
           "name": "material_id",
@@ -4957,6 +5091,126 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.question_knowledge_node": {
+      "name": "question_knowledge_node",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "question_knowledge_node_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "knowledge_node_id": {
+          "name": "knowledge_node_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "udx_question_knowledge_node_question_id_knowledge_node_id": {
+          "name": "udx_question_knowledge_node_question_id_knowledge_node_id",
+          "columns": [
+            {
+              "expression": "question_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "knowledge_node_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_question_knowledge_node_question_id": {
+          "name": "idx_question_knowledge_node_question_id",
+          "columns": [
+            {
+              "expression": "question_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_question_knowledge_node_knowledge_node_id": {
+          "name": "idx_question_knowledge_node_knowledge_node_id",
+          "columns": [
+            {
+              "expression": "knowledge_node_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "question_knowledge_node_question_id_question_id_fk": {
+          "name": "question_knowledge_node_question_id_question_id_fk",
+          "tableFrom": "question_knowledge_node",
+          "tableTo": "question",
+          "columnsFrom": ["question_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "question_knowledge_node_knowledge_node_id_knowledge_node_id_fk": {
+          "name": "question_knowledge_node_knowledge_node_id_knowledge_node_id_fk",
+          "tableFrom": "question_knowledge_node",
+          "tableTo": "knowledge_node",
+          "columnsFrom": ["knowledge_node_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.question_option": {
       "name": "question_option",
       "schema": "",
@@ -5064,6 +5318,126 @@
           "columnsFrom": ["question_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.question_tag": {
+      "name": "question_tag",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "question_tag_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tag_id": {
+          "name": "tag_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "udx_question_tag_question_id_tag_id": {
+          "name": "udx_question_tag_question_id_tag_id",
+          "columns": [
+            {
+              "expression": "question_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "tag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_question_tag_question_id": {
+          "name": "idx_question_tag_question_id",
+          "columns": [
+            {
+              "expression": "question_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_question_tag_tag_id": {
+          "name": "idx_question_tag_tag_id",
+          "columns": [
+            {
+              "expression": "tag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "question_tag_question_id_question_id_fk": {
+          "name": "question_tag_question_id_question_id_fk",
+          "tableFrom": "question_tag",
+          "tableTo": "question",
+          "columnsFrom": ["question_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "question_tag_tag_id_tag_id_fk": {
+          "name": "question_tag_tag_id_tag_id_fk",
+          "tableFrom": "question_tag",
+          "tableTo": "tag",
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
           "onUpdate": "no action"
         }
       },
@@ -5182,6 +5556,93 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.tag": {
+      "name": "tag",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "tag_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "public_id": {
+          "name": "public_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "udx_tag_public_id": {
+          "name": "udx_tag_public_id",
+          "columns": [
+            {
+              "expression": "public_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "udx_tag_name": {
+          "name": "udx_tag_name",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.answer_record": {
       "name": "answer_record",
       "schema": "",
@@ -5276,7 +5737,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027draft\u0027"
+          "default": "'draft'"
         },
         "is_correct": {
           "name": "is_correct",
@@ -5813,7 +6274,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027wrong_answer\u0027"
+          "default": "'wrong_answer'"
         },
         "mistake_book_status": {
           "name": "mistake_book_status",
@@ -5821,7 +6282,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027unmastered\u0027"
+          "default": "'unmastered'"
         },
         "wrong_count": {
           "name": "wrong_count",
@@ -6069,7 +6530,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027in_progress\u0027"
+          "default": "'in_progress'"
         },
         "started_at": {
           "name": "started_at",
@@ -6335,7 +6796,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "\u0027in_progress\u0027"
+          "default": "'in_progress'"
         },
         "started_at": {
           "name": "started_at",

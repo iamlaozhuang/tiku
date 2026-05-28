@@ -29,6 +29,13 @@
       "when": 1779843120000,
       "tag": "20260526005200_add_model_config_redaction_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779957500156,
+      "tag": "20260528013600_add_question_knowledge_tag_binding",
+      "breakpoints": true
     }
   ]
 }

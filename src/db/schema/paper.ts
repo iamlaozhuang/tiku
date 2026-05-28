@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { admin, professionEnum } from "./auth";
+import { knowledgeNode } from "./ai-rag";
 
 export type PaperTableName = "paper";
 export const paperTableName: PaperTableName = "paper";
@@ -196,6 +197,67 @@ export const scoringPoint = pgTable(
   (table) => [
     index("idx_scoring_point_question_id").on(table.question_id),
     index("idx_scoring_point_sort_order").on(table.sort_order),
+  ],
+);
+
+export const tag = pgTable(
+  "tag",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    name: text("name").notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_tag_public_id").on(table.public_id),
+    uniqueIndex("udx_tag_name").on(table.name),
+  ],
+);
+
+export const questionKnowledgeNode = pgTable(
+  "question_knowledge_node",
+  {
+    id: idColumn(),
+    question_id: bigint("question_id", { mode: "number" })
+      .notNull()
+      .references(() => question.id, { onDelete: "cascade" }),
+    knowledge_node_id: bigint("knowledge_node_id", { mode: "number" })
+      .notNull()
+      .references(() => knowledgeNode.id, { onDelete: "restrict" }),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_question_knowledge_node_question_id_knowledge_node_id").on(
+      table.question_id,
+      table.knowledge_node_id,
+    ),
+    index("idx_question_knowledge_node_question_id").on(table.question_id),
+    index("idx_question_knowledge_node_knowledge_node_id").on(
+      table.knowledge_node_id,
+    ),
+  ],
+);
+
+export const questionTag = pgTable(
+  "question_tag",
+  {
+    id: idColumn(),
+    question_id: bigint("question_id", { mode: "number" })
+      .notNull()
+      .references(() => question.id, { onDelete: "cascade" }),
+    tag_id: bigint("tag_id", { mode: "number" })
+      .notNull()
+      .references(() => tag.id, { onDelete: "restrict" }),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_question_tag_question_id_tag_id").on(
+      table.question_id,
+      table.tag_id,
+    ),
+    index("idx_question_tag_question_id").on(table.question_id),
+    index("idx_question_tag_tag_id").on(table.tag_id),
   ],
 );
 
@@ -397,12 +459,43 @@ export const questionRelations = relations(question, ({ many, one }) => ({
     references: [material.id],
   }),
   paperQuestions: many(paperQuestion),
+  questionKnowledgeNodes: many(questionKnowledgeNode),
   questionOptions: many(questionOption),
   scoringPoints: many(scoringPoint),
+  questionTags: many(questionTag),
   updatedByAdmin: one(admin, {
     fields: [question.updated_by_admin_id],
     references: [admin.id],
     relationName: "questionUpdatedByAdmin",
+  }),
+}));
+
+export const tagRelations = relations(tag, ({ many }) => ({
+  questionTags: many(questionTag),
+}));
+
+export const questionKnowledgeNodeRelations = relations(
+  questionKnowledgeNode,
+  ({ one }) => ({
+    knowledgeNode: one(knowledgeNode, {
+      fields: [questionKnowledgeNode.knowledge_node_id],
+      references: [knowledgeNode.id],
+    }),
+    question: one(question, {
+      fields: [questionKnowledgeNode.question_id],
+      references: [question.id],
+    }),
+  }),
+);
+
+export const questionTagRelations = relations(questionTag, ({ one }) => ({
+  question: one(question, {
+    fields: [questionTag.question_id],
+    references: [question.id],
+  }),
+  tag: one(tag, {
+    fields: [questionTag.tag_id],
+    references: [tag.id],
   }),
 }));
 

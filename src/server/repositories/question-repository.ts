@@ -13,10 +13,14 @@ import {
 
 import {
   admin,
+  knowledgeNode,
   material,
   question,
+  questionKnowledgeNode,
   questionOption,
+  questionTag,
   scoringPoint,
+  tag,
 } from "@/db/schema";
 import type {
   MultiChoiceRule,
@@ -77,6 +81,8 @@ export type QuestionAccessRow = {
   material_public_id: string | null;
   question_options: QuestionOptionAccessRow[];
   scoring_points: ScoringPointAccessRow[];
+  knowledge_node_public_ids: string[];
+  tag_public_ids: string[];
   created_at: Date;
   updated_at: Date;
 };
@@ -204,6 +210,8 @@ export function createPostgresQuestionRepository(
           questionRow.id,
           input.questionOptions,
           input.scoringPoints,
+          input.knowledgeNodePublicIds,
+          input.tagPublicIds,
         );
 
         const createdQuestion = await findQuestionByPublicId(
@@ -265,6 +273,8 @@ export function createPostgresQuestionRepository(
           updatedQuestion.id,
           input.questionOptions,
           input.scoringPoints,
+          input.knowledgeNodePublicIds,
+          input.tagPublicIds,
         );
 
         const reloadedQuestion = await findQuestionByPublicId(
@@ -347,6 +357,8 @@ export function createPostgresQuestionRepository(
             score: scoringPointRow.score,
             sortOrder: scoringPointRow.sort_order,
           })),
+          sourceQuestion.knowledge_node_public_ids,
+          sourceQuestion.tag_public_ids,
         );
 
         const copiedQuestion = await findQuestionByPublicId(
@@ -366,7 +378,10 @@ export function createPostgresQuestionRepository(
 
 type QuestionBaseRow = Omit<
   QuestionAccessRow,
-  "question_options" | "scoring_points"
+  | "question_options"
+  | "scoring_points"
+  | "knowledge_node_public_ids"
+  | "tag_public_ids"
 >;
 
 function createQuestionConditions(
@@ -472,6 +487,27 @@ async function hydrateQuestions(
     .from(scoringPoint)
     .where(inArray(scoringPoint.question_id, questionIds))
     .orderBy(asc(scoringPoint.sort_order));
+  const knowledgeNodeBindingRows = await database
+    .select({
+      question_id: questionKnowledgeNode.question_id,
+      public_id: knowledgeNode.public_id,
+    })
+    .from(questionKnowledgeNode)
+    .innerJoin(
+      knowledgeNode,
+      eq(knowledgeNode.id, questionKnowledgeNode.knowledge_node_id),
+    )
+    .where(inArray(questionKnowledgeNode.question_id, questionIds))
+    .orderBy(asc(knowledgeNode.public_id));
+  const tagBindingRows = await database
+    .select({
+      question_id: questionTag.question_id,
+      public_id: tag.public_id,
+    })
+    .from(questionTag)
+    .innerJoin(tag, eq(tag.id, questionTag.tag_id))
+    .where(inArray(questionTag.question_id, questionIds))
+    .orderBy(asc(tag.public_id));
 
   return rows.map((row) => ({
     ...row,
@@ -481,6 +517,12 @@ async function hydrateQuestions(
     scoring_points: scoringPointRows.filter(
       (scoringPointRow) => scoringPointRow.question_id === row.id,
     ),
+    knowledge_node_public_ids: knowledgeNodeBindingRows
+      .filter((bindingRow) => bindingRow.question_id === row.id)
+      .map((bindingRow) => bindingRow.public_id),
+    tag_public_ids: tagBindingRows
+      .filter((bindingRow) => bindingRow.question_id === row.id)
+      .map((bindingRow) => bindingRow.public_id),
   }));
 }
 
@@ -489,6 +531,8 @@ async function replaceQuestionChildren(
   questionId: number,
   questionOptions: NormalizedCreateQuestionInput["questionOptions"],
   scoringPoints: NormalizedCreateQuestionInput["scoringPoints"],
+  knowledgeNodePublicIds: NormalizedCreateQuestionInput["knowledgeNodePublicIds"],
+  tagPublicIds: NormalizedCreateQuestionInput["tagPublicIds"],
 ): Promise<void> {
   await database
     .delete(questionOption)
@@ -496,6 +540,12 @@ async function replaceQuestionChildren(
   await database
     .delete(scoringPoint)
     .where(eq(scoringPoint.question_id, questionId));
+  await database
+    .delete(questionKnowledgeNode)
+    .where(eq(questionKnowledgeNode.question_id, questionId));
+  await database
+    .delete(questionTag)
+    .where(eq(questionTag.question_id, questionId));
 
   if (questionOptions.length > 0) {
     await database.insert(questionOption).values(
@@ -516,6 +566,30 @@ async function replaceQuestionChildren(
         question_id: questionId,
         score: point.score,
         sort_order: point.sortOrder,
+      })),
+    );
+  }
+
+  const knowledgeNodeIds = await resolveKnowledgeNodeIds(
+    database,
+    knowledgeNodePublicIds,
+  );
+  const tagIds = await resolveTagIds(database, tagPublicIds);
+
+  if (knowledgeNodeIds.length > 0) {
+    await database.insert(questionKnowledgeNode).values(
+      knowledgeNodeIds.map((knowledgeNodeId) => ({
+        knowledge_node_id: knowledgeNodeId,
+        question_id: questionId,
+      })),
+    );
+  }
+
+  if (tagIds.length > 0) {
+    await database.insert(questionTag).values(
+      tagIds.map((tagId) => ({
+        question_id: questionId,
+        tag_id: tagId,
       })),
     );
   }
@@ -557,4 +631,66 @@ async function resolveActorAdminId(
   }
 
   return row.id;
+}
+
+async function resolveKnowledgeNodeIds(
+  database: RuntimeDatabase,
+  publicIds: string[],
+): Promise<number[]> {
+  if (publicIds.length === 0) {
+    return [];
+  }
+
+  const uniquePublicIds = Array.from(new Set(publicIds));
+  const rows = await database
+    .select({ id: knowledgeNode.id, public_id: knowledgeNode.public_id })
+    .from(knowledgeNode)
+    .where(inArray(knowledgeNode.public_id, uniquePublicIds));
+
+  assertAllBindingPublicIdsResolved(
+    "knowledge_node",
+    uniquePublicIds,
+    rows.map((row) => row.public_id),
+  );
+
+  return uniquePublicIds.flatMap((publicId) =>
+    rows.filter((row) => row.public_id === publicId).map((row) => row.id),
+  );
+}
+
+async function resolveTagIds(
+  database: RuntimeDatabase,
+  publicIds: string[],
+): Promise<number[]> {
+  if (publicIds.length === 0) {
+    return [];
+  }
+
+  const uniquePublicIds = Array.from(new Set(publicIds));
+  const rows = await database
+    .select({ id: tag.id, public_id: tag.public_id })
+    .from(tag)
+    .where(inArray(tag.public_id, uniquePublicIds));
+
+  assertAllBindingPublicIdsResolved(
+    "tag",
+    uniquePublicIds,
+    rows.map((row) => row.public_id),
+  );
+
+  return uniquePublicIds.flatMap((publicId) =>
+    rows.filter((row) => row.public_id === publicId).map((row) => row.id),
+  );
+}
+
+function assertAllBindingPublicIdsResolved(
+  resourceName: "knowledge_node" | "tag",
+  expectedPublicIds: string[],
+  resolvedPublicIds: string[],
+): void {
+  if (resolvedPublicIds.length === expectedPublicIds.length) {
+    return;
+  }
+
+  throw new Error(`${resourceName} binding public ids could not be resolved.`);
 }
