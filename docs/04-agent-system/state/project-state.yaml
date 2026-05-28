@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-28T05:02:14-07:00"
+updatedAt: "2026-05-28T04:46:18-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: b15902eef2c718721fb2ec9494336ef909d82a6d
-  lastKnownOriginMasterSha: b15902eef2c718721fb2ec9494336ef909d82a6d
+  lastKnownMasterSha: a466bc1251836040a874cd13eb27b18a0092399e
+  lastKnownOriginMasterSha: a466bc1251836040a874cd13eb27b18a0092399e
 currentTask:
   id: phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion
-  status: implemented
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion.md
   branch: codex/phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion
-  commitSha: null
+  commitSha: a466bc1251836040a874cd13eb27b18a0092399e
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion, merge to master, run master validation, push origin/master, delete the short-lived branch, then record cleanup evidence."
+  nextRecommendedAction: "Select the next pending task from task-queue after confirming dependencies and risk gates; request human approval before any high-risk boundary such as database_migration, dependency_change, auth_permission_model, secret/env, external_service_config, deploy/cloud, or destructive data operation."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion.md

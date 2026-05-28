@@ -12571,7 +12571,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion.md
-    status: implemented
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion
     title: Phase 20 Fix RA-06-10 Knowledge UI Recommendation Binding Completion
