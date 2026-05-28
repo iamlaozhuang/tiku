@@ -121,5 +121,24 @@
 - base: `master` / `origin/master` at `02218cbf8420c268b7d73c74ed1f1ae37036de2b`
 - changed files: `project-state.yaml`, `task-queue.yaml`, this evidence file, and the existing RA-03-03 task plan.
 - implementation commit: already present as `06cb3a5f99b391c1d3b1d0707e79292ea7eb7324`.
-- recovery reconciliation commit: pending.
-- merge/push/cleanup: pending.
+- recovery reconciliation commit: `e0926aef672eeca3ac3cb858e66c199029f23c7c` (`docs(practice): reconcile subjective scoring task status`).
+- merge: fast-forward merged into `master`.
+- post-merge master validation:
+  - `git status --short --branch` - pass; `## master...origin/master [ahead 1]`.
+  - `git diff --check` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch origin/master` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `npm.cmd run build` - pass.
+  - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 556 tests), and `format:check` passed.
+- push: `git push origin master` passed, `02218cb..e0926ae master -> master`.
+- cleanup:
+  - initial `git branch -d codex/phase-20-fix-ra-03-03-skill-practice-final-scoring` failed in sandbox with ref lock permission denied.
+  - escalated branch delete passed; deleted already-merged branch at `e0926ae`.
+- final cleanup verification before this evidence update:
+  - `git status --short --branch` - clean `## master...origin/master`.
+  - `git rev-parse HEAD` and `git rev-parse origin/master` both returned `e0926aef672eeca3ac3cb858e66c199029f23c7c`.
+  - `git branch --list codex/*` returned no branches.
+  - `git worktree list --porcelain` showed only `D:/tiku` on `master`.
+  - Phase 20/21 selected task status count is now `TOTAL=52`, `closed=16`, `pending=36`, with no `done`, `pushed`, `blocked`, or `active` entries.

@@ -36,8 +36,8 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 02218cbf8420c268b7d73c74ed1f1ae37036de2b
-  lastKnownOriginMasterSha: 02218cbf8420c268b7d73c74ed1f1ae37036de2b
+  lastKnownMasterSha: e0926aef672eeca3ac3cb858e66c199029f23c7c
+  lastKnownOriginMasterSha: e0926aef672eeca3ac3cb858e66c199029f23c7c
 currentTask:
   id: phase-20-fix-ra-03-03-skill-practice-final-scoring
   status: closed
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "phase-20-fix-ra-03-03-skill-practice-final-scoring was already implemented and merged in master; this run reconciled its stale pending queue status to closed. Next automation loop may scan the queue for the next pending low-risk Phase 22 task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
+  nextRecommendedAction: "phase-20-fix-ra-03-03-skill-practice-final-scoring is closed: the stale pending queue status was reconciled, master was pushed, and the short-lived branch was deleted. Next automation loop may scan the queue for the next pending low-risk Phase 22 task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-03-skill-practice-final-scoring.md
