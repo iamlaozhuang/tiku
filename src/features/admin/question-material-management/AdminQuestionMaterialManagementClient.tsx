@@ -120,6 +120,12 @@ type ScoringPointFormValue = {
   score: string;
 };
 
+type QuestionBindingInput = {
+  fillBlankAnswers?: QuestionDto["fillBlankAnswers"];
+  knowledgeNodePublicIds: string[];
+  tagPublicIds: string[];
+};
+
 type MaterialFormValues = {
   title: string;
   contentRichText: string;
@@ -433,7 +439,14 @@ async function mutateAdminApi<TData>(
   };
 }
 
-function createQuestionInput(values: QuestionFormValues) {
+function createQuestionInput(
+  values: QuestionFormValues,
+  bindings: QuestionBindingInput = {
+    fillBlankAnswers: [],
+    knowledgeNodePublicIds: [],
+    tagPublicIds: [],
+  },
+) {
   const isOptionQuestion = optionQuestionTypes.has(values.questionType);
 
   return {
@@ -468,6 +481,33 @@ function createQuestionInput(values: QuestionFormValues) {
           score: scoringPoint.score,
           sortOrder: pointIndex + 1,
         })),
+    fillBlankAnswers: bindings.fillBlankAnswers ?? [],
+    knowledgeNodePublicIds: bindings.knowledgeNodePublicIds,
+    tagPublicIds: bindings.tagPublicIds,
+  };
+}
+
+function createQuestionInputFromQuestion(
+  question: QuestionDto,
+  knowledgeNodePublicIds: string[],
+) {
+  return {
+    questionType: question.questionType,
+    profession: question.profession,
+    level: question.level,
+    subject: question.subject,
+    stemRichText: question.stemRichText,
+    analysisRichText: question.analysisRichText,
+    standardAnswerRichText: question.standardAnswerRichText,
+    multiChoiceRule: question.multiChoiceRule,
+    scoringMethod: question.scoringMethod,
+    materialPublicId: question.materialPublicId,
+    questionOptions: question.questionOptions,
+    scoringPoints: question.scoringPoints,
+    fillBlankAnswers: question.fillBlankAnswers ?? [],
+    knowledgeNodePublicIds,
+    tagPublicIds: question.tagPublicIds,
+    status: question.status,
   };
 }
 
@@ -670,12 +710,26 @@ export function AdminQuestionMaterialManagement({
           : `/api/v1/questions/${activeForm.publicId}`,
         sessionToken,
         activeForm.mode === "create" ? "POST" : "PATCH",
-        activeForm.mode === "create"
-          ? createQuestionInput(values)
-          : {
-              ...createQuestionInput(values),
-              status: "available",
-            },
+        (() => {
+          if (activeForm.mode === "create") {
+            return createQuestionInput(values);
+          }
+
+          const currentQuestion =
+            questions.find(
+              (question) => question.publicId === activeForm.publicId,
+            ) ?? null;
+
+          return {
+            ...createQuestionInput(values, {
+              fillBlankAnswers: currentQuestion?.fillBlankAnswers ?? [],
+              knowledgeNodePublicIds:
+                currentQuestion?.knowledgeNodePublicIds ?? [],
+              tagPublicIds: currentQuestion?.tagPublicIds ?? [],
+            }),
+            status: "available",
+          };
+        })(),
       );
 
       if (response.code !== 0 || response.data === null) {
@@ -803,11 +857,50 @@ export function AdminQuestionMaterialManagement({
     setActionMessage(`题目 ${question.publicId} 知识点推荐已生成`);
   }
 
-  function handleReviewKnowledgeRecommendation(
+  async function handleReviewKnowledgeRecommendation(
     questionPublicId: string,
     knowledgeNodePublicId: string,
     reviewStatus: RecommendationReviewStatus,
   ) {
+    const sessionToken = getStoredSessionToken();
+    const currentQuestion =
+      questions.find((question) => question.publicId === questionPublicId) ??
+      null;
+
+    if (reviewStatus === "accepted") {
+      if (sessionToken === null || currentQuestion === null) {
+        setActionError("Admin session expired. Sign in again before retrying.");
+        return;
+      }
+
+      const nextKnowledgeNodePublicIds =
+        currentQuestion.knowledgeNodePublicIds.includes(knowledgeNodePublicId)
+          ? currentQuestion.knowledgeNodePublicIds
+          : [...currentQuestion.knowledgeNodePublicIds, knowledgeNodePublicId];
+      const response = await mutateAdminApi<{ question: QuestionDto }>(
+        `/api/v1/questions/${questionPublicId}`,
+        sessionToken,
+        "PATCH",
+        createQuestionInputFromQuestion(
+          currentQuestion,
+          nextKnowledgeNodePublicIds,
+        ),
+      );
+
+      if (response.code !== 0 || response.data === null) {
+        setActionError(
+          "Knowledge node binding save failed. Refresh and retry.",
+        );
+        return;
+      }
+
+      const savedQuestion = response.data.question;
+      setQuestions((currentQuestions) =>
+        upsertByPublicId(currentQuestions, savedQuestion),
+      );
+      setActionError(null);
+    }
+
     setRecommendationsByQuestionPublicId((currentRecommendations) => {
       const currentRecommendation =
         currentRecommendations[questionPublicId] ?? null;
@@ -827,27 +920,6 @@ export function AdminQuestionMaterialManagement({
         },
       };
     });
-
-    if (reviewStatus === "accepted") {
-      setQuestions((currentQuestions) =>
-        currentQuestions.map((question) => {
-          if (
-            question.publicId !== questionPublicId ||
-            question.knowledgeNodePublicIds.includes(knowledgeNodePublicId)
-          ) {
-            return question;
-          }
-
-          return {
-            ...question,
-            knowledgeNodePublicIds: [
-              ...question.knowledgeNodePublicIds,
-              knowledgeNodePublicId,
-            ],
-          };
-        }),
-      );
-    }
 
     setActionMessage(
       reviewStatus === "accepted"

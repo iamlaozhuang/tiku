@@ -11573,7 +11573,7 @@ tasks:
       - phase-18-audit-ra-04-ai-scoring-explanation-hint-model
       - phase-20-fix-ra-02-01-question-knowledge-tag-binding
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-04 audit finding F-RA-04-06-001. Durable question knowledge_node binding may require database/schema approval before implementation.
+    humanApproval: Registered by Phase 18 RA-04 audit finding F-RA-04-06-001. User approved local implementation under database_migration and local ai_runtime risk on 2026-05-28, limited to prioritizing reuse of landed question/knowledge_node binding. If new schema/migration, dependency, env, real provider, external service, cloud/deploy, or destructive operation is required, stop and request separate approval.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -11606,7 +11606,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-06-knowledge-recommendation-confirmed-bindings.md
-    status: pending
+    status: implemented
     retryCount: 0
   - id: phase-20-fix-ra-04-07-persisted-model-config-runtime-selection
     title: Phase 20 Fix RA-04-07 Persisted Model Config Runtime Selection

@@ -207,7 +207,7 @@ describe("phase 11 AI knowledge recommendation review loop", () => {
           reviewState: {
             questionUpdatedAt: "2026-05-24T08:00:00.000Z",
             staleCheck: "question_updated_at_mismatch",
-            bindingMode: "local_review_only",
+            bindingMode: "durable_question_binding",
           },
           recommendations: [
             {

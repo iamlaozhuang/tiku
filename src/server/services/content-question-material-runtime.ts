@@ -417,7 +417,7 @@ function mapKnowledgeRecommendationToApi(input: {
       reviewState: {
         questionUpdatedAt: input.questionUpdatedAt,
         staleCheck: "question_updated_at_mismatch",
-        bindingMode: "local_review_only",
+        bindingMode: "durable_question_binding",
       },
       recommendations: input.result.recommendations.map((recommendation) => ({
         knowledgeNodePublicId: recommendation.knowledgeNodeSnapshot.publicId,

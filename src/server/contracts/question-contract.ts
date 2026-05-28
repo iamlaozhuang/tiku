@@ -64,7 +64,7 @@ export type QuestionKnowledgeRecommendationItemDto = {
 export type QuestionKnowledgeRecommendationReviewStateDto = {
   questionUpdatedAt: string;
   staleCheck: "question_updated_at_mismatch";
-  bindingMode: "local_review_only";
+  bindingMode: "durable_question_binding";
 };
 
 export type QuestionKnowledgeRecommendationDto = {

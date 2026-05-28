@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -293,6 +294,11 @@ function mockWritableContentFetch(
         path === "/api/v1/questions/question-marketing-001" &&
         method === "PATCH"
       ) {
+        const requestBody =
+          init?.body === undefined
+            ? {}
+            : (JSON.parse(String(init.body)) as Record<string, unknown>);
+
         return createJsonResponse({
           code: 0,
           message: "ok",
@@ -300,6 +306,11 @@ function mockWritableContentFetch(
             question: {
               ...questionPayload.data[0],
               stemRichText: "编辑后的题干",
+              knowledgeNodePublicIds: Array.isArray(
+                requestBody.knowledgeNodePublicIds,
+              )
+                ? requestBody.knowledgeNodePublicIds
+                : questionPayload.data[0].knowledgeNodePublicIds,
               updatedAt: "2026-05-19T06:30:00.000Z",
             },
           },
@@ -353,7 +364,7 @@ function mockWritableContentFetch(
               reviewState: {
                 questionUpdatedAt: "2026-05-19T06:20:00.000Z",
                 staleCheck: "question_updated_at_mismatch",
-                bindingMode: "local_review_only",
+                bindingMode: "durable_question_binding",
               },
               recommendations: [
                 {
@@ -1237,9 +1248,21 @@ describe("AdminQuestionMaterialManagement", () => {
         name: "Accept recommendation knowledge-node-sampling-v2",
       }),
     );
-    expect(
-      screen.getByTestId("question-row-question-marketing-001"),
-    ).toHaveTextContent("knowledge-node-sampling-v2");
+
+    const acceptedRecommendationBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/questions/question-marketing-001",
+      "PATCH",
+    );
+    expect(acceptedRecommendationBody.knowledgeNodePublicIds).toEqual([
+      "knowledge-node-sampling",
+      "knowledge-node-sampling-v2",
+    ]);
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("question-row-question-marketing-001"),
+      ).toHaveTextContent("knowledge-node-sampling-v2"),
+    );
 
     fireEvent.click(
       screen.getByRole("button", {
