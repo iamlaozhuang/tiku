@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-28T04:06:27-07:00"
+updatedAt: "2026-05-28T04:18:39-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 16ad04d8bbdb8d2c65e87c47ff0c5577230e7cd1
-  lastKnownOriginMasterSha: 16ad04d8bbdb8d2c65e87c47ff0c5577230e7cd1
+  lastKnownMasterSha: 2da8b98764bf259ee651ebead778ae86c4053091
+  lastKnownOriginMasterSha: 2da8b98764bf259ee651ebead778ae86c4053091
 currentTask:
   id: phase-20-fix-ra-02-08-publish-fill-blank-validation
-  status: implemented
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-02-08-publish-fill-blank-validation.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-08-publish-fill-blank-validation.md
   branch: codex/phase-20-fix-ra-02-08-publish-fill-blank-validation
-  commitSha: null
+  commitSha: 2da8b98764bf259ee651ebead778ae86c4053091
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit phase-20-fix-ra-02-08-publish-fill-blank-validation, merge to master, run master validation, push origin/master, delete the short-lived branch, then record cleanup evidence."
+  nextRecommendedAction: "Select the next pending task from task-queue after confirming dependencies and risk gates; request human approval before any high-risk boundary such as database_migration, dependency_change, auth_permission_model, secret/env, external_service_config, deploy/cloud, or destructive data operation."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-08-publish-fill-blank-validation.md

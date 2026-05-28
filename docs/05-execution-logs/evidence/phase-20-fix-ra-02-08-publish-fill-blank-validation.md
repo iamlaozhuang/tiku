@@ -6,12 +6,12 @@
 
 ## Summary
 
-- Result: implementation validated on short-lived branch; merge/push/cleanup pending.
+- Result: closed and pushed to `origin/master`.
 - Scope: implementation.
 - Changed surfaces: `src/server/services/paper-draft-service.ts`, `src/server/services/paper-draft-service.test.ts`, task plan/evidence, project state, task queue.
 - Gates: task claim readiness passed; RED/GREEN regression passed; quality gate passed.
 - Forbidden scope (`forbiddenScope`): `src/db/schema/**`, `drizzle/**`, `.env.local`, `.env.example`, package/lockfile/dependency, staging/prod/cloud/deploy/real provider, `drizzle-kit push`, destructive data operation remain blocked.
-- Residual gaps (`residualGaps`): master merge, master validation, push, branch cleanup, and cleanup evidence are still pending.
+- Residual gaps (`residualGaps`): none for this task. Future tasks may still require separate high-risk approvals.
 
 ## Human Approval
 
@@ -47,6 +47,21 @@
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                              | pass   | Agent-system readiness passed.                                                                                                                   |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                                 | pass   | Naming convention scan completed.                                                                                                                |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                         | pass   | Inventory only; current changes are task-scoped and unstaged.                                                                                    |
+| `git commit -m "fix(paper): validate fill blank publish answers"`                                                                                                           | pass   | Implementation commit `2da8b98764bf259ee651ebead778ae86c4053091`.                                                                                |
+| `git merge --ff-only codex/phase-20-fix-ra-02-08-publish-fill-blank-validation`                                                                                             | pass   | Fast-forward merged into `master`.                                                                                                               |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                                                                     | pass   | Master validation: `lint`, `typecheck`, full `test:unit` (`135 passed`, `575 passed`), and `format:check` passed.                                |
+| `npm.cmd run test:e2e`                                                                                                                                                      | pass   | Master validation: `25 passed`.                                                                                                                  |
+| `npm.cmd run build`                                                                                                                                                         | pass   | Master validation build completed. Next.js reported local environment file presence; no `.env.local` values were read or recorded.               |
+| `git diff --check`                                                                                                                                                          | pass   | Master validation: no whitespace errors.                                                                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                              | pass   | Master validation readiness passed.                                                                                                              |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                                 | pass   | Master validation naming scan completed.                                                                                                         |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                         | pass   | Master was ahead of `origin/master` by only implementation commit `2da8b98` before push.                                                         |
+| `git push origin master`                                                                                                                                                    | pass   | Pushed `master` from `16ad04d` to `2da8b98`.                                                                                                     |
+| `git branch -d codex/phase-20-fix-ra-02-08-publish-fill-blank-validation`                                                                                                   | pass   | Deleted merged short-lived branch after a Windows ref-lock retry with escalation; no force deletion used.                                        |
+| `git status --short --branch`                                                                                                                                               | pass   | Final cleanup check before docs closeout: `## master...origin/master`.                                                                           |
+| `git rev-list --left-right --count master...origin/master`                                                                                                                  | pass   | Final cleanup check before docs closeout: `0 0`.                                                                                                 |
+| `git branch --list "codex/*"`                                                                                                                                               | pass   | Final cleanup check before docs closeout: no local `codex/*` branches.                                                                           |
+| `git worktree list --porcelain`                                                                                                                                             | pass   | Final cleanup check before docs closeout: only `D:/tiku` on `master`.                                                                            |
 
 ## TDD Log
 
@@ -83,4 +98,8 @@
 
 ## Closeout Status
 
-- Pending commit, merge to `master`, master validation, push, branch deletion, final clean/aligned verification, and cleanup docs commit.
+- Implementation commit: `2da8b98764bf259ee651ebead778ae86c4053091`.
+- Merged to `master`: fast-forward.
+- Pushed to `origin/master`: yes.
+- Deleted short-lived branch: yes.
+- Final cleanup docs commit/push: pending.
