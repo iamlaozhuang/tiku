@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-28T00:58:00-07:00"
+  updatedAt: "2026-05-28T01:02:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: e8af5b45cbc05d185db6ead79c5c6d5040c09970
-  lastKnownOriginMasterSha: e8af5b45cbc05d185db6ead79c5c6d5040c09970
+  lastKnownMasterSha: e5f37282870bfc2909ef467fe5861a0b2917c49a
+  lastKnownOriginMasterSha: e5f37282870bfc2909ef467fe5861a0b2917c49a
 currentTask:
-  id: phase-20-fix-ra-06-06-resource-enable-admin-evidence
-  status: closed
+  id: phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage
+  status: blocked
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-06-06-resource-enable-admin-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-06-resource-enable-admin-evidence.md
-  branch: null
-  commitSha: e8af5b45cbc05d185db6ead79c5c6d5040c09970
+  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage.md
+  branch: codex/phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "RA-06-06 is merged, pushed, and cleaned up; remaining pending tasks require high-risk approval or are not executable as low-risk work."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-06-resource-enable-admin-evidence.md
+  nextRecommendedAction: "RA-06-01 is blocked on high-risk auth/database concurrency approval; no remaining dependency-ready pending task is executable as low-risk work."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage.md

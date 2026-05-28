@@ -12405,7 +12405,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage.md
-    status: pending
+    status: blocked
     retryCount: 0
   - id: phase-20-fix-ra-06-02-user-management-role-detail-alignment
     title: Phase 20 Fix RA-06-02 User Management Role Detail Alignment
