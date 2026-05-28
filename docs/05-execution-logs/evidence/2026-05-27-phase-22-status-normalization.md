@@ -65,3 +65,18 @@
 - Files changed are limited to `project-state.yaml`, `task-queue.yaml`, this task plan, this evidence file, and two historical evidence text corrections.
 - No high-risk gate was triggered; all long-lived blocked gates remain blocked.
 - Commit, merge, push, and cleanup status will be recorded in the closeout section after those operations complete.
+
+## Closeout Status
+
+- implementationCommit: `a96b2080c84e7b1f2711f4624d95067cca05b6ef` (`docs(agent): normalize phase 22 task statuses`).
+- merge: `abcb43ad71e1e92a8a0aa56e1ca0409bfd1e2ba4` (`merge: phase 22 status normalization`) on `master`.
+- post-merge master validation:
+  - `git status --short --branch` - pass; `## master...origin/master [ahead 2]`.
+  - `git diff --check` - pass.
+  - changed-file Prettier check - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; only this task's docs/state files are ahead of `origin/master`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 556 tests), and `format:check` passed.
+- push: pending until this closeout evidence is committed.
+- cleanup: pending until `origin/master` is pushed and the already-merged branch is deleted.

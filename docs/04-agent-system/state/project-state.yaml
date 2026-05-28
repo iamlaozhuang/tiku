@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T20:41:41-07:00"
+  updatedAt: "2026-05-27T20:51:50-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: b6c9438384fd3863fe2c67e256a3edaee80e24a5
+  lastKnownMasterSha: abcb43ad71e1e92a8a0aa56e1ca0409bfd1e2ba4
   lastKnownOriginMasterSha: b6c9438384fd3863fe2c67e256a3edaee80e24a5
 currentTask:
   id: phase-22-status-normalization
-  status: validated_pending_commit
+  status: post_merge_validated_pending_push_cleanup
   sourceStory: user-request-2026-05-27-phase-22-status-normalization
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-22-status-normalization.md
   evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-22-status-normalization.md
   branch: codex/phase-22-status-normalization
-  commitSha: null
+  commitSha: a96b2080c84e7b1f2711f4624d95067cca05b6ef
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit docs-only phase-22-status-normalization, merge to master, push origin/master, delete the short-lived branch, and record cleanup evidence. After cleanup, continue with the next pending low-risk Phase 22 task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
+  nextRecommendedAction: "Commit phase-22-status-normalization closeout evidence, push origin/master, delete the already-merged short-lived branch, and record cleanup evidence. After cleanup, continue with the next pending low-risk Phase 22 task; skip tasks gated by database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation unless approved."
   lastSummaryPath: docs/05-execution-logs/evidence/2026-05-27-phase-22-status-normalization.md
