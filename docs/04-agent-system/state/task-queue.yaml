@@ -10859,7 +10859,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-14-auth-expiry-reminder.md
-    status: pushed
+    status: closed
     retryCount: 0
   - id: phase-18-audit-ra-02-question-paper-content
     title: Phase 18 Audit RA-02 Question Paper And Content
@@ -10985,7 +10985,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-01-student-home-scope-guidance.md
-    status: pushed
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-03-02-practice-objective-ai-explanation
     title: Phase 20 Fix RA-03-02 Practice Objective AI Explanation
@@ -11270,7 +11270,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-08-mock-exam-record-list.md
-    status: pushed
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-03-09-mistake-book-completion
     title: Phase 20 Fix RA-03-09 Mistake Book Completion
@@ -11311,7 +11311,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-09-mistake-book-completion.md
-    status: done
+    status: closed
     retryCount: 0
   - id: phase-18-audit-ra-04-ai-scoring-explanation-hint-model
     title: Phase 18 Audit RA-04 AI Scoring Explanation Hint And Model
@@ -11480,7 +11480,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-03-scoring-progress-page.md
-    status: done
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-04-04-practice-ai-explanation-triggers
     title: Phase 20 Fix RA-04-04 Practice AI Explanation Triggers
@@ -12189,7 +12189,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-04-markdown-chapter-review.md
-    status: done
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-05-05-resource-enable-restore-state
     title: Phase 20 Fix RA-05-05 Resource Enable Restore State
