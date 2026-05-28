@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-28T00:38:00-07:00"
+  updatedAt: "2026-05-28T00:49:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 8bf9af9c8aafb0b6ece2d5e5e708574798b8d1bc
-  lastKnownOriginMasterSha: 8bf9af9c8aafb0b6ece2d5e5e708574798b8d1bc
+  lastKnownMasterSha: 2d7ae296b35890514aec7c01f785c3f8e9879ed5
+  lastKnownOriginMasterSha: 2d7ae296b35890514aec7c01f785c3f8e9879ed5
 currentTask:
-  id: phase-20-fix-ra-05-05-resource-enable-restore-state
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-05-05-resource-enable-restore-state.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-05-resource-enable-restore-state.md
-  branch: null
-  commitSha: 8bf9af9c8aafb0b6ece2d5e5e708574798b8d1bc
+  id: phase-20-fix-ra-06-06-resource-enable-admin-evidence
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-06-06-resource-enable-admin-evidence.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-06-resource-enable-admin-evidence.md
+  branch: codex/phase-20-fix-ra-06-06-resource-enable-admin-evidence
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "RA-05-05 is merged, pushed, and cleaned up; claim the next eligible low-risk pending task after verifying master remains clean/aligned and the task preflight passes."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-05-resource-enable-restore-state.md
+  nextRecommendedAction: "Commit RA-06-06 implementation, merge to master, run post-merge validation, push origin/master, then clean up the short-lived branch."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-06-resource-enable-admin-evidence.md

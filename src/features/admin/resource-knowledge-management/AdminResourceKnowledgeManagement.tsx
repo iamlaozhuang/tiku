@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
+  CheckCircle2,
   DatabaseZap,
   Download,
   FileText,
@@ -108,6 +109,15 @@ type MarkdownReviewState =
     };
 
 type DisableState =
+  | {
+      status: "idle";
+    }
+  | {
+      resource: AdminResourceOpsSummaryDto;
+      status: "confirming" | "submitting";
+    };
+
+type EnableState =
   | {
       status: "idle";
     }
@@ -372,6 +382,23 @@ async function postLocalResourceDisable(
     : null;
 }
 
+async function postLocalResourceEnable(
+  resourcePublicId: string,
+  sessionToken: string,
+): Promise<AdminResourceOpsSummaryDto | null> {
+  const response = await fetch(`/api/v1/resources/${resourcePublicId}/enable`, {
+    headers: createAdminAuthHeaders(sessionToken),
+    method: "POST",
+  });
+  const payload = (await response.json()) as ApiResponse<{
+    resource: AdminResourceOpsSummaryDto;
+  } | null>;
+
+  return payload.code === 0 && payload.data !== null
+    ? payload.data.resource
+    : null;
+}
+
 function useResourceData() {
   const [loadState, setLoadState] = useState<ResourceLoadState>("loading");
   const [resources, setResources] = useState<AdminResourceOpsSummaryDto[]>([]);
@@ -454,6 +481,9 @@ export function AdminResourceKnowledgeManagement() {
     status: "idle",
   });
   const [disableState, setDisableState] = useState<DisableState>({
+    status: "idle",
+  });
+  const [enableState, setEnableState] = useState<EnableState>({
     status: "idle",
   });
   const [markdownReviewState, setMarkdownReviewState] =
@@ -806,6 +836,62 @@ export function AdminResourceKnowledgeManagement() {
     }
   }
 
+  async function handleConfirmEnable() {
+    if (enableState.status !== "confirming") {
+      return;
+    }
+
+    const sessionToken = getStoredSessionToken();
+
+    if (
+      sessionToken === null ||
+      !isSafePublicId(enableState.resource.publicId)
+    ) {
+      setEnableState({ status: "idle" });
+      setToastMessage({
+        message: "资源 publicId 异常，请刷新后重试",
+        tone: "error",
+      });
+      return;
+    }
+
+    setEnableState({ resource: enableState.resource, status: "submitting" });
+
+    try {
+      const enabledResource = await postLocalResourceEnable(
+        enableState.resource.publicId,
+        sessionToken,
+      );
+
+      if (enabledResource === null) {
+        setToastMessage({
+          message: "资源启用失败",
+          tone: "error",
+        });
+        return;
+      }
+
+      setResources((currentResources) =>
+        currentResources.map((resource) =>
+          resource.publicId === enabledResource.publicId
+            ? enabledResource
+            : resource,
+        ),
+      );
+      setToastMessage({
+        message: "资源已启用",
+        tone: "success",
+      });
+    } catch {
+      setToastMessage({
+        message: "资源启用失败",
+        tone: "error",
+      });
+    } finally {
+      setEnableState({ status: "idle" });
+    }
+  }
+
   if (loadState === "loading") {
     return <AdminLoadingState label="正在加载资源与知识库" />;
   }
@@ -947,6 +1033,10 @@ export function AdminResourceKnowledgeManagement() {
             setToastMessage(null);
             setDisableState({ resource, status: "confirming" });
           }}
+          onRequestEnable={(resource) => {
+            setToastMessage(null);
+            setEnableState({ resource, status: "confirming" });
+          }}
           onRequestMarkdownReview={(resource) => {
             setToastMessage(null);
             void handleOpenMarkdownReview(resource);
@@ -983,6 +1073,16 @@ export function AdminResourceKnowledgeManagement() {
           resource={disableState.resource}
           onCancel={() => setDisableState({ status: "idle" })}
           onConfirm={handleConfirmDisable}
+        />
+      ) : null}
+
+      {enableState.status === "confirming" ||
+      enableState.status === "submitting" ? (
+        <EnableConfirmationDialog
+          isSubmitting={enableState.status === "submitting"}
+          resource={enableState.resource}
+          onCancel={() => setEnableState({ status: "idle" })}
+          onConfirm={handleConfirmEnable}
         />
       ) : null}
 
@@ -1145,12 +1245,14 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
 
 function ResourceList({
   onRequestDisable,
+  onRequestEnable,
   onRequestMarkdownReview,
   onRequestPublish,
   onRequestRebuild,
   rows,
 }: {
   onRequestDisable: (resource: AdminResourceOpsSummaryDto) => void;
+  onRequestEnable: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestMarkdownReview: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestPublish: (resource: AdminResourceOpsSummaryDto) => void;
   onRequestRebuild: (resource: AdminResourceOpsSummaryDto) => void;
@@ -1251,7 +1353,16 @@ function ResourceList({
                   </>
                 )}
               </Button>
-              {resource.resourceStatus === "disabled" ? null : (
+              {resource.resourceStatus === "disabled" ? (
+                <Button
+                  disabled={!isSafePublicId(resource.publicId)}
+                  variant="outline"
+                  onClick={() => onRequestEnable(resource)}
+                >
+                  <CheckCircle2 aria-hidden="true" data-icon="inline-start" />
+                  启用资源
+                </Button>
+              ) : (
                 <Button
                   disabled={!isSafePublicId(resource.publicId)}
                   variant="destructive"
@@ -1405,6 +1516,43 @@ function DisableConfirmationDialog({
             onClick={onConfirm}
           >
             确认停用
+          </Button>
+          <Button disabled={isSubmitting} variant="outline" onClick={onCancel}>
+            取消
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EnableConfirmationDialog({
+  isSubmitting,
+  onCancel,
+  onConfirm,
+  resource,
+}: {
+  isSubmitting: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+  resource: AdminResourceOpsSummaryDto;
+}) {
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <h2 className="text-text-primary text-base font-semibold">
+          确认启用{resource.title}？
+        </h2>
+        <p className="text-text-secondary text-sm">
+          启用后该资源将恢复到停用前的本地可用状态。
+        </p>
+        <div className="flex gap-2">
+          <Button disabled={isSubmitting} onClick={onConfirm}>
+            确认启用
           </Button>
           <Button disabled={isSubmitting} variant="outline" onClick={onCancel}>
             取消

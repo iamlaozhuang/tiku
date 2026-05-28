@@ -401,6 +401,24 @@ function mockResourceFetch(payload: unknown = resourcePayload) {
         });
       }
 
+      if (
+        path === "/api/v1/resources/resource-public-001/enable" &&
+        init?.method === "POST"
+      ) {
+        return createJsonResponse({
+          code: 0,
+          message: "ok",
+          data: {
+            resource: {
+              ...resourcePayload.data.resources[0],
+              resourceStatus: "rag_ready",
+              isVectorStale: false,
+              updatedAt: "2026-05-20T15:00:00.000Z",
+            },
+          },
+        });
+      }
+
       return createJsonResponse({
         code: 404001,
         message: "missing",
@@ -1073,6 +1091,49 @@ describe("admin content and knowledge ops baseline", () => {
         method: "POST",
       }),
     );
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
+    expect(document.body.textContent).not.toContain("objectStoragePath");
+  });
+
+  it("enables a disabled local resource through the protected resource action", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockResourceFetch({
+      ...resourcePayload,
+      data: {
+        resources: [
+          {
+            ...resourcePayload.data.resources[0],
+            resourceStatus: "disabled",
+            isVectorStale: false,
+          },
+        ],
+      },
+    });
+
+    render(createElement(AdminResourceKnowledgeManagement));
+
+    const disabledResource = await screen.findByTestId(
+      "resource-row-resource-public-001",
+    );
+
+    expect(within(disabledResource).getByText("已停用")).toBeInTheDocument();
+    fireEvent.click(
+      within(disabledResource).getByRole("button", { name: "启用资源" }),
+    );
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(
+      "确认启用营销知识库讲义？",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确认启用" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("资源已启用");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/resources/resource-public-001/enable",
+      expect.objectContaining({
+        headers: { authorization: "Bearer unit-test-admin-token" },
+        method: "POST",
+      }),
+    );
+    expect(within(disabledResource).getByText("RAG 可用")).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(document.body.textContent).not.toContain("objectStoragePath");
   });
