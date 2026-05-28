@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-28T02:32:09-07:00"
+  updatedAt: "2026-05-28T02:57:42-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 78ebfac5ed0387fb5e0feca3129a1383ca6ef2be
-  lastKnownOriginMasterSha: 78ebfac5ed0387fb5e0feca3129a1383ca6ef2be
+  lastKnownMasterSha: 7f87d3a2ad6e111c6d24e87177de80a2abe3e798
+  lastKnownOriginMasterSha: 7f87d3a2ad6e111c6d24e87177de80a2abe3e798
 currentTask:
   id: phase-20-fix-ra-02-03-question-knowledge-tag-filters
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-02-question-paper-content.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-02-03-question-knowledge-tag-filters.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-03-question-knowledge-tag-filters.md
-  branch: codex/phase-20-fix-ra-02-03-question-knowledge-tag-filters
-  commitSha: null
+  branch: null
+  commitSha: 7f87d3a2ad6e111c6d24e87177de80a2abe3e798
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Implement phase-20-fix-ra-02-03-question-knowledge-tag-filters using existing question_knowledge_node/question_tag tables only; stop if new schema or migration is required."
+  nextRecommendedAction: "Phase 20 RA-02-03 is closed and pushed. Next ready Phase 20 items should be selected one at a time; tasks with database_migration, auth_permission_model, secret_or_env_change, external_service_config, dependency_change, deploy/cloud, or destructive data operation gates still require explicit human approval before implementation."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-03-question-knowledge-tag-filters.md

@@ -90,4 +90,21 @@
 
 ## Closeout Status
 
-- Pending.
+- Implementation commit: `7f87d3a2ad6e111c6d24e87177de80a2abe3e798` (`fix(question): filter by knowledge tags`).
+- Merge: fast-forwarded `master` from `78ebfac` to `7f87d3a`.
+- Post-merge master validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass (`lint`, `typecheck`, `test:unit` 135 files/567 tests, `format:check`).
+  - `npm.cmd run test:e2e`: pass (25 tests).
+  - `npm.cmd run build`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass.
+  - `git diff --check`: pass.
+- Push: `git push origin master` succeeded (`78ebfac..7f87d3a`).
+- Cleanup: deleted merged local branch `codex/phase-20-fix-ra-02-03-question-knowledge-tag-filters`.
+- Final repository check after implementation push:
+  - `git status --short --branch`: `## master...origin/master`.
+  - `git rev-list --left-right --count master...origin/master`: `0 0`.
+  - `git branch --list`: only `master`.
+  - `git worktree list`: only `D:/tiku`.
+- Result: closed; cleanup docs/state commit remains separate from the implementation commit.
