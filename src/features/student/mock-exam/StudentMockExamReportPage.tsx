@@ -66,6 +66,57 @@ type StudentMockExamFixture = {
   examReportPublicId: string;
 };
 
+type MockExamCachePayload = {
+  cachedAt: string;
+  mockExam: MockExamDto;
+};
+
+const mockExamCacheStorageKeyPrefix = "tiku.mockExam.cache.";
+
+function createMockExamCacheStorageKey(input: {
+  paperPublicId?: string;
+  mockExamPublicId: string;
+}): string {
+  return `${mockExamCacheStorageKeyPrefix}${
+    input.paperPublicId ?? input.mockExamPublicId
+  }`;
+}
+
+function readCachedMockExam(cacheStorageKey: string): MockExamDto | null {
+  try {
+    const cachedValue = localStorage.getItem(cacheStorageKey);
+
+    if (cachedValue === null) {
+      return null;
+    }
+
+    const parsedValue = JSON.parse(
+      cachedValue,
+    ) as Partial<MockExamCachePayload>;
+
+    return parsedValue.mockExam === undefined ? null : parsedValue.mockExam;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedMockExam(
+  cacheStorageKey: string,
+  mockExam: MockExamDto,
+): void {
+  try {
+    localStorage.setItem(
+      cacheStorageKey,
+      JSON.stringify({
+        cachedAt: new Date().toISOString(),
+        mockExam,
+      } satisfies MockExamCachePayload),
+    );
+  } catch {
+    // Local cache is a recovery supplement; runtime loading must not depend on it.
+  }
+}
+
 type MockExamQuestionType =
   | "single_choice"
   | "multi_choice"
@@ -922,6 +973,7 @@ export function StudentMockExamPage({
     failedScoringCount: number | null;
     completedReportPublicId: string | null;
   } | null>(null);
+  const [isOfflineRecovered, setIsOfflineRecovered] = useState(false);
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -932,6 +984,10 @@ export function StudentMockExamPage({
 
     async function loadMockExam() {
       const token = getStoredStudentSessionToken();
+      const cacheStorageKey = createMockExamCacheStorageKey({
+        paperPublicId,
+        mockExamPublicId,
+      });
 
       if (token === null) {
         if (isActive) {
@@ -981,9 +1037,25 @@ export function StudentMockExamPage({
             examReportPublicId: "",
           },
         ]);
+        writeCachedMockExam(cacheStorageKey, mockExamPayload.data.mockExam);
+        setIsOfflineRecovered(false);
         setRuntimeState("ready");
       } catch {
         if (isActive) {
+          const cachedMockExam = readCachedMockExam(cacheStorageKey);
+
+          if (cachedMockExam !== null) {
+            setRuntimeMockExams([
+              {
+                mockExam: cachedMockExam,
+                examReportPublicId: "",
+              },
+            ]);
+            setIsOfflineRecovered(true);
+            setRuntimeState("ready");
+            return;
+          }
+
           setRuntimeState("error");
         }
       }
@@ -1464,6 +1536,15 @@ export function StudentMockExamPage({
           <Clock3 className="size-5" aria-hidden="true" />
         </div>
       </div>
+
+      {isOfflineRecovered ? (
+        <div
+          data-testid="mock-exam-offline-recovery"
+          className="border-border bg-background text-text-secondary rounded-lg border px-3 py-2 text-sm leading-6"
+        >
+          Offline recovery: showing cached mock exam.
+        </div>
+      ) : null}
 
       <div className="bg-surface ring-border grid grid-cols-3 gap-2 rounded-xl p-3 text-center shadow-sm ring-1">
         <div>

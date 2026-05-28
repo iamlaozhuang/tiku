@@ -429,6 +429,49 @@ describe("StudentMockExamPage", () => {
     expect(document.body.textContent).not.toContain("unit-test-session-token");
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    const cachedMockExam = localStorage.getItem(
+      "tiku.mockExam.cache.paper-content-published-001",
+    );
+
+    expect(cachedMockExam).toContain("mock-exam-marketing-theory-001");
+    expect(cachedMockExam).not.toContain("unit-test-session-token");
+  });
+
+  it("recovers a runtime mock exam from local cache when the network load fails", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    localStorage.setItem(
+      "tiku.mockExam.cache.paper-content-published-001",
+      JSON.stringify({
+        cachedAt: "2026-05-23T00:00:00.000Z",
+        mockExam: {
+          ...studentMockExamFixture.mockExams[0].mockExam,
+          paperPublicId: "paper-content-published-001",
+        },
+      }),
+    );
+    const fetchMock = vi.fn(async () => {
+      throw new Error("offline");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    type RuntimeMockExamProps = Parameters<typeof StudentMockExamPage>[0] & {
+      paperPublicId: string;
+    };
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      } satisfies RuntimeMockExamProps),
+    );
+
+    expect(
+      await screen.findByTestId("mock-exam-offline-recovery"),
+    ).toHaveTextContent("Offline recovery");
+    expect(
+      screen.getByTestId("mock-exam-surface-mock-exam-marketing-theory-001"),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   });
 
   it("shows the scoring progress surface after runtime submit returns a scoring mock exam", async () => {
