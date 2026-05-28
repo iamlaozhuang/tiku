@@ -474,6 +474,133 @@ describe("StudentMockExamPage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   });
 
+  it("queues failed runtime mock answer saves and retries them without exposing the session token", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const mockExam = {
+      ...studentMockExamFixture.mockExams[0].mockExam,
+      paperPublicId: "paper-content-published-001",
+    };
+    let saveAttemptCount = 0;
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        if (String(url) === "/api/v1/mock-exams") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: { mockExam },
+            }),
+          };
+        }
+
+        if (
+          String(url) ===
+          "/api/v1/mock-exams/mock-exam-marketing-theory-001/answers"
+        ) {
+          saveAttemptCount += 1;
+
+          if (saveAttemptCount === 1) {
+            throw new Error("offline");
+          }
+
+          expect(JSON.parse(String(init?.body))).toMatchObject({
+            paperQuestionPublicId: "paper-question-mock-marketing-001",
+            selectedLabels: ["A"],
+            textAnswer: null,
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              code: 0,
+              message: "ok",
+              data: {
+                answerRecord: {
+                  publicId: "answer-record-runtime-retry-001",
+                  examMode: "mock_exam",
+                  paperQuestionPublicId: "paper-question-mock-marketing-001",
+                  questionPublicId: "question-mock-marketing-001",
+                  answerSnapshot: {
+                    selectedLabels: ["A"],
+                    textAnswer: null,
+                    savedFromClientAt: "2026-05-23T00:00:00.000Z",
+                  },
+                  answerRecordStatus: "saved",
+                  isCorrect: null,
+                  score: null,
+                  maxScore: "2.0",
+                  answeredAt: "2026-05-23T00:00:00.000Z",
+                  submittedAt: null,
+                },
+              },
+            }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 404,
+          json: async () => ({
+            code: 404001,
+            message: "missing",
+            data: null,
+          }),
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    type RuntimeMockExamProps = Parameters<typeof StudentMockExamPage>[0] & {
+      paperPublicId: string;
+    };
+
+    render(
+      createElement(StudentMockExamPage, {
+        paperPublicId: "paper-content-published-001",
+      } satisfies RuntimeMockExamProps),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /理论模考卷 A/ }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "A. 市场细分" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存本题作答" }));
+
+    const retrySurface = await screen.findByTestId(
+      "mock-exam-answer-save-retry",
+    );
+
+    expect(retrySurface).toHaveTextContent("1 题待重新保存");
+
+    const queuedAnswer = localStorage.getItem(
+      "tiku.mockExam.answerQueue.mock-exam-marketing-theory-001",
+    );
+
+    expect(queuedAnswer).toContain("paper-question-mock-marketing-001");
+    expect(queuedAnswer).not.toContain("unit-test-session-token");
+
+    fireEvent.click(screen.getByRole("button", { name: "重试保存" }));
+
+    await waitFor(() =>
+      expect(screen.queryByTestId("mock-exam-answer-save-retry")).toBeNull(),
+    );
+    expect(
+      localStorage.getItem(
+        "tiku.mockExam.answerQueue.mock-exam-marketing-theory-001",
+      ),
+    ).toBeNull();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(saveAttemptCount).toBe(2);
+  });
+
   it("shows the scoring progress surface after runtime submit returns a scoring mock exam", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const mockExam = {

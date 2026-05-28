@@ -71,7 +71,22 @@ type MockExamCachePayload = {
   mockExam: MockExamDto;
 };
 
+type MockExamPendingAnswer = {
+  mockExamPublicId: string;
+  paperQuestionPublicId: string;
+  selectedLabels: string[];
+  textAnswer: string | null;
+  savedFromClientAt: string;
+  queuedAt: string;
+};
+
+type MockExamPendingAnswerQueuePayload = {
+  queuedAt: string;
+  answers: Record<string, MockExamPendingAnswer>;
+};
+
 const mockExamCacheStorageKeyPrefix = "tiku.mockExam.cache.";
+const mockExamAnswerQueueStorageKeyPrefix = "tiku.mockExam.answerQueue.";
 
 function createMockExamCacheStorageKey(input: {
   paperPublicId?: string;
@@ -114,6 +129,57 @@ function writeCachedMockExam(
     );
   } catch {
     // Local cache is a recovery supplement; runtime loading must not depend on it.
+  }
+}
+
+function createMockExamAnswerQueueStorageKey(mockExamPublicId: string): string {
+  return `${mockExamAnswerQueueStorageKeyPrefix}${mockExamPublicId}`;
+}
+
+function readPendingMockExamAnswers(
+  mockExamPublicId: string,
+): Record<string, MockExamPendingAnswer> {
+  try {
+    const queueStorageKey =
+      createMockExamAnswerQueueStorageKey(mockExamPublicId);
+    const queuedValue = localStorage.getItem(queueStorageKey);
+
+    if (queuedValue === null) {
+      return {};
+    }
+
+    const parsedValue = JSON.parse(
+      queuedValue,
+    ) as Partial<MockExamPendingAnswerQueuePayload>;
+
+    return parsedValue.answers ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function writePendingMockExamAnswers(
+  mockExamPublicId: string,
+  answers: Record<string, MockExamPendingAnswer>,
+): void {
+  const queueStorageKey = createMockExamAnswerQueueStorageKey(mockExamPublicId);
+  const answerEntries = Object.entries(answers);
+
+  try {
+    if (answerEntries.length === 0) {
+      localStorage.removeItem(queueStorageKey);
+      return;
+    }
+
+    localStorage.setItem(
+      queueStorageKey,
+      JSON.stringify({
+        queuedAt: new Date().toISOString(),
+        answers: Object.fromEntries(answerEntries),
+      } satisfies MockExamPendingAnswerQueuePayload),
+    );
+  } catch {
+    // Pending answer sync must not make the mock exam page unusable.
   }
 }
 
@@ -962,6 +1028,11 @@ export function StudentMockExamPage({
   const [isSubmitConfirmationOpen, setIsSubmitConfirmationOpen] =
     useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [pendingAnswerByQuestion, setPendingAnswerByQuestion] = useState<
+    Record<string, MockExamPendingAnswer>
+  >({});
+  const [isRetryingPendingAnswers, setIsRetryingPendingAnswers] =
+    useState(false);
   const [runtimeExamReportPublicId, setRuntimeExamReportPublicId] = useState<
     string | null
   >(null);
@@ -974,6 +1045,7 @@ export function StudentMockExamPage({
     completedReportPublicId: string | null;
   } | null>(null);
   const [isOfflineRecovered, setIsOfflineRecovered] = useState(false);
+  const pendingAnswerCount = Object.keys(pendingAnswerByQuestion).length;
 
   useEffect(() => {
     if (!isRuntimeMode || state !== "ready") {
@@ -1037,6 +1109,9 @@ export function StudentMockExamPage({
             examReportPublicId: "",
           },
         ]);
+        setPendingAnswerByQuestion(
+          readPendingMockExamAnswers(mockExamPayload.data.mockExam.publicId),
+        );
         writeCachedMockExam(cacheStorageKey, mockExamPayload.data.mockExam);
         setIsOfflineRecovered(false);
         setRuntimeState("ready");
@@ -1051,6 +1126,9 @@ export function StudentMockExamPage({
                 examReportPublicId: "",
               },
             ]);
+            setPendingAnswerByQuestion(
+              readPendingMockExamAnswers(cachedMockExam.publicId),
+            );
             setIsOfflineRecovered(true);
             setRuntimeState("ready");
             return;
@@ -1168,6 +1246,67 @@ export function StudentMockExamPage({
     });
   }
 
+  function createPendingAnswer(
+    mockExamPublicId: string,
+    question: MockExamPaperQuestion,
+  ) {
+    return {
+      mockExamPublicId,
+      paperQuestionPublicId: question.paperQuestionPublicId,
+      selectedLabels: isOptionMockExamQuestion(question.questionType)
+        ? selectedLabels
+        : [],
+      textAnswer: isTextMockExamQuestion(question.questionType)
+        ? textAnswer
+        : null,
+      savedFromClientAt: new Date().toISOString(),
+      queuedAt: new Date().toISOString(),
+    } satisfies MockExamPendingAnswer;
+  }
+
+  async function sendMockExamAnswer(
+    token: string,
+    pendingAnswer: MockExamPendingAnswer,
+  ) {
+    return await fetchStudentApi<MockExamAnswerRecordResultDto>(
+      `/api/v1/mock-exams/${pendingAnswer.mockExamPublicId}/answers`,
+      token,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          paperQuestionPublicId: pendingAnswer.paperQuestionPublicId,
+          selectedLabels: pendingAnswer.selectedLabels,
+          textAnswer: pendingAnswer.textAnswer,
+          savedFromClientAt: pendingAnswer.savedFromClientAt,
+        }),
+      },
+    );
+  }
+
+  function markAnswerSaved(pendingAnswer: MockExamPendingAnswer) {
+    setSavedAnswerByQuestion({
+      ...savedAnswerByQuestion,
+      [pendingAnswer.paperQuestionPublicId]:
+        pendingAnswer.selectedLabels.length > 0
+          ? pendingAnswer.selectedLabels
+          : [pendingAnswer.textAnswer ?? ""],
+    });
+  }
+
+  function queuePendingAnswer(pendingAnswer: MockExamPendingAnswer) {
+    const nextPendingAnswerByQuestion = {
+      ...pendingAnswerByQuestion,
+      [pendingAnswer.paperQuestionPublicId]: pendingAnswer,
+    };
+
+    setPendingAnswerByQuestion(nextPendingAnswerByQuestion);
+    writePendingMockExamAnswers(
+      pendingAnswer.mockExamPublicId,
+      nextPendingAnswerByQuestion,
+    );
+    markAnswerSaved(pendingAnswer);
+  }
+
   async function handleSaveAnswer() {
     if (mockExam === null) {
       return;
@@ -1182,28 +1321,14 @@ export function StudentMockExamPage({
       }
 
       try {
-        const answerPayload =
-          await fetchStudentApi<MockExamAnswerRecordResultDto>(
-            `/api/v1/mock-exams/${mockExam.publicId}/answers`,
-            token,
-            {
-              method: "POST",
-              body: JSON.stringify({
-                paperQuestionPublicId: currentQuestion.paperQuestionPublicId,
-                selectedLabels: isOptionMockExamQuestion(
-                  currentQuestion.questionType,
-                )
-                  ? selectedLabels
-                  : [],
-                textAnswer: isTextMockExamQuestion(currentQuestion.questionType)
-                  ? textAnswer
-                  : null,
-                savedFromClientAt: new Date().toISOString(),
-              }),
-            },
-          );
+        const pendingAnswer = createPendingAnswer(
+          mockExam.publicId,
+          currentQuestion,
+        );
+        const answerPayload = await sendMockExamAnswer(token, pendingAnswer);
 
         if (isStudentUnauthorizedResponse(answerPayload)) {
+          setIsRetryingPendingAnswers(false);
           setRuntimeState("authorization_expired");
           return;
         }
@@ -1213,7 +1338,9 @@ export function StudentMockExamPage({
           return;
         }
       } catch {
-        setRuntimeState("error");
+        queuePendingAnswer(
+          createPendingAnswer(mockExam.publicId, currentQuestion),
+        );
         return;
       }
     }
@@ -1226,6 +1353,47 @@ export function StudentMockExamPage({
         ? selectedLabels
         : [textAnswer],
     });
+  }
+
+  async function handleRetryPendingAnswers() {
+    if (mockExam === null || pendingAnswerCount === 0) {
+      return;
+    }
+
+    const token = getStoredStudentSessionToken();
+
+    if (token === null) {
+      setRuntimeState("authorization_expired");
+      return;
+    }
+
+    setIsRetryingPendingAnswers(true);
+
+    const remainingPendingAnswers: Record<string, MockExamPendingAnswer> = {};
+
+    for (const pendingAnswer of Object.values(pendingAnswerByQuestion)) {
+      try {
+        const answerPayload = await sendMockExamAnswer(token, pendingAnswer);
+
+        if (isStudentUnauthorizedResponse(answerPayload)) {
+          setRuntimeState("authorization_expired");
+          return;
+        }
+
+        if (answerPayload.code !== 0 || answerPayload.data === null) {
+          remainingPendingAnswers[pendingAnswer.paperQuestionPublicId] =
+            pendingAnswer;
+          continue;
+        }
+      } catch {
+        remainingPendingAnswers[pendingAnswer.paperQuestionPublicId] =
+          pendingAnswer;
+      }
+    }
+
+    setPendingAnswerByQuestion(remainingPendingAnswers);
+    writePendingMockExamAnswers(mockExam.publicId, remainingPendingAnswers);
+    setIsRetryingPendingAnswers(false);
   }
 
   async function generateRuntimeExamReport(
@@ -1543,6 +1711,28 @@ export function StudentMockExamPage({
           className="border-border bg-background text-text-secondary rounded-lg border px-3 py-2 text-sm leading-6"
         >
           Offline recovery: showing cached mock exam.
+        </div>
+      ) : null}
+
+      {pendingAnswerCount > 0 ? (
+        <div
+          data-testid="mock-exam-answer-save-retry"
+          className="border-warning/30 bg-warning/10 text-text-primary grid gap-3 rounded-lg border px-3 py-3 text-sm leading-6"
+        >
+          <div>
+            <p className="font-medium">作答已暂存，等待同步</p>
+            <p className="text-text-secondary">
+              {pendingAnswerCount} 题待重新保存
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={isRetryingPendingAnswers}
+            onClick={() => void handleRetryPendingAnswers()}
+            className="bg-primary text-primary-foreground flex h-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isRetryingPendingAnswers ? "正在重试" : "重试保存"}
+          </button>
         </div>
       ) : null}
 
