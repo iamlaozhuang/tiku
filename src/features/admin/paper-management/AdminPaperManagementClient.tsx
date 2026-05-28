@@ -292,6 +292,24 @@ function countDisabledSourceQuestions(paper: PaperDraftDto): number {
   );
 }
 
+function createPaperLifecycleSummary(paper: AdminPaperOpsSummaryDto): string {
+  if (paper.paperStatus === "published") {
+    return "已发布；可下架终止未完成作答；可复制为新草稿";
+  }
+
+  if (paper.paperStatus === "archived") {
+    return "已下架；历史记录保留；可复制为新草稿";
+  }
+
+  const validationSummary = paper.publishValidationSummary;
+
+  if (validationSummary !== null && validationSummary.trim().length > 0) {
+    return `草稿可继续组卷；发布前需处理：${validationSummary}`;
+  }
+
+  return "草稿可继续组卷；发布前需完成发布校验";
+}
+
 function createPaperInput(values: PaperFormValues) {
   return {
     name: values.name,
@@ -1583,7 +1601,7 @@ function PaperList({
               </Button>
             </div>
 
-            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-3">
+            <div className="border-border mt-4 grid gap-4 border-t pt-4 xl:grid-cols-4">
               <InfoBlock
                 label="原始文件"
                 value={paper.sourceFileName ?? "暂未绑定"}
@@ -1591,6 +1609,10 @@ function PaperList({
               <InfoBlock
                 label="发布校验"
                 value={paper.publishValidationSummary ?? "暂无校验结果"}
+              />
+              <InfoBlock
+                label="生命周期闭环"
+                value={createPaperLifecycleSummary(paper)}
               />
               <InfoBlock
                 label="更新时间"

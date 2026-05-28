@@ -387,10 +387,18 @@ describe("AdminPaperManagement", () => {
       within(firstRow).getByText("2026 春季营销理论模拟卷"),
     ).toBeInTheDocument();
     expect(within(firstRow).getByText("模拟记录 18")).toBeInTheDocument();
+    expect(
+      within(firstRow).getByText(
+        "已发布；可下架终止未完成作答；可复制为新草稿",
+      ),
+    ).toBeInTheDocument();
 
     const draftRow = screen.getByTestId(
       "paper-row-paper-logistics-2026-practice",
     );
+    expect(
+      within(draftRow).getByText(/草稿可继续组卷；发布前需处理/),
+    ).toBeInTheDocument();
     expect(
       within(draftRow).getByRole("button", {
         name: "组卷 paper-logistics-2026-practice",
