@@ -11148,7 +11148,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-05-mock-exam-offline-recovery.md
-    status: validated
+    status: merged
     retryCount: 0
   - id: phase-20-fix-ra-03-06-mock-answer-save-retry
     title: Phase 20 Fix RA-03-06 Mock Answer Save Retry

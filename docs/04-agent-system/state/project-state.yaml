@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-27T17:13:00-07:00"
+  updatedAt: "2026-05-27T17:21:01-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 38aa6baea293cd23567e30bb09a49ec6f6cf3f22
+  lastKnownMasterSha: ba503ae1c54f2d34c9f851e9fb54a764d95a7401
   lastKnownOriginMasterSha: 38aa6baea293cd23567e30bb09a49ec6f6cf3f22
 currentTask:
   id: phase-20-fix-ra-03-05-mock-exam-offline-recovery
-  status: branch_validated_pending_commit
+  status: post_merge_validated_pending_push_cleanup
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-27-phase-20-fix-ra-03-05-mock-exam-offline-recovery.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-05-mock-exam-offline-recovery.md
   branch: codex/phase-20-fix-ra-03-05-mock-exam-offline-recovery
-  commitSha: null
+  commitSha: 7daa510b8cc4c8f5895bd9dd90fcec21b8ba1d65
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Finish phase-20-fix-ra-03-05-mock-exam-offline-recovery closeout: branch validation passed including focused UI, unit, e2e, build, readiness, Git inventory, diff, changed-file Prettier, naming, and quality gate. Commit the scoped task changes, merge into master, validate on master, push, and clean up the short-lived branch."
+  nextRecommendedAction: "Finish phase-20-fix-ra-03-05-mock-exam-offline-recovery closeout. Master is clean and ahead of origin/master by implementation and merge commits; post-merge validation passed including unit, e2e, build, readiness, Git inventory, diff, changed-file Prettier, naming, and quality gate. Commit closeout docs, push origin master, delete the merged short-lived branch, then record final cleanup evidence before claiming closure."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-05-mock-exam-offline-recovery.md

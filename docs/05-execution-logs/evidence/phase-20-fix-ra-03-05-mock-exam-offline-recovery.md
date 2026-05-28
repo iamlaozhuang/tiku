@@ -55,3 +55,20 @@
 | final focused UI test                                                                                                               | pass   | `tests/unit/student-mock-exam-report-ui.test.ts` passed after formatting, 22 tests.                           |
 | final changed-file Prettier check                                                                                                   | pass   | All changed Markdown/YAML/TS/TSX files use Prettier code style.                                               |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                             | pass   | `lint`, `typecheck`, `test:unit` (134 files, 556 tests), and `format:check` passed.                           |
+
+## Closeout Status
+
+- implementationCommit: `7daa510b8cc4c8f5895bd9dd90fcec21b8ba1d65` (`fix(mock): add offline exam recovery cache`).
+- merge: `ba503ae1c54f2d34c9f851e9fb54a764d95a7401` (`merge: phase-20 fix ra-03-05 mock exam offline recovery`) merged into local `master`.
+- post-merge master validation:
+  - `npm.cmd run test:unit` - pass, 134 test files and 556 tests.
+  - `npm.cmd run test:e2e` - pass, 25 Playwright tests.
+  - `npm.cmd run build` - pass. Framework log noted `.env.local` existence only, contents were not read.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master` - pass; `master` was clean and ahead of `origin/master` by implementation and merge commits.
+  - `git diff --check` - pass.
+  - post-merge changed-file Prettier check - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1` - pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1` - pass; `lint`, `typecheck`, `test:unit` (134 files, 556 tests), and `format:check` passed.
+- push: pending.
+- cleanup: pending.
