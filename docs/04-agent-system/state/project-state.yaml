@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-29T01:04:00-07:00"
+  updatedAt: "2026-05-29T01:19:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -39,13 +39,13 @@ repository:
   lastKnownMasterSha: 4bfae46b257cd55333149445993addb3ac14e1e4
   lastKnownOriginMasterSha: 4bfae46b257cd55333149445993addb3ac14e1e4
 currentTask:
-  id: phase-20-fix-ra-03-07-exam-report-analytics-learning-suggestion
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-03-student-experience.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-03-07-exam-report-analytics-learning-suggestion.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-07-exam-report-analytics-learning-suggestion.md
-  branch: null
-  commitSha: 4bfae46b257cd55333149445993addb3ac14e1e4
+  id: phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence
+  status: blocked
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-29-phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence.md
+  branch: codex/phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "phase-20-fix-ra-03-07-exam-report-analytics-learning-suggestion is implemented, merged, pushed, and cleaned up; claim the next eligible low-risk pending task after cleanup docs are committed and master is clean/aligned again."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-03-07-exam-report-analytics-learning-suggestion.md
+  nextRecommendedAction: "phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence is blocked by database_migration approval; commit and push blocked evidence, clean the branch, then skip to the next eligible low-risk pending task."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence.md
