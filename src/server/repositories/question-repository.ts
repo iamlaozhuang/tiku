@@ -24,6 +24,7 @@ import {
   tag,
 } from "@/db/schema";
 import type {
+  FillBlankAnswer,
   MultiChoiceRule,
   Profession,
   QuestionStatus,
@@ -78,6 +79,7 @@ export type QuestionAccessRow = {
   locked_at: Date | null;
   multi_choice_rule: MultiChoiceRule;
   scoring_method: ScoringMethod;
+  fill_blank_answers?: FillBlankAnswer[];
   material_id: number | null;
   material_public_id: string | null;
   question_options: QuestionOptionAccessRow[];
@@ -152,6 +154,7 @@ export function createPostgresQuestionRepository(
           locked_at: question.locked_at,
           multi_choice_rule: question.multi_choice_rule,
           scoring_method: question.scoring_method,
+          fill_blank_answers: question.fill_blank_answers,
           material_id: question.material_id,
           material_public_id: material.public_id,
           created_at: question.created_at,
@@ -195,6 +198,7 @@ export function createPostgresQuestionRepository(
             public_id: `question-${randomUUID()}`,
             question_type: input.questionType,
             scoring_method: input.scoringMethod,
+            fill_blank_answers: input.fillBlankAnswers,
             standard_answer_rich_text: input.standardAnswerRichText,
             stem_rich_text: input.stemRichText,
             subject: input.subject,
@@ -251,6 +255,7 @@ export function createPostgresQuestionRepository(
             profession: input.profession,
             question_type: input.questionType,
             scoring_method: input.scoringMethod,
+            fill_blank_answers: input.fillBlankAnswers,
             standard_answer_rich_text: input.standardAnswerRichText,
             status: input.status,
             stem_rich_text: input.stemRichText,
@@ -332,6 +337,7 @@ export function createPostgresQuestionRepository(
             public_id: `question-${randomUUID()}`,
             question_type: sourceQuestion.question_type,
             scoring_method: sourceQuestion.scoring_method,
+            fill_blank_answers: sourceQuestion.fill_blank_answers,
             standard_answer_rich_text: sourceQuestion.standard_answer_rich_text,
             status: "available",
             stem_rich_text: sourceQuestion.stem_rich_text,
@@ -495,6 +501,7 @@ async function findQuestionByPublicId(
       locked_at: question.locked_at,
       multi_choice_rule: question.multi_choice_rule,
       scoring_method: question.scoring_method,
+      fill_blank_answers: question.fill_blank_answers,
       material_id: question.material_id,
       material_public_id: material.public_id,
       created_at: question.created_at,

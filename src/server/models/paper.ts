@@ -18,6 +18,7 @@ import {
   questionOption,
   questionStatusValues,
   questionTypeValues,
+  type FillBlankAnswerValue,
   scoringMethodValues,
   scoringPoint,
   subjectValues,
@@ -47,6 +48,7 @@ export type PaperStatus = (typeof paperStatusValues)[number];
 export type MultiChoiceRule = (typeof multiChoiceRuleValues)[number];
 export type ScoringMethod = (typeof scoringMethodValues)[number];
 export type PaperAttachmentUsage = (typeof paperAttachmentUsageValues)[number];
+export type FillBlankAnswer = FillBlankAnswerValue;
 
 export type MaterialRow = InferSelectModel<typeof material>;
 export type NewMaterialRow = InferInsertModel<typeof material>;

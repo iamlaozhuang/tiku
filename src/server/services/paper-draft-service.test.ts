@@ -65,6 +65,45 @@ function createPaperQuestion(
   };
 }
 
+function createFillBlankPaperQuestion(
+  overrides: Partial<PaperQuestionAccessRow> = {},
+): PaperQuestionAccessRow {
+  return createPaperQuestion({
+    question_snapshot: {
+      questionPublicId: "question_fill_blank_public_123",
+      questionStatus: "available",
+      questionType: "fill_blank",
+      profession: "logistics",
+      level: 4,
+      subject: "skill",
+      stemRichText: "<p>客户分析应识别___和___。</p>",
+      questionOptions: [],
+      standardAnswerRichText: "<p>客户动机；消费频率</p>",
+      analysisRichText: "<p>逐空核对答案。</p>",
+      multiChoiceRule: "all_correct_only",
+      scoringMethod: "auto_match",
+      fillBlankAnswers: [
+        {
+          blankKey: "blank_1",
+          standardAnswers: ["客户动机", "购买动机"],
+          score: "1.0",
+          sortOrder: 1,
+        },
+        {
+          blankKey: "blank_2",
+          standardAnswers: ["消费频率"],
+          score: "1.0",
+          sortOrder: 2,
+        },
+      ],
+    } as PaperQuestionAccessRow["question_snapshot"],
+    source_question_public_id: "question_fill_blank_public_123",
+    score: "2.0",
+    scoring_points: [],
+    ...overrides,
+  });
+}
+
 function createPaper(
   overrides: Partial<PaperDraftAccessRow> = {},
 ): PaperDraftAccessRow {
@@ -772,6 +811,62 @@ describe("paper draft service", () => {
       message: "Paper publish validation failed.",
       data: null,
     });
+  });
+
+  it("validates fill_blank per-blank score totals before publish", async () => {
+    const publishedInputs: unknown[] = [];
+    const service = createPaperDraftService(
+      createRepository({
+        async findPaperByPublicId(publicId) {
+          return createPaper({
+            public_id: publicId,
+            total_score: "2.0",
+            paper_sections: [
+              {
+                id: 201,
+                title: "填空题",
+                description: null,
+                sort_order: 1,
+                total_score: "2.0",
+                paper_questions: [
+                  createFillBlankPaperQuestion({
+                    score: publicId === "fill_blank_mismatch" ? "3.0" : "2.0",
+                  }),
+                ],
+              },
+            ],
+            question_groups: [],
+          });
+        },
+        async publishPaper(input) {
+          publishedInputs.push(input);
+
+          return createPaper({
+            public_id: input.paperPublicId,
+            paper_status: "published",
+            published_at: new Date("2026-05-19T08:00:00.000Z"),
+          });
+        },
+      }),
+    );
+
+    await expect(service.publishPaper("fill_blank_mismatch")).resolves.toEqual({
+      code: 422204,
+      message: "Paper publish validation failed.",
+      data: null,
+    });
+
+    await expect(service.publishPaper("fill_blank_match")).resolves.toEqual(
+      expect.objectContaining({
+        code: 0,
+      }),
+    );
+    expect(publishedInputs).toEqual([
+      expect.objectContaining({
+        paperPublicId: "fill_blank_match",
+        sourceQuestionPublicIds: ["question_fill_blank_public_123"],
+      }),
+    ]);
   });
 
   it.each(["case_analysis", "calculation"] as const)(

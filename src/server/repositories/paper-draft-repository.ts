@@ -21,6 +21,7 @@ import type {
   QuestionSnapshotDto,
 } from "../contracts/paper-draft-contract";
 import type {
+  FillBlankAnswer,
   MultiChoiceRule,
   PaperStatus,
   PaperType,
@@ -201,6 +202,7 @@ type SourceQuestionSnapshotRow = {
   status: QuestionStatus;
   multi_choice_rule: MultiChoiceRule;
   scoring_method: ScoringMethod;
+  fill_blank_answers?: FillBlankAnswer[];
   material_id: number | null;
   material_public_id: string | null;
   material_title: string | null;
@@ -1017,6 +1019,7 @@ async function findSourceQuestionByPublicId(
       status: question.status,
       multi_choice_rule: question.multi_choice_rule,
       scoring_method: question.scoring_method,
+      fill_blank_answers: question.fill_blank_answers,
       material_id: question.material_id,
       material_public_id: material.public_id,
       material_title: material.title,
@@ -1061,6 +1064,7 @@ async function buildQuestionSnapshot(
     analysisRichText: sourceQuestion.analysis_rich_text,
     multiChoiceRule: sourceQuestion.multi_choice_rule,
     scoringMethod: sourceQuestion.scoring_method,
+    fillBlankAnswers: sourceQuestion.fill_blank_answers ?? [],
   };
 }
 

@@ -36,6 +36,13 @@
       "when": 1779957500156,
       "tag": "20260528013600_add_question_knowledge_tag_binding",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1779963600000,
+      "tag": "20260528032000_add_fill_blank_answers",
+      "breakpoints": true
     }
   ]
 }

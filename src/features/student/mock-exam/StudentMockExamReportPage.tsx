@@ -215,13 +215,22 @@ type ReportQuestionResult = {
   paperQuestionPublicId: string;
   questionPublicId: string;
   questionType: MockExamQuestionType | null;
+  scoringMethod: string | null;
   title: string;
   isCorrect: boolean | null;
   score: string | null;
   maxScore: string;
   selectedAnswer: string | null;
   standardAnswer: string | null;
+  fillBlankAnswers: FillBlankReportAnswer[];
   mistakeBookPublicId: string | null;
+};
+
+type FillBlankReportAnswer = {
+  blankKey: string;
+  standardAnswers: string[];
+  score: string;
+  sortOrder: number;
 };
 
 type ParsedReportSnapshot = {
@@ -255,6 +264,11 @@ const questionTypeLabels: Partial<Record<MockExamQuestionType, string>> = {
   short_answer: "简答题",
   single_choice: "单选题",
   true_false: "判断题",
+};
+
+const scoringMethodLabels: Record<string, string> = {
+  ai_scoring: "AI 评分",
+  auto_match: "自动匹配",
 };
 
 const emptyAnswerSelections: Record<string, string[]> = {};
@@ -495,6 +509,42 @@ function normalizeMockExamQuestionType(
     default:
       return null;
   }
+}
+
+function getFillBlankReportAnswers(value: unknown): FillBlankReportAnswer[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .flatMap((fillBlankAnswer): FillBlankReportAnswer[] => {
+      if (
+        !isRecord(fillBlankAnswer) ||
+        typeof fillBlankAnswer.blankKey !== "string" ||
+        !Array.isArray(fillBlankAnswer.standardAnswers) ||
+        typeof fillBlankAnswer.score !== "string" ||
+        typeof fillBlankAnswer.sortOrder !== "number"
+      ) {
+        return [];
+      }
+
+      const standardAnswers = fillBlankAnswer.standardAnswers.filter(
+        (standardAnswer): standardAnswer is string =>
+          typeof standardAnswer === "string" && standardAnswer.length > 0,
+      );
+
+      return standardAnswers.length === 0
+        ? []
+        : [
+            {
+              blankKey: fillBlankAnswer.blankKey,
+              standardAnswers,
+              score: fillBlankAnswer.score,
+              sortOrder: fillBlankAnswer.sortOrder,
+            },
+          ];
+    })
+    .sort((left, right) => left.sortOrder - right.sortOrder);
 }
 
 function isOptionMockExamQuestion(questionType: MockExamQuestionType): boolean {
@@ -841,12 +891,16 @@ function parseReportSnapshot(
             questionType: normalizeMockExamQuestionType(
               getStringField(questionResult, "questionType"),
             ),
+            scoringMethod: getStringField(questionResult, "scoringMethod"),
             title: questionResult.title,
             isCorrect: questionResult.isCorrect,
             score: questionResult.score,
             maxScore: questionResult.maxScore,
             selectedAnswer: questionResult.selectedAnswer,
             standardAnswer: questionResult.standardAnswer,
+            fillBlankAnswers: getFillBlankReportAnswers(
+              questionResult.fillBlankAnswers,
+            ),
             mistakeBookPublicId: questionResult.mistakeBookPublicId,
           },
         ];
@@ -2196,6 +2250,13 @@ export function StudentExamReportPage({
                     <p className="text-text-primary text-sm font-semibold">
                       {questionResult.title}
                     </p>
+                    {questionResult.scoringMethod === null ? null : (
+                      <p className="text-text-secondary text-xs">
+                        计分方式：
+                        {scoringMethodLabels[questionResult.scoringMethod] ??
+                          questionResult.scoringMethod}
+                      </p>
+                    )}
                   </div>
                   <p className="text-text-secondary text-xs">
                     {questionResult.score ?? "待评分"} /{" "}
@@ -2206,6 +2267,17 @@ export function StudentExamReportPage({
                   作答：{questionResult.selectedAnswer ?? "未作答"}；标准答案：
                   {questionResult.standardAnswer ?? "生成中"}
                 </p>
+                {questionResult.fillBlankAnswers.length === 0 ? null : (
+                  <ul className="text-text-secondary space-y-1 text-xs">
+                    {questionResult.fillBlankAnswers.map((fillBlankAnswer) => (
+                      <li key={fillBlankAnswer.blankKey}>
+                        {fillBlankAnswer.blankKey}：
+                        {fillBlankAnswer.standardAnswers.join(" / ")}（
+                        {fillBlankAnswer.score} 分）
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {questionResult.mistakeBookPublicId === null ? null : (
                   <p className="text-warning text-sm font-medium">
                     已加入错题本：{questionResult.mistakeBookPublicId}

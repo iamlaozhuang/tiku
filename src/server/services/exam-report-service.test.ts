@@ -438,6 +438,127 @@ describe("exam report service", () => {
     ]);
   });
 
+  it("keeps fill_blank scoring method and per-blank answers in report results", async () => {
+    const service = createExamReportService(
+      createRepository({
+        async findSubmittedMockExamByPublicId() {
+          return createMockExamRow({
+            paper_snapshot: {
+              paperPublicId: "paper_public_fill_blank",
+              name: "fill_blank_report_paper",
+              paperSections: [
+                {
+                  paperSectionTitle: "fill_blank paper_section",
+                  paperQuestions: [
+                    {
+                      paperQuestionPublicId: "paper_question_fill_blank_123",
+                      questionPublicId: "question_fill_blank_123",
+                      questionType: "fill_blank",
+                      title: "Fill blank per blank report",
+                      score: "2.0",
+                      scoringMethod: "auto_match",
+                      fillBlankAnswers: [
+                        {
+                          blankKey: "blank_1",
+                          standardAnswers: ["customer motive"],
+                          score: "1.0",
+                          sortOrder: 1,
+                        },
+                        {
+                          blankKey: "blank_2",
+                          standardAnswers: ["purchase frequency"],
+                          score: "1.0",
+                          sortOrder: 2,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            objective_score: "1.0",
+            total_score: "1.0",
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              ...createAnswerRecordRow(),
+              paper_question_public_id: "paper_question_fill_blank_123",
+              question_public_id: "question_fill_blank_123",
+              question_snapshot: {
+                questionType: "fill_blank",
+                scoringMethod: "auto_match",
+                fillBlankAnswers: [
+                  {
+                    blankKey: "blank_1",
+                    standardAnswers: ["customer motive"],
+                    score: "1.0",
+                    sortOrder: 1,
+                  },
+                  {
+                    blankKey: "blank_2",
+                    standardAnswers: ["purchase frequency"],
+                    score: "1.0",
+                    sortOrder: 2,
+                  },
+                ],
+              },
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "customer motive; wrong answer",
+                savedFromClientAt: null,
+              },
+              is_correct: false,
+              score: "1.0",
+              max_score: "2.0",
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.generateExamReport(userContext, {
+        mockExamPublicId: "mock_exam_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        examReport: {
+          reportSnapshot: {
+            questionResults: [
+              {
+                paperQuestionPublicId: "paper_question_fill_blank_123",
+                questionType: "fill_blank",
+                scoringMethod: "auto_match",
+                selectedAnswer: "customer motive; wrong answer",
+                standardAnswer:
+                  "blank_1: customer motive; blank_2: purchase frequency",
+                fillBlankAnswers: [
+                  {
+                    blankKey: "blank_1",
+                    standardAnswers: ["customer motive"],
+                    score: "1.0",
+                    sortOrder: 1,
+                  },
+                  {
+                    blankKey: "blank_2",
+                    standardAnswers: ["purchase frequency"],
+                    score: "1.0",
+                    sortOrder: 2,
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
   it("persists a redaction-safe learning suggestion snapshot after local retry", async () => {
     const capturedContexts: LearningSuggestionMockContext[] = [];
     const updateInputs: unknown[] = [];

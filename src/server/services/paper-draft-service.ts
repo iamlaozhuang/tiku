@@ -171,6 +171,12 @@ function isSubjectivePaperQuestion(
   );
 }
 
+function isFillBlankPaperQuestion(
+  paperQuestion: PaperQuestionAccessRow,
+): boolean {
+  return paperQuestion.question_snapshot.questionType === "fill_blank";
+}
+
 function listPaperQuestions(
   paperSections: PaperSectionAccessRow[],
 ): PaperQuestionAccessRow[] {
@@ -240,6 +246,25 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
 
     return sumHalfPoints(scoringPointScores) !== questionScore;
   });
+  const fillBlankScoreMismatch = paperQuestions.some((paperQuestion) => {
+    const questionScore = convertScoreToHalfPoints(paperQuestion.score);
+
+    if (
+      questionScore === null ||
+      !isFillBlankPaperQuestion(paperQuestion) ||
+      (paperQuestion.question_snapshot.fillBlankAnswers ?? []).length === 0
+    ) {
+      return false;
+    }
+
+    const fillBlankScores = (
+      paperQuestion.question_snapshot.fillBlankAnswers ?? []
+    ).map(
+      (fillBlankAnswer) => convertScoreToHalfPoints(fillBlankAnswer.score) ?? 0,
+    );
+
+    return sumHalfPoints(fillBlankScores) !== questionScore;
+  });
   const questionScoreTotal = sumHalfPoints(validQuestionScores);
   const issues: PaperPublishValidationIssueDto[] = [
     ...(missingQuestionScore
@@ -290,6 +315,15 @@ function validatePaperForPublish(paper: PaperDraftAccessRow): {
             code: "scoring_point_total_mismatch" as const,
             message:
               "Subjective scoring_point total must equal paper question score.",
+          },
+        ]
+      : []),
+    ...(fillBlankScoreMismatch
+      ? [
+          {
+            code: "fill_blank_score_total_mismatch" as const,
+            message:
+              "Fill_blank per-blank score total must equal paper question score.",
           },
         ]
       : []),

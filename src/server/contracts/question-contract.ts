@@ -1,4 +1,5 @@
 import type {
+  FillBlankAnswer,
   MultiChoiceRule,
   Profession,
   QuestionStatus,
@@ -20,6 +21,8 @@ export type ScoringPointDto = {
   sortOrder: number;
 };
 
+export type FillBlankAnswerDto = FillBlankAnswer;
+
 export type QuestionDto = {
   publicId: string;
   questionType: QuestionType;
@@ -37,6 +40,7 @@ export type QuestionDto = {
   materialPublicId: string | null;
   questionOptions: QuestionOptionDto[];
   scoringPoints: ScoringPointDto[];
+  fillBlankAnswers?: FillBlankAnswerDto[];
   knowledgeNodePublicIds: string[];
   tagPublicIds: string[];
   createdAt: string;

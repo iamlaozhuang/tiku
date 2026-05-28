@@ -22,6 +22,13 @@ export type NormalizedScoringPointInput = {
   sortOrder: number;
 };
 
+export type NormalizedFillBlankAnswerInput = {
+  blankKey: string;
+  standardAnswers: string[];
+  score: string;
+  sortOrder: number;
+};
+
 export type NormalizedCreateQuestionInput = {
   questionType: (typeof questionTypeValues)[number];
   profession: (typeof professionValues)[number];
@@ -35,6 +42,7 @@ export type NormalizedCreateQuestionInput = {
   materialPublicId: string | null;
   questionOptions: NormalizedQuestionOptionInput[];
   scoringPoints: NormalizedScoringPointInput[];
+  fillBlankAnswers: NormalizedFillBlankAnswerInput[];
   knowledgeNodePublicIds: string[];
   tagPublicIds: string[];
 };
@@ -121,6 +129,20 @@ function normalizePublicIdList(value: unknown): string[] | null {
   }
 
   return Array.from(new Set(publicIds as string[]));
+}
+
+function normalizeRequiredTextList(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length === 0) {
+    return null;
+  }
+
+  const texts = value.map((item) => normalizeRequiredText(item));
+
+  if (texts.some((text) => text === null)) {
+    return null;
+  }
+
+  return Array.from(new Set(texts as string[]));
 }
 
 function normalizePositiveInteger(value: unknown): number | null {
@@ -307,6 +329,51 @@ function normalizeScoringPoints(
     : (scoringPoints as NormalizedScoringPointInput[]);
 }
 
+function normalizeFillBlankAnswers(
+  value: unknown,
+): NormalizedFillBlankAnswerInput[] | null {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  const fillBlankAnswers = value.map((fillBlankAnswer) => {
+    if (!isRecord(fillBlankAnswer)) {
+      return null;
+    }
+
+    const blankKey = normalizeRequiredText(fillBlankAnswer.blankKey);
+    const standardAnswers = normalizeRequiredTextList(
+      fillBlankAnswer.standardAnswers,
+    );
+    const score = normalizeScore(fillBlankAnswer.score);
+    const sortOrder = normalizePositiveInteger(fillBlankAnswer.sortOrder);
+
+    if (
+      blankKey === null ||
+      standardAnswers === null ||
+      score === null ||
+      sortOrder === null
+    ) {
+      return null;
+    }
+
+    return {
+      blankKey,
+      standardAnswers,
+      score,
+      sortOrder,
+    };
+  });
+
+  return fillBlankAnswers.some((fillBlankAnswer) => fillBlankAnswer === null)
+    ? null
+    : (fillBlankAnswers as NormalizedFillBlankAnswerInput[]);
+}
+
 export function normalizeCreateQuestionInput(
   input: unknown,
 ): ValidationResult<NormalizedCreateQuestionInput> {
@@ -326,6 +393,7 @@ export function normalizeCreateQuestionInput(
   const materialPublicId = normalizeOptionalPublicId(input.materialPublicId);
   const questionOptions = normalizeQuestionOptions(input.questionOptions);
   const scoringPoints = normalizeScoringPoints(input.scoringPoints);
+  const fillBlankAnswers = normalizeFillBlankAnswers(input.fillBlankAnswers);
   const knowledgeNodePublicIds = normalizePublicIdList(
     input.knowledgeNodePublicIds,
   );
@@ -344,6 +412,7 @@ export function normalizeCreateQuestionInput(
     materialPublicId === undefined ||
     questionOptions === null ||
     scoringPoints === null ||
+    fillBlankAnswers === null ||
     knowledgeNodePublicIds === null ||
     tagPublicIds === null
   ) {
@@ -356,6 +425,17 @@ export function normalizeCreateQuestionInput(
   if (
     isSubjectiveTextQuestionType(input.questionType) &&
     questionOptions.length > 0
+  ) {
+    return {
+      success: false,
+      message: INVALID_QUESTION_INPUT_MESSAGE,
+    };
+  }
+
+  if (
+    fillBlankAnswers.length > 0 &&
+    (input.questionType !== "fill_blank" ||
+      input.scoringMethod !== "auto_match")
   ) {
     return {
       success: false,
@@ -378,6 +458,7 @@ export function normalizeCreateQuestionInput(
       materialPublicId,
       questionOptions,
       scoringPoints,
+      fillBlankAnswers,
       knowledgeNodePublicIds,
       tagPublicIds,
     },

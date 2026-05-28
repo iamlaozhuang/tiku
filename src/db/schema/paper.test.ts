@@ -4,6 +4,7 @@ import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
 
 import {
+  question,
   questionKnowledgeNode,
   questionTag,
   questionTypeValues,
@@ -73,6 +74,12 @@ describe("paper schema question_type enum", () => {
         "idx_question_tag_question_id",
         "idx_question_tag_tag_id",
       ]),
+    );
+  });
+
+  it("stores fill_blank per-blank answer scoring details on source questions", () => {
+    expect(getColumnNames(question)).toEqual(
+      expect.arrayContaining(["fill_blank_answers"]),
     );
   });
 });

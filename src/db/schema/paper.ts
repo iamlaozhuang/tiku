@@ -39,6 +39,13 @@ const adminIdColumn = (name: string) =>
 
 const scoreColumn = (name: string) => numeric(name, { precision: 8, scale: 1 });
 
+export type FillBlankAnswerValue = {
+  blankKey: string;
+  standardAnswers: string[];
+  score: string;
+  sortOrder: number;
+};
+
 export const subjectValues = ["theory", "skill"] as const;
 export const questionTypeValues = [
   "single_choice",
@@ -137,6 +144,10 @@ export const question = pgTable(
       .notNull(),
     scoring_method: scoringMethodEnum("scoring_method")
       .default("auto_match")
+      .notNull(),
+    fill_blank_answers: jsonb("fill_blank_answers")
+      .$type<FillBlankAnswerValue[]>()
+      .default([])
       .notNull(),
     material_id: bigint("material_id", { mode: "number" }).references(
       () => material.id,

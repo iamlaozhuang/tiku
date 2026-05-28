@@ -1,4 +1,5 @@
 import type {
+  FillBlankAnswer,
   MultiChoiceRule,
   PaperStatus,
   PaperType,
@@ -36,6 +37,7 @@ export type QuestionSnapshotDto = {
   analysisRichText: string;
   multiChoiceRule: MultiChoiceRule;
   scoringMethod: ScoringMethod;
+  fillBlankAnswers?: FillBlankAnswer[];
 };
 
 export type PaperScoringPointDto = {
@@ -110,6 +112,7 @@ export type PaperPublishValidationIssueDto = {
     | "paper_has_no_counting_question"
     | "empty_paper_section"
     | "scoring_point_total_mismatch"
+    | "fill_blank_score_total_mismatch"
     | "source_reference_unresolved";
   message: string;
 };

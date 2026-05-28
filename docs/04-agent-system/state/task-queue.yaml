@@ -10506,6 +10506,7 @@ tasks:
       - docs/05-execution-logs/task-plans/**
       - docs/05-execution-logs/evidence/**
       - docs/05-execution-logs/audits-reviews/**
+      - drizzle/**
       - src/**
       - tests/**
       - e2e/**
@@ -11819,7 +11820,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-02-question-paper-content
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-05-001. Per-blank scoring model work may require database/schema approval before implementation.
+    humanApproval: Registered by Phase 18 RA-02 audit finding F-RA-02-05-001. User approved database_migration and local ai_runtime implementation on 2026-05-28. Approval allows local schema/migration files only if required for this task, plus task-scoped src/tests/e2e/docs changes. No .env.local, .env.example, package/lockfile/dependency, staging/prod/cloud/deploy/real provider, destructive data operation, or drizzle-kit push is approved.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -11837,8 +11838,6 @@ tasks:
       - pnpm-lock.yaml
       - package-lock.yaml
       - package-lock.json
-      - src/db/schema/**
-      - drizzle/**
       - scripts/**
     riskTypes:
       - database_migration
@@ -11852,7 +11851,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-02-05-fill-blank-scoring-method-completion.md
-    status: pending
+    status: implemented
     retryCount: 0
   - id: phase-20-fix-ra-02-06-material-reference-list
     title: Phase 20 Fix RA-02-06 Material Reference List

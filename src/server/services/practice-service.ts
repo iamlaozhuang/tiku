@@ -82,6 +82,12 @@ type PracticeQuestionSnapshot = {
   standardAnswerRichText: string | null;
   analysisRichText: string | null;
   score: string;
+  fillBlankAnswers: {
+    blankKey: string;
+    standardAnswers: string[];
+    score: string;
+    sortOrder: number;
+  }[];
   snapshot: Record<string, unknown>;
 };
 
@@ -196,6 +202,39 @@ function getStandardAnswerLabels(value: Record<string, unknown>): string[] {
     );
 }
 
+function getFillBlankAnswers(
+  value: Record<string, unknown>,
+): PracticeQuestionSnapshot["fillBlankAnswers"] {
+  const fillBlankAnswers = value.fillBlankAnswers;
+
+  if (!Array.isArray(fillBlankAnswers)) {
+    return [];
+  }
+
+  return fillBlankAnswers
+    .filter((fillBlankAnswer): fillBlankAnswer is Record<string, unknown> =>
+      isRecord(fillBlankAnswer),
+    )
+    .map((fillBlankAnswer) => ({
+      blankKey: getStringField(fillBlankAnswer, "blankKey") ?? "",
+      standardAnswers: Array.isArray(fillBlankAnswer.standardAnswers)
+        ? filterStringLabels(fillBlankAnswer.standardAnswers)
+        : [],
+      score: getScore(fillBlankAnswer),
+      sortOrder:
+        typeof fillBlankAnswer.sortOrder === "number"
+          ? fillBlankAnswer.sortOrder
+          : 0,
+    }))
+    .filter(
+      (fillBlankAnswer) =>
+        fillBlankAnswer.blankKey.length > 0 &&
+        fillBlankAnswer.standardAnswers.length > 0 &&
+        fillBlankAnswer.sortOrder > 0,
+    )
+    .sort((left, right) => left.sortOrder - right.sortOrder);
+}
+
 function filterStringLabels(labels: unknown[]): string[] {
   return labels.filter(
     (label): label is string => typeof label === "string" && label.length > 0,
@@ -254,6 +293,7 @@ function findPracticeQuestion(
         ),
         analysisRichText: getStringField(paperQuestion, "analysisRichText"),
         score: getScore(paperQuestion),
+        fillBlankAnswers: getFillBlankAnswers(paperQuestion),
         snapshot: paperQuestion,
       };
     }
@@ -316,6 +356,13 @@ function getAutoMatchAnswers(question: PracticeQuestionSnapshot): string[] {
   return question.standardAnswerRichText === null
     ? []
     : [question.standardAnswerRichText];
+}
+
+function splitFillBlankTextAnswer(textAnswer: string): string[] {
+  return textAnswer
+    .split(/[；;\n|]/)
+    .map((blankAnswer) => blankAnswer.trim())
+    .filter((blankAnswer) => blankAnswer.length > 0);
 }
 
 function isOptionQuestion(question: PracticeQuestionSnapshot): boolean {
@@ -498,6 +545,36 @@ function calculateObjectiveScore(
     return {
       isCorrect,
       score: question.score,
+    };
+  }
+
+  if (
+    isAutoMatchFillBlankQuestion(question) &&
+    question.fillBlankAnswers.length > 0
+  ) {
+    const submittedBlankAnswers =
+      input.textAnswer === null
+        ? []
+        : splitFillBlankTextAnswer(input.textAnswer);
+    const score = question.fillBlankAnswers.reduce(
+      (earnedScore, fillBlankAnswer, index) => {
+        const submittedAnswer = submittedBlankAnswers[index] ?? "";
+        const isBlankCorrect = fillBlankAnswer.standardAnswers.some(
+          (standardAnswer) =>
+            normalizeAutoMatchText(standardAnswer) ===
+            normalizeAutoMatchText(submittedAnswer),
+        );
+
+        return isBlankCorrect
+          ? earnedScore + Number.parseFloat(fillBlankAnswer.score)
+          : earnedScore;
+      },
+      0,
+    );
+
+    return {
+      isCorrect,
+      score: formatScore(score),
     };
   }
 

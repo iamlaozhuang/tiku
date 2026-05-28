@@ -105,6 +105,13 @@ type ReportPaperQuestionSnapshot = {
   knowledgeNodePublicIds: string[];
 };
 
+type ReportFillBlankAnswer = {
+  blankKey: string;
+  standardAnswers: string[];
+  score: string;
+  sortOrder: number;
+};
+
 function hasEffectiveAuthorization(
   scopes: ExamReportAuthorizationScopeRow[],
   reportScope: { profession: ExamReportRow["profession"]; level: number },
@@ -170,6 +177,57 @@ function getStringArrayField(
   return fieldValue.filter(
     (item): item is string => typeof item === "string" && item.length > 0,
   );
+}
+
+function getFillBlankAnswers(
+  value: Record<string, unknown>,
+): ReportFillBlankAnswer[] {
+  const fillBlankAnswers = value.fillBlankAnswers;
+
+  if (!Array.isArray(fillBlankAnswers)) {
+    return [];
+  }
+
+  return fillBlankAnswers
+    .filter((fillBlankAnswer): fillBlankAnswer is Record<string, unknown> =>
+      isRecord(fillBlankAnswer),
+    )
+    .map((fillBlankAnswer) => ({
+      blankKey: getStringField(fillBlankAnswer, "blankKey") ?? "",
+      standardAnswers: Array.isArray(fillBlankAnswer.standardAnswers)
+        ? fillBlankAnswer.standardAnswers.filter(
+            (standardAnswer): standardAnswer is string =>
+              typeof standardAnswer === "string" && standardAnswer.length > 0,
+          )
+        : [],
+      score: getScore(fillBlankAnswer),
+      sortOrder:
+        typeof fillBlankAnswer.sortOrder === "number"
+          ? fillBlankAnswer.sortOrder
+          : 0,
+    }))
+    .filter(
+      (fillBlankAnswer) =>
+        fillBlankAnswer.blankKey.length > 0 &&
+        fillBlankAnswer.standardAnswers.length > 0 &&
+        fillBlankAnswer.sortOrder > 0,
+    )
+    .sort((left, right) => left.sortOrder - right.sortOrder);
+}
+
+function formatFillBlankStandardAnswer(
+  fillBlankAnswers: ReportFillBlankAnswer[],
+): string | null {
+  if (fillBlankAnswers.length === 0) {
+    return null;
+  }
+
+  return fillBlankAnswers
+    .map(
+      (fillBlankAnswer) =>
+        `${fillBlankAnswer.blankKey}: ${fillBlankAnswer.standardAnswers.join("/")}`,
+    )
+    .join("; ");
 }
 
 function getPaperName(paperSnapshot: Record<string, unknown>): string {
@@ -384,11 +442,13 @@ function buildQuestionResults(
     const standardAnswerLabels = getStandardAnswerLabels(
       question.questionSnapshot,
     );
+    const fillBlankAnswers = getFillBlankAnswers(question.questionSnapshot);
 
     return {
       paperQuestionPublicId: question.paperQuestionPublicId,
       questionPublicId: question.questionPublicId,
       questionType: question.questionType,
+      scoringMethod: getStringField(question.questionSnapshot, "scoringMethod"),
       title:
         getStringField(question.questionSnapshot, "title") ??
         getStringField(question.questionSnapshot, "stemText") ??
@@ -402,8 +462,9 @@ function buildQuestionResults(
       ),
       standardAnswer:
         standardAnswerLabels.length === 0
-          ? null
+          ? formatFillBlankStandardAnswer(fillBlankAnswers)
           : standardAnswerLabels.join(", "),
+      fillBlankAnswers,
       mistakeBookPublicId: null,
     };
   });

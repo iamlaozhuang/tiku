@@ -878,6 +878,77 @@ describe("StudentExamReportPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders fill_blank scoring method and per-blank report details", () => {
+    const report = {
+      ...studentExamReportFixture.examReports[0],
+      publicId: "exam-report-fill-blank-scoring",
+      reportSnapshot: {
+        totalScoreText: "total score 1.0",
+        accuracyText: "accuracy 50%",
+        scoreSummaryText: "score 1.0 / 2.0",
+        questionResults: [
+          {
+            paperQuestionPublicId: "paper-question-fill-blank-001",
+            questionPublicId: "question-fill-blank-001",
+            questionType: "fill_blank",
+            scoringMethod: "auto_match",
+            title: "Fill blank per blank report item",
+            isCorrect: false,
+            score: "1.0",
+            maxScore: "2.0",
+            selectedAnswer: "customer motive; wrong answer",
+            standardAnswer:
+              "blank_1: customer motive; blank_2: purchase frequency",
+            mistakeBookPublicId: "mistake-book-fill-blank-001",
+            fillBlankAnswers: [
+              {
+                blankKey: "blank_1",
+                standardAnswers: ["customer motive"],
+                score: "1.0",
+                sortOrder: 1,
+              },
+              {
+                blankKey: "blank_2",
+                standardAnswers: ["purchase frequency"],
+                score: "1.0",
+                sortOrder: 2,
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-fill-blank-scoring",
+        examReports: [report],
+      }),
+    );
+
+    expect(
+      screen.getByText("Fill blank per blank report item"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("填空题")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) => element?.textContent === "计分方式：自动匹配",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.textContent === "blank_1：customer motive（1.0 分）",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.textContent === "blank_2：purchase frequency（1.0 分）",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("renders scoring, scoring partial failed, completed, loading, error, authorization expired, and empty report states", () => {
     render(
       createElement(StudentExamReportPage, {

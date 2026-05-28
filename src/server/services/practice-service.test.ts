@@ -162,6 +162,44 @@ function createFillBlankPaperSnapshot(): Record<string, unknown> {
   };
 }
 
+function createFillBlankPerBlankPaperSnapshot(): Record<string, unknown> {
+  return {
+    paperPublicId: "paper_public_123",
+    name: "fill_blank_per_blank_paper",
+    paperSections: [
+      {
+        paperSectionTitle: "二、填空题",
+        paperQuestions: [
+          {
+            paperQuestionPublicId: "paper_question_fill_blank_123",
+            questionPublicId: "question_fill_blank_123",
+            questionType: "fill_blank",
+            stemRichText: "<p>客户分析应识别___和___。</p>",
+            standardAnswerRichText: "<p>客户动机；消费频率</p>",
+            analysisRichText: "<p>逐空核对答案。</p>",
+            score: "2.0",
+            scoringMethod: "auto_match",
+            fillBlankAnswers: [
+              {
+                blankKey: "blank_1",
+                standardAnswers: ["客户动机", "购买动机"],
+                score: "1.0",
+                sortOrder: 1,
+              },
+              {
+                blankKey: "blank_2",
+                standardAnswers: ["消费频率"],
+                score: "1.0",
+                sortOrder: 2,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
 function createSubjectivePaperSnapshot(
   questionType = "short_answer",
 ): Record<string, unknown> {
@@ -1089,6 +1127,46 @@ describe("practice service", () => {
           maxScore: "2.0",
           mistakeBookPublicId: "mistake_book_public_2",
           aiHintStatus: null,
+        },
+      },
+    });
+    expect(mistakeBookInputs).toHaveLength(1);
+  });
+
+  it("scores structured fill_blank answers per blank instead of all-or-nothing", async () => {
+    const mistakeBookInputs: unknown[] = [];
+    const service = createPracticeService(
+      createRepository({
+        async findPracticeByPublicId() {
+          return createPractice({
+            paper_snapshot: createFillBlankPerBlankPaperSnapshot(),
+          });
+        },
+        async upsertMistakeBookFromWrongAnswer(input) {
+          mistakeBookInputs.push(input);
+
+          return {
+            public_id: input.publicId,
+          };
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.submitPracticeAnswer(userContext, "practice_public_123", {
+        paperQuestionPublicId: "paper_question_fill_blank_123",
+        textAnswer: "购买动机；购买频率",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        feedback: {
+          isCorrect: false,
+          score: "1.0",
+          maxScore: "2.0",
+          mistakeBookPublicId: "mistake_book_public_2",
         },
       },
     });

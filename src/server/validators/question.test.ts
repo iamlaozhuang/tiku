@@ -151,4 +151,87 @@ describe("question validator", () => {
       tagPublicId: null,
     });
   });
+
+  it("accepts structured fill_blank per-blank answers for auto-match scoring", () => {
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          questionType: "fill_blank",
+          scoringMethod: "auto_match",
+          standardAnswerRichText: "<p>客户动机；消费频率</p>",
+          fillBlankAnswers: [
+            {
+              blankKey: "blank_1",
+              standardAnswers: ["客户动机", "购买动机"],
+              score: "1.0",
+              sortOrder: 1,
+            },
+            {
+              blankKey: "blank_2",
+              standardAnswers: ["消费频率"],
+              score: 1,
+              sortOrder: 2,
+            },
+          ],
+        }),
+      ),
+    ).toMatchObject({
+      success: true,
+      value: {
+        fillBlankAnswers: [
+          {
+            blankKey: "blank_1",
+            standardAnswers: ["客户动机", "购买动机"],
+            score: "1.0",
+            sortOrder: 1,
+          },
+          {
+            blankKey: "blank_2",
+            standardAnswers: ["消费频率"],
+            score: "1.0",
+            sortOrder: 2,
+          },
+        ],
+      },
+    });
+  });
+
+  it("rejects malformed or misplaced fill_blank per-blank answers", () => {
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          questionType: "fill_blank",
+          fillBlankAnswers: [
+            {
+              blankKey: "blank_1",
+              standardAnswers: [],
+              score: "1.0",
+              sortOrder: 1,
+            },
+          ],
+        }),
+      ),
+    ).toEqual({
+      success: false,
+      message: "Invalid question input.",
+    });
+
+    expect(
+      normalizeCreateQuestionInput(
+        createSubjectiveQuestionInput({
+          fillBlankAnswers: [
+            {
+              blankKey: "blank_1",
+              standardAnswers: ["客户动机"],
+              score: "1.0",
+              sortOrder: 1,
+            },
+          ],
+        }),
+      ),
+    ).toEqual({
+      success: false,
+      message: "Invalid question input.",
+    });
+  });
 });

@@ -35,6 +35,7 @@ export function mapQuestionToApi(question: QuestionAccessRow): QuestionDto {
       score: scoringPoint.score,
       sortOrder: scoringPoint.sort_order,
     })),
+    fillBlankAnswers: question.fill_blank_answers ?? [],
     knowledgeNodePublicIds: question.knowledge_node_public_ids,
     tagPublicIds: question.tag_public_ids,
     createdAt: question.created_at.toISOString(),
