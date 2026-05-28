@@ -417,6 +417,7 @@ function createExamReportRepository(): ExamReportRepository {
         updated_at: input.generatedAt,
       };
     },
+    async updateExamReportLearningSuggestionSnapshot() {},
   };
 }
 

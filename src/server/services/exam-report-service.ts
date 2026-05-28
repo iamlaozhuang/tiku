@@ -100,6 +100,9 @@ type ReportPaperQuestionSnapshot = {
   questionSnapshot: Record<string, unknown>;
   maxScore: string;
   isObjective: boolean;
+  questionType: string | null;
+  paperSectionTitle: string | null;
+  knowledgeNodePublicIds: string[];
 };
 
 function hasEffectiveAuthorization(
@@ -154,6 +157,21 @@ function getStandardAnswerLabels(value: Record<string, unknown>): string[] {
   );
 }
 
+function getStringArrayField(
+  value: Record<string, unknown>,
+  key: string,
+): string[] {
+  const fieldValue = value[key];
+
+  if (!Array.isArray(fieldValue)) {
+    return [];
+  }
+
+  return fieldValue.filter(
+    (item): item is string => typeof item === "string" && item.length > 0,
+  );
+}
+
 function getPaperName(paperSnapshot: Record<string, unknown>): string {
   return getStringField(paperSnapshot, "name") ?? "Untitled paper";
 }
@@ -186,6 +204,8 @@ function listReportPaperQuestions(
       return [];
     }
 
+    const paperSectionTitle = getStringField(paperSection, "paperSectionTitle");
+
     return paperSection.paperQuestions.flatMap((paperQuestion) => {
       if (!isRecord(paperQuestion)) {
         return [];
@@ -211,6 +231,12 @@ function listReportPaperQuestions(
           questionSnapshot: paperQuestion,
           maxScore: getScore(paperQuestion),
           isObjective: getStandardAnswerLabels(paperQuestion).length > 0,
+          questionType: getStringField(paperQuestion, "questionType"),
+          paperSectionTitle,
+          knowledgeNodePublicIds: getStringArrayField(
+            paperQuestion,
+            "knowledgeNodePublicIds",
+          ),
         },
       ];
     });
@@ -271,10 +297,124 @@ function buildQuestionDetails(
   });
 }
 
+function formatCountSummary(
+  label: string,
+  counts: Map<string, number>,
+): string | null {
+  if (counts.size === 0) {
+    return null;
+  }
+
+  const summary = [...counts.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key} ${value}`)
+    .join(", ");
+
+  return `${label}: ${summary}`;
+}
+
+function incrementCount(counts: Map<string, number>, key: string | null) {
+  if (key === null || key.length === 0) {
+    return;
+  }
+
+  counts.set(key, (counts.get(key) ?? 0) + 1);
+}
+
+function buildAnalyticsSummary(questions: ReportPaperQuestionSnapshot[]) {
+  const questionTypeCounts = new Map<string, number>();
+  const paperSectionCounts = new Map<string, number>();
+  const knowledgeNodeCounts = new Map<string, number>();
+
+  questions.forEach((question) => {
+    incrementCount(questionTypeCounts, question.questionType);
+    incrementCount(paperSectionCounts, question.paperSectionTitle);
+    question.knowledgeNodePublicIds.forEach((knowledgeNodePublicId) => {
+      incrementCount(knowledgeNodeCounts, knowledgeNodePublicId);
+    });
+  });
+
+  return {
+    questionTypeSummaryText: formatCountSummary(
+      "question_type analytics",
+      questionTypeCounts,
+    ),
+    paperSectionSummaryText: formatCountSummary(
+      "paper_section analytics",
+      paperSectionCounts,
+    ),
+    knowledgeNodeSummaryText: formatCountSummary(
+      "knowledge_node analytics",
+      knowledgeNodeCounts,
+    ),
+  };
+}
+
+function formatSelectedAnswer(
+  answerSnapshot: ExamReportAnswerRecordRow["answer_snapshot"] | null,
+): string | null {
+  if (answerSnapshot === null) {
+    return null;
+  }
+
+  if (answerSnapshot.textAnswer !== null && answerSnapshot.textAnswer !== "") {
+    return answerSnapshot.textAnswer;
+  }
+
+  return answerSnapshot.selectedLabels.length === 0
+    ? null
+    : answerSnapshot.selectedLabels.join(", ");
+}
+
+function buildQuestionResults(
+  paperSnapshot: Record<string, unknown>,
+  answerRecords: ExamReportAnswerRecordRow[],
+) {
+  const answerByPaperQuestion = new Map(
+    answerRecords.map((answerRecord) => [
+      answerRecord.paper_question_public_id,
+      answerRecord,
+    ]),
+  );
+
+  return listReportPaperQuestions(paperSnapshot).map((question, index) => {
+    const answerRecord = answerByPaperQuestion.get(
+      question.paperQuestionPublicId,
+    );
+    const standardAnswerLabels = getStandardAnswerLabels(
+      question.questionSnapshot,
+    );
+
+    return {
+      paperQuestionPublicId: question.paperQuestionPublicId,
+      questionPublicId: question.questionPublicId,
+      questionType: question.questionType,
+      title:
+        getStringField(question.questionSnapshot, "title") ??
+        getStringField(question.questionSnapshot, "stemText") ??
+        `Question ${index + 1}`,
+      isCorrect:
+        answerRecord?.is_correct ?? (question.isObjective ? false : null),
+      score: answerRecord?.score ?? (question.isObjective ? "0.0" : null),
+      maxScore: question.maxScore,
+      selectedAnswer: formatSelectedAnswer(
+        answerRecord?.answer_snapshot ?? null,
+      ),
+      standardAnswer:
+        standardAnswerLabels.length === 0
+          ? null
+          : standardAnswerLabels.join(", "),
+      mistakeBookPublicId: null,
+    };
+  });
+}
+
 function buildReportSnapshot(
   mockExam: ExamReportMockExamRow,
   answerRecords: ExamReportAnswerRecordRow[],
 ): ExamReportSnapshotDto {
+  const questions = listReportPaperQuestions(mockExam.paper_snapshot);
+
   return {
     paperPublicId: mockExam.paper_public_id,
     paperName: getPaperName(mockExam.paper_snapshot),
@@ -292,7 +432,47 @@ function buildReportSnapshot(
       mockExam.paper_snapshot,
       answerRecords,
     ),
+    questionResults: buildQuestionResults(
+      mockExam.paper_snapshot,
+      answerRecords,
+    ),
+    ...buildAnalyticsSummary(questions),
     learningSuggestionStatus: null,
+  };
+}
+
+function buildLearningSuggestionSnapshot(
+  report: ExamReportRow,
+  answerRecord: ExamReportAnswerRecordRow | null,
+  result: Awaited<
+    ReturnType<
+      ExamReportLearningSuggestionRuntime["generateLearningSuggestion"]
+    >
+  >,
+  options: ExamReportLearningSuggestionOptions,
+  generatedAt: Date,
+) {
+  return {
+    status: "generated",
+    learningSuggestion: result.learningSuggestion,
+    evidenceStatus: "none",
+    generatedAt: generatedAt.toISOString(),
+    reportPublicId: report.public_id,
+    mockExamPublicId: report.mock_exam_public_id,
+    selectedAnswerRecordPublicId: answerRecord?.public_id ?? null,
+    selectedQuestionPublicId: answerRecord?.question_public_id ?? null,
+    modelConfigSnapshot: {
+      modelConfigPublicId: options.modelConfigSnapshot.modelConfigPublicId,
+      aiFuncType: options.modelConfigSnapshot.aiFuncType,
+      modelName: options.modelConfigSnapshot.modelName,
+      providerDisplayName: options.modelConfigSnapshot.providerDisplayName,
+      configVersion: options.modelConfigSnapshot.configVersion,
+    },
+    promptTemplate: {
+      promptTemplateKey: options.promptTemplate.promptTemplateKey,
+      version: options.promptTemplate.version,
+      templateHash: options.promptTemplate.templateHash,
+    },
   };
 }
 
@@ -533,22 +713,36 @@ export function createExamReportService(
       const selectedAnswerRecord =
         selectLearningSuggestionAnswerRecord(answerRecords);
 
-      await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
-        {
-          userPublicId: userContext.userPublicId,
-          answerRecordPublicId: selectedAnswerRecord?.public_id ?? null,
-          mockExamPublicId: report.mock_exam_public_id,
-          questionPublicId: selectedAnswerRecord?.question_public_id ?? null,
-          rawPrompt: buildLearningSuggestionPrompt(
-            report,
-            selectedAnswerRecord,
-          ),
-          rawAnswer: buildLearningSuggestionRawAnswer(selectedAnswerRecord),
-          modelConfigSnapshot: learningSuggestionOptions.modelConfigSnapshot,
-          promptTemplate: learningSuggestionOptions.promptTemplate,
-          startedAt: clock.now(),
-        },
-      );
+      const generatedAt = clock.now();
+      const learningSuggestionResult =
+        await learningSuggestionOptions.learningSuggestionRuntime.generateLearningSuggestion(
+          {
+            userPublicId: userContext.userPublicId,
+            answerRecordPublicId: selectedAnswerRecord?.public_id ?? null,
+            mockExamPublicId: report.mock_exam_public_id,
+            questionPublicId: selectedAnswerRecord?.question_public_id ?? null,
+            rawPrompt: buildLearningSuggestionPrompt(
+              report,
+              selectedAnswerRecord,
+            ),
+            rawAnswer: buildLearningSuggestionRawAnswer(selectedAnswerRecord),
+            modelConfigSnapshot: learningSuggestionOptions.modelConfigSnapshot,
+            promptTemplate: learningSuggestionOptions.promptTemplate,
+            startedAt: generatedAt,
+          },
+        );
+
+      await repository.updateExamReportLearningSuggestionSnapshot({
+        userPublicId: userContext.userPublicId,
+        publicId: report.public_id,
+        learningSuggestionSnapshot: buildLearningSuggestionSnapshot(
+          report,
+          selectedAnswerRecord,
+          learningSuggestionResult,
+          learningSuggestionOptions,
+          generatedAt,
+        ),
+      });
 
       return createSuccessResponse(null);
     },

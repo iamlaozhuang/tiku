@@ -230,6 +230,7 @@ type ParsedReportSnapshot = {
   scoreSummaryText: string;
   questionTypeSummaryText: string | null;
   paperSectionSummaryText: string | null;
+  knowledgeNodeSummaryText: string | null;
   questionResults: ReportQuestionResult[];
 };
 
@@ -796,6 +797,10 @@ function parseReportSnapshot(
     paperSectionSummaryText:
       typeof reportSnapshot.paperSectionSummaryText === "string"
         ? reportSnapshot.paperSectionSummaryText
+        : null,
+    knowledgeNodeSummaryText:
+      typeof reportSnapshot.knowledgeNodeSummaryText === "string"
+        ? reportSnapshot.knowledgeNodeSummaryText
         : null,
     questionResults: questionResults.flatMap(
       (questionResult): ReportQuestionResult[] => {
@@ -2141,8 +2146,9 @@ export function StudentExamReportPage({
       </div>
 
       {parsedReportSnapshot.questionTypeSummaryText === null &&
-      parsedReportSnapshot.paperSectionSummaryText === null ? null : (
-        <div className="bg-surface ring-border grid gap-2 rounded-xl p-3 text-sm shadow-sm ring-1 sm:grid-cols-2">
+      parsedReportSnapshot.paperSectionSummaryText === null &&
+      parsedReportSnapshot.knowledgeNodeSummaryText === null ? null : (
+        <div className="bg-surface ring-border grid gap-2 rounded-xl p-3 text-sm shadow-sm ring-1 sm:grid-cols-3">
           {parsedReportSnapshot.questionTypeSummaryText === null ? null : (
             <p className="text-text-secondary">
               {parsedReportSnapshot.questionTypeSummaryText}
@@ -2151,6 +2157,11 @@ export function StudentExamReportPage({
           {parsedReportSnapshot.paperSectionSummaryText === null ? null : (
             <p className="text-text-secondary">
               {parsedReportSnapshot.paperSectionSummaryText}
+            </p>
+          )}
+          {parsedReportSnapshot.knowledgeNodeSummaryText === null ? null : (
+            <p className="text-text-secondary">
+              {parsedReportSnapshot.knowledgeNodeSummaryText}
             </p>
           )}
         </div>

@@ -105,6 +105,7 @@ function createRepository(): ExamReportRepository {
     async createExamReport() {
       throw new Error("createExamReport should not be called by retry");
     },
+    async updateExamReportLearningSuggestionSnapshot() {},
   };
 }
 

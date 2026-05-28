@@ -75,6 +75,12 @@ export type ExamReportAnswerRecordRow = {
   submitted_at: Date | null;
 };
 
+export type UpdateExamReportLearningSuggestionInput = {
+  userPublicId: string;
+  publicId: string;
+  learningSuggestionSnapshot: LearningSuggestionSnapshotDto;
+};
+
 export type ExamReportListQuery = {
   userPublicId: string;
   page: number;
@@ -129,4 +135,7 @@ export type ExamReportRepository = {
     mockExamPublicId: string;
   }): Promise<ExamReportAnswerRecordRow[]>;
   createExamReport(input: CreateExamReportInput): Promise<ExamReportRow>;
+  updateExamReportLearningSuggestionSnapshot(
+    input: UpdateExamReportLearningSuggestionInput,
+  ): Promise<void>;
 };

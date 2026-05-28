@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   createExamReportService,
   type ExamReportClock,
+  type ExamReportLearningSuggestionOptions,
   type ExamReportPublicIdFactory,
 } from "./exam-report-service";
+import { createModelConfigSnapshot } from "../models/ai-rag";
 import type {
   ExamReportAnswerRecordRow,
   ExamReportAuthorizationScopeRow,
@@ -12,11 +14,27 @@ import type {
   ExamReportRepository,
   ExamReportRow,
 } from "../repositories/exam-report-repository";
+import type { LearningSuggestionMockContext } from "./ai-mock-provider-runtime";
 
 const now = new Date("2026-05-19T09:00:00.000Z");
 const startedAt = new Date("2026-05-19T08:00:00.000Z");
 const submittedAt = new Date("2026-05-19T08:45:00.000Z");
 const scopeExpiresAt = new Date("2026-06-19T08:00:00.000Z");
+const modelConfigSnapshot = createModelConfigSnapshot({
+  providerPublicId: "model-provider-dev-mock",
+  providerKey: "mock",
+  providerDisplayName: "Local Mock AI",
+  modelConfigPublicId: "model-config-dev-learning-suggestion",
+  aiFuncType: "learning_suggestion",
+  modelName: "mock-learning-suggestion",
+  displayName: "Local mock learning suggestion",
+  configVersion: 1,
+  timeoutSecond: 5,
+  maxRetryCount: 0,
+  fallbackModelConfigPublicId: null,
+  promptTemplateKey: "dev_learning_suggestion",
+  promptTemplateVersion: 1,
+});
 
 const userContext = {
   userPublicId: "user_public_123",
@@ -60,6 +78,7 @@ function createPaperSnapshot(): Record<string, unknown> {
             paperQuestionPublicId: "paper_question_public_123",
             questionPublicId: "question_public_123",
             questionType: "single_choice",
+            title: "Runtime single choice",
             stemRichText: "<p>题干</p>",
             standardAnswerLabels: ["A"],
             score: "1.0",
@@ -69,6 +88,7 @@ function createPaperSnapshot(): Record<string, unknown> {
             paperQuestionPublicId: "paper_question_public_unanswered",
             questionPublicId: "question_public_unanswered",
             questionType: "single_choice",
+            title: "Runtime unanswered single choice",
             stemRichText: "<p>未答题干</p>",
             standardAnswerLabels: ["B"],
             score: "2.0",
@@ -191,7 +211,33 @@ function createRepository(
         duration_second: input.durationSecond,
       });
     },
+    async updateExamReportLearningSuggestionSnapshot() {},
     ...overrides,
+  };
+}
+
+function createLearningSuggestionOptions(
+  capturedContexts: LearningSuggestionMockContext[],
+): ExamReportLearningSuggestionOptions {
+  return {
+    learningSuggestionRuntime: {
+      async generateLearningSuggestion(context) {
+        capturedContexts.push(context);
+
+        return {
+          learningSuggestion: "Review missed knowledge nodes.",
+          aiCallLog: {
+            publicId: "ai_call_log_public_redacted",
+          },
+        };
+      },
+    },
+    modelConfigSnapshot,
+    promptTemplate: {
+      promptTemplateKey: "dev_learning_suggestion",
+      version: 1,
+      templateHash: "dev-learning-suggestion-template-v1",
+    },
   };
 }
 
@@ -328,6 +374,37 @@ describe("exam report service", () => {
           learningSuggestionSnapshot: null,
           reportSnapshot: {
             paperName: "2024年专卖三级理论真题",
+            questionTypeSummaryText: "question_type analytics: single_choice 2",
+            paperSectionSummaryText:
+              "paper_section analytics: 一、单项选择题 2",
+            knowledgeNodeSummaryText:
+              "knowledge_node analytics: knowledge_node_public_123 1, knowledge_node_public_456 1",
+            questionResults: [
+              {
+                paperQuestionPublicId: "paper_question_public_123",
+                questionPublicId: "question_public_123",
+                questionType: "single_choice",
+                title: "Runtime single choice",
+                isCorrect: true,
+                score: "1.0",
+                maxScore: "1.0",
+                selectedAnswer: "A",
+                standardAnswer: "A",
+                mistakeBookPublicId: null,
+              },
+              {
+                paperQuestionPublicId: "paper_question_public_unanswered",
+                questionPublicId: "question_public_unanswered",
+                questionType: "single_choice",
+                title: "Runtime unanswered single choice",
+                isCorrect: false,
+                score: "0.0",
+                maxScore: "2.0",
+                selectedAnswer: null,
+                standardAnswer: "B",
+                mistakeBookPublicId: null,
+              },
+            ],
             questionDetails: [
               {
                 answerRecordPublicId: "answer_record_public_123",
@@ -359,6 +436,66 @@ describe("exam report service", () => {
         learningSuggestionSnapshot: null,
       }),
     ]);
+  });
+
+  it("persists a redaction-safe learning suggestion snapshot after local retry", async () => {
+    const capturedContexts: LearningSuggestionMockContext[] = [];
+    const updateInputs: unknown[] = [];
+    const service = createExamReportService(
+      createRepository({
+        async updateExamReportLearningSuggestionSnapshot(input) {
+          updateInputs.push(input);
+        },
+      }),
+      clock,
+      createIdFactory(),
+      createLearningSuggestionOptions(capturedContexts),
+    );
+
+    await expect(
+      service.retryLearningSuggestion(userContext, "exam_report_public_123", {
+        requestedFromClientAt: "2026-05-19T09:05:00.000Z",
+      }),
+    ).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: null,
+    });
+    expect(capturedContexts).toHaveLength(1);
+    expect(updateInputs).toEqual([
+      {
+        userPublicId: "user_public_123",
+        publicId: "exam_report_public_123",
+        learningSuggestionSnapshot: {
+          status: "generated",
+          learningSuggestion: "Review missed knowledge nodes.",
+          evidenceStatus: "none",
+          generatedAt: "2026-05-19T09:00:00.000Z",
+          reportPublicId: "exam_report_public_123",
+          mockExamPublicId: "mock_exam_public_123",
+          selectedAnswerRecordPublicId: "answer_record_public_123",
+          selectedQuestionPublicId: "question_public_123",
+          modelConfigSnapshot: {
+            modelConfigPublicId: "model-config-dev-learning-suggestion",
+            aiFuncType: "learning_suggestion",
+            modelName: "mock-learning-suggestion",
+            providerDisplayName: "Local Mock AI",
+            configVersion: 1,
+          },
+          promptTemplate: {
+            promptTemplateKey: "dev_learning_suggestion",
+            version: 1,
+            templateHash: "dev-learning-suggestion-template-v1",
+          },
+        },
+      },
+    ]);
+
+    const serializedSnapshot = JSON.stringify(updateInputs);
+    expect(serializedSnapshot).not.toContain("selectedLabels");
+    expect(serializedSnapshot).not.toContain("rawPrompt");
+    expect(serializedSnapshot).not.toContain("rawAnswer");
+    expect(serializedSnapshot).not.toContain("ai_call_log_public_redacted");
   });
 
   it("does not generate report for terminated or unknown mock_exam attempts", async () => {

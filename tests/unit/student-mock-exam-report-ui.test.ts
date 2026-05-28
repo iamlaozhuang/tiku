@@ -821,6 +821,8 @@ describe("StudentExamReportPage", () => {
         scoreSummaryText: "得分 8.0 / 10",
         questionTypeSummaryText: "案例分析题 1 题，计算题 1 题",
         paperSectionSummaryText: "案例模块 得分率 80%",
+        knowledgeNodeSummaryText:
+          "knowledge_node analytics: knowledge-node-case 1, knowledge-node-calculation 1",
         questionResults: [
           {
             paperQuestionPublicId: "paper-question-case-analysis-001",
@@ -863,6 +865,11 @@ describe("StudentExamReportPage", () => {
     expect(screen.getByText("案例模块 得分率 80%")).toBeInTheDocument();
     expect(screen.getByText("案例分析题")).toBeInTheDocument();
     expect(screen.getByText("计算题")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "knowledge_node analytics: knowledge-node-case 1, knowledge-node-calculation 1",
+      ),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Synthetic case_analysis report item"),
     ).toBeInTheDocument();

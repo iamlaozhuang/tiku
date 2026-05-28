@@ -1062,6 +1062,27 @@ function createPostgresExamReportRepository(
         mockExamLink.started_at,
       );
     },
+    async updateExamReportLearningSuggestionSnapshot(input) {
+      const database = getDatabase();
+      const userId = await findUserIdByPublicId(database, input.userPublicId);
+
+      if (userId === null) {
+        return;
+      }
+
+      await database
+        .update(examReport)
+        .set({
+          learning_suggestion_snapshot: input.learningSuggestionSnapshot,
+          updated_at: getNow(options),
+        })
+        .where(
+          and(
+            eq(examReport.user_id, userId),
+            eq(examReport.public_id, input.publicId),
+          ),
+        );
+    },
   };
 }
 
