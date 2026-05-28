@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-  updatedAt: "2026-05-29T23:55:00-07:00"
+  updatedAt: "2026-05-29T23:59:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,8 +36,8 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: ceb8312e7ccecde8fd85d525fe88d16599399dc8
-  lastKnownOriginMasterSha: ceb8312e7ccecde8fd85d525fe88d16599399dc8
+  lastKnownMasterSha: 0eb86bb84a48d4a7f21cd813694cb036ae40cc28
+  lastKnownOriginMasterSha: 0eb86bb84a48d4a7f21cd813694cb036ae40cc28
 currentTask:
   id: phase-20-fix-ra-04-05-subjective-practice-ai-hint-scoring
   status: closed
