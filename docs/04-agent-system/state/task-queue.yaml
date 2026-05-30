@@ -12271,7 +12271,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
-    status: validated
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-05-09-report-knowledge-analysis
     title: Phase 20 Fix RA-05-09 Report Knowledge Analysis

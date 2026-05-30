@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-29T21:04:20-07:00"
+updatedAt: "2026-05-29T21:17:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -40,12 +40,12 @@ repository:
   lastKnownOriginMasterSha: 315ab0e347d0d1358c891a977c477f120b3f1170
 currentTask:
   id: phase-20-fix-ra-05-06-vector-rebuild-stale-marker
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-29-phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
   branch: codex/phase-20-fix-ra-05-06-vector-rebuild-stale-marker
-  commitSha: null
+  commitSha: a2da756c2372205226e571eb99d70b8308a23eae
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Continue claimed task phase-20-fix-ra-05-06-vector-rebuild-stale-marker on branch codex/phase-20-fix-ra-05-06-vector-rebuild-stale-marker. Keep implementation local-only and stop if schema/migration, dependency, env/secret, real provider/vector cloud, deploy/cloud, or destructive data work becomes necessary."
+  nextRecommendedAction: "Task phase-20-fix-ra-05-06-vector-rebuild-stale-marker is closed and pushed. Recommend the next pending task only after confirming dependencies and high-risk gates; do not claim auth_permission_model, database migration, dependency, secret/env, real provider/vector cloud, deploy/cloud, or destructive-data work without explicit approval."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md

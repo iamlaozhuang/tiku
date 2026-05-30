@@ -77,8 +77,23 @@ User approved `phase-20-fix-ra-05-06-vector-rebuild-stale-marker` local implemen
 
 - branch: `codex/phase-20-fix-ra-05-06-vector-rebuild-stale-marker`
 - base: `master`
-- changed files before implementation commit: pending
-- implementation commit: pending
-- merge: pending
-- push: pending
-- cleanup: pending
+- changed files before implementation commit:
+  - `docs/04-agent-system/state/project-state.yaml`
+  - `docs/04-agent-system/state/task-queue.yaml`
+  - `docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md`
+  - `docs/05-execution-logs/task-plans/2026-05-29-phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md`
+  - `src/rag/retrieval.ts`
+  - `src/server/contracts/ai-rag-contract.ts`
+  - `src/server/services/rag-resource-knowledge-runtime.ts`
+  - `src/server/services/rag-retrieval-service.ts`
+  - `tests/unit/phase-20-ra-05-06-vector-rebuild-stale-marker.test.ts`
+- implementation commit: `4ccfaf8 fix(rag): preserve stale local vector snapshots`
+- merge: `a2da756c2372205226e571eb99d70b8308a23eae` on `master`
+- master validation after merge:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass; lint, typecheck, 136 unit files / 578 tests, and format check passed.
+  - `npm.cmd run test:e2e`: pass; 25 tests passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass; master ahead 2 before push.
+- push: `git push origin master` succeeded; `master -> origin/master` advanced from `c58a818` to `a2da756`.
+- cleanup: local short-lived branch deleted after merge and push. Post-cleanup checks passed: `git status --short --branch` clean on `master`, `git rev-list --left-right --count master...origin/master` returned `0 0`, `git branch --list codex/*` returned no branches, and `git worktree list` returned only `D:/tiku`.
+- cleanup docs commit: pending.
