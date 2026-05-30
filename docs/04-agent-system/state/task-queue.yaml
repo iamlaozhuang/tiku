@@ -12237,7 +12237,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-05-rag-knowledge
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-06-001. Real provider/vector cloud and dependency changes remain blocked unless separately approved.
+    humanApproval: User approved local deterministic/mock RAG runtime implementation on 2026-05-29. external_service_config risk is bounded to local-only old-vector preservation, stale citation marker, and atomic switch semantics; real provider/vector cloud, staging/prod/cloud/external service config, dependency, env/secret, schema/migration, deploy, destructive data operations, and drizzle-kit push remain blocked.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -12271,7 +12271,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-05-09-report-knowledge-analysis
     title: Phase 20 Fix RA-05-09 Report Knowledge Analysis

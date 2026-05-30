@@ -159,6 +159,7 @@ export type RagCitationDto = {
   chunkIndex: number;
   chunkText: string;
   textHash: string;
+  isStale?: boolean;
   score: number;
 };
 
@@ -178,6 +179,8 @@ export type RagRetrievalEvidenceSummaryDto = {
   chunkPublicIds: string[];
   chunkIndexes: number[];
   textHashes: string[];
+  staleCitationCount?: number;
+  staleResourcePublicIds?: string[];
   queryHash: string;
   maxScore: number | null;
   retrievalMode: "fusion_sort";

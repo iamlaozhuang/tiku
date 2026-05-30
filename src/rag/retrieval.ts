@@ -16,6 +16,7 @@ export type RagRetrievalCandidate = {
   chunkIndex: number;
   text: string;
   textHash: string;
+  isStale?: boolean;
   keywordScore: number;
   semanticScore: number;
 };
@@ -37,6 +38,7 @@ export type RagCitation = {
   chunkIndex: number;
   chunkText: string;
   textHash: string;
+  isStale: boolean;
   score: number;
 };
 
@@ -54,6 +56,8 @@ export type RagRetrievalEvidenceSummary = {
   chunkPublicIds: string[];
   chunkIndexes: number[];
   textHashes: string[];
+  staleCitationCount: number;
+  staleResourcePublicIds: string[];
   queryHash: string;
   maxScore: number | null;
   retrievalMode: "fusion_sort";
@@ -114,6 +118,15 @@ export function summarizeRagRetrievalForEvidence(
     chunkPublicIds: result.citations.map((citation) => citation.chunkPublicId),
     chunkIndexes: result.citations.map((citation) => citation.chunkIndex),
     textHashes: result.citations.map((citation) => citation.textHash),
+    staleCitationCount: result.citations.filter((citation) => citation.isStale)
+      .length,
+    staleResourcePublicIds: [
+      ...new Set(
+        result.citations
+          .filter((citation) => citation.isStale)
+          .map((citation) => citation.resourcePublicId),
+      ),
+    ],
     queryHash: createStableHash(query),
     maxScore:
       result.citations.length === 0
@@ -233,6 +246,7 @@ function createCitation(candidate: RankedRetrievalCandidate): RagCitation {
     chunkIndex: candidate.chunkIndex,
     chunkText: candidate.text,
     textHash: candidate.textHash,
+    isStale: candidate.isStale === true,
     score: candidate.score,
   };
 }
