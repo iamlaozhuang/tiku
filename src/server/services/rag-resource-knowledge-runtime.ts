@@ -106,6 +106,20 @@ type LocalResourceCatalogEntry = {
   chunkCount: number;
   textHashes: string[];
   headingPaths: string[][];
+  activeMarkdownContentHash: string | null;
+  activeChunkSnapshot: LocalResourceVectorChunkSnapshot[];
+};
+
+type LocalResourceVectorChunkSnapshot = {
+  chunkPublicId: string;
+  resourcePublicId: string;
+  resourceTitle: string;
+  profession: Profession;
+  level: number | null;
+  headingPath: string[];
+  chunkIndex: number;
+  text: string;
+  textHash: string;
 };
 
 type LocalResourceCatalog = {
@@ -308,7 +322,12 @@ async function readLocalResourceCatalog(
 
     return {
       resources: Array.isArray(parsedValue.resources)
-        ? parsedValue.resources.filter(isLocalResourceCatalogEntry)
+        ? parsedValue.resources
+            .map(normalizeLocalResourceCatalogEntry)
+            .filter(
+              (resource): resource is LocalResourceCatalogEntry =>
+                resource !== null,
+            )
         : [],
     };
   } catch {
@@ -326,16 +345,16 @@ async function writeLocalResourceCatalog(
   await writeFile(catalogPath, JSON.stringify(catalog, null, 2));
 }
 
-function isLocalResourceCatalogEntry(
+function normalizeLocalResourceCatalogEntry(
   value: unknown,
-): value is LocalResourceCatalogEntry {
+): LocalResourceCatalogEntry | null {
   if (typeof value !== "object" || value === null) {
-    return false;
+    return null;
   }
 
   const entry = value as Partial<LocalResourceCatalogEntry>;
 
-  return (
+  const isBaseEntry =
     typeof entry.publicId === "string" &&
     typeof entry.title === "string" &&
     isResourceType(entry.resourceType) &&
@@ -361,7 +380,44 @@ function isLocalResourceCatalogEntry(
       entry.disabledFromStatus === null) &&
     typeof entry.chunkCount === "number" &&
     Array.isArray(entry.textHashes) &&
-    Array.isArray(entry.headingPaths)
+    Array.isArray(entry.headingPaths);
+
+  if (!isBaseEntry) {
+    return null;
+  }
+
+  return {
+    ...entry,
+    activeMarkdownContentHash:
+      typeof entry.activeMarkdownContentHash === "string"
+        ? entry.activeMarkdownContentHash
+        : null,
+    activeChunkSnapshot: Array.isArray(entry.activeChunkSnapshot)
+      ? entry.activeChunkSnapshot.filter(isLocalResourceVectorChunkSnapshot)
+      : [],
+  } as LocalResourceCatalogEntry;
+}
+
+function isLocalResourceVectorChunkSnapshot(
+  value: unknown,
+): value is LocalResourceVectorChunkSnapshot {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const chunk = value as Partial<LocalResourceVectorChunkSnapshot>;
+
+  return (
+    typeof chunk.chunkPublicId === "string" &&
+    typeof chunk.resourcePublicId === "string" &&
+    typeof chunk.resourceTitle === "string" &&
+    isProfession(chunk.profession) &&
+    (typeof chunk.level === "number" || chunk.level === null) &&
+    Array.isArray(chunk.headingPath) &&
+    chunk.headingPath.every((heading) => typeof heading === "string") &&
+    typeof chunk.chunkIndex === "number" &&
+    typeof chunk.text === "string" &&
+    typeof chunk.textHash === "string"
   );
 }
 
@@ -543,6 +599,22 @@ function createResourceVectorResult(
   };
 }
 
+function createLocalVectorChunkSnapshot(
+  chunkingResult: ReturnType<typeof buildResourceChunks>,
+): LocalResourceVectorChunkSnapshot[] {
+  return chunkingResult.chunks.map((chunk) => ({
+    chunkPublicId: chunk.chunkPublicId,
+    resourcePublicId: chunk.resourcePublicId,
+    resourceTitle: chunk.resourceTitle,
+    profession: chunk.profession,
+    level: chunk.level,
+    headingPath: [...chunk.headingPath],
+    chunkIndex: chunk.chunkIndex,
+    text: chunk.text,
+    textHash: chunk.textHash,
+  }));
+}
+
 async function rebuildResourceVector(input: {
   localResourceStorageRoot: string;
   resourceRepository: RagResourceRuntimeRepository;
@@ -697,6 +769,8 @@ async function uploadLocalResource(input: {
     chunkCount: 0,
     textHashes: [],
     headingPaths: parsedResource?.headingPaths ?? [],
+    activeMarkdownContentHash: null,
+    activeChunkSnapshot: [],
   };
   const nextCatalog = {
     resources: [
@@ -791,14 +865,21 @@ async function updateLocalResourceMarkdown(input: {
 
   const markdownContentHash = createMarkdownContentHash(markdownContent);
   const now = new Date().toISOString();
+  const hasActiveChunkSnapshot = resource.activeChunkSnapshot.length > 0;
   const nextResource: LocalResourceCatalogEntry = {
     ...resource,
     resourceStatus:
-      resource.resourceStatus === "disabled" ? "disabled" : "draft",
+      resource.resourceStatus === "disabled"
+        ? "disabled"
+        : resource.resourceStatus === "rag_ready" && hasActiveChunkSnapshot
+          ? "rag_ready"
+          : "draft",
     markdownContent,
     markdownContentHash,
     indexingErrorMessage: null,
-    isVectorStale: resource.resourceStatus === "rag_ready",
+    isVectorStale:
+      resource.isVectorStale ||
+      (resource.resourceStatus === "rag_ready" && hasActiveChunkSnapshot),
     updatedAt: now,
     headingPaths: markdownContent
       .split("\n")
@@ -880,11 +961,12 @@ async function rebuildLocalResourceVector(input: {
   const now = new Date().toISOString();
 
   if (chunkingResult.status === "skipped") {
+    const hasActiveChunkSnapshot = resource.activeChunkSnapshot.length > 0;
     const failedResource: LocalResourceCatalogEntry = {
       ...resource,
-      resourceStatus: "index_failed",
+      resourceStatus: hasActiveChunkSnapshot ? "rag_ready" : "index_failed",
       indexingErrorMessage: chunkingResult.skippedReason,
-      isVectorStale: false,
+      isVectorStale: hasActiveChunkSnapshot,
       updatedAt: now,
     };
 
@@ -908,6 +990,8 @@ async function rebuildLocalResourceVector(input: {
     chunkCount: chunkingResult.chunks.length,
     textHashes: chunkingResult.chunks.map((chunk) => chunk.textHash),
     headingPaths: chunkingResult.evidenceSummary.headingPaths,
+    activeMarkdownContentHash: resource.markdownContentHash,
+    activeChunkSnapshot: createLocalVectorChunkSnapshot(chunkingResult),
   };
 
   await saveLocalResource({
@@ -1025,32 +1109,18 @@ export async function buildLocalResourceRagRetrievalResult({
   const eligibleResources = catalog.resources.filter(
     (resource) =>
       resource.resourceStatus === "rag_ready" &&
-      resource.markdownContent !== null &&
-      resource.markdownContentHash !== null &&
+      (resource.activeChunkSnapshot.length > 0 ||
+        (resource.markdownContent !== null &&
+          resource.markdownContentHash !== null)) &&
       resource.profession === profession &&
       (level === null || resource.level === null || resource.level === level),
   );
   const authorizedPublicIds =
     authorizedResourcePublicIds ??
     eligibleResources.map((resource) => resource.publicId);
-  const chunks = eligibleResources.flatMap((resource) => {
-    const chunkingResult = buildResourceChunks({
-      resourcePublicId: resource.publicId,
-      resourceTitle: resource.title,
-      resourceStatus: resource.resourceStatus,
-      profession: resource.profession,
-      level: resource.level,
-      markdownContent: resource.markdownContent,
-      markdownContentHash: resource.markdownContentHash,
-    });
-
-    return chunkingResult.status === "chunked"
-      ? chunkingResult.chunks.map((chunk) => ({
-          ...chunk,
-          resourceStatus: resource.resourceStatus,
-        }))
-      : [];
-  });
+  const chunks = eligibleResources.flatMap((resource) =>
+    createLocalRetrievalChunks(resource),
+  );
 
   return buildRagRetrievalContextFromChunks({
     query,
@@ -1059,6 +1129,36 @@ export async function buildLocalResourceRagRetrievalResult({
     authorizedResourcePublicIds: authorizedPublicIds,
     chunks,
   });
+}
+
+function createLocalRetrievalChunks(resource: LocalResourceCatalogEntry) {
+  const isStale = resource.isVectorStale;
+
+  if (resource.activeChunkSnapshot.length > 0) {
+    return resource.activeChunkSnapshot.map((chunk) => ({
+      ...chunk,
+      resourceStatus: resource.resourceStatus,
+      isStale,
+    }));
+  }
+
+  const chunkingResult = buildResourceChunks({
+    resourcePublicId: resource.publicId,
+    resourceTitle: resource.title,
+    resourceStatus: resource.resourceStatus,
+    profession: resource.profession,
+    level: resource.level,
+    markdownContent: resource.markdownContent,
+    markdownContentHash: resource.markdownContentHash,
+  });
+
+  return chunkingResult.status === "chunked"
+    ? chunkingResult.chunks.map((chunk) => ({
+        ...chunk,
+        resourceStatus: resource.resourceStatus,
+        isStale,
+      }))
+    : [];
 }
 
 function mapKnowledgeNodeResult(

@@ -34,6 +34,7 @@ export type RagRetrievalChunkInput = {
   chunkIndex: number;
   text: string;
   textHash: string;
+  isStale?: boolean;
 };
 
 export type RagRetrievalFromChunksInput = Omit<

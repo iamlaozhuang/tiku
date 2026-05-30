@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-28T06:15:37-07:00"
+updatedAt: "2026-05-29T21:04:20-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -39,13 +39,13 @@ repository:
   lastKnownMasterSha: 315ab0e347d0d1358c891a977c477f120b3f1170
   lastKnownOriginMasterSha: 315ab0e347d0d1358c891a977c477f120b3f1170
 currentTask:
-  id: phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-28-phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion.md
-  branch: codex/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion
-  commitSha: 315ab0e347d0d1358c891a977c477f120b3f1170
+  id: phase-20-fix-ra-05-06-vector-rebuild-stale-marker
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-29-phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
+  branch: codex/phase-20-fix-ra-05-06-vector-rebuild-stale-marker
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Recommend the next pending task after confirming dependencies and high-risk gates. Do not claim auth_permission_model, database migration, dependency, secret/env, external service, deploy/cloud, real provider, or destructive-data work without explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-10-knowledge-ui-recommendation-binding-completion.md
+  nextRecommendedAction: "Continue claimed task phase-20-fix-ra-05-06-vector-rebuild-stale-marker on branch codex/phase-20-fix-ra-05-06-vector-rebuild-stale-marker. Keep implementation local-only and stop if schema/migration, dependency, env/secret, real provider/vector cloud, deploy/cloud, or destructive data work becomes necessary."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-06-vector-rebuild-stale-marker.md
