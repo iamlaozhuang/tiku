@@ -11399,7 +11399,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-01-async-ai-scoring-queue.md
-    status: validated
+    status: merged
     retryCount: 0
   - id: phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence
     title: Phase 20 Fix RA-04-02 AI Scoring Timeout Retry Persistence
