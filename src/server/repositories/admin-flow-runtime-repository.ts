@@ -51,13 +51,20 @@ export type AdminUserOrgAuthRuntimeRepository = {
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
   getUserDetail?(publicId: string): Promise<AdminUserDetailDto | null>;
-  resetUserPassword?(publicId: string): Promise<boolean>;
+  resetUserPassword?(
+    publicId: string,
+    input: UserPasswordResetRepositoryInput,
+  ): Promise<boolean>;
   disableUser?(publicId: string): Promise<boolean>;
   enableUser?(publicId: string): Promise<boolean>;
   revokeUserSessions?(publicId: string): Promise<boolean>;
   terminateUserActiveFlows?(
     publicId: string,
   ): Promise<UserActiveFlowTerminationResult>;
+};
+
+export type UserPasswordResetRepositoryInput = {
+  newPassword: string;
 };
 
 export type UserActiveFlowTerminationResult = {
@@ -394,7 +401,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         authorizations,
       };
     },
-    async resetUserPassword(publicId) {
+    async resetUserPassword(publicId, input) {
       const database = getDatabase();
       const [userRow] = await database
         .select({
@@ -411,7 +418,7 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         return false;
       }
 
-      const passwordHash = await hashPassword(`reset-${randomUUID()}`);
+      const passwordHash = await hashPassword(input.newPassword);
       const rows = await database
         .update(authAccount)
         .set({

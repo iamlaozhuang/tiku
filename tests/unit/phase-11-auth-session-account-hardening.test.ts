@@ -269,6 +269,8 @@ describe("phase 11 auth session account hardening", () => {
       new Request(
         "http://localhost/api/v1/users/user-public-001/reset-password",
         {
+          body: JSON.stringify({ newPassword: "ResetPass2026" }),
+          headers: { "content-type": "application/json" },
           method: "POST",
         },
       ),

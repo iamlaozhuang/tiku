@@ -213,12 +213,15 @@ function hasAdminOpsData(data: AdminOpsData): boolean {
 async function postAdminApi<TData>(
   path: string,
   sessionToken: string,
+  body?: Record<string, unknown>,
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
     headers: {
       authorization: `Bearer ${sessionToken}`,
+      ...(body === undefined ? {} : { "content-type": "application/json" }),
     },
     method: "POST",
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 
   return (await response.json()) as ApiResponse<TData | null>;
@@ -370,6 +373,7 @@ export function AdminOpsManagement() {
   const [sortOrder, setSortOrder] = useState(DEFAULT_SORT_ORDER);
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState>(null);
+  const [resetPasswordInput, setResetPasswordInput] = useState("");
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const [generatedRedeemCode, setGeneratedRedeemCode] =
     useState<GeneratedRedeemCode | null>(null);
@@ -520,6 +524,9 @@ export function AdminOpsManagement() {
       const userActionResponse = await postAdminApi<null>(
         `/api/v1/users/${confirmationState.publicId}/${actionPath}`,
         sessionToken,
+        confirmationState.kind === "resetPassword"
+          ? { newPassword: resetPasswordInput }
+          : undefined,
       );
 
       setConfirmationState(null);
@@ -547,6 +554,7 @@ export function AdminOpsManagement() {
             : "密码已重置，未返回明文密码",
         tone: "success",
       });
+      setResetPasswordInput("");
       return;
     }
 
@@ -864,16 +872,19 @@ export function AdminOpsManagement() {
         onEnableUser={(publicId) =>
           setConfirmationState({ kind: "enableUser", publicId })
         }
-        onResetPassword={(publicId) =>
-          setConfirmationState({ kind: "resetPassword", publicId })
-        }
+        onResetPassword={(publicId) => {
+          setResetPasswordInput("");
+          setConfirmationState({ kind: "resetPassword", publicId });
+        }}
       />
 
       {confirmationState === null ? null : (
         <AdminOpsConfirmationDialog
           confirmationState={confirmationState}
+          resetPasswordInput={resetPasswordInput}
           onCancel={() => setConfirmationState(null)}
           onConfirm={() => void handleConfirmAction()}
+          onResetPasswordInputChange={setResetPasswordInput}
         />
       )}
 
@@ -1134,16 +1145,23 @@ function AdminRow({
 
 function AdminOpsConfirmationDialog({
   confirmationState,
+  resetPasswordInput,
   onCancel,
   onConfirm,
+  onResetPasswordInputChange,
 }: {
   confirmationState: Exclude<ConfirmationState, null>;
+  resetPasswordInput: string;
   onCancel: () => void;
   onConfirm: () => void;
+  onResetPasswordInputChange: (value: string) => void;
 }) {
   const isResetPassword = confirmationState.kind === "resetPassword";
   const isDisableUser = confirmationState.kind === "disableUser";
   const isEnableUser = confirmationState.kind === "enableUser";
+  const canConfirm =
+    !isResetPassword ||
+    /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(resetPasswordInput.trim());
   const title = isResetPassword
     ? "确认重置用户密码？"
     : isDisableUser
@@ -1182,8 +1200,20 @@ function AdminOpsConfirmationDialog({
                 ? "启用用户只恢复账号状态，不创建新授权。"
                 : "批量生成卡密必须由后端原子操作保护；当前提示并发冲突以防止重复生成。"}
         </p>
+        {isResetPassword ? (
+          <Input
+            aria-label="reset-password-new-password"
+            autoComplete="new-password"
+            onChange={(event) =>
+              onResetPasswordInputChange(event.currentTarget.value)
+            }
+            type="password"
+            value={resetPasswordInput}
+          />
+        ) : null}
         <div className="flex gap-2">
           <Button
+            disabled={!canConfirm}
             variant={isResetPassword ? "default" : "destructive"}
             onClick={onConfirm}
           >

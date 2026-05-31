@@ -390,7 +390,14 @@ describe("phase 20 RA-06-02 user management role detail alignment", () => {
     const resetResponse = await opsHandlers.users.resetPassword.POST(
       new Request(
         "http://localhost/api/v1/users/user-public-001/reset-password",
-        { method: "POST", headers },
+        {
+          body: JSON.stringify({ newPassword: "ResetPass2026" }),
+          method: "POST",
+          headers: {
+            ...headers,
+            "content-type": "application/json",
+          },
+        },
       ),
       { params: Promise.resolve({ publicId: "user-public-001" }) },
     );

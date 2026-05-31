@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-31T02:45:00-07:00"
+updatedAt: "2026-05-31T04:20:23-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -39,13 +39,13 @@ repository:
   lastKnownMasterSha: ac59aa53861b026b498b51b52ae334eaaab500e9
   lastKnownOriginMasterSha: ac59aa53861b026b498b51b52ae334eaaab500e9
 currentTask:
-  id: phase-20-fix-ra-01-12-employee-transfer-unbind
-  status: closed
+  id: phase-20-fix-ra-01-05-password-reset-ops-flow
+  status: active
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-12-employee-transfer-unbind.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-12-employee-transfer-unbind.md
-  branch: null
-  commitSha: c3822656b1d6fedbde2c78f527fe0f2322b71885
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-05-password-reset-ops-flow.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-05-password-reset-ops-flow.md
+  branch: codex/phase-20-fix-ra-01-05-password-reset-ops-flow
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
