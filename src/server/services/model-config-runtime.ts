@@ -3,6 +3,11 @@ import {
   type AiFuncType,
   type ModelConfigSnapshot,
 } from "../models/ai-rag";
+import type {
+  AdminAiFunctionType,
+  ModelConfigSummaryDto,
+  PromptTemplateSummaryDto,
+} from "../contracts/admin-ai-audit-log-ops-contract";
 
 export type ModelConfigRuntimePromptTemplate = {
   promptTemplateKey: string;
@@ -37,6 +42,11 @@ export type RedactedModelConfigRuntimeSnapshot = {
 
 export type ModelConfigRuntimeCatalog = {
   records: ModelConfigRuntimeRecord[];
+};
+
+export type PersistedModelConfigRuntimeCatalogInput = {
+  modelConfigs: ModelConfigSummaryDto[];
+  promptTemplates: PromptTemplateSummaryDto[];
 };
 
 export type ModelConfigRuntimeCatalogOverrides = Record<
@@ -146,6 +156,98 @@ export function createRedactedModelConfigRuntimeSnapshot(
     promptTemplateVersion: snapshot.promptTemplateVersion,
     snapshotPolicy: "redacted_metadata",
     providerMode: "local_mock",
+  };
+}
+
+function toRuntimeAiFuncType(value: AdminAiFunctionType): AiFuncType {
+  if (value === "ai_scoring") {
+    return "scoring";
+  }
+
+  if (value === "ai_explanation") {
+    return "explanation";
+  }
+
+  if (value === "ai_hint") {
+    return "hint";
+  }
+
+  return value;
+}
+
+function toDefaultPromptTemplateKey(aiFuncType: AiFuncType): string {
+  if (aiFuncType === "scoring") {
+    return "ai_scoring_v1";
+  }
+
+  if (aiFuncType === "explanation") {
+    return "ai_explanation_v1";
+  }
+
+  if (aiFuncType === "hint") {
+    return "ai_hint_v1";
+  }
+
+  return `${aiFuncType}_v1`;
+}
+
+function findPromptTemplate(
+  modelConfig: ModelConfigSummaryDto,
+  promptTemplates: PromptTemplateSummaryDto[],
+): PromptTemplateSummaryDto | null {
+  return (
+    promptTemplates
+      .filter(
+        (promptTemplate) =>
+          promptTemplate.aiFuncType === modelConfig.aiFuncType &&
+          promptTemplate.isActive &&
+          promptTemplate.status === "active",
+      )
+      .sort((left, right) => right.version - left.version)[0] ?? null
+  );
+}
+
+export function createPersistedModelConfigRuntimeCatalog(
+  input: PersistedModelConfigRuntimeCatalogInput,
+): ModelConfigRuntimeCatalog {
+  return {
+    records: input.modelConfigs.map((modelConfig) => {
+      const aiFuncType = toRuntimeAiFuncType(modelConfig.aiFuncType);
+      const promptTemplate = findPromptTemplate(
+        modelConfig,
+        input.promptTemplates,
+      );
+      const promptTemplateKey =
+        promptTemplate?.promptTemplateKey ??
+        toDefaultPromptTemplateKey(aiFuncType);
+      const promptTemplateVersion = promptTemplate?.version ?? 1;
+
+      return {
+        modelConfigSnapshot: createModelConfigSnapshot({
+          providerPublicId: modelConfig.providerPublicId,
+          providerKey: modelConfig.providerKey,
+          providerDisplayName: modelConfig.providerDisplayName,
+          modelConfigPublicId: modelConfig.publicId,
+          aiFuncType,
+          modelName: modelConfig.modelName,
+          displayName: modelConfig.displayName,
+          configVersion: modelConfig.configVersion,
+          timeoutSecond: modelConfig.timeoutSecond,
+          maxRetryCount: modelConfig.maxRetryCount,
+          fallbackModelConfigPublicId: modelConfig.fallbackModelConfigPublicId,
+          promptTemplateKey,
+          promptTemplateVersion,
+        }),
+        promptTemplate: {
+          promptTemplateKey,
+          version: promptTemplateVersion,
+          templateHash:
+            promptTemplate?.bodyDigest ?? `${promptTemplateKey}_baseline`,
+        },
+        isEnabled: modelConfig.isEnabled && modelConfig.status === "enabled",
+        priority: modelConfig.fallbackPriority,
+      };
+    }),
   };
 }
 
