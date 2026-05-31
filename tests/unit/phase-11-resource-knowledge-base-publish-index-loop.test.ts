@@ -690,4 +690,73 @@ describe("phase 11 resource knowledge_base publish index loop", () => {
       citations: [],
     });
   });
+
+  it("marks DOCX PPTX and PDF local resource uploads as conversion failed without converter dependencies", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-resource-formats-"));
+    const handlers = createRagResourceKnowledgeRuntimeRouteHandlers({
+      localResourceStorageRoot: storageRoot,
+      repositories: createRepositories({
+        auditLogEntries: [],
+        publishCalls: [],
+      }),
+      sessionService: createAdminSessionService(),
+    });
+    const fileNames = [
+      "controlled-resource.docx",
+      "controlled-resource.pptx",
+      "controlled-resource.pdf",
+    ];
+
+    for (const fileName of fileNames) {
+      const formData = new FormData();
+
+      formData.set("title", `${fileName} 本地转换验证`);
+      formData.set("profession", "marketing");
+      formData.set("level", "3");
+      formData.set("resourceType", "knowledge_doc");
+      formData.set("fileName", fileName);
+      formData.set(
+        "file",
+        new File(["controlled binary placeholder"], fileName, {
+          type: "application/octet-stream",
+        }),
+      );
+
+      const uploadResponse = await handlers.resources.collection.POST(
+        new Request("http://localhost/api/v1/resources", {
+          body: formData,
+          headers: { authorization: "Bearer admin-session-token" },
+          method: "POST",
+        }),
+      );
+      const uploadPayload = await uploadResponse.json();
+
+      expect(uploadPayload).toMatchObject({
+        code: 0,
+        message: "ok",
+        data: {
+          resource: {
+            originalFileName: fileName,
+            resourceStatus: "conversion_failed",
+            markdownPreviewAvailable: false,
+            indexingErrorSummary: "converter_unavailable",
+          },
+          localResource: {
+            parserMode: "local_only",
+            markdownContentHash: null,
+            charLength: 0,
+            lineCount: 0,
+            chunkCandidateCount: 0,
+            headingPaths: [],
+            redactedPreview: null,
+            skippedReason: "converter_unavailable",
+          },
+        },
+      });
+      expect(JSON.stringify(uploadPayload)).not.toContain(storageRoot);
+      expect(JSON.stringify(uploadPayload)).not.toContain(
+        "controlled binary placeholder",
+      );
+    }
+  });
 });
