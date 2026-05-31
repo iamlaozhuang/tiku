@@ -2,12 +2,12 @@
 
 ## Summary
 
-- Result: pass, pending git closeout.
+- Result: pass.
 - Scope: implementation/local_verification.
 - Task id: `phase-20-fix-ra-05-09-report-knowledge-analysis`.
 - Branch: `codex/phase-20-fix-ra-05-09-report-knowledge-analysis`.
 - Changed surfaces: exam report local snapshot aggregation, student report snapshot display, unit tests, task plan, evidence, project state, task queue.
-- Gates: task claim readiness pass; RED tests observed; target unit pass; full unit pass; e2e pass after rerun; build pass; readiness pass; naming pass; git inventory pass; quality gate pass; diff check pass.
+- Gates: task claim readiness pass; RED tests observed; target unit pass; full unit pass; e2e pass after rerun; build pass; readiness pass; naming pass; git inventory pass; quality gate pass; diff check pass; master validation pass; push pass; cleanup pass.
 - Forbidden scope (`forbiddenScope`): no `.env.local` content opened or copied, no `.env.example`, no package/lockfile/dependency change, no `src/db/schema/**`, no `drizzle/**`, no `scripts/**`, no staging/prod/cloud/real provider, no external service configuration change, no destructive data operation, no `drizzle-kit push`.
 - Residual gaps (`residualGaps`): this task validates local snapshot/runtime/UI behavior only. Production database migration, real historical data backfill, and customer/staging acceptance remain blocked by separate approval gates and are not claimed.
 
@@ -94,7 +94,14 @@ User approved this task on 2026-05-30. The approval includes `database_migration
   - `src/server/services/exam-report-service.ts`
   - `src/server/services/exam-report-service.test.ts`
   - `tests/unit/student-mock-exam-report-ui.test.ts`
-- implementation commit: pending.
-- merge: pending.
-- push: pending.
-- cleanup: pending.
+- implementation commit: `16e48685838abc59606d3a05ed8aee59bfd32108`
+- merge: `620980b355f8ff5e96c1d9c894ab6c6b2dcd4d81` on `master`
+- master validation after merge:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass; lint, typecheck, 136 unit files / 580 tests, and format check passed.
+  - `npm.cmd run build`: pass; Next.js production build compiled successfully and generated 50 static pages. Build log mentioned `.env.local` existence; contents were not opened or copied.
+  - `npm.cmd run test:e2e`: pass; 25 tests passed.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass; master was ahead 2 before push.
+- push: `git push origin master` succeeded; `master -> origin/master` advanced from `7320537` to `620980b`.
+- cleanup: local short-lived branch `codex/phase-20-fix-ra-05-09-report-knowledge-analysis` deleted after merge and push. Post-cleanup checks passed: `git status --short --branch` clean on `master`, `git rev-list --left-right --count master...origin/master` returned `0 0`, `git branch --list codex/*` returned no branches, and `git worktree list` returned only `D:/tiku`.
+- cleanup docs commit: pending.
