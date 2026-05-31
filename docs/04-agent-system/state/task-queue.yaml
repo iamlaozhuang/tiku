@@ -12423,7 +12423,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-02-user-management-role-detail-alignment.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-06-03-organization-employee-management-completion
     title: Phase 20 Fix RA-06-03 Organization Employee Management Completion

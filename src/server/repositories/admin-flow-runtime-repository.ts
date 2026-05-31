@@ -31,6 +31,7 @@ import type {
 } from "../contracts/admin-content-knowledge-ops-contract";
 import type {
   AdminAuthOperationListQuery,
+  AdminUserDetailDto,
   AdminUserListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import { getSharedRuntimePostgresClient } from "./runtime-database";
@@ -49,6 +50,7 @@ export type AdminUserOrgAuthRuntimeRepository = {
   listUsers(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminFlowPage<AdminUserListDto>>;
+  getUserDetail?(publicId: string): Promise<AdminUserDetailDto | null>;
   resetUserPassword?(publicId: string): Promise<boolean>;
   disableUser?(publicId: string): Promise<boolean>;
   enableUser?(publicId: string): Promise<boolean>;
@@ -87,6 +89,8 @@ const {
   authSession,
   employee,
   mockExam,
+  orgAuth,
+  orgAuthOrganization,
   organization,
   paper,
   paperQuestion,
@@ -193,6 +197,194 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
         pagination: createPagination(query, totalRow?.value ?? 0),
       };
     },
+    async getUserDetail(publicId) {
+      const database = getDatabase();
+      const [userDetailRow] = await database
+        .select({
+          created_at: user.created_at,
+          employee_public_id: employee.public_id,
+          internal_organization_id: organization.id,
+          internal_user_id: user.id,
+          name: user.name,
+          organization_name: organization.name,
+          organization_public_id: organization.public_id,
+          organization_tier: organization.org_tier,
+          phone: user.phone,
+          public_id: user.public_id,
+          status: user.status,
+          user_type: user.user_type,
+        })
+        .from(user)
+        .leftJoin(employee, eq(employee.user_id, user.id))
+        .leftJoin(organization, eq(organization.id, employee.organization_id))
+        .where(eq(user.public_id, publicId))
+        .limit(1);
+
+      if (userDetailRow === undefined) {
+        return null;
+      }
+
+      const personalAuthRows = await database
+        .select({
+          expires_at: personalAuth.expires_at,
+          level: personalAuth.level,
+          profession: personalAuth.profession,
+          public_id: personalAuth.public_id,
+          starts_at: personalAuth.starts_at,
+          status: personalAuth.status,
+        })
+        .from(personalAuth)
+        .where(eq(personalAuth.user_id, userDetailRow.internal_user_id))
+        .orderBy(desc(personalAuth.updated_at));
+      const organizationAuthRows =
+        userDetailRow.internal_organization_id === null
+          ? []
+          : await database
+              .select({
+                account_quota: orgAuth.account_quota,
+                auth_scope_type: orgAuth.auth_scope_type,
+                expires_at: orgAuth.expires_at,
+                internal_org_auth_id: orgAuth.id,
+                internal_purchaser_organization_id:
+                  orgAuth.purchaser_organization_id,
+                level: orgAuth.level,
+                profession: orgAuth.profession,
+                public_id: orgAuth.public_id,
+                starts_at: orgAuth.starts_at,
+                status: orgAuth.status,
+                used_quota: orgAuth.used_quota,
+              })
+              .from(orgAuth)
+              .innerJoin(
+                orgAuthOrganization,
+                eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+              )
+              .where(
+                eq(
+                  orgAuthOrganization.organization_id,
+                  userDetailRow.internal_organization_id,
+                ),
+              )
+              .orderBy(desc(orgAuth.updated_at));
+      const orgAuthIds = organizationAuthRows.map(
+        (authorizationRow) => authorizationRow.internal_org_auth_id,
+      );
+      const scopeOrganizationRows =
+        orgAuthIds.length === 0
+          ? []
+          : await database
+              .select({
+                internal_org_auth_id: orgAuthOrganization.org_auth_id,
+                organization_public_id: organization.public_id,
+              })
+              .from(orgAuthOrganization)
+              .innerJoin(
+                organization,
+                eq(organization.id, orgAuthOrganization.organization_id),
+              )
+              .where(inArray(orgAuthOrganization.org_auth_id, orgAuthIds));
+      const purchaserOrganizationIds = [
+        ...new Set(
+          organizationAuthRows.map(
+            (authorizationRow) =>
+              authorizationRow.internal_purchaser_organization_id,
+          ),
+        ),
+      ];
+      const purchaserOrganizationRows =
+        purchaserOrganizationIds.length === 0
+          ? []
+          : await database
+              .select({
+                internal_organization_id: organization.id,
+                name: organization.name,
+              })
+              .from(organization)
+              .where(inArray(organization.id, purchaserOrganizationIds));
+      const scopeOrganizationPublicIdsByAuth = new Map<number, string[]>();
+
+      scopeOrganizationRows.forEach((scopeRow) => {
+        const currentPublicIds =
+          scopeOrganizationPublicIdsByAuth.get(scopeRow.internal_org_auth_id) ??
+          [];
+
+        scopeOrganizationPublicIdsByAuth.set(scopeRow.internal_org_auth_id, [
+          ...currentPublicIds,
+          scopeRow.organization_public_id,
+        ]);
+      });
+
+      const purchaserNameById = new Map(
+        purchaserOrganizationRows.map((organizationRow) => [
+          organizationRow.internal_organization_id,
+          organizationRow.name,
+        ]),
+      );
+      const authorizations: AdminUserDetailDto["authorizations"] = [
+        ...personalAuthRows.map((authorizationRow) => ({
+          publicId: authorizationRow.public_id,
+          authorizationType: "personal_auth" as const,
+          purchaserName: null,
+          authScopeType: null,
+          profession: authorizationRow.profession,
+          level: authorizationRow.level,
+          accountQuota: null,
+          usedQuota: null,
+          startsAt: formatNullableDate(authorizationRow.starts_at),
+          expiresAt: formatNullableDate(authorizationRow.expires_at),
+          status: authorizationRow.status,
+          organizationPublicIds: [],
+        })),
+        ...organizationAuthRows.map((authorizationRow) => ({
+          publicId: authorizationRow.public_id,
+          authorizationType: "org_auth" as const,
+          purchaserName:
+            purchaserNameById.get(
+              authorizationRow.internal_purchaser_organization_id,
+            ) ?? null,
+          authScopeType: authorizationRow.auth_scope_type,
+          profession: authorizationRow.profession,
+          level: authorizationRow.level,
+          accountQuota: authorizationRow.account_quota,
+          usedQuota: authorizationRow.used_quota,
+          startsAt: formatNullableDate(authorizationRow.starts_at),
+          expiresAt: formatNullableDate(authorizationRow.expires_at),
+          status: authorizationRow.status,
+          organizationPublicIds:
+            scopeOrganizationPublicIdsByAuth.get(
+              authorizationRow.internal_org_auth_id,
+            ) ?? [],
+        })),
+      ];
+
+      return {
+        user: {
+          publicId: userDetailRow.public_id,
+          phone: userDetailRow.phone,
+          name: userDetailRow.name,
+          registeredAt: userDetailRow.created_at.toISOString(),
+          status: userDetailRow.status,
+          userType: userDetailRow.user_type,
+          organizationPublicId: userDetailRow.organization_public_id,
+          organizationName: userDetailRow.organization_name,
+          authStatus: authorizations[0]?.status ?? null,
+        },
+        enterpriseBinding:
+          userDetailRow.employee_public_id === null ||
+          userDetailRow.organization_public_id === null ||
+          userDetailRow.organization_name === null ||
+          userDetailRow.organization_tier === null
+            ? null
+            : {
+                employeePublicId: userDetailRow.employee_public_id,
+                organizationPublicId: userDetailRow.organization_public_id,
+                organizationName: userDetailRow.organization_name,
+                orgTier: userDetailRow.organization_tier,
+                status: userDetailRow.status,
+              },
+        authorizations,
+      };
+    },
     async resetUserPassword(publicId) {
       const database = getDatabase();
       const [userRow] = await database
@@ -234,6 +426,10 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
       return revokeUserSessions(getDatabase(), publicId);
     },
   };
+}
+
+function formatNullableDate(value: Date | null): string | null {
+  return value === null ? null : value.toISOString();
 }
 
 async function updateUserStatus(

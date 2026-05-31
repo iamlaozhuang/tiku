@@ -67,6 +67,10 @@ const userLifecycleMutationUnavailableResponse = createErrorResponse(
   503602,
   "Admin user lifecycle runtime is not configured.",
 );
+const userDetailUnavailableResponse = createErrorResponse(
+  503603,
+  "Admin user detail runtime is not configured.",
+);
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -112,11 +116,21 @@ function canReadAuditLogs(actor: AdminFlowActor): boolean {
 }
 
 function canResetUserPassword(actor: AdminFlowActor): boolean {
-  return actor.roles.includes("super_admin");
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
 }
 
 function canManageUserLifecycle(actor: AdminFlowActor): boolean {
-  return actor.roles.includes("super_admin");
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
+}
+
+function canReadUserManagement(actor: AdminFlowActor): boolean {
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
 }
 
 function readRequestIp(request: Request): string | null {
@@ -365,7 +379,9 @@ export function createAdminFlowRuntimeRouteHandlers(
             return createJsonResponse(adminSessionRequiredResponse);
           }
 
-          void actor;
+          if (!canReadUserManagement(actor)) {
+            return createJsonResponse(adminUserPermissionDeniedResponse);
+          }
 
           const result = await repositories.userOrgAuthRepository.listUsers(
             readAdminAuthOperationListQuery(request),
@@ -373,6 +389,36 @@ export function createAdminFlowRuntimeRouteHandlers(
 
           return createJsonResponse(
             createPaginatedResponse({ users: result.users }, result.pagination),
+          );
+        },
+      },
+      detail: {
+        async GET(
+          request: Request,
+          context: { params: Promise<{ publicId: string }> },
+        ): Promise<Response> {
+          const actor = await requireAdminActor(request);
+          const { publicId } = await context.params;
+
+          if (actor === null) {
+            return createJsonResponse(adminSessionRequiredResponse);
+          }
+
+          if (!canReadUserManagement(actor)) {
+            return createJsonResponse(adminUserPermissionDeniedResponse);
+          }
+
+          if (repositories.userOrgAuthRepository.getUserDetail === undefined) {
+            return createJsonResponse(userDetailUnavailableResponse);
+          }
+
+          const userDetail =
+            await repositories.userOrgAuthRepository.getUserDetail(publicId);
+
+          return createJsonResponse(
+            userDetail === null
+              ? userNotFoundResponse
+              : createSuccessResponse(userDetail),
           );
         },
       },
