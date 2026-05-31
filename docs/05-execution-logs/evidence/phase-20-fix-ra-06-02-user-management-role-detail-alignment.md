@@ -108,7 +108,22 @@
 
 - Branch: `codex/phase-20-fix-ra-06-02-user-management-role-detail-alignment`.
 - Base: `master`.
-- Commit: pending.
-- Merge: pending.
-- Push: pending.
-- Cleanup: pending.
+- Implementation commit: `a0a038842970aa1df7f468f1b6385c56fe8de97e` (`fix(admin): align user management role detail`).
+- Merge commit: `81b639ff0fbbcf0374ad41caae4540e15882d6cb` (`merge: phase 20 ra 06 02 user management alignment`).
+- Master validation after merge:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass; master ahead 2 before push with expected files only.
+  - `git diff --check`: pass.
+  - `npm.cmd run build`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass.
+  - `npm.cmd run test:e2e`: pass, 25/25.
+- Push: `git push origin master` pass; `origin/master` updated from `4c3a98b` to `81b639f`.
+- Cleanup:
+  - Local short-lived branch deleted: `git branch -d codex/phase-20-fix-ra-06-02-user-management-role-detail-alignment`.
+  - `git rev-parse master`: `81b639ff0fbbcf0374ad41caae4540e15882d6cb`.
+  - `git rev-parse origin/master`: `81b639ff0fbbcf0374ad41caae4540e15882d6cb`.
+  - `git status --short --branch`: clean before cleanup docs update.
+  - `git branch --list "codex/*"`: none.
+  - `git worktree list --porcelain`: only `D:/tiku` on `master`.
+- Cleanup docs commit: pending; this evidence update and state closeout will be committed separately.

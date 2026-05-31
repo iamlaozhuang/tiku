@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 4c3a98b3a955a447197b261e2981d322a587ac92
-  lastKnownOriginMasterSha: 4c3a98b3a955a447197b261e2981d322a587ac92
+  lastKnownMasterSha: 81b639ff0fbbcf0374ad41caae4540e15882d6cb
+  lastKnownOriginMasterSha: 81b639ff0fbbcf0374ad41caae4540e15882d6cb
 currentTask:
   id: phase-20-fix-ra-06-02-user-management-role-detail-alignment
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-06-02-user-management-role-detail-alignment.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-02-user-management-role-detail-alignment.md
   branch: codex/phase-20-fix-ra-06-02-user-management-role-detail-alignment
-  commitSha: null
+  commitSha: a0a038842970aa1df7f468f1b6385c56fe8de97e
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Task phase-20-fix-ra-06-02-user-management-role-detail-alignment is validated on codex/phase-20-fix-ra-06-02-user-management-role-detail-alignment. Next: commit the task, merge into master, validate on master, push origin/master, delete the short-lived branch, then write cleanup evidence and close the queue entry. Keep schema, drizzle, dependencies, env, cloud/deploy, real provider, and destructive data operations blocked."
+  nextRecommendedAction: "Task phase-20-fix-ra-06-02-user-management-role-detail-alignment is implemented, merged into master, pushed to origin/master, and short-lived branch cleanup is complete. Next eligible user-approved task in the ordered candidate list is phase-20-fix-ra-06-03-organization-employee-management-completion after confirming dependencies, high-risk approval, and clean/aligned master. Keep schema, drizzle, dependencies, env, cloud/deploy, real provider, and destructive data operations blocked."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-02-user-management-role-detail-alignment.md
