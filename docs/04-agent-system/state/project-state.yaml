@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-21-high-risk-tail-closure
-updatedAt: "2026-05-31T10:59:06-07:00"
+updatedAt: "2026-05-31T16:45:07-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 183a9d438d94e9f091cde2edfda1cc498ad0a376
-  lastKnownOriginMasterSha: 183a9d438d94e9f091cde2edfda1cc498ad0a376
+  lastKnownMasterSha: c9b10ed55c8d846e24f55ee16e698e99573c8b99
+  lastKnownOriginMasterSha: c9b10ed55c8d846e24f55ee16e698e99573c8b99
 currentTask:
-  id: phase-21-ai-scoring-retry-persistence-implementation
+  id: phase-21-admin-common-ux-state-audit-startup
   status: closed
-  sourceStory: user-request-2026-05-31-ai-scoring-retry-persistence-implementation
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-ai-scoring-retry-persistence-implementation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation.md
-  branch: codex/phase-21-ai-scoring-retry-persistence-implementation
+  sourceStory: user-request-2026-05-31-continue-phase-21-next-high-risk-tail
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-admin-common-ux-state-audit-startup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-common-ux-state-audit-startup.md
+  branch: codex/phase-21-admin-common-ux-state-audit-startup
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "AI scoring retry persistence is merged to master locally and post-merge gates are recorded. Actual database migration remains pending until the target database is explicitly confirmed as local/development-only."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-post-merge.md
+  nextRecommendedAction: "Pause after the admin common UX state audit startup commit and wait for explicit implementation approval using the prompt in the evidence/task plan."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-admin-common-ux-state-audit-startup.md
