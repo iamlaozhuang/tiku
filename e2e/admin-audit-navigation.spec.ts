@@ -155,4 +155,57 @@ test.describe("admin audit navigation", () => {
       snapshotPolicy: "redacted_metadata",
     });
   });
+
+  test("manages contact_config runtime from the admin shell", async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+
+    await page.getByRole("link", { name: /contact_config/u }).click();
+
+    await expect(page).toHaveURL(/\/ops\/contact-config$/);
+    await expect(page.getByTestId("admin-contact-config-page")).toBeVisible();
+
+    const updatedTitle = `Purchase support ${Date.now()}`;
+
+    await page.getByLabel("Contact config title").fill(updatedTitle);
+    await page
+      .getByLabel("Contact config summary")
+      .fill("Use verified local operations channels.");
+    await page.getByLabel("Contact config channel value").fill("400-000-2026");
+    await page.getByRole("button", { name: /Save contact config/u }).click();
+    await expect(page.getByTestId("admin-contact-config-toast")).toContainText(
+      "Contact config saved.",
+    );
+
+    const contactConfigRuntime = await page.evaluate(async () => {
+      const sessionToken = localStorage.getItem("tiku.localSessionToken");
+
+      if (sessionToken === null) {
+        throw new Error("missing local admin session");
+      }
+
+      const response = await fetch("/api/v1/contact-configs", {
+        headers: { authorization: `Bearer ${sessionToken}` },
+      });
+
+      return {
+        body: await response.json(),
+        status: response.status,
+      };
+    });
+
+    expectStandardEnvelope(contactConfigRuntime.body);
+    expectForbiddenPayloadMarkersHidden(contactConfigRuntime.body);
+    expect(contactConfigRuntime.body).toMatchObject({
+      code: 0,
+      data: {
+        contactConfig: {
+          publicId: "contact-config-local-purchase-guidance",
+          title: updatedTitle,
+        },
+      },
+      message: "ok",
+    });
+  });
 });
