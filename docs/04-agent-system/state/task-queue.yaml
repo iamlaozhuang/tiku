@@ -13215,3 +13215,48 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
     status: closed
     retryCount: 0
+  - id: phase-21-ai-scoring-retry-persistence-implementation-startup
+    title: Phase 21 AI Scoring Retry Persistence Implementation Startup
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-05-31-ai-scoring-retry-persistence-implementation-startup
+    dependencies:
+      - phase-21-historical-queue-closeout-governance
+      - phase-21-tail-ai-scoring-retry-persistence-design
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved only startup preparation and approval checklist work for AI scoring retry persistence implementation. This task may register the fresh task, create the task plan, write approval checklist and evidence, and run local validation. It does not approve schema, Drizzle, migration, source, tests, e2e, scripts, dependencies, lockfiles, env files, staging, prod, cloud, deploy, real provider, external service, destructive data, force push, unknown worktree deletion, or unmerged branch deletion.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-05-31-ai-scoring-retry-persistence-implementation-startup.md
+      - docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation-startup.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - implementation_planning
+      - evidence_integrity
+      - blocked_gate
+      - automation_state
+      - ai_runtime
+      - database_migration
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-31-ai-scoring-retry-persistence-implementation-startup.md docs\05-execution-logs\evidence\2026-05-31-ai-scoring-retry-persistence-implementation-startup.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation-startup.md
+    status: committed
+    retryCount: 0
