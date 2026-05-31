@@ -112,6 +112,16 @@ type ReportFillBlankAnswer = {
   sortOrder: number;
 };
 
+type KnowledgeNodeAnalysisAccumulator = {
+  knowledgeNodePublicId: string;
+  questionPublicIds: string[];
+  questionCount: number;
+  answeredCount: number;
+  correctCount: number;
+  score: number;
+  maxScore: number;
+};
+
 function hasEffectiveAuthorization(
   scopes: ExamReportAuthorizationScopeRow[],
   reportScope: { profession: ExamReportRow["profession"]; level: number },
@@ -146,6 +156,28 @@ function getScore(value: Record<string, unknown>): string {
   }
 
   return typeof score === "string" && score.length > 0 ? score : "0.0";
+}
+
+function parseScore(score: string | null): number {
+  if (score === null) {
+    return 0;
+  }
+
+  const parsedScore = Number.parseFloat(score);
+
+  return Number.isFinite(parsedScore) ? parsedScore : 0;
+}
+
+function formatScore(score: number): string {
+  return score.toFixed(1);
+}
+
+function formatRate(numerator: number, denominator: number): number {
+  if (denominator <= 0) {
+    return 0;
+  }
+
+  return Math.round((numerator / denominator) * 100);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -408,6 +440,98 @@ function buildAnalyticsSummary(questions: ReportPaperQuestionSnapshot[]) {
   };
 }
 
+function buildKnowledgeNodeAnalysis(
+  questions: ReportPaperQuestionSnapshot[],
+  answerRecords: ExamReportAnswerRecordRow[],
+) {
+  const answerByPaperQuestion = new Map(
+    answerRecords.map((answerRecord) => [
+      answerRecord.paper_question_public_id,
+      answerRecord,
+    ]),
+  );
+  const accumulatorByKnowledgeNodePublicId = new Map<
+    string,
+    KnowledgeNodeAnalysisAccumulator
+  >();
+
+  questions.forEach((question) => {
+    const answerRecord = answerByPaperQuestion.get(
+      question.paperQuestionPublicId,
+    );
+    const score = parseScore(
+      answerRecord?.score ?? (question.isObjective ? "0.0" : null),
+    );
+    const maxScore = parseScore(question.maxScore);
+    const isAnswered = answerRecord !== undefined;
+    const isCorrect = answerRecord?.is_correct === true;
+
+    question.knowledgeNodePublicIds.forEach((knowledgeNodePublicId) => {
+      const accumulator = accumulatorByKnowledgeNodePublicId.get(
+        knowledgeNodePublicId,
+      ) ?? {
+        knowledgeNodePublicId,
+        questionPublicIds: [],
+        questionCount: 0,
+        answeredCount: 0,
+        correctCount: 0,
+        score: 0,
+        maxScore: 0,
+      };
+
+      accumulator.questionPublicIds.push(question.questionPublicId);
+      accumulator.questionCount += 1;
+      accumulator.answeredCount += isAnswered ? 1 : 0;
+      accumulator.correctCount += isCorrect ? 1 : 0;
+      accumulator.score += score;
+      accumulator.maxScore += maxScore;
+      accumulatorByKnowledgeNodePublicId.set(
+        knowledgeNodePublicId,
+        accumulator,
+      );
+    });
+  });
+
+  const knowledgeNodeAnalysis = [...accumulatorByKnowledgeNodePublicId.values()]
+    .map((accumulator) => ({
+      knowledgeNodePublicId: accumulator.knowledgeNodePublicId,
+      questionCount: accumulator.questionCount,
+      answeredCount: accumulator.answeredCount,
+      correctCount: accumulator.correctCount,
+      score: formatScore(accumulator.score),
+      maxScore: formatScore(accumulator.maxScore),
+      scoreRate: formatRate(accumulator.score, accumulator.maxScore),
+      accuracyRate: formatRate(
+        accumulator.correctCount,
+        accumulator.questionCount,
+      ),
+      questionPublicIds: accumulator.questionPublicIds,
+    }))
+    .sort(
+      (left, right) =>
+        left.scoreRate - right.scoreRate ||
+        left.accuracyRate - right.accuracyRate ||
+        left.knowledgeNodePublicId.localeCompare(right.knowledgeNodePublicId),
+    )
+    .map((analysisItem, index) => ({
+      ...analysisItem,
+      weaknessRank: index + 1,
+    }));
+
+  return {
+    knowledgeNodeAnalysis,
+    knowledgeNodeWeaknessSummaryText:
+      knowledgeNodeAnalysis.length === 0
+        ? null
+        : `knowledge_node weakness: ${knowledgeNodeAnalysis
+            .map(
+              (analysisItem) =>
+                `${analysisItem.knowledgeNodePublicId} score_rate ${analysisItem.scoreRate}% accuracy ${analysisItem.accuracyRate}% score ${analysisItem.score}/${analysisItem.maxScore}`,
+            )
+            .join("; ")}`,
+  };
+}
+
 function formatSelectedAnswer(
   answerSnapshot: ExamReportAnswerRecordRow["answer_snapshot"] | null,
 ): string | null {
@@ -498,6 +622,7 @@ function buildReportSnapshot(
       answerRecords,
     ),
     ...buildAnalyticsSummary(questions),
+    ...buildKnowledgeNodeAnalysis(questions, answerRecords),
     learningSuggestionStatus: null,
   };
 }

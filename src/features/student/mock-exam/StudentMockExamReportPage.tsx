@@ -233,6 +233,19 @@ type FillBlankReportAnswer = {
   sortOrder: number;
 };
 
+type KnowledgeNodeAnalysisResult = {
+  knowledgeNodePublicId: string;
+  questionCount: number;
+  answeredCount: number;
+  correctCount: number;
+  score: string;
+  maxScore: string;
+  scoreRate: number;
+  accuracyRate: number;
+  weaknessRank: number;
+  questionPublicIds: string[];
+};
+
 type ParsedReportSnapshot = {
   totalScoreText: string;
   accuracyText: string;
@@ -240,6 +253,8 @@ type ParsedReportSnapshot = {
   questionTypeSummaryText: string | null;
   paperSectionSummaryText: string | null;
   knowledgeNodeSummaryText: string | null;
+  knowledgeNodeWeaknessSummaryText: string | null;
+  knowledgeNodeAnalysis: KnowledgeNodeAnalysisResult[];
   questionResults: ReportQuestionResult[];
 };
 
@@ -547,6 +562,56 @@ function getFillBlankReportAnswers(value: unknown): FillBlankReportAnswer[] {
     .sort((left, right) => left.sortOrder - right.sortOrder);
 }
 
+function getStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(
+    (item): item is string => typeof item === "string" && item.length > 0,
+  );
+}
+
+function getKnowledgeNodeAnalysis(
+  value: unknown,
+): KnowledgeNodeAnalysisResult[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.flatMap((analysisItem): KnowledgeNodeAnalysisResult[] => {
+    if (
+      !isRecord(analysisItem) ||
+      typeof analysisItem.knowledgeNodePublicId !== "string" ||
+      typeof analysisItem.questionCount !== "number" ||
+      typeof analysisItem.answeredCount !== "number" ||
+      typeof analysisItem.correctCount !== "number" ||
+      typeof analysisItem.score !== "string" ||
+      typeof analysisItem.maxScore !== "string" ||
+      typeof analysisItem.scoreRate !== "number" ||
+      typeof analysisItem.accuracyRate !== "number" ||
+      typeof analysisItem.weaknessRank !== "number"
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        knowledgeNodePublicId: analysisItem.knowledgeNodePublicId,
+        questionCount: analysisItem.questionCount,
+        answeredCount: analysisItem.answeredCount,
+        correctCount: analysisItem.correctCount,
+        score: analysisItem.score,
+        maxScore: analysisItem.maxScore,
+        scoreRate: analysisItem.scoreRate,
+        accuracyRate: analysisItem.accuracyRate,
+        weaknessRank: analysisItem.weaknessRank,
+        questionPublicIds: getStringArray(analysisItem.questionPublicIds),
+      },
+    ];
+  });
+}
+
 function isOptionMockExamQuestion(questionType: MockExamQuestionType): boolean {
   return (
     questionType === "single_choice" ||
@@ -852,6 +917,13 @@ function parseReportSnapshot(
       typeof reportSnapshot.knowledgeNodeSummaryText === "string"
         ? reportSnapshot.knowledgeNodeSummaryText
         : null,
+    knowledgeNodeWeaknessSummaryText:
+      typeof reportSnapshot.knowledgeNodeWeaknessSummaryText === "string"
+        ? reportSnapshot.knowledgeNodeWeaknessSummaryText
+        : null,
+    knowledgeNodeAnalysis: getKnowledgeNodeAnalysis(
+      reportSnapshot.knowledgeNodeAnalysis,
+    ),
     questionResults: questionResults.flatMap(
       (questionResult): ReportQuestionResult[] => {
         if (
@@ -2218,6 +2290,57 @@ export function StudentExamReportPage({
               {parsedReportSnapshot.knowledgeNodeSummaryText}
             </p>
           )}
+        </div>
+      )}
+
+      {parsedReportSnapshot.knowledgeNodeAnalysis.length === 0 ? null : (
+        <div className="bg-surface ring-border space-y-3 rounded-xl p-4 shadow-sm ring-1">
+          <div className="flex items-center gap-2">
+            <BarChart3
+              className="text-brand-primary size-4"
+              aria-hidden="true"
+            />
+            <h2 className="font-heading text-text-primary text-base font-semibold">
+              知识点薄弱项
+            </h2>
+          </div>
+          {parsedReportSnapshot.knowledgeNodeWeaknessSummaryText ===
+          null ? null : (
+            <p className="text-text-muted text-xs">
+              {parsedReportSnapshot.knowledgeNodeWeaknessSummaryText}
+            </p>
+          )}
+          <div className="space-y-2">
+            {parsedReportSnapshot.knowledgeNodeAnalysis.map((analysisItem) => (
+              <article
+                key={analysisItem.knowledgeNodePublicId}
+                className="border-border bg-background space-y-2 rounded-lg border p-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-text-primary text-sm font-semibold break-all">
+                      {analysisItem.knowledgeNodePublicId}
+                    </p>
+                    <p className="text-text-secondary mt-1 text-xs">
+                      覆盖 {analysisItem.questionCount} 题，已答{" "}
+                      {analysisItem.answeredCount} 题，正确{" "}
+                      {analysisItem.correctCount} 题
+                    </p>
+                  </div>
+                  <p className="text-text-muted text-xs">
+                    #{analysisItem.weaknessRank}
+                  </p>
+                </div>
+                <div className="text-text-secondary grid gap-2 text-xs sm:grid-cols-3">
+                  <p>得分率 {analysisItem.scoreRate}%</p>
+                  <p>正确率 {analysisItem.accuracyRate}%</p>
+                  <p>
+                    {analysisItem.score} / {analysisItem.maxScore}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       )}
 
