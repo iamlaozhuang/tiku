@@ -161,6 +161,109 @@ describe("session service", () => {
     ]);
   });
 
+  it("locks admin login for fifteen minutes only after the fifth failed login", async () => {
+    const recordedFailures: unknown[] = [];
+    const fourthFailureService = createSessionService(
+      createCredentialAdapter({
+        async verifyPasswordCredential() {
+          return false;
+        },
+      }),
+      createRepository({
+        async findLoginUserByPhone() {
+          return {
+            id: 7,
+            auth_user_id: "auth_admin_123",
+            public_id: "admin_public_123",
+            phone: "13900000001",
+            name: "管理员",
+            user_type: null,
+            status: "active",
+            login_failed_count: 3,
+            locked_until_at: null,
+            employee_public_id: null,
+            organization_public_id: null,
+            admin_public_id: "admin_public_123",
+            admin_roles: ["super_admin"],
+            login_failure_user_id: 7,
+          };
+        },
+        async recordLoginFailure(failure) {
+          recordedFailures.push(failure);
+        },
+      }),
+      {
+        now: () => new Date("2026-05-17T12:00:00.000Z"),
+      },
+    );
+    const sessionService = createSessionService(
+      createCredentialAdapter({
+        async verifyPasswordCredential() {
+          return false;
+        },
+      }),
+      createRepository({
+        async findLoginUserByPhone() {
+          return {
+            id: 7,
+            auth_user_id: "auth_admin_123",
+            public_id: "admin_public_123",
+            phone: "13900000001",
+            name: "管理员",
+            user_type: null,
+            status: "active",
+            login_failed_count: 4,
+            locked_until_at: null,
+            employee_public_id: null,
+            organization_public_id: null,
+            admin_public_id: "admin_public_123",
+            admin_roles: ["super_admin"],
+            login_failure_user_id: 7,
+          };
+        },
+        async recordLoginFailure(failure) {
+          recordedFailures.push(failure);
+        },
+      }),
+      {
+        now: () => new Date("2026-05-17T12:00:00.000Z"),
+      },
+    );
+
+    await expect(
+      fourthFailureService.login({
+        phone: "13900000001",
+        password: "abc12345",
+      }),
+    ).resolves.toEqual({
+      code: 401002,
+      message: "Invalid phone or password.",
+      data: null,
+    });
+    await expect(
+      sessionService.login({
+        phone: "13900000001",
+        password: "abc12345",
+      }),
+    ).resolves.toEqual({
+      code: 423001,
+      message: "Account locked.",
+      data: null,
+    });
+    expect(recordedFailures).toEqual([
+      {
+        userId: 7,
+        loginFailedCount: 4,
+        lockedUntilAt: null,
+      },
+      {
+        userId: 7,
+        loginFailedCount: 5,
+        lockedUntilAt: new Date("2026-05-17T12:15:00.000Z"),
+      },
+    ]);
+  });
+
   it("rejects login while the account is locked", async () => {
     const sessionService = createSessionService(
       createCredentialAdapter({
