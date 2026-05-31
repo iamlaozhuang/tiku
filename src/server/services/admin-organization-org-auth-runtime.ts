@@ -17,6 +17,7 @@ import {
   type EmployeeUnbindResultDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type {
+  OrgAuthDetailResultDto,
   DisableOrganizationResultDto,
   OrgAuthResultDto,
   OrganizationDto,
@@ -896,6 +897,28 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             orgAuth === null
               ? orgAuthQuotaExceededResponse
               : createSuccessResponse<OrgAuthResultDto>({ orgAuth }),
+          );
+        },
+      },
+      item: {
+        async GET(request: Request, context: RouteContext): Promise<Response> {
+          const authError = await requireReadableAdminActor(request);
+
+          if (authError !== null) {
+            return createJsonResponse(authError);
+          }
+
+          if (repositories.getOrgAuthDetail === undefined) {
+            return createJsonResponse(orgAuthMutationUnavailableResponse);
+          }
+
+          const { publicId } = await context.params;
+          const orgAuth = await repositories.getOrgAuthDetail(publicId);
+
+          return createJsonResponse(
+            orgAuth === null
+              ? orgAuthNotFoundResponse
+              : createSuccessResponse<OrgAuthDetailResultDto>({ orgAuth }),
           );
         },
       },

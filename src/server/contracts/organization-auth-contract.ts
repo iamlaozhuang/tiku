@@ -45,8 +45,47 @@ export type OrgAuthDto = {
   updatedAt: string;
 };
 
+export type OrgAuthDetailOrganizationDto = {
+  publicId: string;
+  name: string;
+  orgTier: OrgTier;
+  status?: OrgStatus;
+  parentOrganizationPublicId?: string | null;
+  employeeCount?: number;
+};
+
+export type OrgAuthDetailOccupancyDto = {
+  accountQuota: number;
+  usedQuota: number;
+  availableQuota: number;
+};
+
+export type OrgAuthDetailDto = OrgAuthDto & {
+  purchaserOrganization: Required<
+    Pick<
+      OrgAuthDetailOrganizationDto,
+      "name" | "orgTier" | "publicId" | "status"
+    >
+  >;
+  coveredOrganizations: Required<
+    Pick<
+      OrgAuthDetailOrganizationDto,
+      | "employeeCount"
+      | "name"
+      | "orgTier"
+      | "parentOrganizationPublicId"
+      | "publicId"
+    >
+  >[];
+  occupancy: OrgAuthDetailOccupancyDto;
+};
+
 export type OrgAuthResultDto = {
   orgAuth: OrgAuthDto;
+};
+
+export type OrgAuthDetailResultDto = {
+  orgAuth: OrgAuthDetailDto;
 };
 
 export type OrgAuthListDto = {

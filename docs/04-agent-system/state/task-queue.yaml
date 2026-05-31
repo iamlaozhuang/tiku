@@ -12452,7 +12452,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-06-admin-ops-logs-permissions
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-04-001.
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-04-001. User approved local-only auth_permission_model and api_contract implementation plus commit, merge into master, push origin/master, and short-lived branch cleanup in the 2026-05-31 session.
     taskKind: implementation
     allowedFiles: *phase20_ra06_allowed_files
     blockedFiles: *phase20_ra06_blocked_files
@@ -12464,7 +12464,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-04-org-auth-detail-route-alignment.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-06-05-redeem-code-detail-view
     title: Phase 20 Fix RA-06-05 Redeem Code Detail View

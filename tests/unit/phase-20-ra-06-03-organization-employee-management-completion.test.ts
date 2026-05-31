@@ -21,6 +21,7 @@ import type {
   OrganizationListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type {
+  OrgAuthDetailResultDto,
   OrgAuthListDto,
   OrganizationDto,
 } from "@/server/contracts/organization-auth-contract";
@@ -123,6 +124,40 @@ const orgAuthListPayload: {
         updatedAt: "2026-05-31T00:00:00.000Z",
       },
     ],
+  },
+};
+
+const orgAuthDetailPayload: {
+  code: number;
+  message: string;
+  data: OrgAuthDetailResultDto;
+} = {
+  code: 0,
+  message: "ok",
+  data: {
+    orgAuth: {
+      ...orgAuthListPayload.data.orgAuths[0],
+      purchaserOrganization: {
+        publicId: "org-city-001",
+        name: "Hangzhou Test Tobacco",
+        orgTier: "city",
+        status: "disabled",
+      },
+      coveredOrganizations: [
+        {
+          publicId: "org-city-001",
+          name: "Hangzhou Test Tobacco",
+          orgTier: "city",
+          parentOrganizationPublicId: "org-province-001",
+          employeeCount: 1,
+        },
+      ],
+      occupancy: {
+        accountQuota: 100,
+        usedQuota: 1,
+        availableQuota: 99,
+      },
+    },
   },
 };
 
@@ -332,6 +367,10 @@ function mockOrganizationPageFetch() {
 
       if (path === "/api/v1/org-auths?page=1&pageSize=20") {
         return createJsonResponse(orgAuthListPayload);
+      }
+
+      if (path === "/api/v1/org-auths/org-auth-public-001") {
+        return createJsonResponse(orgAuthDetailPayload);
       }
 
       if (path === "/api/v1/employees?page=1&pageSize=20") {
@@ -616,7 +655,7 @@ describe("phase 20 RA-06-03 organization employee management completion", () => 
       within(orgAuthRow).getByRole("button", { name: "查看详情" }),
     );
     expect(
-      screen.getByTestId("admin-org-auth-detail-org-auth-public-001"),
+      await screen.findByTestId("admin-org-auth-detail-org-auth-public-001"),
     ).toHaveTextContent("100");
     expect(
       screen.getByTestId("admin-org-auth-detail-org-auth-public-001"),
