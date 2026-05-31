@@ -10237,7 +10237,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-ai-scoring-explanation.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: phase-16-audit-rag-knowledge
     title: Phase 16 Audit RAG And Knowledge
@@ -12102,7 +12102,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-01-hybrid-rerank-retrieval.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-05-03-resource-conversion-formats
     title: Phase 20 Fix RA-05-03 Resource Conversion Formats

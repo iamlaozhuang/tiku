@@ -9,6 +9,7 @@ import type {
   ResourceStatus,
   ResourceType,
 } from "../models/ai-rag";
+import type { RagRetrievalMode } from "@/rag/retrieval";
 
 export type ModelProviderDto = {
   publicId: string;
@@ -183,7 +184,7 @@ export type RagRetrievalEvidenceSummaryDto = {
   staleResourcePublicIds?: string[];
   queryHash: string;
   maxScore: number | null;
-  retrievalMode: "fusion_sort";
+  retrievalMode: RagRetrievalMode;
 };
 
 export type RagRetrievalResultDto = {

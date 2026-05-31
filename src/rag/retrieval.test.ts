@@ -155,6 +155,66 @@ describe("RAG evidence retrieval", () => {
     expect(noneResult.citations).toEqual([]);
   });
 
+  it("reranks authorized hybrid candidates with local deterministic query relevance", () => {
+    const result = createRagRetrievalResult({
+      query: "customer permit renewal",
+      profession: "marketing",
+      level: 3,
+      retrievalMode: "hybrid_rerank",
+      authorizedResourcePublicIds: [
+        "authorized_exact_resource_public_id",
+        "authorized_vector_resource_public_id",
+      ],
+      candidates: [
+        {
+          ...baseCandidate,
+          chunkPublicId: "authorized_vector_only_chunk_public_id",
+          resourcePublicId: "authorized_vector_resource_public_id",
+          text: "General market operations without the requested phrase.",
+          keywordScore: 0.95,
+          semanticScore: 0.95,
+        },
+        {
+          ...baseCandidate,
+          chunkPublicId: "authorized_exact_rerank_chunk_public_id",
+          resourcePublicId: "authorized_exact_resource_public_id",
+          text: "Customer permit renewal evidence appears in this passage.",
+          keywordScore: 0.4,
+          semanticScore: 0.35,
+        },
+        {
+          ...baseCandidate,
+          chunkPublicId: "unauthorized_exact_rerank_chunk_public_id",
+          resourcePublicId: "unauthorized_resource_public_id",
+          text: "Customer permit renewal evidence must be filtered first.",
+          keywordScore: 1,
+          semanticScore: 1,
+        },
+      ],
+    });
+    const summary = summarizeRagRetrievalForEvidence(
+      result,
+      "customer permit renewal",
+    );
+
+    expect(result.retrievalMode).toBe("hybrid_rerank");
+    expect(result.citations.map((citation) => citation.chunkPublicId)).toEqual([
+      "authorized_exact_rerank_chunk_public_id",
+      "authorized_vector_only_chunk_public_id",
+    ]);
+    expect(
+      result.citations.some(
+        (citation) =>
+          citation.chunkPublicId ===
+          "unauthorized_exact_rerank_chunk_public_id",
+      ),
+    ).toBe(false);
+    expect(summary.retrievalMode).toBe("hybrid_rerank");
+    expect(JSON.stringify(summary)).not.toContain(
+      "Customer permit renewal evidence",
+    );
+  });
+
   it("summarizes retrieval evidence without exposing citation or chunk text", () => {
     const result = createRagRetrievalResult({
       query: "redaction check",

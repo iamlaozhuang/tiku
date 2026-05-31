@@ -4,6 +4,7 @@ import type { Profession, ResourceStatus } from "@/server/models/ai-rag";
 import { isResourceRagEligible } from "@/server/models/ai-rag";
 
 export type EvidenceStatus = "sufficient" | "weak" | "none";
+export type RagRetrievalMode = "fusion_sort" | "hybrid_rerank";
 
 export type RagRetrievalCandidate = {
   chunkPublicId: string;
@@ -28,6 +29,7 @@ export type RagRetrievalInput = {
   authorizedResourcePublicIds: string[];
   candidates: RagRetrievalCandidate[];
   maxCitationCount?: number;
+  retrievalMode?: RagRetrievalMode;
 };
 
 export type RagCitation = {
@@ -45,8 +47,8 @@ export type RagCitation = {
 export type RagRetrievalResult = {
   evidenceStatus: EvidenceStatus;
   citations: RagCitation[];
-  retrievalMode: "fusion_sort";
-  fallbackReason: "rerank_unavailable_fusion_sort";
+  retrievalMode: RagRetrievalMode;
+  fallbackReason: "rerank_unavailable_fusion_sort" | null;
 };
 
 export type RagRetrievalEvidenceSummary = {
@@ -60,7 +62,7 @@ export type RagRetrievalEvidenceSummary = {
   staleResourcePublicIds: string[];
   queryHash: string;
   maxScore: number | null;
-  retrievalMode: "fusion_sort";
+  retrievalMode: RagRetrievalMode;
 };
 
 type RankedRetrievalCandidate = RagRetrievalCandidate & {
@@ -77,6 +79,7 @@ export function createRagRetrievalResult(
   input: RagRetrievalInput,
 ): RagRetrievalResult {
   const maxCitationCount = normalizeMaxCitationCount(input.maxCitationCount);
+  const retrievalMode = input.retrievalMode ?? "fusion_sort";
   const authorizedResourcePublicIds = new Set(
     input.authorizedResourcePublicIds,
   );
@@ -87,8 +90,10 @@ export function createRagRetrievalResult(
       )
       .map((candidate) => ({
         ...candidate,
-        score: calculateFusionScore(candidate),
-        qualityRank: calculateQualityRank(calculateFusionScore(candidate)),
+        score: calculateCandidateScore(candidate, input.query, retrievalMode),
+        qualityRank: calculateQualityRank(
+          calculateCandidateScore(candidate, input.query, retrievalMode),
+        ),
         levelRank: calculateLevelRank(candidate.level, input.level),
       })),
   ).sort(compareRankedCandidates);
@@ -100,8 +105,9 @@ export function createRagRetrievalResult(
   return {
     evidenceStatus: calculateEvidenceStatus(citations),
     citations,
-    retrievalMode: "fusion_sort",
-    fallbackReason: "rerank_unavailable_fusion_sort",
+    retrievalMode,
+    fallbackReason:
+      retrievalMode === "fusion_sort" ? "rerank_unavailable_fusion_sort" : null,
   };
 }
 
@@ -180,6 +186,70 @@ function calculateFusionScore(candidate: RagRetrievalCandidate): number {
     (clampScore(candidate.keywordScore) + clampScore(candidate.semanticScore)) /
     2
   );
+}
+
+function calculateCandidateScore(
+  candidate: RagRetrievalCandidate,
+  query: string,
+  retrievalMode: RagRetrievalMode,
+): number {
+  const fusionScore = calculateFusionScore(candidate);
+
+  if (retrievalMode === "fusion_sort") {
+    return fusionScore;
+  }
+
+  return clampScore(
+    fusionScore * 0.35 + calculateLocalRerankScore(query, candidate) * 0.65,
+  );
+}
+
+function calculateLocalRerankScore(
+  query: string,
+  candidate: RagRetrievalCandidate,
+): number {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (normalizedQuery.length === 0) {
+    return 0;
+  }
+
+  const searchableText = [
+    candidate.resourceTitle,
+    candidate.headingPath.join(" "),
+    candidate.text,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (searchableText.includes(normalizedQuery)) {
+    return 1;
+  }
+
+  const queryTokens = tokenizeForLocalRerank(query);
+
+  if (queryTokens.length === 0) {
+    return 0;
+  }
+
+  const searchableTokens = new Set(tokenizeForLocalRerank(searchableText));
+  const matchedTokenCount = queryTokens.filter((token) =>
+    searchableTokens.has(token),
+  ).length;
+
+  return matchedTokenCount / queryTokens.length;
+}
+
+function tokenizeForLocalRerank(value: string): string[] {
+  return [
+    ...new Set(
+      value
+        .toLowerCase()
+        .split(/[^\p{Letter}\p{Number}]+/u)
+        .map((token) => token.trim())
+        .filter((token) => token.length > 0),
+    ),
+  ];
 }
 
 function calculateQualityRank(score: number): number {
