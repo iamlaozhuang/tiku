@@ -48,6 +48,24 @@ export type PromptTemplateStatus = "draft" | "active" | "disabled";
 
 export type RedactedMetadata = Record<string, string | number | boolean | null>;
 
+export type ModelConfigRuntimeAlignmentDto = {
+  isRuntimeSelected: boolean;
+  selectionReason: "primary" | "fallback" | null;
+  selectedModelConfigPublicId: string | null;
+  fallbackFromModelConfigPublicId: string | null;
+  unavailableReason:
+    | "model_config_not_found"
+    | "primary_model_config_disabled"
+    | "fallback_not_allowed_for_ai_func_type"
+    | "fallback_model_config_not_found"
+    | "fallback_model_config_disabled"
+    | "fallback_ai_func_type_mismatch"
+    | null;
+  promptTemplateKey: string | null;
+  promptTemplateVersion: number | null;
+  providerMode: "local_mock";
+};
+
 const adminAiFunctionTypes = [
   "ai_scoring",
   "ai_explanation",
@@ -96,6 +114,7 @@ export type ModelConfigSummaryDto = {
   timeoutSecond: number;
   maxRetryCount: number;
   updatedAt: string;
+  runtimeAlignment?: ModelConfigRuntimeAlignmentDto | null;
 };
 
 export type ModelConfigListDto = {

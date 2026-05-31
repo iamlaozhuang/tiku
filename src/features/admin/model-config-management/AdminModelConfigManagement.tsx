@@ -731,6 +731,13 @@ function AdminConfigRow({
   const actionLabel = modelConfig.isEnabled
     ? "Disable config"
     : "Enable config";
+  const runtimeAlignment = modelConfig.runtimeAlignment ?? null;
+  const runtimeText =
+    runtimeAlignment === null
+      ? "runtime: not evaluated"
+      : runtimeAlignment.isRuntimeSelected
+        ? `runtime: selected ${runtimeAlignment.selectionReason ?? "primary"} / ${runtimeAlignment.promptTemplateKey ?? "template pending"}`
+        : `runtime: standby / selected: ${runtimeAlignment.selectedModelConfigPublicId ?? "none"}`;
 
   return (
     <div
@@ -746,7 +753,7 @@ function AdminConfigRow({
           {modelConfig.aiFuncType} / {modelConfig.modelAlias} /{" "}
           {modelConfig.status} / priority: {modelConfig.fallbackPriority} /
           fallback: {modelConfig.fallbackModelConfigPublicId ?? "none"} /{" "}
-          {modelConfig.snapshotPolicy}
+          {modelConfig.snapshotPolicy} / {runtimeText}
         </p>
       </div>
       <Button variant="outline" onClick={() => onToggle(modelConfig.publicId)}>

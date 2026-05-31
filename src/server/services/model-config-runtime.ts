@@ -5,6 +5,7 @@ import {
 } from "../models/ai-rag";
 import type {
   AdminAiFunctionType,
+  ModelConfigRuntimeAlignmentDto,
   ModelConfigSummaryDto,
   PromptTemplateSummaryDto,
 } from "../contracts/admin-ai-audit-log-ops-contract";
@@ -249,6 +250,75 @@ export function createPersistedModelConfigRuntimeCatalog(
       };
     }),
   };
+}
+
+export function attachModelConfigRuntimeAlignment(
+  input: PersistedModelConfigRuntimeCatalogInput,
+): ModelConfigSummaryDto[] {
+  const catalog = createPersistedModelConfigRuntimeCatalog(input);
+  const resolver = createModelConfigRuntimeResolver(catalog);
+  const alignmentByAiFuncType = new Map<
+    AdminAiFunctionType,
+    ModelConfigRuntimeAlignmentDto
+  >();
+
+  for (const modelConfig of input.modelConfigs) {
+    if (alignmentByAiFuncType.has(modelConfig.aiFuncType)) {
+      continue;
+    }
+
+    const selection = resolver.resolve({
+      aiFuncType: toRuntimeAiFuncType(modelConfig.aiFuncType),
+      allowFallback: true,
+    });
+
+    alignmentByAiFuncType.set(
+      modelConfig.aiFuncType,
+      selection.status === "selected"
+        ? {
+            isRuntimeSelected: false,
+            selectionReason: selection.selectionReason,
+            selectedModelConfigPublicId:
+              selection.modelConfigSnapshot.modelConfigPublicId,
+            fallbackFromModelConfigPublicId:
+              selection.fallbackFromModelConfigPublicId,
+            unavailableReason: null,
+            promptTemplateKey: selection.promptTemplate.promptTemplateKey,
+            promptTemplateVersion: selection.promptTemplate.version,
+            providerMode: "local_mock",
+          }
+        : {
+            isRuntimeSelected: false,
+            selectionReason: null,
+            selectedModelConfigPublicId: null,
+            fallbackFromModelConfigPublicId: null,
+            unavailableReason: selection.reason,
+            promptTemplateKey: null,
+            promptTemplateVersion: null,
+            providerMode: "local_mock",
+          },
+    );
+  }
+
+  return input.modelConfigs.map((modelConfig) => {
+    const runtimeAlignment = alignmentByAiFuncType.get(modelConfig.aiFuncType);
+
+    if (runtimeAlignment === undefined) {
+      return {
+        ...modelConfig,
+        runtimeAlignment: null,
+      };
+    }
+
+    return {
+      ...modelConfig,
+      runtimeAlignment: {
+        ...runtimeAlignment,
+        isRuntimeSelected:
+          runtimeAlignment.selectedModelConfigPublicId === modelConfig.publicId,
+      },
+    };
+  });
 }
 
 function applyRecordOverride(

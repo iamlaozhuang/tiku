@@ -28,6 +28,7 @@ import {
   normalizeModelConfigInput,
   normalizeModelProviderInput,
 } from "../validators/ai-rag";
+import { attachModelConfigRuntimeAlignment } from "./model-config-runtime";
 import type { SessionService } from "./session-service";
 
 export type { AdminAiAuditLogRuntimeRepositories };
@@ -422,6 +423,26 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     }
   }
 
+  async function listRuntimePromptTemplates(
+    query: AdminAiAuditLogListQuery,
+  ): Promise<PromptTemplateSummaryDto[]> {
+    const listPromptTemplates = repositories.listPromptTemplates;
+
+    if (listPromptTemplates === undefined) {
+      return [];
+    }
+
+    const result = await readRuntimePage({
+      fallbackData: {
+        promptTemplates: [] as PromptTemplateSummaryDto[],
+      },
+      loadPage: () => listPromptTemplates(query),
+      query,
+    });
+
+    return result.promptTemplates;
+  }
+
   async function updateModelConfigEnabled(input: {
     request: Request;
     context: RouteContext;
@@ -637,12 +658,14 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
           loadPage: () => repositories.listModelConfigs(query),
           query,
         });
+        const promptTemplates = await listRuntimePromptTemplates(query);
+        const modelConfigs = attachModelConfigRuntimeAlignment({
+          modelConfigs: result.modelConfigs,
+          promptTemplates,
+        });
 
         return createJsonResponse(
-          createPaginatedResponse(
-            { modelConfigs: result.modelConfigs },
-            result.pagination,
-          ),
+          createPaginatedResponse({ modelConfigs }, result.pagination),
         );
       },
       async POST(request: Request): Promise<Response> {
