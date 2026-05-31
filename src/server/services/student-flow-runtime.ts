@@ -17,6 +17,10 @@ import {
   type AdminAiAuditLogRuntimeRepositories,
 } from "../repositories/admin-ai-audit-log-runtime-repository";
 import {
+  createPostgresAiScoringAttemptRepository,
+  type AiScoringAttemptRepository,
+} from "../repositories/ai-scoring-attempt-repository";
+import {
   createPostgresStudentFlowRepositories,
   type StudentFlowRuntimeRepositoryOptions,
 } from "../repositories/student-flow-runtime-repository";
@@ -278,6 +282,7 @@ export function createDefaultAiScoringRuntime(
     AdminAiAuditLogRuntimeRepositories,
     "appendAiCallLog"
   > = createPostgresAdminAiAuditLogRuntimeRepositories(),
+  aiScoringAttemptRepository: AiScoringAttemptRepository = createPostgresAiScoringAttemptRepository(),
 ): MockExamAiScoringRuntime {
   const aiScoringService = createAiScoringService({
     async runner(input) {
@@ -355,9 +360,10 @@ export function createDefaultAiScoringRuntime(
         retryCount: 0,
       });
       const completedAt = new Date();
+      let aiCallLogPublicId: string | null = null;
 
       if (result.aiCallLogDraft !== null) {
-        await aiCallLogRepository.appendAiCallLog({
+        const aiCallLog = await aiCallLogRepository.appendAiCallLog({
           userPublicId: context.userPublicId,
           answerRecordPublicId: context.answerRecordPublicId,
           mockExamPublicId: context.mockExamPublicId,
@@ -382,6 +388,24 @@ export function createDefaultAiScoringRuntime(
           latencyMs: Math.max(1, completedAt.getTime() - startedAt.getTime()),
           startedAt,
           completedAt,
+        });
+
+        aiCallLogPublicId = aiCallLog.publicId;
+      }
+
+      if (result.aiScoringAttemptDraft !== null) {
+        await aiScoringAttemptRepository.appendAiScoringAttempt({
+          answerRecordPublicId: context.answerRecordPublicId,
+          aiCallLogPublicId,
+          status: result.aiScoringAttemptDraft.status,
+          failureCode: result.aiScoringAttemptDraft.failureCode,
+          failureMessageDigest:
+            result.aiScoringAttemptDraft.failureMessageDigest,
+          scheduledAt: startedAt,
+          startedAt,
+          finishedAt: completedAt,
+          retryAfterAt: result.aiScoringAttemptDraft.retryAfterAt,
+          attemptSnapshot: result.aiScoringAttemptDraft.attemptSnapshot,
         });
       }
 

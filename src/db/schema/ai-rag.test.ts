@@ -6,6 +6,8 @@ import {
   aiCallLog,
   aiCallStatusValues,
   aiFuncTypeValues,
+  aiScoringAttempt,
+  aiScoringAttemptStatusValues,
   knowledgeBase,
   knowledgeNode,
   knowledgeNodeResource,
@@ -35,6 +37,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       getTableName(modelConfig),
       getTableName(promptTemplate),
       getTableName(aiCallLog),
+      getTableName(aiScoringAttempt),
       getTableName(knowledgeBase),
       getTableName(resource),
       getTableName(knowledgeNode),
@@ -44,6 +47,7 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
       "model_config",
       "prompt_template",
       "ai_call_log",
+      "ai_scoring_attempt",
       "knowledge_base",
       "resource",
       "knowledge_node",
@@ -53,6 +57,17 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
 
   it("registers AI call status enum values from the glossary", () => {
     expect(aiCallStatusValues).toEqual(["success", "failed"]);
+  });
+
+  it("registers AI scoring attempt status values for retry persistence", () => {
+    expect(aiScoringAttemptStatusValues).toEqual([
+      "pending",
+      "running",
+      "succeeded",
+      "failed",
+      "timeout",
+      "cancelled",
+    ]);
   });
 
   it("registers RAG resource and knowledge enum values from the glossary", () => {
@@ -216,6 +231,35 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "idx_ai_call_log_model_config_id",
         "idx_ai_call_log_ai_func_type_call_status",
         "idx_ai_call_log_started_at",
+      ]),
+    );
+  });
+
+  it("stores AI scoring retry attempts separately from answer records", () => {
+    expect(getColumnNames(aiScoringAttempt)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "answer_record_id",
+        "attempt_number",
+        "ai_call_log_id",
+        "status",
+        "failure_code",
+        "failure_message_digest",
+        "scheduled_at",
+        "started_at",
+        "finished_at",
+        "retry_after_at",
+        "attempt_snapshot",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getIndexNames(aiScoringAttempt)).toEqual(
+      expect.arrayContaining([
+        "idx_ai_scoring_attempt_answer_record_id",
+        "idx_ai_scoring_attempt_status",
+        "idx_ai_scoring_attempt_retry_after_at",
+        "udx_ai_scoring_attempt_answer_record_id_attempt_number",
       ]),
     );
   });

@@ -4,7 +4,11 @@ import type {
 } from "../contracts/ai-rag-contract";
 import {
   createAiCallLogRedactedSnapshots,
+  createAiScoringAttemptSnapshot,
+  createFailureMessageDigest,
   type AiCallStatus,
+  type AiScoringAttemptSnapshot,
+  type AiScoringAttemptStatus,
   type EvidenceStatus,
   type ModelConfigSnapshot,
   type RedactedJsonObject,
@@ -68,6 +72,14 @@ export type AiScoringCallLogDraft = {
   citationRedactedSnapshot: RedactedJsonObject | null;
 };
 
+export type AiScoringAttemptDraft = {
+  status: AiScoringAttemptStatus;
+  failureCode: string | null;
+  failureMessageDigest: string | null;
+  retryAfterAt: Date | null;
+  attemptSnapshot: AiScoringAttemptSnapshot;
+};
+
 export type ExistingAiScoringResult = {
   scoringStatus: AiScoringStatus;
   totalScore: number;
@@ -82,6 +94,7 @@ export type ExistingAiScoringResult = {
   evidenceStatus: EvidenceStatus;
   citations: RagCitationDto[];
   aiCallLogDraft: AiScoringCallLogDraft | null;
+  aiScoringAttemptDraft: AiScoringAttemptDraft | null;
   failureReason?: string;
 };
 
@@ -259,6 +272,35 @@ function createAiCallLogDraft(input: {
   };
 }
 
+function createAiScoringAttemptDraft(input: {
+  context: AiScoringContext;
+  status: AiScoringAttemptStatus;
+  scoringStatus: AiScoringStatus;
+  failureCode: string | null;
+  failureMessage: unknown;
+}): AiScoringAttemptDraft {
+  return {
+    status: input.status,
+    failureCode: input.failureCode,
+    failureMessageDigest:
+      input.failureMessage === null
+        ? null
+        : createFailureMessageDigest(input.failureMessage),
+    retryAfterAt: null,
+    attemptSnapshot: createAiScoringAttemptSnapshot({
+      answerRecordPublicId: input.context.answerRecordPublicId,
+      mockExamPublicId: input.context.mockExamPublicId,
+      questionPublicId: input.context.questionPublicId,
+      modelConfigSnapshot: input.context.modelConfigSnapshot,
+      promptTemplateKey: input.context.promptTemplate.promptTemplateKey,
+      promptTemplateVersion: input.context.promptTemplate.version,
+      evidenceStatus: input.context.ragRetrievalResult.evidenceStatus,
+      citationCount: input.context.ragRetrievalResult.citations.length,
+      scoringStatus: input.scoringStatus,
+    }),
+  };
+}
+
 function createBaseResult(
   context: AiScoringContext,
   overrides: Partial<ExistingAiScoringResult>,
@@ -277,6 +319,7 @@ function createBaseResult(
     evidenceStatus: context.ragRetrievalResult.evidenceStatus,
     citations: context.ragRetrievalResult.citations,
     aiCallLogDraft: null,
+    aiScoringAttemptDraft: null,
     ...overrides,
   };
 }
@@ -321,6 +364,13 @@ export function createAiScoringService(
           retryCount: retryCount + 1,
           citations: [],
           failureReason: scoringFallbackNotAllowedReason,
+          aiScoringAttemptDraft: createAiScoringAttemptDraft({
+            context,
+            status: "failed",
+            scoringStatus: "scoring_failed",
+            failureCode: scoringFallbackNotAllowedReason,
+            failureMessage: null,
+          }),
         });
       }
 
@@ -331,6 +381,13 @@ export function createAiScoringService(
           totalScore: 0,
           citations: [],
           overallComment: "Unanswered subjective answer scored as zero.",
+          aiScoringAttemptDraft: createAiScoringAttemptDraft({
+            context,
+            status: "succeeded",
+            scoringStatus: "scored",
+            failureCode: null,
+            failureMessage: null,
+          }),
           aiCallLogDraft: createAiCallLogDraft({
             context,
             callStatus: "success",
@@ -392,25 +449,40 @@ export function createAiScoringService(
             providerErrorPayload: null,
             citations: context.ragRetrievalResult.citations,
           }),
+          aiScoringAttemptDraft: createAiScoringAttemptDraft({
+            context,
+            status: "succeeded",
+            scoringStatus: "scored",
+            failureCode: null,
+            failureMessage: null,
+          }),
         });
       } catch (error) {
         const nextRetryCount = retryCount + 1;
+        const providerErrorPayload =
+          error instanceof Error
+            ? { message: error.message, name: error.name }
+            : error;
 
         return createBaseResult(context, {
           scoringStatus: "scoring_failed",
           retryCount: nextRetryCount,
           citations: [],
           failureReason: scoringRunnerFailedReason,
+          aiScoringAttemptDraft: createAiScoringAttemptDraft({
+            context,
+            status: "failed",
+            scoringStatus: "scoring_failed",
+            failureCode: scoringRunnerFailedReason,
+            failureMessage: providerErrorPayload,
+          }),
           aiCallLogDraft: createAiCallLogDraft({
             context,
             callStatus: "failed",
             modelOutput: null,
             providerRequestPayload: null,
             providerResponsePayload: null,
-            providerErrorPayload:
-              error instanceof Error
-                ? { message: error.message, name: error.name }
-                : error,
+            providerErrorPayload,
             citations: [],
           }),
         });

@@ -13260,3 +13260,57 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation-startup.md
     status: committed
     retryCount: 0
+  - id: phase-21-ai-scoring-retry-persistence-implementation
+    title: Phase 21 AI Scoring Retry Persistence Implementation
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-05-31-ai-scoring-retry-persistence-implementation
+    dependencies:
+      - phase-21-ai-scoring-retry-persistence-implementation-startup
+      - phase-21-tail-ai-scoring-retry-persistence-design
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved this fresh implementation task and approved database_migration, ai_runtime, data_contract, evidence_integrity, local_human_verification, and conditional transaction_concurrency. User required an independent ai_scoring_attempt table, additive/reviewable/rollbackable migration, no raw prompt/student answer/model response/provider payload/secret/database URL persistence, validation, commit, and pause without merge/push/deploy.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/ai/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/app/api/v1/**
+      - src/db/schema/**
+      - drizzle/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+    riskTypes:
+      - database_migration
+      - ai_runtime
+      - data_contract
+      - evidence_integrity
+      - local_human_verification
+      - transaction_concurrency
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation.md
+    status: closed
+    retryCount: 0

@@ -151,6 +151,7 @@ describe("ai scoring service", () => {
       evidenceStatus: "sufficient",
       citations: [],
       aiCallLogDraft: null,
+      aiScoringAttemptDraft: null,
     };
     const runner = createRunner({
       scoringPoints: [],
@@ -323,6 +324,14 @@ describe("ai scoring service", () => {
       aiCallLogDraft: {
         callStatus: "failed",
       },
+      aiScoringAttemptDraft: {
+        status: "failed",
+        failureCode: "scoring_runner_failed",
+        attemptSnapshot: {
+          answerRecordPublicId: "answer_record_public_123",
+          scoringStatus: "scoring_failed",
+        },
+      },
     });
 
     await expect(
@@ -334,8 +343,37 @@ describe("ai scoring service", () => {
       scoringStatus: "retry_limit_reached",
       retryCount: 3,
       aiCallLogDraft: null,
+      aiScoringAttemptDraft: null,
     });
     expect(failingRunner).toHaveBeenCalledTimes(1);
+  });
+
+  it("creates redaction-safe attempt drafts without raw prompt, answer, or provider payload", async () => {
+    const failingRunner: AiScoringRunner = vi.fn(async () => {
+      throw new Error("provider timeout includes raw answer detail 7c2a");
+    });
+    const service = createAiScoringService({ runner: failingRunner });
+    const result = await service.scoreSubjectiveAnswer(context);
+    const serializedDraft = JSON.stringify(result.aiScoringAttemptDraft);
+
+    expect(result.aiScoringAttemptDraft).toMatchObject({
+      status: "failed",
+      failureCode: "scoring_runner_failed",
+      failureMessageDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+      attemptSnapshot: {
+        answerRecordPublicId: "answer_record_public_123",
+        mockExamPublicId: "mock_exam_public_123",
+        questionPublicId: "question_public_123",
+        modelConfigPublicId: "model_config_public_123",
+        promptTemplateKey: "ai_scoring_v1",
+        promptTemplateVersion: 1,
+        scoringStatus: "scoring_failed",
+      },
+    });
+    expect(serializedDraft).not.toContain(context.questionText);
+    expect(serializedDraft).not.toContain(context.standardAnswer);
+    expect(serializedDraft).not.toContain(context.studentAnswer);
+    expect(serializedDraft).not.toContain("provider timeout includes");
   });
 
   it("rejects scoring fallback model configs to preserve scoring consistency", async () => {

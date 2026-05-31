@@ -87,6 +87,7 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
 
   it("uses persisted model_config loader for default local ai scoring runtime", async () => {
     const appendedAiCallLogs: unknown[] = [];
+    const appendedAiScoringAttempts: unknown[] = [];
     const runtime = createDefaultAiScoringRuntime(
       undefined,
       {
@@ -135,6 +136,17 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
           };
         },
       },
+      {
+        async appendAiScoringAttempt(input) {
+          appendedAiScoringAttempts.push(input);
+
+          return {
+            answerRecordPublicId: input.answerRecordPublicId,
+            attemptNumber: 1,
+            status: input.status,
+          };
+        },
+      },
     );
 
     const result = await runtime.scoreSubjectiveAnswer({
@@ -169,11 +181,28 @@ describe("phase 20 RA-04-07 persisted model_config runtime selection", () => {
       promptTemplateVersion: 7,
     });
     expect(appendedAiCallLogs).toHaveLength(1);
+    expect(appendedAiScoringAttempts).toHaveLength(1);
     expect(appendedAiCallLogs[0]).toMatchObject({
       modelConfigSnapshot: {
         modelConfigPublicId: "model-config-admin-scoring",
         modelName: "admin-managed-scoring-model",
       },
     });
+    expect(appendedAiScoringAttempts[0]).toMatchObject({
+      answerRecordPublicId: "answer-record-public-001",
+      aiCallLogPublicId: "ai-call-log-public-admin-config",
+      status: "succeeded",
+      failureCode: null,
+      failureMessageDigest: null,
+      attemptSnapshot: {
+        modelConfigPublicId: "model-config-admin-scoring",
+        promptTemplateKey: "ai_scoring_admin_v7",
+        promptTemplateVersion: 7,
+        scoringStatus: "scored",
+      },
+    });
+    expect(JSON.stringify(appendedAiScoringAttempts[0])).not.toContain(
+      "The compliance step is included.",
+    );
   });
 });

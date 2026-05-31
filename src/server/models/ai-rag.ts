@@ -6,6 +6,8 @@ import {
   aiCallLog,
   aiCallStatusValues,
   aiFuncTypeValues,
+  aiScoringAttempt,
+  aiScoringAttemptStatusValues,
   knowledgeBase,
   knowledgeNode,
   knowledgeNodeResource,
@@ -22,6 +24,7 @@ import type { professionValues } from "@/db/schema/auth";
 export {
   aiCallStatusValues,
   aiFuncTypeValues,
+  aiScoringAttemptStatusValues,
   knStatusValues,
   resourceStatusValues,
   resourceTypeValues,
@@ -31,6 +34,8 @@ export const evidenceStatusValues = ["sufficient", "weak", "none"] as const;
 
 export type AiFuncType = (typeof aiFuncTypeValues)[number];
 export type AiCallStatus = (typeof aiCallStatusValues)[number];
+export type AiScoringAttemptStatus =
+  (typeof aiScoringAttemptStatusValues)[number];
 export type ResourceType = (typeof resourceTypeValues)[number];
 export type ResourceStatus = (typeof resourceStatusValues)[number];
 export type KnStatus = (typeof knStatusValues)[number];
@@ -72,6 +77,9 @@ export type NewKnowledgeNodeResourceRow = InferInsertModel<
 
 type AiCallLogSelectRow = InferSelectModel<typeof aiCallLog>;
 type AiCallLogInsertRow = InferInsertModel<typeof aiCallLog>;
+
+type AiScoringAttemptSelectRow = InferSelectModel<typeof aiScoringAttempt>;
+type AiScoringAttemptInsertRow = InferInsertModel<typeof aiScoringAttempt>;
 
 export type ModelConfigSnapshotInput = {
   providerPublicId: string;
@@ -126,6 +134,36 @@ export type AiCallLogRedactedSnapshots = {
   providerRequestPayload: unknown;
   providerResponsePayload: unknown;
   providerErrorPayload: unknown;
+};
+
+export type AiScoringAttemptSnapshotInput = {
+  answerRecordPublicId: string;
+  mockExamPublicId: string | null;
+  questionPublicId: string;
+  modelConfigSnapshot: ModelConfigSnapshot;
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  scoringStatus: string;
+};
+
+export type AiScoringAttemptSnapshot = {
+  answerRecordPublicId: string;
+  mockExamPublicId: string | null;
+  questionPublicId: string;
+  modelConfigPublicId: string;
+  modelName: string;
+  displayName: string;
+  configVersion: number;
+  timeoutSecond: number;
+  maxRetryCount: number;
+  fallbackModelConfigPublicId: string | null;
+  promptTemplateKey: string;
+  promptTemplateVersion: number;
+  evidenceStatus: EvidenceStatus;
+  citationCount: number;
+  scoringStatus: string;
 };
 
 export type KnowledgeNodeSnapshotInput = {
@@ -184,6 +222,20 @@ export type NewAiCallLogRow = Omit<
   citation_redacted_snapshot?: RedactedJsonObject | null;
 };
 
+export type AiScoringAttemptRow = Omit<
+  AiScoringAttemptSelectRow,
+  "attempt_snapshot"
+> & {
+  attempt_snapshot: AiScoringAttemptSnapshot;
+};
+
+export type NewAiScoringAttemptRow = Omit<
+  AiScoringAttemptInsertRow,
+  "attempt_snapshot"
+> & {
+  attempt_snapshot: AiScoringAttemptSnapshot;
+};
+
 export function createModelConfigSnapshot(
   input: ModelConfigSnapshotInput,
 ): ModelConfigSnapshot {
@@ -201,6 +253,33 @@ export function createModelConfigSnapshot(
     fallbackModelConfigPublicId: input.fallbackModelConfigPublicId,
     promptTemplateKey: input.promptTemplateKey,
     promptTemplateVersion: input.promptTemplateVersion,
+  };
+}
+
+export function createFailureMessageDigest(value: unknown): string {
+  return createHash("sha256").update(serializeForHash(value)).digest("hex");
+}
+
+export function createAiScoringAttemptSnapshot(
+  input: AiScoringAttemptSnapshotInput,
+): AiScoringAttemptSnapshot {
+  return {
+    answerRecordPublicId: input.answerRecordPublicId,
+    mockExamPublicId: input.mockExamPublicId,
+    questionPublicId: input.questionPublicId,
+    modelConfigPublicId: input.modelConfigSnapshot.modelConfigPublicId,
+    modelName: input.modelConfigSnapshot.modelName,
+    displayName: input.modelConfigSnapshot.displayName,
+    configVersion: input.modelConfigSnapshot.configVersion,
+    timeoutSecond: input.modelConfigSnapshot.timeoutSecond,
+    maxRetryCount: input.modelConfigSnapshot.maxRetryCount,
+    fallbackModelConfigPublicId:
+      input.modelConfigSnapshot.fallbackModelConfigPublicId,
+    promptTemplateKey: input.promptTemplateKey,
+    promptTemplateVersion: input.promptTemplateVersion,
+    evidenceStatus: input.evidenceStatus,
+    citationCount: input.citationCount,
+    scoringStatus: input.scoringStatus,
   };
 }
 

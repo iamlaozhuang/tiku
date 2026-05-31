@@ -4,14 +4,18 @@ import {
   aiCallStatusValues,
   aiFuncTypeValues,
   assertKnowledgeNodeDepth,
+  aiScoringAttemptStatusValues,
   canTransitionResourceStatus,
   createAiCallLogRedactedSnapshots,
+  createAiScoringAttemptSnapshot,
+  createFailureMessageDigest,
   createKnowledgeNodeSnapshot,
   createModelConfigSnapshot,
   isResourceRagEligible,
   knStatusValues,
   resourceStatusValues,
   resourceTypeValues,
+  type AiScoringAttemptRow,
   type AiCallLogRow,
   type KnowledgeBaseRow,
   type KnowledgeNodeRow,
@@ -22,6 +26,21 @@ import {
 } from "./ai-rag";
 
 const createdAt = new Date("2026-05-20T08:00:00.000Z");
+const modelConfigSnapshot = createModelConfigSnapshot({
+  providerPublicId: "model_config_provider_public_123",
+  providerKey: "baseline_provider",
+  providerDisplayName: "Baseline Provider",
+  modelConfigPublicId: "model_config_public_123",
+  aiFuncType: "scoring",
+  modelName: "baseline-scoring-model",
+  displayName: "Baseline scoring model",
+  configVersion: 3,
+  timeoutSecond: 60,
+  maxRetryCount: 3,
+  fallbackModelConfigPublicId: null,
+  promptTemplateKey: "ai_scoring_v1",
+  promptTemplateVersion: 1,
+});
 
 describe("AI/RAG domain models", () => {
   it("exports AI function types from the schema boundary", () => {
@@ -36,6 +55,17 @@ describe("AI/RAG domain models", () => {
 
   it("exports AI call statuses from the schema boundary", () => {
     expect(aiCallStatusValues).toEqual(["success", "failed"]);
+  });
+
+  it("exports AI scoring attempt statuses from the schema boundary", () => {
+    expect(aiScoringAttemptStatusValues).toEqual([
+      "pending",
+      "running",
+      "succeeded",
+      "failed",
+      "timeout",
+      "cancelled",
+    ]);
   });
 
   it("exports RAG resource and knowledge enums from the schema boundary", () => {
@@ -205,6 +235,86 @@ describe("AI/RAG domain models", () => {
     expect(callLogRow).not.toHaveProperty("publicId");
     expect(callLogRow).not.toHaveProperty("callStatus");
     expect(callLogRow).not.toHaveProperty("modelConfigSnapshot");
+  });
+
+  it("keeps AI scoring attempt rows in snake_case storage shape", () => {
+    const attemptRow = {
+      id: 11,
+      answer_record_id: 10,
+      attempt_number: 2,
+      ai_call_log_id: 20,
+      status: "failed",
+      failure_code: "scoring_runner_failed",
+      failure_message_digest: createFailureMessageDigest(
+        "provider timeout with raw detail",
+      ),
+      scheduled_at: createdAt,
+      started_at: createdAt,
+      finished_at: createdAt,
+      retry_after_at: null,
+      attempt_snapshot: createAiScoringAttemptSnapshot({
+        answerRecordPublicId: "answer_record_public_id",
+        mockExamPublicId: "mock_exam_public_id",
+        questionPublicId: "question_public_id",
+        modelConfigSnapshot: createModelConfigSnapshot({
+          providerPublicId: "model_provider_public_id",
+          providerKey: "qwen",
+          providerDisplayName: "Qwen",
+          modelConfigPublicId: "model_config_public_id",
+          aiFuncType: "scoring",
+          modelName: "qwen-max",
+          displayName: "Qwen Max Scoring",
+          configVersion: 3,
+          timeoutSecond: 60,
+          maxRetryCount: 0,
+          fallbackModelConfigPublicId: null,
+          promptTemplateKey: "ai_scoring_v1",
+          promptTemplateVersion: 1,
+        }),
+        promptTemplateKey: "ai_scoring_v1",
+        promptTemplateVersion: 1,
+        evidenceStatus: "none",
+        citationCount: 0,
+        scoringStatus: "scoring_failed",
+      }),
+      created_at: createdAt,
+      updated_at: createdAt,
+    } satisfies AiScoringAttemptRow;
+
+    expect(attemptRow).not.toHaveProperty("answerRecordId");
+    expect(attemptRow).not.toHaveProperty("attemptNumber");
+    expect(attemptRow).not.toHaveProperty("aiCallLogId");
+  });
+
+  it("creates redaction-safe AI scoring attempt snapshots", () => {
+    const snapshot = createAiScoringAttemptSnapshot({
+      answerRecordPublicId: "answer_record_public_id",
+      mockExamPublicId: "mock_exam_public_id",
+      questionPublicId: "question_public_id",
+      modelConfigSnapshot,
+      promptTemplateKey: "ai_scoring_v1",
+      promptTemplateVersion: 1,
+      evidenceStatus: "weak",
+      citationCount: 2,
+      scoringStatus: "scoring_failed",
+    });
+    const serializedSnapshot = JSON.stringify(snapshot);
+
+    expect(snapshot).toMatchObject({
+      answerRecordPublicId: "answer_record_public_id",
+      mockExamPublicId: "mock_exam_public_id",
+      questionPublicId: "question_public_id",
+      modelConfigPublicId: "model_config_public_123",
+      promptTemplateKey: "ai_scoring_v1",
+      promptTemplateVersion: 1,
+      evidenceStatus: "weak",
+      citationCount: 2,
+      scoringStatus: "scoring_failed",
+    });
+    expect(serializedSnapshot).not.toContain("prompt raw text");
+    expect(serializedSnapshot).not.toContain("student answer raw text");
+    expect(serializedSnapshot).not.toContain("provider-token");
+    expect(serializedSnapshot).not.toContain("DATABASE_URL");
   });
 
   it("keeps RAG resource and knowledge rows in snake_case storage shape", () => {

@@ -41,6 +41,20 @@ export const aiCallStatusValues = ["success", "failed"] as const;
 
 export const aiCallStatusEnum = pgEnum("ai_call_status", aiCallStatusValues);
 
+export const aiScoringAttemptStatusValues = [
+  "pending",
+  "running",
+  "succeeded",
+  "failed",
+  "timeout",
+  "cancelled",
+] as const;
+
+export const aiScoringAttemptStatusEnum = pgEnum(
+  "ai_scoring_attempt_status",
+  aiScoringAttemptStatusValues,
+);
+
 export const resourceTypeValues = [
   "textbook",
   "courseware",
@@ -220,6 +234,37 @@ export const aiCallLog = pgTable(
       table.call_status,
     ),
     index("idx_ai_call_log_started_at").on(table.started_at),
+  ],
+);
+
+export const aiScoringAttempt = pgTable(
+  "ai_scoring_attempt",
+  {
+    id: idColumn(),
+    answer_record_id: bigint("answer_record_id", { mode: "number" }).notNull(),
+    attempt_number: integer("attempt_number").notNull(),
+    ai_call_log_id: bigint("ai_call_log_id", {
+      mode: "number",
+    }).references(() => aiCallLog.id, { onDelete: "set null" }),
+    status: aiScoringAttemptStatusEnum("status").notNull(),
+    failure_code: text("failure_code"),
+    failure_message_digest: text("failure_message_digest"),
+    scheduled_at: timestampColumn("scheduled_at"),
+    started_at: nullableTimestampColumn("started_at"),
+    finished_at: nullableTimestampColumn("finished_at"),
+    retry_after_at: nullableTimestampColumn("retry_after_at"),
+    attempt_snapshot: jsonb("attempt_snapshot").notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    index("idx_ai_scoring_attempt_answer_record_id").on(table.answer_record_id),
+    index("idx_ai_scoring_attempt_status").on(table.status),
+    index("idx_ai_scoring_attempt_retry_after_at").on(table.retry_after_at),
+    uniqueIndex("udx_ai_scoring_attempt_answer_record_id_attempt_number").on(
+      table.answer_record_id,
+      table.attempt_number,
+    ),
   ],
 );
 

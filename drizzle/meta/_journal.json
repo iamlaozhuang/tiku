@@ -43,6 +43,13 @@
       "when": 1779963600000,
       "tag": "20260528032000_add_fill_blank_answers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780249500000,
+      "tag": "20260531104500_add_ai_scoring_attempt",
+      "breakpoints": true
     }
   ]
 }
