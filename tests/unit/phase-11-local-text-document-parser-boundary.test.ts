@@ -1,12 +1,13 @@
 import { createHash } from "node:crypto";
-import { mkdtemp } from "node:fs/promises";
+import { mkdir, mkdtemp, truncate, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 import { parseLocalTextDocumentAsset } from "@/server/services/local-text-document-parser";
 import { storeLocalPaperAssetFile } from "@/server/services/local-paper-asset-storage";
+import { localResourceMaxFileSizeByte } from "@/server/services/rag-resource-knowledge-runtime";
 
 async function storeControlledAsset(input: { fileName: string; body: string }) {
   const storageRoot = await mkdtemp(join(tmpdir(), "tiku-parser-test-"));
@@ -108,8 +109,8 @@ describe("phase 11 local text document parser boundary", () => {
 
   it("skips unsupported local binary formats without OCR or parser fallback", async () => {
     const { paperAsset, storageRoot } = await storeControlledAsset({
-      body: "%PDF-1.7 controlled binary placeholder",
-      fileName: "controlled-paper-source.pdf",
+      body: "controlled unsupported binary placeholder",
+      fileName: "controlled-paper-source.bin",
     });
 
     const parsed = await parseLocalTextDocumentAsset({
@@ -123,10 +124,39 @@ describe("phase 11 local text document parser boundary", () => {
       parserMode: "local_only",
       skippedReason: "unsupported_extension",
       source: {
-        extension: "pdf",
-        fileName: "controlled-paper-source.pdf",
+        extension: "bin",
+        fileName: "controlled-paper-source.bin",
         objectKey: paperAsset.objectKey,
       },
     });
+  });
+
+  it("enforces the 50MB local resource parser limit before reading document content", async () => {
+    const storageRoot = await mkdtemp(join(tmpdir(), "tiku-parser-limit-"));
+    const objectKey = "dev/resource/marketing/202605/large-resource.md";
+    const targetPath = join(storageRoot, ...objectKey.split("/"));
+
+    await mkdir(dirname(targetPath), { recursive: true });
+    await writeFile(targetPath, "");
+    await truncate(targetPath, localResourceMaxFileSizeByte + 1);
+
+    const parsed = await parseLocalTextDocumentAsset({
+      fileName: "large-resource.md",
+      maxFileSizeByte: localResourceMaxFileSizeByte,
+      objectKey,
+      storageRoot,
+    });
+
+    expect(parsed).toEqual({
+      status: "skipped",
+      parserMode: "local_only",
+      skippedReason: "file_too_large",
+      source: {
+        extension: "md",
+        fileName: "large-resource.md",
+        objectKey,
+      },
+    });
+    expect(JSON.stringify(parsed)).not.toContain(storageRoot);
   });
 });

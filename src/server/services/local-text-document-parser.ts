@@ -39,7 +39,10 @@ export type ParsedLocalTextDocumentAsset = {
 export type SkippedLocalTextDocumentAsset = {
   status: "skipped";
   parserMode: "local_only";
-  skippedReason: "unsupported_extension" | "file_too_large";
+  skippedReason:
+    | "unsupported_extension"
+    | "file_too_large"
+    | "converter_unavailable";
   source: Omit<LocalTextDocumentSource, "contentType">;
 };
 
@@ -59,7 +62,8 @@ type HeadingCursor = {
   title: string;
 };
 
-const supportedExtensions = new Set(["txt", "md", "markdown"]);
+const supportedTextExtensions = new Set(["txt", "md", "markdown"]);
+const converterUnavailableExtensions = new Set(["docx", "pptx", "pdf"]);
 const defaultMaxFileSizeByte = 2 * 1024 * 1024;
 
 function resolveInsideStorageRoot(storageRoot: string, objectKey: string) {
@@ -179,7 +183,10 @@ export async function parseLocalTextDocumentAsset({
   const extension = readExtension(fileName);
   const skippedSource = { objectKey, fileName, extension };
 
-  if (!supportedExtensions.has(extension)) {
+  if (
+    !supportedTextExtensions.has(extension) &&
+    !converterUnavailableExtensions.has(extension)
+  ) {
     return {
       status: "skipped",
       parserMode: "local_only",
@@ -196,6 +203,15 @@ export async function parseLocalTextDocumentAsset({
       status: "skipped",
       parserMode: "local_only",
       skippedReason: "file_too_large",
+      source: skippedSource,
+    };
+  }
+
+  if (converterUnavailableExtensions.has(extension)) {
+    return {
+      status: "skipped",
+      parserMode: "local_only",
+      skippedReason: "converter_unavailable",
       source: skippedSource,
     };
   }

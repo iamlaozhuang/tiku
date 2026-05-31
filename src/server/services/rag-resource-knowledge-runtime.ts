@@ -143,6 +143,8 @@ type LocalResourceDetailDto = {
   markdownContent: string | null;
 };
 
+export const localResourceMaxFileSizeByte = 50 * 1024 * 1024;
+
 export type LocalResourceRagRetrievalInput = {
   storageRoot?: string;
   query: string;
@@ -513,6 +515,7 @@ function createLocalIndexingErrorSummary(message: string | null) {
 
   return message === "unsupported_extension" ||
     message === "file_too_large" ||
+    message === "converter_unavailable" ||
     message === "missing_markdown_content" ||
     message === "resource_status_not_chunkable"
     ? message
@@ -739,7 +742,7 @@ async function uploadLocalResource(input: {
     fileName: storedResource.fileName,
     objectKey: storedResource.objectKey,
     storageRoot: input.storageRoot,
-    maxFileSizeByte: 50 * 1024 * 1024,
+    maxFileSizeByte: localResourceMaxFileSizeByte,
   });
   const now = uploadedAt.toISOString();
   const publicId = createLocalResourcePublicId(storedResource);
