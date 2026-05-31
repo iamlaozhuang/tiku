@@ -12,6 +12,7 @@ import {
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
+  type EmployeeSummaryDto,
   type EmployeeImportResultDto,
   type EmployeeMutationResultDto,
   type EmployeeUnbindResultDto,
@@ -35,7 +36,10 @@ import {
   createEmployeeAccountService,
   type EmployeeAccountService,
 } from "./employee-account-service";
-import { normalizeCreateEmployeeAccountInput } from "../validators/employee-account";
+import {
+  normalizeCreateEmployeeAccountInput,
+  type NormalizedCreateEmployeeAccountInput,
+} from "../validators/employee-account";
 import { normalizeCreateOrgAuthInput } from "../validators/org-auth";
 import {
   normalizeCreateOrganizationInput,
@@ -146,6 +150,19 @@ type OrganizationMutationRepositories =
     }): Promise<DisableOrganizationResultDto | null>;
     enableOrganization?(publicId: string): Promise<OrganizationDto | null>;
   };
+
+type NormalizedEmployeeImportInput =
+  | {
+      kind: "existing_user_bind";
+      employees: { userPublicId: string; organizationPublicId: string }[];
+    }
+  | {
+      kind: "employee_account";
+      employeeAccounts: (NormalizedCreateEmployeeAccountInput & {
+        rowNumber: number;
+      })[];
+      rejectedRows: EmployeeImportResultDto["rejectedRows"];
+    };
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -270,16 +287,28 @@ function normalizeEmployeeCreateInput(
     : null;
 }
 
-function normalizeEmployeeImportInput(input: unknown): {
-  employees: { userPublicId: string; organizationPublicId: string }[];
-} | null {
+function normalizeEmployeeImportInput(
+  input: unknown,
+): NormalizedEmployeeImportInput | null {
   if (typeof input !== "object" || input === null) {
     return null;
   }
 
   const value = input as {
+    content?: unknown;
     employees?: unknown;
+    sourceFormat?: unknown;
   };
+
+  if (
+    typeof value.content === "string" &&
+    (value.sourceFormat === "csv" || value.sourceFormat === "tsv")
+  ) {
+    return parseEmployeeAccountImportContent({
+      content: value.content,
+      sourceFormat: value.sourceFormat,
+    });
+  }
 
   if (!Array.isArray(value.employees) || value.employees.length === 0) {
     return null;
@@ -294,10 +323,233 @@ function normalizeEmployeeImportInput(input: unknown): {
   }
 
   return {
+    kind: "existing_user_bind",
     employees: employees as {
       userPublicId: string;
       organizationPublicId: string;
     }[],
+  };
+}
+
+function parseDelimitedLine(line: string, delimiter: "," | "\t"): string[] {
+  const cells: string[] = [];
+  let cell = "";
+  let isQuoted = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    const nextCharacter = line[index + 1];
+
+    if (character === '"' && isQuoted && nextCharacter === '"') {
+      cell += '"';
+      index += 1;
+      continue;
+    }
+
+    if (character === '"') {
+      isQuoted = !isQuoted;
+      continue;
+    }
+
+    if (character === delimiter && !isQuoted) {
+      cells.push(cell.trim());
+      cell = "";
+      continue;
+    }
+
+    cell += character;
+  }
+
+  cells.push(cell.trim());
+
+  return cells;
+}
+
+function normalizeHeaderName(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function readEmployeeAccountCell(input: {
+  cells: string[];
+  fallbackIndex: number;
+  headerIndexByName: Map<string, number>;
+  name: string;
+}): string {
+  const headerIndex = input.headerIndexByName.get(input.name);
+  const index = headerIndex ?? input.fallbackIndex;
+
+  return input.cells[index]?.trim() ?? "";
+}
+
+function parseEmployeeAccountImportContent(input: {
+  content: string;
+  sourceFormat: "csv" | "tsv";
+}): NormalizedEmployeeImportInput | null {
+  const delimiter = input.sourceFormat === "tsv" ? "\t" : ",";
+  const parsedRows = input.content
+    .split(/\r?\n/u)
+    .map((line, index) => ({
+      cells: parseDelimitedLine(line, delimiter),
+      rowNumber: index + 1,
+    }))
+    .filter((row) => row.cells.some((cell) => cell.length > 0));
+
+  if (parsedRows.length === 0) {
+    return null;
+  }
+
+  const firstRow = parsedRows[0];
+  const firstHeaderNames = new Set(firstRow?.cells.map(normalizeHeaderName));
+  const hasHeader =
+    firstHeaderNames.has("phone") &&
+    firstHeaderNames.has("name") &&
+    firstHeaderNames.has("initialpassword") &&
+    firstHeaderNames.has("organizationpublicid");
+  const headerIndexByName = new Map<string, number>(
+    hasHeader
+      ? (firstRow?.cells.map((cell, index) => [
+          normalizeHeaderName(cell),
+          index,
+        ]) ?? [])
+      : [],
+  );
+  const dataRows = hasHeader ? parsedRows.slice(1) : parsedRows;
+  const rawAccounts = dataRows.map((row) => ({
+    rowNumber: row.rowNumber,
+    phone: readEmployeeAccountCell({
+      cells: row.cells,
+      fallbackIndex: 0,
+      headerIndexByName,
+      name: "phone",
+    }),
+    name: readEmployeeAccountCell({
+      cells: row.cells,
+      fallbackIndex: 1,
+      headerIndexByName,
+      name: "name",
+    }),
+    initialPassword: readEmployeeAccountCell({
+      cells: row.cells,
+      fallbackIndex: 2,
+      headerIndexByName,
+      name: "initialpassword",
+    }),
+    organizationPublicId: readEmployeeAccountCell({
+      cells: row.cells,
+      fallbackIndex: 3,
+      headerIndexByName,
+      name: "organizationpublicid",
+    }),
+  }));
+  const phoneCounts = new Map<string, number>();
+
+  for (const account of rawAccounts) {
+    if (account.phone.length > 0) {
+      phoneCounts.set(account.phone, (phoneCounts.get(account.phone) ?? 0) + 1);
+    }
+  }
+
+  const rejectedRows: EmployeeImportResultDto["rejectedRows"] = [];
+  const employeeAccounts: (NormalizedCreateEmployeeAccountInput & {
+    rowNumber: number;
+  })[] = [];
+
+  for (const account of rawAccounts) {
+    const validation = normalizeCreateEmployeeAccountInput(account);
+    const isDuplicatePhone = (phoneCounts.get(account.phone) ?? 0) > 1;
+
+    if (isDuplicatePhone) {
+      rejectedRows.push({
+        rowNumber: account.rowNumber,
+        userPublicId: null,
+        organizationPublicId: account.organizationPublicId || null,
+        reason: "duplicate_phone",
+      });
+      continue;
+    }
+
+    if (!validation.success) {
+      rejectedRows.push({
+        rowNumber: account.rowNumber,
+        userPublicId: null,
+        organizationPublicId: account.organizationPublicId || null,
+        reason: "invalid_row",
+      });
+      continue;
+    }
+
+    employeeAccounts.push({
+      ...validation.value,
+      rowNumber: account.rowNumber,
+    });
+  }
+
+  if (employeeAccounts.length === 0 && rejectedRows.length === 0) {
+    return null;
+  }
+
+  return {
+    kind: "employee_account",
+    employeeAccounts,
+    rejectedRows,
+  };
+}
+
+function mapEmployeeAccountResultToEmployeeSummary(
+  input: EmployeeAccountResultDto,
+): EmployeeSummaryDto {
+  return {
+    publicId: input.employeeAccount.employee.publicId,
+    userPublicId: input.employeeAccount.user.publicId,
+    phone: input.employeeAccount.user.phone,
+    name: input.employeeAccount.user.name,
+    organizationPublicId: input.employeeAccount.employee.organizationPublicId,
+    status: input.employeeAccount.user.status,
+  };
+}
+
+async function importEmployeeAccounts(input: {
+  employeeAccountService: EmployeeAccountService;
+  normalizedInput: Extract<
+    NormalizedEmployeeImportInput,
+    { kind: "employee_account" }
+  >;
+}): Promise<EmployeeImportResultDto> {
+  if (input.normalizedInput.rejectedRows.length > 0) {
+    return {
+      importedEmployees: [],
+      rejectedRows: input.normalizedInput.rejectedRows,
+    };
+  }
+
+  const importedEmployees: EmployeeSummaryDto[] = [];
+  const rejectedRows: EmployeeImportResultDto["rejectedRows"] = [];
+
+  for (const accountInput of input.normalizedInput.employeeAccounts) {
+    const { rowNumber, ...employeeAccountInput } = accountInput;
+    const result =
+      await input.employeeAccountService.createEmployeeAccount(
+        employeeAccountInput,
+      );
+
+    if (result.code === 0 && result.data !== null) {
+      importedEmployees.push(
+        mapEmployeeAccountResultToEmployeeSummary(result.data),
+      );
+      continue;
+    }
+
+    rejectedRows.push({
+      rowNumber,
+      userPublicId: null,
+      organizationPublicId: employeeAccountInput.organizationPublicId,
+      reason: "employee_create_failed",
+    });
+  }
+
+  return {
+    importedEmployees,
+    rejectedRows,
   };
 }
 
@@ -1124,19 +1376,6 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(actorOrError);
           }
 
-          if (repositories.importEmployees === undefined) {
-            await appendEmployeeAuditLog({
-              request,
-              actor: actorOrError,
-              actionType: "employee.import",
-              targetPublicId: null,
-              resultStatus: "failed",
-              metadataSummary: "redacted employee import unavailable metadata",
-            });
-
-            return createJsonResponse(employeeMutationUnavailableResponse);
-          }
-
           const normalizedInput = normalizeEmployeeImportInput(
             await readRequestJson(request),
           );
@@ -1154,7 +1393,41 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(employeeInputInvalidResponse);
           }
 
-          const result = await repositories.importEmployees(normalizedInput);
+          const result =
+            normalizedInput.kind === "employee_account"
+              ? await importEmployeeAccounts({
+                  employeeAccountService,
+                  normalizedInput,
+                })
+              : await (async () => {
+                  const importEmployees = repositories.importEmployees;
+
+                  if (importEmployees === undefined) {
+                    await appendEmployeeAuditLog({
+                      request,
+                      actor: actorOrError,
+                      actionType: "employee.import",
+                      targetPublicId: null,
+                      resultStatus: "failed",
+                      metadataSummary:
+                        "redacted employee import unavailable metadata",
+                    });
+
+                    return null;
+                  }
+
+                  return importEmployees({
+                    employees: normalizedInput.employees,
+                  });
+                })();
+
+          if (
+            result === null &&
+            normalizedInput.kind === "existing_user_bind" &&
+            repositories.importEmployees === undefined
+          ) {
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
 
           await appendEmployeeAuditLog({
             request,

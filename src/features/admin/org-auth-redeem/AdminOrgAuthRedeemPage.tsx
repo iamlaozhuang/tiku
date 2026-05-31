@@ -117,12 +117,17 @@ type OrganizationConfirmationState =
     }
   | null;
 
-type EmployeeImportInput = {
-  employees: {
-    userPublicId: string;
-    organizationPublicId: string;
-  }[];
-};
+type EmployeeImportInput =
+  | {
+      employees: {
+        userPublicId: string;
+        organizationPublicId: string;
+      }[];
+    }
+  | {
+      content: string;
+      sourceFormat: "csv" | "tsv";
+    };
 
 type EmployeeConfirmationState =
   | {
@@ -505,40 +510,47 @@ function buildEmployeeImportInput(value: string): {
   input: EmployeeImportInput | null;
   message: string | null;
 } {
-  const employees = value
-    .split(/\r?\n/u)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .map((line) => {
-      const [userPublicId, organizationPublicId] = line
-        .split(",")
-        .map((item) => item.trim());
+  const trimmedValue = value.trim();
 
-      return userPublicId === undefined ||
-        organizationPublicId === undefined ||
-        userPublicId.length === 0 ||
-        organizationPublicId.length === 0
-        ? null
-        : { userPublicId, organizationPublicId };
-    });
-
-  if (employees.length === 0) {
-    return { input: null, message: "请填写员工导入行。" };
+  if (trimmedValue.length === 0) {
+    return { input: null, message: "请填写员工导入内容。" };
   }
 
-  if (employees.some((employee) => employee === null)) {
+  const lines = trimmedValue
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const firstLine = lines[0]?.toLowerCase().replace(/\s+/gu, "") ?? "";
+  const hasEmployeeAccountHeader =
+    firstLine.includes("phone") &&
+    firstLine.includes("name") &&
+    firstLine.includes("initialpassword") &&
+    firstLine.includes("organizationpublicid");
+  const legacyRows = lines.map((line) =>
+    line.split(",").map((item) => item.trim()),
+  );
+  const isLegacyPublicIdImport =
+    !hasEmployeeAccountHeader &&
+    legacyRows.every(
+      (row) => row.length === 2 && row.every((item) => item.length > 0),
+    );
+
+  if (isLegacyPublicIdImport) {
     return {
-      input: null,
-      message: "每行必须使用 userPublicId,organizationPublicId。",
+      input: {
+        employees: legacyRows.map(([userPublicId, organizationPublicId]) => ({
+          userPublicId: userPublicId ?? "",
+          organizationPublicId: organizationPublicId ?? "",
+        })),
+      },
+      message: null,
     };
   }
 
   return {
     input: {
-      employees: employees as {
-        userPublicId: string;
-        organizationPublicId: string;
-      }[],
+      content: trimmedValue,
+      sourceFormat: lines.some((line) => line.includes("\t")) ? "tsv" : "csv",
     },
     message: null,
   };
@@ -1082,8 +1094,8 @@ function EmployeeImportActionPanel({
             员工批量导入
           </h2>
           <p className="text-text-secondary text-sm leading-6">
-            每行填写
-            userPublicId,organizationPublicId；提交后后端按批次校验并返回导入摘要。
+            支持 userPublicId,organizationPublicId，或粘贴
+            phone,name,initialPassword,organizationPublicId CSV/TSV。
           </p>
         </div>
         <textarea
