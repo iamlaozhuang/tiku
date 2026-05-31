@@ -178,3 +178,17 @@ diff check: pass
 - Mutation scope review: repository gathers active user ids through `employee.organization_id in affected organizationIds`; active `practice` and active/scoring `mock_exam` rows are terminated for those users only.
 - Evidence review: command output records counts and redacted metadata only; no token, password, or private payload is recorded.
 - Verdict: `APPROVE`.
+
+## Merge and Push Closeout
+
+- Implementation commit: `803249cc5034966464e8207d2e44c0b8e7aa7033` (`fix(auth): terminate organization active flows`).
+- Merge commit on `master`: `bb7dceae8c043c18522173f32576068333415d3a` (`merge: phase 20 organization disable termination`).
+- Pushed: `origin/master` advanced from `70118021c56931924b2f4873c3d005828a2196da` to `bb7dceae8c043c18522173f32576068333415d3a`.
+- Deleted merged short-lived branch: `codex/phase-20-fix-ra-01-10-organization-enable-disable-termination`.
+- Master validation after merge:
+  - `git diff --check`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass; ahead by implementation and merge commits before push.
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass; lint, typecheck, `test:unit` 143 files / 597 tests, format check.
+  - `npm.cmd run test:e2e`: pass; 26 tests.
