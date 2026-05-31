@@ -13,6 +13,7 @@ import {
   type AuditLogListDto,
   type ModelConfigListDto,
 } from "../contracts/admin-ai-audit-log-ops-contract";
+import { attachModelConfigRuntimeAlignment } from "./model-config-runtime";
 
 export type AdminAiAuditLogOpsRole =
   | "super_admin"
@@ -181,6 +182,24 @@ const sampleAiCallLogSummaries: AiCallLogSummaryListDto["dailySummaries"] = [
   },
 ];
 
+const samplePromptTemplates = [
+  {
+    publicId: "prompt-template-public-001",
+    promptTemplateKey: "ai_scoring_admin_v3",
+    aiFuncType: "ai_scoring",
+    version: 3,
+    title: "评分模板",
+    description: null,
+    bodyDigest: "sha256-scoring-admin-v3",
+    bodyPreviewMasked: "[redacted]",
+    status: "active",
+    isActive: true,
+    updatedAt: "2026-05-21T08:00:00.000Z",
+  },
+] satisfies Parameters<
+  typeof attachModelConfigRuntimeAlignment
+>[0]["promptTemplates"];
+
 function createPagination(
   query: Partial<AdminAiAuditLogListQuery>,
   total: number,
@@ -203,9 +222,14 @@ export function createAdminAiAuditLogOpsService({
 }: AdminAiAuditLogOpsServiceContext): AdminAiAuditLogOpsService {
   return {
     async listModelConfigs(query) {
+      const modelConfigs = attachModelConfigRuntimeAlignment({
+        modelConfigs: sampleModelConfigs,
+        promptTemplates: samplePromptTemplates,
+      });
+
       return createPaginatedResponse(
-        { modelConfigs: sampleModelConfigs },
-        createPagination(query, sampleModelConfigs.length),
+        { modelConfigs },
+        createPagination(query, modelConfigs.length),
       );
     },
     async listAuditLogs(query) {
