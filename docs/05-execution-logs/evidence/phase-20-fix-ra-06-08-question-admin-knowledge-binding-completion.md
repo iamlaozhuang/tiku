@@ -6,10 +6,10 @@
 
 ## Summary
 
-- Result: validation passed; pre-commit closeout pending.
+- Result: closed, merged to `master`, pushed to `origin/master`, and cleaned up.
 - Scope: implementation.
 - Changed surfaces: question admin UI direct knowledge_node/tag binding inputs, focused UI test, task plan/evidence, and governance state.
-- Gates: startup readiness, claim readiness, TDD RED/GREEN, full unit, e2e, quality gate, build, readiness, naming, diff check, and git inventory passed. In-app Browser/IAB failed due local Windows sandbox startup failure.
+- Gates: startup readiness, claim readiness, TDD RED/GREEN, full unit, e2e, quality gate, build, readiness, naming, diff check, git inventory, post-merge master validation, push, branch cleanup, and final clean/aligned checks passed. In-app Browser/IAB failed due local Windows sandbox startup failure.
 - Forbidden scope (`forbiddenScope`): `.env.local`, `.env.example`, package/lockfile/dependency, `src/db/schema/**`, `drizzle/**`, schema/migration, staging/prod/cloud/deploy/real provider, external service config, destructive data operation, and `drizzle-kit push` remain blocked.
 - Residual gaps (`residualGaps`): no IAB browser verification because local Browser runtime failed twice with `windows sandbox failed: spawn setup refresh`; Playwright e2e passed as fallback.
 
@@ -30,6 +30,7 @@
 - Phase 20 queue count: total 52, completed 36, remaining 16, closed 36, pending 14, blocked 2, active 0, done 0, pushed 0.
 - Created branch: `codex/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion`.
 - `project-state.yaml` drift: repository SHA still pointed at `d23eead...`; Git reality is `97a1872...`.
+- Closeout Phase 20 queue count after marking 06-08 closed: total 52, completed 37, remaining 15, closed 37, pending 13, blocked 2, active 0, done 0, pushed 0.
 
 ## Command Results
 
@@ -54,6 +55,20 @@
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                                    | pass    | Inventory completed; changed files are task-scoped and currently unstaged/untracked.                                                                           |
 | Browser plugin `iab` connection via `node_repl`                                                                                                                                        | fail    | Attempt 1 failed before tab listing with `windows sandbox failed: spawn setup refresh`.                                                                        |
 | Browser plugin `iab` connection via `node_repl`                                                                                                                                        | fail    | Retry failed with the same local Windows sandbox startup error; fallback browser evidence is the passing Playwright e2e suite.                                 |
+| `git commit -m "fix(admin): complete question knowledge binding"`                                                                                                                      | pass    | Created implementation commit `71b9aee9f69cd9748617f8b027cf11b2be522244`; pre-commit hook ran `lint-staged`, `lint`, and `typecheck`.                          |
+| `git merge --no-ff codex/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion`                                                                                            | pass    | Created merge commit `6176c4dbdfef6c6b4dd470c44173799b12a57022` on `master`.                                                                                   |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`                                                                                | pass    | Post-merge master validation: lint, typecheck, unit (139 files / 591 tests), and `format:check` passed.                                                        |
+| `npm.cmd run test:e2e`                                                                                                                                                                 | pass    | Post-merge master validation: Playwright e2e passed 25 tests.                                                                                                  |
+| `npm.cmd run build`                                                                                                                                                                    | pass    | Post-merge master validation: Next build passed; `.env.local` existence was reported by framework output only, with no file read or edit.                      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`                                                                            | pass    | Post-merge master naming scan passed.                                                                                                                          |
+| `git diff --check`                                                                                                                                                                     | pass    | Post-merge master whitespace check passed.                                                                                                                     |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`                                                                         | pass    | Post-merge master agent-system readiness passed.                                                                                                               |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`                                                    | pass    | Post-merge master inventory completed; `master` was ahead of `origin/master` by the expected implementation and merge commits.                                 |
+| `git push origin master`                                                                                                                                                               | pass    | Pushed `master` from `97a1872` to `6176c4d`.                                                                                                                   |
+| `git branch -d codex/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion`                                                                                                | fail    | Initial sandboxed branch deletion failed with `.git` ref lock permission denied.                                                                               |
+| `git branch -d codex/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion`                                                                                                | pass    | Escalated retry deleted the already merged short-lived branch.                                                                                                 |
+| `git fetch origin` / `git status --short --branch` / `git rev-list --left-right --count master...origin/master`                                                                        | pass    | Final cleanup check after first push and branch deletion: `master` clean/aligned with `origin/master` at `6176c4d`, rev-list `0 0`.                            |
+| `git branch --list "codex/*"` / `git worktree list` / `Get-ChildItem -Force .worktrees`                                                                                                | pass    | No residual `codex/*` branches; only worktree is `D:/tiku`; `.worktrees` is empty.                                                                             |
 
 ## TDD Log
 
@@ -88,6 +103,13 @@
   - `git diff --check`
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+  - Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+  - Post-merge `npm.cmd run test:e2e`
+  - Post-merge `npm.cmd run build`
+  - Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`
+  - Post-merge `git diff --check`
+  - Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+  - Post-merge `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
 - Failed then fixed/retried:
   - TDD RED focused unit failed for the expected missing UI inputs.
   - First full unit run timed out at the tool layer; rerun with longer timeout passed.
@@ -97,4 +119,9 @@
 
 ## Closeout Status
 
-- Pending.
+- Implementation commit: `71b9aee9f69cd9748617f8b027cf11b2be522244` (`fix(admin): complete question knowledge binding`).
+- Merge commit: `6176c4dbdfef6c6b4dd470c44173799b12a57022` (`merge: phase 20 ra 06 08 question knowledge binding`).
+- First push: `origin/master` updated from `97a1872` to `6176c4d`.
+- Short-lived branch cleanup: `codex/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion` deleted after merge and push.
+- Final cleanup check before docs closeout: `master` clean/aligned with `origin/master`, no residual `codex/*` branch, no unknown worktree.
+- Queue/state closeout: 06-08 marked `closed`; current user-restricted five-task set is exhausted.

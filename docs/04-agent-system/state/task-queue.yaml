@@ -12548,7 +12548,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion.md
-    status: validated
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion
     title: Phase 20 Fix RA-06-09 Paper Admin Lifecycle Gap Completion

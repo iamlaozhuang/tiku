@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 97a1872d4d029125e31d3c87463a146563de2de9
-  lastKnownOriginMasterSha: 97a1872d4d029125e31d3c87463a146563de2de9
+  lastKnownMasterSha: 6176c4dbdfef6c6b4dd470c44173799b12a57022
+  lastKnownOriginMasterSha: 6176c4dbdfef6c6b4dd470c44173799b12a57022
 currentTask:
   id: phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion.md
   branch: codex/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion
-  commitSha: null
+  commitSha: 71b9aee9f69cd9748617f8b027cf11b2be522244
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Task phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion is implemented and validated on codex/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion. Commit the task, merge to master, rerun master validation, push origin/master, delete the short-lived branch, and reconcile cleanup docs/state. Schema, drizzle, package, lockfile, env, cloud, deploy, real provider, and destructive data operations remain blocked."
+  nextRecommendedAction: "Task phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion is implemented, validated, merged to master, pushed, and cleaned up. The current user-restricted five-task set is exhausted; do not claim additional tasks without a refreshed queue scope and eligibility check. Schema, drizzle, package, lockfile, env, cloud, deploy, real provider, and destructive data operations remain blocked."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion.md
