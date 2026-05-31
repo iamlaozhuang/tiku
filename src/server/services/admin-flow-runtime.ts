@@ -307,6 +307,7 @@ export function createAdminFlowRuntimeRouteHandlers(
     actionType: "user.disable" | "user.enable";
     mutate: ((publicId: string) => Promise<boolean>) | undefined;
     revokeSessions: boolean;
+    terminateActiveFlows: boolean;
     successMetadataSummary: string;
   }): Promise<Response> {
     const actor = await requireAdminActor(input.request);
@@ -352,6 +353,16 @@ export function createAdminFlowRuntimeRouteHandlers(
       repositories.userOrgAuthRepository.revokeUserSessions !== undefined
     ) {
       await repositories.userOrgAuthRepository.revokeUserSessions(publicId);
+    }
+
+    if (
+      didMutate &&
+      input.terminateActiveFlows &&
+      repositories.userOrgAuthRepository.terminateUserActiveFlows !== undefined
+    ) {
+      await repositories.userOrgAuthRepository.terminateUserActiveFlows(
+        publicId,
+      );
     }
 
     await appendUserLifecycleAuditLog({
@@ -497,6 +508,7 @@ export function createAdminFlowRuntimeRouteHandlers(
             actionType: "user.disable",
             mutate: repositories.userOrgAuthRepository.disableUser,
             revokeSessions: true,
+            terminateActiveFlows: true,
             successMetadataSummary: "redacted user disable metadata",
           });
         },
@@ -512,6 +524,7 @@ export function createAdminFlowRuntimeRouteHandlers(
             actionType: "user.enable",
             mutate: repositories.userOrgAuthRepository.enableUser,
             revokeSessions: false,
+            terminateActiveFlows: false,
             successMetadataSummary: "redacted user enable metadata",
           });
         },
