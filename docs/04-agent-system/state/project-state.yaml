@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-31T08:20:00-07:00"
+updatedAt: "2026-05-31T08:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -40,12 +40,12 @@ repository:
   lastKnownOriginMasterSha: b7d26b05ec4fcc5e7c3b5d0396ed05e45cdb7a6f
 currentTask:
   id: phase-20-fix-ra-05-01-hybrid-rerank-retrieval
-  status: validated
+  status: merged
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-05-01-hybrid-rerank-retrieval.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-01-hybrid-rerank-retrieval.md
   branch: codex/phase-20-fix-ra-05-01-hybrid-rerank-retrieval
-  commitSha: null
+  commitSha: ff1f103ca04f9dcfd197ffb551ccbf1a7c517423
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit phase-20-fix-ra-05-01-hybrid-rerank-retrieval, merge it into master, run master validation, push origin master, delete the merged short-lived branch, and write cleanup evidence before claiming the next task."
+  nextRecommendedAction: "Push master for phase-20-fix-ra-05-01-hybrid-rerank-retrieval, delete the merged short-lived branch, and write cleanup evidence before claiming the next task."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-01-hybrid-rerank-retrieval.md
