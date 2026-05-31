@@ -14,6 +14,8 @@ import {
   PlusCircle,
   ShieldCheck,
   Ticket,
+  Upload,
+  UserMinus,
   UsersRound,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -21,6 +23,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
   EmployeeListDto,
+  EmployeeImportResultDto,
+  EmployeeUnbindResultDto,
   OrganizationListDto,
   RedeemCodeGenerationDto,
   RedeemCodeListDto,
@@ -106,7 +110,25 @@ type OrganizationConfirmationState =
       publicId: string | null;
     }
   | {
-      kind: "disableOrganization";
+      kind: "disableOrganization" | "enableOrganization";
+      publicId: string;
+    }
+  | null;
+
+type EmployeeImportInput = {
+  employees: {
+    userPublicId: string;
+    organizationPublicId: string;
+  }[];
+};
+
+type EmployeeConfirmationState =
+  | {
+      kind: "importEmployees";
+      input: EmployeeImportInput;
+    }
+  | {
+      kind: "unbindEmployee";
       publicId: string;
     }
   | null;
@@ -477,6 +499,49 @@ function buildOrganizationInput(
   };
 }
 
+function buildEmployeeImportInput(value: string): {
+  input: EmployeeImportInput | null;
+  message: string | null;
+} {
+  const employees = value
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      const [userPublicId, organizationPublicId] = line
+        .split(",")
+        .map((item) => item.trim());
+
+      return userPublicId === undefined ||
+        organizationPublicId === undefined ||
+        userPublicId.length === 0 ||
+        organizationPublicId.length === 0
+        ? null
+        : { userPublicId, organizationPublicId };
+    });
+
+  if (employees.length === 0) {
+    return { input: null, message: "请填写员工导入行。" };
+  }
+
+  if (employees.some((employee) => employee === null)) {
+    return {
+      input: null,
+      message: "每行必须使用 userPublicId,organizationPublicId。",
+    };
+  }
+
+  return {
+    input: {
+      employees: employees as {
+        userPublicId: string;
+        organizationPublicId: string;
+      }[],
+    },
+    message: null,
+  };
+}
+
 function mapOrganizationResultToListItem(
   organization: OrganizationResultDto["organization"],
   currentOrganization?: AdminOrgAuthData["organizations"][number],
@@ -759,12 +824,14 @@ function AdminDataRow({
 function OrganizationList({
   onDisableOrganization,
   onEditOrganization,
+  onEnableOrganization,
   organizations,
 }: {
   onDisableOrganization: (publicId: string) => void;
   onEditOrganization: (
     organization: AdminOrgAuthData["organizations"][number],
   ) => void;
+  onEnableOrganization: (publicId: string) => void;
   organizations: AdminOrgAuthData["organizations"];
 }) {
   return (
@@ -811,7 +878,17 @@ function OrganizationList({
                 <Ban className="size-3.5" aria-hidden="true" />
                 停用
               </button>
-            ) : null}
+            ) : (
+              <button
+                type="button"
+                className="bg-primary text-primary-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+                data-testid={`organization-enable-${organization.publicId}`}
+                onClick={() => onEnableOrganization(organization.publicId)}
+              >
+                <CheckCircle2 className="size-3.5" aria-hidden="true" />
+                启用
+              </button>
+            )}
           </div>
         </AdminDataRow>
       ))}
@@ -821,9 +898,11 @@ function OrganizationList({
 
 function OrgAuthList({
   onCancelOrgAuth,
+  onViewOrgAuthDetail,
   orgAuths,
 }: {
   onCancelOrgAuth: (publicId: string) => void;
+  onViewOrgAuthDetail: (publicId: string) => void;
   orgAuths: AdminOrgAuthData["orgAuths"];
 }) {
   return (
@@ -857,6 +936,14 @@ function OrgAuthList({
             <span className="bg-success/10 text-success w-fit rounded-lg px-2 py-1 text-xs font-medium">
               {authStatusLabels[orgAuth.status]}
             </span>
+            <button
+              type="button"
+              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+              onClick={() => onViewOrgAuthDetail(orgAuth.publicId)}
+            >
+              <Eye className="size-3.5" aria-hidden="true" />
+              查看详情
+            </button>
             {orgAuth.status === "active" ? (
               <button
                 type="button"
@@ -873,10 +960,60 @@ function OrgAuthList({
   );
 }
 
+function OrgAuthDetailPanel({
+  onClose,
+  orgAuth,
+}: {
+  onClose: () => void;
+  orgAuth: AdminOrgAuthData["orgAuths"][number];
+}) {
+  return (
+    <section
+      className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+      data-public-id={orgAuth.publicId}
+      data-testid={`admin-org-auth-detail-${orgAuth.publicId}`}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-2">
+          <p className="text-brand-primary text-xs font-medium">org_auth</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            {orgAuth.name}
+          </h2>
+          <div className="text-text-secondary grid gap-1 text-sm md:grid-cols-2">
+            <p>购买主体 {orgAuth.purchaserOrganizationPublicId}</p>
+            <p>授权范围 {authScopeTypeLabels[orgAuth.authScopeType]}</p>
+            <p>{formatProfessionLevel(orgAuth)}</p>
+            <p>
+              额度 {orgAuth.usedQuota} / {orgAuth.accountQuota}
+            </p>
+            <p>
+              有效期 {formatDate(orgAuth.startsAt)} 至{" "}
+              {formatDate(orgAuth.expiresAt)}
+            </p>
+            <p>状态 {authStatusLabels[orgAuth.status]}</p>
+          </div>
+          <p className="text-text-muted text-xs">
+            覆盖企业 {orgAuth.organizationPublicIds.join("、") || "无"}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+          onClick={onClose}
+        >
+          关闭
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function EmployeeList({
   employees,
+  onUnbindEmployee,
 }: {
   employees: AdminOrgAuthData["employees"];
+  onUnbindEmployee: (publicId: string) => void;
 }) {
   return (
     <AdminPanel title="员工账号">
@@ -896,12 +1033,121 @@ function EmployeeList({
               {employee.organizationPublicId}
             </p>
           </div>
-          <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
-            {userStatusLabels[employee.status]}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="bg-secondary text-secondary-foreground w-fit rounded-lg px-2 py-1 text-xs font-medium">
+              {userStatusLabels[employee.status]}
+            </span>
+            <button
+              type="button"
+              className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center gap-1 rounded-lg border px-2.5 text-sm font-medium transition-transform active:scale-[0.98]"
+              data-testid={`employee-unbind-${employee.publicId}`}
+              onClick={() => onUnbindEmployee(employee.publicId)}
+            >
+              <UserMinus className="size-3.5" aria-hidden="true" />
+              解绑
+            </button>
+          </div>
         </AdminDataRow>
       ))}
     </AdminPanel>
+  );
+}
+
+function EmployeeImportActionPanel({
+  importText,
+  onImportTextChange,
+  onSubmit,
+}: {
+  importText: string;
+  onImportTextChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <p className="text-brand-primary text-xs font-medium">employee</p>
+          <h2 className="text-text-primary text-base font-semibold">
+            员工批量导入
+          </h2>
+          <p className="text-text-secondary text-sm leading-6">
+            每行填写
+            userPublicId,organizationPublicId；提交后后端按批次校验并返回导入摘要。
+          </p>
+        </div>
+        <textarea
+          className="border-border bg-background min-h-24 w-full rounded-md border px-3 py-2 text-sm"
+          data-testid="employee-import-textarea"
+          value={importText}
+          onChange={(event) => onImportTextChange(event.target.value)}
+        />
+        <button
+          type="button"
+          className="bg-primary text-primary-foreground inline-flex h-9 items-center justify-center gap-2 rounded-lg px-4 text-sm font-medium transition-transform active:scale-[0.98]"
+          data-testid="employee-import-submit"
+          onClick={onSubmit}
+        >
+          <Upload className="size-4" aria-hidden="true" />
+          导入员工
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function EmployeeConfirmationDialog({
+  confirmationState,
+  onCancel,
+  onConfirm,
+}: {
+  confirmationState: Exclude<EmployeeConfirmationState, null>;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const isImport = confirmationState.kind === "importEmployees";
+
+  return (
+    <div
+      aria-modal="true"
+      className="border-border bg-surface fixed top-20 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-md border p-4 shadow-lg"
+      role="alertdialog"
+    >
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <AlertCircle
+            className="text-brand-primary size-4"
+            aria-hidden="true"
+          />
+          <h2 className="text-text-primary text-base font-semibold">
+            {isImport ? "确认导入员工？" : "确认解绑员工？"}
+          </h2>
+        </div>
+        <p className="text-text-muted text-sm leading-6">
+          员工操作只提交用户和企业 publicId；后端继续执行角色校验和脱敏审计。
+        </p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            className={
+              isImport
+                ? "bg-primary text-primary-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+                : "bg-destructive text-destructive-foreground inline-flex h-8 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            }
+            data-testid="employee-confirm-action"
+            onClick={onConfirm}
+          >
+            确认
+          </button>
+          <button
+            type="button"
+            className="border-border bg-background hover:bg-muted hover:text-foreground inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium transition-transform active:scale-[0.98]"
+            onClick={onCancel}
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1139,6 +1385,7 @@ function OrganizationConfirmationDialog({
   const titleByKind = {
     createOrganization: "确认新增企业组织？",
     disableOrganization: "确认停用企业组织？",
+    enableOrganization: "确认启用企业组织？",
     updateOrganization: "确认更新企业组织？",
   } satisfies Record<
     Exclude<OrganizationConfirmationState, null>["kind"],
@@ -1969,11 +2216,17 @@ export function AdminOrgAuthPage() {
     useState<OrgAuthConfirmationState>(null);
   const [organizationConfirmationState, setOrganizationConfirmationState] =
     useState<OrganizationConfirmationState>(null);
+  const [employeeConfirmationState, setEmployeeConfirmationState] =
+    useState<EmployeeConfirmationState>(null);
   const [orgAuthFormState, setOrgAuthFormState] = useState<OrgAuthFormState>(
     defaultOrgAuthFormState,
   );
   const [organizationFormState, setOrganizationFormState] =
     useState<OrganizationFormState>(defaultOrganizationFormState);
+  const [employeeImportText, setEmployeeImportText] = useState("");
+  const [selectedOrgAuthPublicId, setSelectedOrgAuthPublicId] = useState<
+    string | null
+  >(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const totalEmployeeCount = useMemo(
     () =>
@@ -1983,6 +2236,13 @@ export function AdminOrgAuthPage() {
         0,
       ),
     [data.organizations],
+  );
+  const selectedOrgAuth = useMemo(
+    () =>
+      data.orgAuths.find(
+        (orgAuth) => orgAuth.publicId === selectedOrgAuthPublicId,
+      ) ?? null,
+    [data.orgAuths, selectedOrgAuthPublicId],
   );
 
   async function handleConfirmOrgAuthAction() {
@@ -2137,6 +2397,43 @@ export function AdminOrgAuthPage() {
       return;
     }
 
+    if (organizationConfirmationState.kind === "enableOrganization") {
+      const enableResponse = await postAdminApi<OrganizationResultDto>(
+        `/api/v1/organizations/${organizationConfirmationState.publicId}/enable`,
+        sessionToken,
+      );
+
+      setOrganizationConfirmationState(null);
+
+      if (enableResponse.code !== 0 || enableResponse.data === null) {
+        setToastMessage({
+          message: enableResponse.message,
+          tone: "error",
+        });
+        return;
+      }
+
+      const enabledOrganization = enableResponse.data.organization;
+
+      setData((currentData) => ({
+        ...currentData,
+        organizations: currentData.organizations.map((organization) =>
+          organization.publicId === enabledOrganization.publicId
+            ? mapOrganizationResultToListItem(enabledOrganization, organization)
+            : organization,
+        ),
+      }));
+      setToastMessage({ message: "企业组织已启用。", tone: "success" });
+      return;
+    }
+
+    if (
+      organizationConfirmationState.kind !== "createOrganization" &&
+      organizationConfirmationState.kind !== "updateOrganization"
+    ) {
+      return;
+    }
+
     const mutationInput = organizationConfirmationState.input;
     const mutationResponse =
       organizationConfirmationState.kind === "createOrganization"
@@ -2199,6 +2496,109 @@ export function AdminOrgAuthPage() {
           : "企业组织已更新。",
       tone: "success",
     });
+  }
+
+  function handleSubmitEmployeeImport() {
+    const importDraft = buildEmployeeImportInput(employeeImportText);
+
+    if (importDraft.input === null) {
+      setToastMessage({
+        message: importDraft.message ?? "员工导入输入无效。",
+        tone: "error",
+      });
+      return;
+    }
+
+    setEmployeeConfirmationState({
+      kind: "importEmployees",
+      input: importDraft.input,
+    });
+  }
+
+  async function handleConfirmEmployeeAction() {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null || employeeConfirmationState === null) {
+      setEmployeeConfirmationState(null);
+      setLoadState("unauthorized");
+      return;
+    }
+
+    if (employeeConfirmationState.kind === "importEmployees") {
+      const importResponse = await postAdminApi<EmployeeImportResultDto>(
+        "/api/v1/employees/import",
+        sessionToken,
+        employeeConfirmationState.input,
+      );
+
+      setEmployeeConfirmationState(null);
+
+      if (importResponse.code !== 0 || importResponse.data === null) {
+        setToastMessage({ message: importResponse.message, tone: "error" });
+        return;
+      }
+
+      const { importedEmployees, rejectedRows } = importResponse.data;
+
+      setData((currentData) => ({
+        ...currentData,
+        employees: [
+          ...importedEmployees,
+          ...currentData.employees.filter(
+            (employee) =>
+              !importedEmployees.some(
+                (importedEmployee) =>
+                  importedEmployee.publicId === employee.publicId,
+              ),
+          ),
+        ],
+        organizations: currentData.organizations.map((organization) => ({
+          ...organization,
+          employeeCount:
+            organization.employeeCount +
+            importedEmployees.filter(
+              (employee) =>
+                employee.organizationPublicId === organization.publicId,
+            ).length,
+        })),
+      }));
+      setEmployeeImportText("");
+      setToastMessage({
+        message: `员工导入完成：成功 ${importedEmployees.length}，拒绝 ${rejectedRows.length}。`,
+        tone: rejectedRows.length === 0 ? "success" : "error",
+      });
+      return;
+    }
+
+    const unbindResponse = await postAdminApi<EmployeeUnbindResultDto>(
+      `/api/v1/employees/${employeeConfirmationState.publicId}/unbind`,
+      sessionToken,
+    );
+
+    setEmployeeConfirmationState(null);
+
+    if (unbindResponse.code !== 0 || unbindResponse.data === null) {
+      setToastMessage({ message: unbindResponse.message, tone: "error" });
+      return;
+    }
+
+    const unboundEmployee = unbindResponse.data;
+
+    setData((currentData) => ({
+      ...currentData,
+      employees: currentData.employees.filter(
+        (employee) => employee.publicId !== unboundEmployee.employeePublicId,
+      ),
+      organizations: currentData.organizations.map((organization) =>
+        organization.publicId === unboundEmployee.previousOrganizationPublicId
+          ? {
+              ...organization,
+              employeeCount: Math.max(organization.employeeCount - 1, 0),
+            }
+          : organization,
+      ),
+    }));
+    setToastMessage({ message: "员工已解绑。", tone: "success" });
   }
 
   if (loadState === "loading") {
@@ -2279,6 +2679,12 @@ export function AdminOrgAuthPage() {
         onSubmit={handleSubmitOrganization}
       />
 
+      <EmployeeImportActionPanel
+        importText={employeeImportText}
+        onImportTextChange={setEmployeeImportText}
+        onSubmit={handleSubmitEmployeeImport}
+      />
+
       <section className="grid gap-4 xl:grid-cols-3" aria-label="企业授权摘要">
         <SummaryTile
           icon={<Building2 className="size-4" aria-hidden="true" />}
@@ -2307,15 +2713,37 @@ export function AdminOrgAuthPage() {
             })
           }
           onEditOrganization={handleEditOrganization}
+          onEnableOrganization={(publicId) =>
+            setOrganizationConfirmationState({
+              kind: "enableOrganization",
+              publicId,
+            })
+          }
         />
         <OrgAuthList
           orgAuths={data.orgAuths}
           onCancelOrgAuth={(publicId) =>
             setConfirmationState({ kind: "cancelOrgAuth", publicId })
           }
+          onViewOrgAuthDetail={setSelectedOrgAuthPublicId}
         />
-        <EmployeeList employees={data.employees} />
+        <EmployeeList
+          employees={data.employees}
+          onUnbindEmployee={(publicId) =>
+            setEmployeeConfirmationState({
+              kind: "unbindEmployee",
+              publicId,
+            })
+          }
+        />
       </section>
+
+      {selectedOrgAuth === null ? null : (
+        <OrgAuthDetailPanel
+          orgAuth={selectedOrgAuth}
+          onClose={() => setSelectedOrgAuthPublicId(null)}
+        />
+      )}
 
       {confirmationState === null ? null : (
         <OrgAuthConfirmationDialog
@@ -2330,6 +2758,14 @@ export function AdminOrgAuthPage() {
           confirmationState={organizationConfirmationState}
           onCancel={() => setOrganizationConfirmationState(null)}
           onConfirm={() => void handleConfirmOrganizationAction()}
+        />
+      )}
+
+      {employeeConfirmationState === null ? null : (
+        <EmployeeConfirmationDialog
+          confirmationState={employeeConfirmationState}
+          onCancel={() => setEmployeeConfirmationState(null)}
+          onConfirm={() => void handleConfirmEmployeeAction()}
         />
       )}
 

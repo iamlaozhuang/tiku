@@ -12,7 +12,9 @@ import {
   type AdminAuthOperationListQuery,
   type AdminAuthOperationPageSize,
   type AdminAuthOperationSortField,
+  type EmployeeImportResultDto,
   type EmployeeMutationResultDto,
+  type EmployeeUnbindResultDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type {
   DisableOrganizationResultDto,
@@ -125,6 +127,7 @@ type OrganizationMutationRepositories =
       publicId: string;
       isCascade: boolean;
     }): Promise<DisableOrganizationResultDto | null>;
+    enableOrganization?(publicId: string): Promise<OrganizationDto | null>;
   };
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
@@ -176,7 +179,9 @@ function canReadEnterpriseAuth(actor: AdminOrganizationOrgAuthActor): boolean {
 }
 
 function canManageEmployee(actor: AdminOrganizationOrgAuthActor): boolean {
-  return actor.roles.includes("super_admin");
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
 }
 
 function canManageOrgAuth(actor: AdminOrganizationOrgAuthActor): boolean {
@@ -230,6 +235,37 @@ function normalizeEmployeeCreateInput(
         organizationPublicId: value.organizationPublicId.trim(),
       }
     : null;
+}
+
+function normalizeEmployeeImportInput(input: unknown): {
+  employees: { userPublicId: string; organizationPublicId: string }[];
+} | null {
+  if (typeof input !== "object" || input === null) {
+    return null;
+  }
+
+  const value = input as {
+    employees?: unknown;
+  };
+
+  if (!Array.isArray(value.employees) || value.employees.length === 0) {
+    return null;
+  }
+
+  const employees = value.employees.map((employeeInput) =>
+    normalizeEmployeeCreateInput(employeeInput),
+  );
+
+  if (employees.some((employeeInput) => employeeInput === null)) {
+    return null;
+  }
+
+  return {
+    employees: employees as {
+      userPublicId: string;
+      organizationPublicId: string;
+    }[],
+  };
 }
 
 function readAdminAuthOperationListQuery(
@@ -328,7 +364,11 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
   async function appendEmployeeAuditLog(input: {
     request: Request;
     actor: AdminOrganizationOrgAuthActor;
-    actionType: "employee.create" | "employee.disable";
+    actionType:
+      | "employee.create"
+      | "employee.disable"
+      | "employee.import"
+      | "employee.unbind";
     targetPublicId: string | null;
     resultStatus: "success" | "failed";
     metadataSummary: string;
@@ -371,7 +411,8 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     actionType:
       | "organization.create"
       | "organization.update"
-      | "organization.disable";
+      | "organization.disable"
+      | "organization.enable";
     targetPublicId: string | null;
     resultStatus: "success" | "failed";
     metadataSummary: string;
@@ -393,7 +434,8 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     actionType:
       | "organization.create"
       | "organization.update"
-      | "organization.disable",
+      | "organization.disable"
+      | "organization.enable",
     targetPublicId: string | null,
   ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
     const actor = await resolveAdminActor(request, sessionService);
@@ -447,7 +489,11 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
   async function requireEmployeeManager(
     request: Request,
-    actionType: "employee.create" | "employee.disable",
+    actionType:
+      | "employee.create"
+      | "employee.disable"
+      | "employee.import"
+      | "employee.unbind",
     targetPublicId: string | null,
   ): Promise<AdminOrganizationOrgAuthActor | ApiResponse<null>> {
     const actor = await resolveAdminActor(request, sessionService);
@@ -704,6 +750,56 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           );
         },
       },
+      enable: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireOrganizationManager(
+            request,
+            "organization.enable",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (
+            organizationMutationRepositories.enableOrganization === undefined
+          ) {
+            await appendOrganizationAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "organization.enable",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted organization enable unavailable metadata",
+            });
+
+            return createJsonResponse(organizationMutationUnavailableResponse);
+          }
+
+          const organization =
+            await organizationMutationRepositories.enableOrganization(publicId);
+
+          await appendOrganizationAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "organization.enable",
+            targetPublicId: publicId,
+            resultStatus: organization === null ? "failed" : "success",
+            metadataSummary: "redacted organization enable metadata",
+          });
+
+          return createJsonResponse(
+            organization === null
+              ? organizationNotFoundResponse
+              : createSuccessResponse<OrganizationResultDto>({
+                  organization,
+                }),
+          );
+        },
+      },
     },
     orgAuths: {
       collection: {
@@ -934,6 +1030,72 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           );
         },
       },
+      importBatch: {
+        async POST(request: Request): Promise<Response> {
+          const actorOrError = await requireEmployeeManager(
+            request,
+            "employee.import",
+            null,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.importEmployees === undefined) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.import",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted employee import unavailable metadata",
+            });
+
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
+
+          const normalizedInput = normalizeEmployeeImportInput(
+            await readRequestJson(request),
+          );
+
+          if (normalizedInput === null) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.import",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted employee invalid input metadata",
+            });
+
+            return createJsonResponse(employeeInputInvalidResponse);
+          }
+
+          const result = await repositories.importEmployees(normalizedInput);
+
+          await appendEmployeeAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "employee.import",
+            targetPublicId: null,
+            resultStatus:
+              result === null || result.rejectedRows.length > 0
+                ? "failed"
+                : "success",
+            metadataSummary:
+              result === null
+                ? "redacted employee import metadata"
+                : `redacted employee import metadata; imported=${result.importedEmployees.length} rejected=${result.rejectedRows.length}`,
+          });
+
+          return createJsonResponse(
+            result === null
+              ? employeeNotFoundResponse
+              : createSuccessResponse<EmployeeImportResultDto>(result),
+          );
+        },
+      },
       disable: {
         async POST(request: Request, context: RouteContext): Promise<Response> {
           const { publicId } = await context.params;
@@ -973,6 +1135,50 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           return createJsonResponse(
             didDisable ? createSuccessResponse(null) : employeeNotFoundResponse,
+          );
+        },
+      },
+      unbind: {
+        async POST(request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+          const actorOrError = await requireEmployeeManager(
+            request,
+            "employee.unbind",
+            publicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.unbindEmployee === undefined) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.unbind",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted employee unbind unavailable metadata",
+            });
+
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
+
+          const result = await repositories.unbindEmployee(publicId);
+
+          await appendEmployeeAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "employee.unbind",
+            targetPublicId: publicId,
+            resultStatus: result === null ? "failed" : "success",
+            metadataSummary: "redacted employee unbind metadata",
+          });
+
+          return createJsonResponse(
+            result === null
+              ? employeeNotFoundResponse
+              : createSuccessResponse<EmployeeUnbindResultDto>(result),
           );
         },
       },
