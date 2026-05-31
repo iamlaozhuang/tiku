@@ -628,113 +628,121 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
       const database = getDatabase();
       const organizationIds = await listInputOrganizationIds(database, input);
 
-      if (organizationIds.length === 0) {
-        return false;
-      }
-
-      const [row] = await database
-        .select({ value: count() })
-        .from(orgAuth)
-        .innerJoin(
-          orgAuthOrganization,
-          eq(orgAuthOrganization.org_auth_id, orgAuth.id),
-        )
-        .where(
-          and(
-            eq(orgAuth.status, "active"),
-            eq(orgAuth.profession, input.profession),
-            eq(orgAuth.level, input.level),
-            lt(orgAuth.starts_at, input.expiresAt),
-            gt(orgAuth.expires_at, input.startsAt),
-            inArray(orgAuthOrganization.organization_id, organizationIds),
-          ),
-        );
-
-      return (row?.value ?? 0) > 0;
+      return hasOverlappingOrgAuthWithOrganizationIds(
+        database,
+        input,
+        organizationIds,
+      );
     },
     async createOrgAuth(input) {
       const database = getDatabase();
-      const [purchaserOrganization] = await database
-        .select({ id: organization.id, public_id: organization.public_id })
-        .from(organization)
-        .where(eq(organization.public_id, input.purchaserOrganizationPublicId))
-        .limit(1);
 
-      if (purchaserOrganization === undefined) {
-        return null;
-      }
+      return database.transaction(async (transaction) => {
+        const transactionalDatabase =
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase;
+        const [purchaserOrganization] = await transactionalDatabase
+          .select({ id: organization.id, public_id: organization.public_id })
+          .from(organization)
+          .where(
+            eq(organization.public_id, input.purchaserOrganizationPublicId),
+          )
+          .limit(1);
 
-      const organizationIds = await listInputOrganizationIds(database, input);
+        if (purchaserOrganization === undefined) {
+          return null;
+        }
 
-      if (organizationIds.length === 0) {
-        return null;
-      }
+        const organizationIds = await listInputOrganizationIds(
+          transactionalDatabase,
+          input,
+        );
 
-      const usedQuota = await countActiveEmployeesByOrganizationIds(
-        database,
-        organizationIds,
-      );
+        if (organizationIds.length === 0) {
+          return null;
+        }
 
-      if (usedQuota > input.accountQuota) {
-        return null;
-      }
-
-      const now = new Date();
-      const [orgAuthRow] = await database
-        .insert(orgAuth)
-        .values({
-          public_id: `org-auth-${randomUUID()}`,
-          name: input.name,
-          purchaser_organization_id: purchaserOrganization.id,
-          auth_scope_type: input.authScopeType,
-          profession: input.profession,
+        await lockOrgAuthQuotaScope(transactionalDatabase, {
           level: input.level,
-          account_quota: input.accountQuota,
-          used_quota: usedQuota,
-          starts_at: input.startsAt,
-          expires_at: input.expiresAt,
-          status: "active",
-          cancelled_at: null,
-          created_at: now,
-          updated_at: now,
-        })
-        .returning({
-          id: orgAuth.id,
-          public_id: orgAuth.public_id,
-          name: orgAuth.name,
-          auth_scope_type: orgAuth.auth_scope_type,
-          profession: orgAuth.profession,
-          level: orgAuth.level,
-          account_quota: orgAuth.account_quota,
-          used_quota: orgAuth.used_quota,
-          starts_at: orgAuth.starts_at,
-          expires_at: orgAuth.expires_at,
-          status: orgAuth.status,
-          cancelled_at: orgAuth.cancelled_at,
-          created_at: orgAuth.created_at,
-          updated_at: orgAuth.updated_at,
+          organizationIds,
+          profession: input.profession,
         });
 
-      if (orgAuthRow === undefined) {
-        return null;
-      }
+        if (
+          await hasOverlappingOrgAuthWithOrganizationIds(
+            transactionalDatabase,
+            input,
+            organizationIds,
+          )
+        ) {
+          return null;
+        }
 
-      await database.insert(orgAuthOrganization).values(
-        organizationIds.map((organizationId) => ({
-          org_auth_id: orgAuthRow.id,
-          organization_id: organizationId,
-        })),
-      );
+        const usedQuota = await countActiveEmployeesByOrganizationIds(
+          transactionalDatabase,
+          organizationIds,
+        );
 
-      const organizationPublicIds = await listOrganizationPublicIdsByIds(
-        database,
-        organizationIds,
-      );
+        if (usedQuota > input.accountQuota) {
+          return null;
+        }
 
-      return mapOrgAuthMutationRowToDto({
-        ...orgAuthRow,
-        purchaser_organization_public_id: purchaserOrganization.public_id,
-        organization_public_ids: organizationPublicIds,
+        const now = new Date();
+        const [orgAuthRow] = await transactionalDatabase
+          .insert(orgAuth)
+          .values({
+            public_id: `org-auth-${randomUUID()}`,
+            name: input.name,
+            purchaser_organization_id: purchaserOrganization.id,
+            auth_scope_type: input.authScopeType,
+            profession: input.profession,
+            level: input.level,
+            account_quota: input.accountQuota,
+            used_quota: usedQuota,
+            starts_at: input.startsAt,
+            expires_at: input.expiresAt,
+            status: "active",
+            cancelled_at: null,
+            created_at: now,
+            updated_at: now,
+          })
+          .returning({
+            id: orgAuth.id,
+            public_id: orgAuth.public_id,
+            name: orgAuth.name,
+            auth_scope_type: orgAuth.auth_scope_type,
+            profession: orgAuth.profession,
+            level: orgAuth.level,
+            account_quota: orgAuth.account_quota,
+            used_quota: orgAuth.used_quota,
+            starts_at: orgAuth.starts_at,
+            expires_at: orgAuth.expires_at,
+            status: orgAuth.status,
+            cancelled_at: orgAuth.cancelled_at,
+            created_at: orgAuth.created_at,
+            updated_at: orgAuth.updated_at,
+          });
+
+        if (orgAuthRow === undefined) {
+          return null;
+        }
+
+        await transactionalDatabase.insert(orgAuthOrganization).values(
+          organizationIds.map((organizationId) => ({
+            org_auth_id: orgAuthRow.id,
+            organization_id: organizationId,
+          })),
+        );
+
+        const organizationPublicIds = await listOrganizationPublicIdsByIds(
+          transactionalDatabase,
+          organizationIds,
+        );
+
+        return mapOrgAuthMutationRowToDto({
+          ...orgAuthRow,
+          purchaser_organization_public_id: purchaserOrganization.public_id,
+          organization_public_ids: organizationPublicIds,
+        });
       });
     },
     async cancelOrgAuth(publicId) {
@@ -1630,6 +1638,60 @@ async function listInputOrganizationIds(
   }
 
   return listOrganizationAndDescendantIds(database, rootOrganization.id);
+}
+
+async function lockOrgAuthQuotaScope(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: {
+    level: number;
+    organizationIds: number[];
+    profession: NormalizedCreateOrgAuthInput["profession"];
+  },
+): Promise<void> {
+  const lockKeys = [...input.organizationIds]
+    .sort((left, right) => left - right)
+    .map(
+      (organizationId) =>
+        `org_auth:${input.profession}:level:${input.level}:organization:${organizationId}`,
+    );
+
+  await database.execute(sql`
+    select pg_advisory_xact_lock(200111, hashtext(scope_lock.lock_key))
+    from unnest(array[${sql.join(
+      lockKeys.map((lockKey) => sql`${lockKey}`),
+      sql`, `,
+    )}]) as scope_lock(lock_key)
+  `);
+}
+
+async function hasOverlappingOrgAuthWithOrganizationIds(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: NormalizedCreateOrgAuthInput,
+  organizationIds: number[],
+): Promise<boolean> {
+  if (organizationIds.length === 0) {
+    return false;
+  }
+
+  const [row] = await database
+    .select({ value: count() })
+    .from(orgAuth)
+    .innerJoin(
+      orgAuthOrganization,
+      eq(orgAuthOrganization.org_auth_id, orgAuth.id),
+    )
+    .where(
+      and(
+        eq(orgAuth.status, "active"),
+        eq(orgAuth.profession, input.profession),
+        eq(orgAuth.level, input.level),
+        lt(orgAuth.starts_at, input.expiresAt),
+        gt(orgAuth.expires_at, input.startsAt),
+        inArray(orgAuthOrganization.organization_id, organizationIds),
+      ),
+    );
+
+  return (row?.value ?? 0) > 0;
 }
 
 async function listOrganizationAndDescendantIds(
