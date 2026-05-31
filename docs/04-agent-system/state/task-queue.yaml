@@ -12537,7 +12537,7 @@ tasks:
       - phase-18-audit-ra-06-admin-ops-logs-permissions
       - phase-20-fix-ra-02-01-question-knowledge-tag-binding
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-08-001.
+    humanApproval: Registered by Phase 18 RA-06 audit finding F-RA-06-08-001. User approved claiming this recommended task and approved the required local database_migration-risk review on 2026-05-31, limited to reusing existing question_knowledge_node/question_tag local models for question admin knowledge binding UI/runtime/test/evidence. No schema, drizzle, migration, package, lockfile, env, cloud, deploy, real provider, external service, or destructive data operation is approved.
     taskKind: implementation
     allowedFiles: *phase20_ra06_allowed_files
     blockedFiles: *phase20_ra06_blocked_files
@@ -12548,7 +12548,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-06-09-paper-admin-lifecycle-gap-completion
     title: Phase 20 Fix RA-06-09 Paper Admin Lifecycle Gap Completion
