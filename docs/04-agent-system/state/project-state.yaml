@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-31T06:39:55-07:00"
+updatedAt: "2026-05-31T07:25:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 5b800e86636eb49533e8d46c4e5941ed3069a071
-  lastKnownOriginMasterSha: 5b800e86636eb49533e8d46c4e5941ed3069a071
+  lastKnownMasterSha: 0671fd99c8326010a70e14aaffc9b120c05705e6
+  lastKnownOriginMasterSha: 0671fd99c8326010a70e14aaffc9b120c05705e6
 currentTask:
-  id: phase-20-fix-ra-01-04-employee-import
-  status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-04-employee-import.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-04-employee-import.md
-  branch: null
-  commitSha: 5b5a9cc45487abf02bcb6ac10aa83327fe7e32c8
+  id: phase-20-fix-ra-04-01-async-ai-scoring-queue
+  status: validated
+  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md#findings
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-04-01-async-ai-scoring-queue.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-01-async-ai-scoring-queue.md
+  branch: codex/phase-20-fix-ra-04-01-async-ai-scoring-queue
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Both user-prioritized Phase 20 tasks in this run are implemented, merged into master, pushed, and their short-lived branches are deleted. After this cleanup docs commit is pushed, verify master clean/aligned with origin/master and no codex/* branches or unknown worktrees remain before claiming any new task."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-04-employee-import.md
+  nextRecommendedAction: "Commit phase-20-fix-ra-04-01-async-ai-scoring-queue, merge it into master, run master validation, push origin master, delete the merged short-lived branch, and write cleanup evidence before claiming the next task."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-01-async-ai-scoring-queue.md

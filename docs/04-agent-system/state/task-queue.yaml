@@ -10197,7 +10197,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-student-experience.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: phase-16-audit-ai-scoring-explanation
     title: Phase 16 Audit AI Scoring Explanation Hint And Model
@@ -11399,7 +11399,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-01-async-ai-scoring-queue.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence
     title: Phase 20 Fix RA-04-02 AI Scoring Timeout Retry Persistence

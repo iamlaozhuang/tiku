@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createDeterministicMockExamAiScoringQueue,
   createMockExamService,
   type MockExamClock,
   type MockExamPublicIdFactory,
@@ -929,6 +930,172 @@ describe("mock exam service", () => {
             aiScoringSnapshot: expect.objectContaining({
               promptTemplateKey: "ai_scoring_v1",
             }),
+          }),
+        ],
+      }),
+    ]);
+  });
+
+  it("queues subjective AI scoring and applies results after FIFO drain", async () => {
+    const submitInputs: unknown[] = [];
+    const scoringUpdateInputs: unknown[] = [];
+    const scoringContexts: unknown[] = [];
+    const aiScoringQueue = createDeterministicMockExamAiScoringQueue();
+    const service = createMockExamService(
+      createRepository({
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              public_id: "answer_record_public_objective",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_123",
+              question_public_id: "question_public_123",
+              answer_snapshot: {
+                selectedLabels: ["A"],
+                textAnswer: null,
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "1.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+            {
+              public_id: "answer_record_public_subjective",
+              exam_mode: "mock_exam",
+              paper_question_public_id: "paper_question_public_456",
+              question_public_id: "question_public_456",
+              answer_snapshot: {
+                selectedLabels: [],
+                textAnswer: "queued subjective answer",
+                savedFromClientAt: null,
+              },
+              answer_record_status: "saved",
+              is_correct: null,
+              score: null,
+              max_score: "5.0",
+              answered_at: now,
+              submitted_at: null,
+            },
+          ];
+        },
+        async submitMockExam(input) {
+          submitInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: input.examStatus,
+            submitted_at: input.submittedAt,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 2,
+          });
+        },
+        async applyMockExamScoringResults(input) {
+          scoringUpdateInputs.push(input);
+
+          return createMockExam({
+            public_id: input.publicId,
+            exam_status: input.examStatus,
+            submitted_at: now,
+            objective_score: input.objectiveScore,
+            subjective_score: input.subjectiveScore,
+            total_score: input.totalScore,
+            answered_count: 2,
+          });
+        },
+      }),
+      clock,
+      createIdFactory(),
+      {
+        aiScoringQueue,
+        aiScoringRuntime: {
+          async scoreSubjectiveAnswer(context) {
+            scoringContexts.push(context);
+
+            return {
+              answerRecordPublicId: context.answerRecordPublicId,
+              scoringStatus: "scored",
+              score: "4.5",
+              maxScore: "5.0",
+              scoringSnapshot: {
+                promptTemplateKey: "ai_scoring_v1",
+                promptTemplateVersion: 1,
+                scoringPoints: [],
+                citations: [],
+                evidenceStatus: "none",
+              },
+              failureReason: null,
+            };
+          },
+        },
+      },
+    );
+
+    await expect(
+      service.submitMockExam(userContext, "mock_exam_public_existing", {}),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        mockExam: {
+          examStatus: "scoring",
+        },
+        unansweredCount: 0,
+      },
+    });
+    expect(scoringContexts).toEqual([]);
+    expect(aiScoringQueue.listPendingJobs()).toEqual([
+      expect.objectContaining({
+        mockExamPublicId: "mock_exam_public_existing",
+        answerRecordPublicIds: ["answer_record_public_subjective"],
+      }),
+    ]);
+    expect(submitInputs).toEqual([
+      expect.objectContaining({
+        examStatus: "scoring",
+        objectiveScore: "1.0",
+        subjectiveScore: null,
+        totalScore: "1.0",
+        answerRecordResults: [
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_123",
+            answerRecordStatus: "scored",
+            score: "1.0",
+          }),
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_456",
+            answerRecordStatus: "submitted",
+            score: null,
+          }),
+        ],
+      }),
+    ]);
+
+    await expect(aiScoringQueue.drainNext()).resolves.toMatchObject({
+      status: "processed",
+      mockExamPublicId: "mock_exam_public_existing",
+    });
+
+    expect(scoringContexts).toEqual([
+      expect.objectContaining({
+        answerRecordPublicId: "answer_record_public_subjective",
+        studentAnswer: "queued subjective answer",
+      }),
+    ]);
+    expect(scoringUpdateInputs).toEqual([
+      expect.objectContaining({
+        examStatus: "completed",
+        objectiveScore: "1.0",
+        subjectiveScore: "4.5",
+        totalScore: "5.5",
+        answerRecordResults: [
+          expect.objectContaining({
+            paperQuestionPublicId: "paper_question_public_456",
+            answerRecordStatus: "scored",
+            score: "4.5",
           }),
         ],
       }),
