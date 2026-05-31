@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-31T11:00:00-07:00"
+  currentPhase: phase-21-high-risk-tail-closure
+updatedAt: "2026-05-31T11:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 3a72827d2a5c096e4c7f41052306aa18a54f8270
-  lastKnownOriginMasterSha: 3a72827d2a5c096e4c7f41052306aa18a54f8270
+  lastKnownMasterSha: e57c59c2b05cd440d8a715b5ddbb696b978b4be0
+  lastKnownOriginMasterSha: e57c59c2b05cd440d8a715b5ddbb696b978b4be0
 currentTask:
-  id: phase-20-fix-ra-05-03-resource-conversion-formats
+  id: phase-20-closeout-phase-21-seeding
   status: closed
-  sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-05-03-resource-conversion-formats.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-03-resource-conversion-formats.md
+  sourceStory: user-request-2026-05-31-phase-20-closeout-phase-21-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-closeout-phase-21-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-31-phase-20-closeout-phase-21-seeding.md
   branch: null
-  commitSha: 5f5fc0a3adcf0a624093393a08528b18832e1e54
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Batch limit reached after completing the three requested priority tasks; report final status and await the next human instruction before claiming more work."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-03-resource-conversion-formats.md
+  nextRecommendedAction: "Claim phase-21-tail-ai-scoring-retry-persistence-design first; do not implement schema or migration until database_migration approval evidence exists."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-phase-20-closeout-phase-21-seeding.md

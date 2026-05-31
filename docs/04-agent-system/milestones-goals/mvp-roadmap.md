@@ -257,3 +257,43 @@ Closeout status:
 
 - Phase 11 staging release planning is closed by `docs/05-execution-logs/evidence/2026-05-23-phase-11-staging-release-planning.md`.
 - Implementation is intentionally not approved by this planning task; the next Phase 11 task must request explicit human approval before any staging architecture, resource, secret, migration, provider, observability, deployment, or cloud work begins.
+
+## Phase 20: Requirement Gap Fixes Closeout
+
+Closeout status:
+
+- Phase 20 requirement gap fixes are closed with accepted deferred blockers by `docs/05-execution-logs/evidence/2026-05-31-phase-20-closeout-phase-21-seeding.md`.
+- Final Phase 20 queue count is `50 closed + 2 blocked accepted deferred`.
+- The two accepted deferred blockers remain `blocked` in `docs/04-agent-system/state/task-queue.yaml`:
+  - `phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence`
+  - `phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage`
+- These blockers are not counted as completed implementation. They are explicitly moved into Phase 21 planning and approval flow.
+
+Non-goals:
+
+- Do not change the two Phase 20 blocker statuses to `closed` without completing their Phase 21 implementation tasks.
+- Do not add schema, migration, dependency, env, provider, cloud, staging, prod, deploy, or destructive data work during Phase 20 closeout.
+
+## Phase 21: High-Risk Tail Closure
+
+Primary deliverables:
+
+- Phase 21 high-risk tail contract at `docs/02-architecture/interfaces/phase-21-high-risk-tail-contract.md`.
+- AI scoring retry persistence design with migration approval checklist.
+- Admin common UX, permission, and concurrency split design.
+- Follow-up implementation tasks that remain blocked until their risk-specific approvals are recorded.
+
+Non-goals:
+
+- Do not connect real providers.
+- Do not read or modify `.env.local` or `.env.example`.
+- Do not create, rotate, expose, or persist secrets.
+- Do not modify `package.json`, lockfiles, schema, drizzle migrations, or scripts without a task-specific approval gate.
+- Do not deploy, connect to staging/prod, change cloud resources, run destructive data operations, or use force push.
+
+Dependency order:
+
+- Starts after Phase 20 closeout evidence is committed and pushed.
+- First planning task is `phase-21-tail-ai-scoring-retry-persistence-design`.
+- AI scoring retry persistence implementation remains blocked until design and `database_migration` approval exist.
+- Admin concurrency and permission implementation tasks remain blocked until the split design and required risk approvals exist.
