@@ -73,6 +73,108 @@ Before implementation, evidence must record:
 - explicit approval for `database_migration`;
 - explicit statement that destructive migration and force schema push remain forbidden.
 
+#### Design Candidate A: `answer_record` Retry Fields
+
+Store only the current durable retry state on `answer_record`.
+
+Suggested additive fields:
+
+- `ai_scoring_status`: current retry lifecycle state, using lower `snake_case` string values such as `pending`, `running`, `succeeded`, `failed`, `retry_scheduled`, and `abandoned`.
+- `ai_scoring_retry_count`: non-negative retry count for the active scoring lifecycle.
+- `ai_scoring_last_failed_at`: last scoring failure time, nullable.
+- `ai_scoring_next_retry_at`: next retry schedule time, nullable.
+- `ai_scoring_failure_code`: redaction-safe failure category, nullable.
+- `ai_scoring_snapshot`: redaction-safe JSON snapshot of model config, prompt template reference, retry policy, scoring status, and attempt summary.
+
+Benefits:
+
+- Smallest schema surface for the MVP.
+- Fast lookup from an `answer_record` without a join.
+- Simple rollback before runtime use because all fields are additive and nullable.
+
+Tradeoffs:
+
+- Loses per-attempt history unless `ai_scoring_snapshot` stores a compact summary.
+- Harder to audit retry timing and failure evolution.
+- Concurrent retries need careful compare-and-update behavior on the row to prevent stale overwrite.
+
+Use this only if Phase 21 implementation scope is limited to current-state persistence and does not need attempt-level audit.
+
+#### Design Candidate B: Dedicated `ai_scoring_attempt` Structure
+
+Store retry lifecycle history in a dedicated table keyed to `answer_record`.
+
+Suggested table: `ai_scoring_attempt`.
+
+Suggested additive fields:
+
+- `id`: internal BIGINT primary key.
+- `answer_record_id`: foreign key to `answer_record`.
+- `attempt_no`: one-based attempt number within an answer record.
+- `ai_call_log_id`: nullable internal reference to `ai_call_log` when a call record exists.
+- `status`: attempt status using lower `snake_case` string values such as `pending`, `running`, `succeeded`, `failed`, `timeout`, and `cancelled`.
+- `failure_code`: redaction-safe failure category, nullable.
+- `failure_message_digest`: non-reversible digest or stable category for troubleshooting, nullable.
+- `scheduled_at`: planned attempt time.
+- `started_at`: actual start time, nullable.
+- `finished_at`: actual finish time, nullable.
+- `retry_after_at`: next retry eligibility time, nullable.
+- `attempt_snapshot`: redaction-safe JSON snapshot for model config public reference, prompt template key/version, retry policy, timeout, and evidence status.
+- `created_at` and `updated_at`: standard timestamps.
+
+Suggested indexes:
+
+- `idx_ai_scoring_attempt_answer_record_id`
+- `idx_ai_scoring_attempt_status`
+- `idx_ai_scoring_attempt_retry_after_at`
+- `udx_ai_scoring_attempt_answer_record_id_attempt_no`
+
+Benefits:
+
+- Preserves durable per-attempt audit history without overloading `answer_record`.
+- Supports deterministic retry, timeout, and concurrency proof.
+- Keeps future retry policy and `ai_call_log` correlation easier to inspect.
+
+Tradeoffs:
+
+- Larger migration and repository surface.
+- Requires service and repository joins or separate queries for scoring detail views.
+- Requires a clear retention rule so this table does not become a raw AI payload sink.
+
+Recommendation:
+
+- Prefer Candidate B for implementation because retry persistence is an audit and concurrency concern, not just a display state.
+- Candidate A remains acceptable only for a deliberately smaller MVP if the human owner approves losing attempt history.
+
+#### Migration Approval Evidence Required
+
+Before any implementation task may change schema, `src/**`, `tests/**`, `e2e/**`, `src/db/schema/**`, or `drizzle/**`, evidence must record:
+
+- selected candidate: Candidate A, Candidate B, or a reviewed hybrid;
+- exact table and field list, with `snake_case` database names and no unregistered abbreviations;
+- generated migration file name using `{YYYYMMDDHHMMSS}_{description}.sql`;
+- migration generation command, for example `corepack pnpm@10 exec drizzle-kit generate`, with a secret-safe environment plan;
+- note that current Drizzle configuration may load `.env.local`; running a migration command must not print, copy, or expose secret values and may require separate `secret_or_env_change` approval if env content must be read or modified;
+- data preservation rule for existing `answer_record` rows;
+- backfill rule for nullable fields or empty attempt history;
+- rollback plan for `dev`, `staging`, and `prod`, with destructive rollback still blocked unless separately approved;
+- validation commands for unit, e2e, naming, readiness, quality gate, and `git diff --check`;
+- explicit human approval for `database_migration`.
+
+#### Data Retention Rule
+
+- Persist only redaction-safe retry metadata, status, timestamps, public references, failure categories, digests, retry policy, and evidence status.
+- Do not store raw prompts, raw student answers, raw model responses, raw provider payloads, Authorization headers, API keys, database URLs, full papers, or customer/customer-like private data.
+- Keep retry metadata for the same retention window as the related `answer_record` and `exam_report` unless a later retention task defines a shorter purge policy.
+- If `answer_record` deletion or anonymization is introduced later, retry metadata must follow the same deletion or anonymization boundary.
+
+#### Rollback Plan
+
+- Design-only rollback: revert this contract section, the task plan, evidence, and queue/project-state updates.
+- Pre-runtime migration rollback in `dev`: after reviewed backup or disposable local data confirmation, drop only the newly added nullable fields or `ai_scoring_attempt` table created by the approved migration.
+- Post-runtime rollback: disable retry scheduling in application configuration or code first, preserve existing retry metadata for audit, and only remove schema after separate approval confirms data export, retention impact, and restore path.
+- `drizzle-kit push`, destructive migration, production data deletion, force push, staging/prod changes, and real provider work remain forbidden.
+
 ### Admin Concurrency And Permission Tail
 
 Before implementation, evidence must record:

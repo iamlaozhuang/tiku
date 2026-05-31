@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-21-high-risk-tail-closure
-updatedAt: "2026-05-31T12:05:00-07:00"
+updatedAt: "2026-05-31T12:20:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: ebb78a1215c96260aa910c5df3f445e4a82ac799
-  lastKnownOriginMasterSha: ebb78a1215c96260aa910c5df3f445e4a82ac799
+  lastKnownMasterSha: c38f36c4004a8e31fb542aef8bda7d16ea010148
+  lastKnownOriginMasterSha: c38f36c4004a8e31fb542aef8bda7d16ea010148
 currentTask:
-  id: phase-20-closeout-phase-21-seeding
-  status: closed
-  sourceStory: user-request-2026-05-31-phase-20-closeout-phase-21-seeding
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-closeout-phase-21-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-31-phase-20-closeout-phase-21-seeding.md
-  branch: null
-  commitSha: c11c64932c39bc8586a2da572ce8f0f17626cad3
+  id: phase-21-tail-ai-scoring-retry-persistence-design
+  status: validated
+  sourceStory: docs/05-execution-logs/evidence/phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence.md
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-21-tail-ai-scoring-retry-persistence-design.md
+  evidencePath: docs/05-execution-logs/evidence/phase-21-tail-ai-scoring-retry-persistence-design.md
+  branch: codex/phase-21-tail-ai-scoring-retry-persistence-design
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Claim phase-21-tail-ai-scoring-retry-persistence-design first; do not implement schema or migration until database_migration approval evidence exists."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-phase-20-closeout-phase-21-seeding.md
+  nextRecommendedAction: "Commit and close phase-21-tail-ai-scoring-retry-persistence-design; do not implement schema or migration until database_migration approval evidence exists."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-21-tail-ai-scoring-retry-persistence-design.md
