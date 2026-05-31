@@ -112,3 +112,32 @@
 - `converter_unavailable` is deterministic local-only metadata for DOCX/PPTX/PDF under the current no-dependency approval boundary.
 - `localResourceMaxFileSizeByte` names the upload parser limit and is asserted as exactly 50MB in parser boundary tests.
 - The parser checks file size before returning converter-unavailable status for recognized document extensions, preventing oversized known-format files from bypassing the size gate.
+
+## Git Closeout
+
+- Implementation commit: `5f5fc0a3adcf0a624093393a08528b18832e1e54`.
+- Merge target: `master`.
+- Merge commit: `72194188d328db4224fa08d20e5c336001856944`.
+- Changed files against `origin/master` after merge:
+  - `docs/04-agent-system/state/project-state.yaml`
+  - `docs/04-agent-system/state/task-queue.yaml`
+  - `docs/05-execution-logs/evidence/phase-20-fix-ra-05-03-resource-conversion-formats.md`
+  - `docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-05-03-resource-conversion-formats.md`
+  - `src/server/services/local-text-document-parser.ts`
+  - `src/server/services/rag-resource-knowledge-runtime.ts`
+  - `tests/unit/phase-11-local-text-document-parser-boundary.test.ts`
+  - `tests/unit/phase-11-resource-knowledge-base-publish-index-loop.test.ts`
+- Master validation:
+  - `npm.cmd run lint`: pass.
+  - `npm.cmd run typecheck`: pass.
+  - `npm.cmd run test:unit`: pass, 149 files and 615 tests.
+  - `npm.cmd run test:e2e`: pass, 26 tests.
+  - `npm.cmd run format:check`: pass.
+  - `git diff --check`: pass.
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory, ahead 2 before push.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass.
+- Push: pending.
+- Short branch deletion: pending.
+- Cleanup docs commit: pending.
