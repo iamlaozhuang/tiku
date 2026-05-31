@@ -1,6 +1,7 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { createMockAiProvider } from "@/ai/mock-provider";
 import type { ApiResponse } from "../contracts/api-response";
+import { createAdminAiAuditLogListQuery } from "../contracts/admin-ai-audit-log-ops-contract";
 import type { EvidenceStatus } from "../models/ai-rag";
 import type { Profession } from "../models/auth";
 import type {
@@ -11,7 +12,10 @@ import type { StudentPaperRepository } from "../repositories/student-paper-repos
 import type { PracticeRepository } from "../repositories/practice-repository";
 import type { MockExamRepository } from "../repositories/mock-exam-repository";
 import type { ExamReportRepository } from "../repositories/exam-report-repository";
-import { createPostgresAdminAiAuditLogRuntimeRepositories } from "../repositories/admin-ai-audit-log-runtime-repository";
+import {
+  createPostgresAdminAiAuditLogRuntimeRepositories,
+  type AdminAiAuditLogRuntimeRepositories,
+} from "../repositories/admin-ai-audit-log-runtime-repository";
 import {
   createPostgresStudentFlowRepositories,
   type StudentFlowRuntimeRepositoryOptions,
@@ -49,6 +53,7 @@ import type { SessionService } from "./session-service";
 import {
   createLocalModelConfigRuntimeCatalog,
   createModelConfigRuntimeResolver,
+  createPersistedModelConfigRuntimeCatalog,
   type ModelConfigRuntimeCatalog,
 } from "./model-config-runtime";
 import { defaultLocalUploadStorageRoot } from "./local-paper-asset-storage";
@@ -83,6 +88,9 @@ type StudentFlowRagRetrievalRuntime = {
   ): Promise<RagRetrievalResultDto>;
 };
 
+export type ModelConfigRuntimeCatalogLoader =
+  () => Promise<ModelConfigRuntimeCatalog | null>;
+
 type StudentFlowUserResolver = StudentPaperUserResolver &
   PracticeUserResolver &
   MockExamUserResolver &
@@ -116,6 +124,58 @@ function createDefaultLearningSuggestionOptions(
     modelConfigSnapshot: modelConfigSelection.modelConfigSnapshot,
     promptTemplate: modelConfigSelection.promptTemplate,
   };
+}
+
+export async function loadPersistedModelConfigRuntimeCatalog(
+  repositories: Pick<
+    AdminAiAuditLogRuntimeRepositories,
+    "listModelConfigs" | "listPromptTemplates"
+  > = createPostgresAdminAiAuditLogRuntimeRepositories(),
+): Promise<ModelConfigRuntimeCatalog | null> {
+  try {
+    const query = createAdminAiAuditLogListQuery({
+      page: 1,
+      pageSize: 100,
+      sortBy: "updatedAt",
+      sortOrder: "desc",
+    });
+    const [modelConfigPage, promptTemplatePage] = await Promise.all([
+      repositories.listModelConfigs(query),
+      repositories.listPromptTemplates?.(query) ??
+        Promise.resolve({
+          promptTemplates: [],
+          pagination: {
+            page: 1,
+            pageSize: 100,
+            sortBy: "updatedAt" as const,
+            sortOrder: "desc" as const,
+            total: 0,
+          },
+        }),
+    ]);
+    const catalog = createPersistedModelConfigRuntimeCatalog({
+      modelConfigs: modelConfigPage.modelConfigs,
+      promptTemplates: promptTemplatePage.promptTemplates,
+    });
+
+    return catalog.records.length === 0 ? null : catalog;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveModelConfigRuntimeCatalog(
+  modelConfigRuntimeCatalog: ModelConfigRuntimeCatalog | undefined,
+  modelConfigRuntimeCatalogLoader: ModelConfigRuntimeCatalogLoader,
+): Promise<ModelConfigRuntimeCatalog> {
+  if (modelConfigRuntimeCatalog !== undefined) {
+    return modelConfigRuntimeCatalog;
+  }
+
+  return (
+    (await modelConfigRuntimeCatalogLoader()) ??
+    createLocalModelConfigRuntimeCatalog()
+  );
 }
 
 function createEmptyRagRetrievalResult(
@@ -208,29 +268,17 @@ function estimateTokenCount(value: string): number {
   return Math.max(1, Math.ceil(value.length / 4));
 }
 
-function createDefaultAiScoringRuntime(
+export function createDefaultAiScoringRuntime(
   modelConfigRuntimeCatalog?: ModelConfigRuntimeCatalog,
   ragRetrievalRuntime: StudentFlowRagRetrievalRuntime = createDefaultStudentFlowRagRetrievalRuntime(
     defaultLocalUploadStorageRoot,
   ),
+  modelConfigRuntimeCatalogLoader: ModelConfigRuntimeCatalogLoader = loadPersistedModelConfigRuntimeCatalog,
+  aiCallLogRepository: Pick<
+    AdminAiAuditLogRuntimeRepositories,
+    "appendAiCallLog"
+  > = createPostgresAdminAiAuditLogRuntimeRepositories(),
 ): MockExamAiScoringRuntime {
-  const aiCallLogRepository =
-    createPostgresAdminAiAuditLogRuntimeRepositories();
-  const modelConfigSelection = createModelConfigRuntimeResolver(
-    modelConfigRuntimeCatalog ?? createLocalModelConfigRuntimeCatalog(),
-  ).resolve({
-    aiFuncType: "scoring",
-    allowFallback: false,
-  });
-
-  if (modelConfigSelection.status !== "selected") {
-    throw new Error(
-      `Local ai_scoring model_config is unavailable: ${modelConfigSelection.reason}`,
-    );
-  }
-
-  const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
-  const promptTemplate = modelConfigSelection.promptTemplate;
   const aiScoringService = createAiScoringService({
     async runner(input) {
       const scoringPointMaxScoreTotal = input.scoringPoints.reduce(
@@ -270,6 +318,24 @@ function createDefaultAiScoringRuntime(
 
   return {
     async scoreSubjectiveAnswer(context: MockExamAiScoringRuntimeContext) {
+      const modelConfigSelection = createModelConfigRuntimeResolver(
+        await resolveModelConfigRuntimeCatalog(
+          modelConfigRuntimeCatalog,
+          modelConfigRuntimeCatalogLoader,
+        ),
+      ).resolve({
+        aiFuncType: "scoring",
+        allowFallback: false,
+      });
+
+      if (modelConfigSelection.status !== "selected") {
+        throw new Error(
+          `Local ai_scoring model_config is unavailable: ${modelConfigSelection.reason}`,
+        );
+      }
+
+      const modelConfigSnapshot = modelConfigSelection.modelConfigSnapshot;
+      const promptTemplate = modelConfigSelection.promptTemplate;
       const startedAt = new Date();
       const result = await aiScoringService.scoreSubjectiveAnswer({
         userPublicId: context.userPublicId,
