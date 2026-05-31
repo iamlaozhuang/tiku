@@ -222,6 +222,14 @@ Route present: /api/v1/organizations/[publicId]/employees/[employeePublicId]/unb
 
 Note: Next.js reported `.env.local` as an environment source during build, but no env file content or secret value was read, changed, copied, or recorded in this evidence.
 
+## Git Closeout
+
+- Implementation commit: `c3822656b1d6fedbde2c78f527fe0f2322b71885`
+- Merge commit on `master`: `ac59aa53861b026b498b51b52ae334eaaab500e9`
+- Push: `origin/master` updated from `70fd7b6` to `ac59aa5`
+- Short-lived branch cleanup: `codex/phase-20-fix-ra-01-12-employee-transfer-unbind` deleted after merge.
+- Cleanup docs/state commit: pending.
+
 ## Security Review
 
 - `auth_permission_model`: organization-scoped unbind requires admin employee mutation permission, uses public IDs in the URL, validates employee/organization binding in repository lookup, revokes active sessions, and removes org_auth effectiveness by requiring `user_type = employee`.
