@@ -138,6 +138,12 @@
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory, ahead 2 before push.
   - `Test-NamingConventions.ps1`: pass.
   - `Invoke-QualityGate.ps1`: pass.
-- Push: pending.
-- Short branch deletion: pending.
-- Cleanup docs commit: pending.
+- Master validation docs commit: `3a72827d`.
+- Push: pass.
+  - Command: `git push origin master`
+  - Result: `3bb10200..3a72827d  master -> master`.
+- Short branch deletion: pass.
+  - Command: `git branch -d codex/phase-20-fix-ra-05-03-resource-conversion-formats`
+  - Sandbox attempt failed because Git could not create the ref lock.
+  - Escalated rerun deleted the already merged branch: `was 5f5fc0a3`.
+- Cleanup docs commit: this evidence/state update; SHA reported in final handoff after commit creation.
