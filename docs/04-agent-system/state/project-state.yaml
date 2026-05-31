@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: cecd7136261ae5b0845fa79099796ba2b84668a3
-  lastKnownOriginMasterSha: cecd7136261ae5b0845fa79099796ba2b84668a3
+  lastKnownMasterSha: d23eead9607ee04e9bf85139364528247b01ddd2
+  lastKnownOriginMasterSha: d23eead9607ee04e9bf85139364528247b01ddd2
 currentTask:
   id: phase-20-fix-ra-06-13-admin-account-security-policy-alignment
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-06-13-admin-account-security-policy-alignment.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-13-admin-account-security-policy-alignment.md
   branch: codex/phase-20-fix-ra-06-13-admin-account-security-policy-alignment
-  commitSha: null
+  commitSha: 2a3daf68c8a654dd0a9210b83a1af6ef4f8cfe92
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Task phase-20-fix-ra-06-13-admin-account-security-policy-alignment is validated on branch codex/phase-20-fix-ra-06-13-admin-account-security-policy-alignment and is ready for the authorized commit, merge to master, push, and cleanup sequence. Keep schema, drizzle, dependencies, env, cloud/deploy, real provider, external service, and destructive data operations blocked."
+  nextRecommendedAction: "Task phase-20-fix-ra-06-13-admin-account-security-policy-alignment is implemented, merged to master, pushed, and cleaned up. Next ordered candidate in the restricted list is phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion, which is pending and requires fresh eligibility checks plus database_migration approval. Keep schema/drizzle changes blocked; if schema or migration work is required, stop and request separate approval."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-13-admin-account-security-policy-alignment.md

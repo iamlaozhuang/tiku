@@ -101,4 +101,26 @@
 
 ## Git Closeout
 
-Pending commit, merge, push, and cleanup.
+- Implementation commit: `2a3daf68c8a654dd0a9210b83a1af6ef4f8cfe92` (`fix(admin): align admin account security policy`).
+- Merge commit: `d23eead9607ee04e9bf85139364528247b01ddd2` (`merge: phase 20 ra 06 13 admin account security policy`).
+- Merge target: `master`.
+- Push: `git push origin master` pass, pushed `cecd713..d23eead`.
+- Master validation after merge:
+  - `npm.cmd run build`: pass.
+  - `npm.cmd run test:e2e`: pass, 25 tests passed.
+  - `git diff --check`: pass.
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory, master ahead by two before push and clean.
+  - `Invoke-QualityGate.ps1`: first post-merge run timed out at 184 seconds; rerun with 360-second timeout passed lint/typecheck/test:unit/format:check.
+- Cleanup:
+  - `git branch -d codex/phase-20-fix-ra-06-13-admin-account-security-policy-alignment`: first attempt failed with Windows git ref lock permission error; escalated retry passed.
+  - `git branch --list "codex/*"`: pass, no output after cleanup.
+  - `git worktree list`: pass, only `D:/tiku`.
+  - `git rev-list --left-right --count master...origin/master`: pass, `0 0` after implementation push.
+  - `git status --short --branch`: pass, `## master...origin/master` after implementation push and branch cleanup.
+
+## Handoff
+
+- Closed task: `phase-20-fix-ra-06-13-admin-account-security-policy-alignment`.
+- Next ordered candidate in the restricted list: `phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion`.
+- Next candidate risk: `database_migration`; schema/drizzle changes remain blocked. If knowledge binding cannot close by reusing existing `question_knowledge_node` / `question_tag` local models, stop and request separate approval.
