@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-31T00:00:00-07:00"
+updatedAt: "2026-05-31T01:47:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 067a92303b72edbffe167f57bc293790523349e9
-  lastKnownOriginMasterSha: 067a92303b72edbffe167f57bc293790523349e9
+  lastKnownMasterSha: 5d9bc3451c86d5c8ab02833435cc8c4bb8980d64
+  lastKnownOriginMasterSha: 5d9bc3451c86d5c8ab02833435cc8c4bb8980d64
 currentTask:
-  id: phase-20-fix-ra-01-06-user-disable-termination
-  status: closed
+  id: phase-20-fix-ra-01-03-employee-account-runtime
+  status: validated
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-06-user-disable-termination.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-06-user-disable-termination.md
-  branch: codex/phase-20-fix-ra-01-06-user-disable-termination
-  commitSha: 3a192fb2df6d32ed07c66be94eadfb385a7e368a
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-03-employee-account-runtime.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-03-employee-account-runtime.md
+  branch: codex/phase-20-fix-ra-01-03-employee-account-runtime
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Task phase-20-fix-ra-01-06-user-disable-termination is implemented, validated, merged to master, pushed, and cleaned up. Next session must refresh Phase 20 eligibility before claiming exactly one pending task. Recommended low-blocked-gate candidates are remaining RA-01 local auth tasks that do not require dependency, secret/env, schema, drizzle, cloud, deploy, real provider, or destructive data work; skip tasks that still require blocked gate approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-06-user-disable-termination.md
+  nextRecommendedAction: "Task phase-20-fix-ra-01-03-employee-account-runtime is implemented and validated on branch codex/phase-20-fix-ra-01-03-employee-account-runtime. Next step is commit, merge into master, master validation, push origin master, delete the merged short-lived branch, then cleanup docs closeout."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-03-employee-account-runtime.md

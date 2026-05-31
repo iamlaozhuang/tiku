@@ -25,9 +25,17 @@ import type {
 } from "../contracts/organization-auth-contract";
 import {
   createPostgresAdminOrganizationOrgAuthRuntimeRepositories,
+  createPostgresEmployeeAccountCredentialAdapter,
+  createPostgresEmployeeAccountRepository,
   type AdminOrganizationOrgAuthRuntimeRepositories,
   type AdminOrganizationOrgAuthRuntimeRepositoryOptions,
 } from "../repositories/admin-organization-org-auth-runtime-repository";
+import type { EmployeeAccountResultDto } from "../contracts/employee-account-contract";
+import {
+  createEmployeeAccountService,
+  type EmployeeAccountService,
+} from "./employee-account-service";
+import { normalizeCreateEmployeeAccountInput } from "../validators/employee-account";
 import { normalizeCreateOrgAuthInput } from "../validators/org-auth";
 import {
   normalizeCreateOrganizationInput,
@@ -42,6 +50,7 @@ export type { AdminOrganizationOrgAuthRuntimeRepositories };
 
 export type AdminOrganizationOrgAuthRuntimeOptions =
   AdminOrganizationOrgAuthRuntimeRepositoryOptions & {
+    employeeAccountService?: EmployeeAccountService;
     repositories?: AdminOrganizationOrgAuthRuntimeRepositories;
     sessionService?: Pick<SessionService, "getCurrentSession">;
   };
@@ -346,6 +355,12 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     createPostgresAdminOrganizationOrgAuthRuntimeRepositories(options);
   const organizationMutationRepositories =
     repositories as OrganizationMutationRepositories;
+  const employeeAccountService =
+    options.employeeAccountService ??
+    createEmployeeAccountService(
+      createPostgresEmployeeAccountCredentialAdapter(options),
+      createPostgresEmployeeAccountRepository(options),
+    );
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
 
   async function requireReadableAdminActor(
@@ -1004,6 +1019,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
           );
         },
         async POST(request: Request): Promise<Response> {
+          const requestBody = await readRequestJson(request);
           const actorOrError = await requireEmployeeManager(
             request,
             "employee.create",
@@ -1012,6 +1028,31 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           if ("code" in actorOrError) {
             return createJsonResponse(actorOrError);
+          }
+
+          const employeeAccountInput =
+            normalizeCreateEmployeeAccountInput(requestBody);
+
+          if (employeeAccountInput.success) {
+            const result =
+              await employeeAccountService.createEmployeeAccount(requestBody);
+            const targetPublicId =
+              result.code === 0 && result.data !== null
+                ? result.data.employeeAccount.employee.publicId
+                : null;
+
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.create",
+              targetPublicId,
+              resultStatus: result.code === 0 ? "success" : "failed",
+              metadataSummary: "redacted employee account create metadata",
+            });
+
+            return createJsonResponse<
+              EmployeeAccountResultDto | EmployeeMutationResultDto | null
+            >(result);
           }
 
           if (repositories.createEmployee === undefined) {
@@ -1027,9 +1068,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             return createJsonResponse(employeeMutationUnavailableResponse);
           }
 
-          const normalizedInput = normalizeEmployeeCreateInput(
-            await readRequestJson(request),
-          );
+          const normalizedInput = normalizeEmployeeCreateInput(requestBody);
 
           if (normalizedInput === null) {
             return createJsonResponse(employeeInputInvalidResponse);
