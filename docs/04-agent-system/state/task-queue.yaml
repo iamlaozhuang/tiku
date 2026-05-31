@@ -12527,7 +12527,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-07-model-config-runtime-admin-alignment.md
-    status: validated
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-06-08-question-admin-knowledge-binding-completion
     title: Phase 20 Fix RA-06-08 Question Admin Knowledge Binding Completion

@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: ac59aa53861b026b498b51b52ae334eaaab500e9
-  lastKnownOriginMasterSha: ac59aa53861b026b498b51b52ae334eaaab500e9
+  lastKnownMasterSha: 8d83d6d70d9d120ff4cf928071ff034700c1b3d3
+  lastKnownOriginMasterSha: 8d83d6d70d9d120ff4cf928071ff034700c1b3d3
 currentTask:
   id: phase-20-fix-ra-06-07-model-config-runtime-admin-alignment
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-06-07-model-config-runtime-admin-alignment.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-07-model-config-runtime-admin-alignment.md
-  branch: codex/phase-20-fix-ra-06-07-model-config-runtime-admin-alignment
-  commitSha: null
+  branch: null
+  commitSha: 0fa9ef01b375a947522e31195cad6942e05dfe55
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit validated task phase-20-fix-ra-06-07-model-config-runtime-admin-alignment, merge into master, run master validation, push origin master, delete merged short branch, and write cleanup docs before claiming another task."
+  nextRecommendedAction: "Task phase-20-fix-ra-06-07-model-config-runtime-admin-alignment is implemented, merged into master, pushed to origin/master, and its short-lived branch has been deleted. If master remains clean/aligned and no codex/* branch or unknown worktree exists, the next user-prioritized eligible task is phase-20-fix-ra-01-04-employee-import with no dependency/package/env/schema changes."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-07-model-config-runtime-admin-alignment.md

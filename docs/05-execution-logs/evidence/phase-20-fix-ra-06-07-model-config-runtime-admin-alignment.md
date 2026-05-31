@@ -79,7 +79,9 @@ residualGaps: none
 - branch: `codex/phase-20-fix-ra-06-07-model-config-runtime-admin-alignment`
 - base: `master`
 - changed files: tracked/untracked inventory recorded by `Test-GitCompletionReadiness.ps1`
-- commit: pending
-- merge: pending
-- push: pending
-- cleanup: pending
+- implementation commit: `0fa9ef0` (`fix(ai): align admin model config runtime selection`)
+- merge: `8d83d6d` (`merge: phase 20 model config runtime admin alignment`) into `master`
+- master validation: pass after merge; quality gate, e2e, build, diff check, readiness, git completion readiness, and naming conventions all passed
+- push: `git push origin master` updated `origin/master` from `a6a7b2c` to `8d83d6d`
+- cleanup: merged short branch deleted locally after push
+- closeout docs commit: pending
