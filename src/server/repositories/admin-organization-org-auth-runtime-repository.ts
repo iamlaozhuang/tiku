@@ -102,7 +102,9 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
     input: EmployeeImportInput,
   ): Promise<EmployeeImportResultDto | null>;
   disableEmployee?(publicId: string): Promise<boolean>;
-  unbindEmployee?(publicId: string): Promise<EmployeeUnbindResultDto | null>;
+  unbindEmployee?(
+    input: EmployeeUnbindInput,
+  ): Promise<EmployeeUnbindResultDto | null>;
   auditLogRepository?: {
     appendAuditLog(input: AppendEmployeeAuditLogInput): Promise<void>;
   };
@@ -116,6 +118,13 @@ export type CreateEmployeeInput = {
 export type EmployeeImportInput = {
   employees: EmployeeImportRowInputDto[];
 };
+
+export type EmployeeUnbindInput =
+  | string
+  | {
+      employeePublicId: string;
+      organizationPublicId?: string | null;
+    };
 
 export type AppendEmployeeAuditLogInput = {
   actorPublicId: string;
@@ -964,53 +973,74 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
 
       return true;
     },
-    async unbindEmployee(publicId) {
+    async unbindEmployee(input) {
       const database = getDatabase();
-      const [employeeRow] = await database
-        .select({
-          employee_id: employee.id,
-          employee_public_id: employee.public_id,
-          user_id: user.id,
-          user_public_id: user.public_id,
-          auth_user_id: user.auth_user_id,
-          organization_public_id: organization.public_id,
-        })
-        .from(employee)
-        .innerJoin(user, eq(user.id, employee.user_id))
-        .innerJoin(organization, eq(organization.id, employee.organization_id))
-        .where(eq(employee.public_id, publicId))
-        .limit(1);
+      const employeePublicId =
+        typeof input === "string" ? input : input.employeePublicId;
+      const organizationPublicId =
+        typeof input === "string" ? null : (input.organizationPublicId ?? null);
 
-      if (employeeRow === undefined) {
-        return null;
-      }
+      return database.transaction(async (transaction) => {
+        const conditions = [eq(employee.public_id, employeePublicId)];
 
-      await database
-        .update(user)
-        .set({
-          user_type: "personal",
-          updated_at: new Date(),
-        })
-        .where(eq(user.id, employeeRow.user_id));
-      await database
-        .update(employee)
-        .set({
-          updated_at: new Date(),
-        })
-        .where(eq(employee.id, employeeRow.employee_id));
+        if (organizationPublicId !== null) {
+          conditions.push(eq(organization.public_id, organizationPublicId));
+        }
 
-      if (employeeRow.auth_user_id !== null) {
-        await database
-          .delete(authSession)
-          .where(eq(authSession.user_id, employeeRow.auth_user_id));
-      }
+        const [employeeRow] = await transaction
+          .select({
+            employee_id: employee.id,
+            employee_public_id: employee.public_id,
+            organization_id: employee.organization_id,
+            user_id: user.id,
+            user_public_id: user.public_id,
+            auth_user_id: user.auth_user_id,
+            organization_public_id: organization.public_id,
+          })
+          .from(employee)
+          .innerJoin(user, eq(user.id, employee.user_id))
+          .innerJoin(
+            organization,
+            eq(organization.id, employee.organization_id),
+          )
+          .where(and(...conditions))
+          .limit(1);
 
-      return {
-        employeePublicId: employeeRow.employee_public_id,
-        userPublicId: employeeRow.user_public_id,
-        previousOrganizationPublicId: employeeRow.organization_public_id,
-        status: "unbound",
-      };
+        if (employeeRow === undefined) {
+          return null;
+        }
+
+        await transaction
+          .update(user)
+          .set({
+            user_type: "personal",
+            updated_at: new Date(),
+          })
+          .where(eq(user.id, employeeRow.user_id));
+        await transaction
+          .update(employee)
+          .set({
+            updated_at: new Date(),
+          })
+          .where(eq(employee.id, employeeRow.employee_id));
+
+        if (employeeRow.auth_user_id !== null) {
+          await transaction
+            .delete(authSession)
+            .where(eq(authSession.user_id, employeeRow.auth_user_id));
+        }
+
+        await refreshOrgAuthUsedQuotaByOrganizationIds(transaction, [
+          employeeRow.organization_id,
+        ]);
+
+        return {
+          employeePublicId: employeeRow.employee_public_id,
+          userPublicId: employeeRow.user_public_id,
+          previousOrganizationPublicId: employeeRow.organization_public_id,
+          status: "unbound",
+        };
+      });
     },
     auditLogRepository: {
       async appendAuditLog(input) {
@@ -1527,7 +1557,14 @@ async function listEmployeeCounts(
       value: count(),
     })
     .from(employee)
-    .where(inArray(employee.organization_id, organizationIds))
+    .innerJoin(user, eq(user.id, employee.user_id))
+    .where(
+      and(
+        inArray(employee.organization_id, organizationIds),
+        eq(user.user_type, "employee"),
+        eq(user.status, "active"),
+      ),
+    )
     .groupBy(employee.organization_id);
 
   return new Map(rows.map((row) => [row.organization_id, row.value]));
@@ -1730,11 +1767,52 @@ async function countActiveEmployeesByOrganizationIds(
     .where(
       and(
         inArray(employee.organization_id, organizationIds),
+        eq(user.user_type, "employee"),
         eq(user.status, "active"),
       ),
     );
 
   return row?.value ?? 0;
+}
+
+async function refreshOrgAuthUsedQuotaByOrganizationIds(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<void> {
+  if (organizationIds.length === 0) {
+    return;
+  }
+
+  const orgAuthRows = await database
+    .select({ org_auth_id: orgAuthOrganization.org_auth_id })
+    .from(orgAuthOrganization)
+    .innerJoin(orgAuth, eq(orgAuth.id, orgAuthOrganization.org_auth_id))
+    .where(
+      and(
+        inArray(orgAuthOrganization.organization_id, organizationIds),
+        eq(orgAuth.status, "active"),
+      ),
+    );
+  const orgAuthIds = [...new Set(orgAuthRows.map((row) => row.org_auth_id))];
+
+  for (const orgAuthId of orgAuthIds) {
+    const scopeRows = await database
+      .select({ organization_id: orgAuthOrganization.organization_id })
+      .from(orgAuthOrganization)
+      .where(eq(orgAuthOrganization.org_auth_id, orgAuthId));
+    const usedQuota = await countActiveEmployeesByOrganizationIds(
+      database,
+      scopeRows.map((row) => row.organization_id),
+    );
+
+    await database
+      .update(orgAuth)
+      .set({
+        used_quota: usedQuota,
+        updated_at: new Date(),
+      })
+      .where(eq(orgAuth.id, orgAuthId));
+  }
 }
 
 async function terminateOrganizationActiveFlows(

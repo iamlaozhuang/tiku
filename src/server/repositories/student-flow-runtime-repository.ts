@@ -1130,6 +1130,7 @@ async function listEffectiveAuthorizationScopes(
     .where(
       and(
         eq(user.public_id, userPublicId),
+        eq(user.user_type, "employee"),
         eq(user.status, "active"),
         eq(organization.status, "active"),
         eq(orgAuth.status, "active"),
