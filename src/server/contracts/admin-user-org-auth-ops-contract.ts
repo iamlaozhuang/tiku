@@ -128,7 +128,13 @@ export type EmployeeImportRejectedRowDto = {
   rowNumber: number;
   userPublicId: string | null;
   organizationPublicId: string | null;
-  reason: "duplicate_user" | "user_not_found" | "organization_not_found";
+  reason:
+    | "duplicate_phone"
+    | "duplicate_user"
+    | "employee_create_failed"
+    | "invalid_row"
+    | "organization_not_found"
+    | "user_not_found";
 };
 
 export type EmployeeImportResultDto = {
