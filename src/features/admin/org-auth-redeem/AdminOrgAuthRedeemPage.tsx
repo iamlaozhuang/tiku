@@ -32,8 +32,10 @@ import type {
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/server/contracts/contact-config-contract";
 import type {
+  OrgAuthDetailDto,
   DisableOrganizationResultDto,
   OrgAuthListDto,
+  OrgAuthDetailResultDto,
   OrgAuthResultDto,
   OrganizationResultDto,
 } from "@/server/contracts/organization-auth-contract";
@@ -965,7 +967,7 @@ function OrgAuthDetailPanel({
   orgAuth,
 }: {
   onClose: () => void;
-  orgAuth: AdminOrgAuthData["orgAuths"][number];
+  orgAuth: OrgAuthDetailDto;
 }) {
   return (
     <section
@@ -986,15 +988,24 @@ function OrgAuthDetailPanel({
             <p>
               额度 {orgAuth.usedQuota} / {orgAuth.accountQuota}
             </p>
+            <p>可用额度 {orgAuth.occupancy.availableQuota}</p>
             <p>
               有效期 {formatDate(orgAuth.startsAt)} 至{" "}
               {formatDate(orgAuth.expiresAt)}
             </p>
             <p>状态 {authStatusLabels[orgAuth.status]}</p>
+            <p>购买主体名称 {orgAuth.purchaserOrganization.name}</p>
           </div>
           <p className="text-text-muted text-xs">
             覆盖企业 {orgAuth.organizationPublicIds.join("、") || "无"}
           </p>
+          <div className="text-text-muted space-y-1 text-xs">
+            {orgAuth.coveredOrganizations.map((organization) => (
+              <p key={organization.publicId}>
+                {organization.name} / 员工 {organization.employeeCount}
+              </p>
+            ))}
+          </div>
         </div>
         <button
           type="button"
@@ -2227,6 +2238,8 @@ export function AdminOrgAuthPage() {
   const [selectedOrgAuthPublicId, setSelectedOrgAuthPublicId] = useState<
     string | null
   >(null);
+  const [selectedOrgAuthDetail, setSelectedOrgAuthDetail] =
+    useState<OrgAuthDetailDto | null>(null);
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const totalEmployeeCount = useMemo(
     () =>
@@ -2237,13 +2250,30 @@ export function AdminOrgAuthPage() {
       ),
     [data.organizations],
   );
-  const selectedOrgAuth = useMemo(
-    () =>
-      data.orgAuths.find(
-        (orgAuth) => orgAuth.publicId === selectedOrgAuthPublicId,
-      ) ?? null,
-    [data.orgAuths, selectedOrgAuthPublicId],
-  );
+  async function handleViewOrgAuthDetail(publicId: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    setSelectedOrgAuthPublicId(publicId);
+    setSelectedOrgAuthDetail(null);
+
+    const detailResponse = await fetchAdminApi<OrgAuthDetailResultDto>(
+      `/api/v1/org-auths/${publicId}`,
+      sessionToken,
+    );
+
+    if (detailResponse.code !== 0 || detailResponse.data === null) {
+      setSelectedOrgAuthPublicId(null);
+      setToastMessage({ message: detailResponse.message, tone: "error" });
+      return;
+    }
+
+    setSelectedOrgAuthDetail(detailResponse.data.orgAuth);
+  }
 
   async function handleConfirmOrgAuthAction() {
     const sessionToken = getStoredSessionToken();
@@ -2725,7 +2755,9 @@ export function AdminOrgAuthPage() {
           onCancelOrgAuth={(publicId) =>
             setConfirmationState({ kind: "cancelOrgAuth", publicId })
           }
-          onViewOrgAuthDetail={setSelectedOrgAuthPublicId}
+          onViewOrgAuthDetail={(publicId) => {
+            void handleViewOrgAuthDetail(publicId);
+          }}
         />
         <EmployeeList
           employees={data.employees}
@@ -2738,10 +2770,25 @@ export function AdminOrgAuthPage() {
         />
       </section>
 
-      {selectedOrgAuth === null ? null : (
+      {selectedOrgAuthPublicId !== null && selectedOrgAuthDetail === null ? (
+        <section
+          className="bg-surface border-brand-primary/30 rounded-md border p-4 shadow-sm"
+          data-testid={`admin-org-auth-detail-loading-${selectedOrgAuthPublicId}`}
+        >
+          <div className="text-text-secondary flex items-center gap-2 text-sm">
+            <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+            正在加载企业授权详情
+          </div>
+        </section>
+      ) : null}
+
+      {selectedOrgAuthDetail === null ? null : (
         <OrgAuthDetailPanel
-          orgAuth={selectedOrgAuth}
-          onClose={() => setSelectedOrgAuthPublicId(null)}
+          orgAuth={selectedOrgAuthDetail}
+          onClose={() => {
+            setSelectedOrgAuthPublicId(null);
+            setSelectedOrgAuthDetail(null);
+          }}
         />
       )}
 

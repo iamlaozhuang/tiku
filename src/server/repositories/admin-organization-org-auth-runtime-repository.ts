@@ -32,6 +32,7 @@ import type {
 } from "../contracts/admin-user-org-auth-ops-contract";
 import type {
   DisableOrganizationResultDto,
+  OrgAuthDetailDto,
   OrgAuthDto,
   OrgAuthListDto,
   OrganizationDto,
@@ -63,6 +64,7 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   listOrgAuths(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<OrgAuthListDto>>;
+  getOrgAuthDetail?(publicId: string): Promise<OrgAuthDetailDto | null>;
   listEmployees(
     query: AdminAuthOperationListQuery,
   ): Promise<AdminOrganizationOrgAuthPage<EmployeeListDto>>;
@@ -322,6 +324,104 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
           updatedAt: row.updated_at.toISOString(),
         })),
         pagination: createPagination(query, totalRow?.value ?? 0),
+      };
+    },
+    async getOrgAuthDetail(publicId) {
+      const database = getDatabase();
+      const [row] = await database
+        .select({
+          id: orgAuth.id,
+          public_id: orgAuth.public_id,
+          name: orgAuth.name,
+          purchaser_organization_public_id: organization.public_id,
+          purchaser_organization_name: organization.name,
+          purchaser_organization_tier: organization.org_tier,
+          purchaser_organization_status: organization.status,
+          auth_scope_type: orgAuth.auth_scope_type,
+          profession: orgAuth.profession,
+          level: orgAuth.level,
+          account_quota: orgAuth.account_quota,
+          used_quota: orgAuth.used_quota,
+          starts_at: orgAuth.starts_at,
+          expires_at: orgAuth.expires_at,
+          status: orgAuth.status,
+          cancelled_at: orgAuth.cancelled_at,
+          created_at: orgAuth.created_at,
+          updated_at: orgAuth.updated_at,
+        })
+        .from(orgAuth)
+        .innerJoin(
+          organization,
+          eq(organization.id, orgAuth.purchaser_organization_id),
+        )
+        .where(eq(orgAuth.public_id, publicId))
+        .limit(1);
+
+      if (row === undefined) {
+        return null;
+      }
+
+      const coveredOrganizationRows = await database
+        .select({
+          id: organization.id,
+          public_id: organization.public_id,
+          name: organization.name,
+          org_tier: organization.org_tier,
+          parent_organization_id: organization.parent_organization_id,
+        })
+        .from(orgAuthOrganization)
+        .innerJoin(
+          organization,
+          eq(organization.id, orgAuthOrganization.organization_id),
+        )
+        .where(eq(orgAuthOrganization.org_auth_id, row.id))
+        .orderBy(asc(organization.public_id));
+      const coveredOrganizationIds = coveredOrganizationRows.map(
+        (organizationRow) => organizationRow.id,
+      );
+      const parentPublicIds = await listParentOrganizationPublicIds(
+        database,
+        coveredOrganizationRows
+          .map((organizationRow) => organizationRow.parent_organization_id)
+          .filter((id): id is number => id !== null),
+      );
+      const employeeCounts = await listEmployeeCounts(
+        database,
+        coveredOrganizationIds,
+      );
+
+      return {
+        ...mapOrgAuthMutationRowToDto({
+          ...row,
+          organization_public_ids: coveredOrganizationRows.map(
+            (organizationRow) => organizationRow.public_id,
+          ),
+        }),
+        purchaserOrganization: {
+          publicId: row.purchaser_organization_public_id,
+          name: row.purchaser_organization_name,
+          orgTier: row.purchaser_organization_tier,
+          status: row.purchaser_organization_status,
+        },
+        coveredOrganizations: coveredOrganizationRows.map(
+          (organizationRow) => ({
+            publicId: organizationRow.public_id,
+            name: organizationRow.name,
+            orgTier: organizationRow.org_tier,
+            parentOrganizationPublicId:
+              organizationRow.parent_organization_id === null
+                ? null
+                : (parentPublicIds.get(
+                    organizationRow.parent_organization_id,
+                  ) ?? null),
+            employeeCount: employeeCounts.get(organizationRow.id) ?? 0,
+          }),
+        ),
+        occupancy: {
+          accountQuota: row.account_quota,
+          usedQuota: row.used_quota,
+          availableQuota: Math.max(row.account_quota - row.used_quota, 0),
+        },
       };
     },
     async listEmployees(query) {
