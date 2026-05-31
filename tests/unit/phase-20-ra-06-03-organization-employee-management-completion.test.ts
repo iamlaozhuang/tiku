@@ -309,10 +309,12 @@ function createEnterpriseRepositories(input: {
       };
     },
     async unbindEmployee(publicId) {
+      const employeePublicId =
+        typeof publicId === "string" ? publicId : publicId.employeePublicId;
       input.mutationInputs.push({ action: "unbindEmployee", publicId });
 
       return {
-        employeePublicId: publicId,
+        employeePublicId,
         userPublicId: "user-public-001",
         previousOrganizationPublicId: "org-city-001",
         status: "unbound",

@@ -130,7 +130,13 @@ function createPostgresEffectiveAuthorizationRepository(
         )
         .innerJoin(employee, eq(employee.organization_id, organization.id))
         .innerJoin(user, eq(user.id, employee.user_id))
-        .where(and(eq(user.public_id, userPublicId), eq(user.status, "active")))
+        .where(
+          and(
+            eq(user.public_id, userPublicId),
+            eq(user.user_type, "employee"),
+            eq(user.status, "active"),
+          ),
+        )
         .orderBy(asc(orgAuth.expires_at));
 
       return rows satisfies EffectiveOrgAuthRow[];

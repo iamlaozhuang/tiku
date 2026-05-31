@@ -124,6 +124,13 @@ type RouteContext = {
   }>;
 };
 
+type OrganizationEmployeeRouteContext = {
+  params: Promise<{
+    publicId: string;
+    employeePublicId: string;
+  }>;
+};
+
 type OrganizationMutationRepositories =
   AdminOrganizationOrgAuthRuntimeRepositories & {
     createOrganization?(
@@ -1168,6 +1175,57 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             result === null
               ? employeeNotFoundResponse
               : createSuccessResponse<EmployeeImportResultDto>(result),
+          );
+        },
+      },
+      organizationUnbind: {
+        async POST(
+          request: Request,
+          context: OrganizationEmployeeRouteContext,
+        ): Promise<Response> {
+          const { employeePublicId, publicId: organizationPublicId } =
+            await context.params;
+          const actorOrError = await requireEmployeeManager(
+            request,
+            "employee.unbind",
+            employeePublicId,
+          );
+
+          if ("code" in actorOrError) {
+            return createJsonResponse(actorOrError);
+          }
+
+          if (repositories.unbindEmployee === undefined) {
+            await appendEmployeeAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "employee.unbind",
+              targetPublicId: employeePublicId,
+              resultStatus: "failed",
+              metadataSummary: "redacted employee unbind unavailable metadata",
+            });
+
+            return createJsonResponse(employeeMutationUnavailableResponse);
+          }
+
+          const result = await repositories.unbindEmployee({
+            employeePublicId,
+            organizationPublicId,
+          });
+
+          await appendEmployeeAuditLog({
+            request,
+            actor: actorOrError,
+            actionType: "employee.unbind",
+            targetPublicId: employeePublicId,
+            resultStatus: result === null ? "failed" : "success",
+            metadataSummary: "redacted employee unbind metadata",
+          });
+
+          return createJsonResponse(
+            result === null
+              ? employeeNotFoundResponse
+              : createSuccessResponse<EmployeeUnbindResultDto>(result),
           );
         },
       },
