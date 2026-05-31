@@ -592,11 +592,17 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         return null;
       }
 
+      const activeFlowTermination = await terminateOrganizationActiveFlows(
+        database,
+        organizationIds,
+      );
+
       return {
         organization: await mapOrganizationMutationRowToDto(
           database,
           disabledOrganization,
         ),
+        activeFlowTermination,
         affectedOrganizationPublicIds: await listOrganizationPublicIdsByIds(
           database,
           organizationIds,
@@ -1667,6 +1673,59 @@ async function countActiveEmployeesByOrganizationIds(
     );
 
   return row?.value ?? 0;
+}
+
+async function terminateOrganizationActiveFlows(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  organizationIds: number[],
+): Promise<OrgAuthTerminationResult> {
+  const userIds = await listActiveUserIdsByOrganizationIds(
+    database,
+    organizationIds,
+  );
+
+  if (userIds.length === 0) {
+    return { practiceCount: 0, mockExamCount: 0 };
+  }
+
+  const now = new Date();
+  const terminatedPractices = await database
+    .update(practice)
+    .set({
+      practice_status: "terminated",
+      terminated_at: now,
+      updated_at: now,
+    })
+    .where(
+      and(
+        inArray(practice.user_id, userIds),
+        eq(practice.practice_status, "in_progress"),
+      ),
+    )
+    .returning({ id: practice.id });
+  const terminatedMockExams = await database
+    .update(mockExam)
+    .set({
+      exam_status: "terminated",
+      terminated_at: now,
+      updated_at: now,
+    })
+    .where(
+      and(
+        inArray(mockExam.user_id, userIds),
+        inArray(mockExam.exam_status, [
+          "in_progress",
+          "scoring",
+          "scoring_partial_failed",
+        ]),
+      ),
+    )
+    .returning({ id: mockExam.id });
+
+  return {
+    practiceCount: terminatedPractices.length,
+    mockExamCount: terminatedMockExams.length,
+  };
 }
 
 async function importEmployeesWithDatabase(

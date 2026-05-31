@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-31T02:26:00-07:00"
+updatedAt: "2026-05-31T02:40:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 1e396984790fbb9ebfcc7fb034a2fa60d45e0d5e
-  lastKnownOriginMasterSha: 1e396984790fbb9ebfcc7fb034a2fa60d45e0d5e
+  lastKnownMasterSha: 70118021c56931924b2f4873c3d005828a2196da
+  lastKnownOriginMasterSha: 70118021c56931924b2f4873c3d005828a2196da
 currentTask:
-  id: phase-20-fix-ra-01-09-contact-config-runtime
-  status: closed
+  id: phase-20-fix-ra-01-10-organization-enable-disable-termination
+  status: validated
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#findings
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-09-contact-config-runtime.md
-  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-09-contact-config-runtime.md
-  branch: null
-  commitSha: 5c137c0f248d1e886f822e3bc44e5ec9c36bec49
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-10-organization-enable-disable-termination.md
+  evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-10-organization-enable-disable-termination.md
+  branch: codex/phase-20-fix-ra-01-10-organization-enable-disable-termination
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Task phase-20-fix-ra-01-09-contact-config-runtime is closed, merged into master, pushed to origin/master, and its short-lived branch has been deleted. Next step is refresh Phase 20 eligibility from task-queue.yaml and claim the next pending dependency-ready low-risk task only if master is clean/aligned and no codex/* branch or unknown worktree exists."
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-09-contact-config-runtime.md
+  nextRecommendedAction: "Task phase-20-fix-ra-01-10-organization-enable-disable-termination is implemented and validated on branch codex/phase-20-fix-ra-01-10-organization-enable-disable-termination. Next step is commit, merge into master, master validation, push origin master, delete the merged short-lived branch, then cleanup docs closeout. This is the third task in the current batch, so pause after cleanup."
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-10-organization-enable-disable-termination.md
