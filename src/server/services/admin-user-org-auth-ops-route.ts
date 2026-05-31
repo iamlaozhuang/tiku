@@ -44,6 +44,13 @@ export function createAdminUserOrgAuthOpsRouteHandlers(
           await service.listUsers(readListQuery(request)),
         );
       },
+      detail: {
+        async GET(_request: Request, context: RouteContext): Promise<Response> {
+          const { publicId } = await context.params;
+
+          return createJsonResponse(await service.getUserDetail(publicId));
+        },
+      },
     },
     organizations: {
       async GET(request: Request): Promise<Response> {

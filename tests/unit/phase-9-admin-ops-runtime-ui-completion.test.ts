@@ -440,12 +440,12 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(JSON.stringify(payload)).not.toContain("admin-session-token");
   });
 
-  it("denies user reset password for non-super admins and records redacted audit metadata", async () => {
+  it("denies user reset password for content admins and records redacted audit metadata", async () => {
     const { auditInputs, repositories, resetInputs } =
       createAdminOpsRepositories();
     const handlers = createAdminFlowRuntimeRouteHandlers({
       repositories,
-      sessionService: createAdminSessionService("ops_admin"),
+      sessionService: createAdminSessionService("content_admin"),
     }) as ReturnType<typeof createAdminFlowRuntimeRouteHandlers> & {
       users: {
         resetPassword: {

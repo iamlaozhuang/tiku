@@ -59,6 +59,35 @@ export type AdminUserListDto = {
   users: AdminUserSummaryDto[];
 };
 
+export type AdminUserEnterpriseBindingDto = {
+  employeePublicId: string;
+  organizationPublicId: string;
+  organizationName: string;
+  orgTier: OrgTier;
+  status: UserStatus;
+};
+
+export type AdminUserAuthorizationSummaryDto = {
+  publicId: string;
+  authorizationType: "personal_auth" | "org_auth";
+  purchaserName: string | null;
+  authScopeType: AuthScopeType | null;
+  profession: Profession;
+  level: number;
+  accountQuota: number | null;
+  usedQuota: number | null;
+  startsAt: string | null;
+  expiresAt: string | null;
+  status: AuthStatus;
+  organizationPublicIds: string[];
+};
+
+export type AdminUserDetailDto = {
+  user: AdminUserSummaryDto;
+  enterpriseBinding: AdminUserEnterpriseBindingDto | null;
+  authorizations: AdminUserAuthorizationSummaryDto[];
+};
+
 export type OrganizationTreeNodeDto = {
   publicId: string;
   name: string;

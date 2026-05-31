@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, KeyRound, RotateCcwKey, ShieldCheck } from "lucide-react";
+import {
+  AlertCircle,
+  Eye,
+  KeyRound,
+  RotateCcwKey,
+  ShieldCheck,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +38,7 @@ import type {
   OrganizationListDto,
   RedeemCodeGenerationDto,
   RedeemCodeListDto,
+  AdminUserDetailDto,
   AdminUserListDto,
 } from "@/server/contracts/admin-user-org-auth-ops-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
@@ -62,6 +71,10 @@ type AdminOpsData = {
 type ConfirmationState =
   | {
       kind: "resetPassword";
+      publicId: string;
+    }
+  | {
+      kind: "disableUser" | "enableUser";
       publicId: string;
     }
   | {
@@ -347,6 +360,11 @@ export function AdminOpsManagement() {
   const [toastMessage, setToastMessage] = useState<ToastMessage | null>(null);
   const [generatedRedeemCode, setGeneratedRedeemCode] =
     useState<GeneratedRedeemCode | null>(null);
+  const [selectedUserDetail, setSelectedUserDetail] =
+    useState<AdminUserDetailDto | null>(null);
+  const [userDetailState, setUserDetailState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
 
   const listQuery = useMemo(
     () =>
@@ -379,6 +397,61 @@ export function AdminOpsManagement() {
       window.clearTimeout(loadTimer);
     };
   }, [listQuery]);
+
+  async function handleViewUserDetail(publicId: string) {
+    const sessionToken = getStoredSessionToken();
+
+    if (sessionToken === null) {
+      setLoadState("unauthorized");
+      return;
+    }
+
+    setUserDetailState("loading");
+    const userDetailResponse = await fetchAdminApi<AdminUserDetailDto>(
+      `/api/v1/users/${publicId}`,
+      sessionToken,
+    );
+
+    if (userDetailResponse.code !== 0 || userDetailResponse.data === null) {
+      setSelectedUserDetail(null);
+      setUserDetailState("error");
+      setToastMessage({
+        message: userDetailResponse.message,
+        tone: "error",
+      });
+      return;
+    }
+
+    setSelectedUserDetail(userDetailResponse.data);
+    setUserDetailState("ready");
+  }
+
+  function updateUserStatus(publicId: string, status: UserStatus) {
+    setData((currentData) => ({
+      ...currentData,
+      users: currentData.users.map((user) =>
+        user.publicId === publicId ? { ...user, status } : user,
+      ),
+    }));
+    setSelectedUserDetail((currentDetail) =>
+      currentDetail?.user.publicId === publicId
+        ? {
+            ...currentDetail,
+            user: {
+              ...currentDetail.user,
+              status,
+            },
+            enterpriseBinding:
+              currentDetail.enterpriseBinding === null
+                ? null
+                : {
+                    ...currentDetail.enterpriseBinding,
+                    status,
+                  },
+          }
+        : currentDetail,
+    );
+  }
 
   async function handleConfirmAction() {
     const sessionToken = getStoredSessionToken();
@@ -419,23 +492,52 @@ export function AdminOpsManagement() {
       return;
     }
 
-    const resetResponse = await postAdminApi<null>(
-      `/api/v1/users/${confirmationState.publicId}/reset-password`,
-      sessionToken,
-    );
+    if (
+      confirmationState.kind === "disableUser" ||
+      confirmationState.kind === "enableUser" ||
+      confirmationState.kind === "resetPassword"
+    ) {
+      const isDisableUser = confirmationState.kind === "disableUser";
+      const isEnableUser = confirmationState.kind === "enableUser";
+      const actionPath = isDisableUser
+        ? "disable"
+        : isEnableUser
+          ? "enable"
+          : "reset-password";
+      const userActionResponse = await postAdminApi<null>(
+        `/api/v1/users/${confirmationState.publicId}/${actionPath}`,
+        sessionToken,
+      );
+
+      setConfirmationState(null);
+
+      if (userActionResponse.code !== 0) {
+        setToastMessage({
+          message: userActionResponse.message,
+          tone: "error",
+        });
+        return;
+      }
+
+      if (isDisableUser || isEnableUser) {
+        updateUserStatus(
+          confirmationState.publicId,
+          isDisableUser ? "disabled" : "active",
+        );
+      }
+
+      setToastMessage({
+        message: isDisableUser
+          ? "用户已停用，会话已撤销"
+          : isEnableUser
+            ? "用户已启用"
+            : "密码已重置，未返回明文密码",
+        tone: "success",
+      });
+      return;
+    }
 
     setConfirmationState(null);
-    setToastMessage(
-      resetResponse.code === 0
-        ? {
-            message: "密码已重置，未返回明文密码",
-            tone: "success",
-          }
-        : {
-            message: resetResponse.message,
-            tone: "error",
-          },
-    );
   }
 
   if (loadState === "loading") {
@@ -597,17 +699,27 @@ export function AdminOpsManagement() {
                 </p>
                 <PublicId value={user.publicId} />
               </div>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setConfirmationState({
-                    kind: "resetPassword",
-                    publicId: user.publicId,
-                  })
-                }
-              >
-                重置密码
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => void handleViewUserDetail(user.publicId)}
+                >
+                  <Eye aria-hidden="true" />
+                  查看详情
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setConfirmationState({
+                      kind: "resetPassword",
+                      publicId: user.publicId,
+                    })
+                  }
+                >
+                  <RotateCcwKey aria-hidden="true" />
+                  重置密码
+                </Button>
+              </div>
             </AdminRow>
           ))}
         </AdminPanel>
@@ -728,6 +840,20 @@ export function AdminOpsManagement() {
         </AdminPanel>
       </section>
 
+      <AdminUserDetailPanel
+        detail={selectedUserDetail}
+        state={userDetailState}
+        onDisableUser={(publicId) =>
+          setConfirmationState({ kind: "disableUser", publicId })
+        }
+        onEnableUser={(publicId) =>
+          setConfirmationState({ kind: "enableUser", publicId })
+        }
+        onResetPassword={(publicId) =>
+          setConfirmationState({ kind: "resetPassword", publicId })
+        }
+      />
+
       {confirmationState === null ? null : (
         <AdminOpsConfirmationDialog
           confirmationState={confirmationState}
@@ -745,6 +871,150 @@ function getFirstGeneratedRedeemCode(
   data: LegacyRedeemCodeGenerationDto,
 ): GeneratedRedeemCode | null {
   return data.redeemCodes?.[0] ?? data.redeemCode ?? null;
+}
+
+function AdminUserDetailPanel({
+  detail,
+  onDisableUser,
+  onEnableUser,
+  onResetPassword,
+  state,
+}: {
+  detail: AdminUserDetailDto | null;
+  onDisableUser: (publicId: string) => void;
+  onEnableUser: (publicId: string) => void;
+  onResetPassword: (publicId: string) => void;
+  state: "idle" | "loading" | "ready" | "error";
+}) {
+  if (state === "idle") {
+    return null;
+  }
+
+  if (state === "loading") {
+    return <AdminLoadingState label="正在加载用户详情" />;
+  }
+
+  if (state === "error" || detail === null) {
+    return (
+      <AdminErrorState
+        description="请确认当前账号仍具备用户管理权限，并稍后重试。"
+        title="用户详情加载失败"
+      />
+    );
+  }
+
+  const user = detail.user;
+
+  return (
+    <section
+      aria-label="用户详情"
+      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
+      data-public-id={user.publicId}
+      data-testid={`admin-user-detail-${user.publicId}`}
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 space-y-2">
+          <h2 className="text-text-primary text-base font-semibold">
+            用户详情
+          </h2>
+          <p className="text-text-primary text-sm font-medium">
+            {user.name} / {user.phone}
+          </p>
+          <p className="text-text-muted text-xs">
+            {userTypeLabels[user.userType]} / {userStatusLabels[user.status]} /{" "}
+            {user.authStatus === null
+              ? "无授权"
+              : authStatusLabels[user.authStatus]}
+          </p>
+          <PublicId value={user.publicId} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onResetPassword(user.publicId)}
+          >
+            <RotateCcwKey aria-hidden="true" />
+            重置密码
+          </Button>
+          {user.status === "active" ? (
+            <Button
+              variant="destructive"
+              onClick={() => onDisableUser(user.publicId)}
+            >
+              <UserX aria-hidden="true" />
+              停用用户
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => onEnableUser(user.publicId)}
+            >
+              <UserCheck aria-hidden="true" />
+              启用用户
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <section className="border-border rounded-md border p-3">
+          <h3 className="text-text-primary text-sm font-semibold">企业绑定</h3>
+          {detail.enterpriseBinding === null ? (
+            <p className="text-text-muted mt-2 text-sm">未绑定企业</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              <p className="text-text-primary text-sm">
+                {detail.enterpriseBinding.organizationName} /{" "}
+                {detail.enterpriseBinding.orgTier}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <PublicId value={detail.enterpriseBinding.employeePublicId} />
+                <PublicId
+                  value={detail.enterpriseBinding.organizationPublicId}
+                />
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="border-border rounded-md border p-3">
+          <h3 className="text-text-primary text-sm font-semibold">授权列表</h3>
+          <div className="mt-2 space-y-3">
+            {detail.authorizations.length === 0 ? (
+              <p className="text-text-muted text-sm">暂无授权</p>
+            ) : (
+              detail.authorizations.map((authorization) => (
+                <article
+                  key={authorization.publicId}
+                  className="border-border border-t pt-3 first:border-t-0 first:pt-0"
+                >
+                  <p className="text-text-primary text-sm font-medium">
+                    {authorization.authorizationType}
+                  </p>
+                  <p className="text-text-muted text-xs">
+                    {formatProfessionLevel(authorization)} /{" "}
+                    {authStatusLabels[authorization.status]} / 购买方{" "}
+                    {authorization.purchaserName ?? "个人"}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <PublicId value={authorization.publicId} />
+                    {authorization.organizationPublicIds.map(
+                      (organizationPublicId) => (
+                        <PublicId
+                          key={`${authorization.publicId}-${organizationPublicId}`}
+                          value={organizationPublicId}
+                        />
+                      ),
+                    )}
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
+    </section>
+  );
 }
 
 function SummaryTile({
@@ -814,8 +1084,22 @@ function AdminOpsConfirmationDialog({
   onConfirm: () => void;
 }) {
   const isResetPassword = confirmationState.kind === "resetPassword";
-  const title = isResetPassword ? "确认重置用户密码？" : "卡密生成需要二次确认";
-  const confirmLabel = isResetPassword ? "确认重置" : "确认生成";
+  const isDisableUser = confirmationState.kind === "disableUser";
+  const isEnableUser = confirmationState.kind === "enableUser";
+  const title = isResetPassword
+    ? "确认重置用户密码？"
+    : isDisableUser
+      ? "确认停用用户？"
+      : isEnableUser
+        ? "确认启用用户？"
+        : "卡密生成需要二次确认";
+  const confirmLabel = isResetPassword
+    ? "确认重置"
+    : isDisableUser
+      ? "确认停用"
+      : isEnableUser
+        ? "确认启用"
+        : "确认生成";
 
   return (
     <div
@@ -834,7 +1118,11 @@ function AdminOpsConfirmationDialog({
         <p className="text-text-muted text-sm">
           {isResetPassword
             ? "重置只提交用户 publicId，响应不会返回明文密码。"
-            : "批量生成卡密必须由后端原子操作保护；当前提示并发冲突以防止重复生成。"}
+            : isDisableUser
+              ? "停用用户会提交 publicId，并撤销该用户现有会话。"
+              : isEnableUser
+                ? "启用用户只恢复账号状态，不创建新授权。"
+                : "批量生成卡密必须由后端原子操作保护；当前提示并发冲突以防止重复生成。"}
         </p>
         <div className="flex gap-2">
           <Button

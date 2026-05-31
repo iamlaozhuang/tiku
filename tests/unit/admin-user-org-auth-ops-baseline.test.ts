@@ -457,11 +457,11 @@ describe("admin user organization authorization ops baseline", () => {
     expect(query).not.toHaveProperty("id");
   });
 
-  it("returns safe admin operation summaries and permission-denied mutations", async () => {
+  it("returns safe admin operation summaries and denies content admin user credential mutations", async () => {
     const service = createAdminUserOrgAuthOpsService({
       actor: {
-        publicId: "admin-ops-001",
-        roles: ["ops_admin"],
+        publicId: "admin-content-001",
+        roles: ["content_admin"],
         canViewRedeemCodePlainText: false,
       },
     });

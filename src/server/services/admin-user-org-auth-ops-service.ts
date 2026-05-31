@@ -9,6 +9,7 @@ import {
   ADMIN_AUTH_OPERATION_ERROR_CODES,
   type AdminAuthOperationListQuery,
   type AdminRoleListDto,
+  type AdminUserDetailDto,
   type AuthorizationListDto,
   type OrganizationListDto,
   type RedeemCodeListDto,
@@ -38,6 +39,9 @@ export type AdminUserOrgAuthOpsService = {
   listUsers(
     query: Partial<AdminAuthOperationListQuery>,
   ): Promise<AdminOpsApiResponse<AdminUserListDto | null>>;
+  getUserDetail(
+    publicId: string,
+  ): Promise<ApiResponse<AdminUserDetailDto | null>>;
   listOrganizations(
     query: Partial<AdminAuthOperationListQuery>,
   ): Promise<AdminOpsApiResponse<OrganizationListDto | null>>;
@@ -82,6 +86,47 @@ const sampleUsers: AdminUserListDto["users"] = [
     authStatus: "expired",
   },
 ];
+
+const sampleUserDetail: AdminUserDetailDto = {
+  user: sampleUsers[0]!,
+  enterpriseBinding: {
+    employeePublicId: "employee-public-001",
+    organizationPublicId: "organization-public-001",
+    organizationName: "杭州烟草",
+    orgTier: "city",
+    status: "active",
+  },
+  authorizations: [
+    {
+      publicId: "personal-auth-public-001",
+      authorizationType: "personal_auth",
+      purchaserName: null,
+      authScopeType: null,
+      profession: "monopoly",
+      level: 3,
+      accountQuota: null,
+      usedQuota: null,
+      startsAt: "2026-05-01T00:00:00.000Z",
+      expiresAt: "2027-05-01T00:00:00.000Z",
+      status: "active",
+      organizationPublicIds: [],
+    },
+    {
+      publicId: "authorization-public-001",
+      authorizationType: "org_auth",
+      purchaserName: "杭州烟草",
+      authScopeType: "current_and_descendants",
+      profession: "monopoly",
+      level: 3,
+      accountQuota: 100,
+      usedQuota: 42,
+      startsAt: "2026-05-01T00:00:00.000Z",
+      expiresAt: "2027-05-01T00:00:00.000Z",
+      status: "active",
+      organizationPublicIds: ["organization-public-001"],
+    },
+  ],
+};
 
 const sampleOrganizations: OrganizationListDto["organizations"] = [
   {
@@ -139,7 +184,9 @@ function createPagination(
 }
 
 function canManageUserCredential(actor: AdminUserOrgAuthOpsActor): boolean {
-  return actor.roles.includes("super_admin");
+  return (
+    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+  );
 }
 
 export function createAdminUserOrgAuthOpsService({
@@ -150,6 +197,11 @@ export function createAdminUserOrgAuthOpsService({
       return createPaginatedResponse(
         { users: sampleUsers },
         createPagination(query, sampleUsers.length),
+      );
+    },
+    async getUserDetail(publicId) {
+      return createSuccessResponse(
+        publicId === sampleUserDetail.user.publicId ? sampleUserDetail : null,
       );
     },
     async listOrganizations(query) {
@@ -222,6 +274,12 @@ export function createUnavailableAdminUserOrgAuthOpsService(): AdminUserOrgAuthO
     },
     async listOrganizations() {
       return unavailableResponse;
+    },
+    async getUserDetail() {
+      return createErrorResponse(
+        unavailableResponse.code,
+        unavailableResponse.message,
+      );
     },
     async listAuthorizations() {
       return unavailableResponse;

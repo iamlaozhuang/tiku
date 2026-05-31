@@ -245,7 +245,7 @@ describe("phase 11 system ops user management loop", () => {
     expect(JSON.stringify(auditInputs)).not.toContain("admin-session-token");
   });
 
-  it("denies user lifecycle mutation for non-super admins without touching users", async () => {
+  it("denies user lifecycle mutation for content admins without touching users", async () => {
     const auditInputs: unknown[] = [];
     const mutationInputs: unknown[] = [];
     const handlers = createAdminFlowRuntimeRouteHandlers({
@@ -253,7 +253,7 @@ describe("phase 11 system ops user management loop", () => {
         auditInputs,
         mutationInputs,
       }),
-      sessionService: createAdminSessionService("ops_admin"),
+      sessionService: createAdminSessionService("content_admin"),
     });
 
     const response = await handlers.users.disable.POST(
