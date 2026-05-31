@@ -55,6 +55,14 @@ export type AdminUserOrgAuthRuntimeRepository = {
   disableUser?(publicId: string): Promise<boolean>;
   enableUser?(publicId: string): Promise<boolean>;
   revokeUserSessions?(publicId: string): Promise<boolean>;
+  terminateUserActiveFlows?(
+    publicId: string,
+  ): Promise<UserActiveFlowTerminationResult>;
+};
+
+export type UserActiveFlowTerminationResult = {
+  practiceCount: number;
+  mockExamCount: number;
 };
 
 export type AdminContentKnowledgeRuntimeRepository = {
@@ -95,6 +103,7 @@ const {
   paper,
   paperQuestion,
   personalAuth,
+  practice,
   question,
   user,
 } = databaseSchema;
@@ -425,6 +434,9 @@ function createPostgresAdminUserOrgAuthRuntimeRepository(
     async revokeUserSessions(publicId) {
       return revokeUserSessions(getDatabase(), publicId);
     },
+    async terminateUserActiveFlows(publicId) {
+      return terminateUserActiveFlows(getDatabase(), publicId);
+    },
   };
 }
 
@@ -478,6 +490,62 @@ async function revokeUserSessions(
     .where(eq(authSession.user_id, userRow.auth_user_id));
 
   return true;
+}
+
+async function terminateUserActiveFlows(
+  database: AdminFlowRuntimeDatabase,
+  publicId: string,
+): Promise<UserActiveFlowTerminationResult> {
+  const [userRow] = await database
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.public_id, publicId))
+    .limit(1);
+
+  if (userRow === undefined) {
+    return { practiceCount: 0, mockExamCount: 0 };
+  }
+
+  const now = new Date();
+  const terminatedPractices = await database
+    .update(practice)
+    .set({
+      practice_status: "terminated",
+      terminated_at: now,
+      termination_reason: "account_disabled",
+      updated_at: now,
+    })
+    .where(
+      and(
+        eq(practice.user_id, userRow.id),
+        eq(practice.practice_status, "in_progress"),
+      ),
+    )
+    .returning({ id: practice.id });
+  const terminatedMockExams = await database
+    .update(mockExam)
+    .set({
+      exam_status: "terminated",
+      terminated_at: now,
+      termination_reason: "account_disabled",
+      updated_at: now,
+    })
+    .where(
+      and(
+        eq(mockExam.user_id, userRow.id),
+        inArray(mockExam.exam_status, [
+          "in_progress",
+          "scoring",
+          "scoring_partial_failed",
+        ]),
+      ),
+    )
+    .returning({ id: mockExam.id });
+
+  return {
+    practiceCount: terminatedPractices.length,
+    mockExamCount: terminatedMockExams.length,
+  };
 }
 
 function createPostgresAdminContentKnowledgeRuntimeRepository(

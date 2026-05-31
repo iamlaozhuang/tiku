@@ -10624,7 +10624,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-01-user-auth-authorization
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-01 audit finding F-RA-01-06-001.
+    humanApproval: Registered by Phase 18 RA-01 audit finding F-RA-01-06-001. User approved claiming this recommended task and approved the required local auth_permission_model scope on 2026-05-31, limited to account disable active practice/mock_exam termination runtime/test/evidence. No schema, drizzle, migration, package, lockfile, env, cloud, deploy, external service, real provider, force push, or destructive data operation is approved.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -10656,7 +10656,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-06-user-disable-termination.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-01-09-contact-config-runtime
     title: Phase 20 Fix RA-01-09 Contact Config Runtime
