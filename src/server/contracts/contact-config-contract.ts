@@ -22,6 +22,13 @@ export type PurchaseGuidanceContactConfigResultDto = {
   contactConfig: PurchaseGuidanceContactConfigDto;
 };
 
+export type UpdateContactConfigInputDto = {
+  title: string;
+  summary: string;
+  channels: ContactConfigChannelDto[];
+  safetyNotice: string;
+};
+
 export const LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG: PurchaseGuidanceContactConfigDto =
   {
     publicId: "contact-config-local-purchase-guidance",

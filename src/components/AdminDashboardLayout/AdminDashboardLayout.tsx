@@ -26,6 +26,7 @@ const CONTENT_MENU: MenuItem[] = [
 ];
 
 const OPS_MENU: MenuItem[] = [
+  { href: "/ops/contact-config", label: "contact_config", icon: "C" },
   { href: "/ops/users", label: "用户管理", icon: "👥" },
   { href: "/ops/organizations", label: "企业管理", icon: "🏢" },
   { href: "/ops/redeem-codes", label: "卡密管理", icon: "🔑" },
