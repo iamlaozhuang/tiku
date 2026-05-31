@@ -12989,9 +12989,15 @@ tasks:
       - implementation_planning
       - evidence_integrity
       - blocked_gate
-    validationCommands: *phase21_tail_docs_validation
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\02-architecture\interfaces\phase-21-high-risk-tail-contract.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-31-phase-21-tail-admin-concurrency-permission-split-design.md docs\05-execution-logs\evidence\phase-21-tail-admin-concurrency-permission-split-design.md
     evidencePath: docs/05-execution-logs/evidence/phase-21-tail-admin-concurrency-permission-split-design.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-21-tail-admin-common-ux-state-audit
     title: Phase 21 Tail Admin Common UX State Audit

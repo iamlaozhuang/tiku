@@ -187,6 +187,208 @@ Before implementation, evidence must record:
 - explicit approval for `auth_permission_model` if permission behavior changes;
 - explicit approval for schema/migration or dependency changes if needed.
 
+#### RA-06-01 Split Principle
+
+`phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage` must not be implemented as one broad task. It is split into the smallest reviewable units below so UI state, write concurrency, and permission boundaries can be verified independently.
+
+#### Subtask 1: `phase-21-tail-admin-common-ux-state-audit`
+
+Goal:
+
+- Prove common `admin` UX states without changing write semantics.
+
+Scope:
+
+- Loading, empty, error, disabled, confirmation, success, and failure states for shared admin shells and high-risk admin operation views.
+- Candidate surfaces: `user`, `organization`, `employee`, `authorization`, `redeem_code`, content/knowledge management summaries, model configuration metadata, `audit_log`, and `ai_call_log` read views.
+- Confirmation and danger-state copy for disabling users or organizations, cancelling `authorization`, employee import, redeem code batch generation, model config enable/disable, and fallback reordering where those surfaces already exist.
+
+Suggested allowed files:
+
+- `docs/04-agent-system/state/project-state.yaml`
+- `docs/04-agent-system/state/task-queue.yaml`
+- `docs/05-execution-logs/task-plans/**`
+- `docs/05-execution-logs/evidence/**`
+- `docs/05-execution-logs/audits-reviews/**`
+- `src/app/**`
+- `src/components/**`
+- `src/features/admin/**`
+- `tests/**`
+- `e2e/**`
+
+Suggested blocked files:
+
+- `.env.local`
+- `.env.example`
+- `package.json`
+- lockfiles
+- `src/db/schema/**`
+- `drizzle/**`
+- `scripts/**`
+
+Suggested risk types:
+
+- `admin_ops`
+- `browser_runtime`
+- `local_human_verification`
+- `evidence_integrity`
+
+Suggested validation commands:
+
+- `npm.cmd run test:unit`
+- `npm.cmd run test:e2e`
+- `npm.cmd run build`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+- `git diff --check`
+
+Approval needs:
+
+- `auth_permission_model`: not required if this task only proves UI states over existing permission behavior.
+- `transaction/concurrency`: not required if no write semantics change.
+- `database_migration`: not approved and should remain blocked.
+- `dependency_change`: not approved and should remain blocked.
+
+#### Subtask 2: `phase-21-tail-admin-write-concurrency-proof`
+
+Goal:
+
+- Prove deterministic concurrency behavior for high-risk admin writes.
+
+Scope:
+
+- `authorization` creation and adjustment overlap checks by `organization`, `auth_scope_type`, `profession`, `level`, and effective date range.
+- Employee import atomicity for accepted import batch behavior and conflict reporting.
+- `redeem_code` batch generation idempotence or uniqueness guarantees.
+- Any existing model configuration fallback reordering or enable/disable write path if it is part of the same admin operations surface.
+- Conflict response contract using standard `{ code, message, data, pagination? }`, with `4096xx` conflict codes and camelCase fields.
+
+Suggested allowed files:
+
+- `docs/04-agent-system/state/project-state.yaml`
+- `docs/04-agent-system/state/task-queue.yaml`
+- `docs/05-execution-logs/task-plans/**`
+- `docs/05-execution-logs/evidence/**`
+- `docs/05-execution-logs/audits-reviews/**`
+- `src/server/services/**`
+- `src/server/repositories/**`
+- `src/server/contracts/**`
+- `src/server/mappers/**`
+- `src/server/validators/**`
+- `src/app/api/v1/**`
+- `tests/**`
+- `e2e/**`
+
+Suggested blocked files:
+
+- `.env.local`
+- `.env.example`
+- `package.json`
+- lockfiles
+- `scripts/**`
+- `src/db/schema/**` and `drizzle/**` unless the task evidence has explicit `database_migration` approval.
+
+Suggested risk types:
+
+- `admin_ops`
+- `data_contract`
+- `authorization`
+- `transaction_concurrency`
+- `local_human_verification`
+- `evidence_integrity`
+
+Suggested validation commands:
+
+- `npm.cmd run test:unit`
+- `npm.cmd run test:e2e`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+- `git diff --check`
+
+Approval needs:
+
+- `transaction/concurrency`: required before changing write concurrency behavior, transaction boundaries, optimistic locking, conflict responses, or retry semantics.
+- `auth_permission_model`: required if role checks or permission outcomes change.
+- `database_migration`: required if implementation adds version columns, lock columns, uniqueness constraints, generated indexes, or migration files.
+- `dependency_change`: required if any new concurrency, import, database, or test tooling is introduced.
+
+#### Subtask 3: `phase-21-tail-admin-permission-boundary-review`
+
+Goal:
+
+- Prove admin role and permission boundaries for high-risk admin operations.
+
+Scope:
+
+- `super_admin`, `ops_admin`, and `content_admin` role matrix.
+- Denial proof for disabled or non-admin users.
+- Public identifier tampering proof for `user`, `organization`, `employee`, `authorization`, `redeem_code`, `audit_log`, `ai_call_log`, model configuration, content, and knowledge resources.
+- Service-level permission checks, not UI-only hiding.
+- Redaction rules for password hashes, session internals, redeem code clear text, provider credentials, raw prompts, raw answers, raw model outputs, raw chunks, and provider payloads.
+
+Suggested allowed files:
+
+- `docs/04-agent-system/state/project-state.yaml`
+- `docs/04-agent-system/state/task-queue.yaml`
+- `docs/05-execution-logs/task-plans/**`
+- `docs/05-execution-logs/evidence/**`
+- `docs/05-execution-logs/audits-reviews/**`
+- `src/server/services/**`
+- `src/server/repositories/**`
+- `src/server/contracts/**`
+- `src/server/mappers/**`
+- `src/server/validators/**`
+- `src/app/api/v1/**`
+- `tests/**`
+- `e2e/**`
+
+Suggested blocked files:
+
+- `.env.local`
+- `.env.example`
+- `package.json`
+- lockfiles
+- `src/db/schema/**`
+- `drizzle/**`
+- `scripts/**`
+
+Suggested risk types:
+
+- `admin_ops`
+- `auth_permission_model`
+- `authorization`
+- `local_human_verification`
+- `evidence_integrity`
+
+Suggested validation commands:
+
+- `npm.cmd run test:unit`
+- `npm.cmd run test:e2e`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`
+- `git diff --check`
+
+Approval needs:
+
+- `auth_permission_model`: required before changing role, scope, service permission, or denial behavior.
+- `transaction/concurrency`: not required unless the task also changes high-risk writes.
+- `database_migration`: not approved and should remain blocked.
+- `dependency_change`: not approved and should remain blocked.
+
+#### High-Risk Items Still Requiring Human Approval
+
+- `auth_permission_model` for any role, permission, denial, organization scope, public identifier, or admin service authorization behavior change.
+- `transaction/concurrency` for any transaction boundary, optimistic lock, atomic write, conflict response, retry behavior, or race-condition proof that changes runtime behavior.
+- `database_migration` for any schema, migration, unique index, lock/version column, constraint, or Drizzle output.
+- `dependency_change` for any new package, CLI, test runner, database helper, concurrency harness, or lockfile change.
+- `browser_runtime` or local human verification approval if implementation claims rendered admin UX behavior beyond automated unit coverage.
+
 ## Task Split
 
 Phase 21 begins with two planning tasks:
