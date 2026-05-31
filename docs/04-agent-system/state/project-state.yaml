@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-20-requirement-gap-fixes
-updatedAt: "2026-05-31T04:20:23-07:00"
+updatedAt: "2026-05-31T04:47:14-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -40,12 +40,12 @@ repository:
   lastKnownOriginMasterSha: ac59aa53861b026b498b51b52ae334eaaab500e9
 currentTask:
   id: phase-20-fix-ra-01-05-password-reset-ops-flow
-  status: active
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-05-password-reset-ops-flow.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-05-password-reset-ops-flow.md
-  branch: codex/phase-20-fix-ra-01-05-password-reset-ops-flow
-  commitSha: null
+  branch: null
+  commitSha: 90bdd44972ffd9521e5adc808da80426712010b9
   prUrl: null
   retryCount: 0
   lastFailurePath: null

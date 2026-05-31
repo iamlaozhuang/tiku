@@ -65,8 +65,9 @@ residualGaps: none
 
 - branch: `codex/phase-20-fix-ra-01-05-password-reset-ops-flow`
 - base: `master`
-- changed files: pending commit on task branch
-- commit: pending
-- merge: pending
-- push: pending
-- cleanup: pending
+- changed files: task implementation, tests, UI handoff, task plan, evidence, state
+- commit: `90bdd44972ffd9521e5adc808da80426712010b9` (`fix(auth): add password reset handoff`)
+- merge: `67ae779` (`merge: phase 20 password reset ops flow`) into `master`
+- master validation: pass after merge; quality gate, e2e, build, diff check, readiness, git completion readiness, and naming conventions all passed
+- push: pending cleanup docs commit
+- cleanup: task status set to closed; short branch deletion pending final push
