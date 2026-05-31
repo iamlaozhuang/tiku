@@ -10615,7 +10615,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-05-password-reset-ops-flow.md
-    status: pending
+    status: active
     retryCount: 0
   - id: phase-20-fix-ra-01-06-user-disable-termination
     title: Phase 20 Fix RA-01-06 User Disable Termination

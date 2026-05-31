@@ -27,6 +27,7 @@ import {
   type AdminFlowRuntimeRepositories,
   type AdminFlowRuntimeRepositoryOptions,
 } from "../repositories/admin-flow-runtime-repository";
+import { normalizeUserPasswordResetInput } from "../validators/user-password-reset";
 import type { SessionService } from "./session-service";
 
 export type { AdminFlowRuntimeRepositories };
@@ -63,6 +64,10 @@ const userPasswordResetUnavailableResponse = createErrorResponse(
   503601,
   "Admin user password reset runtime is not configured.",
 );
+const userPasswordResetValidationFailedResponse = createErrorResponse(
+  ADMIN_AUTH_OPERATION_ERROR_CODES.validationFailed,
+  "Invalid password reset input.",
+);
 const userLifecycleMutationUnavailableResponse = createErrorResponse(
   503602,
   "Admin user lifecycle runtime is not configured.",
@@ -74,6 +79,14 @@ const userDetailUnavailableResponse = createErrorResponse(
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
+}
+
+async function readJsonBody(request: Request): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
 }
 
 function isAdminFlowRole(role: string): role is AdminFlowRole {
@@ -461,9 +474,32 @@ export function createAdminFlowRuntimeRouteHandlers(
             return createJsonResponse(adminUserPermissionDeniedResponse);
           }
 
+          const resetInput = normalizeUserPasswordResetInput(
+            await readJsonBody(request),
+          );
+
+          if (!resetInput.success) {
+            await repositories.auditLogRepository.appendAuditLog({
+              actorPublicId: actor.publicId,
+              actorRole: actor.roles[0],
+              actionType: "user.reset_password",
+              targetResourceType: "user",
+              targetPublicId: publicId,
+              resultStatus: "failed",
+              metadataSummary:
+                "redacted user credential reset validation metadata",
+              requestIp: readRequestIp(request),
+            });
+
+            return createJsonResponse(
+              userPasswordResetValidationFailedResponse,
+            );
+          }
+
           const didReset =
             (await repositories.userOrgAuthRepository.resetUserPassword?.(
               publicId,
+              resetInput.value,
             )) ?? false;
 
           if (

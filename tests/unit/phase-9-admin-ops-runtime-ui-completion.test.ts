@@ -407,9 +407,11 @@ describe("phase 9 admin ops runtime ui completion", () => {
       new Request(
         "http://localhost/api/v1/users/user-public-001/reset-password",
         {
+          body: JSON.stringify({ newPassword: "ResetPass2026" }),
           method: "POST",
           headers: {
             authorization: "Bearer admin-session-token",
+            "content-type": "application/json",
             "x-forwarded-for": "203.0.113.10, 10.0.0.1",
           },
         },
@@ -535,6 +537,9 @@ describe("phase 9 admin ops runtime ui completion", () => {
     expect(screen.getByRole("alertdialog")).toHaveTextContent(
       "确认重置用户密码？",
     );
+    fireEvent.change(screen.getByLabelText("reset-password-new-password"), {
+      target: { value: "ResetPass2026" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "确认重置" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "密码已重置，未返回明文密码",
