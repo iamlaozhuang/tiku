@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Pause for human review of the committed ai_scoring_attempt retry persistence implementation. Do not merge, push, deploy, or apply database migration to shared environments without explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation.md
+  nextRecommendedAction: "AI scoring retry persistence is merged to master locally and post-merge gates are recorded. Actual database migration remains pending until the target database is explicitly confirmed as local/development-only."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-post-merge.md
