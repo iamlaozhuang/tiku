@@ -91,6 +91,10 @@ const {
 
 const SESSION_RUNTIME_UNAVAILABLE_CODE = 503001;
 const CREDENTIAL_PROVIDER_ID = "credential";
+const localAdminLoginFailureState = new Map<
+  number,
+  { loginFailedCount: number; lockedUntilAt: Date | null }
+>();
 
 function createRuntimeUnavailableResponse<TData>(): ApiResponse<TData | null> {
   return createErrorResponse(
@@ -159,6 +163,14 @@ function createPostgresSessionUserRepository(
     },
 
     async recordLoginFailure(input: LoginFailureInput) {
+      if (input.userKind === "admin") {
+        localAdminLoginFailureState.set(input.userId, {
+          loginFailedCount: input.loginFailedCount,
+          lockedUntilAt: input.lockedUntilAt,
+        });
+        return;
+      }
+
       const database = getDatabase();
 
       await database
@@ -171,7 +183,12 @@ function createPostgresSessionUserRepository(
         .where(eq(user.id, input.userId));
     },
 
-    async resetLoginFailures(userId) {
+    async resetLoginFailures(userId, userKind) {
+      if (userKind === "admin") {
+        localAdminLoginFailureState.delete(userId);
+        return;
+      }
+
       const database = getDatabase();
 
       await database
@@ -683,11 +700,19 @@ async function findLoginAdminAccountByPhone(
   if (row === undefined) {
     return null;
   }
+  const loginFailureState = localAdminLoginFailureState.get(row.id) ?? {
+    loginFailedCount: 0,
+    lockedUntilAt: null,
+  };
 
   return {
-    ...mapAdminAccountRow(row),
-    login_failed_count: 0,
-    login_failure_user_id: null,
+    ...mapAdminAccountRow({
+      ...row,
+      locked_until_at: loginFailureState.lockedUntilAt,
+    }),
+    login_failed_count: loginFailureState.loginFailedCount,
+    login_failure_user_id: row.id,
+    login_failure_user_kind: "admin",
   };
 }
 
@@ -727,6 +752,7 @@ function mapAdminAccountRow(row: {
   admin_role: AdminRole;
   auth_user_id: string | null;
   id: number;
+  locked_until_at?: Date | null;
   name: string;
   phone: string;
   public_id: string;
@@ -742,7 +768,7 @@ function mapAdminAccountRow(row: {
     auth_user_id: row.auth_user_id,
     employee_public_id: null,
     id: row.id,
-    locked_until_at: null,
+    locked_until_at: row.locked_until_at ?? null,
     name: row.name,
     organization_public_id: null,
     phone: row.phone,

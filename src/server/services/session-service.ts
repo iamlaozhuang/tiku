@@ -31,8 +31,10 @@ const ACCOUNT_DISABLED_CODE = 403002;
 const SESSION_UNAVAILABLE_CODE = 503001;
 const STUDENT_SESSION_DURATION_DAY = 7;
 const ADMIN_SESSION_DURATION_HOUR = 8;
-const MAX_LOGIN_FAILURE_COUNT = 3;
-const LOCK_DURATION_MINUTE = 5;
+const STUDENT_MAX_LOGIN_FAILURE_COUNT = 3;
+const STUDENT_LOCK_DURATION_MINUTE = 5;
+const ADMIN_MAX_LOGIN_FAILURE_COUNT = 5;
+const ADMIN_LOCK_DURATION_MINUTE = 15;
 
 function addDays(value: Date, dayCount: number): Date {
   return new Date(value.getTime() + dayCount * 24 * 60 * 60 * 1000);
@@ -69,6 +71,21 @@ function isAdminLoginUser(
     loginUser.user_type === null &&
     loginUser.admin_public_id !== null
   );
+}
+
+function getLoginLockPolicy(isAdminLogin: boolean): {
+  maxFailureCount: number;
+  lockDurationMinute: number;
+} {
+  return isAdminLogin
+    ? {
+        maxFailureCount: ADMIN_MAX_LOGIN_FAILURE_COUNT,
+        lockDurationMinute: ADMIN_LOCK_DURATION_MINUTE,
+      }
+    : {
+        maxFailureCount: STUDENT_MAX_LOGIN_FAILURE_COUNT,
+        lockDurationMinute: STUDENT_LOCK_DURATION_MINUTE,
+      };
 }
 
 export function createSessionService(
@@ -108,6 +125,8 @@ export function createSessionService(
         return createAccountLockedResponse();
       }
 
+      const isAdminLogin = isAdminLoginUser(loginUser);
+      const lockPolicy = getLoginLockPolicy(isAdminLogin);
       const isPasswordValid = await credentialAdapter.verifyPasswordCredential({
         authUserId: loginUser.auth_user_id,
         password: loginInput.value.password,
@@ -116,13 +135,14 @@ export function createSessionService(
       if (!isPasswordValid) {
         const loginFailedCount = loginUser.login_failed_count + 1;
         const lockedUntilAt =
-          loginFailedCount >= MAX_LOGIN_FAILURE_COUNT
-            ? addMinutes(now, LOCK_DURATION_MINUTE)
+          loginFailedCount >= lockPolicy.maxFailureCount
+            ? addMinutes(now, lockPolicy.lockDurationMinute)
             : null;
 
         if (loginUser.login_failure_user_id !== null) {
           await sessionUserRepository.recordLoginFailure({
             userId: loginUser.login_failure_user_id,
+            userKind: loginUser.login_failure_user_kind,
             loginFailedCount,
             lockedUntilAt,
           });
@@ -133,7 +153,6 @@ export function createSessionService(
           : createAccountLockedResponse();
       }
 
-      const isAdminLogin = isAdminLoginUser(loginUser);
       const createAuthSession =
         isAdminLogin && credentialAdapter.createSession !== undefined
           ? credentialAdapter.createSession
@@ -148,6 +167,7 @@ export function createSessionService(
       if (loginUser.login_failure_user_id !== null) {
         await sessionUserRepository.resetLoginFailures(
           loginUser.login_failure_user_id,
+          loginUser.login_failure_user_kind,
         );
       }
 

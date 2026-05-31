@@ -140,6 +140,19 @@ const redeemCodeStatusLabels = {
   used: "已使用",
 } satisfies Record<RedeemCodeStatus, string>;
 
+const adminSecurityPolicies = [
+  ["后台会话", "8 小时"],
+  ["多设备登录", "允许"],
+  ["登录失败锁定", "5 次 / 15 分钟"],
+  ["账号边界", "后台账号独立"],
+] as const;
+
+const adminRolePolicies = [
+  ["super_admin", "后台账号与角色管理"],
+  ["ops_admin", "用户、企业、授权、卡密运营"],
+  ["content_admin", "题库、试卷、知识点内容维护"],
+] as const;
+
 const emptyAdminOpsData: AdminOpsData = {
   aiCallLogs: [],
   auditLogs: [],
@@ -657,6 +670,8 @@ export function AdminOpsManagement() {
         />
       </section>
 
+      <AdminAccountSecurityPolicyPanel />
+
       {generatedRedeemCode === null ? null : (
         <section
           aria-label="本地卡密生成结果"
@@ -864,6 +879,49 @@ export function AdminOpsManagement() {
 
       {toastMessage === null ? null : <AdminOpsToast message={toastMessage} />}
     </main>
+  );
+}
+
+function AdminAccountSecurityPolicyPanel() {
+  return (
+    <section
+      aria-label="后台账号安全策略"
+      className="bg-surface ring-border rounded-md p-4 shadow-sm ring-1"
+    >
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="space-y-2">
+          <h2 className="text-text-primary text-base font-semibold">
+            后台账号安全策略
+          </h2>
+          <p className="text-text-muted max-w-2xl text-sm leading-6">
+            后台用户使用独立账号体系，角色授权与学员账号分离；锁定只阻止新登录，不影响已有活跃后台会话。
+          </p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[32rem]">
+          {adminSecurityPolicies.map(([label, value]) => (
+            <div
+              key={label}
+              className="border-border rounded-md border px-3 py-2"
+            >
+              <p className="text-text-muted text-xs">{label}</p>
+              <p className="text-text-primary mt-1 text-sm font-semibold">
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="border-border mt-4 grid gap-3 border-t pt-4 xl:grid-cols-3">
+        {adminRolePolicies.map(([role, scope]) => (
+          <article key={role} className="min-w-0">
+            <p className="text-text-primary font-mono text-sm font-semibold">
+              {role}
+            </p>
+            <p className="text-text-muted mt-1 text-xs">{scope}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
