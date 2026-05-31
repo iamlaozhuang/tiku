@@ -145,6 +145,11 @@
 
 ## Push And Cleanup Status
 
-- Push: pending.
-- Short branch deletion: pending.
-- Cleanup docs commit: pending.
+- Push: pass.
+  - Command: `git push origin master`
+  - Result: `b7d26b05..0dc7de8a  master -> master`.
+- Short branch deletion: pass.
+  - Command: `git branch -d codex/phase-20-fix-ra-05-01-hybrid-rerank-retrieval`
+  - Sandbox attempt failed because Git could not create the ref lock.
+  - Escalated rerun deleted the already merged branch: `was ff1f103c`.
+- Cleanup docs commit: this evidence/state update; SHA reported in final handoff after commit creation.
