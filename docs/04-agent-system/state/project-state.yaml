@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-21-high-risk-tail-closure
-updatedAt: "2026-05-31T11:50:00-07:00"
+updatedAt: "2026-05-31T12:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,8 +36,8 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 45d7f30a12c40dc20ba283c5763e3a06bce6c442
-  lastKnownOriginMasterSha: e57c59c2b05cd440d8a715b5ddbb696b978b4be0
+  lastKnownMasterSha: ebb78a1215c96260aa910c5df3f445e4a82ac799
+  lastKnownOriginMasterSha: ebb78a1215c96260aa910c5df3f445e4a82ac799
 currentTask:
   id: phase-20-closeout-phase-21-seeding
   status: closed

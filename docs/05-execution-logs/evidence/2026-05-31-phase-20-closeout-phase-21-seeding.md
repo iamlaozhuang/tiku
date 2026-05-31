@@ -97,5 +97,12 @@
   - `Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass inventory, ahead 2 before push.
   - `Test-NamingConventions.ps1`: pass.
   - `Invoke-QualityGate.ps1`: pass, including `test:unit` 149 files / 615 tests.
-- Push: pending.
-- Short branch cleanup: pending.
+- Master validation evidence commit: `ebb78a12`.
+- Push: pass.
+  - Command: `git push origin master`
+  - Result: `e57c59c2..ebb78a12  master -> master`.
+- Short branch cleanup: pass.
+  - Command: `git branch -d codex/phase-20-closeout-phase-21-seeding`
+  - Sandbox attempt failed because Git could not create the ref lock.
+  - Escalated rerun deleted the already merged branch: `was c11c6493`.
+- Cleanup evidence commit: this evidence/state update; SHA reported in final handoff after commit creation.
