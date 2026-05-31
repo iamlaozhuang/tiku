@@ -88,7 +88,10 @@ export type SaveMockExamAnswerInput = {
 
 export type SubmitMockExamInput = {
   publicId: string;
-  examStatus: Extract<ExamStatus, "completed" | "scoring_partial_failed">;
+  examStatus: Extract<
+    ExamStatus,
+    "completed" | "scoring" | "scoring_partial_failed"
+  >;
   submittedAt: Date;
   objectiveScore: string;
   subjectiveScore: string | null;

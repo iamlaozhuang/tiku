@@ -109,8 +109,43 @@ export type MockExamAiScoringRuntime = {
   ): Promise<MockExamAiScoringRuntimeResult>;
 };
 
+export type MockExamAiScoringQueueReceipt = {
+  jobPublicId: string;
+  mockExamPublicId: string;
+  queuedAt: Date;
+  answerRecordPublicIds: string[];
+};
+
+export type MockExamAiScoringQueueJob = MockExamAiScoringQueueReceipt & {
+  process(): Promise<void>;
+};
+
+export type MockExamAiScoringQueue = {
+  enqueue(
+    job: MockExamAiScoringQueueJob,
+  ): Promise<MockExamAiScoringQueueReceipt>;
+};
+
+export type MockExamAiScoringQueueDrainResult =
+  | {
+      status: "empty";
+    }
+  | {
+      status: "processed";
+      jobPublicId: string;
+      mockExamPublicId: string;
+      answerRecordPublicIds: string[];
+    };
+
+export type DeterministicMockExamAiScoringQueue = MockExamAiScoringQueue & {
+  listPendingJobs(): MockExamAiScoringQueueReceipt[];
+  drainNext(): Promise<MockExamAiScoringQueueDrainResult>;
+  drainAll(): Promise<MockExamAiScoringQueueDrainResult[]>;
+};
+
 export type MockExamServiceOptions = {
   aiScoringRuntime?: MockExamAiScoringRuntime;
+  aiScoringQueue?: MockExamAiScoringQueue;
 };
 
 type MockExamQuestionSnapshot = {
@@ -150,6 +185,56 @@ const systemPublicIdFactory: MockExamPublicIdFactory = {
     return `${prefix}_${crypto.randomUUID()}`;
   },
 };
+
+export function createDeterministicMockExamAiScoringQueue(): DeterministicMockExamAiScoringQueue {
+  const pendingJobs: MockExamAiScoringQueueJob[] = [];
+
+  return {
+    async enqueue(job) {
+      pendingJobs.push(job);
+
+      return {
+        jobPublicId: job.jobPublicId,
+        mockExamPublicId: job.mockExamPublicId,
+        queuedAt: job.queuedAt,
+        answerRecordPublicIds: [...job.answerRecordPublicIds],
+      };
+    },
+    listPendingJobs() {
+      return pendingJobs.map((job) => ({
+        jobPublicId: job.jobPublicId,
+        mockExamPublicId: job.mockExamPublicId,
+        queuedAt: job.queuedAt,
+        answerRecordPublicIds: [...job.answerRecordPublicIds],
+      }));
+    },
+    async drainNext() {
+      const job = pendingJobs.shift();
+
+      if (job === undefined) {
+        return { status: "empty" };
+      }
+
+      await job.process();
+
+      return {
+        status: "processed",
+        jobPublicId: job.jobPublicId,
+        mockExamPublicId: job.mockExamPublicId,
+        answerRecordPublicIds: [...job.answerRecordPublicIds],
+      };
+    },
+    async drainAll() {
+      const results: MockExamAiScoringQueueDrainResult[] = [];
+
+      while (pendingJobs.length > 0) {
+        results.push(await this.drainNext());
+      }
+
+      return results;
+    },
+  };
+}
 
 function isSameScope(
   scope: MockExamAuthorizationScopeRow,
@@ -705,6 +790,41 @@ async function scoreSubjectiveQuestions(input: {
   return results;
 }
 
+function createSubmittedSubjectiveResult(input: {
+  question: MockExamQuestionSnapshot;
+  submittedAt: Date;
+}): MockExamSubjectiveScoringResult {
+  return {
+    paperQuestionPublicId: input.question.paperQuestionPublicId,
+    answerRecordStatus: "submitted",
+    isCorrect: null,
+    score: null,
+    submittedAt: input.submittedAt,
+    aiScoringSnapshot: {
+      scoringStatus: "queued",
+    },
+  };
+}
+
+function listQueueableSubjectiveAnswerRecords(input: {
+  answerByPaperQuestion: Map<string, MockExamAnswerRecordRow>;
+  questions: MockExamQuestionSnapshot[];
+}): MockExamAnswerRecordRow[] {
+  return input.questions.filter(isAiScoringQuestion).flatMap((question) => {
+    const answerRecord = input.answerByPaperQuestion.get(
+      question.paperQuestionPublicId,
+    );
+
+    if (answerRecord === undefined) {
+      return [];
+    }
+
+    return getStudentAnswer(answerRecord.answer_snapshot).trim().length > 0
+      ? [answerRecord]
+      : [];
+  });
+}
+
 function calculateSubjectiveScore(
   subjectiveResults: MockExamSubjectiveScoringResult[],
 ): string | null {
@@ -728,6 +848,13 @@ function calculateExamStatus(
   )
     ? "scoring_partial_failed"
     : "completed";
+}
+
+function createAiScoringQueueJobPublicId(
+  mockExamPublicId: string,
+  queuedAt: Date,
+): string {
+  return `ai_scoring_queue_${mockExamPublicId}_${queuedAt.getTime()}`;
 }
 
 function createMockExamNotFoundResponse(): ApiResponse<null> {
@@ -798,8 +925,17 @@ async function submitReadableMockExam(
   const unansweredCount = questions.filter(
     (question) => !answerByPaperQuestion.has(question.paperQuestionPublicId),
   ).length;
+  const shouldQueueAiScoring =
+    options.aiScoringRuntime !== undefined &&
+    options.aiScoringQueue !== undefined;
+  const queueableSubjectiveAnswerRecords = shouldQueueAiScoring
+    ? listQueueableSubjectiveAnswerRecords({
+        answerByPaperQuestion,
+        questions,
+      })
+    : [];
   const subjectiveResults =
-    options.aiScoringRuntime === undefined
+    options.aiScoringRuntime === undefined || shouldQueueAiScoring
       ? []
       : await scoreSubjectiveQuestions({
           aiScoringRuntime: options.aiScoringRuntime,
@@ -811,13 +947,15 @@ async function submitReadableMockExam(
           onlyFailedRecords: false,
         });
   const subjectiveScore =
-    options.aiScoringRuntime === undefined
+    options.aiScoringRuntime === undefined || shouldQueueAiScoring
       ? null
       : calculateSubjectiveScore(subjectiveResults);
   const examStatus =
     options.aiScoringRuntime === undefined
       ? "completed"
-      : calculateExamStatus(subjectiveResults);
+      : shouldQueueAiScoring && queueableSubjectiveAnswerRecords.length > 0
+        ? "scoring"
+        : calculateExamStatus(subjectiveResults);
   const totalScore = formatScore(
     objectiveScore +
       (subjectiveScore === null ? 0 : parseScore(subjectiveScore)),
@@ -838,10 +976,19 @@ async function submitReadableMockExam(
 
         if (
           answerRecord === undefined ||
-          (options.aiScoringRuntime !== undefined &&
+          (!shouldQueueAiScoring &&
+            options.aiScoringRuntime !== undefined &&
             isAiScoringQuestion(question))
         ) {
           return [];
+        }
+
+        if (shouldQueueAiScoring && isAiScoringQuestion(question)) {
+          const studentAnswer = getStudentAnswer(answerRecord.answer_snapshot);
+
+          return studentAnswer.trim().length === 0
+            ? [createUnansweredSubjectiveResult(question, submittedAt)]
+            : [createSubmittedSubjectiveResult({ question, submittedAt })];
         }
 
         return [
@@ -854,6 +1001,59 @@ async function submitReadableMockExam(
 
   if (submittedMockExam === null) {
     return createMockExamNotFoundResponse();
+  }
+
+  if (
+    shouldQueueAiScoring &&
+    queueableSubjectiveAnswerRecords.length > 0 &&
+    options.aiScoringRuntime !== undefined &&
+    options.aiScoringQueue !== undefined
+  ) {
+    const aiScoringRuntime = options.aiScoringRuntime;
+    const aiScoringQueue = options.aiScoringQueue;
+
+    await aiScoringQueue.enqueue({
+      jobPublicId: createAiScoringQueueJobPublicId(
+        mockExam.public_id,
+        submittedAt,
+      ),
+      mockExamPublicId: mockExam.public_id,
+      queuedAt: submittedAt,
+      answerRecordPublicIds: queueableSubjectiveAnswerRecords.map(
+        (answerRecord) => answerRecord.public_id,
+      ),
+      async process() {
+        const queuedSubjectiveResults = await scoreSubjectiveQuestions({
+          aiScoringRuntime,
+          userContext,
+          mockExam,
+          answerByPaperQuestion,
+          questions,
+          submittedAt,
+          onlyFailedRecords: false,
+        });
+        const queuedSubjectiveScore = calculateSubjectiveScore(
+          queuedSubjectiveResults,
+        );
+        const queuedExamStatus = calculateExamStatus(queuedSubjectiveResults);
+        const queuedTotalScore = formatScore(
+          objectiveScore +
+            (queuedSubjectiveScore === null
+              ? 0
+              : parseScore(queuedSubjectiveScore)),
+        );
+
+        await repository.applyMockExamScoringResults({
+          publicId: mockExam.public_id,
+          examStatus: queuedExamStatus,
+          scoredAt: submittedAt,
+          objectiveScore: formatScore(objectiveScore),
+          subjectiveScore: queuedSubjectiveScore,
+          totalScore: queuedTotalScore,
+          answerRecordResults: queuedSubjectiveResults,
+        });
+      },
+    });
   }
 
   return {
