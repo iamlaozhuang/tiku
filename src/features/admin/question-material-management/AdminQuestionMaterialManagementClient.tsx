@@ -108,6 +108,8 @@ type QuestionFormValues = {
   scoringMethod: ScoringMethod;
   questionOptions: QuestionOptionFormValue[];
   scoringPoints: ScoringPointFormValue[];
+  knowledgeNodePublicIdsText: string;
+  tagPublicIdsText: string;
 };
 
 type QuestionOptionFormValue = {
@@ -247,6 +249,7 @@ function createDefaultScoringPoints(): ScoringPointFormValue[] {
 function createDefaultQuestionFormValues(): QuestionFormValues {
   return {
     analysisRichText: "老师解析",
+    knowledgeNodePublicIdsText: "",
     level: "3",
     materialPublicId: "",
     multiChoiceRule: "all_correct_only",
@@ -258,6 +261,7 @@ function createDefaultQuestionFormValues(): QuestionFormValues {
     standardAnswerRichText: "A",
     stemRichText: "新建题目题干",
     subject: "theory",
+    tagPublicIdsText: "",
   };
 }
 
@@ -276,6 +280,9 @@ function createQuestionFormValuesFromQuestion(
 ): QuestionFormValues {
   return {
     analysisRichText: stripRichText(question.analysisRichText),
+    knowledgeNodePublicIdsText: formatPublicIdList(
+      question.knowledgeNodePublicIds,
+    ),
     level: String(question.level),
     materialPublicId: question.materialPublicId ?? "",
     multiChoiceRule: question.multiChoiceRule,
@@ -300,6 +307,7 @@ function createQuestionFormValuesFromQuestion(
     standardAnswerRichText: stripRichText(question.standardAnswerRichText),
     stemRichText: stripRichText(question.stemRichText),
     subject: question.subject,
+    tagPublicIdsText: formatPublicIdList(question.tagPublicIds),
   };
 }
 
@@ -444,8 +452,10 @@ function createQuestionInput(
   values: QuestionFormValues,
   bindings: QuestionBindingInput = {
     fillBlankAnswers: [],
-    knowledgeNodePublicIds: [],
-    tagPublicIds: [],
+    knowledgeNodePublicIds: parsePublicIdList(
+      values.knowledgeNodePublicIdsText,
+    ),
+    tagPublicIds: parsePublicIdList(values.tagPublicIdsText),
   },
 ) {
   const isOptionQuestion = optionQuestionTypes.has(values.questionType);
@@ -510,6 +520,19 @@ function createQuestionInputFromQuestion(
     tagPublicIds: question.tagPublicIds,
     status: question.status,
   };
+}
+
+function formatPublicIdList(publicIds: string[]): string {
+  return publicIds.join("\n");
+}
+
+function parsePublicIdList(value: string): string[] {
+  const publicIds = value
+    .split(/[\s,，]+/u)
+    .map((publicId) => publicId.trim())
+    .filter((publicId) => publicId.length > 0);
+
+  return Array.from(new Set(publicIds));
 }
 
 function normalizeStandardAnswerForQuestionType(
@@ -727,9 +750,10 @@ export function AdminQuestionMaterialManagement({
           return {
             ...createQuestionInput(values, {
               fillBlankAnswers: currentQuestion?.fillBlankAnswers ?? [],
-              knowledgeNodePublicIds:
-                currentQuestion?.knowledgeNodePublicIds ?? [],
-              tagPublicIds: currentQuestion?.tagPublicIds ?? [],
+              knowledgeNodePublicIds: parsePublicIdList(
+                values.knowledgeNodePublicIdsText,
+              ),
+              tagPublicIds: parsePublicIdList(values.tagPublicIdsText),
             }),
             status: "available",
           };
@@ -1436,6 +1460,43 @@ function QuestionWriteForm({
           />
         </label>
       </div>
+      <fieldset className="border-border grid gap-3 rounded-md border p-3">
+        <legend className="text-text-secondary px-1 text-sm font-medium">
+          知识点与标签绑定
+        </legend>
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="grid gap-2 text-sm font-medium">
+            <span className="text-text-secondary">知识点 publicIds</span>
+            <textarea
+              aria-label="知识点 publicIds"
+              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-16 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+              placeholder="knowledge-node-public-001"
+              value={formValues.knowledgeNodePublicIdsText}
+              onChange={(event) =>
+                setFormValues({
+                  ...formValues,
+                  knowledgeNodePublicIdsText: event.target.value,
+                })
+              }
+            />
+          </label>
+          <label className="grid gap-2 text-sm font-medium">
+            <span className="text-text-secondary">标签 publicIds</span>
+            <textarea
+              aria-label="标签 publicIds"
+              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 bg-surface min-h-16 rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3"
+              placeholder="tag-public-001"
+              value={formValues.tagPublicIdsText}
+              onChange={(event) =>
+                setFormValues({
+                  ...formValues,
+                  tagPublicIdsText: event.target.value,
+                })
+              }
+            />
+          </label>
+        </div>
+      </fieldset>
       <label className="grid gap-2 text-sm font-medium">
         <span className="text-text-secondary">
           题干

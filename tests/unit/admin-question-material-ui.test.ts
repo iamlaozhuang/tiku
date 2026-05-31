@@ -311,6 +311,9 @@ function mockWritableContentFetch(
               )
                 ? requestBody.knowledgeNodePublicIds
                 : questionPayload.data[0].knowledgeNodePublicIds,
+              tagPublicIds: Array.isArray(requestBody.tagPublicIds)
+                ? requestBody.tagPublicIds
+                : questionPayload.data[0].tagPublicIds,
               updatedAt: "2026-05-19T06:30:00.000Z",
             },
           },
@@ -1227,6 +1230,65 @@ describe("AdminQuestionMaterialManagement", () => {
       screen.getByTestId("question-row-question-logistics-002"),
     ).toHaveAttribute("data-selected", "false");
     expect(within(editPanel).getByRole("form")).toBeInTheDocument();
+  });
+
+  it("edits durable knowledge_node and tag bindings from the question form", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
+    const fetchMock = mockWritableContentFetch();
+
+    render(createElement(AdminQuestionMaterialManagement));
+
+    await screen.findByTestId("question-row-question-marketing-001");
+    fireEvent.click(screen.getByTestId("question-edit-question-marketing-001"));
+
+    const questionForm = within(screen.getByRole("form", { name: "题目表单" }));
+
+    expect(questionForm.getByLabelText("知识点 publicIds")).toHaveValue(
+      "knowledge-node-sampling",
+    );
+    expect(questionForm.getByLabelText("标签 publicIds")).toHaveValue(
+      "tag-research",
+    );
+
+    fireEvent.change(questionForm.getByLabelText("知识点 publicIds"), {
+      target: {
+        value:
+          "knowledge-node-sampling\nknowledge-node-retail, knowledge-node-price",
+      },
+    });
+    fireEvent.change(questionForm.getByLabelText("标签 publicIds"), {
+      target: { value: "tag-research tag-compliance" },
+    });
+    fireEvent.click(questionForm.getByRole("button", { name: "保存题目" }));
+
+    expect(
+      await screen.findByText("题目 question-marketing-001 已保存"),
+    ).toBeInTheDocument();
+
+    const requestBody = readJsonRequestBody(
+      fetchMock,
+      "/api/v1/questions/question-marketing-001",
+      "PATCH",
+    );
+
+    expect(requestBody.knowledgeNodePublicIds).toEqual([
+      "knowledge-node-sampling",
+      "knowledge-node-retail",
+      "knowledge-node-price",
+    ]);
+    expect(requestBody.tagPublicIds).toEqual([
+      "tag-research",
+      "tag-compliance",
+    ]);
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("question-row-question-marketing-001"),
+      ).toHaveTextContent("knowledge-node-price"),
+    );
+    expect(
+      screen.getByTestId("question-row-question-marketing-001"),
+    ).toHaveTextContent("tag-compliance");
+    expect(document.body.textContent).not.toContain("unit-test-admin-token");
   });
 
   it("reviews knowledge_node recommendations with confidence, stale, accept, and discard states", async () => {
