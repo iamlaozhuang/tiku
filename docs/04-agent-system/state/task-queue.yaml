@@ -12464,7 +12464,7 @@ tasks:
       - evidence_integrity
     validationCommands: *phase20_ra06_validation
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-04-org-auth-detail-route-alignment.md
-    status: validated
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-06-05-redeem-code-detail-view
     title: Phase 20 Fix RA-06-05 Redeem Code Detail View

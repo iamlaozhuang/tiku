@@ -94,4 +94,20 @@ Verdict: APPROVE for task commit, merge to `master`, push, and short-lived branc
 
 ## Git Closeout
 
-Pending implementation commit, merge into `master`, post-merge validation, push, branch cleanup, and cleanup docs commit.
+- Implementation commit: `b72ad69fc763fc7e591581838dc44782a174656a` (`fix(admin): align org auth detail route`).
+- Merge commit on `master`: `046981edd74d9cc24b266db1d2e15b7bf9fa5ed5` (`merge: phase 20 ra 06 04 org auth detail route`).
+- Post-merge `master` validation:
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1`: pass; lint, typecheck, full unit suite, and format check passed.
+  - `npm.cmd run test:e2e`: pass; 25 tests passed.
+  - `npm.cmd run build`: pass; production build succeeded and included `/api/v1/org-auths/[publicId]`.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`: pass.
+  - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1`: pass.
+  - `git diff --check`: pass.
+- Push: `git push origin master` moved `origin/master` from `c9363ea` to `046981e`.
+- Cleanup: deleted merged branch `codex/phase-20-fix-ra-06-04-org-auth-detail-route-alignment`.
+- Post-clean verification before cleanup docs commit:
+  - `git status --short --branch`: `## master...origin/master`
+  - `git rev-list --left-right --count master...origin/master`: `0 0`
+  - `git branch --list "codex/*"`: no output
+  - `git worktree list --porcelain`: only `D:/tiku` on `master`
