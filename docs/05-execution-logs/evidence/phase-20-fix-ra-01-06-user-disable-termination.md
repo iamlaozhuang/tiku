@@ -203,6 +203,99 @@ git diff --check
 
 Result: pass after evidence update.
 
+## Closeout Evidence
+
+- Implementation commit: `3a192fb fix(auth): terminate active flows on user disable`.
+- Merge commit: `067a923 merge: phase 20 ra 01 06 user disable termination`.
+- Merge target: `master`.
+- Push target: `origin master`.
+- Push result: pass, `972a345..067a923 master -> master`.
+- Branch cleanup: `codex/phase-20-fix-ra-01-06-user-disable-termination` was merged, then deleted locally. The first sandbox delete attempt failed with `.git` ref lock permission denial; approved elevated rerun succeeded.
+- Worktree cleanup: no task worktree existed; `git worktree list --porcelain` reported only `D:/tiku`.
+- Post-clean branch inventory: no local `codex/*` branches.
+- Post-clean alignment: after `git fetch origin`, `git rev-list --left-right --count master...origin/master` returned `0 0`.
+- Post-clean status: `git status --short --branch` returned `## master...origin/master`.
+
+### Master Validation After Merge
+
+Command:
+
+```powershell
+npm.cmd run test:e2e
+```
+
+Result: pass on `master`.
+
+## Cleanup Docs Validation
+
+After branch deletion and post-clean alignment, cleanup-only changes were made to `project-state.yaml`, `task-queue.yaml`, and this evidence file.
+
+Command:
+
+```powershell
+git diff --check
+```
+
+Result: pass.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+```
+
+Result: pass.
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+```
+
+Result: pass; inventory showed only cleanup docs modified and `master...origin/master` at `0 0`.
+
+Command:
+
+```powershell
+npm.cmd run format:check
+```
+
+Result: initial sandbox attempt failed with `EPERM` reading the Prettier binary under `node_modules`; approved elevated rerun passed.
+
+Output summary:
+
+```text
+25 passed
+```
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+```
+
+Result: pass on `master`.
+
+Output summary:
+
+```text
+lint: pass
+typecheck: pass
+test:unit: pass, 140 files / 592 tests
+format:check: pass
+```
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+git diff --check
+```
+
+Result: pass on `master`.
+
 ## Security Review
 
 - Task id: `phase-20-fix-ra-01-06-user-disable-termination`.
