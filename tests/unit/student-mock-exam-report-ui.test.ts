@@ -878,6 +878,71 @@ describe("StudentExamReportPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders knowledge_node weakness analysis from historical report snapshots", () => {
+    const report = {
+      ...studentExamReportFixture.examReports[0],
+      publicId: "exam-report-knowledge-node-analysis",
+      reportSnapshot: {
+        totalScoreText: "total score 3.0",
+        accuracyText: "accuracy 67%",
+        scoreSummaryText: "score 3.0 / 6.0",
+        knowledgeNodeWeaknessSummaryText:
+          "knowledge_node weakness: knowledge_node_public_weak score_rate 0% accuracy 0% score 0.0/2.0",
+        knowledgeNodeAnalysis: [
+          {
+            knowledgeNodePublicId: "knowledge_node_public_weak",
+            questionCount: 1,
+            answeredCount: 0,
+            correctCount: 0,
+            score: "0.0",
+            maxScore: "2.0",
+            scoreRate: 0,
+            accuracyRate: 0,
+            weaknessRank: 1,
+            questionPublicIds: ["question_shared_unanswered"],
+          },
+          {
+            knowledgeNodePublicId: "knowledge_node_public_shared",
+            questionCount: 2,
+            answeredCount: 1,
+            correctCount: 1,
+            score: "1.0",
+            maxScore: "4.0",
+            scoreRate: 25,
+            accuracyRate: 50,
+            weaknessRank: 2,
+            questionPublicIds: [
+              "question_shared_correct",
+              "question_shared_unanswered",
+            ],
+          },
+        ],
+        questionResults: [],
+      },
+    };
+
+    render(
+      createElement(StudentExamReportPage, {
+        examReportPublicId: "exam-report-knowledge-node-analysis",
+        examReports: [report],
+      }),
+    );
+
+    expect(screen.getByText("知识点薄弱项")).toBeInTheDocument();
+    expect(screen.getByText("knowledge_node_public_weak")).toBeInTheDocument();
+    expect(screen.getByText("得分率 0%")).toBeInTheDocument();
+    expect(screen.getByText("正确率 0%")).toBeInTheDocument();
+    expect(screen.getByText("0.0 / 2.0")).toBeInTheDocument();
+    expect(
+      screen.getByText("覆盖 1 题，已答 0 题，正确 0 题"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("knowledge_node_public_shared"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("得分率 25%")).toBeInTheDocument();
+    expect(screen.getByText("正确率 50%")).toBeInTheDocument();
+  });
+
   it("renders fill_blank scoring method and per-blank report details", () => {
     const report = {
       ...studentExamReportFixture.examReports[0],

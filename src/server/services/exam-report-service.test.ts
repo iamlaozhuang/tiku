@@ -438,6 +438,141 @@ describe("exam report service", () => {
     ]);
   });
 
+  it("stores knowledge_node weakness analysis in the immutable report snapshot", async () => {
+    const service = createExamReportService(
+      createRepository({
+        async findSubmittedMockExamByPublicId() {
+          return createMockExamRow({
+            paper_snapshot: {
+              paperPublicId: "paper_public_knowledge_analysis",
+              name: "knowledge_node report paper",
+              paperSections: [
+                {
+                  paperSectionTitle: "knowledge_node paper_section",
+                  paperQuestions: [
+                    {
+                      paperQuestionPublicId: "paper_question_shared_correct",
+                      questionPublicId: "question_shared_correct",
+                      questionType: "single_choice",
+                      title: "Shared correct question",
+                      standardAnswerLabels: ["A"],
+                      score: "2.0",
+                      knowledgeNodePublicIds: ["knowledge_node_public_shared"],
+                    },
+                    {
+                      paperQuestionPublicId: "paper_question_shared_unanswered",
+                      questionPublicId: "question_shared_unanswered",
+                      questionType: "single_choice",
+                      title: "Shared unanswered question",
+                      standardAnswerLabels: ["B"],
+                      score: "2.0",
+                      knowledgeNodePublicIds: [
+                        "knowledge_node_public_shared",
+                        "knowledge_node_public_weak",
+                      ],
+                    },
+                    {
+                      paperQuestionPublicId: "paper_question_strong_correct",
+                      questionPublicId: "question_strong_correct",
+                      questionType: "single_choice",
+                      title: "Strong correct question",
+                      standardAnswerLabels: ["C"],
+                      score: "2.0",
+                      knowledgeNodePublicIds: ["knowledge_node_public_strong"],
+                    },
+                  ],
+                },
+              ],
+            },
+            objective_score: "3.0",
+            total_score: "3.0",
+          });
+        },
+        async listMockExamAnswerRecords() {
+          return [
+            {
+              ...createAnswerRecordRow(),
+              public_id: "answer_record_shared_correct",
+              paper_question_public_id: "paper_question_shared_correct",
+              question_public_id: "question_shared_correct",
+              is_correct: true,
+              score: "1.0",
+              max_score: "2.0",
+            },
+            {
+              ...createAnswerRecordRow(),
+              public_id: "answer_record_strong_correct",
+              paper_question_public_id: "paper_question_strong_correct",
+              question_public_id: "question_strong_correct",
+              is_correct: true,
+              score: "2.0",
+              max_score: "2.0",
+            },
+          ];
+        },
+      }),
+      clock,
+      createIdFactory(),
+    );
+
+    await expect(
+      service.generateExamReport(userContext, {
+        mockExamPublicId: "mock_exam_public_123",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        examReport: {
+          reportSnapshot: {
+            knowledgeNodeWeaknessSummaryText:
+              "knowledge_node weakness: knowledge_node_public_weak score_rate 0% accuracy 0% score 0.0/2.0; knowledge_node_public_shared score_rate 25% accuracy 50% score 1.0/4.0; knowledge_node_public_strong score_rate 100% accuracy 100% score 2.0/2.0",
+            knowledgeNodeAnalysis: [
+              {
+                knowledgeNodePublicId: "knowledge_node_public_weak",
+                questionCount: 1,
+                answeredCount: 0,
+                correctCount: 0,
+                score: "0.0",
+                maxScore: "2.0",
+                scoreRate: 0,
+                accuracyRate: 0,
+                weaknessRank: 1,
+                questionPublicIds: ["question_shared_unanswered"],
+              },
+              {
+                knowledgeNodePublicId: "knowledge_node_public_shared",
+                questionCount: 2,
+                answeredCount: 1,
+                correctCount: 1,
+                score: "1.0",
+                maxScore: "4.0",
+                scoreRate: 25,
+                accuracyRate: 50,
+                weaknessRank: 2,
+                questionPublicIds: [
+                  "question_shared_correct",
+                  "question_shared_unanswered",
+                ],
+              },
+              {
+                knowledgeNodePublicId: "knowledge_node_public_strong",
+                questionCount: 1,
+                answeredCount: 1,
+                correctCount: 1,
+                score: "2.0",
+                maxScore: "2.0",
+                scoreRate: 100,
+                accuracyRate: 100,
+                weaknessRank: 3,
+                questionPublicIds: ["question_strong_correct"],
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
   it("keeps fill_blank scoring method and per-blank answers in report results", async () => {
     const service = createExamReportService(
       createRepository({

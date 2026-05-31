@@ -12281,7 +12281,7 @@ tasks:
       - phase-18-audit-ra-05-rag-knowledge
       - phase-20-fix-ra-02-01-question-knowledge-tag-binding
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-05 audit finding F-RA-05-09-001. Database/schema work may require separate human approval before implementation.
+    humanApproval: User approved local implementation on 2026-05-30 with database_migration risk bounded to reusing existing question_knowledge_node/question_tag/exam_report snapshot/answer_record models. No src/db/schema, drizzle, dependency, env/secret, staging/prod/cloud/real provider, external service configuration, destructive data operation, or drizzle-kit push is allowed.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -12315,7 +12315,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-05-09-report-knowledge-analysis.md
-    status: pending
+    status: active
     retryCount: 0
   - id: phase-18-audit-ra-06-admin-ops-logs-permissions
     title: Phase 18 Audit RA-06 Admin Ops Logs And Permissions
