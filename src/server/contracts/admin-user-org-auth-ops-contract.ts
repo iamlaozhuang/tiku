@@ -119,6 +119,30 @@ export type EmployeeMutationResultDto = {
   employee: EmployeeSummaryDto;
 };
 
+export type EmployeeImportRowInputDto = {
+  userPublicId: string;
+  organizationPublicId: string;
+};
+
+export type EmployeeImportRejectedRowDto = {
+  rowNumber: number;
+  userPublicId: string | null;
+  organizationPublicId: string | null;
+  reason: "duplicate_user" | "user_not_found" | "organization_not_found";
+};
+
+export type EmployeeImportResultDto = {
+  importedEmployees: EmployeeSummaryDto[];
+  rejectedRows: EmployeeImportRejectedRowDto[];
+};
+
+export type EmployeeUnbindResultDto = {
+  employeePublicId: string;
+  userPublicId: string;
+  previousOrganizationPublicId: string;
+  status: "unbound";
+};
+
 export type AuthorizationSummaryDto = {
   publicId: string;
   purchaserName: string;

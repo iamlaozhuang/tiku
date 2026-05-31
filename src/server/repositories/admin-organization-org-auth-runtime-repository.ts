@@ -22,7 +22,11 @@ import * as databaseSchema from "@/db/schema";
 import type { ApiPagination } from "../contracts/api-response";
 import type {
   AdminAuthOperationListQuery,
+  EmployeeImportResultDto,
+  EmployeeImportRowInputDto,
+  EmployeeImportRejectedRowDto,
   EmployeeMutationResultDto,
+  EmployeeUnbindResultDto,
   EmployeeListDto,
   OrganizationListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
@@ -73,6 +77,7 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
     publicId: string;
     isCascade: boolean;
   }): Promise<DisableOrganizationResultDto | null>;
+  enableOrganization?(publicId: string): Promise<OrganizationDto | null>;
   hasOverlappingOrgAuth?(input: NormalizedCreateOrgAuthInput): Promise<boolean>;
   createOrgAuth?(
     input: NormalizedCreateOrgAuthInput,
@@ -84,7 +89,11 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
   createEmployee?(
     input: CreateEmployeeInput,
   ): Promise<EmployeeMutationResultDto["employee"] | null>;
+  importEmployees?(
+    input: EmployeeImportInput,
+  ): Promise<EmployeeImportResultDto | null>;
   disableEmployee?(publicId: string): Promise<boolean>;
+  unbindEmployee?(publicId: string): Promise<EmployeeUnbindResultDto | null>;
   auditLogRepository?: {
     appendAuditLog(input: AppendEmployeeAuditLogInput): Promise<void>;
   };
@@ -93,6 +102,10 @@ export type AdminOrganizationOrgAuthRuntimeRepositories = {
 export type CreateEmployeeInput = {
   userPublicId: string;
   organizationPublicId: string;
+};
+
+export type EmployeeImportInput = {
+  employees: EmployeeImportRowInputDto[];
 };
 
 export type AppendEmployeeAuditLogInput = {
@@ -480,6 +493,21 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         ),
       };
     },
+    async enableOrganization(publicId) {
+      const database = getDatabase();
+      const [organizationRow] = await database
+        .update(organization)
+        .set({
+          status: "active",
+          updated_at: new Date(),
+        })
+        .where(eq(organization.public_id, publicId))
+        .returning(selectOrganizationMutationColumns());
+
+      return organizationRow === undefined
+        ? null
+        : mapOrganizationMutationRowToDto(database, organizationRow);
+    },
     async hasOverlappingOrgAuth(input) {
       const database = getDatabase();
       const organizationIds = await listInputOrganizationIds(database, input);
@@ -762,6 +790,16 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
         status: "active",
       };
     },
+    async importEmployees(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) =>
+        importEmployeesWithDatabase(
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase,
+          input,
+        ),
+      );
+    },
     async disableEmployee(publicId) {
       const database = getDatabase();
       const [employeeRow] = await database
@@ -801,6 +839,54 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
       }
 
       return true;
+    },
+    async unbindEmployee(publicId) {
+      const database = getDatabase();
+      const [employeeRow] = await database
+        .select({
+          employee_id: employee.id,
+          employee_public_id: employee.public_id,
+          user_id: user.id,
+          user_public_id: user.public_id,
+          auth_user_id: user.auth_user_id,
+          organization_public_id: organization.public_id,
+        })
+        .from(employee)
+        .innerJoin(user, eq(user.id, employee.user_id))
+        .innerJoin(organization, eq(organization.id, employee.organization_id))
+        .where(eq(employee.public_id, publicId))
+        .limit(1);
+
+      if (employeeRow === undefined) {
+        return null;
+      }
+
+      await database
+        .update(user)
+        .set({
+          user_type: "personal",
+          updated_at: new Date(),
+        })
+        .where(eq(user.id, employeeRow.user_id));
+      await database
+        .update(employee)
+        .set({
+          updated_at: new Date(),
+        })
+        .where(eq(employee.id, employeeRow.employee_id));
+
+      if (employeeRow.auth_user_id !== null) {
+        await database
+          .delete(authSession)
+          .where(eq(authSession.user_id, employeeRow.auth_user_id));
+      }
+
+      return {
+        employeePublicId: employeeRow.employee_public_id,
+        userPublicId: employeeRow.user_public_id,
+        previousOrganizationPublicId: employeeRow.organization_public_id,
+        status: "unbound",
+      };
     },
     auditLogRepository: {
       async appendAuditLog(input) {
@@ -1161,6 +1247,216 @@ async function countActiveEmployeesByOrganizationIds(
     );
 
   return row?.value ?? 0;
+}
+
+async function importEmployeesWithDatabase(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: EmployeeImportInput,
+): Promise<EmployeeImportResultDto> {
+  const importRows = input.employees.map((employeeInput, index) => ({
+    ...employeeInput,
+    rowNumber: index + 1,
+  }));
+  const userPublicIds = [
+    ...new Set(importRows.map((employeeInput) => employeeInput.userPublicId)),
+  ];
+  const organizationPublicIds = [
+    ...new Set(
+      importRows.map((employeeInput) => employeeInput.organizationPublicId),
+    ),
+  ];
+  const duplicateUserPublicIds = new Set(
+    userPublicIds.filter(
+      (userPublicId) =>
+        importRows.filter(
+          (employeeInput) => employeeInput.userPublicId === userPublicId,
+        ).length > 1,
+    ),
+  );
+  const userRows = await database
+    .select({
+      id: user.id,
+      public_id: user.public_id,
+      phone: user.phone,
+      name: user.name,
+    })
+    .from(user)
+    .where(inArray(user.public_id, userPublicIds));
+  const organizationRows = await database
+    .select({
+      id: organization.id,
+      public_id: organization.public_id,
+    })
+    .from(organization)
+    .where(inArray(organization.public_id, organizationPublicIds));
+  const userByPublicId = new Map(
+    userRows.map((userRow) => [userRow.public_id, userRow]),
+  );
+  const organizationByPublicId = new Map(
+    organizationRows.map((organizationRow) => [
+      organizationRow.public_id,
+      organizationRow,
+    ]),
+  );
+  const rejectedRows = importRows.flatMap((employeeInput) =>
+    createEmployeeImportRejectedRows({
+      duplicateUserPublicIds,
+      employeeInput,
+      organizationByPublicId,
+      userByPublicId,
+    }),
+  );
+
+  if (rejectedRows.length > 0) {
+    return {
+      importedEmployees: [],
+      rejectedRows,
+    };
+  }
+
+  const userIds = userRows.map((userRow) => userRow.id);
+  const existingEmployeeRows =
+    userIds.length === 0
+      ? []
+      : await database
+          .select({
+            id: employee.id,
+            public_id: employee.public_id,
+            user_id: employee.user_id,
+          })
+          .from(employee)
+          .where(inArray(employee.user_id, userIds));
+  const existingEmployeeByUserId = new Map(
+    existingEmployeeRows.map((employeeRow) => [
+      employeeRow.user_id,
+      employeeRow,
+    ]),
+  );
+  const now = new Date();
+  let importedEmployees: EmployeeImportResultDto["importedEmployees"] = [];
+
+  for (const employeeInput of importRows) {
+    const userRow = userByPublicId.get(employeeInput.userPublicId);
+    const organizationRow = organizationByPublicId.get(
+      employeeInput.organizationPublicId,
+    );
+
+    if (userRow === undefined || organizationRow === undefined) {
+      continue;
+    }
+
+    const existingEmployee = existingEmployeeByUserId.get(userRow.id);
+    const employeePublicId =
+      existingEmployee?.public_id ?? `employee-${randomUUID()}`;
+
+    if (existingEmployee === undefined) {
+      await database.insert(employee).values({
+        public_id: employeePublicId,
+        user_id: userRow.id,
+        organization_id: organizationRow.id,
+        created_at: now,
+        updated_at: now,
+      });
+    } else {
+      await database
+        .update(employee)
+        .set({
+          organization_id: organizationRow.id,
+          updated_at: now,
+        })
+        .where(eq(employee.id, existingEmployee.id));
+    }
+
+    await database
+      .update(user)
+      .set({
+        user_type: "employee",
+        status: "active",
+        disabled_at: null,
+        updated_at: now,
+      })
+      .where(eq(user.id, userRow.id));
+
+    importedEmployees = [
+      ...importedEmployees,
+      {
+        publicId: employeePublicId,
+        userPublicId: userRow.public_id,
+        phone: userRow.phone,
+        name: userRow.name,
+        organizationPublicId: organizationRow.public_id,
+        status: "active",
+      },
+    ];
+  }
+
+  return {
+    importedEmployees,
+    rejectedRows: [],
+  };
+}
+
+function createEmployeeImportRejectedRows(input: {
+  duplicateUserPublicIds: Set<string>;
+  employeeInput: EmployeeImportRowInputDto & { rowNumber: number };
+  organizationByPublicId: Map<
+    string,
+    {
+      id: number;
+      public_id: string;
+    }
+  >;
+  userByPublicId: Map<
+    string,
+    {
+      id: number;
+      public_id: string;
+      phone: string;
+      name: string;
+    }
+  >;
+}): EmployeeImportRejectedRowDto[] {
+  const { employeeInput } = input;
+  const duplicateUserRejectedRow = input.duplicateUserPublicIds.has(
+    employeeInput.userPublicId,
+  )
+    ? [
+        {
+          rowNumber: employeeInput.rowNumber,
+          userPublicId: employeeInput.userPublicId,
+          organizationPublicId: employeeInput.organizationPublicId,
+          reason: "duplicate_user" as const,
+        },
+      ]
+    : [];
+  const userRejectedRow = input.userByPublicId.has(employeeInput.userPublicId)
+    ? []
+    : [
+        {
+          rowNumber: employeeInput.rowNumber,
+          userPublicId: employeeInput.userPublicId,
+          organizationPublicId: employeeInput.organizationPublicId,
+          reason: "user_not_found" as const,
+        },
+      ];
+  const organizationRejectedRow = input.organizationByPublicId.has(
+    employeeInput.organizationPublicId,
+  )
+    ? []
+    : [
+        {
+          rowNumber: employeeInput.rowNumber,
+          userPublicId: employeeInput.userPublicId,
+          organizationPublicId: employeeInput.organizationPublicId,
+          reason: "organization_not_found" as const,
+        },
+      ];
+
+  return [
+    ...duplicateUserRejectedRow,
+    ...userRejectedRow,
+    ...organizationRejectedRow,
+  ];
 }
 
 async function findOrgAuthActiveFlowScope(
