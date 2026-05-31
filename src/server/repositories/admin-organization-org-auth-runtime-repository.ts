@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { hashPassword } from "better-auth/crypto";
 import {
   and,
   asc,
@@ -30,6 +31,12 @@ import type {
   EmployeeListDto,
   OrganizationListDto,
 } from "../contracts/admin-user-org-auth-ops-contract";
+import type { UserRegistrationCredentialAdapter } from "../auth/user-registration-boundary";
+import type {
+  BindExistingUserToOrganizationInput,
+  CreateEmployeeAccountInput,
+  EmployeeAccountRepository,
+} from "./employee-account-repository";
 import type {
   DisableOrganizationResultDto,
   OrgAuthDetailDto,
@@ -128,7 +135,9 @@ export type OrgAuthTerminationResult = {
 
 const {
   auditLog,
+  authAccount,
   authSession,
+  authUser,
   employee,
   mockExam,
   orgAuth,
@@ -137,6 +146,7 @@ const {
   practice,
   user,
 } = databaseSchema;
+const CREDENTIAL_PROVIDER_ID = "credential";
 
 type OrganizationMutationRow = {
   id: number;
@@ -1004,6 +1014,316 @@ export function createPostgresAdminOrganizationOrgAuthRuntimeRepositories(
             request_ip: input.requestIp,
           });
       },
+    },
+  };
+}
+
+export function createPostgresEmployeeAccountCredentialAdapter(
+  options: AdminOrganizationOrgAuthRuntimeRepositoryOptions = {},
+): UserRegistrationCredentialAdapter {
+  const getDatabase = createLazyDatabaseGetter(
+    options.createDatabase ?? createLocalRuntimeDatabase,
+  );
+
+  return {
+    async createPasswordCredential(input) {
+      const database = getDatabase();
+      const authUserId = `auth-user-${randomUUID()}`;
+      const passwordHash = await hashPassword(input.password);
+      const now = new Date();
+
+      await database.transaction(async (transaction) => {
+        await transaction.insert(authUser).values({
+          created_at: now,
+          email: `phone-${input.phone}@tiku.local`,
+          email_verified: now,
+          id: authUserId,
+          image: null,
+          name: input.phone,
+          updated_at: now,
+        });
+        await transaction.insert(authAccount).values({
+          access_token: null,
+          access_token_expires_at: null,
+          account_id: authUserId,
+          created_at: now,
+          id: `auth-account-${randomUUID()}`,
+          id_token: null,
+          password: passwordHash,
+          provider_id: CREDENTIAL_PROVIDER_ID,
+          refresh_token: null,
+          refresh_token_expires_at: null,
+          scope: null,
+          updated_at: now,
+          user_id: authUserId,
+        });
+      });
+
+      return { authUserId };
+    },
+  };
+}
+
+export function createPostgresEmployeeAccountRepository(
+  options: AdminOrganizationOrgAuthRuntimeRepositoryOptions = {},
+): EmployeeAccountRepository {
+  const getDatabase = createLazyDatabaseGetter(
+    options.createDatabase ?? createLocalRuntimeDatabase,
+  );
+
+  return {
+    async findUserByPhone(phone) {
+      const database = getDatabase();
+      const [row] = await database
+        .select({
+          auth_user_id: user.auth_user_id,
+          employee_public_id: employee.public_id,
+          id: user.id,
+          locked_until_at: user.locked_until_at,
+          name: user.name,
+          organization_public_id: organization.public_id,
+          phone: user.phone,
+          public_id: user.public_id,
+          status: user.status,
+          user_type: user.user_type,
+        })
+        .from(user)
+        .leftJoin(employee, eq(employee.user_id, user.id))
+        .leftJoin(organization, eq(organization.id, employee.organization_id))
+        .where(eq(user.phone, phone))
+        .limit(1);
+
+      if (row === undefined || row.auth_user_id === null) {
+        return null;
+      }
+
+      return {
+        ...row,
+        auth_user_id: row.auth_user_id,
+      };
+    },
+    async findOrganizationByPublicId(publicId) {
+      const database = getDatabase();
+      const [row] = await database
+        .select({
+          name: organization.name,
+          public_id: organization.public_id,
+        })
+        .from(organization)
+        .where(eq(organization.public_id, publicId))
+        .limit(1);
+
+      return row ?? null;
+    },
+    async createEmployeeAccount(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) =>
+        createEmployeeAccountWithDatabase(
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase,
+          input,
+        ),
+      );
+    },
+    async bindExistingUserToOrganization(input) {
+      const database = getDatabase();
+
+      return database.transaction(async (transaction) =>
+        bindEmployeeAccountWithDatabase(
+          transaction as AdminOrganizationOrgAuthRuntimeDatabase,
+          input,
+        ),
+      );
+    },
+  };
+}
+
+async function createEmployeeAccountWithDatabase(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: CreateEmployeeAccountInput,
+) {
+  const [organizationRow] = await database
+    .select({
+      id: organization.id,
+      name: organization.name,
+      public_id: organization.public_id,
+    })
+    .from(organization)
+    .where(eq(organization.public_id, input.organizationPublicId))
+    .limit(1);
+
+  if (organizationRow === undefined) {
+    throw new Error("Organization does not exist.");
+  }
+
+  const now = new Date();
+  const [userRow] = await database
+    .insert(user)
+    .values({
+      auth_user_id: input.authUserId,
+      created_at: now,
+      disabled_at: null,
+      locked_until_at: null,
+      login_failed_count: 0,
+      name: input.name,
+      phone: input.phone,
+      public_id: `user-${randomUUID()}`,
+      status: "active",
+      updated_at: now,
+      user_type: "employee",
+    })
+    .returning({
+      auth_user_id: user.auth_user_id,
+      id: user.id,
+      locked_until_at: user.locked_until_at,
+      name: user.name,
+      phone: user.phone,
+      public_id: user.public_id,
+      status: user.status,
+      user_type: user.user_type,
+    });
+
+  if (userRow === undefined || userRow.auth_user_id === null) {
+    throw new Error("Employee user creation failed.");
+  }
+
+  const [employeeRow] = await database
+    .insert(employee)
+    .values({
+      created_at: now,
+      organization_id: organizationRow.id,
+      public_id: `employee-${randomUUID()}`,
+      updated_at: now,
+      user_id: userRow.id,
+    })
+    .returning({
+      created_at: employee.created_at,
+      id: employee.id,
+      public_id: employee.public_id,
+      updated_at: employee.updated_at,
+    });
+
+  if (employeeRow === undefined) {
+    throw new Error("Employee account creation failed.");
+  }
+
+  return {
+    employee: {
+      id: employeeRow.id,
+      public_id: employeeRow.public_id,
+      user_public_id: userRow.public_id,
+      organization_public_id: organizationRow.public_id,
+      created_at: employeeRow.created_at,
+      updated_at: employeeRow.updated_at,
+    },
+    organization: {
+      public_id: organizationRow.public_id,
+      name: organizationRow.name,
+    },
+    user: {
+      id: userRow.id,
+      auth_user_id: userRow.auth_user_id,
+      public_id: userRow.public_id,
+      phone: userRow.phone,
+      name: userRow.name,
+      user_type: userRow.user_type,
+      status: userRow.status,
+      locked_until_at: userRow.locked_until_at,
+      employee_public_id: employeeRow.public_id,
+      organization_public_id: organizationRow.public_id,
+    },
+  };
+}
+
+async function bindEmployeeAccountWithDatabase(
+  database: AdminOrganizationOrgAuthRuntimeDatabase,
+  input: BindExistingUserToOrganizationInput,
+) {
+  const [userRow] = await database
+    .select({
+      auth_user_id: user.auth_user_id,
+      id: user.id,
+      locked_until_at: user.locked_until_at,
+      name: user.name,
+      phone: user.phone,
+      public_id: user.public_id,
+    })
+    .from(user)
+    .where(eq(user.public_id, input.userPublicId))
+    .limit(1);
+  const [organizationRow] = await database
+    .select({
+      id: organization.id,
+      name: organization.name,
+      public_id: organization.public_id,
+    })
+    .from(organization)
+    .where(eq(organization.public_id, input.organizationPublicId))
+    .limit(1);
+
+  if (
+    userRow === undefined ||
+    userRow.auth_user_id === null ||
+    organizationRow === undefined
+  ) {
+    throw new Error("Employee account binding failed.");
+  }
+
+  const now = new Date();
+  const [employeeRow] = await database
+    .insert(employee)
+    .values({
+      created_at: now,
+      organization_id: organizationRow.id,
+      public_id: `employee-${randomUUID()}`,
+      updated_at: now,
+      user_id: userRow.id,
+    })
+    .returning({
+      created_at: employee.created_at,
+      id: employee.id,
+      public_id: employee.public_id,
+      updated_at: employee.updated_at,
+    });
+
+  await database
+    .update(user)
+    .set({
+      disabled_at: null,
+      status: "active",
+      updated_at: now,
+      user_type: "employee",
+    })
+    .where(eq(user.id, userRow.id));
+
+  if (employeeRow === undefined) {
+    throw new Error("Employee account binding failed.");
+  }
+
+  return {
+    employee: {
+      id: employeeRow.id,
+      public_id: employeeRow.public_id,
+      user_public_id: userRow.public_id,
+      organization_public_id: organizationRow.public_id,
+      created_at: employeeRow.created_at,
+      updated_at: employeeRow.updated_at,
+    },
+    organization: {
+      public_id: organizationRow.public_id,
+      name: organizationRow.name,
+    },
+    user: {
+      id: userRow.id,
+      auth_user_id: userRow.auth_user_id,
+      public_id: userRow.public_id,
+      phone: userRow.phone,
+      name: userRow.name,
+      user_type: "employee" as const,
+      status: "active" as const,
+      locked_until_at: userRow.locked_until_at,
+      employee_public_id: employeeRow.public_id,
+      organization_public_id: organizationRow.public_id,
     },
   };
 }
