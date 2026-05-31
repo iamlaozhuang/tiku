@@ -10706,7 +10706,7 @@ tasks:
     dependencies:
       - phase-18-audit-ra-01-user-auth-authorization
     taskPlanPolicy: required
-    humanApproval: Registered by Phase 18 RA-01 audit finding F-RA-01-10-001.
+    humanApproval: Registered by Phase 18 RA-01 audit finding F-RA-01-10-001. User approved this local auth_permission_model batch on 2026-05-31, limited to organization enable/disable termination runtime/test/evidence/closeout. No dependency, package, lockfile, schema, drizzle, env, cloud, deploy, real provider, external service, force push, unknown worktree deletion, or destructive data operation beyond intended local active-flow termination status transitions is approved.
     taskKind: implementation
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -10738,7 +10738,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-10-organization-enable-disable-termination.md
-    status: pending
+    status: validated
     retryCount: 0
   - id: phase-20-fix-ra-01-11-org-auth-quota-atomicity
     title: Phase 20 Fix RA-01-11 Org Auth Quota Atomicity

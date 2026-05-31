@@ -24,6 +24,10 @@ export type OrganizationResultDto = {
 };
 
 export type DisableOrganizationResultDto = OrganizationResultDto & {
+  activeFlowTermination?: {
+    practiceCount: number;
+    mockExamCount: number;
+  };
   affectedOrganizationPublicIds: string[];
 };
 

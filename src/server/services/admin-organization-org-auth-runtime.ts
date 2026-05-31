@@ -144,6 +144,22 @@ function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
 }
 
+function formatOrganizationDisableMetadata(
+  result: DisableOrganizationResultDto | null,
+): string {
+  if (result === null) {
+    return "redacted organization disable metadata";
+  }
+
+  const activeFlowTermination = result.activeFlowTermination;
+
+  if (activeFlowTermination === undefined) {
+    return `redacted organization disable metadata; affected organization=${result.affectedOrganizationPublicIds.length}`;
+  }
+
+  return `redacted organization disable metadata; affected organization=${result.affectedOrganizationPublicIds.length} terminated practice=${activeFlowTermination.practiceCount} mock_exam=${activeFlowTermination.mockExamCount}`;
+}
+
 function isAdminOrganizationOrgAuthRole(
   role: string,
 ): role is AdminOrganizationOrgAuthRole {
@@ -753,10 +769,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
             actionType: "organization.disable",
             targetPublicId: publicId,
             resultStatus: result === null ? "failed" : "success",
-            metadataSummary:
-              result === null
-                ? "redacted organization disable metadata"
-                : `redacted organization disable metadata; affected organization=${result.affectedOrganizationPublicIds.length}`,
+            metadataSummary: formatOrganizationDisableMetadata(result),
           });
 
           return createJsonResponse(
