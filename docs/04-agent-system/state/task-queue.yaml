@@ -11649,7 +11649,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-07-persisted-model-config-runtime-selection.md
-    status: active
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-04-08-prompt-template-source-of-truth-alignment
     title: Phase 20 Fix RA-04-08 Prompt Template Source Of Truth Alignment

@@ -53,8 +53,9 @@ residualGaps: none
 
 - branch: `codex/phase-20-fix-ra-04-07-persisted-model-config-runtime-selection`
 - base: `master`
-- changed files: pending commit on task branch
-- commit: pending
-- merge: pending
-- push: pending
-- cleanup: pending
+- changed files: model_config runtime catalog mapper, student AI scoring runtime loader, tests, task plan, evidence, state
+- commit: `c9748e10112788a043c9b28e8665e08b786633d9` (`fix(ai): use persisted model config runtime selection`)
+- merge: `a7eb06b4dda4d6e65890a4dd7fb72330bec7380f` (`merge: phase 20 persisted model config runtime selection`) into `master`
+- master validation: pass after merge; quality gate, e2e, build, diff check, readiness, git completion readiness, and naming conventions all passed
+- push: pending cleanup docs commit
+- cleanup: task status set to closed; short branch deletion pending final push
