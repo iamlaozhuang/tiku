@@ -80,8 +80,9 @@ residualGaps: none
 - branch: `codex/phase-20-fix-ra-01-04-employee-import`
 - base: `master`
 - changed files: tracked/untracked inventory recorded by `Test-GitCompletionReadiness.ps1`
-- implementation commit: pending
-- merge: pending
-- master validation: pending
-- push: pending
-- cleanup: pending
+- implementation commit: `5b5a9cc` (`fix(auth): add employee import runtime`)
+- merge: `5b800e8` (`merge: phase 20 employee import runtime`) into `master`
+- master validation: pass after merge; lint, typecheck, full unit, e2e, build, format:check, quality gate, diff check, readiness, git completion readiness, and naming conventions all passed
+- push: `git push origin master` updated `origin/master` from `7d43084` to `5b800e8`
+- cleanup: merged short branch deleted locally after push
+- closeout docs commit: pending
