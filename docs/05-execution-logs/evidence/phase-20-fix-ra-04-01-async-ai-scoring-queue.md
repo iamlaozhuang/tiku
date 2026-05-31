@@ -161,6 +161,11 @@
 
 ## Push And Cleanup Status
 
-- Push: pending.
-- Short branch deletion: pending.
-- Cleanup docs commit: pending.
+- Push: pass.
+  - Command: `git push origin master`
+  - Result: `0671fd99..73559580  master -> master`.
+- Short branch deletion: pass.
+  - Command: `git branch -d codex/phase-20-fix-ra-04-01-async-ai-scoring-queue`
+  - Sandbox attempt failed because Git could not create the ref lock.
+  - Escalated rerun deleted the already merged branch: `was 92a8a4df`.
+- Cleanup docs commit: this evidence/state update; SHA reported in final handoff after commit creation.
