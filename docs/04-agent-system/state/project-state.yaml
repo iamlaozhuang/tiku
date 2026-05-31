@@ -36,16 +36,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 782f51f045afd09fc63785d1d581653997790cc7
-  lastKnownOriginMasterSha: 782f51f045afd09fc63785d1d581653997790cc7
+  lastKnownMasterSha: fb0b4d2f4ad0f7dfd80a73b238f00c742f8151af
+  lastKnownOriginMasterSha: fb0b4d2f4ad0f7dfd80a73b238f00c742f8151af
 currentTask:
   id: phase-20-fix-ra-01-11-org-auth-quota-atomicity
-  status: validated
+  status: closed
   sourceStory: docs/05-execution-logs/audits-reviews/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md#findings
   planPath: docs/05-execution-logs/task-plans/2026-05-31-phase-20-fix-ra-01-11-org-auth-quota-atomicity.md
   evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-11-org-auth-quota-atomicity.md
-  branch: codex/phase-20-fix-ra-01-11-org-auth-quota-atomicity
-  commitSha: null
+  branch: null
+  commitSha: 43b3c815c2066d4b55429b9bdf4e76698ff7f9c4
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Continue task phase-20-fix-ra-01-11-org-auth-quota-atomicity on branch codex/phase-20-fix-ra-01-11-org-auth-quota-atomicity: finish validation, evidence, commit, merge to master, master validation, push, branch cleanup, and cleanup docs closeout before claiming another task."
+  nextRecommendedAction: "Task phase-20-fix-ra-01-11-org-auth-quota-atomicity is implemented, merged into master, pushed to origin/master, and its short-lived branch has been deleted. If master remains clean/aligned and no codex/* branch or unknown worktree exists after cleanup docs push, the next eligible priority candidate is phase-20-fix-ra-01-12-employee-transfer-unbind."
   lastSummaryPath: docs/05-execution-logs/evidence/phase-20-fix-ra-01-11-org-auth-quota-atomicity.md

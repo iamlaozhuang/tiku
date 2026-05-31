@@ -247,7 +247,16 @@ format:check: pass
 
 ## Git Closeout
 
-- Implementation commit: pending.
-- Merge to master: pending.
-- Push `origin master`: pending.
-- Short-lived branch cleanup: pending.
+- Implementation commit: `43b3c815c2066d4b55429b9bdf4e76698ff7f9c4` (`fix(auth): make org auth quota creation atomic`).
+- Merge commit on `master`: `fb0b4d2f4ad0f7dfd80a73b238f00c742f8151af` (`merge: phase 20 org auth quota atomicity`).
+- Master validation after merge:
+  - `git diff --check`: pass.
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass; `master` was ahead of `origin/master` by implementation and merge commits before push.
+  - `npm.cmd run test:unit`: pass; 144 files / 599 tests.
+  - `npm.cmd run test:e2e`: pass; 26 tests.
+  - `Invoke-QualityGate.ps1`: pass; lint, typecheck, `test:unit`, and `format:check`.
+- Push `origin master`: pass; `origin/master` advanced from `782f51f045afd09fc63785d1d581653997790cc7` to `fb0b4d2f4ad0f7dfd80a73b238f00c742f8151af`.
+- Short-lived branch cleanup: pass; deleted `codex/phase-20-fix-ra-01-11-org-auth-quota-atomicity` after merge and push.
+- Cleanup docs commit: pending.
