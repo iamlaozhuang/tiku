@@ -97,6 +97,7 @@ tasks:
     dependencies:
       - phase-0-automation-sops
     allowedFiles:
+      - docs/02-architecture/interfaces/phase-21-high-risk-tail-contract.md
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/milestones-goals/mvp-roadmap.md
@@ -6107,7 +6108,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Real provider, secret/env, external service, and cost controls remain outside current approval; keep as future approval gate only.
+    status: closed
     retryCount: 0
   - id: phase-10-local-deepseek-provider-smoke-runtime
     title: Local DeepSeek Provider Smoke Runtime
@@ -7342,7 +7346,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-    status: blocked
+    closureDecision: superseded
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Replaced by corrected full independent audit pass sequence and summary closeout.
+    status: closed
     retryCount: 0
   - id: phase-12-mvp-requirements-runtime-audit-summary
     title: Phase 12 MVP Requirements Runtime Audit Summary And Repair Queue
@@ -7382,7 +7389,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-25-phase-12-mvp-requirements-runtime-audit.md
-    status: blocked
+    closureDecision: superseded
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Replaced by the completed full requirements audit summary and repair queue.
+    status: closed
     retryCount: 0
   - id: phase-12-mvp-full-requirements-audit-pass-1
     title: Phase 12 MVP Full Requirements Audit Pass 1
@@ -9464,7 +9474,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-real-provider-staging-redaction-approval-gate.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Remains a human approval gate for real provider/staging/secret/deploy boundaries, not an executable pending queue task.
+    status: closed
     retryCount: 0
   - id: phase-14-local-human-experience-verification
     title: Phase 14 Local Human Experience Verification
@@ -10278,7 +10291,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-rag-knowledge.md
-    status: pending
+    closureDecision: superseded
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Later Phase 18 RA-05 audit and Phase 20 RAG fixes replaced this stale Phase 16 audit placeholder.
+    status: closed
     retryCount: 0
   - id: phase-16-audit-admin-ops-logs
     title: Phase 16 Audit Admin Ops Logs And Permissions
@@ -10319,7 +10335,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-admin-ops-logs.md
-    status: pending
+    closureDecision: superseded
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Later Phase 18 RA-06 audit, Phase 20 admin fixes, and Phase 21 split design replaced this stale Phase 16 audit placeholder.
+    status: closed
     retryCount: 0
   - id: phase-17-prerequisite-readiness-planning
     title: Phase 17 Prerequisite Readiness Planning
@@ -10446,7 +10465,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-prerequisite-local-role-account-fixture-baseline.md
-    status: pending
+    closureDecision: superseded
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Later Phase 18/20 verification and closeout moved prerequisite handling forward; future fixture work needs a fresh approved task.
+    status: closed
     retryCount: 0
   - id: phase-18-audit-ra-01-user-auth-authorization
     title: Phase 18 Audit RA-01 User Auth And Authorization
@@ -11440,7 +11462,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Phase 20 accepted this as deferred and Phase 21 design split the implementation gate.
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-04-03-scoring-progress-page
     title: Phase 20 Fix RA-04-03 Scoring Progress Page
@@ -12403,7 +12428,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-20-fix-ra-06-01-admin-common-ux-concurrency-coverage.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Phase 20 accepted this as deferred and Phase 21 split design decomposed it into narrower gates.
+    status: closed
     retryCount: 0
   - id: phase-20-fix-ra-06-02-user-management-role-detail-alignment
     title: Phase 20 Fix RA-06-02 User Management Role Detail Alignment
@@ -12970,7 +12998,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-21-tail-ai-scoring-retry-persistence-implementation.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Implementation still requires explicit database_migration approval before schema or migration work.
+    status: closed
     retryCount: 0
   - id: phase-21-tail-admin-concurrency-permission-split-design
     title: Phase 21 Tail Admin Concurrency Permission Split Design
@@ -13042,7 +13073,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-21-tail-admin-common-ux-state-audit.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Runtime/admin UX audit requires fresh implementation approval and local verification scope.
+    status: closed
     retryCount: 0
   - id: phase-21-tail-admin-write-concurrency-proof
     title: Phase 21 Tail Admin Write Concurrency Proof
@@ -13085,7 +13119,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-21-tail-admin-write-concurrency-proof.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Write concurrency proof requires explicit approval for transaction/concurrency strategy and any schema/dependency impact.
+    status: closed
     retryCount: 0
   - id: phase-21-tail-admin-permission-boundary-review
     title: Phase 21 Tail Admin Permission Boundary Review
@@ -13130,5 +13167,51 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/phase-21-tail-admin-permission-boundary-review.md
-    status: blocked
+    closureDecision: deferred
+    closureEvidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    closureReason: Permission boundary behavior changes require explicit auth_permission_model approval.
+    status: closed
+    retryCount: 0
+  - id: phase-21-historical-queue-closeout-governance
+    title: Phase 21 Historical Queue Closeout Governance
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-05-31-historical-queue-closeout-superseded-deferred-governance
+    dependencies:
+      - phase-21-tail-ai-scoring-retry-persistence-design
+      - phase-21-tail-admin-concurrency-permission-split-design
+    taskPlanPolicy: required
+    humanApproval: User explicitly requested a historical queue closeout and superseded/deferred governance pass. Scope is docs/state/evidence only; no source, tests, e2e, schema, drizzle, scripts, dependency, lockfile, env, staging, prod, cloud, real provider, deploy, destructive data, force push, unknown worktree deletion, or unmerged branch deletion is approved.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - implementation_planning
+      - evidence_integrity
+      - blocked_gate
+      - automation_state
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\02-architecture\interfaces\phase-21-high-risk-tail-contract.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-05-31-historical-queue-closeout-governance.md docs\05-execution-logs\evidence\2026-05-31-historical-queue-closeout-governance.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-historical-queue-closeout-governance.md
+    status: closed
     retryCount: 0

@@ -14,6 +14,12 @@ The accepted Phase 20 closeout position is:
 - `2` Phase 20 tasks remain `blocked` as accepted deferred blockers.
 - There are no Phase 20 `pending`, `claimed`, `validated`, or `merged` tasks.
 
+Post-governance queue representation:
+
+- The 2026-05-31 historical queue closeout changes stale queue residues to `status: closed` with `closureDecision: deferred` or `closureDecision: superseded`, because automation scripts do not support `superseded` or `deferred` as primary status values.
+- The two Phase 20 high-risk tail items remain deferred in meaning even when their queue rows are closed for governance hygiene.
+- `closureDecision: deferred` is not an implementation-complete claim; it means future work requires a fresh approved task before source, schema, migration, test, e2e, env, provider, staging, prod, cloud, deploy, or dependency changes.
+
 ## Deferred Blockers
 
 ### `phase-20-fix-ra-04-02-ai-scoring-timeout-retry-persistence`
@@ -417,7 +423,7 @@ Implementation tasks remain blocked until their design and human approval eviden
 
 Phase 20 may be described as closed with accepted deferred blockers only when:
 
-- the queue still records the two blockers as `blocked`;
+- the queue records the two blockers either as `blocked` or as `closed` with `closureDecision: deferred`;
 - this Phase 21 contract exists;
 - Phase 21 queue tasks exist for both blocker families;
 - `project-state.yaml` points handoff to Phase 21;
