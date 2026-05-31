@@ -309,3 +309,17 @@ test:e2e: 25 passed
 - API contract review: route remains `POST /api/v1/employees`; request JSON uses camelCase; response envelope remains `{ code, message, data }`; external URL exposes no numeric database id.
 - Test coverage and accepted gaps: unit coverage proves full employee account creation path, redacted audit metadata, and no existing-user mutation fallback for full payload; related unit, full unit, and full e2e gates passed. No accepted local validation gap.
 - Verdict: `APPROVE`.
+
+## Merge and Push Closeout
+
+- Implementation commit: `1b600fb3e507b40b83d599e44460d567700c8d92` (`fix(auth): add employee account runtime`).
+- Merge commit on `master`: `02130d63c9aed5b113debe70ecf05fd76b6f1435` (`merge: phase 20 employee account runtime`).
+- Pushed: `origin/master` advanced from `5d9bc3451c86d5c8ab02833435cc8c4bb8980d64` to `02130d63c9aed5b113debe70ecf05fd76b6f1435`.
+- Deleted merged short-lived branch: `codex/phase-20-fix-ra-01-03-employee-account-runtime`.
+- Master validation after merge:
+  - `git diff --check`: pass.
+  - `Test-GitCompletionReadiness.ps1 -BaseBranch origin/master`: pass; ahead by implementation and merge commits before push.
+  - `Test-AgentSystemReadiness.ps1`: pass.
+  - `Test-NamingConventions.ps1`: pass.
+  - `Invoke-QualityGate.ps1`: pass; lint, typecheck, `test:unit` 141 files / 593 tests, format check.
+  - `npm.cmd run test:e2e`: pass; 25 tests.
