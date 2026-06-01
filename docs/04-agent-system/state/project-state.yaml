@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 60de527282fa2de3f485d001939ac2507c9039e1
-  lastKnownOriginMasterSha: 60de527282fa2de3f485d001939ac2507c9039e1
+  lastKnownMasterSha: f6716231fb14932835dfd478ecbbd78e0fd3b421
+  lastKnownOriginMasterSha: f6716231fb14932835dfd478ecbbd78e0fd3b421
 currentTask:
-  id: phase-21-authorization-overlap-concurrency-proof
-  status: validated
-  sourceStory: user-request-2026-06-01-batch-advance-authorization-overlap-concurrency-proof
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-authorization-overlap-concurrency-proof.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-authorization-overlap-concurrency-proof.md
-  branch: codex/phase-21-authorization-overlap-concurrency-proof
+  id: phase-21-ai-scoring-retry-persistence-closeout-audit
+  status: closed
+  sourceStory: user-request-2026-06-01-batch-advance-ai-scoring-retry-persistence-closeout-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-ai-scoring-retry-persistence-closeout-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-persistence-closeout-audit.md
+  branch: codex/phase-21-ai-scoring-retry-persistence-closeout-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Commit, merge, push, and clean up the validated authorization/org_auth overlap concurrency proof before claiming the next fresh queue task."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-authorization-overlap-concurrency-proof.md
+  nextRecommendedAction: "Batch task 4 is complete after commit/merge/push/cleanup. AI scoring retry persistence local/dev migration drift remains blocked until separately approved."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-persistence-closeout-audit.md
