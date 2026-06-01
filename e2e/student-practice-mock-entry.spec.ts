@@ -69,7 +69,7 @@ test.describe("student practice mock entry", () => {
     ).toBeVisible();
     await expect(page.locator("body")).not.toContainText("practice-");
 
-    await page.getByRole("button", { name: /^A\./ }).first().click();
+    await page.getByRole("button", { name: /^B\./ }).first().click();
     const practiceAnswerResponse = page.waitForResponse((response) => {
       const request = response.request();
 

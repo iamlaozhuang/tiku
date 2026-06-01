@@ -14821,3 +14821,294 @@ tasks:
     status: blocked
     retryCount: 0
     blockReason: "Requires separate human approval for e2e/test/runtime hardening. Current Phase 22 reruns passed and did not reproduce the prior /redeem-code observation."
+  - id: phase-23-fresh-db-bootstrap-validation-data-batch
+    title: Phase 23 Fresh DB Bootstrap And Validation Data Implementation Batch
+    phase: phase-23-fresh-db-bootstrap-validation-data-implementation
+    sourceStory: user-request-2026-06-01-phase-23-fresh-db-bootstrap-validation-data-implementation-batch
+    dependencies:
+      - phase-22-fresh-db-e2e-determinism-evidence-consolidation
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved a new serial batch named phase-23 fresh DB bootstrap and validation data implementation batch. Scope: create a short-lived branch; register a new parent and serial child tasks without reusing historical closed/deferred/blocked items; implement the minimum auditable and rerunnable local/dev synthetic data preparation mechanism needed to move a fresh migrated DB through dev seed/bootstrap, validation data prep, full e2e first pass, build, and quality gates. Approved local/dev env handling is secret-safe: existing app/scripts may load .env.local; if a fresh local/dev DB target must be selected, DATABASE_URL target databaseName may be read or modified only without printing, copying, committing, or recording any full value or credentials. Evidence may record only existence, hostClass, databaseName, counts, route names, and pass/fail outcomes. Approved execution includes existing npm scripts, local/dev seed/validation prep commands, local dev server/browser/e2e, reviewed Drizzle migrate workflow only for the confirmed fresh local/dev target, and non-destructive docker compose local/dev helper checks. Explicitly approved final actions include commit, merge to master, push master, and cleanup of the merged branch. Prohibited: .env.example changes, package/lockfile/dependency changes, raw SQL, drizzle-kit push, migration table repair, DB reset/drop/truncate/delete/volume reset/destructive data operations, staging/prod/cloud/deploy/real provider/external service, force push, unknown worktree deletion, unmerged branch deletion, and evidence disclosure of DB URLs, credentials, provider payloads, raw prompts, raw student answers, raw model responses, or plaintext redeem_code."
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - scripts/**
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - tests/**
+      - e2e/**
+      - src/server/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - secret
+      - data_contract
+      - auth
+      - session
+      - evidence_integrity
+      - local_verification
+      - product_readiness
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-phase-23-fresh-db-bootstrap-validation-data-security-review.md
+    validationCommands:
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-fresh-db-bootstrap-validation-data-batch.md
+    status: closed
+    retryCount: 0
+  - id: phase-23-implementation-preflight-approval-boundary
+    title: Phase 23 Implementation Preflight And Approval Boundary
+    phase: phase-23-fresh-db-bootstrap-validation-data-implementation
+    sourceStory: phase-23-fresh-db-bootstrap-validation-data-batch
+    dependencies:
+      - phase-23-fresh-db-bootstrap-validation-data-batch
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 23 fresh DB bootstrap and validation data implementation batch approval. Scope confirms allowed/prohibited boundaries, reviews Phase 22 evidence, confirms fresh local/dev DB target and secret-safe env rules without recording secrets, and selects the next safe implementation path."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - secret
+      - database_migration
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - rg -n "fresh DB|validation data|mistake_book|ai_call_log|org_auth|material|prepared dev DB|Residual gaps" docs/05-execution-logs/evidence/2026-06-01-phase-22-*.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-implementation-preflight-approval-boundary.md
+    status: closed
+    retryCount: 0
+  - id: phase-23-dev-seed-gap-closure
+    title: Phase 23 Dev Seed Gap Closure
+    phase: phase-23-fresh-db-bootstrap-validation-data-implementation
+    sourceStory: phase-23-fresh-db-bootstrap-validation-data-batch
+    dependencies:
+      - phase-23-implementation-preflight-approval-boundary
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 23 batch approval. Scope is limited to verifying or minimally closing idempotent dev seed baseline gaps through src/db/dev-seed.ts, src/db/dev-seed.test.ts, and existing local/dev seed execution. Do not change schema, migrations, dependencies, package/lockfiles, .env.example, or use destructive DB operations."
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - scripts/db/Seed-DevDatabase.ps1
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - data_contract
+      - seed_idempotency
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit -- src/db/dev-seed.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-dev-seed-gap-closure.md
+    status: closed
+    retryCount: 0
+  - id: phase-23-validation-data-prep-mechanism
+    title: Phase 23 Validation Data Prep Mechanism
+    phase: phase-23-fresh-db-bootstrap-validation-data-implementation
+    sourceStory: phase-23-fresh-db-bootstrap-validation-data-batch
+    dependencies:
+      - phase-23-dev-seed-gap-closure
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 23 batch approval. Scope is limited to a minimum local/dev synthetic validation data prep mechanism through existing local/dev APIs or safe service boundaries, plus tests/e2e wiring as needed. Required data includes org_auth, material, mistake_book, ai_call_log, and related baseline entities only where needed for full e2e. Do not record plaintext redeem_code, raw prompts, raw student answers, raw model responses, provider payloads, credentials, or DB URLs."
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - scripts/**
+      - src/db/dev-seed.ts
+      - src/db/dev-seed.test.ts
+      - tests/**
+      - e2e/**
+      - src/server/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - data_contract
+      - auth
+      - session
+      - secret
+      - evidence_integrity
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-phase-23-validation-data-prep-mechanism-security-review.md
+    validationCommands:
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-validation-data-prep-mechanism.md
+    status: closed
+    retryCount: 0
+  - id: phase-23-fresh-db-first-run-e2e-validation
+    title: Phase 23 Fresh DB First Run E2E Validation
+    phase: phase-23-fresh-db-bootstrap-validation-data-implementation
+    sourceStory: phase-23-fresh-db-bootstrap-validation-data-batch
+    dependencies:
+      - phase-23-validation-data-prep-mechanism
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 23 batch approval. Scope validates fresh migrated local/dev DB -> dev seed/bootstrap -> validation data prep -> full e2e first pass -> build/quality gates using reviewed Drizzle migrate only on the confirmed fresh local/dev target. Stop if raw SQL, destructive DB operations, migration repair, schema/migration changes, dependency changes, staging/prod/cloud/deploy, real provider, or external service is required."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - scripts/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - secret
+      - local_verification
+      - product_readiness
+      - evidence_integrity
+    validationCommands:
+      - reviewed Drizzle migrate workflow for confirmed fresh local/dev target
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\db\Seed-DevDatabase.ps1
+      - validation data prep command
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-fresh-db-first-run-e2e-validation.md
+    status: closed
+    retryCount: 0
+  - id: phase-23-e2e-order-data-isolation-hardening-assessment
+    title: Phase 23 E2E Order Data Isolation Hardening Assessment
+    phase: phase-23-fresh-db-bootstrap-validation-data-implementation
+    sourceStory: phase-23-fresh-db-bootstrap-validation-data-batch
+    dependencies:
+      - phase-23-fresh-db-first-run-e2e-validation
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 23 batch approval. Scope assesses whether fresh path still has e2e order/data isolation volatility. Implement only minimum hardening in tests/e2e/scripts/src/server if volatility is observed and can be fixed without schema, migration, dependency, env, destructive DB, staging/prod/cloud/deploy, real provider, or external service changes. If not needed, record no implementation required."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - scripts/**
+      - tests/**
+      - e2e/**
+      - src/server/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - product_readiness
+      - auth
+      - session
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:e2e
+      - git status --short --branch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-e2e-order-data-isolation-hardening-assessment.md
+    status: closed
+    retryCount: 0
+  - id: phase-23-evidence-consolidation-closeout
+    title: Phase 23 Evidence Consolidation And Closeout
+    phase: phase-23-fresh-db-bootstrap-validation-data-implementation
+    sourceStory: phase-23-fresh-db-bootstrap-validation-data-batch
+    dependencies:
+      - phase-23-e2e-order-data-isolation-hardening-assessment
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 23 batch approval. Scope consolidates pass/fail/blocked evidence, residual risks, security review verdicts, validation commands, local CI, git diff/readiness/naming/quality gates, commit, merge to master, push master, cleanup merged branch, and final master/origin alignment checks."
+    taskKind: closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - automation_state
+      - release_readiness
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-evidence-consolidation-closeout.md
+    status: closed
+    retryCount: 0
