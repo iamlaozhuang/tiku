@@ -2,7 +2,7 @@
 
 ## Summary
 
-- Result: pass; final commit/merge/push/cleanup pending.
+- Result: pass; push/cleanup pending.
 - Scope: closeout/docs_only.
 - Changed surfaces: project-state, task-queue, task plans, evidence.
 - Gates: git inventory pass; `git diff --check` pass; readiness pass; git completion readiness pass; naming pass; quality gate pass after Prettier repair of 13 Phase 29 Markdown files.
@@ -82,8 +82,10 @@ Before `phase-30-staging-dry-run-after-approval`, human approval must explicitly
 ## Git Closeout
 
 - User approval: the 2026-06-01 prompt explicitly approved commit, merge `master`, push `master`, and cleanup of the merged short-lived branch. Force push remains prohibited.
-- Commit: pending at evidence write time; final SHA will be reported in final handoff.
-- Merge to `master`: pending.
+- Implementation commit: `ce6cd639b808` (`docs(staging): prepare phase 29 procurement approval`).
+- Merge to `master`: pass; merge commit `16a450e9` (`merge phase 29 staging procurement approval prep`).
+- Post-merge `master` validation: pass; `git status` clean, `master...origin/master` was `2 0` before push, readiness pass, git completion readiness pass, naming pass, and quality gate pass with `154` files and `634` unit tests.
+- Closeout evidence commit: pending at evidence write time; final SHA will be reported in final handoff.
 - Push `master`: pending.
 - Branch cleanup: pending.
 - Final alignment: pending.
