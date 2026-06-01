@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-22-mvp-local-acceptance-reaudit
-updatedAt: "2026-06-01T14:10:00-07:00"
+updatedAt: "2026-06-01T15:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: cf46a0719e7ee3d3e1e5729459351f9a96c91a73
-  lastKnownOriginMasterSha: cf46a0719e7ee3d3e1e5729459351f9a96c91a73
+  lastKnownMasterSha: 58f5071dc2fcd63836d651e0391850f442422028
+  lastKnownOriginMasterSha: 58f5071dc2fcd63836d651e0391850f442422028
 currentTask:
-  id: phase-22-mvp-local-acceptance-runtime-batch
+  id: phase-22-fresh-db-seed-bootstrap-readiness-batch
   status: closed
-  sourceStory: user-request-2026-06-01-phase-22-mvp-local-acceptance-runtime-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-22-mvp-local-acceptance-runtime-batch.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-batch.md
-  branch: codex/phase-22-mvp-local-acceptance-runtime-batch
+  sourceStory: user-request-2026-06-01-phase-22-fresh-db-seed-bootstrap-readiness-and-e2e-determinism-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-22-fresh-db-seed-bootstrap-readiness-batch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-fresh-db-seed-bootstrap-readiness-batch.md
+  branch: codex/phase-22-fresh-db-seed-bootstrap-readiness
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 22 MVP local acceptance runtime verification batch is locally closed. Runtime preflight, boot smoke, auth/session, admin MVP, student MVP, local/mock AI scoring persistence, fresh DB readiness assessment, full unit, full e2e rerun, build, readiness, naming, and quality gate passed. Fresh empty DB remains not acceptance-ready without approved seed/bootstrap and validation data prep. Long-lived gates for .env values, dependencies, scripts/source/test/e2e/schema/drizzle changes, destructive DB actions, staging/prod/cloud/deploy, real provider, and external services remain blocked. Next step is product review of the evidence and any separately approved follow-up tasks for fresh DB seed/bootstrap automation or e2e order/data isolation hardening."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-22-evidence-consolidation.md
+  nextRecommendedAction: "Phase 22 fresh DB seed/bootstrap readiness and e2e determinism batch is locally closed. Existing dev seed/bootstrap is partial and not sufficient for one-step fresh empty DB e2e acceptance without separately approved validation-data prep. Focused role-based e2e and full e2e passed; the prior /redeem-code observation did not reproduce. Blocked follow-up recommendations are registered for fresh DB bootstrap/validation-data implementation and e2e order/data isolation hardening. Long-lived gates for env/secret, dependencies, destructive data, staging/prod/cloud/deploy, real provider, and external services remain blocked."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-22-fresh-db-e2e-determinism-evidence-consolidation.md
