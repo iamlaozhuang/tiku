@@ -14452,3 +14452,372 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-evidence-consolidation.md
     status: closed
     retryCount: 0
+  - id: phase-22-fresh-db-seed-bootstrap-readiness-batch
+    title: Phase 22 Fresh DB Seed Bootstrap Readiness And E2E Determinism Batch
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: user-request-2026-06-01-phase-22-fresh-db-seed-bootstrap-readiness-and-e2e-determinism-batch
+    dependencies:
+      - phase-22-evidence-consolidation
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved a new serial batch named phase-22 fresh DB seed/bootstrap readiness and e2e determinism batch. Scope: register a new parent and serial child tasks, inspect existing seed/bootstrap/readiness/e2e mechanisms, run existing npm scripts and e2e/test commands, start local dev server/browser if needed, write task plans and evidence, run validationCommands/local CI/git diff/readiness/naming/quality gates, commit, merge to master, push master, and clean merged branch. Do not reuse historical closed/deferred/blocked tasks. Do not read, print, copy, modify, or commit .env.local values; .env.local may only be loaded by existing app/scripts. Do not modify .env.local, .env.example, package/lockfiles, dependencies, scripts, src, tests, e2e, src/db/schema, or drizzle. Do not run DB reset, destructive data operation, raw SQL, drizzle-kit push, migration table repair, staging/prod/cloud/deploy, real provider, external service, force push, unknown worktree deletion, or unmerged branch deletion."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - destructive_data_operation
+      - evidence_integrity
+      - blocked_gate
+      - product_readiness
+      - auth
+      - session
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-phase-22-fresh-db-seed-bootstrap-readiness-security-review.md
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-fresh-db-seed-bootstrap-readiness-batch.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-fresh-db-seed-bootstrap-preflight
+    title: Phase 22 Fresh DB Seed Bootstrap Preflight
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-fresh-db-seed-bootstrap-readiness-batch
+    dependencies:
+      - phase-22-fresh-db-seed-bootstrap-readiness-batch
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 fresh DB seed/bootstrap readiness and e2e determinism batch approval. Scope is read-only inspection of existing mechanisms, scripts, e2e data needs, and forbidden actions. Do not read .env.local values."
+    taskKind: read_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - rg -n "seed|bootstrap|fresh|validation data|redeem|mock-exam|practice|ai_call_log|localSessionToken" docs e2e scripts src -g "!*.env*" -g "!node_modules/**"
+      - rg -n "Fresh Empty DB E2E Prerequisites|Seed And Bootstrap Rule|Validation Data Prep Rule|Stop-And-Report" docs/04-agent-system/sop/fresh-local-dev-db-validation-playbook.md
+      - git status --short --branch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-fresh-db-seed-bootstrap-preflight.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-validation-data-requirement-matrix
+    title: Phase 22 Validation Data Requirement Matrix
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-fresh-db-seed-bootstrap-readiness-batch
+    dependencies:
+      - phase-22-fresh-db-seed-bootstrap-preflight
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 fresh DB seed/bootstrap readiness and e2e determinism batch approval. Scope is evidence-only matrix of minimum synthetic data for full e2e. Do not create data or record secrets, raw answers, raw prompts, raw model responses, provider payloads, or plaintext redeem_code."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - data_contract
+      - evidence_integrity
+    validationCommands:
+      - rg -n "user|session|authorization|organization|org_auth|redeem_code|question|material|paper|paper_section|practice|mock_exam|answer_record|exam_report|mistake_book|ai_call_log" docs e2e src/server src/db/schema -g "!*.env*" -g "!node_modules/**"
+      - git status --short --branch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-validation-data-requirement-matrix.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-existing-seed-bootstrap-capability-assessment
+    title: Phase 22 Existing Seed Bootstrap Capability Assessment
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-fresh-db-seed-bootstrap-readiness-batch
+    dependencies:
+      - phase-22-validation-data-requirement-matrix
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 fresh DB seed/bootstrap readiness and e2e determinism batch approval. Scope assesses whether existing mechanisms are enough. Do not modify scripts, source, tests, e2e, schema, drizzle, dependencies, or env."
+    taskKind: read_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - rg -n "seed|bootstrap|create.*test|ensure.*test|upsert|idempotent|test data|fixture" scripts src e2e tests docs -g "!*.env*" -g "!node_modules/**"
+      - git status --short --branch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-existing-seed-bootstrap-capability-assessment.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-e2e-order-data-isolation-diagnosis
+    title: Phase 22 E2E Order Data Isolation Diagnosis
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-fresh-db-seed-bootstrap-readiness-batch
+    dependencies:
+      - phase-22-existing-seed-bootstrap-capability-assessment
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 fresh DB seed/bootstrap readiness and e2e determinism batch approval. Scope diagnoses and reruns the prior role-based full-flow redirect to /redeem-code observation using existing e2e only. Do not modify tests or runtime code."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - auth
+      - session
+      - product_readiness
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/role-based-acceptance/role-based-full-flow.spec.ts
+      - npm.cmd run test:e2e
+      - git status --short --branch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-e2e-order-data-isolation-diagnosis.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-follow-up-implementation-gate-proposal
+    title: Phase 22 Follow Up Implementation Gate Proposal
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-fresh-db-seed-bootstrap-readiness-batch
+    dependencies:
+      - phase-22-e2e-order-data-isolation-diagnosis
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 fresh DB seed/bootstrap readiness and e2e determinism batch approval. Scope registers blocked gates and follow-up task recommendations if seed, e2e, scripts, schema, source, dependencies, migrations, or env changes are required. Do not implement them."
+    taskKind: blocked_gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - blocked_gate
+      - dependency_policy
+      - database_migration
+      - evidence_integrity
+    validationCommands:
+      - rg -n "dependency-change|secret-env-change|destructive-data-operation|real-provider-staging-redaction|deploy-and-cloud-change" docs/04-agent-system/state/blocked-gates.yaml
+      - git status --short --branch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-follow-up-implementation-gate-proposal.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-fresh-db-e2e-determinism-evidence-consolidation
+    title: Phase 22 Fresh DB E2E Determinism Evidence Consolidation
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-fresh-db-seed-bootstrap-readiness-batch
+    dependencies:
+      - phase-22-follow-up-implementation-gate-proposal
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 fresh DB seed/bootstrap readiness and e2e determinism batch approval. Scope consolidates pass/fail/blocked results, runs required gates, records residual risks, commits, merges to master, pushes master, and cleans merged branch."
+    taskKind: closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - automation_state
+      - release_readiness
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-fresh-db-e2e-determinism-evidence-consolidation.md
+    status: closed
+    retryCount: 0
+  - id: phase-23-fresh-db-bootstrap-validation-data-implementation-gate
+    title: Phase 23 Fresh DB Bootstrap Validation Data Implementation Gate
+    phase: phase-23-follow-up-proposals
+    sourceStory: phase-22-follow-up-implementation-gate-proposal
+    dependencies:
+      - phase-22-fresh-db-e2e-determinism-evidence-consolidation
+    taskPlanPolicy: required
+    humanApproval: "Blocked follow-up recommendation only. Implementation would require separate explicit approval because it may need seed/bootstrap, validation-data prep, scripts/source/e2e/schema changes, env target handling, or DB writes. This current Phase 22 batch does not approve implementation."
+    taskKind: blocked_gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+    riskTypes:
+      - database_migration
+      - destructive_data_operation
+      - secret
+      - evidence_integrity
+      - blocked_gate
+    securityReviewRequired: true
+    validationCommands:
+      - pending human approval
+    evidencePath: docs/05-execution-logs/evidence/phase-23-fresh-db-bootstrap-validation-data-implementation-gate.md
+    status: blocked
+    retryCount: 0
+    blockReason: "Requires separate human approval for implementation scope and safe local/dev DB/seed/bootstrap/validation-data handling. Long-lived gates remain secret-env-change, destructive-data-operation, dependency-change, real-provider-staging-redaction, and deploy-and-cloud-change."
+  - id: phase-23-e2e-order-data-isolation-hardening-gate
+    title: Phase 23 E2E Order Data Isolation Hardening Gate
+    phase: phase-23-follow-up-proposals
+    sourceStory: phase-22-follow-up-implementation-gate-proposal
+    dependencies:
+      - phase-22-fresh-db-e2e-determinism-evidence-consolidation
+    taskPlanPolicy: required
+    humanApproval: "Blocked follow-up recommendation only. Implementation would require separate explicit approval because it may need e2e test data isolation changes, test hardening, runtime hooks, or setup/teardown mechanism changes. This current Phase 22 batch does not approve implementation."
+    taskKind: blocked_gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - src/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - product_readiness
+      - auth
+      - session
+      - evidence_integrity
+      - blocked_gate
+    securityReviewRequired: true
+    validationCommands:
+      - pending human approval
+    evidencePath: docs/05-execution-logs/evidence/phase-23-e2e-order-data-isolation-hardening-gate.md
+    status: blocked
+    retryCount: 0
+    blockReason: "Requires separate human approval for e2e/test/runtime hardening. Current Phase 22 reruns passed and did not reproduce the prior /redeem-code observation."
