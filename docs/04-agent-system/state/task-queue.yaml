@@ -13945,3 +13945,55 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-fresh-local-dev-migration-closeout-reconciliation.md
     status: closed
     retryCount: 0
+  - id: phase-21-fresh-local-dev-db-validation-flow-docs
+    title: Phase 21 Fresh Local Dev DB Validation Flow Docs
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-06-01-fresh-local-dev-db-validation-flow-docs
+    dependencies:
+      - phase-21-fresh-local-dev-migration-closeout-reconciliation
+    taskPlanPolicy: required
+    humanApproval: "User approved one fresh docs-only task to document the fresh local/dev DB plus seed/bootstrap plus validation data prep flow for later AI scoring retry persistence and fresh DB e2e verification. Scope is limited to project-state, task-queue, task plan, evidence, and at most one docs-only SOP/playbook under docs/04-agent-system/sop. The task must not read, modify, print, copy, or commit .env.local; must not modify .env.example, package/lockfiles, dependencies, scripts, src, tests, e2e, src/db/schema, drizzle, staging/prod/cloud/deploy, real provider, external service, or destructive data; and must not run DB connection, migration, seed, raw SQL, drizzle-kit push, or destructive data operations."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/sop/fresh-local-dev-db-validation-playbook.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - docs/05-execution-logs/audits-reviews/**
+    riskTypes:
+      - evidence_integrity
+      - automation_state
+      - blocked_gate
+      - database_migration
+      - secret_or_env_change
+      - destructive_data_operation
+      - ai_runtime
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\sop\fresh-local-dev-db-validation-playbook.md docs\05-execution-logs\task-plans\2026-06-01-fresh-local-dev-db-validation-flow-docs.md docs\05-execution-logs\evidence\2026-06-01-fresh-local-dev-db-validation-flow-docs.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-fresh-local-dev-db-validation-flow-docs.md
+    status: closed
+    retryCount: 0
