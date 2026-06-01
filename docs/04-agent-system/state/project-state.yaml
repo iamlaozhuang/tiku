@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-22-mvp-local-acceptance-reaudit
-updatedAt: "2026-06-01T12:35:00-07:00"
+updatedAt: "2026-06-01T14:10:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 8027c34c12b78242647368c9959a93737fdb3742
-  lastKnownOriginMasterSha: 8027c34c12b78242647368c9959a93737fdb3742
+  lastKnownMasterSha: cf46a0719e7ee3d3e1e5729459351f9a96c91a73
+  lastKnownOriginMasterSha: cf46a0719e7ee3d3e1e5729459351f9a96c91a73
 currentTask:
-  id: phase-22-mvp-local-acceptance-reaudit-planning
+  id: phase-22-mvp-local-acceptance-runtime-batch
   status: closed
-  sourceStory: user-request-2026-06-01-phase-22-mvp-local-acceptance-reaudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md
-  branch: codex/phase-22-mvp-local-acceptance-reaudit-planning
+  sourceStory: user-request-2026-06-01-phase-22-mvp-local-acceptance-runtime-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-22-mvp-local-acceptance-runtime-batch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-batch.md
+  branch: codex/phase-22-mvp-local-acceptance-runtime-batch
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 22 planning is complete. Next recommended task is phase-22-mvp-local-acceptance-runtime-verification, currently blocked until explicit human approval for local-only runtime verification actions such as dev server, Browser/Playwright, e2e, and DB-backed app checks. .env.local contents, migrations, seed/bootstrap, raw SQL, destructive data, source/test/script/schema/drizzle/dependency changes, staging/prod/cloud/deploy, real provider, and external service remain blocked."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md
+  nextRecommendedAction: "Phase 22 MVP local acceptance runtime verification batch is locally closed. Runtime preflight, boot smoke, auth/session, admin MVP, student MVP, local/mock AI scoring persistence, fresh DB readiness assessment, full unit, full e2e rerun, build, readiness, naming, and quality gate passed. Fresh empty DB remains not acceptance-ready without approved seed/bootstrap and validation data prep. Long-lived gates for .env values, dependencies, scripts/source/test/e2e/schema/drizzle changes, destructive DB actions, staging/prod/cloud/deploy, real provider, and external services remain blocked. Next step is product review of the evidence and any separately approved follow-up tasks for fresh DB seed/bootstrap automation or e2e order/data isolation hardening."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-22-evidence-consolidation.md

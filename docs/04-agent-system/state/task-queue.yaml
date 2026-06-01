@@ -14090,3 +14090,365 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-verification.md
     status: blocked
     retryCount: 0
+  - id: phase-22-mvp-local-acceptance-runtime-batch
+    title: Phase 22 MVP Local Acceptance Runtime Verification Batch
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: user-request-2026-06-01-phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-mvp-local-acceptance-reaudit-planning
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved a new runtime verification task batch named phase-22 MVP local acceptance runtime verification batch. Scope is local/dev runtime verification only: register a new batch parent, split child tasks, start local dev server, use local browser/Playwright, execute existing npm scripts and existing e2e/test commands, write task plans and evidence, run validationCommands/local CI/git diff/readiness/naming/quality gates, commit, merge to master, push master, and clean merged branch. Do not reuse historical closed/deferred tasks. Do not read, print, copy, modify, or commit .env.local values; .env.local may only be loaded by existing app/scripts. Do not modify .env.local, .env.example, package/lockfiles, dependencies, scripts, src, tests, e2e, src/db/schema, or drizzle. Do not run DB reset, destructive data operation, raw SQL, drizzle-kit push, migration table repair, staging/prod/cloud/deploy, real provider, external service, force push, unknown worktree deletion, or unmerged branch deletion."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_human_verification
+      - product_readiness
+      - release_readiness
+      - evidence_integrity
+      - blocked_gate
+      - auth
+      - session
+      - admin
+      - ai_runtime
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-phase-22-mvp-local-acceptance-runtime-batch-security-review.md
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-batch.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-runtime-preflight
+    title: Phase 22 Runtime Preflight
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-mvp-local-acceptance-runtime-batch
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope is local dependency/script/port/forbidden-scope preflight without reading .env.local values."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git worktree list
+      - node -e "const pkg=require('./package.json'); for (const name of ['dev','build','test','test:unit','test:e2e','lint','typecheck','format:check']) { if (!pkg.scripts?.[name]) process.exit(1); }"
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-runtime-preflight.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-local-app-boot-smoke
+    title: Phase 22 Local App Boot Smoke
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-runtime-preflight
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope permits starting the existing local dev server and checking localhost/127.0.0.1 reachability only."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_human_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run dev -- --hostname 127.0.0.1
+      - Invoke-WebRequest -UseBasicParsing http://127.0.0.1:3000
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-local-app-boot-smoke.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-auth-session-smoke
+    title: Phase 22 Auth Session Smoke
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-local-app-boot-smoke
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope uses only existing local/dev test accounts through existing e2e; credentials must not be recorded."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - auth
+      - session
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts
+      - npm.cmd run test:e2e -- e2e/local-business-flow.spec.ts
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-auth-session-smoke.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-admin-mvp-smoke
+    title: Phase 22 Admin MVP Smoke
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-auth-session-smoke
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope validates existing admin MVP routes and flows for question, material, paper, paper_section, audit_log, ai_call_log, and role boundaries without changing runtime code."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - admin
+      - product_readiness
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/staging-required-role-flows.spec.ts e2e/content-action-closures.spec.ts e2e/admin-audit-navigation.spec.ts e2e/admin-role-denial-browser.spec.ts
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-admin-mvp-smoke.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-student-mvp-smoke
+    title: Phase 22 Student MVP Smoke
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-auth-session-smoke
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope validates existing student MVP practice, mock_exam, answer_record, exam_report, and mistake_book flows without recording raw answers."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - product_readiness
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/student-practice-mock-entry.spec.ts e2e/role-based-acceptance/role-based-full-flow.spec.ts
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-student-mvp-smoke.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-ai-scoring-persistence-smoke
+    title: Phase 22 AI Scoring Persistence Smoke
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-student-mvp-smoke
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope validates only local/mock/fake provider or existing local-safe AI runtime paths for ai_call_log, retry, and persistence. Real provider and external services remain blocked."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - ai_runtime
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/ai-scoring-service.test.ts tests/unit/phase-7-ai-mock-provider-and-log-runtime-smoke.test.ts tests/unit/phase-11-ai-call-log-coverage-hardening.test.ts
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-ai-scoring-persistence-smoke.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-fresh-db-readiness-assessment
+    title: Phase 22 Fresh DB Readiness Assessment
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-runtime-preflight
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope is assessment-only: determine fresh empty DB e2e seed/bootstrap/validation-data gaps from existing evidence and current e2e prerequisites. Do not run destructive reset, raw SQL, drizzle push, migration repair, or schema/script/source changes."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - destructive_data_operation
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - rg -n "Fresh Empty DB E2E Prerequisites|Minimum data" docs/04-agent-system/sop/fresh-local-dev-db-validation-playbook.md
+      - rg -n "test\\(|/api/v1/|localSessionToken|redeem|mock-exam|practice|ai_call_log" e2e
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-fresh-db-readiness-assessment.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-evidence-consolidation
+    title: Phase 22 Evidence Consolidation
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: phase-22-mvp-local-acceptance-runtime-batch
+    dependencies:
+      - phase-22-admin-mvp-smoke
+      - phase-22-ai-scoring-persistence-smoke
+      - phase-22-fresh-db-readiness-assessment
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 phase-22 MVP local acceptance runtime verification batch approval. Scope consolidates pass/fail/blocked results, runs required gates, records follow-up recommendations, commits, merges to master, pushes master, and cleans merged branch."
+    taskKind: closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - automation_state
+      - release_readiness
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-evidence-consolidation.md
+    status: closed
+    retryCount: 0
