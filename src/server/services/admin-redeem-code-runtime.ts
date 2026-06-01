@@ -19,6 +19,7 @@ import {
   REDEEM_CODE_BATCH_CREATE_LIMIT,
   type AdminRedeemCodeRuntimeRepositories,
   type AdminRedeemCodeRuntimeRepositoryOptions,
+  RedeemCodeGenerationConflictError,
 } from "../repositories/admin-redeem-code-runtime-repository";
 import type { SessionService } from "./session-service";
 
@@ -373,12 +374,29 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
           return createJsonResponse(batchRequest.response);
         }
 
-        const createdRedeemCodeBatch = await repositories.createRedeemCodeBatch(
-          {
+        let createdRedeemCodeBatch: Awaited<
+          ReturnType<
+            AdminRedeemCodeRuntimeRepositories["createRedeemCodeBatch"]
+          >
+        >;
+
+        try {
+          createdRedeemCodeBatch = await repositories.createRedeemCodeBatch({
             ...batchRequest.value,
             actorPublicId: actor.publicId,
-          },
-        );
+          });
+        } catch (error) {
+          if (error instanceof RedeemCodeGenerationConflictError) {
+            return createJsonResponse(
+              createErrorResponse(
+                ADMIN_AUTH_OPERATION_ERROR_CODES.concurrentConflict,
+                "Redeem code generation conflicted with another operation. Refresh and try again.",
+              ),
+            );
+          }
+
+          throw error;
+        }
 
         await repositories.auditLogRepository?.appendAuditLog({
           actorPublicId: actor.publicId,

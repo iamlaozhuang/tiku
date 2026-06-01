@@ -32,6 +32,9 @@ type AdminRedeemCodeRuntimeDatabase = PostgresJsDatabase<typeof databaseSchema>;
 
 export type AdminRedeemCodeRuntimeRepositoryOptions = {
   createDatabase?: () => AdminRedeemCodeRuntimeDatabase;
+  createGenerationGroupId?: () => string;
+  createRedeemCodePlainText?: () => string;
+  createRedeemCodePublicId?: () => string;
   now?: () => Date;
 };
 
@@ -78,6 +81,13 @@ const LOCAL_REDEEM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const LOCAL_REDEEM_CODE_LENGTH = 8;
 const LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS = 5;
 
+export class RedeemCodeGenerationConflictError extends Error {
+  constructor() {
+    super("Redeem code generation conflicted with another operation.");
+    this.name = "RedeemCodeGenerationConflictError";
+  }
+}
+
 function createLazyDatabaseGetter(
   createDatabase: () => AdminRedeemCodeRuntimeDatabase,
 ): () => AdminRedeemCodeRuntimeDatabase {
@@ -113,33 +123,50 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
     options.createDatabase ?? createLocalRuntimeDatabase,
   );
   const clock = options.now ?? (() => new Date());
+  const createGenerationGroupId =
+    options.createGenerationGroupId ??
+    (() => `redeem-code-batch-${randomUUID()}`);
+  const createRedeemCodePlainText =
+    options.createRedeemCodePlainText ?? createLocalRedeemCodePlainText;
+  const createRedeemCodePublicId =
+    options.createRedeemCodePublicId ?? (() => `redeem-code-${randomUUID()}`);
 
   return {
     async createRedeemCodeBatch(input) {
       const database = getDatabase();
-      const generationGroupId = `redeem-code-batch-${randomUUID()}`;
-      const redeemCodes: RedeemCodeGenerationItemDto[] = [];
+      const generationGroupId = createGenerationGroupId();
 
-      for (let codeIndex = 0; codeIndex < input.count; codeIndex += 1) {
-        redeemCodes.push(
-          await createRedeemCodeWithRetry(database, {
-            ...input,
+      return database.transaction(async (transactionDatabase) => {
+        const redeemCodes: RedeemCodeGenerationItemDto[] = [];
+
+        for (let codeIndex = 0; codeIndex < input.count; codeIndex += 1) {
+          redeemCodes.push(
+            await createRedeemCodeWithRetry(
+              transactionDatabase as AdminRedeemCodeRuntimeDatabase,
+              {
+                ...input,
+                generationGroupId,
+              },
+              {
+                createRedeemCodePlainText,
+                createRedeemCodePublicId,
+              },
+            ),
+          );
+        }
+
+        return {
+          generation: {
             generationGroupId,
-          }),
-        );
-      }
-
-      return {
-        generation: {
-          generationGroupId,
-          count: redeemCodes.length,
-          profession: input.profession,
-          level: input.level,
-          durationDay: input.durationDay,
-          redeemDeadlineAt: input.redeemDeadlineAt.toISOString(),
-        },
-        redeemCodes,
-      };
+            count: redeemCodes.length,
+            profession: input.profession,
+            level: input.level,
+            durationDay: input.durationDay,
+            redeemDeadlineAt: input.redeemDeadlineAt.toISOString(),
+          },
+          redeemCodes,
+        };
+      });
     },
     async listRedeemCodes(query) {
       const database = getDatabase();
@@ -215,19 +242,23 @@ export function createPostgresAdminRedeemCodeRuntimeRepositories(
 async function createRedeemCodeWithRetry(
   database: AdminRedeemCodeRuntimeDatabase,
   input: CreateRedeemCodeBatchInput & { generationGroupId: string },
+  helpers: {
+    createRedeemCodePlainText: () => string;
+    createRedeemCodePublicId: () => string;
+  },
 ): Promise<RedeemCodeGenerationItemDto> {
   for (
     let attemptIndex = 0;
     attemptIndex < LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS;
     attemptIndex += 1
   ) {
-    const codePlainText = createLocalRedeemCodePlainText();
+    const codePlainText = helpers.createRedeemCodePlainText();
 
     try {
       const [createdRedeemCode] = await database
         .insert(redeemCode)
         .values({
-          public_id: `redeem-code-${randomUUID()}`,
+          public_id: helpers.createRedeemCodePublicId(),
           code_hash: createRedeemCodeHash(codePlainText),
           code_display: codePlainText,
           profession: input.profession,
@@ -262,13 +293,32 @@ async function createRedeemCodeWithRetry(
         createdAt: createdRedeemCode.created_at.toISOString(),
       };
     } catch (error) {
-      if (attemptIndex === LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS - 1) {
+      if (!isUniqueConstraintError(error)) {
         throw error;
+      }
+
+      if (attemptIndex === LOCAL_REDEEM_CODE_MAX_CREATE_ATTEMPTS - 1) {
+        throw new RedeemCodeGenerationConflictError();
       }
     }
   }
 
-  throw new Error("Redeem code creation exhausted retry attempts.");
+  throw new RedeemCodeGenerationConflictError();
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  const errorRecord = error as { code?: unknown; constraint?: unknown };
+
+  return (
+    errorRecord.code === "23505" &&
+    (errorRecord.constraint === undefined ||
+      errorRecord.constraint === "udx_redeem_code_code_hash" ||
+      errorRecord.constraint === "udx_redeem_code_public_id")
+  );
 }
 
 function createRedeemCodeConditions(
