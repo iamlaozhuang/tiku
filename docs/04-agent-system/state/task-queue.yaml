@@ -15112,3 +15112,252 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-evidence-consolidation-closeout.md
     status: closed
     retryCount: 0
+  - id: phase-24-fresh-validation-operationalization-batch
+    title: Phase 24 Fresh Validation Operationalization Batch
+    phase: phase-24-fresh-validation-operationalization
+    sourceStory: user-request-2026-06-01-phase-24-fresh-validation-operationalization-batch
+    dependencies:
+      - phase-23-evidence-consolidation-closeout
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved a new serial batch named phase-24 fresh validation operationalization batch. Scope: first reconcile Phase 23 governance state, then operationalize the fresh local/dev validation chain as auditable, rerunnable, and secret-safe local/dev process. Approved actions include creating a short-lived branch, registering a new parent and serial child tasks, writing task plans and evidence for every child task, modifying only allowed docs/scripts/e2e/tests surfaces, secret-safe .env.local DATABASE_URL target databaseName handling when needed, existing npm scripts, the new or existing local/dev runner, scripts/db/Seed-DevDatabase.ps1, scripts/local/Invoke-ValidationDataPrep.ps1, local dev server and local browser/e2e, reviewed Drizzle migrate workflow on confirmed fresh local/dev targets, and non-destructive docker compose local/dev helper commands. The prompt explicitly permits commit, merge to master, push master, and cleanup if recorded in evidence. Prohibited: .env.example changes, package/lockfile/dependency changes, raw SQL, drizzle-kit push, migration table repair, DB reset/drop/truncate/delete/volume reset/destructive data operations, staging/prod/cloud/deploy/real provider/external service, force push, unknown worktree deletion, unmerged branch deletion, and evidence disclosure of DB URLs, credentials, provider payloads, raw prompts, raw student answers, raw model responses, or plaintext redeem_code."
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - scripts/**
+      - e2e/**
+      - tests/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - secret
+      - local_verification
+      - evidence_integrity
+      - product_readiness
+      - automation_state
+      - blocked_gate
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-phase-24-readiness-audit-closeout-security-review.md
+    validationCommands:
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-fresh-validation-operationalization-batch.md
+    status: closed
+    retryCount: 0
+  - id: phase-24-state-reconciliation-preflight
+    title: Phase 24 State Reconciliation Preflight
+    phase: phase-24-fresh-validation-operationalization
+    sourceStory: phase-24-fresh-validation-operationalization-batch
+    dependencies:
+      - phase-24-fresh-validation-operationalization-batch
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 24 batch approval. Scope is governance-only: reconcile project-state and task-queue with Phase 23 post-merge Git reality, including lastKnownMasterSha, lastKnownOriginMasterSha, currentTask, branch, commitSha, and handoff. Do not touch scripts, tests, e2e, env, dependencies, schema, migrations, or runtime behavior."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-24-state-reconciliation-preflight.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-24-state-reconciliation-preflight.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - evidence_integrity
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-state-reconciliation-preflight.md
+    status: closed
+    retryCount: 0
+  - id: phase-24-fresh-validation-orchestration-design
+    title: Phase 24 Fresh Validation Orchestration Design
+    phase: phase-24-fresh-validation-operationalization
+    sourceStory: phase-24-fresh-validation-operationalization-batch
+    dependencies:
+      - phase-24-state-reconciliation-preflight
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 24 batch approval. Scope is design-only: document which fresh local/dev validation steps can be scripted and which remain approval/manual gates, with minimum design, command order, evidence rules, and risk boundaries. Do not implement scripts or run DB-changing commands in this task."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-24-fresh-validation-orchestration-design.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-24-fresh-validation-orchestration-design.md
+      - docs/05-execution-logs/audits-reviews/2026-06-01-phase-24-fresh-validation-orchestration-design.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - secret
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-fresh-validation-orchestration-design.md
+    status: closed
+    retryCount: 0
+  - id: phase-24-safe-local-dev-bootstrap-runner
+    title: Phase 24 Safe Local Dev Bootstrap Runner
+    phase: phase-24-fresh-validation-operationalization
+    sourceStory: phase-24-fresh-validation-operationalization-batch
+    dependencies:
+      - phase-24-fresh-validation-orchestration-design
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 24 batch approval. Scope is the minimum local/dev-only runner or playbook improvement needed to chain fresh target selection, reviewed Drizzle migrate, dev seed, validation data prep, full e2e, and build. The runner must be secret-safe, local/dev-only, non-destructive, rerunnable through a fresh databaseName, and must stop on gates requiring dependency, schema, migration repair, raw SQL, destructive DB operations, staging/prod/cloud/deploy, real provider, or external service."
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-24-safe-local-dev-bootstrap-runner.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-24-safe-local-dev-bootstrap-runner.md
+      - scripts/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - secret
+      - database_migration
+      - local_verification
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-safe-local-dev-bootstrap-runner.md
+    status: closed
+    retryCount: 0
+  - id: phase-24-fresh-db-repeatability-verification
+    title: Phase 24 Fresh DB Repeatability Verification
+    phase: phase-24-fresh-validation-operationalization
+    sourceStory: phase-24-fresh-validation-operationalization-batch
+    dependencies:
+      - phase-24-safe-local-dev-bootstrap-runner
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 24 batch approval. Scope creates a new fresh local/dev DB target and verifies the complete chain is rerunnable through the approved runner/playbook. Evidence may record only existence/absence, hostClass, databaseName, command results, counts/classes, and failure summaries without secrets or sensitive payloads."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-24-fresh-db-repeatability-verification.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-24-fresh-db-repeatability-verification.md
+      - docs/05-execution-logs/audits-reviews/**
+      - scripts/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - database_migration
+      - secret
+      - local_verification
+      - product_readiness
+      - evidence_integrity
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\local\Invoke-FreshValidationRun.ps1 -DatabaseName tiku_fresh_phase24_20260601_001
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-fresh-db-repeatability-verification.md
+    status: closed
+    retryCount: 0
+  - id: phase-24-readiness-audit-closeout
+    title: Phase 24 Readiness Audit Closeout
+    phase: phase-24-fresh-validation-operationalization
+    sourceStory: phase-24-fresh-validation-operationalization-batch
+    dependencies:
+      - phase-24-fresh-db-repeatability-verification
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 24 batch approval. Scope summarizes pass/fail/blocked status, residual risks, security/evidence hygiene, next recommended action, local CI, readiness, naming, quality gate, commit, merge to master, push master, cleanup merged branch, and final master/origin alignment. The user prompt explicitly authorizes these final actions for this batch when recorded in evidence."
+    taskKind: closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-24-readiness-audit-closeout.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-24-readiness-audit-closeout.md
+      - docs/05-execution-logs/audits-reviews/2026-06-01-phase-24-readiness-audit-closeout-security-review.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - automation_state
+      - release_readiness
+      - blocked_gate
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-phase-24-readiness-audit-closeout-security-review.md
+    validationCommands:
+      - git diff --check
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-readiness-audit-closeout.md
+    status: closed
+    retryCount: 0
