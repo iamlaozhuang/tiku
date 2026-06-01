@@ -13458,3 +13458,58 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-write-concurrency-proof-startup.md
     status: committed
     retryCount: 0
+  - id: phase-21-admin-write-concurrency-proof-implementation
+    title: Phase 21 Admin Write Concurrency Proof Implementation
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-05-31-admin-write-concurrency-proof-implementation
+    dependencies:
+      - phase-21-admin-write-concurrency-proof-startup
+      - phase-21-tail-admin-concurrency-permission-split-design
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved this fresh implementation task after merging, pushing, and cleaning the startup branch. Approved risk types are admin_ops, transaction_concurrency, data_contract, authorization, local_human_verification, and evidence_integrity. Scope is limited to proving redeem_code generation or duplicate-submit concurrency behavior; if existing code cannot prove redeem_code safety without schema changes, stop and report instead of expanding to authorization overlap or other write paths.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/app/api/v1/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - admin_ops
+      - transaction_concurrency
+      - data_contract
+      - authorization
+      - local_human_verification
+      - evidence_integrity
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-05-31-admin-write-concurrency-proof-implementation-security-review.md
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-write-concurrency-proof-implementation.md
+    status: validated
+    retryCount: 0
