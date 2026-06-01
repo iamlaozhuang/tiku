@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-21-high-risk-tail-closure
-updatedAt: "2026-05-31T16:59:37-07:00"
+updatedAt: "2026-05-31T17:09:22-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -39,12 +39,12 @@ repository:
   lastKnownMasterSha: c9b10ed55c8d846e24f55ee16e698e99573c8b99
   lastKnownOriginMasterSha: c9b10ed55c8d846e24f55ee16e698e99573c8b99
 currentTask:
-  id: phase-21-ai-scoring-retry-persistence-implementation
+  id: phase-21-admin-common-ux-state-audit-startup
   status: closed
-  sourceStory: user-request-2026-05-31-ai-scoring-retry-persistence-implementation
-  planPath: docs/05-execution-logs/task-plans/2026-05-31-ai-scoring-retry-persistence-implementation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation.md
-  branch: codex/phase-21-ai-scoring-retry-persistence-implementation
+  sourceStory: user-request-2026-05-31-continue-phase-21-next-high-risk-tail
+  planPath: docs/05-execution-logs/task-plans/2026-05-31-admin-common-ux-state-audit-startup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-common-ux-state-audit-startup.md
+  branch: codex/phase-21-admin-common-ux-state-audit-startup
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "AI scoring retry persistence is merged and pushed to master. User confirmed local/dev DATABASE_URL and approved local migrate, but drizzle-kit migrate exited 1 without applying ai_scoring_attempt; read-only checks show local/dev migration history drift. Do not run raw SQL, repair migration metadata, reset DB, or retry against another database without fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-local-migration.md
+  nextRecommendedAction: "Admin common UX state audit startup is being merged to master under user approval. After merge, push, and branch cleanup, proceed to the approved fresh Admin common UX state audit implementation using the prompt in the task plan/evidence. Keep the AI scoring local/dev migration drift unresolved unless the user separately approves a database reset, fresh local database, or drift reconciliation task."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-05-31-admin-common-ux-state-audit-startup.md
