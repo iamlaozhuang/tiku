@@ -14088,7 +14088,12 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-verification.md
-    status: blocked
+    status: closed
+    resolution: superseded
+    supersededBy:
+      - phase-22-mvp-local-acceptance-runtime-batch
+      - phase-27-blocked-queue-reconciliation
+    supersededReason: "This historical gate was never executed as a standalone task. The later approved Phase 22 runtime batch executed the local/mock-safe acceptance verification under a fresh parent task, and Phase 27 records the reconciliation without converting this entry into completed runtime work."
     retryCount: 0
   - id: phase-22-mvp-local-acceptance-runtime-batch
     title: Phase 22 MVP Local Acceptance Runtime Verification Batch
@@ -14777,7 +14782,14 @@ tasks:
     validationCommands:
       - pending human approval
     evidencePath: docs/05-execution-logs/evidence/phase-23-fresh-db-bootstrap-validation-data-implementation-gate.md
-    status: blocked
+    status: closed
+    resolution: superseded
+    supersededBy:
+      - phase-23-fresh-db-bootstrap-validation-data-batch
+      - phase-24-fresh-validation-operationalization-batch
+      - phase-25-fresh-validation-runner-hardening-batch
+      - phase-27-blocked-queue-reconciliation
+    supersededReason: "This historical blocked recommendation was covered by later approved Phase 23-25 batches. It is closed as superseded only, not as a claim that the original blocked gate itself was executed."
     retryCount: 0
     blockReason: "Requires separate human approval for implementation scope and safe local/dev DB/seed/bootstrap/validation-data handling. Long-lived gates remain secret-env-change, destructive-data-operation, dependency-change, real-provider-staging-redaction, and deploy-and-cloud-change."
   - id: phase-23-e2e-order-data-isolation-hardening-gate
@@ -14818,7 +14830,12 @@ tasks:
     validationCommands:
       - pending human approval
     evidencePath: docs/05-execution-logs/evidence/phase-23-e2e-order-data-isolation-hardening-gate.md
-    status: blocked
+    status: closed
+    resolution: superseded
+    supersededBy:
+      - phase-23-e2e-order-data-isolation-hardening-assessment
+      - phase-27-blocked-queue-reconciliation
+    supersededReason: "This historical blocked recommendation was covered by the later approved Phase 23 e2e isolation assessment and hardening. It is closed as superseded only, not as a claim that the original blocked gate remained executable."
     retryCount: 0
     blockReason: "Requires separate human approval for e2e/test/runtime hardening. Current Phase 22 reruns passed and did not reproduce the prior /redeem-code observation."
   - id: phase-23-fresh-db-bootstrap-validation-data-batch
@@ -15904,5 +15921,284 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-26-readiness-scorecard-and-next-plan.md
+    status: closed
+    retryCount: 0
+  - id: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    title: Phase 27 Blocked Queue Reconciliation And Owner Acceptance Prep Batch
+    phase: phase-27-blocked-queue-reconciliation-and-phase-28-owner-acceptance-prep
+    sourceStory: user-request-2026-06-01-phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    dependencies:
+      - phase-26-readiness-scorecard-and-next-plan
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved a new serial batch named phase-27 blocked queue reconciliation and owner acceptance prep batch. Scope is docs/state/evidence only: first reconcile exactly three historical blocked queue items as superseded by later approved batches, then prepare owner-facing acceptance scripts, data prerequisites, evidence index, known limitations, and staging approval package inputs. Approved final actions include commit, merge master, push master, and cleanup of the merged short-lived branch. Prohibited: product code, scripts, tests, e2e, env files, dependencies/package/lockfiles, schema/drizzle/migrations, raw SQL, DB reset/drop/truncate/delete/volume reset/destructive data operations, staging/prod/cloud/deploy/real provider/external service, force push, unknown worktree deletion, unmerged branch deletion, and sensitive evidence disclosure."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - release_readiness
+      - product_readiness
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-27-28-blocked-queue-and-owner-acceptance-batch.md
+    status: closed
+    retryCount: 0
+  - id: phase-27-blocked-queue-reconciliation-preflight
+    title: Phase 27 Blocked Queue Reconciliation Preflight
+    phase: phase-27-blocked-queue-reconciliation
+    sourceStory: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    dependencies:
+      - phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 27/28 batch approval. Scope recovers Git/state/queue/blocked-gates/latest evidence and confirms only docs/state/evidence files are writable before reconciliation."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-27-blocked-queue-reconciliation-preflight.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-27-blocked-queue-reconciliation-preflight.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - evidence_integrity
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-27-blocked-queue-reconciliation-preflight.md
+    status: closed
+    retryCount: 0
+  - id: phase-27-blocked-queue-reconciliation
+    title: Phase 27 Blocked Queue Reconciliation
+    phase: phase-27-blocked-queue-reconciliation
+    sourceStory: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    dependencies:
+      - phase-27-blocked-queue-reconciliation-preflight
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 27/28 batch approval. Scope reconciles exactly three historical blocked queue items as superseded by later approved batches and records why they should not remain executable blocked tasks. Long-lived gates remain blocked."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-27-blocked-queue-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-27-blocked-queue-reconciliation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - blocked_gate
+      - automation_state
+      - evidence_integrity
+    validationCommands:
+      - rg -n "phase-22-mvp-local-acceptance-runtime-verification|phase-23-fresh-db-bootstrap-validation-data-implementation-gate|phase-23-e2e-order-data-isolation-hardening-gate|resolution: superseded" docs/04-agent-system/state/task-queue.yaml
+      - rg -n "real-provider-staging-redaction|dependency-change|secret-env-change|deploy-and-cloud-change|destructive-data-operation" docs/04-agent-system/state/blocked-gates.yaml
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-27-blocked-queue-reconciliation.md
+    status: closed
+    retryCount: 0
+  - id: phase-28-owner-acceptance-prep-plan
+    title: Phase 28 Owner Acceptance Prep Plan
+    phase: phase-28-owner-acceptance-prep
+    sourceStory: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    dependencies:
+      - phase-27-blocked-queue-reconciliation
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 27/28 batch approval. Scope defines owner-facing acceptance package structure only; no product code, DB, env, provider, staging, deploy, script, test, schema, or dependency changes."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-28-owner-acceptance-prep-plan.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-prep-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - product_readiness
+      - release_readiness
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-prep-plan.md
+    status: closed
+    retryCount: 0
+  - id: phase-28-owner-role-scenario-scripts
+    title: Phase 28 Owner Role Scenario Scripts
+    phase: phase-28-owner-acceptance-prep
+    sourceStory: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    dependencies:
+      - phase-28-owner-acceptance-prep-plan
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 27/28 batch approval. Scope writes owner-facing student/admin scenario scripts using existing Phase 22-26 evidence only. No runtime verification or product changes."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-28-owner-role-scenario-scripts.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-role-scenario-scripts.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - product_readiness
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-role-scenario-scripts.md
+    status: closed
+    retryCount: 0
+  - id: phase-28-owner-acceptance-data-and-evidence-index
+    title: Phase 28 Owner Acceptance Data And Evidence Index
+    phase: phase-28-owner-acceptance-prep
+    sourceStory: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    dependencies:
+      - phase-28-owner-role-scenario-scripts
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 27/28 batch approval. Scope records synthetic/local/dev acceptance data prerequisites, evidence index for Phase 22-26, known limitations, and staging approval package inputs without running fresh DB full validation."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-28-owner-acceptance-data-and-evidence-index.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-data-and-evidence-index.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - product_readiness
+      - release_readiness
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-data-and-evidence-index.md
+    status: closed
+    retryCount: 0
+  - id: phase-28-owner-acceptance-readiness-closeout
+    title: Phase 28 Owner Acceptance Readiness Closeout
+    phase: phase-28-owner-acceptance-prep
+    sourceStory: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
+    dependencies:
+      - phase-28-owner-acceptance-data-and-evidence-index
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 27/28 batch approval. Scope writes final batch evidence summary, updates project-state handoff, runs read-only/governance validation, and performs approved commit/merge/push/cleanup. No force push."
+    taskKind: closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-28-owner-acceptance-readiness-closeout.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-readiness-closeout.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-27-28-blocked-queue-and-owner-acceptance-batch.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - release_readiness
+      - automation_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-readiness-closeout.md
     status: closed
     retryCount: 0
