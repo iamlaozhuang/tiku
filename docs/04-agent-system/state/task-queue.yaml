@@ -13846,3 +13846,56 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-local-dev-repair-approval-package.md
     status: closed
     retryCount: 0
+  - id: phase-21-ai-scoring-retry-fresh-local-dev-migration-verification
+    title: Phase 21 AI Scoring Retry Fresh Local Dev Migration Verification
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-06-01-fresh-local-dev-db-ai-scoring-retry-migration
+    dependencies:
+      - phase-21-ai-scoring-retry-local-dev-repair-approval-package
+    taskPlanPolicy: required
+    humanApproval: "User selected Option 1: Fresh local/dev database target. Approved one fresh queue task only. Scope permits necessary secret-safe .env.local DATABASE_URL read or local/dev target modification without printing, copying, committing, or exposing values; local/dev DB identity checks; read-only verification; and drizzle-kit migrate against a fresh local/dev DB. Creating or selecting a fresh empty local/dev database is allowed only when it does not require raw SQL, deletion/rebuild, drop/truncate/reset, destructive data operation, or migration table repair. After the first e2e failure on the empty fresh DB, the user explicitly approved seed/bootstrap if appropriate; this permits running the repository's existing local/dev seed/bootstrap mechanism against the verified fresh local/dev DB. Stop and report blocked gate if raw SQL, destructive data operation, migration table repair, schema/drizzle/src/tests/e2e change, dependency change, staging/prod/cloud/deploy, real provider, or external service is required."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - .env.local
+    blockedFiles:
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - automation_state
+      - blocked_gate
+      - ai_runtime
+      - database_migration
+      - secret_or_env_change
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification-security-review.md
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification.md docs\05-execution-logs\evidence\2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification.md docs\05-execution-logs\audits-reviews\2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification-security-review.md
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification.md
+    status: closed
+    retryCount: 1
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification.md
