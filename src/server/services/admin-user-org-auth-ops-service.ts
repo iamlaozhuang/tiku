@@ -21,6 +21,7 @@ export type AdminOpsRole = "super_admin" | "ops_admin" | "content_admin";
 export type AdminUserOrgAuthOpsActor = {
   publicId: string;
   roles: AdminOpsRole[];
+  status?: "active" | "disabled";
   canViewRedeemCodePlainText: boolean;
 };
 
@@ -185,8 +186,13 @@ function createPagination(
 
 function canManageUserCredential(actor: AdminUserOrgAuthOpsActor): boolean {
   return (
-    actor.roles.includes("super_admin") || actor.roles.includes("ops_admin")
+    (actor.status ?? "active") === "active" &&
+    (actor.roles.includes("super_admin") || actor.roles.includes("ops_admin"))
   );
+}
+
+function findSampleUserByPublicId(publicId: string) {
+  return sampleUsers.find((user) => user.publicId === publicId) ?? null;
 }
 
 export function createAdminUserOrgAuthOpsService({
@@ -254,11 +260,18 @@ export function createAdminUserOrgAuthOpsService({
         ],
       });
     },
-    async resetUserPassword() {
+    async resetUserPassword(publicId) {
       if (!canManageUserCredential(actor)) {
         return createErrorResponse(
           ADMIN_AUTH_OPERATION_ERROR_CODES.adminPermissionDenied,
           "Admin permission denied.",
+        );
+      }
+
+      if (findSampleUserByPublicId(publicId) === null) {
+        return createErrorResponse(
+          ADMIN_AUTH_OPERATION_ERROR_CODES.resourceNotFound,
+          "Admin resource not found.",
         );
       }
 

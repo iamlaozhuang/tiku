@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 2600d29c7c8391dc21e61f97e301dd7252c12109
-  lastKnownOriginMasterSha: 2600d29c7c8391dc21e61f97e301dd7252c12109
+  lastKnownMasterSha: dcec60fde1a1916c32daaf88e5a8a1b2ba9c23ff
+  lastKnownOriginMasterSha: dcec60fde1a1916c32daaf88e5a8a1b2ba9c23ff
 currentTask:
-  id: phase-21-write-concurrency-closeout-reconciliation
+  id: phase-21-admin-permission-boundary-review
   status: validated
-  sourceStory: user-request-2026-06-01-batch-advance-phase-21-closeout-reconciliation
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-21-write-concurrency-closeout-reconciliation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-21-write-concurrency-closeout-reconciliation.md
-  branch: codex/phase-21-write-concurrency-closeout-reconciliation
+  sourceStory: user-request-2026-06-01-batch-advance-admin-permission-boundary-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-admin-permission-boundary-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-admin-permission-boundary-review.md
+  branch: codex/phase-21-admin-permission-boundary-review
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Run docs/state reconciliation validation, commit, merge to master, push master, clean the temporary branch, then proceed to the fresh Admin permission boundary review task only after post-merge inventory is clean."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-21-write-concurrency-closeout-reconciliation.md
+  nextRecommendedAction: "Complete TDD permission boundary proof for super_admin, ops_admin, content_admin, denial cases, and publicId tamper protection within approved files only."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-admin-permission-boundary-review.md

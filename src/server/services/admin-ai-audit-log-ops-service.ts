@@ -23,6 +23,7 @@ export type AdminAiAuditLogOpsRole =
 export type AdminAiAuditLogOpsActor = {
   publicId: string;
   roles: AdminAiAuditLogOpsRole[];
+  status?: "active" | "disabled";
 };
 
 export type AdminAiAuditLogOpsServiceContext = {
@@ -214,7 +215,18 @@ function createPagination(
 }
 
 function canManageModelConfig(actor: AdminAiAuditLogOpsActor): boolean {
-  return actor.roles.includes("super_admin");
+  return (
+    (actor.status ?? "active") === "active" &&
+    actor.roles.includes("super_admin")
+  );
+}
+
+function findSampleModelConfigByPublicId(publicId: string) {
+  return (
+    sampleModelConfigs.find(
+      (modelConfig) => modelConfig.publicId === publicId,
+    ) ?? null
+  );
 }
 
 export function createAdminAiAuditLogOpsService({
@@ -250,7 +262,7 @@ export function createAdminAiAuditLogOpsService({
         createPagination(query, sampleAiCallLogSummaries.length),
       );
     },
-    async enableModelConfig() {
+    async enableModelConfig(publicId) {
       if (!canManageModelConfig(actor)) {
         return createErrorResponse(
           ADMIN_AI_AUDIT_LOG_ERROR_CODES.adminPermissionDenied,
@@ -258,13 +270,27 @@ export function createAdminAiAuditLogOpsService({
         );
       }
 
+      if (findSampleModelConfigByPublicId(publicId) === null) {
+        return createErrorResponse(
+          ADMIN_AI_AUDIT_LOG_ERROR_CODES.resourceNotFound,
+          "Admin resource not found.",
+        );
+      }
+
       return createSuccessResponse(null);
     },
-    async disableModelConfig() {
+    async disableModelConfig(publicId) {
       if (!canManageModelConfig(actor)) {
         return createErrorResponse(
           ADMIN_AI_AUDIT_LOG_ERROR_CODES.adminPermissionDenied,
           "Admin permission denied.",
+        );
+      }
+
+      if (findSampleModelConfigByPublicId(publicId) === null) {
+        return createErrorResponse(
+          ADMIN_AI_AUDIT_LOG_ERROR_CODES.resourceNotFound,
+          "Admin resource not found.",
         );
       }
 

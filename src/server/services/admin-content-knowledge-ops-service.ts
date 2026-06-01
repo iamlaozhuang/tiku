@@ -22,6 +22,7 @@ export type AdminContentKnowledgeOpsRole =
 export type AdminContentKnowledgeOpsActor = {
   publicId: string;
   roles: AdminContentKnowledgeOpsRole[];
+  status?: "active" | "disabled";
 };
 
 export type AdminContentKnowledgeOpsServiceContext = {
@@ -158,7 +159,15 @@ function createPagination(
 
 function canManageContent(actor: AdminContentKnowledgeOpsActor): boolean {
   return (
-    actor.roles.includes("content_admin") || actor.roles.includes("super_admin")
+    (actor.status ?? "active") === "active" &&
+    (actor.roles.includes("content_admin") ||
+      actor.roles.includes("super_admin"))
+  );
+}
+
+function findSampleResourceByPublicId(publicId: string) {
+  return (
+    sampleResources.find((resource) => resource.publicId === publicId) ?? null
   );
 }
 
@@ -190,11 +199,18 @@ export function createAdminContentKnowledgeOpsService({
         createPagination(query, sampleKnowledgeNodes.length),
       );
     },
-    async triggerResourceVectorRebuild() {
+    async triggerResourceVectorRebuild(publicId) {
       if (!canManageContent(actor)) {
         return createErrorResponse(
           ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.adminPermissionDenied,
           "Admin permission denied.",
+        );
+      }
+
+      if (findSampleResourceByPublicId(publicId) === null) {
+        return createErrorResponse(
+          ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.resourceNotFound,
+          "Admin resource not found.",
         );
       }
 
