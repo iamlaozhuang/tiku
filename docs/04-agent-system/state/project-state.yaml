@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-21-high-risk-tail-closure
-updatedAt: "2026-06-01T00:00:00-07:00"
+updatedAt: "2026-06-01T00:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: f6716231fb14932835dfd478ecbbd78e0fd3b421
-  lastKnownOriginMasterSha: f6716231fb14932835dfd478ecbbd78e0fd3b421
+  lastKnownMasterSha: cd74d9d7194436e0eb8ca74b856605920e3a46d6
+  lastKnownOriginMasterSha: cd74d9d7194436e0eb8ca74b856605920e3a46d6
 currentTask:
-  id: phase-21-ai-scoring-retry-persistence-closeout-audit
+  id: phase-21-final-state-queue-closeout-reconciliation
   status: closed
-  sourceStory: user-request-2026-06-01-batch-advance-ai-scoring-retry-persistence-closeout-audit
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-ai-scoring-retry-persistence-closeout-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-persistence-closeout-audit.md
-  branch: codex/phase-21-ai-scoring-retry-persistence-closeout-audit
+  sourceStory: user-request-2026-06-01-batch-session-phase-21-final-state-queue-closeout-reconciliation
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-21-final-state-queue-closeout-reconciliation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-21-final-state-queue-closeout-reconciliation.md
+  branch: codex/phase-21-final-state-queue-closeout-reconciliation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Batch task 4 is complete after commit/merge/push/cleanup. AI scoring retry persistence local/dev migration drift remains blocked until separately approved."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-persistence-closeout-audit.md
+  nextRecommendedAction: "Register fresh batch task 2 for AI scoring retry persistence local/dev migration drift read-only audit. Do not read env, connect database, run migration, modify src/tests/e2e/schema/drizzle/scripts, or use historical closed/deferred queue rows."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-21-final-state-queue-closeout-reconciliation.md
