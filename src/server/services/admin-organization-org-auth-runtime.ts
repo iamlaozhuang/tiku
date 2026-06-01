@@ -1168,6 +1168,22 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
 
           const orgAuth = await repositories.createOrgAuth(orgAuthInput.value);
 
+          if (
+            orgAuth === null &&
+            (await repositories.hasOverlappingOrgAuth(orgAuthInput.value))
+          ) {
+            await appendOrgAuthAuditLog({
+              request,
+              actor: actorOrError,
+              actionType: "org_auth.create",
+              targetPublicId: null,
+              resultStatus: "failed",
+              metadataSummary: "redacted org_auth overlap metadata",
+            });
+
+            return createJsonResponse(orgAuthScopeOverlapResponse);
+          }
+
           await appendOrgAuthAuditLog({
             request,
             actor: actorOrError,

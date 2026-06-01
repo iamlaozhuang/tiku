@@ -13606,5 +13606,59 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-admin-permission-boundary-review.md
+    status: closed
+    retryCount: 0
+  - id: phase-21-authorization-overlap-concurrency-proof
+    title: Phase 21 Authorization Overlap Concurrency Proof
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-06-01-batch-advance-authorization-overlap-concurrency-proof
+    dependencies:
+      - phase-21-admin-permission-boundary-review
+      - phase-21-tail-admin-concurrency-permission-split-design
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved task 3 in the batch session. Approved risk types: admin_ops, transaction_concurrency, authorization, data_contract, local_human_verification, and evidence_integrity. Scope is limited to authorization/org_auth overlap write path; if existing code cannot prove concurrency safety without schema changes, stop and report. No employee import, redeem_code, model config, other write path, schema, migration, dependency, env, scripts, staging/prod/cloud/deploy, real provider, external service, destructive data, or force push is approved."
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/app/api/v1/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - admin_ops
+      - transaction_concurrency
+      - authorization
+      - data_contract
+      - local_human_verification
+      - evidence_integrity
+    securityReviewRequired: true
+    securityReviewPath: docs/05-execution-logs/audits-reviews/2026-06-01-authorization-overlap-concurrency-proof-security-review.md
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-authorization-overlap-concurrency-proof.md
     status: validated
     retryCount: 0

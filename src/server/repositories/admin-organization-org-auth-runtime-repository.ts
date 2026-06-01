@@ -1720,6 +1720,7 @@ async function hasOverlappingOrgAuthWithOrganizationIds(
     .where(
       and(
         eq(orgAuth.status, "active"),
+        eq(orgAuth.auth_scope_type, input.authScopeType),
         eq(orgAuth.profession, input.profession),
         eq(orgAuth.level, input.level),
         lt(orgAuth.starts_at, input.expiresAt),
