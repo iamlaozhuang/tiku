@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-25-fresh-validation-runner-hardening
-updatedAt: "2026-06-01T10:45:00-07:00"
+  currentPhase: phase-26-mvp-completeness-and-health-audit
+updatedAt: "2026-06-01T05:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: b36c40536b74a71101e9e075d272e6b0ba3af8da
-  lastKnownOriginMasterSha: b36c40536b74a71101e9e075d272e6b0ba3af8da
+  lastKnownMasterSha: 47deffba20634e8711bf9091c11c7a05e001194b
+  lastKnownOriginMasterSha: 47deffba20634e8711bf9091c11c7a05e001194b
 currentTask:
-  id: phase-25-readiness-audit-closeout
+  id: phase-26-readiness-scorecard-and-next-plan
   status: closed
-  sourceStory: phase-25-fresh-validation-runner-hardening-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-25-readiness-audit-closeout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-25-readiness-audit-closeout.md
-  branch: codex/phase-25-fresh-validation-runner-hardening
+  sourceStory: phase-26-mvp-completeness-and-health-audit-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-26-readiness-scorecard-and-next-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-26-readiness-scorecard-and-next-plan.md
+  branch: codex/phase-26-mvp-health-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 25 fresh validation runner hardening batch passed. Fresh repeatability verification passed on tiku_fresh_phase25_20260601_001 through preflight, migrate, dev seed, validation data prep, full e2e, and build. No executable pending task is registered after Phase 25 closeout."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-25-readiness-audit-closeout.md
+  nextRecommendedAction: "Phase 26 MVP completeness and health audit is docs-only/read-only and closed. Use docs/05-execution-logs/audits-reviews/2026-06-01-phase-26-mvp-readiness-baseline.md as the readiness baseline before staging planning, owner acceptance prep, or additional MVP gap closure. No product-code fix was performed in Phase 26."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-26-readiness-scorecard-and-next-plan.md
