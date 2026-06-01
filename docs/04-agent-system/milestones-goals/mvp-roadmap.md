@@ -297,3 +297,35 @@ Dependency order:
 - First planning task is `phase-21-tail-ai-scoring-retry-persistence-design`.
 - AI scoring retry persistence implementation remains blocked until design and `database_migration` approval exist.
 - Admin concurrency and permission implementation tasks remain blocked until the split design and required risk approvals exist.
+
+Closeout status:
+
+- Phase 21 high-risk tail closure is closed by the Phase 21 evidence set ending with `docs/05-execution-logs/evidence/2026-06-01-fresh-local-dev-db-validation-flow-docs.md`.
+- The AI scoring retry persistence and admin common UX/concurrency/permission tail items were handled through fresh approved tasks, local validation, closeout reconciliation, and safety playbook documentation.
+- Staging, production, cloud, deploy, real provider, secret/env, dependency, and destructive-data gates remain blocked by default.
+
+## Phase 22: MVP Local Acceptance Re-Audit
+
+Primary deliverables:
+
+- Phase 22 local acceptance re-audit contract at `docs/02-architecture/interfaces/phase-22-mvp-local-acceptance-reaudit-contract.md`.
+- A 64-item matrix recheck that starts from the Phase 18/19 requirement traceability matrix and Phase 20/21 closeout evidence instead of re-auditing from scratch.
+- A local MVP human-verification plan organized into a small set of role-based user journeys.
+- A later local-only verification pass, when explicitly approved, that separates `runtime_closed`, `local_verified`, `mock_only`, `metadata_only`, `staging_blocked`, and `deferred` outcomes.
+- A staging readiness blocker summary that separates local product gaps from external environment, cloud, secret/env, migration, seed/bootstrap, deploy, and provider gates.
+
+Non-goals:
+
+- Do not read or modify `.env.local` or `.env.example`.
+- Do not connect to staging or production.
+- Do not deploy or create cloud resources.
+- Do not run migrations, seed/bootstrap, raw SQL, `drizzle-kit push`, destructive data operations, or real provider calls without separate task-specific approval.
+- Do not modify source, tests, e2e, schema, drizzle migrations, scripts, package files, lockfiles, or dependencies during the docs-only planning task.
+- Do not claim customer acceptance or production readiness.
+
+Dependency order:
+
+- Starts after Phase 21 closeout and fresh local/dev DB validation flow documentation.
+- First task is `phase-22-mvp-local-acceptance-reaudit-planning`, which is docs-only and seeds the Phase 22 review approach.
+- Local browser/runtime verification must be a later `local_verification` task with explicit local-only approval, startup report, target route matrix, and evidence hygiene.
+- Any DB, env, migration, seed/bootstrap, provider, staging, cloud, deploy, dependency, source, test, e2e, script, schema, or drizzle change requires a separate approved task.

@@ -13997,3 +13997,96 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-fresh-local-dev-db-validation-flow-docs.md
     status: closed
     retryCount: 0
+  - id: phase-22-mvp-local-acceptance-reaudit-planning
+    title: Phase 22 MVP Local Acceptance Re-Audit Planning
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: user-request-2026-06-01-phase-22-mvp-local-acceptance-reaudit
+    dependencies:
+      - phase-21-fresh-local-dev-db-validation-flow-docs
+    taskPlanPolicy: required
+    humanApproval: "User agreed with the recommendation to organize a Phase 22 MVP local acceptance re-audit and asked the agent to continue under the mechanism rules. This first task is docs/state/interface planning only: persist the Phase 22 contract, update roadmap/state/queue, create a task plan, create evidence, and produce a re-audit planning report based on the existing 64-item Phase 18/19 matrix and Phase 20/21 closeout evidence. It must not read or modify .env.local or .env.example; must not run DB connections, migrations, seed/bootstrap, raw SQL, drizzle-kit push, destructive data, dev server, browser verification, e2e, staging/prod/cloud/deploy, real provider, or external services; and must not modify source, tests, e2e, scripts, schema, drizzle, dependencies, package files, or lockfiles."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/02-architecture/interfaces/phase-22-mvp-local-acceptance-reaudit-contract.md
+      - docs/04-agent-system/milestones-goals/mvp-roadmap.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - automation_state
+      - release_readiness
+      - product_readiness
+      - blocked_gate
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\02-architecture\interfaces\phase-22-mvp-local-acceptance-reaudit-contract.md docs\04-agent-system\milestones-goals\mvp-roadmap.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md docs\05-execution-logs\evidence\2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md docs\05-execution-logs\audits-reviews\2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md
+    status: closed
+    retryCount: 0
+  - id: phase-22-mvp-local-acceptance-runtime-verification
+    title: Phase 22 MVP Local Acceptance Runtime Verification
+    phase: phase-22-mvp-local-acceptance-reaudit
+    sourceStory: docs/05-execution-logs/audits-reviews/2026-06-01-phase-22-mvp-local-acceptance-reaudit-planning.md#next-task
+    dependencies:
+      - phase-22-mvp-local-acceptance-reaudit-planning
+    taskPlanPolicy: required
+    humanApproval: "Seeded by the Phase 22 planning task. This future task requires a fresh explicit approval before it may run local dev server, browser verification, e2e, DB-backed API checks, seed/bootstrap, or validation data preparation. It remains local-only and must not read or modify .env.local or .env.example; must not run migrations, raw SQL, drizzle-kit push, destructive data, staging/prod/cloud/deploy, real provider, external service, dependency, package/lockfile, schema, drizzle, or script changes."
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_human_verification
+      - product_readiness
+      - release_readiness
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git status --short --branch
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-verification.md
+    status: blocked
+    retryCount: 0
