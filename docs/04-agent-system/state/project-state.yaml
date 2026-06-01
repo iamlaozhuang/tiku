@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: phase-21-high-risk-tail-closure
-updatedAt: "2026-06-01T01:45:00-07:00"
+updatedAt: "2026-06-01T10:40:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: dbe7bf0219f39c5237d6a13b7d19124fbbab4e9f
-  lastKnownOriginMasterSha: dbe7bf0219f39c5237d6a13b7d19124fbbab4e9f
+  lastKnownMasterSha: 200c56656a31f7776b5e32f690a86341884001c6
+  lastKnownOriginMasterSha: 200c56656a31f7776b5e32f690a86341884001c6
 currentTask:
-  id: phase-21-ai-scoring-retry-local-dev-repair-approval-package
+  id: phase-21-ai-scoring-retry-fresh-local-dev-migration-verification
   status: closed
-  sourceStory: user-request-2026-06-01-batch-session-ai-scoring-retry-local-dev-repair-approval-package
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-ai-scoring-retry-local-dev-repair-approval-package.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-local-dev-repair-approval-package.md
-  branch: codex/ai-scoring-retry-local-dev-repair-approval
+  sourceStory: user-request-2026-06-01-fresh-local-dev-db-ai-scoring-retry-migration
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification.md
+  branch: codex/ai-scoring-retry-fresh-local-dev-migration
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Batch repair approval package is ready. Await explicit human selection and approval before any env read, DB connection, migration, raw SQL, reset/rebuild, migration table repair, schema/drizzle/src/tests/e2e change, staging/prod/cloud/deploy, or real provider work."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-local-dev-repair-approval-package.md
+  nextRecommendedAction: "Fresh local/dev DB migration verification passed after approved local/dev seed/bootstrap and API-generated validation data. Task is locally merged to master; push master and cleanup are authorized by the user request and performed as final shell actions."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-ai-scoring-retry-fresh-local-dev-migration-verification.md
