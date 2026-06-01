@@ -13357,3 +13357,57 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-common-ux-state-audit-startup.md
     status: closed
     retryCount: 0
+  - id: phase-21-admin-common-ux-state-audit-implementation
+    title: Phase 21 Admin Common UX State Audit Implementation
+    phase: phase-21-high-risk-tail-closure
+    sourceStory: user-request-2026-05-31-admin-common-ux-state-audit-implementation
+    dependencies:
+      - phase-21-admin-common-ux-state-audit-startup
+      - phase-21-tail-admin-concurrency-permission-split-design
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved the fresh Admin common UX state audit implementation after merging and cleaning the startup branch. Approved risk types are admin_ops, browser_runtime, local_human_verification, and evidence_integrity. Scope excludes env files, package or lockfile changes, schema, Drizzle, scripts, staging/prod/cloud/deploy, real provider, destructive data, and force push.
+    taskKind: implementation
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/(admin)/**
+      - src/app/api/v1/**
+      - src/components/admin/**
+      - src/features/admin/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/services/**
+      - src/server/validators/**
+      - tests/**
+      - e2e/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    riskTypes:
+      - admin_ops
+      - browser_runtime
+      - local_human_verification
+      - evidence_integrity
+    securityReviewRequired: true
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-common-ux-state-audit-implementation.md
+    status: committed
+    retryCount: 0

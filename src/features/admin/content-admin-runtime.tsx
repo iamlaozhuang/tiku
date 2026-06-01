@@ -14,6 +14,7 @@ export type AdminLoadState =
   | "empty"
   | "unauthorized"
   | "error";
+type AdminUxState = "loading" | "empty" | "error" | "permission-denied";
 
 export const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 export const DEFAULT_CONTENT_LIST_QUERY =
@@ -103,15 +104,24 @@ export function AdminSurfaceStatus({
   action,
   description,
   icon,
+  state,
   title,
 }: {
   action?: ReactNode;
   description: string;
   icon: ReactNode;
+  state: Exclude<AdminUxState, "loading">;
   title: string;
 }) {
+  const role = state === "empty" ? "status" : "alert";
+
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-xl flex-col items-center justify-center gap-4 px-6 text-center">
+    <main
+      aria-live={role === "status" ? "polite" : "assertive"}
+      className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-xl flex-col items-center justify-center gap-4 px-6 text-center"
+      data-admin-ux-state={state}
+      role={role}
+    >
       <div className="bg-secondary text-secondary-foreground flex size-11 items-center justify-center rounded-full">
         {icon}
       </div>
@@ -139,6 +149,7 @@ export function AdminUnauthorizedState() {
       }
       description="后台数据需要有效的管理员会话，请登录后再查看。"
       icon={<AlertCircle aria-hidden="true" className="size-5" />}
+      state="permission-denied"
       title="请先登录后台"
     />
   );
@@ -146,7 +157,12 @@ export function AdminUnauthorizedState() {
 
 export function AdminLoadingState({ label }: { label: string }) {
   return (
-    <main className="space-y-4">
+    <main
+      aria-live="polite"
+      className="space-y-4"
+      data-admin-ux-state="loading"
+      role="status"
+    >
       <div className="text-text-secondary flex items-center gap-2 text-sm">
         <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
         {label}
@@ -178,6 +194,7 @@ export function AdminErrorState({
     <AdminSurfaceStatus
       description={description}
       icon={<AlertCircle aria-hidden="true" className="size-5" />}
+      state="error"
       title={title}
     />
   );
@@ -194,6 +211,7 @@ export function AdminEmptyState({
     <AdminSurfaceStatus
       description={description}
       icon={<CheckCircle2 aria-hidden="true" className="size-5" />}
+      state="empty"
       title={title}
     />
   );
