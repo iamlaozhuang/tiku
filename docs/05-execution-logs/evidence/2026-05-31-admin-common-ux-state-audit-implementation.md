@@ -187,8 +187,21 @@ Final gate details: lint pass, typecheck pass, test:unit pass, format:check pass
 ```text
 branch: codex/phase-21-admin-common-ux-state-audit-implementation
 base: master bdd5ac952390567c55e857f1c6910ea1b4700c2b
-commit: pending at evidence write time
-merge: skipped, not approved for implementation branch
-push: skipped, not approved for implementation branch
-cleanup: skipped, branch is intentionally preserved for review
+implementation commit: e53d5b0db78d470bc56ae53899e46d4fedfe4f45
+merge: fast-forwarded into master, bdd5ac95..e53d5b0d
+push: origin/master updated, bdd5ac95..e53d5b0d
+cleanup: local branch codex/phase-21-admin-common-ux-state-audit-implementation deleted after verifying it was merged
+```
+
+Post-merge validation on `master`:
+
+```text
+git diff --check: pass
+npm.cmd run test:unit: pass, 150 files / 623 tests
+npm.cmd run build: first run failed on transient Google font fetch/internal font module resolution; rerun passed
+npm.cmd run test:e2e: pass, 26 tests
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1: pass
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master: pass
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1: pass
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1: pass
 ```
