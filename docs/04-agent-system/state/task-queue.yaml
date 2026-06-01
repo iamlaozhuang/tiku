@@ -16202,3 +16202,329 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-readiness-closeout.md
     status: closed
     retryCount: 0
+  - id: phase-29-staging-procurement-and-approval-prep
+    title: Phase 29 Staging Procurement And Approval Prep Batch
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: user-request-2026-06-01-phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-28-owner-acceptance-readiness-closeout
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved a new serial docs-only batch named phase-29-staging-procurement-and-approval-prep. Scope is procurement and approval preparation only: resource inventory, secret/env approval package, migration/rollback plan, owner acceptance runbook, real-provider redaction decision input, closeout evidence, and state/queue updates. The user explicitly approved commit, merge master, push master, and cleanup of the merged short-lived branch. Prohibited: product code, scripts, tests, e2e, env files, package/lockfiles/dependencies, schema/drizzle/migrations, raw SQL, drizzle-kit push, migration table repair, DB reset/drop/truncate/delete/volume reset/destructive data operations, staging/prod/cloud/deploy/real provider/external service, force push, unknown worktree deletion, unmerged branch deletion, and evidence disclosure of DB URLs, credentials, provider payloads, raw prompts, raw student answers, raw model responses, or plaintext redeem_code."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - release_readiness
+      - blocked_gate
+      - secret
+      - migration
+      - external_service
+      - evidence_integrity
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-and-approval-prep-batch.md
+    status: closed
+    retryCount: 0
+  - id: phase-29-staging-procurement-preflight
+    title: Phase 29 Staging Procurement Preflight
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-29-staging-procurement-and-approval-prep
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 29 docs-only batch approval. Scope recovers Git/state/queue/blocked gates/latest evidence, confirms branch isolation and allowed files, and records that no procurement, staging/prod/cloud/deploy, secret/env, DB, provider, or product-code action is approved."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-29-staging-procurement-preflight.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-preflight.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - evidence_integrity
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-preflight.md
+    status: closed
+    retryCount: 0
+  - id: phase-29-tencent-cloud-resource-inventory-plan
+    title: Phase 29 Tencent Cloud Resource Inventory Plan
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-29-staging-procurement-preflight
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 29 docs-only batch approval. Scope prepares procurement inventory and approval inputs for Tencent Cloud resource categories only. Do not purchase, create, modify, deploy, connect, or configure cloud resources."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-29-tencent-cloud-resource-inventory-plan.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-tencent-cloud-resource-inventory-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - release_readiness
+      - external_service
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-06-01-phase-29-tencent-cloud-resource-inventory-plan.md' -Pattern 'PostgreSQL|pgvector|对象存储|应用部署|域名|TLS|日志|监控|告警|备份|恢复|账号|权限'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-tencent-cloud-resource-inventory-plan.md
+    status: closed
+    retryCount: 0
+  - id: phase-29-staging-secret-env-approval-package
+    title: Phase 29 Staging Secret Env Approval Package
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-29-tencent-cloud-resource-inventory-plan
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 29 docs-only batch approval. Scope lists required variables, owner, storage location, rotation/rollback, and evidence redaction rules without reading or modifying .env files or creating secrets."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-29-staging-secret-env-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-secret-env-approval-package.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - secret
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-06-01-phase-29-staging-secret-env-approval-package.md' -Pattern 'APP_ENV|APP_BASE_URL|DATABASE_URL|BETTER_AUTH_SECRET|OBJECT_STORAGE|AI_PROVIDER_ENABLED|owner|rotation|rollback|redaction'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-secret-env-approval-package.md
+    status: closed
+    retryCount: 0
+  - id: phase-29-staging-database-migration-rollback-plan
+    title: Phase 29 Staging Database Migration Rollback Plan
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-29-staging-secret-env-approval-package
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 29 docs-only batch approval. Scope prepares staging migration input, backup point, rollback decision point, drift check, and drizzle-kit push prohibition. Do not run migrations, raw SQL, DB commands, or connect to staging/prod."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-29-staging-database-migration-rollback-plan.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-database-migration-rollback-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - migration
+      - destructive_data_operation
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-06-01-phase-29-staging-database-migration-rollback-plan.md' -Pattern 'migration input|backup point|rollback decision point|drift check|drizzle-kit push'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-database-migration-rollback-plan.md
+    status: closed
+    retryCount: 0
+  - id: phase-29-staging-owner-acceptance-runbook
+    title: Phase 29 Staging Owner Acceptance Runbook
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-29-staging-database-migration-rollback-plan
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 29 docs-only batch approval. Scope converts Phase 28 role scripts into a future staging acceptance execution order, data prerequisites, and result record template. Do not run acceptance, browser, DB, deploy, provider, or cloud actions."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-29-staging-owner-acceptance-runbook.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-owner-acceptance-runbook.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - product_readiness
+      - release_readiness
+      - evidence_integrity
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-06-01-phase-29-staging-owner-acceptance-runbook.md' -Pattern 'S1|A1|result record|data prerequisite|staging'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-owner-acceptance-runbook.md
+    status: closed
+    retryCount: 0
+  - id: phase-29-real-provider-redaction-approval-decision
+    title: Phase 29 Real Provider Redaction Approval Decision
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-29-staging-owner-acceptance-runbook
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 29 docs-only batch approval. Scope keeps real-provider redaction blocked by default and lists approval inputs only. Do not call providers, configure secrets, enable quota, connect staging/prod, or write sensitive payloads to evidence."
+    taskKind: blocked_gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-29-real-provider-redaction-approval-decision.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-real-provider-redaction-approval-decision.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - blocked_gate
+      - secret
+      - external_service
+      - evidence_integrity
+    validationCommands:
+      - Select-String -Path 'docs\05-execution-logs\evidence\2026-06-01-phase-29-real-provider-redaction-approval-decision.md' -Pattern 'real-provider-staging-redaction|blocked|approval inputs|kill-switch|redaction'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-real-provider-redaction-approval-decision.md
+    status: closed
+    retryCount: 0
+  - id: phase-29-staging-procurement-approval-closeout
+    title: Phase 29 Staging Procurement Approval Closeout
+    phase: phase-29-staging-procurement-and-approval-prep
+    sourceStory: phase-29-staging-procurement-and-approval-prep
+    dependencies:
+      - phase-29-real-provider-redaction-approval-decision
+    taskPlanPolicy: required
+    humanApproval: "Covered by the 2026-06-01 Phase 29 docs-only batch approval. Scope writes closeout evidence, records blocked gates and human approvals required before phase-30-staging-dry-run-after-approval, runs read-only/governance validation, commits, merges to master, pushes master, and cleans the merged short-lived branch. No force push."
+    taskKind: closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-01-phase-29-staging-procurement-approval-closeout.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-approval-closeout.md
+      - docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-and-approval-prep-batch.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - release_readiness
+      - automation_state
+      - blocked_gate
+      - secret
+      - migration
+      - external_service
+      - evidence_integrity
+    validationCommands:
+      - git status --short --branch
+      - git rev-list --left-right --count master...origin/master
+      - git branch --list
+      - git branch --no-merged master
+      - git worktree list
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-NamingConventions.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-QualityGate.ps1
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-approval-closeout.md
+    status: closed
+    retryCount: 0

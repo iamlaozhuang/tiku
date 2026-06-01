@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-28-owner-acceptance-prep
-updatedAt: "2026-06-01T06:20:00-07:00"
+  currentPhase: phase-29-staging-procurement-and-approval-prep
+updatedAt: "2026-06-01T06:23:44-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 47deffba20634e8711bf9091c11c7a05e001194b
-  lastKnownOriginMasterSha: 47deffba20634e8711bf9091c11c7a05e001194b
+  lastKnownMasterSha: 9df239e1cf7e55754b092fa930cf4eb56cdab95d
+  lastKnownOriginMasterSha: 9df239e1cf7e55754b092fa930cf4eb56cdab95d
 currentTask:
-  id: phase-28-owner-acceptance-readiness-closeout
+  id: phase-29-staging-procurement-approval-closeout
   status: closed
-  sourceStory: phase-27-blocked-queue-reconciliation-and-owner-acceptance-prep-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-28-owner-acceptance-readiness-closeout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-28-owner-acceptance-readiness-closeout.md
-  branch: codex/phase-27-owner-acceptance-prep
+  sourceStory: phase-29-staging-procurement-and-approval-prep
+  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-29-staging-procurement-approval-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-approval-closeout.md
+  branch: codex/phase-29-staging-procurement-and-approval-prep
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 27/28 docs-only batch reconciled the three historical blocked queue items as superseded and prepared an owner-facing acceptance package. Next recommended action is a staging implementation approval package that explicitly covers secret/env, cloud/deploy, database/resource inventory, migration/rollback, monitoring, owner accounts, and optional real-provider redaction gates before any staging implementation."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-27-28-blocked-queue-and-owner-acceptance-batch.md
+  nextRecommendedAction: "Phase 29 docs-only batch prepared procurement and approval materials for future staging implementation. Next eligible follow-up is phase-30-staging-dry-run-after-approval only after explicit human approval unlocks required staging cloud/resource, secret/env, migration/rollback, domain/TLS/callback, monitoring, and owner acceptance inputs. Real-provider redaction remains blocked unless separately approved."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-and-approval-prep-batch.md
