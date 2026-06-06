@@ -17624,3 +17624,349 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md
     status: done
     retryCount: 0
+  - id: phase-32-advanced-edition-doc-governance-batch-queueing
+    title: Phase 32 Advanced Edition Doc Governance Batch Queueing
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: user-approved serial docs-only governance hardening batch queueing
+    dependencies:
+      - phase-32-advanced-edition-doc-governance-state-sync
+    taskPlanPolicy: required
+    humanApproval: "User approved arranging the next docs-only governance items as a serial batch. Each productive task must be followed by a paired review task. If review passes, the task branch may be committed, merged to master, pushed to origin/master, and cleaned up. Scope remains docs-only; no product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, Cost Calibration Gate execution, or code-stage queue seeding."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-32-advanced-edition-doc-governance-batch-queueing.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-32-advanced-edition-doc-governance-batch-queueing.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-phase-32-advanced-edition-doc-governance-batch-queueing-review.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-phase-32-advanced-edition-doc-governance-batch-queueing.md docs\05-execution-logs\evidence\2026-06-06-phase-32-advanced-edition-doc-governance-batch-queueing.md docs\05-execution-logs\audits-reviews\2026-06-06-phase-32-advanced-edition-doc-governance-batch-queueing-review.md
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-32-advanced-edition-doc-source-of-truth-index','phase-32-advanced-edition-cost-calibration-blocked-gate-clarification','phase-32-advanced-edition-evidence-redaction-template','phase-32-advanced-edition-implementation-boundary-checklist','review','taskKind: docs_only'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-32-advanced-edition-doc-governance-batch-queueing.md
+    status: done
+    retryCount: 0
+  - id: phase-32-advanced-edition-doc-source-of-truth-index
+    title: Phase 32 Advanced Edition Document Source Of Truth Index
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: phase-32-advanced-edition-doc-governance-batch-queueing
+    dependencies:
+      - phase-32-advanced-edition-doc-governance-batch-queueing
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-doc-source-of-truth-index.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - governance_state
+      - source_of_truth
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\2026-06-06-advanced-edition-doc-source-of-truth-index.md -Pattern 'Source Of Truth','Read Order','Blocked Work','Cost Calibration Gate remains blocked','code-stage queue seeding remains paused'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-doc-source-of-truth-index.md
+    status: pending
+    retryCount: 0
+  - id: phase-32-advanced-edition-doc-source-of-truth-index-review
+    title: Phase 32 Advanced Edition Document Source Of Truth Index Review
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md
+    dependencies:
+      - phase-32-advanced-edition-doc-source-of-truth-index
+    taskPlanPolicy: required
+    humanApproval: "User approved serial docs-only batch progression. After this paired review records pass and validation evidence is complete, Codex may commit the productive task and review, merge the short branch to master, push origin/master, and clean up the merged short branch. Scope remains docs-only; no code-stage implementation, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate execution."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-doc-source-of-truth-index-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-doc-source-of-truth-index-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-doc-source-of-truth-index-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_review
+      - governance_state
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-doc-source-of-truth-index-review.md -Pattern 'pass','Scope Review','Blocking Findings','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-doc-source-of-truth-index-review.md
+    status: pending
+    retryCount: 0
+  - id: phase-32-advanced-edition-cost-calibration-blocked-gate-clarification
+    title: Phase 32 Advanced Edition Cost Calibration Blocked Gate Clarification
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: phase-32-advanced-edition-doc-governance-batch-queueing
+    dependencies:
+      - phase-32-advanced-edition-doc-source-of-truth-index-review
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/advanced-edition-cost-calibration-blocked-gate.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - blocked_gate
+      - provider_cost_measurement
+      - governance_state
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\04-agent-system\sop\advanced-edition-cost-calibration-blocked-gate.md -Pattern 'blocked','fresh explicit approval','provider','env/secret','staging','prod','cloud','deploy','payment','external-service'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification.md
+    status: pending
+    retryCount: 0
+  - id: phase-32-advanced-edition-cost-calibration-blocked-gate-clarification-review
+    title: Phase 32 Advanced Edition Cost Calibration Blocked Gate Clarification Review
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: docs/04-agent-system/sop/advanced-edition-cost-calibration-blocked-gate.md
+    dependencies:
+      - phase-32-advanced-edition-cost-calibration-blocked-gate-clarification
+    taskPlanPolicy: required
+    humanApproval: "User approved serial docs-only batch progression. After this paired review records pass and validation evidence is complete, Codex may commit the productive task and review, merge the short branch to master, push origin/master, and clean up the merged short branch. Scope remains docs-only and must not execute Cost Calibration Gate or touch provider, env/secret, staging/prod/cloud/deploy, payment, or external-service work."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/advanced-edition-cost-calibration-blocked-gate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_review
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md -Pattern 'pass','Scope Review','Blocking Findings','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md
+    status: pending
+    retryCount: 0
+  - id: phase-32-advanced-edition-evidence-redaction-template
+    title: Phase 32 Advanced Edition Evidence Redaction Template
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: phase-32-advanced-edition-doc-governance-batch-queueing
+    dependencies:
+      - phase-32-advanced-edition-cost-calibration-blocked-gate-clarification-review
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/advanced-edition-evidence-redaction-template.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-evidence-redaction-template.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - evidence_integrity
+      - redaction_policy
+      - audit_log
+      - ai_call_log
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\04-agent-system\sop\advanced-edition-evidence-redaction-template.md -Pattern 'audit_log','ai_call_log','redeem_code','prompt','provider payload','secret','token'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template.md
+    status: pending
+    retryCount: 0
+  - id: phase-32-advanced-edition-evidence-redaction-template-review
+    title: Phase 32 Advanced Edition Evidence Redaction Template Review
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: docs/04-agent-system/sop/advanced-edition-evidence-redaction-template.md
+    dependencies:
+      - phase-32-advanced-edition-evidence-redaction-template
+    taskPlanPolicy: required
+    humanApproval: "User approved serial docs-only batch progression. After this paired review records pass and validation evidence is complete, Codex may commit the productive task and review, merge the short branch to master, push origin/master, and clean up the merged short branch. Scope remains docs-only; no sensitive payload, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate execution."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/advanced-edition-evidence-redaction-template.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-evidence-redaction-template-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-evidence-redaction-template-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_review
+      - evidence_integrity
+      - redaction_policy
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-evidence-redaction-template-review.md -Pattern 'pass','Scope Review','Blocking Findings','Sensitive Field Review'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template-review.md
+    status: pending
+    retryCount: 0
+  - id: phase-32-advanced-edition-implementation-boundary-checklist
+    title: Phase 32 Advanced Edition Implementation Boundary Checklist
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: phase-32-advanced-edition-doc-governance-batch-queueing
+    dependencies:
+      - phase-32-advanced-edition-evidence-redaction-template-review
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/advanced-edition-implementation-boundary-checklist.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-implementation-boundary-checklist.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-boundary-checklist.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_boundary
+      - terminology_review
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\04-agent-system\sop\advanced-edition-implementation-boundary-checklist.md -Pattern 'authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','formal content separation'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-boundary-checklist.md
+    status: pending
+    retryCount: 0
+  - id: phase-32-advanced-edition-implementation-boundary-checklist-review
+    title: Phase 32 Advanced Edition Implementation Boundary Checklist Review
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: docs/04-agent-system/sop/advanced-edition-implementation-boundary-checklist.md
+    dependencies:
+      - phase-32-advanced-edition-implementation-boundary-checklist
+    taskPlanPolicy: required
+    humanApproval: "User approved serial docs-only batch progression. After this paired review records pass and validation evidence is complete, Codex may commit the productive task and review, merge the short branch to master, push origin/master, and clean up the merged short branch. Scope remains docs-only and must not create code-stage implementation subtasks or execute any blocked gate."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/advanced-edition-implementation-boundary-checklist.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-implementation-boundary-checklist-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-implementation-boundary-checklist-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-boundary-checklist-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_review
+      - implementation_boundary
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-implementation-boundary-checklist-review.md -Pattern 'pass','Scope Review','Terminology Review','Blocking Findings'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-boundary-checklist-review.md
+    status: pending
+    retryCount: 0
