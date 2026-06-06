@@ -17853,7 +17853,7 @@ tasks:
       - git diff --check
       - Select-String -Path docs\04-agent-system\sop\advanced-edition-evidence-redaction-template.md -Pattern 'audit_log','ai_call_log','redeem_code','prompt','provider payload','secret','token'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-32-advanced-edition-evidence-redaction-template-review
     title: Phase 32 Advanced Edition Evidence Redaction Template Review
@@ -17892,7 +17892,7 @@ tasks:
       - git diff --check
       - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-evidence-redaction-template-review.md -Pattern 'pass','Scope Review','Blocking Findings','Sensitive Field Review'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template-review.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-32-advanced-edition-implementation-boundary-checklist
     title: Phase 32 Advanced Edition Implementation Boundary Checklist
