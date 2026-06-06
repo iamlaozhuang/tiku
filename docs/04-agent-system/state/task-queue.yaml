@@ -16528,3 +16528,226 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-approval-closeout.md
     status: closed
     retryCount: 0
+  - id: phase-30-advanced-edition-mvp-requirements-plan
+    title: Phase 30 Advanced Edition MVP Requirements Queue Plan
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: user-request-2026-06-06-advanced-edition-mvp-requirements-queue
+    dependencies:
+      - phase-29-staging-procurement-approval-closeout
+    taskPlanPolicy: required
+    humanApproval: "User explicitly approved constructing a lightweight serial mechanism and starting the advanced edition MVP requirements queue. Scope is docs-only queue seeding and project-state handoff for the confirmed main loop: advanced personal AI question/paper generation, organization admin training creation, employee answering/statistics, and operations authorization/quota management. Do not write product code, schema, API implementation, dependencies, env files, provider calls, staging/prod/cloud/deploy actions, online payment, or real customer/customer-like data operations."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-mvp-requirements-queue.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-queue.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - requirements_scope
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-advanced-edition-mvp-requirements-queue.md docs\05-execution-logs\evidence\2026-06-06-advanced-edition-mvp-requirements-queue.md
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-30-advanced-edition-mvp-requirements-plan','phase-30-advanced-edition-mvp-requirements-review'
+      - Select-String -Path docs\04-agent-system\state\project-state.yaml -Pattern 'phase-30-advanced-edition-mvp-requirements'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-queue.md
+    status: done
+    retryCount: 0
+  - id: phase-30-advanced-edition-mvp-scope-and-source
+    title: Phase 30 Advanced Edition MVP Scope And Source Of Truth
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: docs/superpowers/specs/2026-06-05-advanced-edition-ai-generation-design.md
+    dependencies:
+      - phase-30-advanced-edition-mvp-requirements-plan
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_scope
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'MVP Main Loop','Source Of Truth','Non-Goals'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-scope-and-source.md
+    status: done
+    retryCount: 0
+  - id: phase-30-advanced-edition-integration-matrix
+    title: Phase 30 Advanced Edition Existing Module Integration Matrix
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-mvp-scope-and-source
+    dependencies:
+      - phase-30-advanced-edition-mvp-scope-and-source
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_scope
+      - formal_content_boundary
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Existing Module Integration Matrix','question','paper','practice','mock_exam','exam_report','mistake_book'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-integration-matrix.md
+    status: done
+    retryCount: 0
+  - id: phase-30-advanced-edition-role-boundary-matrix
+    title: Phase 30 Advanced Edition Role And Data Boundary Matrix
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-integration-matrix
+    dependencies:
+      - phase-30-advanced-edition-integration-matrix
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - permission_boundary
+      - privacy_boundary
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Role And Data Boundary Matrix','personal_auth','org_auth','organization','employee','ops_admin'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-role-boundary-matrix.md
+    status: pending
+    retryCount: 0
+  - id: phase-30-advanced-edition-acceptance-scenarios
+    title: Phase 30 Advanced Edition MVP Acceptance Scenarios
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-role-boundary-matrix
+    dependencies:
+      - phase-30-advanced-edition-role-boundary-matrix
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - acceptance_scope
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Acceptance Scenarios','AI 出题','AI 组卷','企业训练','授权','额度'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-acceptance-scenarios.md
+    status: pending
+    retryCount: 0
+  - id: phase-30-advanced-edition-mvp-requirements-review
+    title: Phase 30 Advanced Edition MVP Requirements Review
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-acceptance-scenarios
+    dependencies:
+      - phase-30-advanced-edition-acceptance-scenarios
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_review
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Follow-Up Decision Queue','Traceability To Existing Decisions'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-review.md
+    status: pending
+    retryCount: 0
