@@ -55,6 +55,7 @@ Future implementation should keep formal content and personal AI learning conten
   - Normalize question generation constraints, `paper` generation constraints, list filters, and generated practice answer input.
 - Create only if REST surface is in scope: `src/server/services/ai-generated-learning-route.ts`.
 - Create only if REST surface is in scope: `src/app/api/v1/ai-generated-learning/**/route.ts`.
+- Create only if user-facing Web surface is in scope: `src/app/(student)/ai-generated-learning/**`.
 - Test: `src/server/services/ai-generated-learning-service.test.ts`.
 - Test: `src/server/mappers/ai-generated-learning-mapper.test.ts`.
 - Test: `src/server/validators/ai-generated-learning.test.ts`.
@@ -287,13 +288,18 @@ Generated `paper` is not a formal `paper` and must never be listed by `student-p
 
 - Create only if API surface is in scope: `src/server/services/ai-generated-learning-route.ts`
 - Create only if API surface is in scope: `src/app/api/v1/ai-generated-learning/**/route.ts`
+- Create only if user-facing Web surface is in scope: `src/app/(student)/ai-generated-learning/**`
 - Test: route-level tests if routes are added.
+- Test: Web surface tests if pages are added.
 
 - [ ] Add thin route handlers after service tests pass.
 - [ ] Keep responses in `{ code, message, data, pagination? }`.
 - [ ] Use public ids in route paths.
 - [ ] Use verb subpaths only for actions such as submit, cancel, or start generated practice.
 - [ ] Keep resource nesting within the two-level API boundary.
+- [ ] Add owner-facing list, detail, task status, and generated practice entry states when Web pages are included.
+- [ ] Verify Loading, Empty, and Error states for generated content list/detail surfaces.
+- [ ] Clearly mark generated learning content as AI-generated and isolated from formal `question`, `paper`, `practice`, and `mock_exam`.
 
 ## Required Acceptance Tests
 
@@ -326,3 +332,10 @@ Generated `paper` is not a formal `paper` and must never be listed by `student-p
 - Organization analytics planning must treat personal AI learning content as owner-private body content and use only aggregate summaries where allowed.
 - Operations authorization and quota planning must provide quota reservation/finalization and visible consumption summaries for `personal_auth` users.
 - Retention/log governance must apply the confirmed 90-day retention and 30-day recovery window to personal AI learning generated content.
+
+## Post-Review Clarifications
+
+- User-facing implementation must include list/detail/task status surfaces when the product flow is exposed in Web, not only service contracts. These surfaces must include Loading, Empty, and Error states.
+- Generated personal learning content must be explicitly marked as AI-generated in owner-facing surfaces and must not visually or semantically appear as formal `question`, formal `paper`, formal `practice`, or formal `mock_exam`.
+- Generated practice is a separate AI learning practice flow. Future implementation must not call formal `practice-service` write methods as a shortcut.
+- The optional route wording means route/page creation depends on the later implementation task's transport scope, not that owner-facing access may be skipped from the product flow.
