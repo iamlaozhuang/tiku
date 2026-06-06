@@ -262,8 +262,15 @@
 | AI 额度与异步任务       | `Quota Unit And Configuration`, `Quota Defaults And Consumption Table`, `Quota Package And Ledger Rules`, `Worker Runtime And Recovery`, `Peak Capacity And Degradation Strategy` |
 | 内容保留与日志治理      | `Expired Content Governance`, `Log And Evidence Redaction`                                                                                                                        |
 
+## Operations Configuration Contract
+
+运营配置清单按独立配置 contract 维护，不在本 MVP 需求规格正文中展开全部配置项。
+
+- Contract path: `docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md`
+- 覆盖范围：企业后台开关、授权/额度配置、额度包与额度流水、异步任务、高峰降级、内容保留、到期隐藏、硬删除审批、受控快照例外、`audit_log`、`ai_call_log` 和 evidence 脱敏。
+- 本 MVP 需求规格只约束主闭环、角色边界、验收场景和与既有模块的衔接边界。
+- 配置 contract 约束配置项、作用域、治理规则和审计要求；具体默认点数、时长、阈值仍需在进入实现拆分前单独确认。
+
 ## Follow-Up Decision Queue
 
-当前 MVP 需求规格仍需按串行队列继续确认：
-
-1. 运营配置清单是否进入本文档正文，还是后续单独形成配置 contract。
+当前 MVP 需求规格中的 follow-up decision queue 已全部定稿。后续若出现新的产品、运营、合规或实现问题，应新增 follow-up decision queue，不得复用已定稿条目。
