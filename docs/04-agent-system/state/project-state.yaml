@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: ebb0827e21b681fc6c534e8a534513a72085f452
-  lastKnownOriginMasterSha: 6ede04992bad11fdab60aa6b20590127d45a183e
+  lastKnownMasterSha: 66a086d87c8c5f08b32c666fa0dd55bb8e5e2a6e
+  lastKnownOriginMasterSha: 66a086d87c8c5f08b32c666fa0dd55bb8e5e2a6e
 currentTask:
-  id: phase-31-advanced-edition-retention-log-governance-implementation-plan
+  id: phase-31-advanced-edition-requirements-handoff-hardening
   status: done
-  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-7-retention-expired-hidden-audit-log-and-ai-call-log-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
-  branch: master
+  sourceStory: user-approved requirements-stage batch hardening after Phase 31 implementation planning completion
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-handoff-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening.md
+  branch: codex/advanced-edition-requirements-handoff-hardening
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Advanced edition retention and log governance implementation plan merged into master and post-merge validation passed. No remaining executable Phase 31 advanced edition implementation planning task is pending. Cost Calibration Gate remains blocked pending fresh approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-retention-log-governance-post-merge-master-validation.md
+  nextRecommendedAction: "Advanced edition requirements-stage handoff hardening package drafted and reviewed. Next action is docs-only validation, commit, merge to master, push, and short branch cleanup. Cost Calibration Gate remains blocked pending fresh approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening.md
