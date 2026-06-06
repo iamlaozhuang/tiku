@@ -273,4 +273,6 @@
 
 ## Follow-Up Decision Queue
 
-当前 MVP 需求规格中的 follow-up decision queue 已全部定稿。后续若出现新的产品、运营、合规或实现问题，应新增 follow-up decision queue，不得复用已定稿条目。
+当前 MVP 主规格中的 follow-up decision queue 已关闭。运营配置 contract 中的 `Default Value Decision Queue` 属于后续默认值决策，不影响本文档作为首期 MVP 需求验收源。
+
+后续若出现新的产品、运营、合规或实现问题，应新增 follow-up decision queue，不得复用已定稿条目。

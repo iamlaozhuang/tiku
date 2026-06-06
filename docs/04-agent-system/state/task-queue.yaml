@@ -16790,5 +16790,5 @@ tasks:
       - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md docs\superpowers\specs\2026-06-06-advanced-edition-ops-config-contract.md
       - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md,docs\superpowers\specs\2026-06-06-advanced-edition-ops-config-contract.md -Pattern 'Follow-Up Decision Queue','Traceability To Existing Decisions','Default Value Decision Queue'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-review.md
-    status: pending
+    status: done
     retryCount: 0
