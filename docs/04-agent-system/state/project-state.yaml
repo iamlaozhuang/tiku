@@ -39,12 +39,12 @@ repository:
   lastKnownMasterSha: 815337415e33fb2b7e4a32181d2d6b9709398bbc
   lastKnownOriginMasterSha: 815337415e33fb2b7e4a32181d2d6b9709398bbc
 currentTask:
-  id: phase-30-advanced-edition-mvp-requirements-review
+  id: phase-30-advanced-edition-default-value-governance
   status: done
-  sourceStory: phase-30-advanced-edition-ops-config-contract
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-mvp-requirements-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-review.md
-  branch: codex/advanced-edition-mvp-requirements-review
+  sourceStory: phase-30-advanced-edition-mvp-requirements-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-default-value-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
+  branch: codex/advanced-edition-default-value-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 30 MVP requirements review is complete. Next recommended discussion is concrete default-value decisions from docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md#default-value-decision-queue, starting with quota package initial points and action consumption points."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-review.md
+  nextRecommendedAction: "Phase 30 default value governance is complete. Next recommended discussion is whether to create a Cost Calibration Gate task queue, or first merge the current stacked docs-only branch chain before continuing default-value and cost-measurement planning."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
