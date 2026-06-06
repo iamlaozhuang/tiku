@@ -39,11 +39,11 @@ repository:
   lastKnownMasterSha: fd11e876c029b53005cdfd9a41652e52a816d7fd
   lastKnownOriginMasterSha: fd11e876c029b53005cdfd9a41652e52a816d7fd
 currentTask:
-  id: phase-30-advanced-edition-mvp-requirements-plan
+  id: phase-30-advanced-edition-mvp-scope-and-source
   status: done
-  sourceStory: user-request-2026-06-06-advanced-edition-mvp-requirements-queue
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-mvp-requirements-queue.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-queue.md
+  sourceStory: docs/superpowers/specs/2026-06-05-advanced-edition-ai-generation-design.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-mvp-scope-and-source.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-scope-and-source.md
   branch: codex/advanced-edition-mvp-requirements-queue
   commitSha: null
   prUrl: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 30 advanced edition MVP requirements queue is seeded. Next eligible task is phase-30-advanced-edition-mvp-scope-and-source: create the MVP requirements document, define source of truth, confirm the main loop boundary, and record non-goals before integration details. Keep the work docs-only and do not write code, schema, API implementation, dependencies, env files, provider calls, staging/prod/cloud/deploy actions, online payment, or real customer/customer-like data operations."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-queue.md
+  nextRecommendedAction: "Phase 30 MVP requirements source-of-truth task is complete. Next eligible task is phase-30-advanced-edition-integration-matrix: define how新增模块衔接 existing formal question, paper, practice, mock_exam, exam_report, and mistake_book domains. Keep the work docs-only and continue confirming one key decision at a time."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-scope-and-source.md

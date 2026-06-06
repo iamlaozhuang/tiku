@@ -16602,7 +16602,7 @@ tasks:
       - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md
       - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'MVP Main Loop','Source Of Truth','Non-Goals'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-scope-and-source.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-30-advanced-edition-integration-matrix
     title: Phase 30 Advanced Edition Existing Module Integration Matrix
