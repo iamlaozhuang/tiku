@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-31-advanced-edition-implementation-planning
-updatedAt: "2026-06-06T00:00:00-07:00"
+  currentPhase: phase-32-advanced-edition-doc-governance-state-sync
+updatedAt: "2026-06-06T09:18:03-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 8133b539ae6b07c76de8806d102ed362151f316f
-  lastKnownOriginMasterSha: 66a086d87c8c5f08b32c666fa0dd55bb8e5e2a6e
+  lastKnownMasterSha: 6d895796fa099c43037bd1c2eb65870e4f342e96
+  lastKnownOriginMasterSha: 6d895796fa099c43037bd1c2eb65870e4f342e96
 currentTask:
-  id: phase-31-advanced-edition-requirements-handoff-hardening
+  id: phase-32-advanced-edition-doc-governance-state-sync
   status: done
-  sourceStory: user-approved requirements-stage batch hardening after Phase 31 implementation planning completion
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-handoff-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening.md
-  branch: master
+  sourceStory: user-approved docs-only governance state sync after Phase 31 advanced edition requirements handoff
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md
+  branch: codex/phase-32-advanced-edition-doc-governance-state-sync
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Advanced edition requirements-stage handoff hardening package merged into master and post-merge validation passed. Requirements phase is ready for later code-stage queue seeding after explicit user direction. Cost Calibration Gate remains blocked pending fresh approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening-post-merge-master-validation.md
+  nextRecommendedAction: "Phase 32 docs-only governance state sync recorded the latest master/origin master SHA and pauses code-stage queue seeding. Next recommended action is advanced edition document governance hardening, such as source-of-truth indexing, blocked-gate clarification, and evidence/redaction templates. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md

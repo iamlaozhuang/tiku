@@ -17585,3 +17585,42 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening.md
     status: done
     retryCount: 0
+  - id: phase-32-advanced-edition-doc-governance-state-sync
+    title: Phase 32 Advanced Edition Doc Governance State Sync
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: user-approved docs-only governance state sync after Phase 31 advanced edition requirements handoff
+    dependencies:
+      - phase-31-advanced-edition-requirements-handoff-hardening
+    taskPlanPolicy: required
+    humanApproval: "User approved starting phase-32-advanced-edition-doc-governance-state-sync. Scope is docs-only governance state synchronization: update project-state.yaml, append this task-queue entry, write task plan and evidence, record latest master/origin master SHA, and state that code-stage queue seeding remains paused. Do not create code-stage implementation subtasks. Do not modify product code, schema, migrations, API, services, UI, tests, e2e, scripts, dependencies, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, or execute Cost Calibration Gate."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md docs\05-execution-logs\evidence\2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md
+      - Select-String -Path docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-32-advanced-edition-doc-governance-state-sync','Cost Calibration Gate remains blocked','code-stage queue seeding remains paused','taskKind: docs_only'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-32-advanced-edition-doc-governance-state-sync.md
+    status: done
+    retryCount: 0
