@@ -315,6 +315,16 @@
 - 配置 contract 约束配置项、作用域、治理规则和审计要求；具体默认点数、时长、阈值仍需在进入实现拆分前单独确认。
 - 2026-06-06 已确认：生成内容保留期按内容域拆分治理，个人/员工 AI 学习型生成内容和企业训练未发布草稿首期均为 90 天，已发布企业训练长期保留，正式 `question` / `paper` 草稿按现有内容管理规则保留；到期隐藏后的恢复窗口首期为 30 天；`audit_log` 首期保留 1095 天；`ai_call_log` 首期保留 180 天。
 
+## Requirements Freeze Handoff
+
+2026-06-06 需求冻结审查结论为 `freeze_ready_for_implementation_planning`。
+
+- Freeze review: `docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-requirements-freeze-review.md`
+- Implementation breakdown prep: `docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md`
+- 本文档继续作为高级版首期 MVP 主闭环、角色边界、验收场景和既有模块衔接的 source of truth。
+- 后续实现拆解必须继续遵守 ops config contract；未确认的生产默认额度点数、AI 行为消耗点数、并发阈值、超时阈值和高峰阈值不得写死。
+- `Cost Calibration Gate` 仍为 blocked gate；未获得新的明确批准前，不得推进 provider 成本测算、真实 provider 调用、env/secret、staging/prod/cloud/deploy、支付或外部服务动作。
+
 ## Follow-Up Decision Queue
 
 当前 MVP 主规格中的 follow-up decision queue 已关闭。运营配置 contract 中的 `Default Value Decision Queue` 属于后续默认值决策，不影响本文档作为首期 MVP 需求验收源。
