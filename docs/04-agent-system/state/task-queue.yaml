@@ -17699,7 +17699,7 @@ tasks:
       - git diff --check
       - Select-String -Path docs\superpowers\plans\2026-06-06-advanced-edition-doc-source-of-truth-index.md -Pattern 'Source Of Truth','Read Order','Blocked Work','Cost Calibration Gate remains blocked','code-stage queue seeding remains paused'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-doc-source-of-truth-index.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-32-advanced-edition-doc-source-of-truth-index-review
     title: Phase 32 Advanced Edition Document Source Of Truth Index Review
@@ -17738,7 +17738,7 @@ tasks:
       - git diff --check
       - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-doc-source-of-truth-index-review.md -Pattern 'pass','Scope Review','Blocking Findings','Cost Calibration Gate remains blocked'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-doc-source-of-truth-index-review.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-32-advanced-edition-cost-calibration-blocked-gate-clarification
     title: Phase 32 Advanced Edition Cost Calibration Blocked Gate Clarification
