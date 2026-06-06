@@ -36,7 +36,7 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 88941421d3229c098285cddeba5ad0c1f8886c16
+  lastKnownMasterSha: 2d33a881441a80263de829b7cec69d8ae3b9461d
   lastKnownOriginMasterSha: 88941421d3229c098285cddeba5ad0c1f8886c16
 currentTask:
   id: phase-31-advanced-edition-organization-training-implementation-plan-review
@@ -44,7 +44,7 @@ currentTask:
   sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
   planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-organization-training-implementation-plan-review.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-implementation-plan-review.md
-  branch: codex/advanced-edition-org-training-plan
+  branch: master
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Advanced edition organization training implementation plan review passed. Next recommended pending task is phase-31-advanced-edition-organization-analytics-implementation-plan, unless the operator chooses to process phase-31-advanced-edition-ops-auth-quota-implementation-plan first. Scope remains docs-only. Cost Calibration Gate remains blocked pending fresh approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-implementation-plan-review.md
+  nextRecommendedAction: "Advanced edition organization training planning merged into master and post-merge validation passed. Next recommended pending task is phase-31-advanced-edition-organization-analytics-implementation-plan, unless the operator chooses to process phase-31-advanced-edition-ops-auth-quota-implementation-plan first. Scope remains docs-only. Cost Calibration Gate remains blocked pending fresh approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-post-merge-master-validation.md
