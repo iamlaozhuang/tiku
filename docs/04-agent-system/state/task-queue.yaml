@@ -16828,3 +16828,80 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
     status: done
     retryCount: 0
+  - id: phase-30-advanced-edition-cost-calibration-gate-queue
+    title: Phase 30 Advanced Edition Cost Calibration Gate Queue
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-default-value-governance
+    dependencies:
+      - phase-30-advanced-edition-default-value-governance
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-30-advanced-edition-cost-calibration-gate','blocked_gate','humanApprovalRequired','Cost Calibration Gate','provider_cost_measurement'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
+    status: done
+    retryCount: 0
+  - id: phase-30-advanced-edition-cost-calibration-gate
+    title: Phase 30 Advanced Edition Cost Calibration Gate
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-cost-calibration-gate-queue
+    dependencies:
+      - phase-30-advanced-edition-default-value-governance
+      - phase-30-advanced-edition-cost-calibration-gate-queue
+    taskPlanPolicy: required
+    humanApprovalRequired: true
+    humanApproval: "Not approved for execution. User approved creating this blocked gate queue only. Future execution requires fresh explicit approval for provider cost measurement, model selection, sample measurement, pricing assumptions, and any real provider, environment, staging/prod, cloud, deployment, payment, or external-service action."
+    taskKind: blocked_gate
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - blocked_gate
+      - provider_cost_measurement
+      - pricing_assumption
+      - evidence_integrity
+      - secret_or_env_change
+      - external_service_config
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-30-advanced-edition-cost-calibration-gate','blocked_gate','humanApprovalRequired','Cost Calibration Gate','provider_cost_measurement'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate.md
+    status: pending
+    retryCount: 0
