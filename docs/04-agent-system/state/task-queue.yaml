@@ -17218,12 +17218,52 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan-review.md
     status: done
     retryCount: 0
+  - id: phase-31-advanced-edition-personal-ai-generation-implementation-plan-second-review
+    title: Phase 31 Advanced Edition Personal AI Generation Implementation Plan Second Review
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan.md
+    dependencies:
+      - phase-31-advanced-edition-personal-ai-generation-implementation-plan-review
+    taskPlanPolicy: required
+    humanApproval: "User requested another review of the just-generated plan before continuing to the next task. Scope remains docs-only; no product code, schema, API, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate action."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan-second-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan-second-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan-second-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - generated_content_boundary
+      - requirements_review
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-personal-ai-generation-implementation-plan-second-review.md -Pattern 'pass','Coverage Matrix','Queue Integrity Review','Blocking findings: none'
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-31-advanced-edition-personal-ai-generation-implementation-plan-second-review','phase-31-advanced-edition-organization-training-implementation-plan','phase-30-advanced-edition-cost-calibration-gate','taskKind: blocked_gate'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan-second-review.md
+    status: done
+    retryCount: 0
   - id: phase-31-advanced-edition-organization-training-implementation-plan
     title: Phase 31 Advanced Edition Organization Training Implementation Plan
     phase: phase-31-advanced-edition-implementation-planning
     sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-4-organization-training-lifecycle
     dependencies:
-      - phase-31-advanced-edition-personal-ai-generation-implementation-plan-review
+      - phase-31-advanced-edition-personal-ai-generation-implementation-plan-second-review
     taskPlanPolicy: required
     taskKind: docs_only
     allowedFiles:
@@ -17253,14 +17293,55 @@ tasks:
       - git diff --check
       - Select-String -Path docs\superpowers\plans\*.md -Pattern 'organization','employee','answer_record'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-implementation-plan.md
-    status: pending
+    status: done
+    retryCount: 0
+  - id: phase-31-advanced-edition-organization-training-implementation-plan-review
+    title: Phase 31 Advanced Edition Organization Training Implementation Plan Review
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+    dependencies:
+      - phase-31-advanced-edition-organization-training-implementation-plan
+    taskPlanPolicy: required
+    humanApproval: "User requested that after completing the next task, Codex performs a detailed self-check/review, and after review passes, submits, merges master, pushes origin/master, and cleans the short branch. Scope remains docs-only; no product code, schema, API, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate action."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-organization-training-implementation-plan-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-organization-training-implementation-plan-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-implementation-plan-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - organization_scope
+      - requirements_review
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-organization-training-implementation-plan-review.md -Pattern 'pass','Coverage Matrix','Queue Integrity Review','Blocking findings: none'
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-31-advanced-edition-organization-training-implementation-plan-review','phase-31-advanced-edition-organization-analytics-implementation-plan','phase-31-advanced-edition-retention-log-governance-implementation-plan','taskKind: blocked_gate'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-implementation-plan-review.md
+    status: done
     retryCount: 0
   - id: phase-31-advanced-edition-organization-analytics-implementation-plan
     title: Phase 31 Advanced Edition Organization Analytics Implementation Plan
     phase: phase-31-advanced-edition-implementation-planning
     sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-5-organization-analytics-summary
     dependencies:
-      - phase-31-advanced-edition-organization-training-implementation-plan
+      - phase-31-advanced-edition-organization-training-implementation-plan-review
     taskPlanPolicy: required
     taskKind: docs_only
     allowedFiles:
@@ -17336,7 +17417,7 @@ tasks:
     sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-7-retention-expired-hidden-audit-log-and-ai-call-log-governance
     dependencies:
       - phase-31-advanced-edition-ai-task-domain-implementation-plan-review
-      - phase-31-advanced-edition-organization-training-implementation-plan
+      - phase-31-advanced-edition-organization-training-implementation-plan-review
     taskPlanPolicy: required
     taskKind: docs_only
     allowedFiles:
