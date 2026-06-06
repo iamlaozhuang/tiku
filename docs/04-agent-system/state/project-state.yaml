@@ -36,7 +36,7 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 66a086d87c8c5f08b32c666fa0dd55bb8e5e2a6e
+  lastKnownMasterSha: 8133b539ae6b07c76de8806d102ed362151f316f
   lastKnownOriginMasterSha: 66a086d87c8c5f08b32c666fa0dd55bb8e5e2a6e
 currentTask:
   id: phase-31-advanced-edition-requirements-handoff-hardening
@@ -44,7 +44,7 @@ currentTask:
   sourceStory: user-approved requirements-stage batch hardening after Phase 31 implementation planning completion
   planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-handoff-hardening.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening.md
-  branch: codex/advanced-edition-requirements-handoff-hardening
+  branch: master
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Advanced edition requirements-stage handoff hardening package drafted and reviewed. Next action is docs-only validation, commit, merge to master, push, and short branch cleanup. Cost Calibration Gate remains blocked pending fresh approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening.md
+  nextRecommendedAction: "Advanced edition requirements-stage handoff hardening package merged into master and post-merge validation passed. Requirements phase is ready for later code-stage queue seeding after explicit user direction. Cost Calibration Gate remains blocked pending fresh approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-handoff-hardening-post-merge-master-validation.md
