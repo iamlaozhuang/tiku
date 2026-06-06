@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-32-advanced-edition-cost-calibration-blocked-gate-clarification-review
-updatedAt: "2026-06-06T09:44:32-07:00"
+  currentPhase: phase-32-advanced-edition-evidence-redaction-template-review
+updatedAt: "2026-06-06T09:49:41-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 530785ba6941355758a1c3312123c4a83c7bfdf4
-  lastKnownOriginMasterSha: 530785ba6941355758a1c3312123c4a83c7bfdf4
+  lastKnownMasterSha: 5f6375a1c6b8683ffb658615fc11b22bb5eb7f92
+  lastKnownOriginMasterSha: 5f6375a1c6b8683ffb658615fc11b22bb5eb7f92
 currentTask:
-  id: phase-32-advanced-edition-cost-calibration-blocked-gate-clarification-review
+  id: phase-32-advanced-edition-evidence-redaction-template-review
   status: done
-  sourceStory: phase-32-advanced-edition-cost-calibration-blocked-gate-clarification
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md
-  branch: codex/phase-32-cost-calibration-blocked-gate
+  sourceStory: phase-32-advanced-edition-evidence-redaction-template
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-evidence-redaction-template-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template-review.md
+  branch: codex/phase-32-evidence-redaction-template
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Continue the Phase 32 docs-only governance hardening batch with phase-32-advanced-edition-evidence-redaction-template, then run its paired review before commit, merge, push, and short-branch cleanup. Code-stage queue seeding remains paused. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-blocked-gate-clarification-review.md
+  nextRecommendedAction: "Continue the Phase 32 docs-only governance hardening batch with phase-32-advanced-edition-implementation-boundary-checklist, then run its paired review before commit, merge, push, and short-branch cleanup. Code-stage queue seeding remains paused. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template-review.md
