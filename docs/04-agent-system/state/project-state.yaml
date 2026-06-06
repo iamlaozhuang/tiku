@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 4a800bf0cbe65f140772cc9e27b332472f765f80
-  lastKnownOriginMasterSha: 53a6ac2f4379315a32a960c51ee482e368cbb7b2
+  lastKnownMasterSha: 6ede04992bad11fdab60aa6b20590127d45a183e
+  lastKnownOriginMasterSha: 6ede04992bad11fdab60aa6b20590127d45a183e
 currentTask:
-  id: phase-31-advanced-edition-ops-auth-quota-implementation-plan-review
+  id: phase-31-advanced-edition-retention-log-governance-implementation-plan
   status: done
-  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan-review.md
-  branch: master
+  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-7-retention-expired-hidden-audit-log-and-ai-call-log-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+  branch: codex/advanced-edition-retention-log-plan
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Advanced edition operations authorization and quota implementation plan merged into master and post-merge validation passed. Next executable task is phase-31-advanced-edition-retention-log-governance-implementation-plan. Scope remains docs-only. Cost Calibration Gate remains blocked pending fresh approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ops-auth-quota-post-merge-master-validation.md
+  nextRecommendedAction: "Advanced edition retention and log governance implementation plan drafted and self-reviewed. Next required action is docs-only validation, commit, merge to master, push, and short branch cleanup. Cost Calibration Gate remains blocked pending fresh approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
