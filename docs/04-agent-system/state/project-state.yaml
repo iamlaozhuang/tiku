@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-30-advanced-edition-mvp-requirements
+  currentPhase: phase-31-advanced-edition-implementation-planning
 updatedAt: "2026-06-06T00:00:00-07:00"
 architecture:
   status: complete
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 272ee172b8a513fd179dfaea624720021154e959
-  lastKnownOriginMasterSha: 272ee172b8a513fd179dfaea624720021154e959
+  lastKnownMasterSha: f6d4572e808dfc53987923ffe9406b913f73b884
+  lastKnownOriginMasterSha: f6d4572e808dfc53987923ffe9406b913f73b884
 currentTask:
-  id: phase-30-advanced-edition-cost-calibration-gate-queue
+  id: phase-30-advanced-edition-implementation-planning-queue-seeding
   status: done
-  sourceStory: phase-30-advanced-edition-default-value-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
-  branch: codex/advanced-edition-cost-calibration-gate
+  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-implementation-planning-queue-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-planning-queue-seeding.md
+  branch: codex/advanced-edition-requirements-freeze-prep
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Cost Calibration Gate queue has been registered as blocked pending fresh approval. Next recommended discussion is whether to pause Phase 30 requirements design for owner review, or continue with non-cost product decisions that do not require provider, payment, env, staging/prod, cloud, deployment, or external-service actions."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
+  nextRecommendedAction: "Advanced edition requirements are freeze-ready for implementation planning. Next recommended pending task is phase-31-advanced-edition-auth-context-implementation-plan, which must remain docs-only unless a later implementation task is explicitly approved. Cost Calibration Gate remains blocked pending fresh approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-planning-queue-seeding.md

@@ -16905,3 +16905,345 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate.md
     status: pending
     retryCount: 0
+  - id: phase-30-advanced-edition-requirements-freeze-and-implementation-prep
+    title: Phase 30 Advanced Edition Requirements Freeze And Implementation Prep
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-cost-calibration-gate-queue
+    dependencies:
+      - phase-30-advanced-edition-mvp-requirements-review
+      - phase-30-advanced-edition-default-value-governance
+      - phase-30-advanced-edition-cost-calibration-gate-queue
+    taskPlanPolicy: required
+    humanApproval: "User requested continuing requirements work with requirements freeze review and implementation prep. Scope was docs-only; no product code, schema, API, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate action."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-requirements-freeze-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-freeze-and-implementation-prep.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-freeze-and-implementation-prep.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_review
+      - implementation_planning
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md docs\superpowers\plans\2026-06-06-advanced-edition-mvp-implementation-breakdown.md docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-requirements-freeze-review.md docs\05-execution-logs\task-plans\2026-06-06-advanced-edition-requirements-freeze-and-implementation-prep.md docs\05-execution-logs\evidence\2026-06-06-advanced-edition-requirements-freeze-and-implementation-prep.md
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Requirements Freeze Handoff','freeze_ready_for_implementation_planning'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-freeze-and-implementation-prep.md
+    status: done
+    retryCount: 0
+  - id: phase-30-advanced-edition-implementation-planning-queue-seeding
+    title: Phase 30 Advanced Edition Implementation Planning Queue Seeding
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+    dependencies:
+      - phase-30-advanced-edition-requirements-freeze-and-implementation-prep
+    taskPlanPolicy: required
+    humanApproval: "User requested continuing after requirements freeze and implementation prep. Scope is docs-only queue seeding for detailed implementation planning tasks; no product code, schema, API, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate action."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-implementation-planning-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-planning-queue-seeding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_state
+      - roadmap_scope
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-31-advanced-edition-auth-context-implementation-plan','phase-31-advanced-edition-ai-task-domain-implementation-plan','phase-31-advanced-edition-personal-ai-generation-implementation-plan','phase-31-advanced-edition-organization-training-implementation-plan','phase-31-advanced-edition-organization-analytics-implementation-plan','phase-31-advanced-edition-ops-auth-quota-implementation-plan','phase-31-advanced-edition-retention-log-governance-implementation-plan'
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-30-advanced-edition-cost-calibration-gate','blocked_gate','humanApprovalRequired','provider_cost_measurement'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-planning-queue-seeding.md
+    status: done
+    retryCount: 0
+  - id: phase-31-advanced-edition-auth-context-implementation-plan
+    title: Phase 31 Advanced Edition Authorization Context Implementation Plan
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-1-authorization-context-and-advanced-capability-gate
+    dependencies:
+      - phase-30-advanced-edition-implementation-planning-queue-seeding
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - auth_permission_model
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\*.md -Pattern 'authorization','personal_auth','org_auth','redeem_code'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-auth-context-implementation-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-31-advanced-edition-ai-task-domain-implementation-plan
+    title: Phase 31 Advanced Edition AI Task Domain Implementation Plan
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-2-ai-generation-task-domain
+    dependencies:
+      - phase-31-advanced-edition-auth-context-implementation-plan
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - ai_task_lifecycle
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\*.md -Pattern 'ai_call_log','audit_log','production_enablement_blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-31-advanced-edition-personal-ai-generation-implementation-plan
+    title: Phase 31 Advanced Edition Personal AI Generation Implementation Plan
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-3-personal-ai-question-and-paper-generation
+    dependencies:
+      - phase-31-advanced-edition-ai-task-domain-implementation-plan
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - generated_content_boundary
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\*.md -Pattern 'question','paper','mock_exam'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-31-advanced-edition-organization-training-implementation-plan
+    title: Phase 31 Advanced Edition Organization Training Implementation Plan
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-4-organization-training-lifecycle
+    dependencies:
+      - phase-31-advanced-edition-ai-task-domain-implementation-plan
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - organization_scope
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\*.md -Pattern 'organization','employee','answer_record'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-31-advanced-edition-organization-analytics-implementation-plan
+    title: Phase 31 Advanced Edition Organization Analytics Implementation Plan
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-5-organization-analytics-summary
+    dependencies:
+      - phase-31-advanced-edition-organization-training-implementation-plan
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - privacy_boundary
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\*.md -Pattern '统计摘要','员工统计','Privacy Boundary'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-31-advanced-edition-ops-auth-quota-implementation-plan
+    title: Phase 31 Advanced Edition Operations Authorization And Quota Implementation Plan
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-6-operations-authorization-and-quota-management
+    dependencies:
+      - phase-31-advanced-edition-auth-context-implementation-plan
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - authorization_governance
+      - quota_governance
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\*.md -Pattern 'authorization','redeem_code','audit_log'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-31-advanced-edition-retention-log-governance-implementation-plan
+    title: Phase 31 Advanced Edition Retention And Log Governance Implementation Plan
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-7-retention-expired-hidden-audit-log-and-ai-call-log-governance
+    dependencies:
+      - phase-31-advanced-edition-ai-task-domain-implementation-plan
+      - phase-31-advanced-edition-organization-training-implementation-plan
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/**
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - retention_governance
+      - audit_log
+      - ai_call_log
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\plans\*.md -Pattern 'expired_hidden','audit_log','ai_call_log'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+    status: pending
+    retryCount: 0
