@@ -16903,7 +16903,7 @@ tasks:
       - git diff --check
       - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-30-advanced-edition-cost-calibration-gate','blocked_gate','humanApprovalRequired','Cost Calibration Gate','provider_cost_measurement'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-30-advanced-edition-requirements-freeze-and-implementation-prep
     title: Phase 30 Advanced Edition Requirements Freeze And Implementation Prep
@@ -17450,6 +17450,48 @@ tasks:
       - git diff --check
       - Select-String -Path docs\superpowers\plans\*.md -Pattern 'authorization','redeem_code','audit_log'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
+    status: done
+    retryCount: 0
+  - id: phase-31-advanced-edition-ops-auth-quota-implementation-plan-review
+    title: Phase 31 Advanced Edition Operations Authorization And Quota Implementation Plan Review
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
+    dependencies:
+      - phase-31-advanced-edition-ops-auth-quota-implementation-plan
+    taskPlanPolicy: required
+    humanApproval: "User requested serial docs-only progression through the remaining implementation planning queue, with detailed review, validation, commit, merge, push, and short branch cleanup after each task. Scope remains docs-only; no product code, schema, API, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, export, or Cost Calibration Gate action."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - authorization_governance
+      - quota_governance
+      - requirements_review
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-ops-auth-quota-implementation-plan-review.md -Pattern 'pass','Coverage Matrix','Queue Integrity Review','Blocking findings: none'
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-31-advanced-edition-ops-auth-quota-implementation-plan-review','phase-31-advanced-edition-retention-log-governance-implementation-plan','taskKind: blocked_gate'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan-review.md
     status: pending
     retryCount: 0
   - id: phase-31-advanced-edition-retention-log-governance-implementation-plan
@@ -17460,6 +17502,7 @@ tasks:
       - phase-31-advanced-edition-ai-task-domain-implementation-plan-review
       - phase-31-advanced-edition-organization-training-implementation-plan-review
       - phase-31-advanced-edition-organization-analytics-implementation-plan-review
+      - phase-31-advanced-edition-ops-auth-quota-implementation-plan-review
     taskPlanPolicy: required
     taskKind: docs_only
     allowedFiles:
