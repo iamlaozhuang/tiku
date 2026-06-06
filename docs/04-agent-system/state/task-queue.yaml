@@ -16614,6 +16614,7 @@ tasks:
     taskKind: docs_only
     allowedFiles:
       - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md
       - docs/05-execution-logs/task-plans/**
       - docs/05-execution-logs/evidence/**
       - docs/04-agent-system/state/project-state.yaml
@@ -16712,10 +16713,10 @@ tasks:
       - git diff --check
       - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Acceptance Scenarios','AI 出题','AI 组卷','企业训练','授权','额度'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-acceptance-scenarios.md
-    status: pending
+    status: done
     retryCount: 0
-  - id: phase-30-advanced-edition-mvp-requirements-review
-    title: Phase 30 Advanced Edition MVP Requirements Review
+  - id: phase-30-advanced-edition-ops-config-contract
+    title: Phase 30 Advanced Edition Ops Config Contract
     phase: phase-30-advanced-edition-mvp-requirements
     sourceStory: phase-30-advanced-edition-acceptance-scenarios
     dependencies:
@@ -16724,6 +16725,46 @@ tasks:
     taskKind: docs_only
     allowedFiles:
       - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - configuration_contract
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-ops-config-contract.md -Pattern 'Configuration Matrix','quota_unit','authorization','organization','audit_log','ai_call_log','Default Value Decision Queue'
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Operations Configuration Contract','2026-06-06-advanced-edition-ops-config-contract.md','已全部定稿'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ops-config-contract.md
+    status: done
+    retryCount: 0
+  - id: phase-30-advanced-edition-mvp-requirements-review
+    title: Phase 30 Advanced Edition MVP Requirements Review
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-ops-config-contract
+    dependencies:
+      - phase-30-advanced-edition-acceptance-scenarios
+      - phase-30-advanced-edition-ops-config-contract
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md
       - docs/05-execution-logs/task-plans/**
       - docs/05-execution-logs/evidence/**
       - docs/04-agent-system/state/project-state.yaml
@@ -16746,8 +16787,44 @@ tasks:
       - evidence_integrity
     validationCommands:
       - git diff --check
-      - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md
-      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md -Pattern 'Follow-Up Decision Queue','Traceability To Existing Decisions'
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md docs\superpowers\specs\2026-06-06-advanced-edition-ops-config-contract.md
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-mvp-requirements.md,docs\superpowers\specs\2026-06-06-advanced-edition-ops-config-contract.md -Pattern 'Follow-Up Decision Queue','Traceability To Existing Decisions','Default Value Decision Queue'
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-review.md
-    status: pending
+    status: done
+    retryCount: 0
+  - id: phase-30-advanced-edition-default-value-governance
+    title: Phase 30 Advanced Edition Default Value Governance
+    phase: phase-30-advanced-edition-mvp-requirements
+    sourceStory: phase-30-advanced-edition-mvp-requirements-review
+    dependencies:
+      - phase-30-advanced-edition-mvp-requirements-review
+    taskPlanPolicy: required
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - default_value_governance
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\superpowers\specs\2026-06-06-advanced-edition-ops-config-contract.md -Pattern 'Default Value Governance','configuration_required','dev_test_placeholder','Cost Calibration Gate','production_enablement_blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
+    status: done
     retryCount: 0

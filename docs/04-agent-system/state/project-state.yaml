@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: d35dcfe0f2dfdb3dfb6a77ed1c2f6cc4f570782d
-  lastKnownOriginMasterSha: d35dcfe0f2dfdb3dfb6a77ed1c2f6cc4f570782d
+  lastKnownMasterSha: 815337415e33fb2b7e4a32181d2d6b9709398bbc
+  lastKnownOriginMasterSha: 815337415e33fb2b7e4a32181d2d6b9709398bbc
 currentTask:
-  id: phase-30-advanced-edition-role-boundary-matrix
+  id: phase-30-advanced-edition-default-value-governance
   status: done
-  sourceStory: phase-30-advanced-edition-integration-matrix
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-role-boundary-matrix.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-role-boundary-matrix.md
-  branch: codex/advanced-edition-role-boundary-matrix
+  sourceStory: phase-30-advanced-edition-mvp-requirements-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-default-value-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
+  branch: codex/advanced-edition-default-value-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 30 role boundary matrix task is complete. Next eligible task is phase-30-advanced-edition-acceptance-scenarios: define MVP acceptance scenarios, failure scenarios, completion states, and evidence requirements. Keep the work docs-only and continue confirming one key decision at a time."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-role-boundary-matrix.md
+  nextRecommendedAction: "Phase 30 default value governance is complete. Next recommended discussion is whether to create a Cost Calibration Gate task queue, or first merge the current stacked docs-only branch chain before continuing default-value and cost-measurement planning."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
