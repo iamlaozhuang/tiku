@@ -237,3 +237,10 @@ Missing production configuration must become `production_enablement_blocked`; it
 - Organization training lifecycle should consume the same task domain and add organization content ownership, employee assignment, and training answer workflows.
 - Operations authorization and quota management should provide quota reservation/finalization and configuration source contracts consumed by this domain.
 - Retention and log governance should own `expired_hidden`, `audit_log` retention, and `ai_call_log` retention behavior after this lifecycle is defined.
+
+## Post-Review Clarifications
+
+- Lifecycle status naming for implementation planning uses `succeeded` as the stable API/domain success state. User-facing text may still describe the result as generated, but later implementation should not introduce a parallel public status for the same state without a new decision.
+- `expired_hidden` remains a retention/log governance concern. The AI task domain may expose recovery metadata needed by that later plan, but should not own final retention policy.
+- Platform-originated generation or adoption tasks are out of this first AI task domain plan unless a later content governance task explicitly scopes them in. The first task types remain personal AI question generation, personal AI `paper` generation, and organization training generation.
+- Quota reservation and finalization are service boundaries in this domain. Exact ledger shape, point values, and package configuration remain owned by the operations authorization and quota plan.

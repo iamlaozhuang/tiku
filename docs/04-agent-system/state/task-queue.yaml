@@ -17058,6 +17058,47 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
     status: done
     retryCount: 0
+  - id: phase-31-advanced-edition-ai-task-domain-implementation-plan-review
+    title: Phase 31 Advanced Edition AI Task Domain Implementation Plan Review
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
+    dependencies:
+      - phase-31-advanced-edition-ai-task-domain-implementation-plan
+    taskPlanPolicy: required
+    humanApproval: "User requested continuing the next task, then performing a detailed review, and after review passing, submitting, merging master, pushing origin/master, and cleaning the short branch. Scope remains docs-only; no product code, schema, API, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate action."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-ai-task-domain-implementation-plan-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-ai-task-domain-implementation-plan-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ai-task-domain-implementation-plan-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - ai_task_lifecycle
+      - requirements_review
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-ai-task-domain-implementation-plan-review.md -Pattern 'pass_with_clarifications','Coverage Matrix','Queue Integrity Review','Blocking findings: none'
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-31-advanced-edition-ai-task-domain-implementation-plan-review','phase-31-advanced-edition-personal-ai-generation-implementation-plan','phase-30-advanced-edition-cost-calibration-gate','taskKind: blocked_gate'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ai-task-domain-implementation-plan-review.md
+    status: done
+    retryCount: 0
   - id: phase-31-advanced-edition-implementation-planning-breakdown-review
     title: Phase 31 Advanced Edition Implementation Planning Breakdown Review
     phase: phase-31-advanced-edition-implementation-planning
@@ -17104,7 +17145,7 @@ tasks:
     phase: phase-31-advanced-edition-implementation-planning
     sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-3-personal-ai-question-and-paper-generation
     dependencies:
-      - phase-31-advanced-edition-ai-task-domain-implementation-plan
+      - phase-31-advanced-edition-ai-task-domain-implementation-plan-review
     taskPlanPolicy: required
     taskKind: docs_only
     allowedFiles:
@@ -17141,7 +17182,7 @@ tasks:
     phase: phase-31-advanced-edition-implementation-planning
     sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-4-organization-training-lifecycle
     dependencies:
-      - phase-31-advanced-edition-ai-task-domain-implementation-plan
+      - phase-31-advanced-edition-ai-task-domain-implementation-plan-review
     taskPlanPolicy: required
     taskKind: docs_only
     allowedFiles:
@@ -17253,7 +17294,7 @@ tasks:
     phase: phase-31-advanced-edition-implementation-planning
     sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md#task-group-7-retention-expired-hidden-audit-log-and-ai-call-log-governance
     dependencies:
-      - phase-31-advanced-edition-ai-task-domain-implementation-plan
+      - phase-31-advanced-edition-ai-task-domain-implementation-plan-review
       - phase-31-advanced-edition-organization-training-implementation-plan
     taskPlanPolicy: required
     taskKind: docs_only
