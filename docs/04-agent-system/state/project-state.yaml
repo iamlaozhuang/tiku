@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 815337415e33fb2b7e4a32181d2d6b9709398bbc
-  lastKnownOriginMasterSha: 815337415e33fb2b7e4a32181d2d6b9709398bbc
+  lastKnownMasterSha: 272ee172b8a513fd179dfaea624720021154e959
+  lastKnownOriginMasterSha: 272ee172b8a513fd179dfaea624720021154e959
 currentTask:
-  id: phase-30-advanced-edition-default-value-governance
+  id: phase-30-advanced-edition-cost-calibration-gate-queue
   status: done
-  sourceStory: phase-30-advanced-edition-mvp-requirements-review
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-default-value-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
-  branch: codex/advanced-edition-default-value-governance
+  sourceStory: phase-30-advanced-edition-default-value-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
+  branch: codex/advanced-edition-cost-calibration-gate
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 30 default value governance is complete. Next recommended discussion is whether to create a Cost Calibration Gate task queue, or first merge the current stacked docs-only branch chain before continuing default-value and cost-measurement planning."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-default-value-governance.md
+  nextRecommendedAction: "Cost Calibration Gate queue has been registered as blocked pending fresh approval. Next recommended discussion is whether to pause Phase 30 requirements design for owner review, or continue with non-cost product decisions that do not require provider, payment, env, staging/prod, cloud, deployment, or external-service actions."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
