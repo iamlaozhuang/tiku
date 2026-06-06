@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-29-staging-procurement-and-approval-prep
-updatedAt: "2026-06-01T06:23:44-07:00"
+  currentPhase: phase-30-advanced-edition-mvp-requirements
+updatedAt: "2026-06-06T00:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 9df239e1cf7e55754b092fa930cf4eb56cdab95d
-  lastKnownOriginMasterSha: 9df239e1cf7e55754b092fa930cf4eb56cdab95d
+  lastKnownMasterSha: fd11e876c029b53005cdfd9a41652e52a816d7fd
+  lastKnownOriginMasterSha: fd11e876c029b53005cdfd9a41652e52a816d7fd
 currentTask:
-  id: phase-29-staging-procurement-approval-closeout
-  status: closed
-  sourceStory: phase-29-staging-procurement-and-approval-prep
-  planPath: docs/05-execution-logs/task-plans/2026-06-01-phase-29-staging-procurement-approval-closeout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-approval-closeout.md
-  branch: codex/phase-29-staging-procurement-and-approval-prep
+  id: phase-30-advanced-edition-mvp-requirements-plan
+  status: done
+  sourceStory: user-request-2026-06-06-advanced-edition-mvp-requirements-queue
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-mvp-requirements-queue.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-queue.md
+  branch: codex/advanced-edition-mvp-requirements-queue
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Phase 29 docs-only batch prepared procurement and approval materials for future staging implementation. Next eligible follow-up is phase-30-staging-dry-run-after-approval only after explicit human approval unlocks required staging cloud/resource, secret/env, migration/rollback, domain/TLS/callback, monitoring, and owner acceptance inputs. Real-provider redaction remains blocked unless separately approved."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-01-phase-29-staging-procurement-and-approval-prep-batch.md
+  nextRecommendedAction: "Phase 30 advanced edition MVP requirements queue is seeded. Next eligible task is phase-30-advanced-edition-mvp-scope-and-source: create the MVP requirements document, define source of truth, confirm the main loop boundary, and record non-goals before integration details. Keep the work docs-only and do not write code, schema, API implementation, dependencies, env files, provider calls, staging/prod/cloud/deploy actions, online payment, or real customer/customer-like data operations."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-mvp-requirements-queue.md
