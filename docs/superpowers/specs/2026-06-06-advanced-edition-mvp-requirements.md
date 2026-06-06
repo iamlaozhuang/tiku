@@ -153,14 +153,17 @@
 
 - 可以在企业授权上下文允许时使用企业授权和企业额度发起个人 AI 学习任务，但内容仍归个人。
 - 可以作答自己可见组织范围内的企业训练。
+- 每名员工每个企业训练版本只允许一次正式提交；正式提交前可以保存草稿作答，正式提交后该版本结果只读。
 - 可以查看自己的企业训练作答状态和结果摘要。
+- 企业训练下架后，仍可以查看自己的历史结果摘要，但不能重新进入题目详情、答案解析或新增作答。
 - 不可查看其他员工个人内容、企业训练管理后台、企业额度总账明细、平台 AI 草稿池或运营治理数据。
 
 企业管理员：
 
-- 可以在绑定 `organization` 及可见下级组织范围内创建、编辑、发布和下架企业训练。
+- 可以在绑定 `organization` 及可见下级组织范围内创建、编辑未发布草稿、发布和下架企业训练。
 - 可以查看员工正式学习摘要、AI 自主学习摘要、企业训练统计和额度消耗摘要。
-- 不可查看员工个人无关内容、使用个人授权和个人额度产生的 AI 学习内容、prompt、AI 原始输入输出、员工主观题原文、明文 `redeem_code` 或 provider payload。
+- 首期只能在后台在线查看员工统计摘要，不提供员工统计数据导出、组织级汇总导出或员工级摘要导出。
+- 不可查看员工个人无关内容、使用个人授权和个人额度产生的 AI 学习内容、员工正式学习题目级或答案级明细、员工使用企业额度进行个人 AI 学习的单个任务详情、单个任务列表摘要、prompt、AI 原始输入输出、员工主观题原文、员工企业训练逐题作答明细、客观题逐题对错、明文 `redeem_code` 或 provider payload。
 - 企业管理员的统计可见范围必须按组织权限和作答时组织快照约束。
 
 平台内容老师：
@@ -205,17 +208,25 @@
 企业管理员创建企业训练：
 
 - 前置条件：企业管理员拥有有效企业 `authorization`，且在绑定 `organization` 及可见下级组织范围内操作。
-- 企业管理员可以基于企业训练内容创建、编辑、发布、下架和查看训练摘要。
+- 企业管理员可以基于企业训练内容创建草稿、编辑未发布草稿、发布、下架和查看训练摘要。
 - 企业训练内容不得自动写入正式 `question` 或正式 `paper`，除非后续进入平台内容老师采纳流程。
 - 发布企业训练时必须固定组织可见范围，并保留作答时组织快照。
-- 企业管理员只能查看组织范围内训练统计、员工完成状态和得分摘要，不得查看员工个人无关内容或敏感原文。
+- 企业训练发布后内容不可直接编辑；如需修改题目、分值、答案、解析、标题、说明或可见范围，必须下架或保留旧版本，并复制为新草稿后重新发布新版本。
+- 新版本不得覆盖旧版本的内容、组织范围快照、员工 `answer_record`、统计摘要或 `audit_log`。
+- 企业训练首期不设置强制截止时间；停止新增作答以企业管理员手动下架为准，不提供到期自动停止新增作答、截止提醒、逾期标记、补考或自动下架。
+- 企业管理员只能查看组织范围内训练级和员工级统计摘要、员工完成状态和得分摘要，不得查看员工企业训练逐题作答明细、客观题逐题对错、主观题原文、个人无关内容或敏感原文。
 
 企业员工完成作答并形成统计：
 
 - 前置条件：员工在企业 `authorization` 上下文中，且属于企业训练发布时允许的 `organization` 范围。
 - 员工可以查看、进入并完成自己可见范围内的企业训练。
+- 每名员工每个企业训练版本只允许一次正式提交；重复提交、补考、取最高分和取最后一次提交不属于首期。
 - 员工作答记录必须进入企业训练统计，但个人学习内容所有权不因此转移给企业管理员。
+- 企业训练统计、完成率、排行和得分摘要只基于正式提交记录计算。
 - 企业管理员可见统计必须基于员工身份、作答时组织快照、训练范围和脱敏规则计算。
+- 企业管理员只能查看员工使用企业额度进行个人 AI 学习的统计摘要和额度消耗摘要，不得查看单个任务详情、单个任务列表摘要、用户输入摘要、生成内容摘要、prompt 或 AI 原始输入输出。
+- 企业管理员只能查看员工正式学习统计摘要和记录摘要，不得查看正式 `practice`、`mock_exam`、`exam_report` 或 `mistake_book` 的题目级、答案级、解析级或错题明细。
+- 企业管理员首期只能在线查看员工统计摘要，不提供员工统计数据导出、组织级汇总导出、员工级摘要导出、导出文件生成、导出下载或导出文件流转治理。
 - 员工在正式学习入口产生的正式 `practice`、`mock_exam`、`exam_report` 和 `mistake_book` 仍按正式学习边界处理。
 
 平台运营管理员完成授权/额度治理：
@@ -233,8 +244,24 @@
 - 异步任务失败/超时：任务应进入失败或超时状态；已扣额度的处理规则必须以额度流水为准；用户可见失败分类，运营可见治理摘要。
 - 高峰期承载不足：系统可以降级为排队、限流、延迟执行或暂停创建任务；不得绕过授权、额度和日志规则。
 - 组织越权：企业管理员和员工不得通过组织切换、URL 猜测或历史身份访问非授权 `organization` 范围内容。
+- 企业训练下架：下架后员工不得新增作答，也不得重新进入题目详情或答案解析；员工仍可查看自己的历史结果摘要，历史 `answer_record`、统计摘要、组织快照、`audit_log` 和额度流水必须保留。
 - 内容到期隐藏/恢复：到期内容默认隐藏；取消隐藏必须由授权角色执行并写 `audit_log`；硬删除仍需审批记录。
 - 日志脱敏：`audit_log`、`ai_call_log`、额度流水和 evidence 不得记录 prompt、AI 原始输入输出、provider payload、secret、token、数据库 URL 或明文 `redeem_code`。
+
+### Supplemental Acceptance Assertions
+
+本轮补充决策进入后续实现验收时，必须额外覆盖以下断言：
+
+- 企业训练发布后内容不可直接编辑；修改题目、分值、答案、解析、标题、说明或可见范围时，必须复制为新草稿并重新发布新版本。
+- 企业训练新版本不得覆盖旧版本内容、组织范围快照、员工 `answer_record`、统计摘要或 `audit_log`。
+- 每名员工每个企业训练版本只允许一次正式提交；正式提交前可以保存草稿作答，正式提交后结果只读。
+- 企业训练首期不设置强制截止时间；停止新增作答只通过企业管理员手动下架，不提供到期自动停止新增作答、截止提醒、逾期标记、补考或自动下架。
+- 企业训练下架后，员工只能查看自己的历史结果摘要，不得新增作答或重新进入题目详情、答案解析。
+- 企业管理员只能查看训练级和员工级统计摘要，不得查看员工企业训练逐题作答明细、客观题逐题对错、主观题原文、完整题目、答案解析或完整作答明细。
+- 企业管理员只能查看员工使用企业额度进行个人 AI 学习的统计摘要和额度消耗摘要，不得查看单个任务详情、单个任务列表摘要、用户输入摘要、生成内容摘要、prompt 或 AI 原始输入输出。
+- 企业管理员只能查看员工正式学习统计摘要和记录摘要，不得查看正式 `practice`、`mock_exam`、`exam_report` 或 `mistake_book` 的题目级、答案级、解析级或错题明细。
+- 企业管理员首期只能在线查看员工统计摘要，不提供员工统计数据导出、组织级汇总导出、员工级摘要导出、导出文件生成、导出下载或导出文件流转治理。
+- 内容域保留期、到期隐藏恢复窗口、`audit_log` 保留期和 `ai_call_log` 保留期必须按运营配置 contract 执行，并能通过配置版本和 `audit_log` 追溯。
 
 ### Completion States
 
@@ -262,6 +289,22 @@
 | AI 额度与异步任务       | `Quota Unit And Configuration`, `Quota Defaults And Consumption Table`, `Quota Package And Ledger Rules`, `Worker Runtime And Recovery`, `Peak Capacity And Degradation Strategy` |
 | 内容保留与日志治理      | `Expired Content Governance`, `Log And Evidence Redaction`                                                                                                                        |
 
+### Supplemental Decision Traceability
+
+| Supplemental Decision Area     | Confirmed Requirement                                                                                                             | Existing Decision Source                                                                       | Evidence                                                                                                                                                                                       |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 内容域保留期                   | 个人/员工 AI 学习型生成内容和企业训练未发布草稿首期 90 天；已发布企业训练长期保留；正式 `question` / `paper` 草稿按现有规则保留。 | `Retention Policy`, `Retention Domain Decision`                                                | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-retention-domain-decision.md`                                                                                                     |
+| 到期隐藏恢复窗口               | `expired_content_hidden_grace_day` 首期为 30 天。                                                                                 | `Expired Content Governance`, `Expired Hidden Grace Decision`                                  | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-expired-hidden-grace-decision.md`                                                                                                 |
+| 日志保留期                     | `audit_log_retention_day` 首期 1095 天；`ai_call_log_retention_day` 首期 180 天。                                                 | `Log And Evidence Redaction`, `Audit Log Retention Decision`, `AI Call Log Retention Decision` | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-audit-log-retention-decision.md`, `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ai-call-log-retention-decision.md` |
+| 企业训练发布后变更             | 已发布企业训练不可直接编辑；只允许下架、复制为新草稿、重新发布新版本。                                                            | `Organization Training Minimum Loop`                                                           | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-published-edit-decision.md`                                                                                 |
+| 企业训练正式提交               | 每名员工每个企业训练版本只允许一次正式提交。                                                                                      | `Organization Training Minimum Loop`                                                           | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-single-submit-decision.md`                                                                                  |
+| 企业训练截止时间               | 首期不设置强制截止时间；停止新增作答以企业管理员手动下架为准。                                                                    | `Organization Training Minimum Loop`                                                           | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-deadline-decision.md`                                                                                       |
+| 企业训练下架后员工可见性       | 下架后员工只可查看自己的历史结果摘要，不得重新进入题目详情、答案解析或新增作答。                                                  | `Organization Training Minimum Loop`                                                           | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-takedown-visibility-decision.md`                                                                            |
+| 企业训练作答明细可见性         | 企业管理员首期不可查看员工企业训练逐题作答明细，只看训练级和员工级统计摘要。                                                      | `Employee Detail Field Visibility`, `Privacy Boundary`                                         | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-organization-training-answer-detail-visibility-decision.md`                                                                       |
+| 员工企业额度 AI 学习任务可见性 | 企业管理员只看统计摘要和额度消耗摘要，不看单个任务详情或任务列表摘要。                                                            | `Employee Detail Field Visibility`, `Actor And Owner Model`                                    | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-employee-ai-task-visibility-decision.md`                                                                                          |
+| 员工正式学习明细可见性         | 企业管理员只看员工正式学习统计摘要和记录摘要，不看题目级或答案级明细。                                                            | `Employee Detail Field Visibility`, `Statistics Separation`                                    | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-formal-learning-detail-visibility-decision.md`                                                                                    |
+| 员工统计导出                   | 企业管理员首期不提供员工统计数据导出，只提供后台在线查看摘要。                                                                    | `Organization Portal Homepage Metrics`, `Employee Detail Field Visibility`                     | `docs/05-execution-logs/evidence/2026-06-06-advanced-edition-employee-stat-export-decision.md`                                                                                                 |
+
 ## Operations Configuration Contract
 
 运营配置清单按独立配置 contract 维护，不在本 MVP 需求规格正文中展开全部配置项。
@@ -270,6 +313,7 @@
 - 覆盖范围：企业后台开关、授权/额度配置、额度包与额度流水、异步任务、高峰降级、内容保留、到期隐藏、硬删除审批、受控快照例外、`audit_log`、`ai_call_log` 和 evidence 脱敏。
 - 本 MVP 需求规格只约束主闭环、角色边界、验收场景和与既有模块的衔接边界。
 - 配置 contract 约束配置项、作用域、治理规则和审计要求；具体默认点数、时长、阈值仍需在进入实现拆分前单独确认。
+- 2026-06-06 已确认：生成内容保留期按内容域拆分治理，个人/员工 AI 学习型生成内容和企业训练未发布草稿首期均为 90 天，已发布企业训练长期保留，正式 `question` / `paper` 草稿按现有内容管理规则保留；到期隐藏后的恢复窗口首期为 30 天；`audit_log` 首期保留 1095 天；`ai_call_log` 首期保留 180 天。
 
 ## Follow-Up Decision Queue
 
