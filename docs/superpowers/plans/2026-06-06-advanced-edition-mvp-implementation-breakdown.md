@@ -296,3 +296,14 @@ The paths below are implementation planning anchors. Future task plans must conf
 - Placeholder scan: no future task is allowed to rely on unstated production default values.
 - Type and naming consistency: project terms remain `authorization`, `personal_auth`, `org_auth`, `redeem_code`, `question`, `paper`, `mock_exam`, `audit_log`, and `ai_call_log`.
 - Blocked work isolation: `Cost Calibration Gate` and production default value decisions remain excluded.
+
+## Post-Review Clarifications
+
+2026-06-06 breakdown review result: `pass_with_clarifications`.
+
+- This plan seeds detailed implementation planning tasks, not code implementation tasks.
+- Code implementation tasks must be seeded later after the related detailed implementation plan defines exact file boundaries, tests, risk gates, and evidence requirements.
+- UI/page state coverage must be expanded in the detailed plans for personal AI generation, organization training, organization analytics, and operations authorization/quota management.
+- Organization analytics must define exact summary metric formulas before implementation.
+- Schema or migration work, if required by a detailed plan, must be split into a separately approved implementation task.
+- `Cost Calibration Gate`, provider cost measurement, real provider calls, production quota defaults, env/secret, staging/prod/cloud/deploy, payment, and external-service work remain blocked.

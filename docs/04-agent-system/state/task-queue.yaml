@@ -17058,6 +17058,47 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
     status: pending
     retryCount: 0
+  - id: phase-31-advanced-edition-implementation-planning-breakdown-review
+    title: Phase 31 Advanced Edition Implementation Planning Breakdown Review
+    phase: phase-31-advanced-edition-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+    dependencies:
+      - phase-30-advanced-edition-implementation-planning-queue-seeding
+      - phase-31-advanced-edition-auth-context-implementation-plan
+    taskPlanPolicy: required
+    humanApproval: "User requested a detailed re-review of the completed breakdown to ensure it is complete, clear, and has no omissions or errors. Scope is docs-only review; no product code, schema, API, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate action."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-implementation-planning-breakdown-review.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-implementation-planning-breakdown-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-planning-breakdown-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - implementation_planning
+      - requirements_review
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-implementation-planning-breakdown-review.md -Pattern 'pass_with_clarifications','Coverage Matrix','Queue Integrity Review','Non-Blocking Clarifications','Blocking findings: none'
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml -Pattern 'phase-30-advanced-edition-cost-calibration-gate','humanApprovalRequired','taskKind: blocked_gate','provider_cost_measurement'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-planning-breakdown-review.md
+    status: done
+    retryCount: 0
   - id: phase-31-advanced-edition-personal-ai-generation-implementation-plan
     title: Phase 31 Advanced Edition Personal AI Generation Implementation Plan
     phase: phase-31-advanced-edition-implementation-planning
