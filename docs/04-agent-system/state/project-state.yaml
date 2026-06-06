@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-32-advanced-edition-evidence-redaction-template-review
-updatedAt: "2026-06-06T09:49:41-07:00"
+  currentPhase: phase-32-advanced-edition-implementation-boundary-checklist-review
+updatedAt: "2026-06-06T09:53:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 5f6375a1c6b8683ffb658615fc11b22bb5eb7f92
-  lastKnownOriginMasterSha: 5f6375a1c6b8683ffb658615fc11b22bb5eb7f92
+  lastKnownMasterSha: a7b42c15628e31a8c3bf1aa6d6fea5bf48936986
+  lastKnownOriginMasterSha: a7b42c15628e31a8c3bf1aa6d6fea5bf48936986
 currentTask:
-  id: phase-32-advanced-edition-evidence-redaction-template-review
+  id: phase-32-advanced-edition-implementation-boundary-checklist-review
   status: done
-  sourceStory: phase-32-advanced-edition-evidence-redaction-template
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-evidence-redaction-template-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template-review.md
-  branch: codex/phase-32-evidence-redaction-template
+  sourceStory: phase-32-advanced-edition-implementation-boundary-checklist
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-implementation-boundary-checklist-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-boundary-checklist-review.md
+  branch: codex/phase-32-implementation-boundary-checklist
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Continue the Phase 32 docs-only governance hardening batch with phase-32-advanced-edition-implementation-boundary-checklist, then run its paired review before commit, merge, push, and short-branch cleanup. Code-stage queue seeding remains paused. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-evidence-redaction-template-review.md
+  nextRecommendedAction: "Run the Phase 32 docs-only governance hardening batch final review. Code-stage queue seeding remains paused. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-implementation-boundary-checklist-review.md
