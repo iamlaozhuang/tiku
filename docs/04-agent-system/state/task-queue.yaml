@@ -18087,3 +18087,85 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
     status: done
     retryCount: 0
+  - id: phase-33-advanced-edition-requirements-folder-consolidation
+    title: Phase 33 Advanced Edition Requirements Folder Consolidation
+    phase: phase-33-advanced-edition-requirements-governance
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
+    dependencies:
+      - phase-33-advanced-edition-requirements-folder-consolidation-plan
+    taskPlanPolicy: required
+    humanApproval: "User approved executing the consolidation plan, then running review, committing, merging to master, pushing origin/master, and cleaning up the short branch. Scope remains docs-only; no product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, Cost Calibration Gate execution, or code-stage queue seeding."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/**
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-folder-consolidation.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_governance
+      - source_of_truth
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\01-requirements\00-index.md docs\01-requirements\advanced-edition\00-index.md docs\01-requirements\advanced-edition\modules\*.md docs\01-requirements\advanced-edition\stories\*.md
+      - Select-String -Path docs\01-requirements\advanced-edition\**\*.md -Pattern 'authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation.md
+    status: done
+    retryCount: 0
+  - id: phase-33-advanced-edition-requirements-folder-consolidation-review
+    title: Phase 33 Advanced Edition Requirements Folder Consolidation Review
+    phase: phase-33-advanced-edition-requirements-governance
+    sourceStory: docs/01-requirements/advanced-edition/00-index.md
+    dependencies:
+      - phase-33-advanced-edition-requirements-folder-consolidation
+    taskPlanPolicy: required
+    humanApproval: "User approved execution review and, if review passes, commit, merge to master, push origin/master, and short branch cleanup. Scope remains docs-only and must not execute Cost Calibration Gate or create code-stage queue items."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/01-requirements/00-index.md
+      - docs/01-requirements/advanced-edition/**
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-folder-consolidation-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-advanced-edition-requirements-folder-consolidation-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_review
+      - source_of_truth
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-advanced-edition-requirements-folder-consolidation-review.md -Pattern 'pass','Scope Review','Source Preservation Review','Terminology Review','Blocking Findings'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-review.md
+    status: done
+    retryCount: 0

@@ -153,3 +153,17 @@
 - 题目审核工作流。
 - 排行榜、通过线、证书和正式考试能力。
 - 用户自助修改密码、手机号换绑、短信验证码。
+
+## Advanced Edition Requirement Reading Surface
+
+Advanced edition requirements are collected as a derived reading surface under `docs/01-requirements/advanced-edition/`.
+
+This section does not replace the standard edition `modules/` and `stories/` documents. It also does not move or override the advanced edition source documents under `docs/superpowers/specs/` and `docs/superpowers/plans/`.
+
+- Advanced edition index: [advanced-edition/00-index.md](./advanced-edition/00-index.md)
+- Advanced edition modules: [advanced-edition/modules/](./advanced-edition/modules/)
+- Advanced edition stories: [advanced-edition/stories/](./advanced-edition/stories/)
+
+Cost Calibration Gate remains blocked pending fresh explicit approval. Code-stage queue seeding remains paused unless explicitly approved later.
+
+---

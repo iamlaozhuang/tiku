@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-33-advanced-edition-requirements-folder-consolidation-plan
-updatedAt: "2026-06-06T19:08:27-07:00"
+  currentPhase: phase-33-advanced-edition-requirements-folder-consolidation-review
+updatedAt: "2026-06-06T19:19:24-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -39,11 +39,11 @@ repository:
   lastKnownMasterSha: 3974edca329ad4121776fad78836f1eb6f856a37
   lastKnownOriginMasterSha: 3974edca329ad4121776fad78836f1eb6f856a37
 currentTask:
-  id: phase-33-advanced-edition-requirements-folder-consolidation-plan
+  id: phase-33-advanced-edition-requirements-folder-consolidation-review
   status: done
-  sourceStory: user-approved advanced edition requirements folder consolidation planning
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
+  sourceStory: phase-33-advanced-edition-requirements-folder-consolidation
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-folder-consolidation-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-review.md
   branch: codex/phase-33-advanced-edition-requirements-folder-consolidation-plan
   commitSha: null
   prUrl: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Review the advanced edition requirements folder consolidation plan. If approved later, create derived docs under docs/01-requirements/advanced-edition/** without moving existing source documents. Code-stage queue seeding remains paused. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
+  nextRecommendedAction: "Advanced edition requirements are now collected as a derived reading surface under docs/01-requirements/advanced-edition/**. Recommended next docs-only step is phase-33-advanced-edition-implementation-readiness-review unless the user explicitly approves code-stage queue seeding. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-review.md
