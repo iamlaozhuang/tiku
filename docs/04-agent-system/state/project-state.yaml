@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-48-automated-governance-stack-closeout-audit
-updatedAt: "2026-06-07T10:00:00-07:00"
+  currentPhase: phase-49-codex-app-readiness-audit-execution
+updatedAt: "2026-06-07T11:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -46,15 +46,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 03cadb7ca019463966a59361888ec8cb0f656224
-  lastKnownOriginMasterSha: 03cadb7ca019463966a59361888ec8cb0f656224
+  lastKnownMasterSha: 5413de2b312264a4c78b88c9fdf05a439e8415c7
+  lastKnownOriginMasterSha: 5413de2b312264a4c78b88c9fdf05a439e8415c7
 currentTask:
-  id: phase-48-automated-governance-stack-closeout-audit
+  id: phase-49-codex-app-readiness-audit-execution
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-48-automated-governance-stack-closeout-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-48-automated-governance-stack-closeout-audit.md
-  branch: codex/phase-48-automated-governance-stack-closeout-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-49-codex-app-readiness-audit-execution.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-49-codex-app-readiness-audit-execution.md
+  branch: codex/phase-49-codex-app-readiness-audit-execution
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -91,5 +91,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Automated governance stack closeout audit completed as docs-only mechanism review. Recommended next human decision: run the actual read-only Codex App readiness audit, request a dedicated mode transition proposal, approve a narrow code-stage task seeding batch, or pause. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-48-automated-governance-stack-closeout-audit.md
+  nextRecommendedAction: "Codex App readiness audit executed as docs-only read-only inspection. Recommended next local-completable task: run a dedicated docs-only automation readiness scorecard using this actual readiness evidence. Browser-dependent local UI verification should wait for node_repl / Browser bridge repair or an approved fallback. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-49-codex-app-readiness-audit-execution.md
