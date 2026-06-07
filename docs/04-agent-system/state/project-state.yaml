@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-53-requirement-task-coverage-gap-governance
-updatedAt: "2026-06-07T15:00:00-07:00"
+  currentPhase: phase-54-task-queue-archival-index-governance
+updatedAt: "2026-06-07T16:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -28,6 +28,7 @@ automation:
   readinessScorecardModeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
   codeStageTaskSeedingSopPath: docs/04-agent-system/sop/code-stage-task-seeding-governance.md
   requirementTaskCoverageGapAuditSopPath: docs/04-agent-system/sop/requirement-task-coverage-and-gap-audit-governance.md
+  taskQueueArchivalIndexSopPath: docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -47,15 +48,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: e2bae5b4d95af2ea6643c2475d6f1940c5b4a795
-  lastKnownOriginMasterSha: e2bae5b4d95af2ea6643c2475d6f1940c5b4a795
+  lastKnownMasterSha: 9ea0b08d0d3f7e3f4e6adf2816802f974f85a274
+  lastKnownOriginMasterSha: 9ea0b08d0d3f7e3f4e6adf2816802f974f85a274
 currentTask:
-  id: phase-53-requirement-task-coverage-gap-governance
+  id: phase-54-task-queue-archival-index-governance
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-53-requirement-task-coverage-gap-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-53-requirement-task-coverage-gap-governance.md
-  branch: codex/phase-53-requirement-task-coverage-gap-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-54-task-queue-archival-index-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-54-task-queue-archival-index-governance.md
+  branch: codex/phase-54-task-queue-archival-index-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -92,5 +93,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Requirement-task coverage and gap audit governance completed as docs-only. Recommended next semi_auto docs-only task: task queue archival and index governance, to keep active queue recovery small while preserving audit history. Cost Calibration Gate remains blocked; code-stage queue seeding and product implementation remain unapproved."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-53-requirement-task-coverage-gap-governance.md
+  nextRecommendedAction: "Task queue archival and index governance completed as docs-only. Recommended next semi_auto docs-only task: thread rollover and handoff governance, to define when a long-running Codex thread should suggest or require a new thread. Cost Calibration Gate remains blocked; code-stage queue seeding and product implementation remain unapproved."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-54-task-queue-archival-index-governance.md
