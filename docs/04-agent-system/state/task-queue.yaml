@@ -19481,3 +19481,52 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-56-advanced-edition-coverage-audit.md
     status: done
     retryCount: 0
+  - id: phase-57-docs-slimming-readonly-inventory
+    title: Phase 57 Docs Slimming Readonly Inventory
+    phase: phase-57-docs-slimming-readonly-inventory
+    sourceStory: user-request-2026-06-07-docs-slimming-execution-approval
+    dependencies:
+      - phase-56-advanced-edition-coverage-audit
+    taskPlanPolicy: required
+    humanApproval: "User approved executing the recommended docs-only document slimming preparation task. Scope is readonly inventory and mechanism sync only; no document moving, deletion, archive execution, source-of-truth rewriting, code-stage queue seeding, automatic task claiming execution, automation.mode change, product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, Codex configuration change, skill/plugin installation, connector installation, session history cleanup, cache deletion, business browser navigation, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, implementation queue items, or Cost Calibration Gate execution."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-57-docs-slimming-readonly-inventory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-57-docs-slimming-readonly-inventory.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-57-docs-slimming-readonly-inventory.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/01-requirements/**
+      - docs/02-architecture/**
+      - docs/03-standards/**
+      - docs/04-agent-system/sop/**
+      - docs/superpowers/**
+    riskTypes:
+      - docs_slimming
+      - readonly_inventory
+      - archive_candidate_review
+      - source_of_truth_boundary
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-57-docs-slimming-readonly-inventory.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-57-docs-slimming-readonly-inventory.md docs\05-execution-logs\evidence\2026-06-07-phase-57-docs-slimming-readonly-inventory.md
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-07-phase-57-docs-slimming-readonly-inventory.md,docs\05-execution-logs\evidence\2026-06-07-phase-57-docs-slimming-readonly-inventory.md -Pattern 'Inventory Verdict','Inventory Snapshot','Directory Pressure Map','Archive Candidate Register','Slimming Candidate Register','Do Not Touch Register','Recommended Execution Sequence','Blocked Gates','Cost Calibration Gate remains blocked','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-57-docs-slimming-readonly-inventory.md
+    status: done
+    retryCount: 0
