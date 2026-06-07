@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-55-thread-rollover-handoff-governance
-updatedAt: "2026-06-07T17:00:00-07:00"
+  currentPhase: phase-56-advanced-edition-coverage-audit
+updatedAt: "2026-06-07T18:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -49,15 +49,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 89da5f9473410ed6dc7a7c86fde90ecc8a103249
-  lastKnownOriginMasterSha: 89da5f9473410ed6dc7a7c86fde90ecc8a103249
+  lastKnownMasterSha: 3f1244b8171ea1999f4d898301ef666dc2c81623
+  lastKnownOriginMasterSha: 3f1244b8171ea1999f4d898301ef666dc2c81623
 currentTask:
-  id: phase-55-thread-rollover-handoff-governance
+  id: phase-56-advanced-edition-coverage-audit
   status: done
-  sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-55-thread-rollover-handoff-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-55-thread-rollover-handoff-governance.md
-  branch: codex/phase-55-thread-rollover-handoff-governance
+  sourceStory: user-request-2026-06-07-advanced-edition-docs-only-coverage-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-56-advanced-edition-coverage-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-56-advanced-edition-coverage-audit.md
+  branch: codex/phase-56-advanced-edition-coverage-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -94,5 +94,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Thread rollover and handoff governance completed as docs-only. Recommended next human decision: either approve a future task queue archive execution plan, approve a docs-only advanced-edition coverage audit using the new coverage SOP, or pause for review. Cost Calibration Gate remains blocked; code-stage queue seeding and product implementation remain unapproved."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+  nextRecommendedAction: "Advanced edition docs-only coverage audit completed. No blocking requirements-stage coverage gap was found for the approved MVP loops. Recommended next human decision: approve a code-stage queue seeding plan, approve a future task queue archive execution plan, or pause for review. Cost Calibration Gate remains blocked; code-stage queue seeding and product implementation remain unapproved."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-56-advanced-edition-coverage-audit.md
