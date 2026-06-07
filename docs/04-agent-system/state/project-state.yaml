@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-69-advanced-authorization-context-implementation-planning
-updatedAt: "2026-06-07T15:06:58-07:00"
+  currentPhase: phase-70-advanced-ai-task-domain-implementation-planning
+updatedAt: "2026-06-07T15:11:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: b75348cf8af859ae097a7644c82e1ebfacbacc48
-  lastKnownOriginMasterSha: b75348cf8af859ae097a7644c82e1ebfacbacc48
+  lastKnownMasterSha: c68f649a44313637a5035792ea355d279b8eecdb
+  lastKnownOriginMasterSha: c68f649a44313637a5035792ea355d279b8eecdb
 currentTask:
-  id: phase-69-advanced-authorization-context-implementation-planning
+  id: phase-70-advanced-ai-task-domain-implementation-planning
   status: done
-  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-auth-context-implementation-plan.md
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
-  branch: codex/phase-69-authorization-context-planning
+  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+  branch: codex/phase-70-ai-task-domain-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,10 +99,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 69 advanced authorization context implementation planning records future implementation slices for
-    contract/mapper, service resolver, repository field discovery, route/runtime compatibility, and tests/redaction.
-    Continue to Phase 70 advanced AI task domain implementation planning after closeout. Do not execute product
-    implementation, authorization permission model changes beyond planning, dependency, schema, migration,
-    provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, external-service
-    actions, or Cost Calibration Gate execution without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+    Phase 70 advanced AI task domain implementation planning records future implementation slices for contract/status
+    DTOs, lifecycle model, repository boundary, service orchestration, mapper/redaction, audit_log, and ai_call_log.
+    Continue to Phase 71 advanced personal AI generation implementation planning after closeout. Do not execute product
+    implementation, dependency, schema, migration, provider_cost_measurement, real provider calls, env/secret,
+    staging/prod/cloud/deploy, payment, external-service actions, or Cost Calibration Gate execution without fresh
+    explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
