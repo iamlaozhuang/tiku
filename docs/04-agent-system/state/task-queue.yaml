@@ -18046,3 +18046,44 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-post-closeout-state-sha-sync.md
     status: done
     retryCount: 0
+  - id: phase-33-advanced-edition-requirements-folder-consolidation-plan
+    title: Phase 33 Advanced Edition Requirements Folder Consolidation Plan
+    phase: phase-33-advanced-edition-requirements-governance
+    sourceStory: user-approved advanced edition requirements folder consolidation planning
+    dependencies:
+      - phase-32-advanced-edition-post-closeout-state-sha-sync
+    taskPlanPolicy: required
+    humanApproval: "User approved first creating only a consolidation plan for advanced edition requirements. Scope is docs-only and must not move files, modify docs/01-requirements/** content, create implementation subtasks, touch product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, or execute Cost Calibration Gate."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/superpowers/plans/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - docs/01-requirements/**
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - requirements_governance
+      - source_of_truth
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\superpowers\plans\2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md docs\05-execution-logs\task-plans\2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md docs\05-execution-logs\evidence\2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml
+      - Select-String -Path docs\superpowers\plans\2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md -Pattern 'docs/01-requirements/advanced-edition','Do not move existing files','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-requirements-folder-consolidation-plan.md
+    status: done
+    retryCount: 0
