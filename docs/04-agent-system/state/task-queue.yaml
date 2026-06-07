@@ -511,3 +511,49 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-59-evidence-gap-reconciliation.md
     status: done
     retryCount: 0
+  - id: phase-60-execution-log-archive-governance
+    title: Phase 60 Execution Log Archive Governance
+    phase: phase-60-execution-log-archive-governance
+    sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
+    dependencies:
+      - phase-59-evidence-gap-reconciliation
+    taskPlanPolicy: required
+    humanApproval: User approved serial execution of the 1-10 automation readiness work combination with per-task validation, commit, merge, push, and short-lived branch cleanup. Phase 60 scope is docs-only execution-log archive/index governance. It does not move, delete, or archive execution-log files and does not approve code-stage queue seeding, product code, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-60-execution-log-archive-governance.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-60-execution-log-archive-governance.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-60-execution-log-archive-governance.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+    riskTypes:
+      - execution_log_archival
+      - execution_log_index
+      - docs_governance
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/sop/execution-log-archival-and-index-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs/05-execution-logs/task-plans/2026-06-07-phase-60-execution-log-archive-governance.md docs/05-execution-logs/evidence/2026-06-07-phase-60-execution-log-archive-governance.md docs/05-execution-logs/audits-reviews/2026-06-07-phase-60-execution-log-archive-governance.md
+      - Select-String -Path docs/04-agent-system/sop/execution-log-archival-and-index-governance.md,docs/05-execution-logs/evidence/2026-06-07-phase-60-execution-log-archive-governance.md,docs/05-execution-logs/audits-reviews/2026-06-07-phase-60-execution-log-archive-governance.md -Pattern 'execution-log-index','evidence','task-plans','audits-reviews','handoffs','Cost Calibration Gate remains blocked','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-60-execution-log-archive-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-60-execution-log-archive-governance.md
+    status: done
+    retryCount: 0

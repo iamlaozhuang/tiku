@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-59-evidence-gap-reconciliation
-updatedAt: "2026-06-07T09:28:31-07:00"
+  currentPhase: phase-60-execution-log-archive-governance
+updatedAt: "2026-06-07T09:35:49-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -43,21 +43,22 @@ automation:
       - codex/
     draftPrOnly: true
     autoMerge: false
+  executionLogArchivalIndexSopPath: docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
 taskSource:
   requirementsPath: docs/01-requirements/stories
   queueStrategy: story_to_verifiable_units
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: da794e7fdbc6af66c49a2607afbeb1d0b9a7805f
-  lastKnownOriginMasterSha: da794e7fdbc6af66c49a2607afbeb1d0b9a7805f
+  lastKnownMasterSha: 9e573eff
+  lastKnownOriginMasterSha: 9e573eff
 currentTask:
-  id: phase-59-evidence-gap-reconciliation
+  id: phase-60-execution-log-archive-governance
   status: done
   sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-59-evidence-gap-reconciliation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-59-evidence-gap-reconciliation.md
-  branch: codex/phase-59-evidence-gap-reconciliation
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-60-execution-log-archive-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-60-execution-log-archive-governance.md
+  branch: codex/phase-60-execution-log-archive-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -94,5 +95,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 59 evidence-gap reconciliation completed. Continue serial docs-only automation readiness work with Phase 60 execution-log archive/index governance. Cost Calibration Gate remains blocked; provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, and external-service actions remain forbidden without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-59-evidence-gap-reconciliation.md
+  nextRecommendedAction: Phase 60 execution-log archive/index governance completed. Continue serial docs-only automation readiness work with Phase 61 execution-log archive/index first batch. Cost Calibration Gate remains blocked; provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, and external-service actions remain forbidden without fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-60-execution-log-archive-governance.md
