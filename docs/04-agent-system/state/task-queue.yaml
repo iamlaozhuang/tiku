@@ -557,3 +557,53 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-60-execution-log-archive-governance.md
     status: done
     retryCount: 0
+  - id: phase-61-execution-log-archive-first-batch
+    title: Phase 61 Execution Log Archive First Batch
+    phase: phase-61-execution-log-archive-first-batch
+    sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
+    dependencies:
+      - phase-60-execution-log-archive-governance
+    taskPlanPolicy: required
+    humanApproval: "User approved serial execution of the 1-10 automation readiness work combination with per-task validation, commit, merge, push, and short-lived branch cleanup. Phase 61 scope is docs-only execution-log archive/index first batch: move selected old task plan files into docs/05-execution-logs/archive/2026-05/task-plans and create execution-log-index.yaml. No evidence, audit review, product code, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate execution."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-61-execution-log-archive-first-batch.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-61-execution-log-archive-first-batch.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-61-execution-log-archive-first-batch.md
+      - docs/05-execution-logs/execution-log-index.yaml
+      - docs/05-execution-logs/archive/2026-05/task-plans/*.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - docs/05-execution-logs/handoffs/**
+    riskTypes:
+      - execution_log_archival
+      - execution_log_index
+      - docs_governance
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - python execution-log archive invariant check
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <Phase 61 touched state/index/evidence/audit files>
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-61-execution-log-archive-first-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-61-execution-log-archive-first-batch.md
+    status: done
+    retryCount: 0

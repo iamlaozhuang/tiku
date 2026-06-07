@@ -1,0 +1,2271 @@
+schemaVersion: 1
+generatedFrom:
+  activeRoot: docs/05-execution-logs
+  generatedByTask: phase-61-execution-log-archive-first-batch
+  generatedAt: "2026-06-07T09:45:00-07:00"
+entries:
+  - path: docs/05-execution-logs/task-plans/2026-05-14-oss-research-plan.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-14-oss-research-plan.md
+    kind: task_plan
+    taskId: oss-research-plan
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-14-oss-research-plan.md
+    commitSha: null
+    date: "2026-05-14"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-15-phase-0-architecture-freeze-and-agent-system.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-15-phase-0-architecture-freeze-and-agent-system.md
+    kind: task_plan
+    taskId: phase-0-architecture-freeze-and-agent-system
+    phase: phase-0
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-15-phase-0-architecture-freeze-and-agent-system.md
+    commitSha: null
+    date: "2026-05-15"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-16-environment-deployment-notes.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-environment-deployment-notes.md
+    kind: task_plan
+    taskId: environment-deployment-notes
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-environment-deployment-notes.md
+    commitSha: null
+    date: "2026-05-16"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-16-mechanism-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-mechanism-hardening.md
+    kind: task_plan
+    taskId: mechanism-hardening
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-mechanism-hardening.md
+    commitSha: null
+    date: "2026-05-16"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-16-phase-1-formatting-gate-decision.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-formatting-gate-decision.md
+    kind: task_plan
+    taskId: phase-1-formatting-gate-decision
+    phase: phase-1
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-formatting-gate-decision.md
+    commitSha: null
+    date: "2026-05-16"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-16-phase-1-foundation-planning.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-foundation-planning.md
+    kind: task_plan
+    taskId: phase-1-foundation-planning
+    phase: phase-1
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-foundation-planning.md
+    commitSha: null
+    date: "2026-05-16"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-16-phase-1-server-boundary-skeleton.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-server-boundary-skeleton.md
+    kind: task_plan
+    taskId: phase-1-server-boundary-skeleton
+    phase: phase-1
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-server-boundary-skeleton.md
+    commitSha: null
+    date: "2026-05-16"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-16-phase-1-test-tooling-decision.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-test-tooling-decision.md
+    kind: task_plan
+    taskId: phase-1-test-tooling-decision
+    phase: phase-1
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-16-phase-1-test-tooling-decision.md
+    commitSha: null
+    date: "2026-05-16"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-dependency-format-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-dependency-format-baseline.md
+    kind: task_plan
+    taskId: dependency-format-baseline
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-dependency-format-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-foundation-review-closeout.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-foundation-review-closeout.md
+    kind: task_plan
+    taskId: foundation-review-closeout
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-foundation-review-closeout.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-git-submit-push-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-git-submit-push-hardening.md
+    kind: task_plan
+    taskId: git-submit-push-hardening
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-git-submit-push-hardening.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-mechanism-git-health-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-mechanism-git-health-hardening.md
+    kind: task_plan
+    taskId: mechanism-git-health-hardening
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-mechanism-git-health-hardening.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-admin-employee-account-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-admin-employee-account-baseline.md
+    kind: task_plan
+    taskId: phase-2-admin-employee-account-baseline
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-admin-employee-account-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-adapter-boundary.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-auth-adapter-boundary.md
+    kind: task_plan
+    taskId: phase-2-auth-adapter-boundary
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-auth-adapter-boundary.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-dependency-repair.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-auth-dependency-repair.md
+    kind: task_plan
+    taskId: phase-2-auth-dependency-repair
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-auth-dependency-repair.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-auth-schema-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-auth-schema-baseline.md
+    kind: task_plan
+    taskId: phase-2-auth-schema-baseline
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-auth-schema-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-effective-authorization-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-effective-authorization-baseline.md
+    kind: task_plan
+    taskId: phase-2-effective-authorization-baseline
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-effective-authorization-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-organization-auth-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-organization-auth-baseline.md
+    kind: task_plan
+    taskId: phase-2-organization-auth-baseline
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-organization-auth-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-redeem-code-auth-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-redeem-code-auth-baseline.md
+    kind: task_plan
+    taskId: phase-2-redeem-code-auth-baseline
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-redeem-code-auth-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-session-login-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-session-login-baseline.md
+    kind: task_plan
+    taskId: phase-2-session-login-baseline
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-session-login-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-17-phase-2-user-registration-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-user-registration-baseline.md
+    kind: task_plan
+    taskId: phase-2-user-registration-baseline
+    phase: phase-2
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-17-phase-2-user-registration-baseline.md
+    commitSha: null
+    date: "2026-05-17"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-agent-mechanism-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-agent-mechanism-hardening.md
+    kind: task_plan
+    taskId: agent-mechanism-hardening
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-agent-mechanism-hardening.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-browser-verification-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-browser-verification-hardening.md
+    kind: task_plan
+    taskId: browser-verification-hardening
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-browser-verification-hardening.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-0-2-mechanism-review.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-0-2-mechanism-review.md
+    kind: task_plan
+    taskId: phase-0-2-mechanism-review
+    phase: phase-0
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-0-2-mechanism-review.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-admin-paper-ui-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-admin-paper-ui-baseline.md
+    kind: task_plan
+    taskId: phase-3-admin-paper-ui-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-admin-paper-ui-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-admin-question-material-ui-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-admin-question-material-ui-baseline.md
+    kind: task_plan
+    taskId: phase-3-admin-question-material-ui-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-admin-question-material-ui-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-material-library-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-material-library-baseline.md
+    kind: task_plan
+    taskId: phase-3-material-library-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-material-library-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-paper-draft-composition-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-paper-draft-composition-baseline.md
+    kind: task_plan
+    taskId: phase-3-paper-draft-composition-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-paper-draft-composition-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-paper-lifecycle-asset-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-paper-lifecycle-asset-baseline.md
+    kind: task_plan
+    taskId: phase-3-paper-lifecycle-asset-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-paper-lifecycle-asset-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-paper-publish-snapshot-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-paper-publish-snapshot-baseline.md
+    kind: task_plan
+    taskId: phase-3-paper-publish-snapshot-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-paper-publish-snapshot-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-library-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-library-baseline.md
+    kind: task_plan
+    taskId: phase-3-question-library-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-library-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-paper-contract-approval.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-contract-approval.md
+    kind: task_plan
+    taskId: phase-3-question-paper-contract-approval
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-contract-approval.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-paper-planning.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-planning.md
+    kind: task_plan
+    taskId: phase-3-question-paper-planning
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-planning.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-paper-readiness.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-readiness.md
+    kind: task_plan
+    taskId: phase-3-question-paper-readiness
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-readiness.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-3-question-paper-schema-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-schema-baseline.md
+    kind: task_plan
+    taskId: phase-3-question-paper-schema-baseline
+    phase: phase-3
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-3-question-paper-schema-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-answer-record-schema-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-answer-record-schema-baseline.md
+    kind: task_plan
+    taskId: phase-4-answer-record-schema-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-answer-record-schema-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-exam-report-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-exam-report-baseline.md
+    kind: task_plan
+    taskId: phase-4-exam-report-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-exam-report-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-mistake-book-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-mistake-book-baseline.md
+    kind: task_plan
+    taskId: phase-4-mistake-book-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-mistake-book-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-mock-exam-session-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-mock-exam-session-baseline.md
+    kind: task_plan
+    taskId: phase-4-mock-exam-session-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-mock-exam-session-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-practice-session-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-practice-session-baseline.md
+    kind: task_plan
+    taskId: phase-4-practice-session-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-practice-session-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-practice-ui-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-practice-ui-baseline.md
+    kind: task_plan
+    taskId: phase-4-practice-ui-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-practice-ui-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-experience-contract-approval.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-experience-contract-approval.md
+    kind: task_plan
+    taskId: phase-4-student-experience-contract-approval
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-experience-contract-approval.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-experience-planning.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-experience-planning.md
+    kind: task_plan
+    taskId: phase-4-student-experience-planning
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-experience-planning.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-home-ui-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-home-ui-baseline.md
+    kind: task_plan
+    taskId: phase-4-student-home-ui-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-home-ui-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-phase-4-student-paper-access-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-paper-access-baseline.md
+    kind: task_plan
+    taskId: phase-4-student-paper-access-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-phase-4-student-paper-access-baseline.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-19-rawfiles-recovery-and-inventory.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-rawfiles-recovery-and-inventory.md
+    kind: task_plan
+    taskId: rawfiles-recovery-and-inventory
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-19-rawfiles-recovery-and-inventory.md
+    commitSha: null
+    date: "2026-05-19"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-4-mock-exam-report-ui-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-4-mock-exam-report-ui-baseline.md
+    kind: task_plan
+    taskId: phase-4-mock-exam-report-ui-baseline
+    phase: phase-4
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-4-mock-exam-report-ui-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-call-log-and-redaction-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-call-log-and-redaction-baseline.md
+    kind: task_plan
+    taskId: phase-5-ai-call-log-and-redaction-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-call-log-and-redaction-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-explanation-and-hint-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-explanation-and-hint-baseline.md
+    kind: task_plan
+    taskId: phase-5-ai-explanation-and-hint-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-explanation-and-hint-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+    kind: task_plan
+    taskId: phase-5-ai-rag-contract-and-threat-model-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-rag-contract-and-threat-model-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-rag-entry-gate-and-task-queue-seeding.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-rag-entry-gate-and-task-queue-seeding.md
+    kind: task_plan
+    taskId: phase-5-ai-rag-entry-gate-and-task-queue-seeding
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-rag-entry-gate-and-task-queue-seeding.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-ai-scoring-service-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-scoring-service-baseline.md
+    kind: task_plan
+    taskId: phase-5-ai-scoring-service-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-ai-scoring-service-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-knowledge-recommendation-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-knowledge-recommendation-baseline.md
+    kind: task_plan
+    taskId: phase-5-knowledge-recommendation-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-knowledge-recommendation-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-mechanism-hardening-readiness.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-mechanism-hardening-readiness.md
+    kind: task_plan
+    taskId: phase-5-mechanism-hardening-readiness
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-mechanism-hardening-readiness.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-model-config-and-prompt-template-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-model-config-and-prompt-template-baseline.md
+    kind: task_plan
+    taskId: phase-5-model-config-and-prompt-template-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-model-config-and-prompt-template-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-rag-chunking-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-rag-chunking-baseline.md
+    kind: task_plan
+    taskId: phase-5-rag-chunking-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-rag-chunking-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline.md
+    kind: task_plan
+    taskId: phase-5-rag-evidence-status-retrieval-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-rag-evidence-status-retrieval-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline.md
+    kind: task_plan
+    taskId: phase-5-rag-resource-and-knowledge-schema-baseline
+    phase: phase-5
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-5-rag-resource-and-knowledge-schema-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md
+    kind: task_plan
+    taskId: phase-6-admin-ops-contract-and-threat-model-baseline
+    phase: phase-6
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-admin-ops-contract-and-threat-model-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-6-admin-ops-queue-seeding.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-admin-ops-queue-seeding.md
+    kind: task_plan
+    taskId: phase-6-admin-ops-queue-seeding
+    phase: phase-6
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-admin-ops-queue-seeding.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-6-admin-shell-common-interaction-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-admin-shell-common-interaction-baseline.md
+    kind: task_plan
+    taskId: phase-6-admin-shell-common-interaction-baseline
+    phase: phase-6
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-admin-shell-common-interaction-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+    kind: task_plan
+    taskId: phase-6-ai-and-audit-log-ops-baseline
+    phase: phase-6
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-ai-and-audit-log-ops-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-6-content-and-knowledge-ops-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-content-and-knowledge-ops-baseline.md
+    kind: task_plan
+    taskId: phase-6-content-and-knowledge-ops-baseline
+    phase: phase-6
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-content-and-knowledge-ops-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-20-phase-6-user-org-auth-ops-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-user-org-auth-ops-baseline.md
+    kind: task_plan
+    taskId: phase-6-user-org-auth-ops-baseline
+    phase: phase-6
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-20-phase-6-user-org-auth-ops-baseline.md
+    commitSha: null
+    date: "2026-05-20"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-codex-skill-gap-governance.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-codex-skill-gap-governance.md
+    kind: task_plan
+    taskId: codex-skill-gap-governance
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-codex-skill-gap-governance.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-fix-phase-6-ai-audit-log-status.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-fix-phase-6-ai-audit-log-status.md
+    kind: task_plan
+    taskId: fix-phase-6-ai-audit-log-status
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-fix-phase-6-ai-audit-log-status.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-local-business-flow-verification.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-local-business-flow-verification.md
+    kind: task_plan
+    taskId: local-business-flow-verification
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-local-business-flow-verification.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-local-handoff-readiness-prep.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-local-handoff-readiness-prep.md
+    kind: task_plan
+    taskId: local-handoff-readiness-prep
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-local-handoff-readiness-prep.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-local-postgres-pgvector-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-local-postgres-pgvector-baseline.md
+    kind: task_plan
+    taskId: local-postgres-pgvector-baseline
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-local-postgres-pgvector-baseline.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-admin-flow-runtime-smoke.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-admin-flow-runtime-smoke.md
+    kind: task_plan
+    taskId: phase-7-admin-flow-runtime-smoke
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-admin-flow-runtime-smoke.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
+    kind: task_plan
+    taskId: phase-7-ai-mock-provider-and-log-runtime-smoke
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-ai-mock-provider-and-log-runtime-smoke.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-audit-log-runtime-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-audit-log-runtime-baseline.md
+    kind: task_plan
+    taskId: phase-7-audit-log-runtime-baseline
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-audit-log-runtime-baseline.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-auth-session-runtime-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-auth-session-runtime-baseline.md
+    kind: task_plan
+    taskId: phase-7-auth-session-runtime-baseline
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-auth-session-runtime-baseline.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-dev-database-migration-and-seed-baseline.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-dev-database-migration-and-seed-baseline.md
+    kind: task_plan
+    taskId: phase-7-dev-database-migration-and-seed-baseline
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-dev-database-migration-and-seed-baseline.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-local-runtime-readiness-planning.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-local-runtime-readiness-planning.md
+    kind: task_plan
+    taskId: phase-7-local-runtime-readiness-planning
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-local-runtime-readiness-planning.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+    kind: task_plan
+    taskId: phase-7-runtime-inventory-and-slice-contract
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-runtime-inventory-and-slice-contract.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-21-phase-7-student-flow-runtime-smoke.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-student-flow-runtime-smoke.md
+    kind: task_plan
+    taskId: phase-7-student-flow-runtime-smoke
+    phase: phase-7
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-21-phase-7-student-flow-runtime-smoke.md
+    commitSha: null
+    date: "2026-05-21"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-fix-local-business-flow-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-fix-local-business-flow-runtime.md
+    kind: task_plan
+    taskId: fix-local-business-flow-runtime
+    phase: null
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-fix-local-business-flow-runtime.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-admin-org-auth-redeem-ui.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-admin-org-auth-redeem-ui.md
+    kind: task_plan
+    taskId: phase-8-admin-org-auth-redeem-ui
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-admin-org-auth-redeem-ui.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
+    kind: task_plan
+    taskId: phase-8-admin-organization-org-auth-runtime
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-admin-organization-org-auth-runtime.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-admin-redeem-code-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-admin-redeem-code-runtime.md
+    kind: task_plan
+    taskId: phase-8-admin-redeem-code-runtime
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-admin-redeem-code-runtime.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-planning-and-queue-seeding.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-planning-and-queue-seeding.md
+    kind: task_plan
+    taskId: phase-8-planning-and-queue-seeding
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-planning-and-queue-seeding.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-authorization-redeem-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-authorization-redeem-runtime.md
+    kind: task_plan
+    taskId: phase-8-student-authorization-redeem-runtime
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-authorization-redeem-runtime.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-login-session-ui-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-login-session-ui-runtime.md
+    kind: task_plan
+    taskId: phase-8-student-login-session-ui-runtime
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-login-session-ui-runtime.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-mistake-book-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-mistake-book-runtime.md
+    kind: task_plan
+    taskId: phase-8-student-mistake-book-runtime
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-mistake-book-runtime.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-mistake-book-ui.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-mistake-book-ui.md
+    kind: task_plan
+    taskId: phase-8-student-mistake-book-ui
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-mistake-book-ui.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-22-phase-8-student-profile-redeem-ui.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-profile-redeem-ui.md
+    kind: task_plan
+    taskId: phase-8-student-profile-redeem-ui
+    phase: phase-8
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-22-phase-8-student-profile-redeem-ui.md
+    commitSha: null
+    date: "2026-05-22"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-db-rebuild-seed-rehearsal.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-db-rebuild-seed-rehearsal.md
+    kind: task_plan
+    taskId: phase-10-local-db-rebuild-seed-rehearsal
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-db-rebuild-seed-rehearsal.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-deepseek-provider-smoke-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-deepseek-provider-smoke-runtime.md
+    kind: task_plan
+    taskId: phase-10-local-deepseek-provider-smoke-runtime
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-deepseek-provider-smoke-runtime.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+    kind: task_plan
+    taskId: phase-10-local-fresh-checkout-readiness
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-fresh-checkout-readiness.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+    kind: task_plan
+    taskId: phase-10-local-mvp-acceptance-rerun-closeout
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-mvp-acceptance-rerun-closeout.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+    kind: task_plan
+    taskId: phase-10-local-rag-real-content-smoke-test
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-rag-real-content-smoke-test.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+    kind: task_plan
+    taskId: phase-10-local-real-ai-provider-safety-plan
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-ai-provider-safety-plan.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+    kind: task_plan
+    taskId: phase-10-local-real-ai-provider-smoke-test
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-ai-provider-smoke-test.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-content-import-dry-run.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-content-import-dry-run.md
+    kind: task_plan
+    taskId: phase-10-local-real-content-import-dry-run
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-content-import-dry-run.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
+    kind: task_plan
+    taskId: phase-10-local-real-content-rag-smoke-runtime
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-local-real-content-rag-smoke-runtime.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-10-planning-and-queue-seeding.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-planning-and-queue-seeding.md
+    kind: task_plan
+    taskId: phase-10-planning-and-queue-seeding
+    phase: phase-10
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-10-planning-and-queue-seeding.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-11-local-product-readiness-audit.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-local-product-readiness-audit.md
+    kind: task_plan
+    taskId: phase-11-local-product-readiness-audit
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-local-product-readiness-audit.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-11-local-product-readiness-roleplay-run.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-local-product-readiness-roleplay-run.md
+    kind: task_plan
+    taskId: phase-11-local-product-readiness-roleplay-run
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-local-product-readiness-roleplay-run.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-11-staging-architecture-adr.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-staging-architecture-adr.md
+    kind: task_plan
+    taskId: phase-11-staging-architecture-adr
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-staging-architecture-adr.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-11-staging-release-planning.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-staging-release-planning.md
+    kind: task_plan
+    taskId: phase-11-staging-release-planning
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-11-staging-release-planning.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-admin-ops-runtime-ui-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-admin-ops-runtime-ui-completion.md
+    kind: task_plan
+    taskId: phase-9-admin-ops-runtime-ui-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-admin-ops-runtime-ui-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-ai-knowledge-model-config-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-ai-knowledge-model-config-runtime.md
+    kind: task_plan
+    taskId: phase-9-ai-knowledge-model-config-runtime
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-ai-knowledge-model-config-runtime.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime.md
+    kind: task_plan
+    taskId: phase-9-ai-scoring-explanation-hint-runtime
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-ai-scoring-explanation-hint-runtime.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-auth-session-account-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-auth-session-account-completion.md
+    kind: task_plan
+    taskId: phase-9-auth-session-account-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-auth-session-account-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-authorization-expiry-termination-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-authorization-expiry-termination-completion.md
+    kind: task_plan
+    taskId: phase-9-authorization-expiry-termination-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-authorization-expiry-termination-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-closeout-release-readiness.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-closeout-release-readiness.md
+    kind: task_plan
+    taskId: phase-9-closeout-release-readiness
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-closeout-release-readiness.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-content-admin-ui-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-content-admin-ui-completion.md
+    kind: task_plan
+    taskId: phase-9-content-admin-ui-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-content-admin-ui-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-content-question-material-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-content-question-material-runtime.md
+    kind: task_plan
+    taskId: phase-9-content-question-material-runtime
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-content-question-material-runtime.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-multi-client-rest-contract-verification.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-multi-client-rest-contract-verification.md
+    kind: task_plan
+    taskId: phase-9-multi-client-rest-contract-verification
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-multi-client-rest-contract-verification.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-paper-composition-lifecycle-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-paper-composition-lifecycle-runtime.md
+    kind: task_plan
+    taskId: phase-9-paper-composition-lifecycle-runtime
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-paper-composition-lifecycle-runtime.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-planning-and-queue-seeding.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-planning-and-queue-seeding.md
+    kind: task_plan
+    taskId: phase-9-planning-and-queue-seeding
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-planning-and-queue-seeding.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
+    kind: task_plan
+    taskId: phase-9-rag-resource-knowledge-runtime
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-rag-resource-knowledge-runtime.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+    kind: task_plan
+    taskId: phase-9-requirements-runtime-gap-inventory
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-requirements-runtime-gap-inventory.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+    kind: task_plan
+    taskId: phase-9-resource-knowledge-admin-ui-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-resource-knowledge-admin-ui-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-student-experience-ui-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-student-experience-ui-completion.md
+    kind: task_plan
+    taskId: phase-9-student-experience-ui-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-student-experience-ui-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-student-mock-exam-report-runtime-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-student-mock-exam-report-runtime-completion.md
+    kind: task_plan
+    taskId: phase-9-student-mock-exam-report-runtime-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-student-mock-exam-report-runtime-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-23-phase-9-student-practice-runtime-completion.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-student-practice-runtime-completion.md
+    kind: task_plan
+    taskId: phase-9-student-practice-runtime-completion
+    phase: phase-9
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-23-phase-9-student-practice-runtime-completion.md
+    commitSha: null
+    date: "2026-05-23"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-experience-plan.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-experience-plan.md
+    kind: task_plan
+    taskId: phase-11-local-happy-path-experience-plan
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-experience-plan.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-ops-role-verification.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-ops-role-verification.md
+    kind: task_plan
+    taskId: phase-11-local-happy-path-ops-role-verification
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-ops-role-verification.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-redeem-code-generation-source.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-redeem-code-generation-source.md
+    kind: task_plan
+    taskId: phase-11-local-happy-path-redeem-code-generation-source
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-redeem-code-generation-source.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-redeem-code-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-redeem-code-loop.md
+    kind: task_plan
+    taskId: phase-11-local-happy-path-redeem-code-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-redeem-code-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-student-answer-flow.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-student-answer-flow.md
+    kind: task_plan
+    taskId: phase-11-local-happy-path-student-answer-flow
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-student-answer-flow.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-local-happy-path-student-session-controls.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-student-session-controls.md
+    kind: task_plan
+    taskId: phase-11-local-happy-path-student-session-controls
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-local-happy-path-student-session-controls.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-ai-call-log-coverage-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-ai-call-log-coverage-hardening.md
+    kind: task_plan
+    taskId: phase-11-mvp-ai-call-log-coverage-hardening
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-ai-call-log-coverage-hardening.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-ai-knowledge-recommendation-review-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-ai-knowledge-recommendation-review-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-ai-knowledge-recommendation-review-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-ai-knowledge-recommendation-review-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-audit-log-coverage-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-audit-log-coverage-hardening.md
+    kind: task_plan
+    taskId: phase-11-mvp-audit-log-coverage-hardening
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-audit-log-coverage-hardening.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-auth-session-account-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-auth-session-account-hardening.md
+    kind: task_plan
+    taskId: phase-11-mvp-auth-session-account-hardening
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-auth-session-account-hardening.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-contact-config-purchase-guidance-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-contact-config-purchase-guidance-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-contact-config-purchase-guidance-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-contact-config-purchase-guidance-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-content-ops-paper-composition-publish-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-content-ops-paper-composition-publish-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-content-ops-paper-composition-publish-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-content-ops-paper-composition-publish-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-content-ops-question-material-write-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-content-ops-question-material-write-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-content-to-student-runtime-propagation.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-content-to-student-runtime-propagation.md
+    kind: task_plan
+    taskId: phase-11-mvp-content-to-student-runtime-propagation
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-content-to-student-runtime-propagation.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+    kind: task_plan
+    taskId: phase-11-mvp-functional-completeness-gap-audit
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-functional-completeness-gap-audit.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-knowledge-node-tree-management-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-knowledge-node-tree-management-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-knowledge-node-tree-management-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-knowledge-node-tree-management-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md
+    kind: task_plan
+    taskId: phase-11-mvp-model-config-fallback-runtime
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-model-config-fallback-runtime.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+    kind: task_plan
+    taskId: phase-11-mvp-queue-runner-mechanism-hardening
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-queue-runner-mechanism-hardening.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-redeem-code-batch-management-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-redeem-code-batch-management-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-redeem-code-batch-management-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-redeem-code-batch-management-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-resource-knowledge-base-publish-index-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-resource-knowledge-base-publish-index-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-student-ai-practice-mock-report-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-student-ai-practice-mock-report-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-student-ai-practice-mock-report-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-student-ai-practice-mock-report-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-system-ops-org-auth-management-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-system-ops-org-auth-management-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-system-ops-org-auth-management-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-system-ops-org-auth-management-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-system-ops-organization-management-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-system-ops-organization-management-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-system-ops-organization-management-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-system-ops-organization-management-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-mvp-system-ops-user-management-loop.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-system-ops-user-management-loop.md
+    kind: task_plan
+    taskId: phase-11-mvp-system-ops-user-management-loop
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-mvp-system-ops-user-management-loop.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md
+    kind: task_plan
+    taskId: phase-11-role-based-full-flow-acceptance-rerun
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-role-based-full-flow-acceptance-rerun.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-admin-audit-navigation.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-admin-audit-navigation.md
+    kind: task_plan
+    taskId: phase-11-staging-entry-admin-audit-navigation
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-admin-audit-navigation.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+    kind: task_plan
+    taskId: phase-11-staging-entry-auth-route-guards
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-auth-route-guards.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-content-action-closures.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-content-action-closures.md
+    kind: task_plan
+    taskId: phase-11-staging-entry-content-action-closures
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-content-action-closures.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-fix-scope.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-fix-scope.md
+    kind: task_plan
+    taskId: phase-11-staging-entry-fix-scope
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-fix-scope.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-known-limitations.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-known-limitations.md
+    kind: task_plan
+    taskId: phase-11-staging-entry-known-limitations
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-known-limitations.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-student-error-states.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-student-error-states.md
+    kind: task_plan
+    taskId: phase-11-staging-entry-student-error-states
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-student-error-states.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    kind: task_plan
+    taskId: phase-11-staging-entry-student-practice-mock-entry
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-entry-student-practice-mock-entry.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
+  - path: docs/05-execution-logs/task-plans/2026-05-24-phase-11-staging-required-role-flow-closures.md
+    archivePath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-required-role-flow-closures.md
+    kind: task_plan
+    taskId: phase-11-staging-required-role-flow-closures
+    phase: phase-11
+    status: archived
+    evidencePath: null
+    auditReviewPath: null
+    taskPlanPath: docs/05-execution-logs/archive/2026-05/task-plans/2026-05-24-phase-11-staging-required-role-flow-closures.md
+    commitSha: null
+    date: "2026-05-24"
+    tags:
+      - task_plan
+      - execution_log_archive
+      - docs_only
