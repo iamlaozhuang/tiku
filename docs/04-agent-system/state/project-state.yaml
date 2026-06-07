@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-40-task-lifecycle-governance
-updatedAt: "2026-06-07T02:00:00-07:00"
+  currentPhase: phase-41-local-first-validation-governance
+updatedAt: "2026-06-07T03:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -20,6 +20,7 @@ automation:
   governanceSopPath: docs/04-agent-system/sop/automated-advancement-governance.md
   moduleLifecycleSopPath: docs/04-agent-system/sop/module-lifecycle-governance.md
   taskLifecycleSopPath: docs/04-agent-system/sop/task-lifecycle-governance.md
+  localFirstValidationSopPath: docs/04-agent-system/sop/local-first-validation-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -39,15 +40,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 6b74a793df4f19f8ae41410cf429d8d2a5d16af2
-  lastKnownOriginMasterSha: 6b74a793df4f19f8ae41410cf429d8d2a5d16af2
+  lastKnownMasterSha: 9cdafa747732bbd7bbe573c05bf30f6421b1aca3
+  lastKnownOriginMasterSha: 9cdafa747732bbd7bbe573c05bf30f6421b1aca3
 currentTask:
-  id: phase-40-task-lifecycle-governance
+  id: phase-41-local-first-validation-governance
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-40-task-lifecycle-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-40-task-lifecycle-governance.md
-  branch: codex/phase-40-task-lifecycle-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-41-local-first-validation-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-41-local-first-validation-governance.md
+  branch: codex/phase-41-local-first-validation-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -84,5 +85,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Task lifecycle governance completed as docs-only mechanism hardening. Recommended next docs-only task: define local-first validation governance, including what can be fully validated in dev and what must remain blocked until staging/prod/provider approval. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-40-task-lifecycle-governance.md
+  nextRecommendedAction: "Local-first validation governance completed as docs-only mechanism hardening. Recommended next docs-only task: define Codex app readiness audit governance for Windows desktop automation readiness, skill visibility, permission posture, and thread hygiene. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-41-local-first-validation-governance.md
