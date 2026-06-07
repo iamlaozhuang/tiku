@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-33-post-merge-governance-state-sha-sync
+  currentPhase: phase-33-advanced-edition-implementation-readiness-review
 updatedAt: "2026-06-06T20:26:59-07:00"
 architecture:
   status: complete
@@ -39,11 +39,11 @@ repository:
   lastKnownMasterSha: aeff9643e9bdaa39d078062ad30f447f145f57d3
   lastKnownOriginMasterSha: aeff9643e9bdaa39d078062ad30f447f145f57d3
 currentTask:
-  id: phase-33-post-merge-governance-state-sha-sync
+  id: phase-33-advanced-edition-implementation-readiness-review
   status: done
-  sourceStory: phase-33-advanced-edition-requirements-consolidation-final-review
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-33-post-merge-governance-state-sha-sync.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-post-merge-governance-state-sha-sync.md
+  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-33-advanced-edition-implementation-readiness-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-implementation-readiness-review.md
   branch: codex/phase-33-post-merge-governance-state-sha-sync
   commitSha: null
   prUrl: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Post-merge governance state SHA sync is complete for master/origin aeff9643e9bdaa39d078062ad30f447f145f57d3. Recommended next docs-only step is phase-33-advanced-edition-implementation-readiness-review unless the user explicitly approves code-stage queue seeding. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-33-post-merge-governance-state-sha-sync.md
+  nextRecommendedAction: "Advanced edition implementation readiness review is ready with explicit approval prerequisites. Continue docs-only with implementation entry boundary hardening, then requirements reading-surface maintenance rules. Code-stage queue seeding remains paused unless the user explicitly approves it. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-implementation-readiness-review.md
