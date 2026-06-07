@@ -16,6 +16,10 @@ Primary sources:
 - `docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md`
 - `docs/superpowers/plans/2026-06-06-advanced-edition-doc-source-of-truth-index.md`
 
+Maintenance rule:
+
+- `docs/04-agent-system/sop/advanced-edition-requirements-reading-surface-maintenance.md`
+
 Implementation planning references:
 
 - `docs/superpowers/plans/2026-06-06-advanced-edition-auth-context-implementation-plan.md`
