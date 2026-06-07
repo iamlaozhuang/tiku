@@ -18008,3 +18008,41 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-doc-governance-batch-closeout.md
     status: done
     retryCount: 0
+  - id: phase-32-advanced-edition-post-closeout-state-sha-sync
+    title: Phase 32 Advanced Edition Post Closeout State SHA Sync
+    phase: phase-32-advanced-edition-doc-governance-hardening
+    sourceStory: phase-32-advanced-edition-doc-governance-batch-closeout
+    dependencies:
+      - phase-32-advanced-edition-doc-governance-batch-closeout
+    taskPlanPolicy: required
+    humanApproval: "User approved executing the recommended first next task: phase-32-advanced-edition-post-closeout-state-sha-sync. Scope remains docs-only; no product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, Cost Calibration Gate execution, or code-stage queue seeding."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-06-advanced-edition-post-closeout-state-sha-sync.md
+      - docs/05-execution-logs/evidence/2026-06-06-advanced-edition-post-closeout-state-sha-sync.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-advanced-edition-post-closeout-state-sha-sync.md docs\05-execution-logs\evidence\2026-06-06-advanced-edition-post-closeout-state-sha-sync.md
+      - Select-String -Path docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml -Pattern '85f7b1823df34cecc51cf74751f2f35454a8a0e9','phase-32-advanced-edition-post-closeout-state-sha-sync','Cost Calibration Gate remains blocked','code-stage queue seeding remains paused'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-post-closeout-state-sha-sync.md
+    status: done
+    retryCount: 0
