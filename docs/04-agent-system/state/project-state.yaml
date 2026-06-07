@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-50-automation-readiness-scorecard
-updatedAt: "2026-06-07T12:00:00-07:00"
+  currentPhase: phase-51-browser-bridge-readiness-recheck
+updatedAt: "2026-06-07T13:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -46,15 +46,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 9aee96fac6b1e5ee84ff209e249dbcabf5da8683
-  lastKnownOriginMasterSha: 9aee96fac6b1e5ee84ff209e249dbcabf5da8683
+  lastKnownMasterSha: 316f80180ac553eb14c48ce809c75b08f7f1abe7
+  lastKnownOriginMasterSha: 316f80180ac553eb14c48ce809c75b08f7f1abe7
 currentTask:
-  id: phase-50-automation-readiness-scorecard
+  id: phase-51-browser-bridge-readiness-recheck
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-50-automation-readiness-scorecard.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-50-automation-readiness-scorecard.md
-  branch: codex/phase-50-automation-readiness-scorecard
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-51-browser-bridge-readiness-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-51-browser-bridge-readiness-recheck.md
+  branch: codex/phase-51-browser-bridge-readiness-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -91,5 +91,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Automation readiness scorecard supports ready_for_docs_auto_proposal only. Recommended next task: create a dedicated docs-only mode transition proposal for docs_auto_candidate; do not change automation.mode until that proposal records explicit approval. Browser-dependent local UI verification should wait for node_repl / Browser bridge repair or an approved fallback. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-50-automation-readiness-scorecard.md
+  nextRecommendedAction: "Browser bridge readiness recheck passed after sandbox permission adjustment. Recommended next task: create a dedicated docs-only mode transition proposal for docs_auto_candidate using phase-50 scorecard evidence and phase-51 Browser bridge evidence; do not change automation.mode until that proposal records explicit approval. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-51-browser-bridge-readiness-recheck.md
