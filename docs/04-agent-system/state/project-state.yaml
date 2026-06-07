@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-37-doc-encoding-regression-review
-updatedAt: "2026-06-06T21:26:21-07:00"
+  currentPhase: phase-38-automated-advancement-governance
+updatedAt: "2026-06-07T00:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: ff39b2d4959b43f4960d585355135fd0b88a689a
-  lastKnownOriginMasterSha: ff39b2d4959b43f4960d585355135fd0b88a689a
+  lastKnownMasterSha: 6ddac38adb803e0c2bee6fd2d9aababcffe8c1c5
+  lastKnownOriginMasterSha: 6ddac38adb803e0c2bee6fd2d9aababcffe8c1c5
 currentTask:
-  id: phase-37-doc-encoding-regression-review
+  id: phase-38-post-merge-state-sync-6ddac38
   status: done
-  sourceStory: user-request-2026-06-06-doc-encoding-governance-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-37-doc-encoding-regression-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-37-doc-encoding-regression-review.md
-  branch: codex/phase-34-doc-encoding-governance-batch
+  sourceStory: user-request-2026-06-07-automated-advancement-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-38-post-merge-state-sync-6ddac38.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-38-post-merge-state-sync-6ddac38.md
+  branch: codex/phase-38-automated-advancement-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Doc encoding governance batch completed. No safe project documentation encoding repair was identified under docs/. One out-of-scope runtime upload artifact requires separate approval before inspection or repair. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-37-doc-encoding-regression-review.md
+  nextRecommendedAction: "Mechanism state synchronization completed for master/origin master at 6ddac38adb803e0c2bee6fd2d9aababcffe8c1c5. Next recommended docs-only task: phase-38-automated-advancement-governance-charter. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-38-post-merge-state-sync-6ddac38.md
