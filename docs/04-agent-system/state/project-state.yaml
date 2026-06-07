@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-47-code-stage-task-seeding-governance
-updatedAt: "2026-06-07T09:00:00-07:00"
+  currentPhase: phase-48-automated-governance-stack-closeout-audit
+updatedAt: "2026-06-07T10:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -46,15 +46,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 0420d9fd4772193f450f9b35201190d4393c498a
-  lastKnownOriginMasterSha: 0420d9fd4772193f450f9b35201190d4393c498a
+  lastKnownMasterSha: 03cadb7ca019463966a59361888ec8cb0f656224
+  lastKnownOriginMasterSha: 03cadb7ca019463966a59361888ec8cb0f656224
 currentTask:
-  id: phase-47-code-stage-task-seeding-governance
+  id: phase-48-automated-governance-stack-closeout-audit
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-47-code-stage-task-seeding-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-47-code-stage-task-seeding-governance.md
-  branch: codex/phase-47-code-stage-task-seeding-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-48-automated-governance-stack-closeout-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-48-automated-governance-stack-closeout-audit.md
+  branch: codex/phase-48-automated-governance-stack-closeout-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -91,5 +91,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Code-stage task seeding governance completed as docs-only mechanism hardening. Recommended next docs-only task: run a docs-only mechanism closeout audit for the automated advancement governance stack before proposing any mode transition or code-stage queue seeding. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-47-code-stage-task-seeding-governance.md
+  nextRecommendedAction: "Automated governance stack closeout audit completed as docs-only mechanism review. Recommended next human decision: run the actual read-only Codex App readiness audit, request a dedicated mode transition proposal, approve a narrow code-stage task seeding batch, or pause. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-48-automated-governance-stack-closeout-audit.md
