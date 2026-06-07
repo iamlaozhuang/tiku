@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-51-browser-bridge-readiness-recheck
-updatedAt: "2026-06-07T13:00:00-07:00"
+  currentPhase: phase-52-docs-auto-candidate-mode-transition-proposal
+updatedAt: "2026-06-07T14:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -46,15 +46,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 316f80180ac553eb14c48ce809c75b08f7f1abe7
-  lastKnownOriginMasterSha: 316f80180ac553eb14c48ce809c75b08f7f1abe7
+  lastKnownMasterSha: 6446f72e03553171a06071dd4cb7e5c6e18ce41b
+  lastKnownOriginMasterSha: 6446f72e03553171a06071dd4cb7e5c6e18ce41b
 currentTask:
-  id: phase-51-browser-bridge-readiness-recheck
+  id: phase-52-docs-auto-candidate-mode-transition-proposal
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-51-browser-bridge-readiness-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-51-browser-bridge-readiness-recheck.md
-  branch: codex/phase-51-browser-bridge-readiness-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-52-docs-auto-candidate-mode-transition-proposal.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-52-docs-auto-candidate-mode-transition-proposal.md
+  branch: codex/phase-52-docs-auto-candidate-mode-transition-proposal
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -91,5 +91,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Browser bridge readiness recheck passed after sandbox permission adjustment. Recommended next task: create a dedicated docs-only mode transition proposal for docs_auto_candidate using phase-50 scorecard evidence and phase-51 Browser bridge evidence; do not change automation.mode until that proposal records explicit approval. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-51-browser-bridge-readiness-recheck.md
+  nextRecommendedAction: "Docs auto candidate mode transition proposal completed as docs-only. Recommended next human decision: explicitly approve or reject a dedicated state-only automation.mode change to docs_auto_candidate. Cost Calibration Gate remains blocked pending fresh explicit approval; code-stage queue seeding and product implementation remain unapproved."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-52-docs-auto-candidate-mode-transition-proposal.md
