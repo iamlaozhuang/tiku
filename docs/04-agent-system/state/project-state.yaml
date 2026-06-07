@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-46-automation-readiness-scorecard-mode-transition-governance
-updatedAt: "2026-06-07T08:00:00-07:00"
+  currentPhase: phase-47-code-stage-task-seeding-governance
+updatedAt: "2026-06-07T09:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -26,6 +26,7 @@ automation:
   parallelWorkSopPath: docs/04-agent-system/sop/parallel-work-governance.md
   failureRetryHumanTakeoverSopPath: docs/04-agent-system/sop/failure-retry-and-human-takeover-governance.md
   readinessScorecardModeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+  codeStageTaskSeedingSopPath: docs/04-agent-system/sop/code-stage-task-seeding-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -45,15 +46,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: d3b2832257bf63d2dee7669ed1baa65a9757e9b7
-  lastKnownOriginMasterSha: d3b2832257bf63d2dee7669ed1baa65a9757e9b7
+  lastKnownMasterSha: 0420d9fd4772193f450f9b35201190d4393c498a
+  lastKnownOriginMasterSha: 0420d9fd4772193f450f9b35201190d4393c498a
 currentTask:
-  id: phase-46-automation-readiness-scorecard-mode-transition-governance
+  id: phase-47-code-stage-task-seeding-governance
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-46-automation-readiness-scorecard-mode-transition-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-46-automation-readiness-scorecard-mode-transition-governance.md
-  branch: codex/phase-46-automation-readiness-scorecard-mode-transition-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-47-code-stage-task-seeding-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-47-code-stage-task-seeding-governance.md
+  branch: codex/phase-47-code-stage-task-seeding-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -90,5 +91,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Automation readiness scorecard and mode transition governance completed as docs-only mechanism hardening. Recommended next docs-only task: define code-stage task seeding governance for advanced edition implementation planning, without creating implementation queue items unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-46-automation-readiness-scorecard-mode-transition-governance.md
+  nextRecommendedAction: "Code-stage task seeding governance completed as docs-only mechanism hardening. Recommended next docs-only task: run a docs-only mechanism closeout audit for the automated advancement governance stack before proposing any mode transition or code-stage queue seeding. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-47-code-stage-task-seeding-governance.md

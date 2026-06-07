@@ -19042,3 +19042,47 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-46-automation-readiness-scorecard-mode-transition-governance.md
     status: done
     retryCount: 0
+  - id: phase-47-code-stage-task-seeding-governance
+    title: Phase 47 Code-Stage Task Seeding Governance
+    phase: phase-47-code-stage-task-seeding-governance
+    sourceStory: user-request-2026-06-07-automated-advancement-governance
+    dependencies:
+      - phase-46-automation-readiness-scorecard-mode-transition-governance
+    taskPlanPolicy: required
+    humanApproval: "User approved iterative automated mechanism governance work and authorized each round to commit, merge, push, and clean short-lived branches after validation. Scope is docs-only code-stage task seeding governance; no actual code-stage queue seeding, implementation queue items, automation.mode change, product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, Codex configuration change, skill/plugin installation, connector installation, thread creation, worktree creation, parallel worker execution, destructive recovery, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate execution."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/code-stage-task-seeding-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-47-code-stage-task-seeding-governance.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-47-code-stage-task-seeding-governance-review.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-47-code-stage-task-seeding-governance.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+    riskTypes:
+      - automation_policy
+      - code_stage_seeding
+      - implementation_planning
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\sop\code-stage-task-seeding-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-47-code-stage-task-seeding-governance.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-47-code-stage-task-seeding-governance-review.md docs\05-execution-logs\evidence\2026-06-07-phase-47-code-stage-task-seeding-governance.md
+      - Select-String -Path docs\04-agent-system\sop\code-stage-task-seeding-governance.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-47-code-stage-task-seeding-governance-review.md,docs\05-execution-logs\evidence\2026-06-07-phase-47-code-stage-task-seeding-governance.md -Pattern 'Seeding Approval Gate','Required Inputs','Seedable Task Kinds','Task Template','Scope Split Rules','Advanced Edition MVP Seeding Boundaries','Validation Selection','Seeding Review Gate','Cost Calibration Gate remains blocked','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-47-code-stage-task-seeding-governance.md
+    status: done
+    retryCount: 0
