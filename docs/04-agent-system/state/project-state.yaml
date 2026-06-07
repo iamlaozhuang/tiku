@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-49-codex-app-readiness-audit-execution
-updatedAt: "2026-06-07T11:00:00-07:00"
+  currentPhase: phase-50-automation-readiness-scorecard
+updatedAt: "2026-06-07T12:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -46,15 +46,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 5413de2b312264a4c78b88c9fdf05a439e8415c7
-  lastKnownOriginMasterSha: 5413de2b312264a4c78b88c9fdf05a439e8415c7
+  lastKnownMasterSha: 9aee96fac6b1e5ee84ff209e249dbcabf5da8683
+  lastKnownOriginMasterSha: 9aee96fac6b1e5ee84ff209e249dbcabf5da8683
 currentTask:
-  id: phase-49-codex-app-readiness-audit-execution
+  id: phase-50-automation-readiness-scorecard
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-49-codex-app-readiness-audit-execution.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-49-codex-app-readiness-audit-execution.md
-  branch: codex/phase-49-codex-app-readiness-audit-execution
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-50-automation-readiness-scorecard.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-50-automation-readiness-scorecard.md
+  branch: codex/phase-50-automation-readiness-scorecard
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -91,5 +91,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Codex App readiness audit executed as docs-only read-only inspection. Recommended next local-completable task: run a dedicated docs-only automation readiness scorecard using this actual readiness evidence. Browser-dependent local UI verification should wait for node_repl / Browser bridge repair or an approved fallback. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-49-codex-app-readiness-audit-execution.md
+  nextRecommendedAction: "Automation readiness scorecard supports ready_for_docs_auto_proposal only. Recommended next task: create a dedicated docs-only mode transition proposal for docs_auto_candidate; do not change automation.mode until that proposal records explicit approval. Browser-dependent local UI verification should wait for node_repl / Browser bridge repair or an approved fallback. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-50-automation-readiness-scorecard.md
