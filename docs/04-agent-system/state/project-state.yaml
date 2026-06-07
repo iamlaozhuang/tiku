@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-62-mechanism-source-index
-updatedAt: "2026-06-07T10:05:00-07:00"
+  currentPhase: phase-63-codex-app-readiness-follow-up
+updatedAt: "2026-06-07T10:20:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -52,15 +52,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 349a79f7
-  lastKnownOriginMasterSha: 349a79f7
+  lastKnownMasterSha: eadf53bf
+  lastKnownOriginMasterSha: eadf53bf
 currentTask:
-  id: phase-62-mechanism-source-index
+  id: phase-63-codex-app-readiness-follow-up
   status: done
   sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-62-mechanism-source-index.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-62-mechanism-source-index.md
-  branch: codex/phase-62-mechanism-source-index
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-63-codex-app-readiness-follow-up.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-63-codex-app-readiness-follow-up.md
+  branch: codex/phase-63-codex-app-readiness-follow-up
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -97,5 +97,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 62 mechanism source-of-truth index completed. Continue serial docs-only automation readiness work with Phase 63 Codex App readiness follow-up. Cost Calibration Gate remains blocked; provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, and external-service actions remain forbidden without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-62-mechanism-source-index.md
+  nextRecommendedAction: Phase 63 Codex App readiness follow-up completed. Continue serial docs-only automation readiness work with Phase 64 advanced edition code-stage queue seeding plan. Keep automation.mode as semi_auto; do not perform actual code-stage queue seeding, product implementation, Codex configuration changes, plugin or skill installation, Browser navigation, cleanup, provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, external-service actions, or Cost Calibration Gate execution.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-63-codex-app-readiness-follow-up.md
