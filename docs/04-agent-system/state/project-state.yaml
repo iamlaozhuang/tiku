@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-43-skill-dispatch-thread-handoff-governance
-updatedAt: "2026-06-07T05:00:00-07:00"
+  currentPhase: phase-44-parallel-work-governance
+updatedAt: "2026-06-07T06:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -23,6 +23,7 @@ automation:
   localFirstValidationSopPath: docs/04-agent-system/sop/local-first-validation-governance.md
   codexAppReadinessSopPath: docs/04-agent-system/sop/codex-app-readiness-audit-governance.md
   skillThreadHandoffSopPath: docs/04-agent-system/sop/skill-dispatch-and-thread-handoff-governance.md
+  parallelWorkSopPath: docs/04-agent-system/sop/parallel-work-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -42,15 +43,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 88442cd86236e187c8ecafe30b133b8c6d5c70a8
-  lastKnownOriginMasterSha: 88442cd86236e187c8ecafe30b133b8c6d5c70a8
+  lastKnownMasterSha: 10072a0efc282c9af7aec64fa07fe1c58ed186c2
+  lastKnownOriginMasterSha: 10072a0efc282c9af7aec64fa07fe1c58ed186c2
 currentTask:
-  id: phase-43-skill-dispatch-thread-handoff-governance
+  id: phase-44-parallel-work-governance
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-43-skill-dispatch-thread-handoff-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-43-skill-dispatch-thread-handoff-governance.md
-  branch: codex/phase-43-skill-dispatch-thread-handoff-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-44-parallel-work-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-44-parallel-work-governance.md
+  branch: codex/phase-44-parallel-work-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -87,5 +88,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Skill dispatch and thread handoff governance completed as docs-only mechanism hardening. Recommended next docs-only task: define parallel work governance, including when independent threads/worktrees are allowed, how scopes stay isolated, and when parallelism is forbidden. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-43-skill-dispatch-thread-handoff-governance.md
+  nextRecommendedAction: "Parallel work governance completed as docs-only mechanism hardening. Recommended next docs-only task: define failure retry and human takeover governance, including retry budgets, blocker classification, escalation evidence, and manual recovery handoff. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-44-parallel-work-governance.md
