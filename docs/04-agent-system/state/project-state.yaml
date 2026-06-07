@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-33-post-merge-state-sha-sync-82d15a50
-updatedAt: "2026-06-06T20:59:01-07:00"
+  currentPhase: phase-37-doc-encoding-regression-review
+updatedAt: "2026-06-06T21:26:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -36,15 +36,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 82d15a504d5b8a46984e87541bc058657a53598d
-  lastKnownOriginMasterSha: 82d15a504d5b8a46984e87541bc058657a53598d
+  lastKnownMasterSha: ff39b2d4959b43f4960d585355135fd0b88a689a
+  lastKnownOriginMasterSha: ff39b2d4959b43f4960d585355135fd0b88a689a
 currentTask:
-  id: phase-33-post-merge-state-sha-sync-82d15a50
+  id: phase-37-doc-encoding-regression-review
   status: done
-  sourceStory: phase-33-advanced-edition-doc-governance-followup-batch-closeout
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
-  branch: codex/phase-33-post-merge-state-sha-sync-82d15a50
+  sourceStory: user-request-2026-06-06-doc-encoding-governance-batch
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-37-doc-encoding-regression-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-37-doc-encoding-regression-review.md
+  branch: codex/phase-34-doc-encoding-governance-batch
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Post-merge governance state SHA sync is complete for master/origin 82d15a504d5b8a46984e87541bc058657a53598d. Advanced edition docs-only governance is ready for the next explicit user decision. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
+  nextRecommendedAction: "Doc encoding governance batch completed. No safe project documentation encoding repair was identified under docs/. One out-of-scope runtime upload artifact requires separate approval before inspection or repair. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-37-doc-encoding-regression-review.md
