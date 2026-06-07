@@ -706,3 +706,55 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-63-codex-app-readiness-follow-up.md
     status: done
     retryCount: 0
+  - id: phase-64-advanced-code-stage-seeding-plan
+    title: Phase 64 Advanced Edition Code-Stage Queue Seeding Plan
+    phase: phase-64-advanced-code-stage-seeding-plan
+    sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
+    dependencies:
+      - phase-63-codex-app-readiness-follow-up
+    taskPlanPolicy: required
+    humanApproval: User approved serial execution of the 1-10 automation readiness work combination with per-task validation, commit, merge, push, and short-lived branch cleanup. Phase 64 scope is docs-only planning for the future Phase 65 code-stage queue seeding execution. It may define seeding boundaries and planned queue entries, but must not execute queue seeding, product implementation, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, automation.mode change, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+    riskTypes:
+      - code_stage_seeding_plan
+      - advanced_edition
+      - implementation_planning
+      - blocked_gate
+      - docs_governance
+      - evidence_integrity
+    validationCommands:
+      - python YAML parse and planned seed invariant check
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <Phase 64 touched files>
+      - Select-String required plan anchors
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+    status: done
+    retryCount: 0

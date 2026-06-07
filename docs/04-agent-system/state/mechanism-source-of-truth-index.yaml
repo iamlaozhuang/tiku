@@ -1,6 +1,6 @@
 schemaVersion: 1
-generatedByTask: phase-62-mechanism-source-index
-generatedAt: "2026-06-07T10:05:00-07:00"
+generatedByTask: phase-64-advanced-code-stage-seeding-plan
+generatedAt: "2026-06-07T10:35:00-07:00"
 purpose: Lightweight navigation index for Tiku automation governance source-of-truth files. This index does not replace SOPs, state files, task queue entries, evidence, or audit reviews.
 mode:
   current: semi_auto
@@ -22,6 +22,9 @@ canonicalStateFiles:
   - id: mechanism-source-of-truth-index
     path: docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
     role: navigation index for mechanism facts
+  - id: advanced-edition-code-stage-seeding-plan
+    path: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+    role: planned Phase 65 code-stage queue seeding boundary
 archiveIndexes:
   - id: task-queue-archive-2026-05
     path: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
@@ -106,6 +109,7 @@ recoveryReadOrder:
   - docs/04-agent-system/state/project-state.yaml
   - docs/04-agent-system/state/task-queue.yaml
   - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+  - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
   - latest task plan from project-state
   - latest evidence from project-state
   - latest audit review when present
@@ -121,6 +125,7 @@ terminologyAnchors:
 forbiddenClaims:
   - This index does not approve product implementation.
   - This index does not approve code-stage queue seeding.
+  - The advanced edition code-stage seeding plan does not approve direct product implementation.
   - This index does not approve provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, or external-service actions.
   - Cost Calibration Gate remains blocked pending fresh explicit approval.
   - This index does not prove runtime behavior for authorization, paper, mock_exam, redeem_code, audit_log, or ai_call_log.

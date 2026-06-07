@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-63-codex-app-readiness-follow-up
-updatedAt: "2026-06-07T10:20:00-07:00"
+  currentPhase: phase-64-advanced-code-stage-seeding-plan
+updatedAt: "2026-06-07T10:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -46,21 +46,22 @@ automation:
   executionLogArchivalIndexSopPath: docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
   executionLogIndexPath: docs/05-execution-logs/execution-log-index.yaml
   mechanismSourceOfTruthIndexPath: docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+  advancedEditionCodeStageSeedingPlanPath: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
 taskSource:
   requirementsPath: docs/01-requirements/stories
   queueStrategy: story_to_verifiable_units
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: eadf53bf
-  lastKnownOriginMasterSha: eadf53bf
+  lastKnownMasterSha: 0b3575bc
+  lastKnownOriginMasterSha: 0b3575bc
 currentTask:
-  id: phase-63-codex-app-readiness-follow-up
+  id: phase-64-advanced-code-stage-seeding-plan
   status: done
   sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-63-codex-app-readiness-follow-up.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-63-codex-app-readiness-follow-up.md
-  branch: codex/phase-63-codex-app-readiness-follow-up
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+  branch: codex/phase-64-advanced-code-stage-seeding-plan
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -97,5 +98,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 63 Codex App readiness follow-up completed. Continue serial docs-only automation readiness work with Phase 64 advanced edition code-stage queue seeding plan. Keep automation.mode as semi_auto; do not perform actual code-stage queue seeding, product implementation, Codex configuration changes, plugin or skill installation, Browser navigation, cleanup, provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, external-service actions, or Cost Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-63-codex-app-readiness-follow-up.md
+  nextRecommendedAction: Phase 64 advanced edition code-stage queue seeding plan completed. Continue serial docs-only automation readiness work with Phase 65 advanced edition code-stage queue seeding execution. Phase 65 may seed pending planning/review tasks according to docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml, but must not seed direct implementation tasks or execute product implementation, dependency, schema, migration, provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, external-service actions, automation.mode change, or Cost Calibration Gate execution.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md

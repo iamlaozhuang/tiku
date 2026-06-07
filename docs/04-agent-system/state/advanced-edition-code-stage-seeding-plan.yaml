@@ -1,0 +1,218 @@
+schemaVersion: 1
+generatedByTask: phase-64-advanced-code-stage-seeding-plan
+generatedAt: "2026-06-07T10:35:00-07:00"
+purpose: Planned Phase 65 queue seeding boundary for advanced edition code-stage readiness. This plan is not the queue execution itself and does not approve product implementation.
+sourceDocuments:
+  - docs/01-requirements/advanced-edition/00-index.md
+  - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+  - docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-auth-context-implementation-plan.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
+  - docs/superpowers/plans/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+coverageEvidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-56-advanced-edition-coverage-audit.md
+codexReadinessEvidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-63-codex-app-readiness-follow-up.md
+mode:
+  current: semi_auto
+  noModeTransitionInPhase65: true
+phase65ExecutionBoundary:
+  maximumSeededTasks: 10
+  permittedTaskKinds:
+    - implementation_planning
+    - local_verification
+    - security_review
+    - blocked_gate
+  directImplementationTaskCreationPermitted: false
+  productCodeExecutionPermitted: false
+  dependencyTaskPermitted: false
+  schemaMigrationTaskPermitted: false
+  deployOrExternalServiceTaskPermitted: false
+  providerTaskPermitted: false
+  envSecretTaskPermitted: false
+  paymentTaskPermitted: false
+  costCalibrationGateExecutionPermitted: false
+plannedSeedTasks:
+  - id: phase-69-advanced-authorization-context-implementation-planning
+    title: Advanced Edition Authorization Context Implementation Planning
+    taskKind: implementation_planning
+    sourceModule: authorization-context
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-auth-context-implementation-plan.md
+    dependencyIds: []
+    riskTags:
+      - authorization_permission
+      - authorization
+      - redeem_code
+      - evidence_redaction
+    expectedOutput: implementation task plan proposal for advanced authorization context, without code edits
+  - id: phase-70-advanced-ai-task-domain-implementation-planning
+    title: Advanced Edition AI Task Domain Implementation Planning
+    taskKind: implementation_planning
+    sourceModule: ai-task-domain
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
+    dependencyIds:
+      - phase-69-advanced-authorization-context-implementation-planning
+    riskTags:
+      - ai_call_log
+      - audit_log
+      - provider_blocked
+      - local_validation
+      - evidence_redaction
+    expectedOutput: implementation task plan proposal for provider-agnostic AI task lifecycle, without provider execution
+  - id: phase-71-advanced-personal-ai-generation-implementation-planning
+    title: Advanced Edition Personal AI Generation Implementation Planning
+    taskKind: implementation_planning
+    sourceModule: personal-ai-generation
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan.md
+    dependencyIds:
+      - phase-70-advanced-ai-task-domain-implementation-planning
+    riskTags:
+      - authorization
+      - paper
+      - mock_exam
+      - ai_call_log
+      - evidence_redaction
+    expectedOutput: implementation task plan proposal for isolated personal AI question and paper learning content
+  - id: phase-72-advanced-organization-training-implementation-planning
+    title: Advanced Edition Organization Training Implementation Planning
+    taskKind: implementation_planning
+    sourceModule: organization-training
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+    dependencyIds:
+      - phase-70-advanced-ai-task-domain-implementation-planning
+    riskTags:
+      - authorization
+      - paper
+      - mock_exam
+      - audit_log
+      - evidence_redaction
+    expectedOutput: implementation task plan proposal for organization training draft, publish, takedown, copy, and employee answer lifecycle
+  - id: phase-73-advanced-organization-analytics-implementation-planning
+    title: Advanced Edition Organization Analytics Implementation Planning
+    taskKind: implementation_planning
+    sourceModule: organization-analytics
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+    dependencyIds:
+      - phase-72-advanced-organization-training-implementation-planning
+    riskTags:
+      - authorization
+      - mock_exam
+      - audit_log
+      - local_validation
+      - evidence_redaction
+    expectedOutput: implementation task plan proposal for organization admin summary analytics and privacy boundaries
+  - id: phase-74-advanced-ops-auth-quota-implementation-planning
+    title: Advanced Edition Operations Authorization And Quota Implementation Planning
+    taskKind: implementation_planning
+    sourceModule: ops-authorization-quota
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
+    dependencyIds:
+      - phase-69-advanced-authorization-context-implementation-planning
+      - phase-70-advanced-ai-task-domain-implementation-planning
+    riskTags:
+      - authorization_permission
+      - authorization
+      - redeem_code
+      - audit_log
+      - ai_call_log
+      - provider_blocked
+      - evidence_redaction
+    expectedOutput: implementation task plan proposal for operations authorization, redeem_code, quota ledger, and redacted governance
+  - id: phase-75-advanced-retention-log-governance-implementation-planning
+    title: Advanced Edition Retention And Log Governance Implementation Planning
+    taskKind: implementation_planning
+    sourceModule: retention-log-governance
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+    dependencyIds:
+      - phase-70-advanced-ai-task-domain-implementation-planning
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+      - phase-72-advanced-organization-training-implementation-planning
+      - phase-74-advanced-ops-auth-quota-implementation-planning
+    riskTags:
+      - audit_log
+      - ai_call_log
+      - evidence_redaction
+      - blocked_gate
+    expectedOutput: implementation task plan proposal for expired_hidden, recovery, retention, audit_log, ai_call_log, and redaction controls
+  - id: phase-76-advanced-code-stage-schema-dependency-blocker-review
+    title: Advanced Edition Schema And Dependency Blocker Review
+    taskKind: blocked_gate
+    sourceModule: cross-cutting
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md
+    dependencyIds:
+      - phase-69-advanced-authorization-context-implementation-planning
+    riskTags:
+      - schema_migration
+      - dependency
+      - blocked_gate
+    expectedOutput: docs-only register of schema, migration, dependency, and package changes that require separate human approval
+  - id: phase-77-advanced-code-stage-security-redaction-review-plan
+    title: Advanced Edition Security And Redaction Review Planning
+    taskKind: security_review
+    sourceModule: cross-cutting
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+    dependencyIds:
+      - phase-70-advanced-ai-task-domain-implementation-planning
+      - phase-74-advanced-ops-auth-quota-implementation-planning
+    riskTags:
+      - security_review
+      - authorization_permission
+      - audit_log
+      - ai_call_log
+      - redeem_code
+      - evidence_redaction
+    expectedOutput: review plan for authorization, redeem_code, audit_log, ai_call_log, and evidence redaction assertions
+  - id: phase-78-advanced-code-stage-local-validation-planning
+    title: Advanced Edition Local Validation Planning
+    taskKind: local_verification
+    sourceModule: cross-cutting
+    sourcePlan: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+    dependencyIds:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+      - phase-72-advanced-organization-training-implementation-planning
+      - phase-73-advanced-organization-analytics-implementation-planning
+      - phase-74-advanced-ops-auth-quota-implementation-planning
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    riskTags:
+      - local_validation
+      - paper
+      - mock_exam
+      - authorization
+      - audit_log
+      - ai_call_log
+    expectedOutput: local-first validation plan for advanced edition implementation tasks without staging/prod or provider use
+phase65MustNotSeed:
+  - direct implementation tasks
+  - dependency package or lockfile change tasks
+  - schema migration execution tasks
+  - provider_cost_measurement tasks
+  - real provider call tasks
+  - env or secret tasks
+  - staging prod cloud deploy tasks
+  - payment tasks
+  - external-service tasks
+  - Cost Calibration Gate execution tasks
+redactionRules:
+  evidenceMustExclude:
+    - secrets
+    - tokens
+    - database URLs
+    - Authorization headers
+    - provider payloads
+    - raw prompts
+    - raw answers
+    - plaintext redeem_code
+    - employee subjective answer text
+    - full paper content
+    - raw generated AI content
+terminologyAnchors:
+  - authorization
+  - paper
+  - mock_exam
+  - redeem_code
+  - audit_log
+  - ai_call_log
