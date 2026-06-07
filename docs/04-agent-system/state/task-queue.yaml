@@ -19392,3 +19392,48 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-54-task-queue-archival-index-governance.md
     status: done
     retryCount: 0
+  - id: phase-55-thread-rollover-handoff-governance
+    title: Phase 55 Thread Rollover Handoff Governance
+    phase: phase-55-thread-rollover-handoff-governance
+    sourceStory: user-request-2026-06-07-automated-advancement-governance
+    dependencies:
+      - phase-54-task-queue-archival-index-governance
+    taskPlanPolicy: required
+    humanApproval: "User approved keeping automation.mode as semi_auto and proceeding with docs-only serial governance optimization. User authorized each task, after detailed validation, to commit, merge, push, clean the short-lived branch, and continue to the next task. Scope is docs-only thread rollover and handoff governance; no Codex thread creation/fork/archive/switch, automation.mode change, automatic task claiming execution, product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, Codex configuration change, skill/plugin installation, connector installation, session history cleanup, cache deletion, business browser navigation, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, actual code-stage queue seeding, implementation queue items, or Cost Calibration Gate execution."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+    riskTypes:
+      - automation_policy
+      - thread_rollover
+      - thread_handoff
+      - context_recovery
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-55-thread-rollover-handoff-governance.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-55-thread-rollover-handoff-governance.md docs\05-execution-logs\evidence\2026-06-07-phase-55-thread-rollover-handoff-governance.md
+      - Select-String -Path docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-55-thread-rollover-handoff-governance.md,docs\05-execution-logs\evidence\2026-06-07-phase-55-thread-rollover-handoff-governance.md -Pattern 'Decision Labels','Continue Current Thread Criteria','Suggest New Thread Signals','Require New Thread Signals','Rollover Preparation Gate','New Thread Startup Gate','Agent Autonomy Boundary','User Cooperation Model','Cost Calibration Gate remains blocked','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+    status: done
+    retryCount: 0

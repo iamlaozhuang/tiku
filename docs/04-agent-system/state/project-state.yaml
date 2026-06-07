@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-54-task-queue-archival-index-governance
-updatedAt: "2026-06-07T16:00:00-07:00"
+  currentPhase: phase-55-thread-rollover-handoff-governance
+updatedAt: "2026-06-07T17:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -29,6 +29,7 @@ automation:
   codeStageTaskSeedingSopPath: docs/04-agent-system/sop/code-stage-task-seeding-governance.md
   requirementTaskCoverageGapAuditSopPath: docs/04-agent-system/sop/requirement-task-coverage-and-gap-audit-governance.md
   taskQueueArchivalIndexSopPath: docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+  threadRolloverHandoffSopPath: docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -48,15 +49,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 9ea0b08d0d3f7e3f4e6adf2816802f974f85a274
-  lastKnownOriginMasterSha: 9ea0b08d0d3f7e3f4e6adf2816802f974f85a274
+  lastKnownMasterSha: 89da5f9473410ed6dc7a7c86fde90ecc8a103249
+  lastKnownOriginMasterSha: 89da5f9473410ed6dc7a7c86fde90ecc8a103249
 currentTask:
-  id: phase-54-task-queue-archival-index-governance
+  id: phase-55-thread-rollover-handoff-governance
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-54-task-queue-archival-index-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-54-task-queue-archival-index-governance.md
-  branch: codex/phase-54-task-queue-archival-index-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+  branch: codex/phase-55-thread-rollover-handoff-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -93,5 +94,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Task queue archival and index governance completed as docs-only. Recommended next semi_auto docs-only task: thread rollover and handoff governance, to define when a long-running Codex thread should suggest or require a new thread. Cost Calibration Gate remains blocked; code-stage queue seeding and product implementation remain unapproved."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-54-task-queue-archival-index-governance.md
+  nextRecommendedAction: "Thread rollover and handoff governance completed as docs-only. Recommended next human decision: either approve a future task queue archive execution plan, approve a docs-only advanced-edition coverage audit using the new coverage SOP, or pause for review. Cost Calibration Gate remains blocked; code-stage queue seeding and product implementation remain unapproved."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-55-thread-rollover-handoff-governance.md
