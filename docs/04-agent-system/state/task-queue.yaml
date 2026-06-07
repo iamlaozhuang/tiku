@@ -18452,3 +18452,163 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
     status: done
     retryCount: 0
+  - id: phase-34-doc-encoding-audit-and-repair-plan
+    title: Phase 34 Doc Encoding Audit And Repair Plan
+    phase: phase-34-doc-encoding-governance
+    sourceStory: user-request-2026-06-06-doc-encoding-governance-batch
+    dependencies:
+      - phase-33-post-merge-state-sha-sync-82d15a50
+    taskPlanPolicy: required
+    humanApproval: "User approved serial batch execution for four doc encoding governance tasks in one run. Scope remains docs-only; no product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, Cost Calibration Gate execution, or code-stage queue seeding."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-34-doc-encoding-audit-and-repair-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-phase-34-doc-encoding-audit-and-repair-plan-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-34-doc-encoding-audit-and-repair-plan.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - doc_encoding
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-phase-34-doc-encoding-audit-and-repair-plan.md docs\05-execution-logs\audits-reviews\2026-06-06-phase-34-doc-encoding-audit-and-repair-plan-review.md docs\05-execution-logs\evidence\2026-06-06-phase-34-doc-encoding-audit-and-repair-plan.md
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-phase-34-doc-encoding-audit-and-repair-plan-review.md -Pattern 'pass','safe repair','out of scope','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-34-doc-encoding-audit-and-repair-plan.md
+    status: done
+    retryCount: 0
+  - id: phase-35-doc-encoding-safe-repair
+    title: Phase 35 Doc Encoding Safe Repair
+    phase: phase-34-doc-encoding-governance
+    sourceStory: phase-34-doc-encoding-audit-and-repair-plan
+    dependencies:
+      - phase-34-doc-encoding-audit-and-repair-plan
+    taskPlanPolicy: required
+    humanApproval: "User approved serial batch execution for four doc encoding governance tasks in one run. This task records safe repair handling only; no speculative repair is allowed."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-35-doc-encoding-safe-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-phase-35-doc-encoding-safe-repair-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-35-doc-encoding-safe-repair.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - doc_encoding
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\05-execution-logs\task-plans\2026-06-06-phase-35-doc-encoding-safe-repair.md docs\05-execution-logs\audits-reviews\2026-06-06-phase-35-doc-encoding-safe-repair-review.md docs\05-execution-logs\evidence\2026-06-06-phase-35-doc-encoding-safe-repair.md
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-phase-35-doc-encoding-safe-repair-review.md,docs\05-execution-logs\evidence\2026-06-06-phase-35-doc-encoding-safe-repair.md -Pattern 'pass','no-op','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-35-doc-encoding-safe-repair.md
+    status: done
+    retryCount: 0
+  - id: phase-36-doc-encoding-risky-case-review
+    title: Phase 36 Doc Encoding Risky Case Review
+    phase: phase-34-doc-encoding-governance
+    sourceStory: phase-35-doc-encoding-safe-repair
+    dependencies:
+      - phase-35-doc-encoding-safe-repair
+    taskPlanPolicy: required
+    humanApproval: "User approved serial batch execution for four doc encoding governance tasks in one run. Risky or out-of-scope cases must not be repaired without separate approval."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-36-doc-encoding-risky-case-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-phase-36-doc-encoding-risky-case-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-36-doc-encoding-risky-case-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+    riskTypes:
+      - doc_encoding
+      - runtime_artifact_boundary
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\05-execution-logs\task-plans\2026-06-06-phase-36-doc-encoding-risky-case-review.md docs\05-execution-logs\audits-reviews\2026-06-06-phase-36-doc-encoding-risky-case-review.md docs\05-execution-logs\evidence\2026-06-06-phase-36-doc-encoding-risky-case-review.md
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-phase-36-doc-encoding-risky-case-review.md,docs\05-execution-logs\evidence\2026-06-06-phase-36-doc-encoding-risky-case-review.md -Pattern 'pass','runtime upload','separate user approval','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-36-doc-encoding-risky-case-review.md
+    status: done
+    retryCount: 0
+  - id: phase-37-doc-encoding-regression-review
+    title: Phase 37 Doc Encoding Regression Review
+    phase: phase-34-doc-encoding-governance
+    sourceStory: phase-36-doc-encoding-risky-case-review
+    dependencies:
+      - phase-36-doc-encoding-risky-case-review
+    taskPlanPolicy: required
+    humanApproval: "User approved serial batch execution for four doc encoding governance tasks in one run and requested one-time completion. This task is final regression review before commit, merge, push, and branch cleanup."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-37-doc-encoding-regression-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-phase-37-doc-encoding-regression-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-37-doc-encoding-regression-review.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+    riskTypes:
+      - doc_encoding
+      - regression_review
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-phase-37-doc-encoding-regression-review.md docs\05-execution-logs\audits-reviews\2026-06-06-phase-37-doc-encoding-regression-review.md docs\05-execution-logs\evidence\2026-06-06-phase-37-doc-encoding-regression-review.md
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-phase-37-doc-encoding-regression-review.md,docs\05-execution-logs\evidence\2026-06-06-phase-37-doc-encoding-regression-review.md -Pattern 'pass','Cost Calibration Gate remains blocked','Code-stage queue seeding remains paused'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-37-doc-encoding-regression-review.md
+    status: done
+    retryCount: 0
