@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-45-failure-retry-human-takeover-governance
-updatedAt: "2026-06-07T07:00:00-07:00"
+  currentPhase: phase-46-automation-readiness-scorecard-mode-transition-governance
+updatedAt: "2026-06-07T08:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -25,6 +25,7 @@ automation:
   skillThreadHandoffSopPath: docs/04-agent-system/sop/skill-dispatch-and-thread-handoff-governance.md
   parallelWorkSopPath: docs/04-agent-system/sop/parallel-work-governance.md
   failureRetryHumanTakeoverSopPath: docs/04-agent-system/sop/failure-retry-and-human-takeover-governance.md
+  readinessScorecardModeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -44,15 +45,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: e3b5361e106056b325adf6ca768c2eaa20cb56a4
-  lastKnownOriginMasterSha: e3b5361e106056b325adf6ca768c2eaa20cb56a4
+  lastKnownMasterSha: d3b2832257bf63d2dee7669ed1baa65a9757e9b7
+  lastKnownOriginMasterSha: d3b2832257bf63d2dee7669ed1baa65a9757e9b7
 currentTask:
-  id: phase-45-failure-retry-human-takeover-governance
+  id: phase-46-automation-readiness-scorecard-mode-transition-governance
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-45-failure-retry-human-takeover-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-45-failure-retry-human-takeover-governance.md
-  branch: codex/phase-45-failure-retry-human-takeover-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-46-automation-readiness-scorecard-mode-transition-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-46-automation-readiness-scorecard-mode-transition-governance.md
+  branch: codex/phase-46-automation-readiness-scorecard-mode-transition-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -89,5 +90,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Failure retry and human takeover governance completed as docs-only mechanism hardening. Recommended next docs-only task: define automation readiness scorecard and mode transition governance, including when semi_auto may be proposed for upgrade, what evidence is required, and which blocked gates still prevent automatic execution. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-45-failure-retry-human-takeover-governance.md
+  nextRecommendedAction: "Automation readiness scorecard and mode transition governance completed as docs-only mechanism hardening. Recommended next docs-only task: define code-stage task seeding governance for advanced edition implementation planning, without creating implementation queue items unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-46-automation-readiness-scorecard-mode-transition-governance.md
