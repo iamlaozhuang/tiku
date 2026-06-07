@@ -1,8 +1,8 @@
 schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
-  generatedByTask: phase-58-task-queue-archive-execution
-  generatedAt: "2026-06-07T20:00:00-07:00"
+  generatedByTask: phase-59-evidence-gap-reconciliation
+  generatedAt: "2026-06-07T09:28:31-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -4030,3 +4030,243 @@ entries:
     archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
     commitSha: null
     completedAt: "2026-06-07"
+  - id: phase-1-foundation-readiness-evidence
+    phase: phase-1-foundation
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-foundation-review-closeout.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-17"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-foundation-readiness.md
+  - id: phase-2-auth-dependency-approval
+    phase: phase-2-user-auth
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-repair.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-17"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-approval.md
+  - id: phase-2-auth-dependency-install
+    phase: phase-2-user-auth
+    status: done
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-repair.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-17"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-dependency-install.md
+  - id: phase-13-real-provider-staging-redaction-approval-gate
+    phase: phase-13-experience-gap-follow-up
+    status: closed
+    taskKind: null
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-29-real-provider-redaction-approval-decision.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-01"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-26-phase-13-real-provider-staging-redaction-approval-gate.md
+  - id: phase-16-audit-user-auth-authorization
+    phase: phase-16-full-requirement-audit-execution
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-01-user-auth-authorization.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-27"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-user-auth-authorization.md
+  - id: phase-16-audit-question-paper-content
+    phase: phase-16-full-requirement-audit-execution
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-02-question-paper-content.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-27"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-question-paper-content.md
+  - id: phase-16-audit-student-experience
+    phase: phase-16-full-requirement-audit-execution
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-03-student-experience.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-27"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-student-experience.md
+  - id: phase-16-audit-ai-scoring-explanation
+    phase: phase-16-full-requirement-audit-execution
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-04-ai-scoring-explanation-hint-model.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-27"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-ai-scoring-explanation.md
+  - id: phase-16-audit-rag-knowledge
+    phase: phase-16-full-requirement-audit-execution
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-05-rag-knowledge.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-27"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-rag-knowledge.md
+  - id: phase-16-audit-admin-ops-logs
+    phase: phase-16-full-requirement-audit-execution
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-18-audit-ra-06-admin-ops-logs-permissions.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-27"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-05-27-phase-16-audit-admin-ops-logs.md
+  - id: phase-21-tail-ai-scoring-retry-persistence-implementation
+    phase: phase-21-high-risk-tail-closure
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-ai-scoring-retry-persistence-implementation.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-31"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/phase-21-tail-ai-scoring-retry-persistence-implementation.md
+  - id: phase-21-tail-admin-common-ux-state-audit
+    phase: phase-21-high-risk-tail-closure
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-common-ux-state-audit-implementation.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-31"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/phase-21-tail-admin-common-ux-state-audit.md
+  - id: phase-21-tail-admin-write-concurrency-proof
+    phase: phase-21-high-risk-tail-closure
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-05-31-admin-write-concurrency-proof-implementation.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    commitSha: null
+    completedAt: "2026-05-31"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/phase-21-tail-admin-write-concurrency-proof.md
+  - id: phase-21-tail-admin-permission-boundary-review
+    phase: phase-21-high-risk-tail-closure
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-admin-permission-boundary-review.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-01"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/phase-21-tail-admin-permission-boundary-review.md
+  - id: phase-22-mvp-local-acceptance-runtime-verification
+    phase: phase-22-mvp-local-acceptance-reaudit
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-batch.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-01"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-22-mvp-local-acceptance-runtime-verification.md
+  - id: phase-23-fresh-db-bootstrap-validation-data-implementation-gate
+    phase: phase-23-follow-up-proposals
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-fresh-db-bootstrap-validation-data-batch.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-01"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/phase-23-fresh-db-bootstrap-validation-data-implementation-gate.md
+  - id: phase-23-e2e-order-data-isolation-hardening-gate
+    phase: phase-23-follow-up-proposals
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-23-e2e-order-data-isolation-hardening-assessment.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-01"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/phase-23-e2e-order-data-isolation-hardening-gate.md
+  - id: phase-24-fresh-validation-operationalization-batch
+    phase: phase-24-fresh-validation-operationalization
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-readiness-audit-closeout.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-01"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-24-fresh-validation-operationalization-batch.md
+  - id: phase-25-fresh-validation-runner-hardening-batch
+    phase: phase-25-fresh-validation-runner-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-25-readiness-audit-closeout.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-01"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-06-01-phase-25-fresh-validation-runner-hardening-batch.md
+  - id: phase-30-advanced-edition-cost-calibration-gate
+    phase: phase-30-advanced-edition-mvp-requirements
+    status: done
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate-queue.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-06"
+    evidenceReconciliation:
+      reconciledByTask: phase-59-evidence-gap-reconciliation
+      previousEvidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate.md
