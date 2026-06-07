@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-72-advanced-organization-training-implementation-planning
-updatedAt: "2026-06-07T15:18:35-07:00"
+  currentPhase: phase-73-advanced-organization-analytics-implementation-planning
+updatedAt: "2026-06-07T15:22:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 4f6e07683ae3d4e1bb30b9434e5e8c1581228588
-  lastKnownOriginMasterSha: 4f6e07683ae3d4e1bb30b9434e5e8c1581228588
+  lastKnownMasterSha: f55e68744e028be948e4a2093378c77adf5e5ec1
+  lastKnownOriginMasterSha: f55e68744e028be948e4a2093378c77adf5e5ec1
 currentTask:
-  id: phase-72-advanced-organization-training-implementation-planning
+  id: phase-73-advanced-organization-analytics-implementation-planning
   status: done
-  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
-  branch: codex/phase-72-organization-training-planning
+  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+  branch: codex/phase-73-organization-analytics-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,10 +99,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 72 advanced organization training implementation planning records future implementation slices for
-    contract/model/validation, draft lifecycle, publish/version/takedown/copy, employee answer lifecycle,
-    summary privacy mapping, and optional route/Web surfaces. Continue to Phase 73 advanced organization analytics
-    implementation planning after closeout. Do not execute product implementation, formal learning write-path changes,
-    dependency, schema, migration, provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy,
-    payment, external-service actions, export flows, or Cost Calibration Gate execution without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+    Phase 73 advanced organization analytics implementation planning records future implementation slices for analytics
+    DTOs/formulas, read-only repository, analytics service, privacy mapper, and optional route/Web surfaces. Continue to
+    Phase 74 advanced operations authorization and quota implementation planning after closeout. Do not execute product
+    implementation, export flows, employee sensitive detail visibility, dependency, schema, migration, provider calls,
+    env/secret, staging/prod/cloud/deploy, payment, external-service actions, or Cost Calibration Gate execution without
+    fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md

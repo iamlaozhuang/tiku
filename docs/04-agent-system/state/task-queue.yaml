@@ -1215,11 +1215,12 @@ tasks:
       - evidence_redaction
     validationCommands:
       - git diff --check
-      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-73 docs>
-      - Select-String required planning anchors
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md docs\05-execution-logs\evidence\2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md,docs\05-execution-logs\evidence\2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md -Pattern 'Implementation Task Proposal','authorization','org_auth','mock_exam','exam_report','mistake_book','audit_log','ai_call_log','export','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
-    status: pending
+    status: done
     retryCount: 0
   - id: phase-74-advanced-ops-auth-quota-implementation-planning
     title: Advanced Edition Operations Authorization And Quota Implementation Planning
