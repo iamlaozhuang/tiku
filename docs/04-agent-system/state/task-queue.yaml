@@ -18414,3 +18414,41 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md
     status: done
     retryCount: 0
+  - id: phase-33-post-merge-state-sha-sync-82d15a50
+    title: Phase 33 Post Merge State SHA Sync 82d15a50
+    phase: phase-33-advanced-edition-requirements-governance
+    sourceStory: phase-33-advanced-edition-doc-governance-followup-batch-closeout
+    dependencies:
+      - phase-33-advanced-edition-doc-governance-followup-batch-closeout
+    taskPlanPolicy: required
+    humanApproval: "User approved the closeout task and requested commit, merge to master, push origin/master, and short branch cleanup. Scope remains docs-only governance state synchronization; no product code, schema, migration, API, service, UI, tests, e2e, scripts, dependency, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, Cost Calibration Gate execution, or code-stage queue seeding."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md docs\05-execution-logs\evidence\2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
+      - Select-String -Path docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md -Pattern '82d15a504d5b8a46984e87541bc058657a53598d','phase-33-post-merge-state-sha-sync-82d15a50','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-post-merge-state-sha-sync-82d15a50.md
+    status: done
+    retryCount: 0
