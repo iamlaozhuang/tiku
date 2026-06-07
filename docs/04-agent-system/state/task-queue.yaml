@@ -858,6 +858,55 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-66-local-implementation-readiness-gate.md
     status: done
     retryCount: 0
+  - id: phase-67-automation-readiness-scorecard
+    title: Phase 67 Automation Readiness Scorecard
+    phase: phase-67-automation-readiness-scorecard
+    sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
+    dependencies:
+      - phase-66-local-implementation-readiness-gate
+    taskPlanPolicy: required
+    humanApproval: User approved serial execution of the 1-10 automation readiness work combination with per-task validation, commit, merge, push, and short-lived branch cleanup. Phase 67 scope is docs-only automation readiness scorecard. It must not change automation.mode, execute product implementation, seed additional code-stage tasks, change dependency/schema/migration/env/secret/provider/deploy/payment/external-service state, or execute Cost Calibration Gate.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-67-automation-readiness-scorecard.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-67-automation-readiness-scorecard.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-67-automation-readiness-scorecard.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+    riskTypes:
+      - automation_scorecard
+      - mode_transition_proposal
+      - local_validation
+      - advanced_edition
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <Phase 67 touched files>
+      - Select-String required scorecard anchors
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-67-automation-readiness-scorecard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-67-automation-readiness-scorecard.md
+    status: done
+    retryCount: 0
   - id: phase-69-advanced-authorization-context-implementation-planning
     title: Advanced Edition Authorization Context Implementation Planning
     phase: phase-69-advanced-authorization-context-implementation-planning

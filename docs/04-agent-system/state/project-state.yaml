@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-66-local-implementation-readiness-gate
-updatedAt: "2026-06-07T11:05:00-07:00"
+  currentPhase: phase-67-automation-readiness-scorecard
+updatedAt: "2026-06-07T11:25:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 721ad9e0
-  lastKnownOriginMasterSha: 721ad9e0
+  lastKnownMasterSha: 3eed68bc
+  lastKnownOriginMasterSha: 3eed68bc
 currentTask:
-  id: phase-66-local-implementation-readiness-gate
+  id: phase-67-automation-readiness-scorecard
   status: done
   sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-66-local-implementation-readiness-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-66-local-implementation-readiness-gate.md
-  branch: codex/phase-66-local-implementation-readiness-gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-67-automation-readiness-scorecard.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-67-automation-readiness-scorecard.md
+  branch: codex/phase-67-automation-readiness-scorecard
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -98,5 +98,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: Phase 66 local implementation readiness gate completed. Continue serial docs-only automation readiness work with Phase 67 automation readiness scorecard. Local readiness is proven through L2 static/unit gates only; Browser UI interaction, local role flow, staging/prod/cloud/deploy, provider_cost_measurement, real provider calls, env/secret, payment, external-service actions, automation.mode change, and Cost Calibration Gate execution remain unapproved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-66-local-implementation-readiness-gate.md
+  nextRecommendedAction: Phase 67 automation readiness scorecard completed. Continue serial docs-only automation readiness work with Phase 68 mode transition proposal/final readiness audit. Phase 67 recommends ready_for_local_auto_proposal targeting local_auto_candidate as a proposal only; automation.mode remains semi_auto until Phase 68 records explicit approval. Do not execute product implementation, dependency, schema, migration, provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, external-service actions, or Cost Calibration Gate execution.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-67-automation-readiness-scorecard.md
