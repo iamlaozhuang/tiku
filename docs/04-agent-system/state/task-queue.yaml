@@ -758,3 +758,492 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
     status: done
     retryCount: 0
+  - id: phase-65-advanced-code-stage-queue-seeding-execution
+    title: Phase 65 Advanced Edition Code-Stage Queue Seeding Execution
+    phase: phase-65-advanced-code-stage-queue-seeding-execution
+    sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
+    dependencies:
+      - phase-64-advanced-code-stage-seeding-plan
+    taskPlanPolicy: required
+    humanApproval: User approved serial execution of the 1-10 automation readiness work combination with per-task validation, commit, merge, push, and short-lived branch cleanup. Phase 65 scope is docs-only queue seeding execution according to docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml. It may seed pending implementation_planning, local_verification, security_review, and blocked_gate tasks only; it must not seed direct implementation tasks or execute product code, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, automation.mode change, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-65-advanced-code-stage-queue-seeding-execution.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-65-advanced-code-stage-queue-seeding-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-65-advanced-code-stage-queue-seeding-execution.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/04-agent-system/sop/**
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+    riskTypes:
+      - code_stage_seeding_execution
+      - task_queue
+      - advanced_edition
+      - implementation_planning
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - python seeded queue invariant check
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <Phase 65 touched files>
+      - Select-String required seed anchors
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-65-advanced-code-stage-queue-seeding-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-65-advanced-code-stage-queue-seeding-execution.md
+    status: done
+    retryCount: 0
+  - id: phase-69-advanced-authorization-context-implementation-planning
+    title: Advanced Edition Authorization Context Implementation Planning
+    phase: phase-69-advanced-authorization-context-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-auth-context-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 under the user-approved serial automation readiness work combination. This is a pending implementation_planning task only; no product implementation, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, automation.mode change, or Cost Calibration Gate execution is approved.
+    taskKind: implementation_planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - authorization_permission
+      - authorization
+      - redeem_code
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-69 docs>
+      - Select-String required planning anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+    status: pending
+    retryCount: 0
+  - id: phase-70-advanced-ai-task-domain-implementation-planning
+    title: Advanced Edition AI Task Domain Implementation Planning
+    phase: phase-70-advanced-ai-task-domain-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-ai-task-domain-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-69-advanced-authorization-context-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending implementation_planning task only. Real provider calls, provider_cost_measurement, dependency, schema, migration, env/secret, staging/prod/cloud/deploy, payment, external-service, direct implementation, automation.mode change, and Cost Calibration Gate execution remain blocked.
+    taskKind: implementation_planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - ai_call_log
+      - audit_log
+      - provider_blocked
+      - local_validation
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-70 docs>
+      - Select-String required planning anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+    status: pending
+    retryCount: 0
+  - id: phase-71-advanced-personal-ai-generation-implementation-planning
+    title: Advanced Edition Personal AI Generation Implementation Planning
+    phase: phase-71-advanced-personal-ai-generation-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-personal-ai-generation-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-70-advanced-ai-task-domain-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending implementation_planning task only. Direct product implementation and formal content write-path changes remain unapproved.
+    taskKind: implementation_planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - authorization
+      - paper
+      - mock_exam
+      - ai_call_log
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-71 docs>
+      - Select-String required planning anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+    status: pending
+    retryCount: 0
+  - id: phase-72-advanced-organization-training-implementation-planning
+    title: Advanced Edition Organization Training Implementation Planning
+    phase: phase-72-advanced-organization-training-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-70-advanced-ai-task-domain-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending implementation_planning task only. Direct organization training implementation and formal question, paper, practice, mock_exam, exam_report, or mistake_book write-path changes remain unapproved.
+    taskKind: implementation_planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - authorization
+      - paper
+      - mock_exam
+      - audit_log
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-72 docs>
+      - Select-String required planning anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+    status: pending
+    retryCount: 0
+  - id: phase-73-advanced-organization-analytics-implementation-planning
+    title: Advanced Edition Organization Analytics Implementation Planning
+    phase: phase-73-advanced-organization-analytics-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-72-advanced-organization-training-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending implementation_planning task only. Direct analytics implementation, export, and employee sensitive detail visibility remain unapproved.
+    taskKind: implementation_planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - authorization
+      - mock_exam
+      - audit_log
+      - local_validation
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-73 docs>
+      - Select-String required planning anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+    status: pending
+    retryCount: 0
+  - id: phase-74-advanced-ops-auth-quota-implementation-planning
+    title: Advanced Edition Operations Authorization And Quota Implementation Planning
+    phase: phase-74-advanced-ops-auth-quota-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-ops-auth-quota-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-69-advanced-authorization-context-implementation-planning
+      - phase-70-advanced-ai-task-domain-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending implementation_planning task only. Direct operations implementation, payment, external-service confirmation, production quota defaults, and Cost Calibration Gate execution remain unapproved.
+    taskKind: implementation_planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-74-advanced-ops-auth-quota-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-74-advanced-ops-auth-quota-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-74-advanced-ops-auth-quota-implementation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - authorization_permission
+      - authorization
+      - redeem_code
+      - audit_log
+      - ai_call_log
+      - provider_blocked
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-74 docs>
+      - Select-String required planning anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-74-advanced-ops-auth-quota-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-74-advanced-ops-auth-quota-implementation-planning.md
+    status: pending
+    retryCount: 0
+  - id: phase-75-advanced-retention-log-governance-implementation-planning
+    title: Advanced Edition Retention And Log Governance Implementation Planning
+    phase: phase-75-advanced-retention-log-governance-implementation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-70-advanced-ai-task-domain-implementation-planning
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+      - phase-72-advanced-organization-training-implementation-planning
+      - phase-74-advanced-ops-auth-quota-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending implementation_planning task only. Direct retention/log implementation, hard-delete executor, provider payload logging, and sensitive snapshot display remain unapproved.
+    taskKind: implementation_planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-75-advanced-retention-log-governance-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-75-advanced-retention-log-governance-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-75-advanced-retention-log-governance-implementation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - audit_log
+      - ai_call_log
+      - evidence_redaction
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-75 docs>
+      - Select-String required planning anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-75-advanced-retention-log-governance-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-75-advanced-retention-log-governance-implementation-planning.md
+    status: pending
+    retryCount: 0
+  - id: phase-76-advanced-code-stage-schema-dependency-blocker-review
+    title: Advanced Edition Schema And Dependency Blocker Review
+    phase: phase-76-advanced-code-stage-schema-dependency-blocker-review
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-requirements-to-implementation-handoff.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-69-advanced-authorization-context-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending blocked_gate task only. This task may record schema, migration, dependency, and package approval needs, but must not change schema, migrations, package files, lockfiles, dependencies, scripts, or product code.
+    taskKind: blocked_gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-76-advanced-code-stage-schema-dependency-blocker-review.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-76-advanced-code-stage-schema-dependency-blocker-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-76-advanced-code-stage-schema-dependency-blocker-review.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - schema_migration
+      - dependency
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-76 docs>
+      - Select-String required blocked gate anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-76-advanced-code-stage-schema-dependency-blocker-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-76-advanced-code-stage-schema-dependency-blocker-review.md
+    status: pending
+    retryCount: 0
+  - id: phase-77-advanced-code-stage-security-redaction-review-plan
+    title: Advanced Edition Security And Redaction Review Planning
+    phase: phase-77-advanced-code-stage-security-redaction-review-plan
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-retention-log-governance-implementation-plan.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-70-advanced-ai-task-domain-implementation-planning
+      - phase-74-advanced-ops-auth-quota-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending security_review task only. It may plan review coverage for authorization, redeem_code, audit_log, ai_call_log, and redaction assertions, but must not execute product code changes.
+    taskKind: security_review
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-77-advanced-code-stage-security-redaction-review-plan.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-77-advanced-code-stage-security-redaction-review-plan.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-77-advanced-code-stage-security-redaction-review-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - security_review
+      - authorization_permission
+      - audit_log
+      - ai_call_log
+      - redeem_code
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-77 docs>
+      - Select-String required security review anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-77-advanced-code-stage-security-redaction-review-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-77-advanced-code-stage-security-redaction-review-plan.md
+    status: pending
+    retryCount: 0
+  - id: phase-78-advanced-code-stage-local-validation-planning
+    title: Advanced Edition Local Validation Planning
+    phase: phase-78-advanced-code-stage-local-validation-planning
+    sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
+    dependencies:
+      - phase-68-mode-transition-proposal-final-readiness-audit
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+      - phase-72-advanced-organization-training-implementation-planning
+      - phase-73-advanced-organization-analytics-implementation-planning
+      - phase-74-advanced-ops-auth-quota-implementation-planning
+      - phase-75-advanced-retention-log-governance-implementation-planning
+    taskPlanPolicy: required
+    humanApproval: Seeded by phase-65 as a pending local_verification planning task only. It may define local-first validation strategy without staging/prod, real provider, env/secret, deploy, payment, or external-service use.
+    taskKind: local_verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_validation
+      - paper
+      - mock_exam
+      - authorization
+      - audit_log
+      - ai_call_log
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <phase-78 docs>
+      - Select-String required local validation anchors
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+    status: pending
+    retryCount: 0
