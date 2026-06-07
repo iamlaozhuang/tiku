@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-38-automated-advancement-governance
-updatedAt: "2026-06-07T00:00:00-07:00"
+  currentPhase: phase-39-module-lifecycle-governance
+updatedAt: "2026-06-07T01:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -18,6 +18,7 @@ architecture:
 automation:
   mode: semi_auto
   governanceSopPath: docs/04-agent-system/sop/automated-advancement-governance.md
+  moduleLifecycleSopPath: docs/04-agent-system/sop/module-lifecycle-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
   maxRetryPerTask: 3
@@ -37,15 +38,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 6ddac38adb803e0c2bee6fd2d9aababcffe8c1c5
-  lastKnownOriginMasterSha: 6ddac38adb803e0c2bee6fd2d9aababcffe8c1c5
+  lastKnownMasterSha: f74d46f936c57f8f37f016990832fd9d54ca58c9
+  lastKnownOriginMasterSha: f74d46f936c57f8f37f016990832fd9d54ca58c9
 currentTask:
-  id: phase-38-automated-advancement-governance-charter
+  id: phase-39-module-lifecycle-governance
   status: done
   sourceStory: user-request-2026-06-07-automated-advancement-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-38-automated-advancement-governance-charter.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-38-automated-advancement-governance-charter.md
-  branch: codex/phase-38-automated-advancement-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-39-module-lifecycle-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-39-module-lifecycle-governance.md
+  branch: codex/phase-39-module-lifecycle-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -82,5 +83,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Automated advancement governance charter completed as docs-only mechanism hardening. Recommended next docs-only task: define the serial batch execution and closeout review template, or stop for human review before expanding the automation model. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-38-automated-advancement-governance-charter.md
+  nextRecommendedAction: "Module lifecycle governance completed as docs-only mechanism hardening. Recommended next docs-only task: define task lifecycle governance with pre-task plan gate, TDD gate, validation gate, review gate, and closeout gate. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-39-module-lifecycle-governance.md
