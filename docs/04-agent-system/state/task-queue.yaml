@@ -907,6 +907,55 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-67-automation-readiness-scorecard.md
     status: done
     retryCount: 0
+  - id: phase-68-mode-transition-proposal-final-readiness-audit
+    title: Phase 68 Mode Transition Proposal And Final Readiness Audit
+    phase: phase-68-mode-transition-proposal-final-readiness-audit
+    sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
+    dependencies:
+      - phase-67-automation-readiness-scorecard
+    taskPlanPolicy: required
+    humanApproval: User approved serial execution of the 1-10 automation readiness work combination with per-task validation, commit, merge, push, and short-lived branch cleanup. Phase 68 scope is docs-only final readiness audit and mode transition proposal. It must not change automation.mode unless explicit mode-change approval is recorded, and it must not execute product implementation, seed additional code-stage tasks, change dependency/schema/migration/env/secret/provider/deploy/payment/external-service state, or execute Cost Calibration Gate.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/04-agent-system/sop/**
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+    riskTypes:
+      - mode_transition_proposal
+      - final_readiness_audit
+      - local_validation
+      - advanced_edition
+      - blocked_gate
+      - evidence_integrity
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <Phase 68 touched files>
+      - Select-String required final audit anchors
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+    status: done
+    retryCount: 0
   - id: phase-69-advanced-authorization-context-implementation-planning
     title: Advanced Edition Authorization Context Implementation Planning
     phase: phase-69-advanced-authorization-context-implementation-planning
