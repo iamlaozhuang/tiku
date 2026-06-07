@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-33-advanced-edition-requirements-reading-surface-maintenance
-updatedAt: "2026-06-06T20:26:59-07:00"
+  currentPhase: phase-33-advanced-edition-doc-governance-followup-batch-closeout
+updatedAt: "2026-06-06T20:44:31-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -39,11 +39,11 @@ repository:
   lastKnownMasterSha: aeff9643e9bdaa39d078062ad30f447f145f57d3
   lastKnownOriginMasterSha: aeff9643e9bdaa39d078062ad30f447f145f57d3
 currentTask:
-  id: phase-33-advanced-edition-requirements-reading-surface-maintenance
+  id: phase-33-advanced-edition-doc-governance-followup-batch-closeout
   status: done
-  sourceStory: docs/01-requirements/advanced-edition/00-index.md
-  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-33-advanced-edition-requirements-reading-surface-maintenance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-requirements-reading-surface-maintenance.md
+  sourceStory: phase-33-advanced-edition-requirements-reading-surface-maintenance
+  planPath: docs/05-execution-logs/task-plans/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md
   branch: codex/phase-33-post-merge-governance-state-sha-sync
   commitSha: null
   prUrl: null
@@ -81,5 +81,5 @@ riskGates:
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
-  nextRecommendedAction: "Advanced edition implementation readiness, implementation boundary, and requirements reading-surface maintenance docs-only batch is complete on the current short branch. Next action is review/merge/push/cleanup if the user approves, or continue with a separate docs-only closeout review. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-requirements-reading-surface-maintenance.md
+  nextRecommendedAction: "Advanced edition docs-only follow-up batch closeout review passed on the current short branch. Next action is merge to master, push origin/master, and clean up the short branch if the user explicitly approves. Code-stage queue seeding remains paused unless explicitly approved. Cost Calibration Gate remains blocked pending fresh explicit approval."
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md

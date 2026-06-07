@@ -18374,3 +18374,43 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-requirements-reading-surface-maintenance.md
     status: done
     retryCount: 0
+  - id: phase-33-advanced-edition-doc-governance-followup-batch-closeout
+    title: Phase 33 Advanced Edition Doc Governance Follow-Up Batch Closeout
+    phase: phase-33-advanced-edition-requirements-governance
+    sourceStory: phase-33-advanced-edition-requirements-reading-surface-maintenance
+    dependencies:
+      - phase-33-advanced-edition-requirements-reading-surface-maintenance
+    taskPlanPolicy: required
+    humanApproval: "User approved continuing the second, third, and fourth recommended docs-only tasks under the project mechanism. This task is the batch closeout review only; merge, push, and branch cleanup still require explicit user approval."
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/task-plans/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md
+      - docs/05-execution-logs/audits-reviews/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout-review.md
+      - docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+      - batch_closeout
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md docs\05-execution-logs\audits-reviews\2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout-review.md docs\05-execution-logs\evidence\2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md
+      - Select-String -Path docs\05-execution-logs\audits-reviews\2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout-review.md,docs\05-execution-logs\evidence\2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md -Pattern 'pass','docs-only','Cost Calibration Gate remains blocked','code-stage queue seeding remains paused'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-06-phase-33-advanced-edition-doc-governance-followup-batch-closeout.md
+    status: done
+    retryCount: 0
