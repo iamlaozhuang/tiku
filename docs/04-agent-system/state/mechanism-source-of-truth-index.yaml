@@ -1,0 +1,126 @@
+schemaVersion: 1
+generatedByTask: phase-62-mechanism-source-index
+generatedAt: "2026-06-07T10:05:00-07:00"
+purpose: Lightweight navigation index for Tiku automation governance source-of-truth files. This index does not replace SOPs, state files, task queue entries, evidence, or audit reviews.
+mode:
+  current: semi_auto
+  modeSourcePath: docs/04-agent-system/state/project-state.yaml
+  modeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+canonicalStateFiles:
+  - id: project-state
+    path: docs/04-agent-system/state/project-state.yaml
+    role: current phase, automation pointers, current task, handoff
+  - id: task-queue
+    path: docs/04-agent-system/state/task-queue.yaml
+    role: active queue and recent recovery window
+  - id: task-history-index
+    path: docs/04-agent-system/state/task-history-index.yaml
+    role: lookup index for archived task queue entries
+  - id: blocked-gates
+    path: docs/04-agent-system/state/blocked-gates.yaml
+    role: long-lived blocked gate registry
+  - id: mechanism-source-of-truth-index
+    path: docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+    role: navigation index for mechanism facts
+archiveIndexes:
+  - id: task-queue-archive-2026-05
+    path: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
+    kind: task_queue_archive
+  - id: task-queue-archive-2026-06
+    path: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    kind: task_queue_archive
+  - id: execution-log-index
+    path: docs/05-execution-logs/execution-log-index.yaml
+    kind: execution_log_index
+sopGroups:
+  lifecycle:
+    - id: task-lifecycle-governance
+      path: docs/04-agent-system/sop/task-lifecycle-governance.md
+    - id: module-lifecycle-governance
+      path: docs/04-agent-system/sop/module-lifecycle-governance.md
+    - id: automated-advancement-governance
+      path: docs/04-agent-system/sop/automated-advancement-governance.md
+    - id: automation-loop
+      path: docs/04-agent-system/sop/automation-loop.md
+  archive_and_recovery:
+    - id: task-queue-archival-and-index-governance
+      path: docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+    - id: execution-log-archival-and-index-governance
+      path: docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
+    - id: thread-rollover-and-handoff-governance
+      path: docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
+  readiness_and_coverage:
+    - id: automation-readiness-scorecard-and-mode-transition-governance
+      path: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+    - id: requirement-task-coverage-and-gap-audit-governance
+      path: docs/04-agent-system/sop/requirement-task-coverage-and-gap-audit-governance.md
+    - id: codex-app-readiness-audit-governance
+      path: docs/04-agent-system/sop/codex-app-readiness-audit-governance.md
+    - id: local-first-validation-governance
+      path: docs/04-agent-system/sop/local-first-validation-governance.md
+  risk_gates:
+    - id: dependency-introduction-gate
+      path: docs/04-agent-system/sop/dependency-introduction-gate.md
+    - id: security-review-gate
+      path: docs/04-agent-system/sop/security-review-gate.md
+    - id: advanced-edition-cost-calibration-blocked-gate
+      path: docs/04-agent-system/sop/advanced-edition-cost-calibration-blocked-gate.md
+    - id: failure-retry-and-human-takeover-governance
+      path: docs/04-agent-system/sop/failure-retry-and-human-takeover-governance.md
+  execution_support:
+    - id: code-stage-task-seeding-governance
+      path: docs/04-agent-system/sop/code-stage-task-seeding-governance.md
+    - id: parallel-work-governance
+      path: docs/04-agent-system/sop/parallel-work-governance.md
+    - id: skill-dispatch-and-thread-handoff-governance
+      path: docs/04-agent-system/sop/skill-dispatch-and-thread-handoff-governance.md
+    - id: skill-dispatch-matrix
+      path: docs/04-agent-system/sop/skill-dispatch-matrix.md
+executionLogRoots:
+  - id: evidence
+    path: docs/05-execution-logs/evidence
+    status: active_large_directory
+  - id: task-plans
+    path: docs/05-execution-logs/task-plans
+    status: active_reduced_by_phase_61
+  - id: audits-reviews
+    path: docs/05-execution-logs/audits-reviews
+    status: active_large_directory
+  - id: handoffs
+    path: docs/05-execution-logs/handoffs
+    status: active
+  - id: execution-log-archive
+    path: docs/05-execution-logs/archive
+    status: active_archive_root
+blockedGateIds:
+  - real-provider-staging-redaction
+  - dependency-change
+  - secret-env-change
+  - deploy-and-cloud-change
+  - destructive-data-operation
+  - Cost Calibration Gate
+recoveryReadOrder:
+  - AGENTS.md
+  - docs/03-standards/code-taste-ten-commandments.md
+  - docs/02-architecture/adr/
+  - docs/04-agent-system/state/project-state.yaml
+  - docs/04-agent-system/state/task-queue.yaml
+  - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+  - latest task plan from project-state
+  - latest evidence from project-state
+  - latest audit review when present
+  - relevant SOPs from this index
+  - task-history-index or execution-log-index only when referenced files are archived
+terminologyAnchors:
+  - authorization
+  - paper
+  - mock_exam
+  - redeem_code
+  - audit_log
+  - ai_call_log
+forbiddenClaims:
+  - This index does not approve product implementation.
+  - This index does not approve code-stage queue seeding.
+  - This index does not approve provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy, payment, or external-service actions.
+  - Cost Calibration Gate remains blocked pending fresh explicit approval.
+  - This index does not prove runtime behavior for authorization, paper, mock_exam, redeem_code, audit_log, or ai_call_log.

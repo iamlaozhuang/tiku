@@ -607,3 +607,53 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-61-execution-log-archive-first-batch.md
     status: done
     retryCount: 0
+  - id: phase-62-mechanism-source-index
+    title: Phase 62 Mechanism Source Of Truth Index
+    phase: phase-62-mechanism-source-index
+    sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
+    dependencies:
+      - phase-61-execution-log-archive-first-batch
+    taskPlanPolicy: required
+    humanApproval: User approved serial execution of the 1-10 automation readiness work combination with per-task validation, commit, merge, push, and short-lived branch cleanup. Phase 62 scope is docs-only mechanism source-of-truth index consolidation. No file moving, deletion, SOP semantic edits, code-stage queue seeding, product code, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-62-mechanism-source-index.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-62-mechanism-source-index.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-62-mechanism-source-index.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - .runtime/**
+      - docs/05-execution-logs/archive/**
+      - docs/05-execution-logs/execution-log-index.yaml
+      - docs/04-agent-system/sop/**
+    riskTypes:
+      - source_of_truth
+      - recovery_governance
+      - docs_governance
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - python mechanism source index path existence check
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check <Phase 62 touched files>
+      - Select-String required anchors
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-AgentSystemReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-62-mechanism-source-index.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-62-mechanism-source-index.md
+    status: done
+    retryCount: 0
