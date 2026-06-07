@@ -18,7 +18,7 @@ sourceDocuments:
 coverageEvidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-56-advanced-edition-coverage-audit.md
 codexReadinessEvidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-63-codex-app-readiness-follow-up.md
 mode:
-  current: semi_auto
+  current: local_auto_candidate
   noModeTransitionInPhase65: true
 phase65ExecutionBoundary:
   maximumSeededTasks: 10

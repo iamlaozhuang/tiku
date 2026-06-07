@@ -3,7 +3,7 @@ generatedByTask: phase-64-advanced-code-stage-seeding-plan
 generatedAt: "2026-06-07T10:35:00-07:00"
 purpose: Lightweight navigation index for Tiku automation governance source-of-truth files. This index does not replace SOPs, state files, task queue entries, evidence, or audit reviews.
 mode:
-  current: semi_auto
+  current: local_auto_candidate
   modeSourcePath: docs/04-agent-system/state/project-state.yaml
   modeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
 canonicalStateFiles:

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-68-mode-transition-proposal-final-readiness-audit
-updatedAt: "2026-06-07T11:45:00-07:00"
+  currentPhase: local-auto-candidate-mode-transition-confirmation
+updatedAt: "2026-06-07T14:54:02-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -16,7 +16,7 @@ architecture:
       path: docs/02-architecture/interfaces/global-db-api-skeleton.md
       status: complete
 automation:
-  mode: semi_auto
+  mode: local_auto_candidate
   governanceSopPath: docs/04-agent-system/sop/automated-advancement-governance.md
   moduleLifecycleSopPath: docs/04-agent-system/sop/module-lifecycle-governance.md
   taskLifecycleSopPath: docs/04-agent-system/sop/task-lifecycle-governance.md
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 76b3b386
-  lastKnownOriginMasterSha: 76b3b386
+  lastKnownMasterSha: b75348cf8af859ae097a7644c82e1ebfacbacc48
+  lastKnownOriginMasterSha: b75348cf8af859ae097a7644c82e1ebfacbacc48
 currentTask:
-  id: phase-68-mode-transition-proposal-final-readiness-audit
+  id: local-auto-candidate-mode-transition-confirmation
   status: done
-  sourceStory: user-request-2026-06-07-serial-automation-readiness-work-combination
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
-  branch: codex/phase-68-mode-transition-final-audit
+  sourceStory: user-request-2026-06-07-local-auto-candidate-mode-transition
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-local-auto-candidate-mode-transition-confirmation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-local-auto-candidate-mode-transition-confirmation.md
+  branch: codex/local-auto-candidate-mode-transition
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,10 +99,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 68 mode transition proposal/final readiness audit completed. Repository is ready for a user decision:
-    continue in semi_auto and manually approve Phase 69 advanced authorization context implementation planning,
-    or explicitly approve a mode transition to local_auto_candidate with the allowed and forbidden task kinds
-    recorded in Phase 68 evidence. Current automation.mode remains semi_auto. Do not execute product implementation,
-    dependency, schema, migration, provider_cost_measurement, real provider calls, env/secret, staging/prod/cloud/deploy,
-    payment, external-service actions, or Cost Calibration Gate execution without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+    Phase 68 mode transition proposal/final readiness audit was approved by the user for a docs-only
+    transition to local_auto_candidate. Phase 69-78 may be serially advanced only for their queued
+    implementation_planning, local_verification planning, security_review planning, and blocked_gate scopes.
+    Do not execute product implementation, dependency, schema, migration, provider_cost_measurement, real provider
+    calls, env/secret, staging/prod/cloud/deploy, payment, external-service actions, authorization permission model
+    changes beyond planning, or Cost Calibration Gate execution without fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-local-auto-candidate-mode-transition-confirmation.md
