@@ -15,6 +15,38 @@ Future implementation work may only be considered after all of these are true:
 - the task confirms whether Cost Calibration Gate is relevant and, if relevant, remains blocked unless fresh explicit approval is recorded;
 - the task declares whether provider, env/secret, staging/prod/cloud/deploy, payment, or external-service work is out of scope.
 
+## Code-Stage Queue Acceptance
+
+A future code-stage task may not start merely because an implementation plan exists. It must have an explicit queue entry that records:
+
+- the user approval that allows code-stage queue seeding;
+- the exact requirement, module, story, or plan section it implements;
+- the expected acceptance scenario or horizontal failure scenario it validates;
+- concrete `allowedFiles` and `blockedFiles`;
+- concrete validation commands;
+- whether schema, migration, authorization permission model, dependency, package, lockfile, env/secret, provider, staging/prod/cloud/deploy, payment, or external-service work is included;
+- the approval evidence path for every high-risk category that is included;
+- the evidence redaction rule for `audit_log`, `ai_call_log`, quota summaries, and any generated content summary.
+
+If the queue entry is missing any required field, the task must remain pending and must not be implemented.
+
+## Hard-Stop Triggers
+
+Stop before editing and request explicit approval if the task mentions or implies any of the following:
+
+- code-stage queue seeding without a fresh explicit user approval;
+- provider cost measurement, model selection measurement, real provider call, provider account, provider quota, provider endpoint, or provider fallback configuration;
+- env/secret creation, reading, update, rotation, `.env.local`, `.env.example`, API key, secret, token, password, or database URL;
+- staging, prod, cloud, deploy, public endpoint, callback URL, TLS, object storage, or production-like resource;
+- payment, external-service, pricing, invoice, refund, reconciliation, or purchase processing outside the already documented operations registration boundary;
+- schema, migration, database destructive operation, `drizzle-kit push`, or data backfill;
+- dependency, package, lockfile, CLI, SDK, or test framework changes;
+- authorization permission model changes without an approval path;
+- physical hard-delete executor;
+- raw sensitive content viewer or controlled snapshot implementation;
+- employee statistics export or organization aggregate export;
+- direct write from AI generated content or organization training into formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book`.
+
 ## Terminology Boundary
 
 Implementation tasks must use project terms consistently:
@@ -75,6 +107,10 @@ Before any future implementation task is started, confirm:
 - verification commands are concrete and local;
 - docs-only tasks do not change product behavior;
 - code-stage queue seeding has explicit approval before it occurs.
+- the task maps to one named MVP main-loop chain or horizontal failure scenario;
+- formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book` boundaries are stated when AI generated content or organization training content is involved;
+- `authorization`, `personal_auth`, `org_auth`, `redeem_code`, quota, `audit_log`, and `ai_call_log` behavior is stated when relevant;
+- response DTOs, evidence, and logs are checked for numeric ids, prompt, raw AI input/output, provider payload, secret, token, database URL, plaintext `redeem_code`, and employee subjective answer text.
 
 ## Non-Goals
 
