@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-88-ai-task-domain-local-contract
-updatedAt: "2026-06-07T22:15:41-07:00"
+  currentPhase: phase-89-paper-mock-exam-scope-read-model
+updatedAt: "2026-06-07T22:24:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 21e152493ff48e26ecfbefe445c484fedea77174
-  lastKnownOriginMasterSha: 21e152493ff48e26ecfbefe445c484fedea77174
+  lastKnownMasterSha: aa35f48d79054a06f77664a05a87f739a0f3ca84
+  lastKnownOriginMasterSha: aa35f48d79054a06f77664a05a87f739a0f3ca84
 currentTask:
-  id: phase-88-ai-task-domain-local-contract
+  id: phase-89-paper-mock-exam-scope-read-model
   status: done
   sourceStory: user-request-2026-06-07-batch-1-phase-88-90
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-88-ai-task-domain-local-contract.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-88-ai-task-domain-local-contract.md
-  branch: codex/phase-88-ai-task-domain-local-contract
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-89-paper-mock-exam-scope-read-model.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-89-paper-mock-exam-scope-read-model.md
+  branch: codex/phase-89-paper-mock-exam-scope-read-model
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,8 +99,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 88 implemented the approved Batch 1 AI task domain local contract as service-layer pure logic only. Continue
-    to Phase 89 only after Phase 88 validation, commit, merge, push, and branch cleanup. Do not execute dependency,
+    Phase 89 implemented the approved Batch 1 paper/mock_exam scope read model as service-layer pure logic only. Continue
+    to Phase 90 only after Phase 89 validation, commit, merge, push, and branch cleanup. Do not execute dependency,
     schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions,
     authorization permission model changes, repository/API route/Server Action work, or Cost Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-88-ai-task-domain-local-contract.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-89-paper-mock-exam-scope-read-model.md
