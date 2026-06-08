@@ -226,6 +226,7 @@ tasks:
             -QueuePath $queuePath `
             -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
             -CloseoutRecovery `
+            -AllowProtectedBranch `
             -SkipRemoteAheadCheck
     )
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "closeoutRecovery: enabled"
@@ -247,6 +248,7 @@ tasks:
                     -ProjectStatePath $projectStatePath `
                     -QueuePath $queuePath `
                     -CloseoutRecovery `
+                    -AllowProtectedBranch `
                     -SkipRemoteAheadCheck 2>&1
             )
         } finally {

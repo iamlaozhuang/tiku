@@ -30,6 +30,9 @@ param(
     [switch]$CloseoutRecovery,
 
     [Parameter(Mandatory = $false)]
+    [switch]$AllowProtectedBranch,
+
+    [Parameter(Mandatory = $false)]
     [switch]$DryRunHandoff,
 
     [Parameter(Mandatory = $false)]
@@ -129,6 +132,9 @@ if (-not $SkipUnattendedReadiness) {
     }
     if ($CloseoutRecovery) {
         $readinessArgs += "-CloseoutRecovery"
+    }
+    if ($AllowProtectedBranch) {
+        $readinessArgs += "-AllowProtectedBranch"
     }
     if ($ReadinessChangedFiles.Count -gt 0) {
         $readinessArgs += @("-ChangedFiles", ($ReadinessChangedFiles -join ","))

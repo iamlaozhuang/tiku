@@ -117,3 +117,8 @@ Passed:
 
 - Default nextModuleRunCandidate remains `ai-task-and-provider` proposal only.
 - This task does not start that module.
+
+## Post-Merge Validation Repair
+
+- RED: master validation showed closeout recovery smoke failed on protected branch because the closeout recovery fixture did not pass `-AllowProtectedBranch`; autopilot closeout recovery smoke had the same readiness passthrough gap.
+- GREEN: `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` and `Invoke-ModuleRunV2Autopilot.Smoke.ps1` pass after adding protected-branch passthrough for closeout recovery smoke.

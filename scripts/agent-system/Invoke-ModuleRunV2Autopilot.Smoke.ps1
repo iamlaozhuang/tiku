@@ -110,6 +110,7 @@ tasks:
             -ProjectStatePath $projectStatePath `
             -QueuePath $queuePath `
             -ReadinessChangedFiles "scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1" `
+            -AllowProtectedBranch `
             -HandoffPath $handoffPath `
             -ThreadLaunchApproved `
             -ThreadToolAvailable
