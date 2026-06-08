@@ -170,6 +170,86 @@ currentTask:
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_RISK_GATE provider" -Command {
         & $scriptPath -TaskId $blockedTaskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" -SkipRemoteAheadCheck
     }
+
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $masterSha
+  lastKnownOriginMasterSha: $originMasterSha
+currentTask:
+  id: $taskId
+"@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    status: done
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    blockedFiles:
+      - .env.local
+      - package.json
+      - src/**
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
+  - id: $blockedTaskId
+    status: in_progress
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - provider
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_UNATTENDED_TASK_STATUS" -Command {
+        & $scriptPath -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" -SkipRemoteAheadCheck
+    }
+
+    $closeoutRecoveryOutput = @(
+        & $scriptPath `
+            -TaskId $taskId `
+            -ProjectStatePath $projectStatePath `
+            -QueuePath $queuePath `
+            -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+            -CloseoutRecovery `
+            -SkipRemoteAheadCheck
+    )
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "closeoutRecovery: enabled"
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_TASK_STATUS"
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $dirtyRecoveryOutput = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -TaskId $taskId `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -CloseoutRecovery `
+                -SkipRemoteAheadCheck 2>&1
+        )
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    Assert-Contains -Output $dirtyRecoveryOutput -Pattern "HARD_BLOCK_CLOSEOUT_RECOVERY_DIRTY_WORKTREE"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

@@ -30,6 +30,9 @@ param(
     [switch]$AllowProtectedBranch,
 
     [Parameter(Mandatory = $false)]
+    [switch]$CloseoutRecovery,
+
+    [Parameter(Mandatory = $false)]
     [switch]$SkipRemoteAheadCheck
 )
 
@@ -251,6 +254,9 @@ $findings = New-Object System.Collections.Generic.List[string]
 try {
     Write-Section -Title "Module Run v2 Unattended Readiness"
     Write-Output "unattendedReadinessMode: hard_block"
+    if ($CloseoutRecovery) {
+        Write-Output "closeoutRecovery: enabled"
+    }
 
     foreach ($requiredPath in @($ProjectStatePath, $QueuePath, $MatrixPath)) {
         if (-not (Test-Path -LiteralPath $requiredPath)) {
@@ -346,7 +352,9 @@ try {
     Write-Output "evidencePath: $evidencePath"
     Write-Output "auditReviewPath: $auditReviewPath"
 
-    if ($taskStatus -notin @("pending", "in_progress")) {
+    if ($CloseoutRecovery -and $taskStatus -in @("done", "closed")) {
+        Write-Output "OK_CLOSEOUT_RECOVERY_TASK_STATUS $TaskId status=$taskStatus"
+    } elseif ($taskStatus -notin @("pending", "in_progress")) {
         Add-Finding "HARD_BLOCK_UNATTENDED_TASK_STATUS $TaskId status=$taskStatus"
     }
 
@@ -379,6 +387,10 @@ try {
     Write-Section -Title "Scope Scan"
     $filesToScan = @(Get-ChangedFilesForScan -ExplicitFiles $ChangedFiles)
     Write-Output "filesToScan: $($filesToScan.Count)"
+    $explicitFilesToScan = @(Expand-FileInputs -Files $ChangedFiles)
+    if ($CloseoutRecovery -and $explicitFilesToScan.Count -eq 0 -and $filesToScan.Count -gt 0) {
+        Add-Finding "HARD_BLOCK_CLOSEOUT_RECOVERY_DIRTY_WORKTREE files=$($filesToScan.Count)"
+    }
     foreach ($changedFile in $filesToScan) {
         $blockedPattern = Get-MatchingPattern -Path $changedFile -Patterns $blockedFiles
         if (-not [string]::IsNullOrWhiteSpace($blockedPattern)) {
@@ -421,7 +433,11 @@ try {
         exit 1
     }
 
-    Write-Output "unattendedStopDecision: continue"
+    if ($CloseoutRecovery -and $taskStatus -in @("done", "closed")) {
+        Write-Output "unattendedStopDecision: closeout_recovery"
+    } else {
+        Write-Output "unattendedStopDecision: continue"
+    }
     Write-Output "unattended readiness passed"
     exit 0
 } catch {
@@ -429,4 +445,3 @@ try {
     Write-Output "unattendedStopDecision: stop_for_hard_block"
     exit 1
 }
-
