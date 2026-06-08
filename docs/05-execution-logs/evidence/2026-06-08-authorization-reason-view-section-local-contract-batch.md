@@ -8,7 +8,7 @@
 
 ## Summary
 
-- Result: local validation pass; merge to `master`, push, and branch cleanup pending.
+- Result: validation pass and merged to `master`; push and branch cleanup pending.
 - Scope: local-only `authorization` reason view section read-model / service-contract module batch.
 - Product code changed: yes, within approved `src/server/models`, `src/server/contracts`, `src/server/validators`, `src/server/services`, and corresponding focused tests.
 - Dependency, package, lockfile, schema, migration, repository, API route, Server Action, scripts, e2e, provider, env/secret, staging/prod/cloud/deploy, payment, or external-service changed: no.
@@ -100,12 +100,12 @@
 
 ## Post-Merge Master Validation
 
-| Command                  | Result  | Notes                              |
-| ------------------------ | ------- | ---------------------------------- |
-| `npm.cmd run lint`       | pending | To be run on `master` after merge. |
-| `npm.cmd run typecheck`  | pending | To be run on `master` after merge. |
-| Batch focused unit tests | pending | To be run on `master` after merge. |
-| `git diff --check`       | pending | To be run on `master` after merge. |
+| Command                  | Result | Notes                                                       |
+| ------------------------ | ------ | ----------------------------------------------------------- |
+| `npm.cmd run lint`       | pass   | Ran on `master` after merge; exit code 0.                   |
+| `npm.cmd run typecheck`  | pass   | Ran on `master` after merge; exit code 0.                   |
+| Batch focused unit tests | pass   | Ran on `master` after merge; 8 files and 16 tests passed.   |
+| `git diff --check`       | pass   | Ran on `master` after merge; no whitespace errors reported. |
 
 ## Residual Gaps
 
