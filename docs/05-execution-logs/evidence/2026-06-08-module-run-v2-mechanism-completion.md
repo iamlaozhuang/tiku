@@ -61,6 +61,16 @@
   evidence to fail.
 - GREEN: `Test-ModuleRunV2PreCommitHardening.Smoke.ps1` passed.
 
+### Post-Merge Validation Repair: Protected Branch Smoke
+
+- Commit: post-closeout repair commit in this run.
+- Goal: make `Test-ModuleRunV2WorkReadiness.Smoke.ps1` valid both on short-lived branches and on protected `master` /
+  `main` post-merge validation.
+- RED: post-merge master validation failed because the smoke expected the successful pre-work path while the new hard
+  gate correctly blocked protected branch startup.
+- GREEN: the smoke now treats `HARD_BLOCK_PROTECTED_BRANCH` as expected on protected branches and keeps the success path
+  on short-lived branches.
+
 ## Hook And Automation Evaluation
 
 | Surface         | Strength   | Evaluation                                                                                  |

@@ -7,6 +7,8 @@ APPROVE.
 ## Findings
 
 - No blocking findings.
+- Post-merge smoke repair accepted: protected branch startup is still blocked, and the smoke now records that as the
+  expected master/main behavior.
 
 ## Hook Evaluation
 

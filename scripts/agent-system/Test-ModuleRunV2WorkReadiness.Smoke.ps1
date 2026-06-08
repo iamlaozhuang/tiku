@@ -47,6 +47,9 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing advisory script: $scriptPath"
 }
 
+$currentBranch = ((& git branch --show-current) -join "").Trim()
+$isProtectedBranch = $currentBranch -eq "master" -or $currentBranch -eq "main"
+
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-work-readiness-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
 
@@ -99,26 +102,36 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
-    $preWorkOutput = @(& $scriptPath -Mode pre-work -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath)
-    Assert-Contains -Output $preWorkOutput -Pattern "Module Run v2 Work Readiness"
-    Assert-Contains -Output $preWorkOutput -Pattern "workReadinessMode: hard_block"
-    Assert-Contains -Output $preWorkOutput -Pattern "checkMode: pre-work"
-    Assert-Contains -Output $preWorkOutput -Pattern "taskId: $taskId"
-    Assert-Contains -Output $preWorkOutput -Pattern "hookIntegrationMatrix: present"
-    Assert-Contains -Output $preWorkOutput -Pattern "Cost Calibration Gate remains blocked"
-    Assert-Contains -Output $preWorkOutput -Pattern "work readiness passed"
-
     $plannedFiles = @(
         "scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1",
         "scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1",
         "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md"
     )
 
-    $preEditOutput = @(& $scriptPath -Mode pre-edit -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -PlannedFiles $plannedFiles)
-    Assert-Contains -Output $preEditOutput -Pattern "checkMode: pre-edit"
-    Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1"
-    Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1"
-    Assert-Contains -Output $preEditOutput -Pattern "work readiness passed"
+    if ($isProtectedBranch) {
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH $currentBranch" -Command {
+            & $scriptPath -Mode pre-work -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath
+        }
+
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH $currentBranch" -Command {
+            & $scriptPath -Mode pre-edit -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -PlannedFiles $plannedFiles
+        }
+    } else {
+        $preWorkOutput = @(& $scriptPath -Mode pre-work -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath)
+        Assert-Contains -Output $preWorkOutput -Pattern "Module Run v2 Work Readiness"
+        Assert-Contains -Output $preWorkOutput -Pattern "workReadinessMode: hard_block"
+        Assert-Contains -Output $preWorkOutput -Pattern "checkMode: pre-work"
+        Assert-Contains -Output $preWorkOutput -Pattern "taskId: $taskId"
+        Assert-Contains -Output $preWorkOutput -Pattern "hookIntegrationMatrix: present"
+        Assert-Contains -Output $preWorkOutput -Pattern "Cost Calibration Gate remains blocked"
+        Assert-Contains -Output $preWorkOutput -Pattern "work readiness passed"
+
+        $preEditOutput = @(& $scriptPath -Mode pre-edit -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -PlannedFiles $plannedFiles)
+        Assert-Contains -Output $preEditOutput -Pattern "checkMode: pre-edit"
+        Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1"
+        Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1"
+        Assert-Contains -Output $preEditOutput -Pattern "work readiness passed"
+    }
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_TASK_ID" -Command {
         & $scriptPath -Mode pre-work -ProjectStatePath $projectStatePath -QueuePath $queuePath
