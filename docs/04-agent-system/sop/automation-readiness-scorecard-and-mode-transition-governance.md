@@ -2,7 +2,7 @@
 
 ## Status
 
-Active for docs-only automation governance planning.
+Active for Module Run v2 local automation readiness governance.
 
 This SOP defines how Tiku evaluates automation readiness and proposes mode transitions. It does not approve changing `project-state.yaml` `automation.mode`, code-stage queue seeding, product code implementation, dependency changes, schema or migration work, env/secret work, provider work, staging/prod/cloud/deploy work, payment work, external-service work, thread creation, worktree creation, parallel worker execution, or Cost Calibration Gate execution. Cost Calibration Gate remains blocked.
 
@@ -13,7 +13,7 @@ Make automation readiness measurable before changing execution behavior.
 The scorecard must prevent:
 
 - treating completed SOP documents as automatic execution approval;
-- upgrading from `semi_auto` without evidence;
+- upgrading automation mode without evidence;
 - hiding blocked gates behind readiness language;
 - using local-only validation to claim staging, prod, provider, payment, or external-service readiness;
 - changing automation mode as a side effect of another docs-only task.
@@ -24,9 +24,9 @@ Use these labels when discussing automation state:
 
 | Label                    | Meaning                                                         | Allowed action                                     |
 | ------------------------ | --------------------------------------------------------------- | -------------------------------------------------- |
-| `semi_auto`              | agent advances only after explicit user-directed rounds         | current project state                              |
+| `semi_auto`              | agent advances only after explicit user-directed rounds         | legacy baseline                                    |
 | `docs_auto_candidate`    | docs-only governance tasks may be proposed for automatic run    | proposal only, not mode change                     |
-| `local_auto_candidate`   | local-completable implementation planning may be proposed       | requires separate approval before execution        |
+| `local_auto_candidate`   | local-completable Module Run v2 work may be proposed            | current project state; requires queued approval    |
 | `guarded_auto_candidate` | limited automatic task claiming may be proposed                 | requires scorecard pass and explicit mode approval |
 | `blocked`                | automation must stop because a required gate or state is unsafe | no automatic advancement                           |
 
@@ -55,13 +55,13 @@ A single blocking example makes the overall result `blocked` until resolved or a
 
 Use these verdicts:
 
-| Verdict                         | Meaning                                              | Next action                            |
-| ------------------------------- | ---------------------------------------------------- | -------------------------------------- |
-| `ready_for_docs_auto_proposal`  | docs-only automatic claiming can be proposed         | create a mode transition proposal task |
-| `ready_for_local_auto_proposal` | local-first implementation planning can be proposed  | create a scoped approval task          |
-| `ready_with_warnings`           | safe for current `semi_auto`, not enough for upgrade | keep `semi_auto` and record warnings   |
-| `not_ready`                     | missing evidence or unresolved warning               | run readiness/audit tasks first        |
-| `blocked`                       | blocked gate or unsafe state exists                  | stop until human decision              |
+| Verdict                         | Meaning                                             | Next action                            |
+| ------------------------------- | --------------------------------------------------- | -------------------------------------- |
+| `ready_for_docs_auto_proposal`  | docs-only automatic claiming can be proposed        | create a mode transition proposal task |
+| `ready_for_local_auto_proposal` | local-first implementation planning can be proposed | create a scoped approval task          |
+| `ready_with_warnings`           | safe for current mode, not enough for upgrade       | keep current mode and record warnings  |
+| `not_ready`                     | missing evidence or unresolved warning              | run readiness/audit tasks first        |
+| `blocked`                       | blocked gate or unsafe state exists                 | stop until human decision              |
 
 Do not use `ready` without a suffix. The suffix must state what kind of automation is being proposed.
 

@@ -2,11 +2,12 @@
 
 ## Status
 
-Active for docs-only governance planning.
+Active for Module Run v2 local automation governance.
 
 This SOP defines the target automation mechanism for Tiku project advancement. It does not by itself approve product code implementation, code-stage queue seeding, dependency changes, env/secret work, provider work, staging/prod/cloud/deploy work, payment work, external-service work, or Cost Calibration Gate execution.
 
-Current `project-state.yaml` `automation.mode` remains `semi_auto` until a later approved task explicitly changes it.
+Current `project-state.yaml` `automation.mode` is `local_auto_candidate`. This label allows local-first Module Run v2
+planning and guarded local implementation only when a queued task and explicit user approval define the scope.
 
 ## Purpose
 

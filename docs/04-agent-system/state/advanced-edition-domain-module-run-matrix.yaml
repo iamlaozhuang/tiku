@@ -327,7 +327,7 @@ automationHandoffPolicy:
     - execute Cost Calibration Gate
     - continue across execution modules without a new Module Run plan and human approval
 hookIntegrationMatrix:
-  status: planned_mechanism_only
+  status: partially_implemented_under_hardening
   implementationRequiresSeparateTaskApproval: true
   levels:
     advisory: report only; does not block commit or progression
@@ -335,13 +335,13 @@ hookIntegrationMatrix:
     hard_block: stop commit, push, or module closeout until fixed or separately approved
   hooks:
     pre-work:
-      strength: advisory
+      strength: hard_block_after_mechanism_completion
       plannedChecks:
         - state and queue current task alignment
         - branch policy and blocked gate awareness
         - Module Run v2 plan exists before code-stage execution
     pre-edit:
-      strength: advisory_or_hard_block
+      strength: hard_block_after_mechanism_completion
       plannedChecks:
         - allowedFiles and blockedFiles match planned edits
         - high-risk surfaces are not touched without approval
@@ -353,6 +353,7 @@ hookIntegrationMatrix:
         - glossary terminology scan
         - lint and typecheck
       existingHuskyPreCommit:
+        - powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
         - npm.cmd run lint-staged
         - npm.cmd run lint
         - npm.cmd run typecheck
@@ -363,7 +364,7 @@ hookIntegrationMatrix:
         - master and origin alignment
         - evidence and audit paths exist
     post-commit:
-      strength: advisory
+      strength: advisory_after_mechanism_completion
       plannedChecks:
         - commit and evidence inventory
         - changed-file scope summary

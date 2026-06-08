@@ -3471,3 +3471,356 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-authorization-and-access-pilot.md
     status: done
     retryCount: 0
+  - id: module-run-v2-mechanism-completion
+    title: Module Run v2 Mechanism Completion
+    phase: module-run-v2-mechanism-completion
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
+    dependencies:
+      - module-run-v2-authorization-and-access-pilot
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved implementing the six-task Module Run v2 mechanism completion plan, including state source sync,
+      start gate hardening, closeout strictness hardening, post-commit advisory, automation readiness refresh, and
+      evidence redaction scan hardening. User authorized per-task commits, fast-forward merge to master, push to origin
+      master after validation, and short-lived branch cleanup. Scope is mechanism scripts, hooks, governance state, SOP
+      alignment, task plans, evidence, and audit reviews only. Do not advance any business module, execute Cost
+      Calibration Gate, or touch dependency, package, lockfile, schema, migration, env/secret, provider,
+      staging/prod/cloud/deploy, payment, external-service, product runtime, `src/db/schema/**`, drizzle, `.env.local`,
+      `.env.example`, or `e2e/**`.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - .husky/post-commit
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PostCommitReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PostCommitReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-*.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-*.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-*.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - module_run_v2
+      - automation_policy
+      - hook_governance
+      - evidence_redaction
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write .husky/post-commit scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 scripts\agent-system\Test-ModuleRunV2WorkReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.ps1 scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-mechanism-completion.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check .husky/post-commit scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 scripts\agent-system\Test-ModuleRunV2WorkReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.ps1 scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-mechanism-completion.md
+      - Select-String -Path docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-completion.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-mechanism-completion.md -Pattern 'pre-work','pre-edit','pre-commit','post-commit','pre-push','module-closeout','nextModuleRunCandidate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-mechanism-completion
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
+    status: in_progress
+    retryCount: 0
+  - id: module-run-v2-mechanism-state-source-sync
+    title: Module Run v2 Mechanism State Source Sync
+    phase: module-run-v2-mechanism-completion
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
+    dependencies:
+      - module-run-v2-authorization-and-access-pilot
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved the Module Run v2 mechanism completion plan. This first task synchronizes durable state, queue,
+      matrix, and SOP wording with the real post-pilot Git state. Scope is governance state and execution logs only.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-completion.md
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - governance_state
+      - automation_policy
+      - hook_governance
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-mechanism-state-source-sync.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-state-source-sync.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-mechanism-state-source-sync.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-mechanism-state-source-sync.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-state-source-sync.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-mechanism-state-source-sync.md
+      - Select-String -Path docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-state-source-sync.md -Pattern '1ab334a71acbc1124f5fed8c23d37d149b7a7a57','local_auto_candidate','partially_implemented_under_hardening','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+    status: in_progress
+    retryCount: 0
+  - id: module-run-v2-start-gate-hardening
+    title: Module Run v2 Start Gate Hardening
+    phase: module-run-v2-mechanism-completion
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
+    dependencies:
+      - module-run-v2-mechanism-state-source-sync
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved hard-block startup behavior for Module Run v2 pre-work and pre-edit. Scope is limited to the work
+      readiness script, smoke test, state, queue, and execution logs.
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-start-gate-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-start-gate-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-start-gate-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - hook_governance
+      - hard_block
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.Smoke.ps1
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 scripts\agent-system\Test-ModuleRunV2WorkReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-start-gate-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-start-gate-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-start-gate-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 scripts\agent-system\Test-ModuleRunV2WorkReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-start-gate-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-start-gate-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-start-gate-hardening.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-start-gate-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-start-gate-hardening.md
+    status: pending
+    retryCount: 0
+  - id: module-run-v2-closeout-strictness-hardening
+    title: Module Run v2 Closeout Strictness Hardening
+    phase: module-run-v2-mechanism-completion
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
+    dependencies:
+      - module-run-v2-start-gate-hardening
+    taskPlanPolicy: required
+    humanApproval: User approved stricter Module Run v2 closeout validation for Batch, RED/GREEN, commit, gate, and handoff evidence.
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-closeout-strictness-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-closeout-strictness-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-closeout-strictness-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - module_closeout
+      - hard_block
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-closeout-strictness-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-closeout-strictness-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-closeout-strictness-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-closeout-strictness-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-closeout-strictness-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-closeout-strictness-hardening.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-closeout-strictness-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-closeout-strictness-hardening.md
+    status: pending
+    retryCount: 0
+  - id: module-run-v2-post-commit-advisory
+    title: Module Run v2 Post-Commit Advisory
+    phase: module-run-v2-mechanism-completion
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
+    dependencies:
+      - module-run-v2-closeout-strictness-hardening
+    taskPlanPolicy: required
+    humanApproval: User approved adding a post-commit advisory script and wiring it into `.husky/post-commit`.
+    taskKind: implementation
+    allowedFiles:
+      - .husky/post-commit
+      - scripts/agent-system/Test-ModuleRunV2PostCommitReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PostCommitReadiness.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-post-commit-advisory.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-commit-advisory.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-commit-advisory.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - hook_governance
+      - post_commit_advisory
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.Smoke.ps1
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write .husky/post-commit scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.ps1 scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-post-commit-advisory.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-post-commit-advisory.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-post-commit-advisory.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check .husky/post-commit scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.ps1 scripts\agent-system\Test-ModuleRunV2PostCommitReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-post-commit-advisory.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-post-commit-advisory.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-post-commit-advisory.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-commit-advisory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-commit-advisory.md
+    status: pending
+    retryCount: 0
+  - id: module-run-v2-automation-readiness-scorecard-refresh
+    title: Module Run v2 Automation Readiness Scorecard Refresh
+    phase: module-run-v2-mechanism-completion
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
+    dependencies:
+      - module-run-v2-post-commit-advisory
+    taskPlanPolicy: required
+    humanApproval: User approved refreshing automation readiness after the real Module Run v2 pilot and hook hardening.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - readiness_scorecard
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+      - Select-String -Path docs\05-execution-logs\evidence\2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md -Pattern 'local_auto_candidate','ready_with_warnings','nextModuleRunCandidate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+    status: pending
+    retryCount: 0
+  - id: module-run-v2-evidence-redaction-scan-hardening
+    title: Module Run v2 Evidence Redaction Scan Hardening
+    phase: module-run-v2-mechanism-completion
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
+    dependencies:
+      - module-run-v2-automation-readiness-scorecard-refresh
+    taskPlanPolicy: required
+    humanApproval: User approved expanding the pre-commit evidence redaction scanner for protected AI, provider, auth, and redeem_code-like content patterns.
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - pre_commit_hard_block
+      - evidence_redaction
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-mechanism-completion.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-completion.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-mechanism-completion.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-mechanism-completion.md -Pattern 'HARD_BLOCK_SENSITIVE_EVIDENCE','pre-work','pre-edit','pre-commit','post-commit','pre-push','module-closeout','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-mechanism-completion
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
+    status: pending
+    retryCount: 0
