@@ -19,7 +19,7 @@
 - RED: no local hard block verifies whether a planning task is allowed to seed implementation tasks.
 - GREEN: added `Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1` and smoke coverage for pass, missing gate, missing
   approval, and unsafe allowed-file cases.
-- Commit: pending.
+- Commit: `8f311cea`.
 - localFullLoopGate: L2.
 
 ### Batch 2: Governance Policy Alignment
@@ -28,7 +28,7 @@
 - GREEN: added `implementationAutoSeedGate`, `autoDriveLocalImplementationApproval`,
   `localExperienceAcceptanceBridgeApproved`, safe local implementation surfaces, bridge-surface conditions, and hard
   blocked surfaces to matrix, SOP, and code-stage seeding plan.
-- Commit: pending.
+- Commit: `8f311cea`.
 - localFullLoopGate: L1.
 
 ### Batch 3: Queue Handoff Alignment
@@ -37,7 +37,7 @@
   planning.
 - GREEN: upgraded `module-run-v2-ai-task-and-provider-planning` so planning may seed low-risk local implementation tasks
   only when `implementationAutoSeedGate` passes; direct implementation remains blocked during the planning task.
-- Commit: pending.
+- Commit: `8f311cea`.
 - localFullLoopGate: L1.
 
 ## Validation Log
