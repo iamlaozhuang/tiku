@@ -128,6 +128,7 @@ terminologyAnchors:
             -ProjectStatePath $projectStatePath `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath `
+            -AllowProtectedBranch `
             -SkipLeaseCheck `
             -SkipWorktreeHygieneCheck
     )
@@ -139,6 +140,7 @@ terminologyAnchors:
             -ProjectStatePath $projectStatePath `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath `
+            -AllowProtectedBranch `
             -SkipLeaseCheck `
             -SkipWorktreeHygieneCheck
     )
@@ -150,6 +152,7 @@ terminologyAnchors:
             -ProjectStatePath $projectStatePath `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath `
+            -AllowProtectedBranch `
             -SkipLeaseCheck `
             -SkipWorktreeHygieneCheck
     )
@@ -161,6 +164,7 @@ terminologyAnchors:
             -ProjectStatePath $projectStatePath `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath `
+            -AllowProtectedBranch `
             -SkipLeaseCheck `
             -SkipWorktreeHygieneCheck
     }
@@ -185,6 +189,7 @@ terminologyAnchors:
             -QueuePath $queuePath `
             -MatrixPath $matrixPath `
             -LeasePath $activeLeasePath `
+            -AllowProtectedBranch `
             -SkipWorktreeHygieneCheck
     }
 } finally {
