@@ -342,6 +342,41 @@ For Codex scheduled automation, run the automation startup readiness script befo
 orchestration. If it returns `stop_existing_run_active`, another human or automation run owns the lane and the scheduler
 must exit without editing or launching a new thread.
 
+## Stopped Automation Hygiene
+
+If a scheduled Codex automation wakeup stops because another run owns the lane, or because startup readiness finds a
+stale automation artifact, the next recovery pass should run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1
+```
+
+This gate is read-only by default. It inventories:
+
+- the configured automation lease file;
+- Codex automation worktrees under the configured worktree root;
+- temporary dry-run handoff directories under the system temp root.
+
+It returns `stoppedAutomationHygieneDecision: clean` when no residual artifact needs action, and
+`stoppedAutomationHygieneDecision: cleanup_available` when all detected residual artifacts are safe cleanup candidates.
+It returns hard-block decisions for active leases, invalid leases, dirty worktrees, or cleanup paths outside the approved
+roots.
+
+Cleanup is explicit:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup
+```
+
+`-Cleanup` may remove only expired clean lease files, stale clean automation worktrees inside the Codex automation
+worktree root, and dry-run handoff temp directories named `tiku-autopilot-handoff-*` inside the system temp root. It must
+not delete dirty worktrees, source files, repository `.git` data outside `git worktree remove`, env files, product code,
+dependency files, schema, migration, or evidence logs.
+
+If the hygiene gate returns `stop_existing_run_active`, automation must leave the active run alone. If it returns
+`stop_dirty_worktree`, `stop_invalid_lease`, or `stop_manual_cleanup_required`, automation must stop and report the
+artifact class for manual inspection instead of attempting repair.
+
 ## Stop Conditions
 
 Stop automated advancement immediately when:

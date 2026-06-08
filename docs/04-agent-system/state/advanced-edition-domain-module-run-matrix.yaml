@@ -6,6 +6,7 @@ generatedAt: "2026-06-08T08:05:00-07:00"
 upgradedAt: "2026-06-08T08:33:09-07:00"
 localExperienceClosureAlignedAt: "2026-06-08T14:59:56-07:00"
 planningToImplementationAutodriveAlignedAt: "2026-06-08T15:16:06-07:00"
+stoppedAutomationHygieneAlignedAt: "2026-06-08T15:30:38-07:00"
 purpose: >-
   Source-of-truth matrix for advancing advanced-edition work by Module Run v2: larger domain-level Batch combinations
   with local full-loop completion gates, stronger thread rollover rules, automation handoff, and hook integration
@@ -468,6 +469,7 @@ automationHandoffPolicy:
   unattendedStopDecisionScript: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
   automationLeaseReadinessScript: scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.ps1
   automationStartupReadinessScript: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+  stoppedAutomationHygieneScript: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
   handoffGeneratorScript: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
   threadLaunchPolicyScript: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
   autopilotOrchestratorScript: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
@@ -498,6 +500,14 @@ automationHandoffPolicy:
     stop_existing_run_active: non-expired lease blocks the scheduler wakeup
     stop_expired_dirty_lease: expired lease worktree has uncommitted changes and must be inspected
     stop_invalid_lease: lease file is malformed
+  stoppedAutomationHygieneDecisionLabels:
+    clean: no residual automation artifacts need action
+    cleanup_available: residual artifacts are present and safe cleanup candidates
+    cleanup_completed: explicit cleanup removed safe residual artifacts
+    stop_existing_run_active: non-expired lease means another run owns the lane
+    stop_invalid_lease: lease file is malformed and requires manual inspection
+    stop_dirty_worktree: expired lease or automation worktree has uncommitted changes
+    stop_manual_cleanup_required: cleanup path or removal result requires manual inspection
   dryRunControls:
     handoffGeneratorDryRun: New-ModuleRunV2ThreadHandoff.ps1 -DryRun does not write the requested output path
     autopilotDryRunHandoff: Invoke-ModuleRunV2Autopilot.ps1 -DryRunHandoff uses temporary handoff evidence outside the repository
@@ -523,8 +533,11 @@ automationHandoffPolicy:
     - seed low-risk local implementation tasks when implementationAutoSeedGate passes
     - update handoff proposal and blocked remainder wording
     - mark provider, env/secret, staging/prod, deploy, payment, or Cost Calibration Gate work as blocked remainder
+    - inventory and clean safe stopped-automation residual artifacts only through
+      Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup
   automationMustNot:
     - ignore an active lease, stale automation worktree, or no-executable-task startup decision
+    - clean dirty automation worktrees or invalid lease files without manual inspection
     - modify schema, migration, dependency, env/secret, provider config, deploy config, payment, or external-service surfaces
     - read or record secrets
     - execute Cost Calibration Gate
@@ -563,6 +576,16 @@ hookIntegrationMatrix:
         - Codex automation approval state
         - stale or dirty automation worktree stop
         - blocked gate anchors
+    stopped-automation-hygiene:
+      strength: hard_block_for_unsafe_cleanup
+      plannedChecks:
+        - active lease stop
+        - invalid lease stop
+        - dirty worktree stop
+        - expired clean lease cleanup candidate
+        - stale clean automation worktree cleanup candidate
+        - dry-run handoff temp cleanup candidate
+        - cleanup path containment
     pre-work:
       strength: hard_block_after_mechanism_completion
       plannedChecks:
@@ -630,6 +653,7 @@ terminologyAnchors:
   - threadRolloverDecision
   - threadLaunchDecision
   - autopilotDecision
+  - stoppedAutomationHygiene
   - authorization
   - paper
   - mock_exam
