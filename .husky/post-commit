@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PostCommitReadiness.ps1 || true
