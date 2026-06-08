@@ -111,6 +111,17 @@ Then run broader gates as relevant:
 
 If a validation command cannot run, evidence must record why and whether the task is blocked or accepted with residual risk.
 
+### Evidence Formatting Finalization Rule
+
+For any task that edits or generates markdown or YAML evidence, audit review, task plan, task queue, or project state files:
+
+1. Write final validation results and audit conclusions first.
+2. Run scoped `prettier --write` on exactly the changed docs/state files.
+3. Run scoped `prettier --check` on the same file list as the confirmation gate.
+4. Run `git diff --check` after formatting.
+
+`prettier --check` is a confirmation gate, not the first formatting step for newly edited evidence. If scoped `prettier --write` changes evidence or audit layout only, rerun the checks and preserve the semantic validation conclusions unless command results changed.
+
 ## Review Gate
 
 Every task needs at least a self-review in evidence.

@@ -2452,3 +2452,58 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-display-local-contract-batch.md
     status: done
     retryCount: 0
+  - id: evidence-format-finalization-governance
+    title: Evidence Format Finalization Governance
+    phase: evidence-format-finalization-governance
+    sourceStory: user-request-2026-06-08-format-blocker-resolution
+    dependencies:
+      - batch-95-authorization-display-local-contract
+    taskPlanPolicy: required
+    humanApproval: >-
+      User explicitly requested resolving the recurring formatting blocker to avoid slowing later development. Scope is
+      docs/state governance only: codify that final evidence, audit review, task plan, task queue, and project state
+      edits must run scoped prettier --write before scoped prettier --check. No scripts, dependencies, package/lockfile,
+      schema, migration, product code, repository, API route, Server Action, provider, env/secret,
+      staging/prod/cloud/deploy, payment, external-service, real authorization permission model change, or Cost
+      Calibration Gate execution is approved.
+    taskKind: docs_state_governance
+    allowedFiles:
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/module-lifecycle-governance.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-evidence-format-finalization-governance.md
+      - docs/05-execution-logs/evidence/2026-06-08-evidence-format-finalization-governance.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-evidence-format-finalization-governance.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - src/**
+    riskTypes:
+      - docs_state_governance
+      - evidence_consistency
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\sop\module-lifecycle-governance.md docs\04-agent-system\sop\local-first-validation-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-evidence-format-finalization-governance.md docs\05-execution-logs\evidence\2026-06-08-evidence-format-finalization-governance.md docs\05-execution-logs\audits-reviews\2026-06-08-evidence-format-finalization-governance.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\sop\module-lifecycle-governance.md docs\04-agent-system\sop\local-first-validation-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-evidence-format-finalization-governance.md docs\05-execution-logs\evidence\2026-06-08-evidence-format-finalization-governance.md docs\05-execution-logs\audits-reviews\2026-06-08-evidence-format-finalization-governance.md
+      - Select-String -Path docs\04-agent-system\sop\task-lifecycle-governance.md,docs\04-agent-system\sop\module-lifecycle-governance.md,docs\04-agent-system\sop\local-first-validation-governance.md,docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\task-plans\2026-06-08-evidence-format-finalization-governance.md,docs\05-execution-logs\evidence\2026-06-08-evidence-format-finalization-governance.md,docs\05-execution-logs\audits-reviews\2026-06-08-evidence-format-finalization-governance.md -Pattern 'Evidence Formatting Finalization Rule','prettier --write','prettier --check','Batch 95','authorization','personal_auth','org_auth','redeem_code','paper','mock_exam','audit_log','ai_call_log','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-evidence-format-finalization-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-evidence-format-finalization-governance.md
+    status: done
+    retryCount: 0
