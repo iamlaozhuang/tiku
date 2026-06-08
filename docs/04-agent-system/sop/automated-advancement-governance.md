@@ -84,6 +84,39 @@ For each task in the batch:
 
 A batch closeout review must confirm all task evidence, changed files, and Git inventory agree before merge or push is considered.
 
+## Module-To-Module Automation Handoff
+
+After Module Run v2 closeout, automation may generate a `nextModuleRunCandidate` proposal. The proposal is a planning
+artifact only; it is not approval to start implementation in the next module.
+
+The proposal must read durable state:
+
+- `docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml`;
+- `docs/04-agent-system/state/project-state.yaml`;
+- `docs/04-agent-system/state/task-queue.yaml`;
+- latest Module Run evidence;
+- latest Module Run audit review.
+
+Automation may:
+
+- detect that all Batches in the current Module Run appear complete;
+- propose the next execution module;
+- draft the next Module Run plan outline;
+- update handoff wording;
+- mark provider, env/secret, staging/prod, deploy, payment, external-service, and Cost Calibration Gate work as blocked
+  remainder.
+
+Automation must not:
+
+- modify schema, migration, dependency, env/secret, provider configuration, deploy configuration, payment, or
+  external-service surfaces;
+- read or record secrets;
+- execute Cost Calibration Gate;
+- continue implementation across execution modules without a fresh Module Run plan and human approval.
+
+Module Run v2 automatic handoff should normally pair with a thread rollover decision. After closeout, the default
+decision is `require_new_thread` before entering the next execution module.
+
 ## Per-Task Review And Commit Rule
 
 Each task must finish with:

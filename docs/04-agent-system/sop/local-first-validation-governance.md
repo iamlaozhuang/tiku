@@ -35,6 +35,33 @@ Use this ladder to classify how far a task can be validated locally:
 
 Tasks must name the highest level reached and the remaining level that is blocked, if any.
 
+## Module Run v2 Local Full-Loop Completion Standard
+
+For advanced edition Module Run v2, the local validation ladder is not only a task label. It is the default module
+completion standard.
+
+Each Module Run plan must declare the intended `localFullLoopGate` level:
+
+- L1 `lint_typecheck`;
+- L2 `unit`;
+- L3 `local_repository_or_docker_db`;
+- L4 `local_api_or_server_action_contract`;
+- L5 `local_ui_browser`;
+- L6 `role_flow`;
+- L7 `local_human_review`;
+- L8 `environment_provider_deploy_blocked_remainder`.
+
+The Module Run should progress to the highest safe local level for its execution module before closeout. If the highest
+useful level is blocked, evidence must state the exact blocked remainder instead of closing the module at a weaker
+contract level by habit.
+
+Local full-loop evidence may include `authorization`, `paper`, `mock_exam`, `redeem_code`, `audit_log`, and
+`ai_call_log` only according to the relevant redaction rules. It must not expose auto-increment ids, DB rows, full paper
+content, plaintext redeem_code, raw prompts, raw answers, raw provider responses, provider payloads, secrets, tokens,
+database URLs, or Authorization headers.
+
+Module Run v2 local completion does not imply staging, prod, provider, payment, or external-service readiness.
+
 ## Allowed Local-First Work
 
 Allowed local-first work includes:
@@ -67,6 +94,27 @@ The following must remain blocked until fresh explicit approval records the requ
 - dependency, package, lockfile, CLI, SDK, or test framework change without approval.
 
 Cost Calibration Gate remains blocked pending fresh explicit approval.
+
+## Local Provider Sandbox
+
+Module Run v2 may use a `local_provider_sandbox` only when the user explicitly approves that specific local provider
+validation call.
+
+The sandbox is allowed only for local dev validation and only when evidence records redacted metadata:
+
+- provider category or mock/local sandbox label;
+- whether the local call succeeded;
+- failure category when it failed;
+- local validation result;
+- no raw prompt, raw response, raw generated AI content, provider payload, API key, token, secret, database URL, or
+  Authorization header.
+
+The sandbox must not read, display, copy, or record `.env.local` contents. It must not change provider packages, SDKs,
+quotas, endpoints, model selection, fallback behavior, staging/prod configuration, cloud resources, deploy settings,
+payment, or external-service settings.
+
+Cost Calibration Gate remains blocked. A redacted, user-approved local provider sandbox call is not provider cost
+calibration and is not approval for staging/prod provider readiness.
 
 ## Mock, Fixture, And Local Labels
 

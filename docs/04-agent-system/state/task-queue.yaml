@@ -3086,3 +3086,73 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-advanced-edition-domain-module-run-matrix.md
     status: done
     retryCount: 0
+  - id: advanced-edition-module-run-v2-mechanism-upgrade
+    title: Advanced Edition Module Run v2 Mechanism Upgrade
+    phase: advanced-edition-module-run-v2-mechanism-upgrade
+    sourceStory: user-request-2026-06-08-module-run-v2-mechanism-upgrade
+    dependencies:
+      - advanced-edition-domain-module-run-matrix
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested implementation of the Module Run v2 mechanism upgrade plan after discussing larger domain Module
+      Runs, stronger boundary matrices, local business closure, automated module handoff, hook integration, and thread
+      rollover. Scope is docs-only mechanism upgrade. It may update the advanced edition Module Run matrix, relevant SOPs,
+      state, queue, task plan, evidence, and audit review. It must not implement hooks or scripts, change product code,
+      seed product implementation tasks as approved execution, change dependency/package/lockfile, schema, migration,
+      src/db/schema/**, drizzle/**, .env.local, .env.example, scripts/**, e2e/**, provider, env/secret,
+      staging/prod/cloud/deploy, payment, external-service, or execute Cost Calibration Gate.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/sop/module-lifecycle-governance.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/code-stage-task-seeding-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+      - docs/05-execution-logs/evidence/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - .husky/**
+    riskTypes:
+      - automation_policy
+      - module_lifecycle
+      - local_validation
+      - thread_rollover
+      - hook_governance
+      - authorization
+      - paper
+      - mock_exam
+      - redeem_code
+      - audit_log
+      - ai_call_log
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\sop\module-lifecycle-governance.md docs\04-agent-system\sop\local-first-validation-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\code-stage-task-seeding-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md docs\05-execution-logs\evidence\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md docs\05-execution-logs\audits-reviews\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\sop\module-lifecycle-governance.md docs\04-agent-system\sop\local-first-validation-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\code-stage-task-seeding-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md docs\05-execution-logs\evidence\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md docs\05-execution-logs\audits-reviews\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+      - Select-String -Path docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\04-agent-system\sop\module-lifecycle-governance.md,docs\04-agent-system\sop\local-first-validation-governance.md,docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\sop\code-stage-task-seeding-governance.md,docs\05-execution-logs\task-plans\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md,docs\05-execution-logs\evidence\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md,docs\05-execution-logs\audits-reviews\2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md -Pattern 'Module Run v2','localFullLoopGate','localProviderSandboxGate','threadRolloverGate','hookIntegrationMatrix','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+    status: done
+    retryCount: 0

@@ -103,6 +103,44 @@ During module execution:
 
 For module-level docs-only batches, every child task must still have its own evidence and reviewable diff.
 
+## Module Run v2 Execution Rhythm
+
+Module Run v2 is the default advancement rhythm for advanced edition implementation after Batch 101.
+
+Module Run v2 changes the execution unit from the historical seven source planning modules to six execution modules:
+
+- `authorization-and-access`;
+- `ai-task-and-provider`;
+- `personal-learning-ai`;
+- `organization-training`;
+- `organization-analytics`;
+- `ops-governance-and-retention`.
+
+The seven source planning modules remain traceable through
+`docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml` `sourceModuleMapping`.
+
+A Module Run v2 may contain up to 8 Batches. This raises throughput, but every Batch still needs:
+
+- a declared Batch boundary inside the Module Run plan;
+- focused tests appropriate to the touched surface;
+- short evidence;
+- an independently reviewable commit unless the task plan explicitly records a narrower subtask commit rule;
+- explicit blocked remainder wording when the next useful step crosses dependency, schema, provider, env/secret, staging/prod, deploy, payment, external-service, or Cost Calibration Gate boundaries.
+
+The Module Run plan must name:
+
+- execution module id;
+- source planning modules mapped into it;
+- candidate Batches and maximum Batch count;
+- highest expected local validation level from `localFullLoopGate`;
+- thread rollover checkpoint after the 4th Batch and requirement after the 6th Batch;
+- module closeout evidence and audit review paths;
+- next Module Run candidate proposal shape.
+
+Module Run v2 does not approve product code by itself. It defines the grouping mechanism; implementation, repository,
+API route, Server Action, UI, schema, dependency, provider, env/secret, deploy, payment, or external-service work still
+requires task-specific approval and allowed files.
+
 ## Module Closeout
 
 A module is complete only when evidence confirms:
@@ -131,6 +169,17 @@ Module batch closeout must also apply the Evidence Formatting Finalization Rule:
 5. Commit only after the formatting finalization and confirmation checks pass.
 
 This keeps module batch closeout deterministic after evidence rows move from draft or pending wording to final pass wording.
+
+For Module Run v2, closeout must additionally confirm:
+
+- no more than 8 Batches were executed in the Module Run;
+- every Batch has focused validation and evidence;
+- the highest safe local validation level was reached or a stop condition explains why it was not;
+- `localFullLoopGate` L8 blocked remainders are explicitly listed;
+- `localProviderSandboxGate` was either unused or has explicit local-only approval and redacted evidence;
+- `threadRolloverGate` decision is recorded;
+- `nextModuleRunCandidate` is proposed without starting cross-module implementation;
+- Cost Calibration Gate remains blocked.
 
 ## Module Switching
 

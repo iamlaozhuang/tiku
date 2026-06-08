@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: advanced-edition-domain-module-run-matrix
-updatedAt: "2026-06-08T08:05:00-07:00"
+  currentPhase: advanced-edition-module-run-v2-mechanism-upgrade
+updatedAt: "2026-06-08T08:38:46-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 67665c986f50bcbf30553dffc1a7f71cd2d9bca8
-  lastKnownOriginMasterSha: 67665c986f50bcbf30553dffc1a7f71cd2d9bca8
+  lastKnownMasterSha: d273a3a8217119cbd8bc3d0946bb6d29c8f4024b
+  lastKnownOriginMasterSha: d273a3a8217119cbd8bc3d0946bb6d29c8f4024b
 currentTask:
-  id: advanced-edition-domain-module-run-matrix
+  id: advanced-edition-module-run-v2-mechanism-upgrade
   status: done
-  sourceStory: user-request-2026-06-08-advanced-edition-domain-module-run-matrix
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-advanced-edition-domain-module-run-matrix.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-domain-module-run-matrix.md
-  branch: codex/advanced-domain-module-run-matrix
+  sourceStory: user-request-2026-06-08-module-run-v2-mechanism-upgrade
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+  branch: codex/module-run-v2-mechanism-upgrade
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,8 +99,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Advanced edition domain Module Run matrix is defined as a docs-only governance source of truth. Batch 101 and later
-    work should select a domain module, create or update a Module Run plan from the matrix, then batch implementation
-    slices under that Module Run instead of restarting full governance for every small Batch. Cost Calibration Gate
-    remains blocked and must not be executed.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-domain-module-run-matrix.md
+    Complete the docs-only Module Run v2 mechanism upgrade, then use the upgraded matrix to propose Batch 101 as the
+    first execution Module Run plan. The next implementation Module Run should start from durable state, honor
+    localFullLoopGate, localProviderSandboxGate, threadRolloverGate, and hookIntegrationMatrix, and keep Cost Calibration
+    Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md

@@ -109,6 +109,31 @@ route handlers / server actions -> service -> repository -> model
 
 They must not return database rows directly through route handlers or Server Actions.
 
+## Module Run v2 Task Grouping
+
+Advanced edition code-stage planning may group tasks by Module Run v2 execution module instead of forcing every small
+Batch to restart full governance.
+
+Allowed grouping:
+
+- one Module Run plan may contain up to 8 candidate Batches;
+- every Batch still declares its own focused validation target, evidence path, and commit expectation;
+- the plan may sequence local model, contract, validator, service, repository, API, Server Action, UI/browser, and role
+  flow validation as long as each surface is explicitly approved in the task scope;
+- the plan must name the intended `localFullLoopGate` level and the L8 blocked remainders.
+
+Grouping does not approve high-risk execution. The following still require separate approval or isolated tasks:
+
+- dependency, package, lockfile, CLI, SDK, or test framework changes;
+- schema, migration, destructive database operation, or data backfill;
+- real authorization permission model, role, permission, quota, or entitlement change;
+- provider configuration, env/secret, staging/prod/cloud/deploy, payment, or external-service work;
+- local provider sandbox execution without explicit approval for that local call;
+- Cost Calibration Gate execution.
+
+Seeded Module Run v2 entries must include thread rollover checkpoints after the 4th Batch and before or after the 6th
+Batch according to `threadRolloverGate`.
+
 ## Advanced Edition MVP Seeding Boundaries
 
 Advanced edition implementation planning may reference these MVP surfaces only when the approval names them:

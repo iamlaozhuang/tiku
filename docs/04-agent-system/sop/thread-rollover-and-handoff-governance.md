@@ -58,6 +58,9 @@ Suggest a new thread when any signal appears:
 
 When suggesting rollover, provide a short reason and the exact handoff source files.
 
+For Module Run v2, also suggest a new thread when the 4th Batch in the same Module Run has completed. The thread may
+continue only when Git status, evidence, audit review, task plan, and blocked gates are still clear.
+
 ## Require New Thread Signals
 
 Require a new thread, or stop for human handoff, when any signal appears:
@@ -73,6 +76,15 @@ Require a new thread, or stop for human handoff, when any signal appears:
 - a blocked gate would be needed to continue.
 
 Do not continue implementation or high-risk planning in the same thread when the recovery state is ambiguous.
+
+For Module Run v2, also require a new thread when:
+
+- the 6th Batch in the same Module Run has completed, unless the user explicitly requests continuing and a recovery
+  audit passes;
+- Module Run closeout has completed and the next action enters a different execution module;
+- the next work switches into schema, dependency, provider, env/secret, deploy, payment, external-service, or security
+  review boundary;
+- context compaction occurred and durable state has not yet been reread.
 
 ## Rollover Preparation Gate
 
@@ -94,6 +106,18 @@ Before starting or requesting a new thread, the current thread must prepare a ha
 - whether uncommitted work exists.
 
 If uncommitted work exists, the handoff must say whether it is task-scoped and why it was not committed.
+
+Module Run v2 handoff must additionally record:
+
+- current Module Run;
+- completed Batches;
+- latest SHA;
+- evidence, audit review, and task plan paths;
+- blocked gates;
+- allowed next task;
+- forbidden scope;
+- validation status;
+- next recommended Module Run.
 
 ## New Thread Startup Gate
 
