@@ -30,6 +30,9 @@ param(
     [switch]$CloseoutRecovery,
 
     [Parameter(Mandatory = $false)]
+    [switch]$DryRunHandoff,
+
+    [Parameter(Mandatory = $false)]
     [string[]]$ReadinessChangedFiles = @(),
 
     [Parameter(Mandatory = $false)]
@@ -54,6 +57,19 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$script:dryRunHandoffTempRoot = ""
+
+function Remove-DryRunHandoffTempRoot {
+    if ([string]::IsNullOrWhiteSpace($script:dryRunHandoffTempRoot)) {
+        return
+    }
+
+    $resolvedTempRoot = [System.IO.Path]::GetFullPath($script:dryRunHandoffTempRoot)
+    $systemTempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+    if ($resolvedTempRoot.StartsWith($systemTempRoot, [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $resolvedTempRoot)) {
+        Remove-Item -LiteralPath $resolvedTempRoot -Recurse -Force
+    }
+}
 
 function Get-DecisionValue {
     param(
@@ -85,8 +101,12 @@ function Write-AutopilotResult {
     Write-Output "autopilotDecision: $Decision"
     Write-Output "reason: $Reason"
     Write-Output "handoffPath: $HandoffPath"
+    if ($DryRunHandoff) {
+        Write-Output "dryRunHandoff: enabled"
+    }
     Write-Output "nextModuleRunCandidate: $NextModuleRunCandidate"
     Write-Output "Cost Calibration Gate remains blocked"
+    Remove-DryRunHandoffTempRoot
     exit $ExitCode
 }
 
@@ -154,8 +174,16 @@ if ($threadDecision -eq "continue_current_thread") {
     Write-AutopilotResult -Decision "continue_current_thread" -Reason "thread rollover gate allows continuation" -ExitCode 0
 }
 
+$effectiveHandoffPath = $HandoffPath
+if ($DryRunHandoff) {
+    $script:dryRunHandoffTempRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-autopilot-handoff-" + [guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $script:dryRunHandoffTempRoot | Out-Null
+    $effectiveHandoffPath = Join-Path -Path $script:dryRunHandoffTempRoot -ChildPath "handoff.md"
+    $HandoffPath = $effectiveHandoffPath
+}
+
 $handoffOutput = @(
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\agent-system\New-ModuleRunV2ThreadHandoff.ps1" -OutputPath $HandoffPath -Decision $threadDecision -Reason "autopilot thread rollover decision" -NextModuleRunCandidate $NextModuleRunCandidate 2>&1
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\agent-system\New-ModuleRunV2ThreadHandoff.ps1" -OutputPath $effectiveHandoffPath -Decision $threadDecision -Reason "autopilot thread rollover decision" -NextModuleRunCandidate $NextModuleRunCandidate 2>&1
 )
 if ($LASTEXITCODE -ne 0) {
     $handoffOutput | ForEach-Object { Write-Output $_ }
@@ -171,7 +199,7 @@ $policyArgs = @(
     "-ThreadRolloverDecision",
     $threadDecision,
     "-HandoffPath",
-    $HandoffPath,
+    $effectiveHandoffPath,
     "-NextModuleRunCandidate",
     $NextModuleRunCandidate
 )

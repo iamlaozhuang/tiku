@@ -116,6 +116,22 @@ tasks:
     )
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "autopilotDecision: launch_new_thread"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "nextModuleRunCandidate: ai-task-and-provider"
+
+    $repoHandoffPath = Join-Path -Path $fixtureRoot -ChildPath "repo-handoff.md"
+    $dryRunLaunchOutput = @(
+        & $scriptPath `
+            -CompletedBatchCount 6 `
+            -SkipUnattendedReadiness `
+            -HandoffPath $repoHandoffPath `
+            -DryRunHandoff `
+            -ThreadLaunchApproved `
+            -ThreadToolAvailable
+    )
+    Assert-Contains -Output $dryRunLaunchOutput -Pattern "autopilotDecision: launch_new_thread"
+    Assert-Contains -Output $dryRunLaunchOutput -Pattern "dryRunHandoff: enabled"
+    if (Test-Path -LiteralPath $repoHandoffPath) {
+        throw "Dry-run autopilot handoff must not write the requested repository handoff path."
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

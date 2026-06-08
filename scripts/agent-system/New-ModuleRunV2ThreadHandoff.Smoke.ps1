@@ -46,6 +46,14 @@ try {
     Assert-Contains -Output $content -Pattern "create_thread"
     Assert-Contains -Output $content -Pattern "send_message_to_thread"
     Assert-Contains -Output $content -Pattern "Cost Calibration Gate remains blocked"
+
+    $dryRunPath = Join-Path -Path $fixtureRoot -ChildPath "dry-run-handoff.md"
+    $dryRunOutput = @(& $scriptPath -OutputPath $dryRunPath -Decision "require_new_thread" -Reason "smoke test" -NextModuleRunCandidate "ai-task-and-provider" -DryRun)
+    Assert-Contains -Output $dryRunOutput -Pattern "handoffGenerator: dry_run"
+    Assert-Contains -Output $dryRunOutput -Pattern "handoffPath:"
+    if (Test-Path -LiteralPath $dryRunPath) {
+        throw "Dry-run handoff must not create an output file."
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

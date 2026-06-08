@@ -22,6 +22,10 @@ param(
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]$UserDecisionNeeded = "create_thread may be called only by Codex thread tooling after launch policy approval"
+    ,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -124,15 +128,20 @@ user decision needed: $UserDecisionNeeded
 Cost Calibration Gate remains blocked.
 "@
 
-$outputDirectory = Split-Path -Path $OutputPath -Parent
-if (-not [string]::IsNullOrWhiteSpace($outputDirectory) -and -not (Test-Path -LiteralPath $outputDirectory)) {
-    New-Item -ItemType Directory -Path $outputDirectory | Out-Null
+$handoffGeneratorMode = "wrote"
+if ($DryRun) {
+    $handoffGeneratorMode = "dry_run"
+} else {
+    $outputDirectory = Split-Path -Path $OutputPath -Parent
+    if (-not [string]::IsNullOrWhiteSpace($outputDirectory) -and -not (Test-Path -LiteralPath $outputDirectory)) {
+        New-Item -ItemType Directory -Path $outputDirectory | Out-Null
+    }
+
+    Set-Content -LiteralPath $OutputPath -Value $handoffContent -Encoding UTF8
 }
 
-Set-Content -LiteralPath $OutputPath -Value $handoffContent -Encoding UTF8
-
 Write-Section -Title "Module Run v2 Thread Handoff"
-Write-Output "handoffGenerator: wrote"
+Write-Output "handoffGenerator: $handoffGeneratorMode"
 Write-Output "handoffPath: $OutputPath"
 Write-Output "threadRolloverDecision: $Decision"
 Write-Output "nextModuleRunCandidate: $NextModuleRunCandidate"

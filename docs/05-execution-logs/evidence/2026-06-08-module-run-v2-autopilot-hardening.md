@@ -36,8 +36,9 @@ Cost Calibration Gate remains blocked.
 ### Batch 3: Dry-Run Handoff Decisions
 
 - Goal: make read-only autopilot/self-check decisions avoid tracked file edits.
-- RED: pending.
-- GREEN: pending.
+- RED: prior self-check regenerated `docs/05-execution-logs/handoffs/2026-06-08-module-run-v2-autopilot-orchestration-control.md`, leaving the worktree dirty after a decision-only run.
+- GREEN: `New-ModuleRunV2ThreadHandoff.Smoke.ps1` passes with `handoffGenerator: dry_run` and confirms no output file is created for `-DryRun`.
+- GREEN: `Invoke-ModuleRunV2Autopilot.Smoke.ps1` passes with `-DryRunHandoff`, observes `dryRunHandoff: enabled`, and confirms the requested repository handoff path is not written.
 - Commit: pending.
 - localFullLoopGate: L1 target.
 
