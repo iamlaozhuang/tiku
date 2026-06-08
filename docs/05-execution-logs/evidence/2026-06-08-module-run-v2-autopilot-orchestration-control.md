@@ -15,7 +15,7 @@ Cost Calibration Gate remains blocked.
 - Goal: generate a concise, redacted thread rollover handoff from durable state.
 - RED: `New-ModuleRunV2ThreadHandoff.Smoke.ps1` did not exist and PowerShell failed with missing script path.
 - GREEN: `New-ModuleRunV2ThreadHandoff.Smoke.ps1` passed.
-- Commit: pending.
+- Commit: `eaac0723b71e740e7e1999e98497f4f765854f5d`
 - localFullLoopGate: L1.
 
 ## Batch 2: Thread Launch Policy
@@ -23,7 +23,7 @@ Cost Calibration Gate remains blocked.
 - Goal: map thread rollover decisions and launch approval into a machine-readable thread launch decision.
 - RED: `Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1` did not exist and PowerShell failed with missing script path.
 - GREEN: `Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1` passed.
-- Commit: pending.
+- Commit: `eaac0723b71e740e7e1999e98497f4f765854f5d`
 - localFullLoopGate: L1.
 
 ## Batch 3: Autopilot Orchestrator
@@ -31,7 +31,7 @@ Cost Calibration Gate remains blocked.
 - Goal: combine stop-decision, thread decision, handoff generation, and launch policy into a single autopilot decision.
 - RED: `Invoke-ModuleRunV2Autopilot.Smoke.ps1` did not exist and PowerShell failed with missing script path.
 - GREEN: `Invoke-ModuleRunV2Autopilot.Smoke.ps1` passed.
-- Commit: pending.
+- Commit: `eaac0723b71e740e7e1999e98497f4f765854f5d`
 - localFullLoopGate: L1.
 
 ## handoffGenerator
@@ -95,13 +95,13 @@ Passed:
 - `npm.cmd run typecheck`
 - `git diff --check`
 
-Pending final rerun after evidence closeout:
-
 - scoped `prettier --write`
 - scoped `prettier --check`
 - required anchor check
-- module-closeout hard block
-- Git completion readiness
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-autopilot-orchestration-control`
+- `Test-GitCompletionReadiness.ps1 -BaseBranch master`
+- pre-commit hard block
+- post-commit advisory
 
 ## nextModuleRunCandidate
 
@@ -125,3 +125,13 @@ The mechanism now supports the intended autopilot chain:
 When `autopilotDecision: launch_new_thread` is present, Codex may call `create_thread` with the generated handoff and use
 `send_message_to_thread` only for that handoff content. The receiving thread still must perform recovery audit before
 business implementation.
+
+## Closeout
+
+- moduleRunVersion: 2
+- localFullLoopGate: L1 completed.
+- threadRolloverGate: `require_new_thread` before changing execution modules.
+- handoffGenerator: ready.
+- threadLaunchDecision: ready.
+- autopilotDecision: `launch_new_thread` observed in approved/tool-available scenario.
+- L8 blocked remainder recorded above.

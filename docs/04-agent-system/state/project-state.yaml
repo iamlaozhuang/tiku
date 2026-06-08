@@ -45,7 +45,7 @@ automation:
     autoMerge: false
   unattendedControl:
     target: guarded local unattended loop with hard-stop decisions
-    currentStatus: autopilot_orchestration_in_progress
+    currentStatus: autopilot_orchestration_ready_after_local_validation
     stopDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     threadDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
     handoffGeneratorScriptPath: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
@@ -73,12 +73,12 @@ repository:
   lastKnownOriginMasterSha: 663b61bebc8c5f33b8acc44e6f3a2c81be409974
 currentTask:
   id: module-run-v2-autopilot-orchestration-control
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-autopilot-thread-launch-and-next-module-queue
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-orchestration-control.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-orchestration-control.md
   branch: codex/module-run-v2-unattended-automation-control
-  commitSha: null
+  commitSha: eaac0723b71e740e7e1999e98497f4f765854f5d
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -115,7 +115,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete autopilot orchestration control, then start a new thread before entering the next business execution
-    module. The next business candidate remains `ai-task-and-provider` as a proposal only; do not cross modules without
-    a fresh Module Run v2 plan and explicit instruction. Cost Calibration Gate remains blocked.
+    Start a new thread before entering the next business execution module. The autopilot mechanism can generate handoff
+    and `autopilotDecision: launch_new_thread`, but the receiving thread must still run recovery audit and create a
+    fresh Module Run v2 plan before any business implementation. The next business candidate remains
+    `ai-task-and-provider` as a proposal only. Cost Calibration Gate remains blocked.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-orchestration-control.md
