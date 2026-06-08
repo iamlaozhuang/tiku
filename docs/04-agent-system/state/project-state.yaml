@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-92-personal-ai-generation-request-contract
-updatedAt: "2026-06-08T01:06:06-07:00"
+  currentPhase: phase-93-org-auth-training-scope-summary
+updatedAt: "2026-06-08T01:17:48-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 4bf181bbde34b9a49f96fc772dc557c57dfe15bb
-  lastKnownOriginMasterSha: 4bf181bbde34b9a49f96fc772dc557c57dfe15bb
+  lastKnownMasterSha: 239f8f2851e9cad1906b6ebace606663deb12a94
+  lastKnownOriginMasterSha: 239f8f2851e9cad1906b6ebace606663deb12a94
 currentTask:
-  id: phase-92-personal-ai-generation-request-contract
+  id: phase-93-org-auth-training-scope-summary
   status: done
   sourceStory: user-request-2026-06-08-batch-2
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-phase-92-personal-ai-generation-request-contract.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-phase-92-personal-ai-generation-request-contract.md
-  branch: codex/phase-92-personal-ai-generation-request-contract
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-phase-93-org-auth-training-scope-summary.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-phase-93-org-auth-training-scope-summary.md
+  branch: codex/phase-93-org-auth-training-scope-summary
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,8 +99,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 92 implemented the Batch 2 personal AI generation request contract as service-layer pure logic only. Continue
-    to Phase 93 only after Phase 92 validation, commit, merge, push, and branch cleanup. Do not execute dependency,
-    schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions,
-    authorization permission model changes, repository/API route/Server Action work, or Cost Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-phase-92-personal-ai-generation-request-contract.md
+    Phase 93 is implementing the Batch 2 org_auth training scope summary as service-layer pure logic only. Do not
+    execute dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service
+    actions, authorization permission model changes, repository/API route/Server Action work, or Cost Calibration Gate
+    execution.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-phase-93-org-auth-training-scope-summary.md
