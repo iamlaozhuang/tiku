@@ -140,6 +140,34 @@ Dry-run launch decisions are advisory unless a durable handoff was explicitly pr
 
 Implementation tasks involving `authorization`, `personal_auth`, `org_auth`, `redeem_code`, `paper`, `mock_exam`, `audit_log`, or `ai_call_log` must also carry the security and evidence redaction requirements defined by the relevant SOPs.
 
+## Planning-To-Implementation Autodrive Gate
+
+After Module Run v2 planning succeeds, automation may continue into implementation only through
+`implementationAutoSeedGate`.
+
+The planning task may seed implementation tasks when all of these are true:
+
+- planning evidence records `implementationAutoSeedGate`, `localExperienceClosureGate`, proposed implementation task
+  ids, focused test targets, localFullLoopGate targets, and blocked remainders;
+- each seeded implementation task records `autoDriveLocalImplementationApproval`;
+- each seeded implementation task is independently reviewable and has allowed files, blocked files, risk types,
+  validation commands, evidence path, and audit review path;
+- safe local implementation surfaces stay within server models, contracts, validators, services, corresponding focused
+  tests, and governance logs;
+- API, Server Action, repository, mapper, UI/browser, role-flow, or e2e bridge surfaces require
+  `localExperienceAcceptanceBridgeApproved`;
+- dependency, package, lockfile, schema, migration, provider/env/secret, staging/prod/cloud/deploy, payment,
+  external-service, and Cost Calibration Gate work remain blocked.
+
+Before an automation run executes a seeded implementation task, it must run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId <planning-task-id> -CandidateTaskId <implementation-task-id>
+```
+
+If the gate fails, automation stops and reports the hard block. A passed gate is approval to continue only to the named
+candidate task; it is not approval for unrelated implementation, high-risk surfaces, or cross-module work.
+
 ## Serial Batch Execution
 
 A serial batch may advance multiple tasks in one run only when the user approval names the batch scope and every task is independently reviewable.
@@ -208,6 +236,7 @@ Automation may:
 - detect that all Batches in the current Module Run appear complete;
 - propose the next execution module;
 - draft the next Module Run plan outline;
+- seed low-risk local implementation tasks after `implementationAutoSeedGate` passes;
 - update handoff wording;
 - mark provider, env/secret, staging/prod, deploy, payment, external-service, and Cost Calibration Gate work as blocked
   remainder.
@@ -219,6 +248,7 @@ Automation must not:
 - read or record secrets;
 - execute Cost Calibration Gate;
 - continue implementation across execution modules without a fresh Module Run plan and human approval.
+- execute a seeded implementation task when `implementationAutoSeedGate` fails.
 
 Module Run v2 automatic handoff should normally pair with a thread rollover decision. After closeout, the default
 decision is `require_new_thread` before entering the next execution module.

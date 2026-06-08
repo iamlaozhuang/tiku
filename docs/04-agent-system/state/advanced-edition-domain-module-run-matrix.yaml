@@ -5,6 +5,7 @@ upgradedByTask: advanced-edition-module-run-v2-mechanism-upgrade
 generatedAt: "2026-06-08T08:05:00-07:00"
 upgradedAt: "2026-06-08T08:33:09-07:00"
 localExperienceClosureAlignedAt: "2026-06-08T14:59:56-07:00"
+planningToImplementationAutodriveAlignedAt: "2026-06-08T15:16:06-07:00"
 purpose: >-
   Source-of-truth matrix for advancing advanced-edition work by Module Run v2: larger domain-level Batch combinations
   with local full-loop completion gates, stronger thread rollover rules, automation handoff, and hook integration
@@ -357,6 +358,56 @@ localExperienceClosureGate:
     When automation wakes with no current in-progress task, it must select or prepare a pending task that keeps
     `localExperienceClosureGate` in scope. If another run owns the lease or a thread has in-progress work, automation
     must stop with the existing-run decision instead of starting unrelated work.
+implementationAutoSeedGate:
+  purpose: >-
+    Let a completed Module Run v2 planning task seed and hand off executable low-risk local implementation tasks without
+    another manual restart, while preserving hard blocks for high-risk work.
+  machineDecisionScript: scripts/agent-system/Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1
+  approvalAnchor: autoDriveLocalImplementationApproval
+  localExperienceBridgeApprovalAnchor: localExperienceAcceptanceBridgeApproved
+  planningTaskMaySeedImplementationWhen:
+    - planning evidence records `implementationAutoSeedGate`.
+    - planning evidence names a target `localExperienceClosureGate` chain or explicit none-with-reason.
+    - every seeded implementation task has `taskKind: implementation`.
+    - every seeded implementation task records `autoDriveLocalImplementationApproval`.
+    - every seeded implementation task has allowed files, blocked files, risk types, validation commands, evidence path,
+      and audit review path.
+    - every seeded implementation task has focused tests and localFullLoopGate target.
+    - every seeded implementation task is small enough for an independent commit.
+  safeLocalImplementationSurfaces:
+    - src/server/models/**
+    - src/server/contracts/**
+    - src/server/validators/**
+    - src/server/services/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+  bridgeSurfacesRequireLocalExperienceAcceptanceBridge:
+    - src/server/repositories/**
+    - src/server/mappers/**
+    - src/app/api/v1/**
+    - src/app/(student)/**
+    - src/app/(admin)/**
+    - e2e/**
+  alwaysBlockedForAutoSeed:
+    - .env.local
+    - .env.example
+    - package.json
+    - pnpm-lock.yaml
+    - package-lock.yaml
+    - package-lock.json
+    - src/db/schema/**
+    - drizzle/**
+    - provider, env/secret, staging/prod/cloud/deploy, payment, or external-service work
+    - schema or migration work
+    - dependency or package work
+    - Cost Calibration Gate execution
+  automationRule: >-
+    After a planning task closes, automation may continue to the first pending seeded implementation task only if
+    `Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1` passes for the planning task and candidate task. Otherwise it
+    must stop and report the hard block.
 experienceClosureContribution:
   authorization-and-access: >-
     Foundation module for local user, organization, and role context. Future work should bridge L4 API or Server Action
@@ -434,6 +485,9 @@ automationHandoffPolicy:
   startupDecisionLabels:
     continue_current_task: scheduled automation may continue the current in-progress task
     prepare_next_task: scheduled automation may prepare the pending planning task only
+    prepare_seeded_implementation_task:
+      scheduled automation may prepare a pending implementation task only after
+      implementationAutoSeedGate passes
     closeout_recovery: scheduled automation may run closeout recovery before selecting the next task
     stop_existing_run_active: another human or automation run owns the lane
     stop_for_hard_block: startup gate found unsafe state
@@ -466,6 +520,7 @@ automationHandoffPolicy:
     - run automation startup readiness before unattended readiness or autopilot orchestration
     - detect that a Module Run appears complete from durable state
     - generate the next Module Run draft proposal
+    - seed low-risk local implementation tasks when implementationAutoSeedGate passes
     - update handoff proposal and blocked remainder wording
     - mark provider, env/secret, staging/prod, deploy, payment, or Cost Calibration Gate work as blocked remainder
   automationMustNot:
@@ -474,6 +529,7 @@ automationHandoffPolicy:
     - read or record secrets
     - execute Cost Calibration Gate
     - continue across execution modules without a new Module Run plan and human approval
+    - execute a seeded implementation task when implementationAutoSeedGate fails
 hookIntegrationMatrix:
   status: local_unattended_control_ready_after_dry_run_hardening
   implementationRequiresSeparateTaskApproval: true
@@ -568,6 +624,8 @@ terminologyAnchors:
   - threadRolloverGate
   - hookIntegrationMatrix
   - localExperienceClosureGate
+  - implementationAutoSeedGate
+  - autoDriveLocalImplementationApproval
   - unattendedStopDecision
   - threadRolloverDecision
   - threadLaunchDecision

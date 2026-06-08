@@ -36,6 +36,42 @@ phase65ExecutionBoundary:
   envSecretTaskPermitted: false
   paymentTaskPermitted: false
   costCalibrationGateExecutionPermitted: false
+moduleRunV2AutodriveBoundary:
+  status: active_after_planning_to_implementation_autodrive_hardening
+  directImplementationTaskCreationPermittedWhenGatePasses: true
+  productCodeExecutionPermittedWhenQueuedAndApproved: true
+  requiredGate: implementationAutoSeedGate
+  requiredApprovalAnchor: autoDriveLocalImplementationApproval
+  localExperienceBridgeApprovalAnchor: localExperienceAcceptanceBridgeApproved
+  permittedAutoSeedTaskKinds:
+    - implementation
+  safeLocalImplementationSurfaces:
+    - src/server/models/**
+    - src/server/contracts/**
+    - src/server/validators/**
+    - src/server/services/**
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+  bridgeSurfacesRequireAcceptancePlanning:
+    - src/server/repositories/**
+    - src/server/mappers/**
+    - src/app/api/v1/**
+    - src/app/(student)/**
+    - src/app/(admin)/**
+    - e2e/**
+  alwaysBlocked:
+    - dependency, package, or lockfile change
+    - schema or migration change
+    - provider/env/secret work
+    - staging/prod/cloud/deploy work
+    - payment or external-service work
+    - Cost Calibration Gate execution
+  note: >-
+    This boundary supersedes the Phase 65 planning-only seed limitation only for Module Run v2 planning tasks that pass
+    `Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1`. Historical Phase 65 entries remain unchanged.
 plannedSeedTasks:
   - id: phase-69-advanced-authorization-context-implementation-planning
     title: Advanced Edition Authorization Context Implementation Planning

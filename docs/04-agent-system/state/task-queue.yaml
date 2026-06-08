@@ -4193,10 +4193,12 @@ tasks:
       - module-run-v2-autopilot-maturity-hardening
     taskPlanPolicy: required
     humanApproval: >-
-      Seeded as a proposal-only next Module Run planning task by the approved autopilot maturity hardening work. This
-      does not approve implementation, provider calls, provider configuration, env/secret, staging/prod/cloud/deploy,
-      payment, external-service, dependency, schema, migration, product code, e2e work, or Cost Calibration Gate
-      execution.
+      Seeded as the next Module Run planning task by the approved autopilot maturity hardening work and upgraded by the
+      planning-to-implementation autodrive hardening. This planning task may seed low-risk local implementation tasks
+      only when `implementationAutoSeedGate` passes and every seeded task records
+      `autoDriveLocalImplementationApproval`. The planning task itself must not execute product implementation,
+      provider calls, provider configuration, env/secret, staging/prod/cloud/deploy, payment, external-service,
+      dependency, schema, migration, product e2e work, or Cost Calibration Gate execution.
     taskKind: implementation_planning
     moduleRunVersion: 2
     executionModule: ai-task-and-provider
@@ -4204,9 +4206,9 @@ tasks:
       - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
-      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
-      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
-      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
     blockedFiles:
       - .env.local
       - .env.example
@@ -4233,7 +4235,8 @@ tasks:
     validationCommands:
       - git diff --check
       - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
-      - Select-String -Path docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'ai-task-and-provider','nextModuleRunCandidate','localFullLoopGate','localExperienceClosureGate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId module-run-v2-ai-task-and-provider-planning
+      - Select-String -Path docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'ai-task-and-provider','nextModuleRunCandidate','localFullLoopGate','localExperienceClosureGate','implementationAutoSeedGate','autoDriveLocalImplementationApproval','Cost Calibration Gate remains blocked'
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
     status: pending
@@ -4347,4 +4350,70 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
     status: pending
+    retryCount: 0
+  - id: module-run-v2-planning-to-implementation-autodrive
+    title: Module Run v2 Planning To Implementation Autodrive
+    phase: module-run-v2-planning-to-implementation-autodrive
+    sourceStory: user-request-2026-06-08-planning-to-implementation-autodrive
+    dependencies:
+      - module-run-v2-local-experience-closure-alignment
+    taskPlanPolicy: required
+    humanApproval: >-
+      User explicitly requested strengthening the mechanism so Codex automation can move from successful planning into
+      safe local implementation without another manual restart. Scope is mechanism-only: scripts, smoke tests,
+      governance SOP/state, task queue, planning logs, evidence, and audit review. This authorizes defining a gated
+      low-risk local implementation auto-seed path, but does not itself start product implementation, provider/env/secret,
+      staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, product e2e implementation,
+      or Cost Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - implementation_autoseed
+      - local_experience_closure
+      - queue_planning
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-work -TaskId module-run-v2-planning-to-implementation-autodrive
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-planning-to-implementation-autodrive -PlannedFiles scripts/agent-system/Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1,scripts/agent-system/Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml,docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\advanced-edition-code-stage-seeding-plan.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-planning-to-implementation-autodrive.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-planning-to-implementation-autodrive.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-planning-to-implementation-autodrive.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\advanced-edition-code-stage-seeding-plan.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-planning-to-implementation-autodrive.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-planning-to-implementation-autodrive.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-planning-to-implementation-autodrive.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1,docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\state\advanced-edition-code-stage-seeding-plan.yaml,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-planning-to-implementation-autodrive.md,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'implementationAutoSeedGate','autoDriveLocalImplementationApproval','module-run-v2-ai-task-and-provider-planning','localExperienceClosureGate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-planning-to-implementation-autodrive
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md
+    status: in_progress
     retryCount: 0

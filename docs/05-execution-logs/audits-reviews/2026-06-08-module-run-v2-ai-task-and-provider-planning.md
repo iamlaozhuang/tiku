@@ -16,3 +16,5 @@ The seeded task is acceptable only as a planning task. It must not start busines
 - Confirm startup readiness and Git completion gates passed after merge/push.
 - Confirm `ai-task-and-provider` remains the best `nextModuleRunCandidate`.
 - Confirm every proposed Batch has allowed files, blocked files, localFullLoopGate target, focused validation, and stop conditions.
+- Confirm any seeded implementation task passes `implementationAutoSeedGate` and records
+  `autoDriveLocalImplementationApproval`.

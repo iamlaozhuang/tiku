@@ -19,6 +19,8 @@ Allowed:
 - Draft a proposal-only Module Run v2 plan with Batches, localFullLoopGate targets, allowed files, blocked files, and stop conditions.
 - Identify the target experience chain, acceptance bridge needs, and local mock or fixture path needed before any future
   local UI/browser or e2e-ready work can be approved.
+- If planning succeeds and `implementationAutoSeedGate` passes, seed low-risk local implementation tasks with
+  `autoDriveLocalImplementationApproval` so automation can continue without another manual restart.
 - Update project/task state only for planning status.
 
 Blocked:
@@ -29,6 +31,14 @@ Blocked:
 - Staging/prod/cloud/deploy, payment, external-service work.
 - Dependency, package, lockfile, schema, migration, `src/db/schema/**`, `drizzle/**`, and `e2e/**`.
 - Cost Calibration Gate execution.
+
+Auto-seed boundary:
+
+- May seed implementation tasks only after evidence records `implementationAutoSeedGate`.
+- Seeded implementation tasks must stay within approved local surfaces unless
+  `localExperienceAcceptanceBridgeApproved` is explicitly recorded.
+- Seeded implementation tasks must include focused tests, localFullLoopGate target, allowed files, blocked files, stop
+  conditions, evidence path, and audit review path.
 
 ## Planning Inputs
 
@@ -43,7 +53,8 @@ Blocked:
 - `git diff --check`
 - scoped prettier check for changed planning docs/state files
 - required anchor check for `ai-task-and-provider`, `nextModuleRunCandidate`, `localFullLoopGate`,
-  `localExperienceClosureGate`, and `Cost Calibration Gate remains blocked`
+  `localExperienceClosureGate`, `implementationAutoSeedGate`, `autoDriveLocalImplementationApproval`, and
+  `Cost Calibration Gate remains blocked`
 
 ## Stop Conditions
 
