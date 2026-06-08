@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: module-run-v2-autopilot-maturity-hardening
-updatedAt: "2026-06-08T14:16:27-07:00"
+updatedAt: "2026-06-08T14:31:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -45,7 +45,7 @@ automation:
     autoMerge: false
   unattendedControl:
     target: guarded local unattended loop with hard-stop decisions
-    currentStatus: autopilot_maturity_hardening_in_progress
+    currentStatus: autopilot_maturity_hardening_ready_after_local_validation
     stopDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     threadDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
     handoffGeneratorScriptPath: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
@@ -80,12 +80,12 @@ repository:
   lastKnownOriginMasterSha: c6fa4c977907fcdeb023af0b6140f2e57d84a165
 currentTask:
   id: module-run-v2-autopilot-maturity-hardening
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-autopilot-maturity-hardening-12345
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
   branch: codex/module-run-v2-autopilot-maturity-hardening
-  commitSha: null
+  commitSha: 4fab13ff
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -122,7 +122,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Autopilot maturity hardening is in progress: add lease, startup readiness, Codex automation state sync, next planning
-    task seed, and worktree hygiene before allowing unattended Module Run v2 continuation. Cost Calibration Gate remains
-    blocked.
+    Autopilot maturity hardening passed local validation. The next queued task is
+    `module-run-v2-ai-task-and-provider-planning`, which is proposal-only planning for `ai-task-and-provider`; do not
+    start implementation without a fresh Module Run v2 plan and explicit approval. Because this task covered five
+    Batches, start a new thread before entering the next execution module. Cost Calibration Gate remains blocked.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md

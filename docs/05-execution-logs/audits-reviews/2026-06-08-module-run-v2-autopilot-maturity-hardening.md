@@ -42,4 +42,4 @@
 
 ## Conclusion
 
-The five maturity hardening items are implemented. Remaining work is final lint/typecheck/format/diff/module-closeout/Git readiness validation, then closeout state update and merge/push cleanup if all gates pass. Cost Calibration Gate remains blocked.
+APPROVE: the five maturity hardening items are implemented and scoped to mechanism surfaces. Module closeout and Git completion readiness passed locally before closeout commit. No blocking findings remain in the implemented scope. Cost Calibration Gate remains blocked.
