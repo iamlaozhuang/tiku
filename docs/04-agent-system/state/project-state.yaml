@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: batch-97-authorization-reason-presentation-local-contract
-updatedAt: "2026-06-08T03:01:47-07:00"
+updatedAt: "2026-06-08T03:14:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -57,7 +57,7 @@ repository:
   lastKnownOriginMasterSha: 57c0d30e83b1af9cb9349d426cce338827238ba7
 currentTask:
   id: batch-97-authorization-reason-presentation-local-contract
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-batch-97-authorization-reason-presentation-local-contract
   planPath: docs/05-execution-logs/task-plans/2026-06-08-authorization-reason-presentation-local-contract-batch.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-presentation-local-contract-batch.md
@@ -99,9 +99,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 97 is in progress as a local-only authorization reason presentation contract module batch. It may transform
-    Batch 96 reason_summary_only data into local_presentation_only display contracts for authorization reason items,
-    paper/mock_exam context, and redacted redeem_code / audit_log / ai_call_log references. Do not execute dependency,
-    schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions,
-    authorization permission model changes, repository/API route/Server Action work, or Cost Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-authorization-access-reason-local-contract-batch.md
+    Batch 97 completed local validation for the authorization reason presentation local contract module batch. It
+    transforms Batch 96 reason_summary_only data into local_presentation_only display contracts for authorization
+    reason items, paper/mock_exam context, and redacted redeem_code / audit_log / ai_call_log references. Do not
+    execute dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service
+    actions, authorization permission model changes, repository/API route/Server Action work, or Cost Calibration Gate
+    execution.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-presentation-local-contract-batch.md
