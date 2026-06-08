@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-86-human-approval-checklist
-updatedAt: "2026-06-07T21:28:04-07:00"
+  currentPhase: phase-87-authorization-context-read-model-contract
+updatedAt: "2026-06-07T21:55:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: bf8073766057c88e6b13ea7c70b9d7a405ad2306
-  lastKnownOriginMasterSha: bf8073766057c88e6b13ea7c70b9d7a405ad2306
+  lastKnownMasterSha: c7ef5a110c2d5a2f37a5a3273cee724e277be8b6
+  lastKnownOriginMasterSha: c7ef5a110c2d5a2f37a5a3273cee724e277be8b6
 currentTask:
-  id: phase-86-human-approval-checklist
+  id: phase-87-authorization-context-read-model-contract
   status: done
-  sourceStory: user-request-2026-06-07-phase-86-human-approval-checklist
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-86-human-approval-checklist.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-86-human-approval-checklist.md
-  branch: codex/phase-86-human-approval-checklist
+  sourceStory: user-request-2026-06-07-phase-87-authorization-context-read-model-contract
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-87-authorization-context-read-model-contract.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-87-authorization-context-read-model-contract.md
+  branch: codex/phase-87-authorization-context-read-model-contract
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,10 +99,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 86 expands the Phase 85 implementation slice draft into a human approval checklist. This checklist is not
-    approval and does not approve product implementation or code-stage queue seeding. To proceed, the user must fill and
-    approve the checklist with exact allowed files, blocked files, validation commands, evidence redaction rules, and
-    high-risk exclusions. Do not execute dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy,
-    payment, external-service actions, authorization permission model changes, queue archive move/delete, code-stage
-    implementation, code-stage queue seeding, or Cost Calibration Gate execution without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-86-human-approval-checklist.md
+    Phase 87 implemented the approved narrow advanced authorization context read-model contract as local service-layer
+    pure logic only. After closeout, continue only with a fresh approved narrow task. Do not execute dependency, schema,
+    migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions, authorization
+    permission model changes, repository/API route/Server Action work, or Cost Calibration Gate execution.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-87-authorization-context-read-model-contract.md
