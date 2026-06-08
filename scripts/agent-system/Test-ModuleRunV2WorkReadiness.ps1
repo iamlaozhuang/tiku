@@ -45,6 +45,16 @@ function Write-Section {
     Write-Output "== $Title =="
 }
 
+function Add-Finding {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Message
+    )
+
+    $script:findings.Add($Message)
+    Write-Output $Message
+}
+
 function Get-TaskBlock {
     param(
         [Parameter(Mandatory = $true)]
@@ -151,6 +161,34 @@ function Get-CurrentTaskId {
     return ""
 }
 
+function Get-CurrentTaskScalar {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Lines,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Key
+    )
+
+    $insideCurrentTask = $false
+    foreach ($line in $Lines) {
+        if ($line -match "^currentTask:\s*$") {
+            $insideCurrentTask = $true
+            continue
+        }
+
+        if ($insideCurrentTask -and $line -match "^\S") {
+            break
+        }
+
+        if ($insideCurrentTask -and $line -match "^\s+$([regex]::Escape($Key)):\s*(.+)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
 function ConvertTo-NormalizedPath {
     param(
         [Parameter(Mandatory = $true)]
@@ -216,21 +254,22 @@ function Write-List {
     $Values | ForEach-Object { Write-Output "$Prefix $_" }
 }
 
+$findings = New-Object System.Collections.Generic.List[string]
+
 try {
     Write-Section -Title "Module Run v2 Work Readiness"
-    Write-Output "advisoryMode: $Mode"
+    Write-Output "workReadinessMode: hard_block"
+    Write-Output "checkMode: $Mode"
 
     foreach ($requiredPath in @($ProjectStatePath, $QueuePath, $MatrixPath)) {
         if (-not (Test-Path -LiteralPath $requiredPath)) {
-            Write-Output "ADVISORY_ERROR missing file: $requiredPath"
-            exit 0
+            throw "Missing required file: $requiredPath"
         }
     }
 
     $insideWorkTree = (& git rev-parse --is-inside-work-tree) -join ""
     if ($LASTEXITCODE -ne 0 -or $insideWorkTree.Trim() -ne "true") {
-        Write-Output "ADVISORY_ERROR not inside a Git worktree"
-        exit 0
+        throw "Module Run v2 work readiness must run inside a Git worktree."
     }
 
     $projectStateLines = @(Get-Content -Path $ProjectStatePath)
@@ -238,7 +277,7 @@ try {
     $matrixContent = Get-Content -Path $MatrixPath -Raw
 
     if ([string]::IsNullOrWhiteSpace($TaskId)) {
-        $TaskId = Get-CurrentTaskId -Lines $projectStateLines
+        Add-Finding "HARD_BLOCK_MISSING_TASK_ID"
     }
 
     Write-Output "taskId: $TaskId"
@@ -253,27 +292,66 @@ try {
     Write-Output "branch: $currentBranch"
     Write-Output "head: $headSha"
     if ($currentBranch -eq "master" -or $currentBranch -eq "main") {
-        Write-Output "ADVISORY_PROTECTED_BRANCH $currentBranch"
+        Add-Finding "HARD_BLOCK_PROTECTED_BRANCH $currentBranch"
     }
 
     $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
     if ($taskBlock.Count -eq 0) {
-        Write-Output "ADVISORY_ERROR task not found in queue: $TaskId"
-        exit 0
+        Add-Finding "HARD_BLOCK_TASK_NOT_FOUND $TaskId"
     }
 
     $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
     $taskKind = Get-ScalarValue -Block $taskBlock -Key "taskKind"
     $evidencePath = Get-ScalarValue -Block $taskBlock -Key "evidencePath"
+    $auditReviewPath = Get-ScalarValue -Block $taskBlock -Key "auditReviewPath"
     $allowedFiles = @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
     $blockedFiles = @(Get-ListValues -Block $taskBlock -Key "blockedFiles")
     $riskTypes = @(Get-ListValues -Block $taskBlock -Key "riskTypes")
     $validationCommands = @(Get-ListValues -Block $taskBlock -Key "validationCommands")
+    $currentTaskId = Get-CurrentTaskId -Lines $projectStateLines
+    $planPath = ""
+    if ($TaskId -eq $currentTaskId) {
+        $planPath = Get-CurrentTaskScalar -Lines $projectStateLines -Key "planPath"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($planPath)) {
+        foreach ($allowedFile in $allowedFiles) {
+            $normalizedAllowedFile = ConvertTo-NormalizedPath -Path $allowedFile
+            if ($normalizedAllowedFile -like "docs/05-execution-logs/task-plans/*.md" -and $normalizedAllowedFile -like "*$TaskId*") {
+                $planPath = $allowedFile
+                break
+            }
+        }
+    }
 
     Write-Section -Title "Task"
     Write-Output "status: $taskStatus"
     Write-Output "taskKind: $taskKind"
+    Write-Output "planPath: $planPath"
     Write-Output "evidencePath: $evidencePath"
+    Write-Output "auditReviewPath: $auditReviewPath"
+
+    if ($taskStatus -in @("done", "closed", "pushed")) {
+        Add-Finding "HARD_BLOCK_INACTIVE_TASK $TaskId status=$taskStatus"
+    }
+
+    if ($taskStatus -notin @("pending", "in_progress")) {
+        Add-Finding "HARD_BLOCK_UNSUPPORTED_TASK_STATUS $TaskId status=$taskStatus"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($planPath)) {
+        Add-Finding "HARD_BLOCK_MISSING_TASK_PLAN_PATH $TaskId"
+    } elseif (-not (Test-Path -LiteralPath $planPath)) {
+        Add-Finding "HARD_BLOCK_MISSING_TASK_PLAN_FILE $planPath"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($evidencePath)) {
+        Add-Finding "HARD_BLOCK_MISSING_EVIDENCE_PATH $TaskId"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($auditReviewPath)) {
+        Add-Finding "HARD_BLOCK_MISSING_AUDIT_PATH $TaskId"
+    }
 
     Write-Section -Title "Allowed Files"
     Write-List -Prefix "allowed:" -Values $allowedFiles
@@ -311,30 +389,35 @@ try {
     if ($Mode -eq "pre-edit") {
         Write-Section -Title "Pre-Edit Planned Files"
         if ($PlannedFiles.Count -eq 0) {
-            Write-Output "plannedFiles: none"
+            Add-Finding "HARD_BLOCK_MISSING_PLANNED_FILES"
         }
 
         foreach ($plannedFile in $PlannedFiles) {
             $blockedPattern = Get-MatchingPattern -Path $plannedFile -Patterns $blockedFiles
             if (-not [string]::IsNullOrWhiteSpace($blockedPattern)) {
-                Write-Output "ADVISORY_BLOCKED_FILE $plannedFile matches $blockedPattern"
+                Add-Finding "HARD_BLOCK_PLANNED_BLOCKED_FILE $plannedFile matches $blockedPattern"
                 continue
             }
 
             $allowedPattern = Get-MatchingPattern -Path $plannedFile -Patterns $allowedFiles
             if (-not [string]::IsNullOrWhiteSpace($allowedPattern)) {
-                Write-Output "ADVISORY_ALLOWED_FILE $plannedFile matches $allowedPattern"
+                Write-Output "OK_PLANNED_ALLOWED_FILE $plannedFile matches $allowedPattern"
                 continue
             }
 
-            Write-Output "ADVISORY_OUT_OF_SCOPE $plannedFile"
+            Add-Finding "HARD_BLOCK_PLANNED_OUT_OF_SCOPE $plannedFile"
         }
     }
 
     Write-Section -Title "Result"
-    Write-Output "advisory result: report_only"
+    if ($findings.Count -gt 0) {
+        Write-Output "work readiness failed with $($findings.Count) finding(s)"
+        exit 1
+    }
+
+    Write-Output "work readiness passed"
     exit 0
 } catch {
-    Write-Output "ADVISORY_ERROR $($_.Exception.Message)"
-    exit 0
+    Write-Output "HARD_BLOCK_ERROR $($_.Exception.Message)"
+    exit 1
 }

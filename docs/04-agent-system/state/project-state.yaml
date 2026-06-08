@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: module-run-v2-mechanism-completion
-updatedAt: "2026-06-08T11:30:00-07:00"
+updatedAt: "2026-06-08T11:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -56,11 +56,11 @@ repository:
   lastKnownMasterSha: 1ab334a71acbc1124f5fed8c23d37d149b7a7a57
   lastKnownOriginMasterSha: 1ab334a71acbc1124f5fed8c23d37d149b7a7a57
 currentTask:
-  id: module-run-v2-mechanism-state-source-sync
+  id: module-run-v2-start-gate-hardening
   status: in_progress
   sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-state-source-sync.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-start-gate-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-start-gate-hardening.md
   branch: codex/module-run-v2-mechanism-completion
   commitSha: null
   prUrl: null
