@@ -99,6 +99,15 @@ Choose validation commands by changed surface:
 
 If a command is unavailable, evidence must record the reason and residual risk.
 
+For docs-only governance, closeout, evidence, audit review, task plan, task queue, and project state changes, apply this formatting order:
+
+1. Write final local validation level, blocked environment work, and residual gap wording.
+2. Run scoped `prettier --write` on the changed docs/state files.
+3. Run scoped `prettier --check` on the same file list.
+4. Run `git diff --check` and required-section or anchor searches.
+
+This order is required before claiming docs-only validation passed. Cost Calibration Gate remains blocked unless separately approved.
+
 ## Local Role Flow Matrix
 
 Use the smallest relevant matrix for each task:

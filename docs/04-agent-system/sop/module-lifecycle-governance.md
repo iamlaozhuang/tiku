@@ -122,6 +122,16 @@ Module closeout must include a document freshness pass:
 - archive or slimming recommendations are recorded as recommendations unless file moves or deletions are separately approved;
 - handoff points to the latest evidence.
 
+Module batch closeout must also apply the Evidence Formatting Finalization Rule:
+
+1. Write final rollup evidence and audit review validation results.
+2. Run scoped `prettier --write` on the changed docs/state files for the batch.
+3. Run scoped `prettier --check` on the same file list.
+4. Run required anchor checks, `git diff --check`, and Git readiness checks.
+5. Commit only after the formatting finalization and confirmation checks pass.
+
+This keeps module batch closeout deterministic after evidence rows move from draft or pending wording to final pass wording.
+
 ## Module Switching
 
 Before switching modules:

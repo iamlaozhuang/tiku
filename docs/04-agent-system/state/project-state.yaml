@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-95-authorization-display-local-contract
-updatedAt: "2026-06-08T01:21:28-07:00"
+  currentPhase: evidence-format-finalization-governance
+updatedAt: "2026-06-08T01:31:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: eff453de343d739dcd118393812f244c55776ae7
-  lastKnownOriginMasterSha: eff453de343d739dcd118393812f244c55776ae7
+  lastKnownMasterSha: 53947f49aba3f606ab9a74c3c13dc8d63de48c38
+  lastKnownOriginMasterSha: 53947f49aba3f606ab9a74c3c13dc8d63de48c38
 currentTask:
-  id: batch-95-authorization-display-local-contract
+  id: evidence-format-finalization-governance
   status: done
-  sourceStory: user-request-2026-06-08-batch-94-state-reconciliation-and-batch-95-continuation
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-authorization-display-local-contract-batch.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-display-local-contract-batch.md
-  branch: codex/batch-95-authorization-display-local-contract
+  sourceStory: user-request-2026-06-08-format-blocker-resolution
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-evidence-format-finalization-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-evidence-format-finalization-governance.md
+  branch: codex/evidence-format-finalization-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,9 +99,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 95 is implementing the authorization display local contract module batch as service-layer pure logic only.
-    It may summarize local display metadata for authorization windows, audiences, redacted evidence references, and
-    aggregate display contracts. Do not execute dependency, schema, migration, provider, env/secret,
+    The recurring docs/state formatting blocker has a governance fix: after final evidence, audit review, task plan,
+    task queue, or project state wording is written, run scoped prettier --write before scoped prettier --check, then
+    run git diff --check and required anchors. Batch 95 is complete at
+    53947f49aba3f606ab9a74c3c13dc8d63de48c38. Do not execute dependency, schema, migration, provider, env/secret,
     staging/prod/cloud/deploy, payment, external-service actions, authorization permission model changes,
     repository/API route/Server Action work, or Cost Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-authorization-display-local-contract-batch.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-evidence-format-finalization-governance.md
