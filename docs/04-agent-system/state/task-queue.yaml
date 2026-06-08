@@ -1885,3 +1885,56 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-87-authorization-context-read-model-contract.md
     status: done
     retryCount: 0
+  - id: phase-88-ai-task-domain-local-contract
+    title: Phase 88 AI Task Domain Local Contract
+    phase: phase-88-ai-task-domain-local-contract
+    sourceStory: user-request-2026-06-07-batch-1-phase-88-90
+    dependencies:
+      - phase-87-authorization-context-read-model-contract
+    taskPlanPolicy: required
+    humanApproval: User approved Batch 1 small-batch code advancement for Phase 88-90. Phase 88 is limited to src/server/models/**, contracts/**, validators/**, services/**, corresponding *.test.ts, task plan, evidence, audit review, project-state.yaml, and task-queue.yaml. Dependency, package/lockfile, schema, migration, src/db/schema/**, drizzle/**, scripts/**, e2e/**, repository, API route, Server Action, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, authorization permission model change, and Cost Calibration Gate execution remain blocked.
+    taskKind: implementation
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-88-ai-task-domain-local-contract.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-88-ai-task-domain-local-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-88-ai-task-domain-local-contract.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+    riskTypes:
+      - implementation
+      - ai_call_log
+      - audit_log
+      - authorization_permission
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- src/server/services/ai-task-domain-service.test.ts src/server/validators/ai-task-domain.test.ts
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check src\server\models\ai-task-domain.ts src\server\contracts\ai-task-domain-contract.ts src\server\validators\ai-task-domain.ts src\server\validators\ai-task-domain.test.ts src\server\services\ai-task-domain-service.ts src\server\services\ai-task-domain-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-88-ai-task-domain-local-contract.md docs\05-execution-logs\evidence\2026-06-07-phase-88-ai-task-domain-local-contract.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-88-ai-task-domain-local-contract.md
+      - Select-String -Path src\server\models\ai-task-domain.ts,src\server\contracts\ai-task-domain-contract.ts,src\server\validators\ai-task-domain.ts,src\server\services\ai-task-domain-service.ts,src\server\services\ai-task-domain-service.test.ts,src\server\validators\ai-task-domain.test.ts,docs\05-execution-logs\task-plans\2026-06-07-phase-88-ai-task-domain-local-contract.md,docs\05-execution-logs\evidence\2026-06-07-phase-88-ai-task-domain-local-contract.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-88-ai-task-domain-local-contract.md -Pattern 'authorization','question','paper','mock_exam','audit_log','ai_call_log','redacted','local_contract_only','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-88-ai-task-domain-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-88-ai-task-domain-local-contract.md
+    status: done
+    retryCount: 0
