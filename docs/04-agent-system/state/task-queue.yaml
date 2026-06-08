@@ -3729,7 +3729,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-commit-advisory.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-commit-advisory.md
-    status: in_progress
+    status: done
     retryCount: 0
   - id: module-run-v2-automation-readiness-scorecard-refresh
     title: Module Run v2 Automation Readiness Scorecard Refresh
@@ -3772,7 +3772,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
-    status: pending
+    status: in_progress
     retryCount: 0
   - id: module-run-v2-evidence-redaction-scan-hardening
     title: Module Run v2 Evidence Redaction Scan Hardening
