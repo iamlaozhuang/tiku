@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-90-audit-ai-call-log-redacted-reference
-updatedAt: "2026-06-07T22:32:59-07:00"
+  currentPhase: phase-91-redeem-code-redacted-reference
+updatedAt: "2026-06-08T00:57:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 5a2103ee0733cb0acb6ef4e3668da054b5835ccb
-  lastKnownOriginMasterSha: 5a2103ee0733cb0acb6ef4e3668da054b5835ccb
+  lastKnownMasterSha: bdad32deeaa6fbd9be88f3264b57964486b2378a
+  lastKnownOriginMasterSha: bdad32deeaa6fbd9be88f3264b57964486b2378a
 currentTask:
-  id: phase-90-audit-ai-call-log-redacted-reference
+  id: phase-91-redeem-code-redacted-reference
   status: done
-  sourceStory: user-request-2026-06-07-batch-1-phase-88-90
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-90-audit-ai-call-log-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-90-audit-ai-call-log-redacted-reference.md
-  branch: codex/phase-90-audit-ai-call-log-redacted-reference
+  sourceStory: user-request-2026-06-08-batch-2
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-phase-91-redeem-code-redacted-reference.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-phase-91-redeem-code-redacted-reference.md
+  branch: codex/phase-91-redeem-code-redacted-reference
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,8 +99,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 90 implemented the approved Batch 1 audit_log/ai_call_log redacted reference contract as service-layer pure logic only.
-    Batch 1 Phase 88-90 is complete after Phase 90 validation, commit, merge, push, and branch cleanup. Do not execute dependency,
+    Phase 91 implemented the Batch 2 redeem_code redacted reference contract as service-layer pure logic only. Continue
+    to Phase 92 only after Phase 91 validation, commit, merge, push, and branch cleanup. Do not execute dependency,
     schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions,
     authorization permission model changes, repository/API route/Server Action work, or Cost Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-90-audit-ai-call-log-redacted-reference.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-phase-91-redeem-code-redacted-reference.md
