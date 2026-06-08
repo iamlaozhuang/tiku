@@ -3331,3 +3331,67 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
     status: done
     retryCount: 0
+  - id: module-run-v2-hook-automation-hardening-sequence
+    title: Module Run v2 Hook Automation Hardening Sequence
+    phase: module-run-v2-hook-automation-hardening-sequence
+    sourceStory: user-request-2026-06-08-module-run-v2-hook-automation-hardening-sequence
+    dependencies:
+      - module-run-v2-pre-commit-scan-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved the recommended sequence: first pilot the current pre-commit hardening in a normal Module Run v2
+      queued task, then add a pre-push hard-block wrapper, then add a module-closeout hard-block wrapper, and finally
+      commit, fast-forward merge into master, push, and clean the short-lived branch. Scope must not include product
+      code, package/lockfile, dependencies, schema, migration, src/db/schema/**, drizzle/**, .env.local, .env.example,
+      tests/e2e, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate
+      execution.
+    taskKind: implementation
+    allowedFiles:
+      - .husky/pre-push
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - hook_governance
+      - pre_push_hard_block
+      - module_closeout
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-hook-automation-hardening-sequence
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-hook-automation-hardening-sequence
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-hook-automation-hardening-sequence
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+      - Select-String -Path .husky\pre-push,scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1,scripts\agent-system\Test-ModuleRunV2PrePushReadiness.Smoke.ps1,scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1,scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-hook-automation-hardening-sequence.md -Pattern 'Module Run v2','pre-push','module-closeout','threadRolloverGate','nextModuleRunCandidate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+    status: done
+    retryCount: 0
