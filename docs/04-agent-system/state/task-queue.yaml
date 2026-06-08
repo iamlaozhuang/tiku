@@ -1547,3 +1547,135 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-80-post-closeout-state-reconciliation.md
     status: done
     retryCount: 0
+  - id: phase-81-next-docs-only-batch-planning
+    title: Phase 81 Next Docs Only Batch Planning
+    phase: phase-81-next-docs-only-batch-planning
+    sourceStory: user-request-2026-06-07-phase-81-83-docs-state-review-evidence-serial-batch
+    dependencies:
+      - phase-80-post-closeout-state-reconciliation
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved serial execution of Phase 81, Phase 82, and Phase 83 under the mechanism. Scope is docs/state/review/evidence only; no product code, dependency, schema, migration, package, lockfile, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, authorization permission model change, queue archive move/delete, code-stage implementation, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-81-next-docs-only-batch-planning.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-81-next-docs-only-batch-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-81-next-docs-only-batch-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - docs_only_batch
+      - governance_state
+      - evidence_integrity
+      - local_auto_candidate
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-81-next-docs-only-batch-planning.md docs\05-execution-logs\evidence\2026-06-07-phase-81-next-docs-only-batch-planning.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-81-next-docs-only-batch-planning.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-07-phase-81-next-docs-only-batch-planning.md,docs\05-execution-logs\evidence\2026-06-07-phase-81-next-docs-only-batch-planning.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-81-next-docs-only-batch-planning.md -Pattern 'Phase 82','Phase 83','docs/state/review/evidence','local_auto_candidate','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked','provider','env/secret','staging/prod','payment','external-service'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-81-next-docs-only-batch-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-81-next-docs-only-batch-planning.md
+    status: done
+    retryCount: 0
+  - id: phase-82-active-queue-slimming-readiness-audit
+    title: Phase 82 Active Queue Slimming Readiness Audit
+    phase: phase-82-active-queue-slimming-readiness-audit
+    sourceStory: user-request-2026-06-07-phase-81-83-docs-state-review-evidence-serial-batch
+    dependencies:
+      - phase-81-next-docs-only-batch-planning
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved serial docs/state/review/evidence progression through Phase 82. This task may audit active queue slimming readiness, but must not move, delete, archive, or rewrite historical queue entries without separate approval.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - docs/04-agent-system/state/archive/**
+      - docs/04-agent-system/state/task-history-index.yaml
+    riskTypes:
+      - task_queue_archival
+      - governance_state
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-82-active-queue-slimming-readiness-audit.md docs\05-execution-logs\evidence\2026-06-07-phase-82-active-queue-slimming-readiness-audit.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-07-phase-82-active-queue-slimming-readiness-audit.md,docs\05-execution-logs\evidence\2026-06-07-phase-82-active-queue-slimming-readiness-audit.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-82-active-queue-slimming-readiness-audit.md -Pattern 'Archive Eligibility','active queue','readiness audit','no archive move','local_auto_candidate','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+    status: pending
+    retryCount: 0
+  - id: phase-83-code-stage-approval-request-pack
+    title: Phase 83 Code Stage Approval Request Pack
+    phase: phase-83-code-stage-approval-request-pack
+    sourceStory: user-request-2026-06-07-phase-81-83-docs-state-review-evidence-serial-batch
+    dependencies:
+      - phase-82-active-queue-slimming-readiness-audit
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved serial docs/state/review/evidence progression through Phase 83. This task may prepare an approval request pack only; it must not approve or execute product implementation, schema, migration, dependency, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, authorization permission model change, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-83-code-stage-approval-request-pack.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-83-code-stage-approval-request-pack.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-83-code-stage-approval-request-pack.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - code_stage_approval
+      - schema_migration
+      - dependency
+      - authorization_permission
+      - provider_blocked
+      - env_secret_blocked
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-83-code-stage-approval-request-pack.md docs\05-execution-logs\evidence\2026-06-07-phase-83-code-stage-approval-request-pack.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-83-code-stage-approval-request-pack.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-07-phase-83-code-stage-approval-request-pack.md,docs\05-execution-logs\evidence\2026-06-07-phase-83-code-stage-approval-request-pack.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-83-code-stage-approval-request-pack.md -Pattern 'Approval Request Pack','fresh explicit approval','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','schema','migration','dependency','provider','env/secret','staging/prod','payment','external-service','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-83-code-stage-approval-request-pack.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-83-code-stage-approval-request-pack.md
+    status: pending
+    retryCount: 0
