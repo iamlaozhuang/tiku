@@ -25,8 +25,8 @@ Cost Calibration Gate remains blocked.
 ## Batch 2: Autopilot Dry-Run Recovery
 
 - Goal: prove routine autopilot dry-run can continue after post-push closeout ancestry reconciliation.
-- RED: pending.
-- GREEN: pending.
+- RED: autopilot dry-run previously stopped with `autopilotDecision: stop_for_hard_block` when state SHA lagged behind pushed HEAD.
+- GREEN: `Invoke-ModuleRunV2Autopilot.Smoke.ps1` passes with a post-push ancestor fixture and reaches `autopilotDecision: launch_new_thread`.
 - Commit: pending.
 - localFullLoopGate: L1 target.
 

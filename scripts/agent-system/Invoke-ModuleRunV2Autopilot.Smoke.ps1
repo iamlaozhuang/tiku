@@ -72,14 +72,13 @@ try {
     $taskId = "module-run-v2-autopilot-closeout-recovery-smoke"
     $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
-    $masterSha = ((& git rev-parse master) -join "").Trim()
-    $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+    $ancestorSha = ((& git rev-parse HEAD~1) -join "").Trim()
 
     @"
 schemaVersion: 1
 repository:
-  lastKnownMasterSha: $masterSha
-  lastKnownOriginMasterSha: $originMasterSha
+  lastKnownMasterSha: $ancestorSha
+  lastKnownOriginMasterSha: $ancestorSha
 currentTask:
   id: $taskId
 "@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
