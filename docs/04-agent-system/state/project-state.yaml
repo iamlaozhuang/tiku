@@ -57,7 +57,7 @@ repository:
   lastKnownOriginMasterSha: a6c7dc843889b2d19002e4bb29899fb81b0f60e1
 currentTask:
   id: module-run-v2-authorization-and-access-pilot
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-module-run-v2-authorization-and-access-pilot
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-authorization-and-access-pilot.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-authorization-and-access-pilot.md
@@ -99,6 +99,6 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Start the next business Module Run candidate `authorization-and-access` with a fresh recovery audit and use the
-    installed pre-work, pre-commit, pre-push, and module-closeout hardening stack as the first full pilot.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+    Start a new thread to evaluate the next Module Run candidate `ai-task-and-provider`; do not cross modules without a
+    fresh Module Run v2 plan and explicit user instruction. Cost Calibration Gate remains blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-authorization-and-access-pilot.md
