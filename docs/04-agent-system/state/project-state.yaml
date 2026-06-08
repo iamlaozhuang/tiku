@@ -1,7 +1,7 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-82-active-queue-slimming-readiness-audit
+  currentPhase: phase-83-code-stage-approval-request-pack
 updatedAt: "2026-06-07T20:31:08-07:00"
 architecture:
   status: complete
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 02399dcb5729a438421e096e508a1f7576d64092
-  lastKnownOriginMasterSha: 02399dcb5729a438421e096e508a1f7576d64092
+  lastKnownMasterSha: e07b08879ca58462ecae96700f25a8a7e94d4412
+  lastKnownOriginMasterSha: e07b08879ca58462ecae96700f25a8a7e94d4412
 currentTask:
-  id: phase-82-active-queue-slimming-readiness-audit
+  id: phase-83-code-stage-approval-request-pack
   status: done
   sourceStory: user-request-2026-06-07-phase-81-83-docs-state-review-evidence-serial-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
-  branch: codex/phase-82-active-queue-slimming-readiness-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-83-code-stage-approval-request-pack.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-83-code-stage-approval-request-pack.md
+  branch: codex/phase-83-code-stage-approval-request-pack
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,9 +99,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 82 confirms active queue archive readiness signals are present, but no archive move, queue entry delete,
-    task-history-index update, or archive file creation has occurred. Phase 83 code-stage approval request pack remains
-    the next pending docs/state/review/evidence task. Do not execute product implementation, dependency, schema, migration,
-    provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions, authorization permission model
-    changes, queue archive move/delete, code-stage implementation, or Cost Calibration Gate execution without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+    Phase 83 records the code-stage approval request pack. Stop before product code. Future work needs fresh explicit
+    approval for a narrow code-stage scope, or a separate queue archive execution approval if active queue slimming should
+    happen first. Do not execute product implementation, dependency, schema, migration, provider, env/secret,
+    staging/prod/cloud/deploy, payment, external-service actions, authorization permission model changes, queue archive
+    move/delete, code-stage implementation, or Cost Calibration Gate execution without fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-83-code-stage-approval-request-pack.md
