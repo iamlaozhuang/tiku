@@ -25,6 +25,9 @@ canonicalStateFiles:
   - id: advanced-edition-code-stage-seeding-plan
     path: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
     role: planned Phase 65 code-stage queue seeding boundary
+  - id: advanced-edition-domain-module-run-matrix
+    path: docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+    role: source-of-truth matrix for domain-level Module Run boundaries, batch grouping, validation, evidence, and stop conditions
 archiveIndexes:
   - id: task-queue-archive-2026-05
     path: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
@@ -110,6 +113,7 @@ recoveryReadOrder:
   - docs/04-agent-system/state/task-queue.yaml
   - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
   - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+  - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
   - latest task plan from project-state
   - latest evidence from project-state
   - latest audit review when present

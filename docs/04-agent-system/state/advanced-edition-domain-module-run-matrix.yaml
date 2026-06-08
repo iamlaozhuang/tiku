@@ -1,0 +1,310 @@
+schemaVersion: 1
+generatedByTask: advanced-edition-domain-module-run-matrix
+generatedAt: "2026-06-08T08:05:00-07:00"
+purpose: >-
+  Source-of-truth matrix for advancing advanced-edition work by domain-level Module Run instead of restarting full
+  governance for every small Batch.
+mode:
+  current: local_auto_candidate
+  moduleRunRhythmEnabledForFutureBatches: true
+  firstEligibleImplementationBatchNumber: 101
+  costCalibrationGateExecutionPermitted: false
+globalModuleRunPolicy:
+  definition:
+    domainModule: Business or governance domain boundary from the advanced-edition implementation planning set.
+    moduleRun: A time-boxed execution group for one domain module that may contain multiple narrow Batches.
+    batch: A reviewable implementation slice inside a Module Run with its own focused tests and commit set.
+    subtask: The smallest RED/GREEN focused-test and commit unit inside a Batch.
+  rhythm:
+    - Read context once per Module Run.
+    - Create one Module Run plan that lists candidate Batches and stop conditions.
+    - Keep each Batch narrow and independently reviewable.
+    - Keep RED/GREEN focused tests and commits at subtask level.
+    - Write short Batch evidence for each Batch and one Module Run rollup evidence at the end.
+  maxBatchCountPerModuleRun: 4
+  maxSubtaskCountPerBatch: 7
+  requiresNewHumanApprovalWhen:
+    - dependency or package or lockfile change is needed
+    - schema or migration change is needed
+    - repository or API route or Server Action work is needed
+    - provider, env/secret, staging/prod/cloud/deploy, payment, or external-service work is needed
+    - real authorization permission model, role, permission, quota, or entitlement behavior changes
+    - Cost Calibration Gate execution is requested
+    - evidence would expose secrets, tokens, database URLs, Authorization headers, provider payloads, raw prompts, raw answers, plaintext redeem_code, employee subjective answer text, full paper content, or raw generated AI content
+  defaultAllowedSurfaces:
+    - src/server/models/**
+    - src/server/contracts/**
+    - src/server/validators/**
+    - src/server/services/**
+    - corresponding focused *.test.ts
+    - docs/04-agent-system/state/project-state.yaml
+    - docs/04-agent-system/state/task-queue.yaml
+    - docs/05-execution-logs/task-plans/**
+    - docs/05-execution-logs/evidence/**
+    - docs/05-execution-logs/audits-reviews/**
+  defaultBlockedSurfaces:
+    - package.json
+    - pnpm-lock.yaml
+    - package-lock.yaml
+    - package-lock.json
+    - src/db/schema/**
+    - drizzle/**
+    - .env.local
+    - .env.example
+    - scripts/**
+    - e2e/**
+  defaultValidationProfile:
+    - npm.cmd run lint
+    - npm.cmd run typecheck
+    - focused unit tests for changed validators and services
+    - git diff --check
+    - scoped prettier --write
+    - scoped prettier --check
+    - required anchor check for the module terminology and blocked gate
+    - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+domainModules:
+  - module: authorization-context
+    sourcePlanningTask: phase-69-advanced-authorization-context-implementation-planning
+    currentProgress:
+      completedBatches:
+        - batch-94-authorization-read-model-local-contract
+        - batch-95-authorization-display-local-contract
+        - batch-96-authorization-access-reason-local-contract
+        - batch-97-authorization-reason-presentation-local-contract
+        - batch-98-authorization-reason-view-section-local-contract
+        - batch-99-authorization-reason-view-model-local-contract
+        - batch-100-authorization-reason-view-model-selector-local-contract
+      latestContractStatus: local_selector_only
+    contractLadder:
+      - local_read_model_only
+      - local_display_only
+      - reason_summary_only
+      - local_presentation_only
+      - local_view_section_only
+      - local_view_model_only
+      - local_selector_only
+      - module_rollup_only
+    allowedBatchSlices:
+      - module rollup selector summary consolidation
+      - local contract ergonomics and focused validator coverage
+      - cross-selector read-model consistency checks without permission enforcement
+    dataExposureRules:
+      - use public identifiers only
+      - do not expose self-incrementing id values
+      - paper and mock_exam are context only
+      - redeem_code, audit_log, and ai_call_log are redacted reference evidence only
+    stopConditions:
+      - real authorization permission model change
+      - new role, permission, quota, or entitlement rule
+      - repository, API route, Server Action, schema, migration, dependency, provider, env/secret, deploy, payment, or external-service work
+      - Cost Calibration Gate execution
+    validationProfile: authorization local contract focused tests plus default validation profile
+    evidenceStrategy: short evidence per Batch, then Module Run rollup summarizing all authorization-context local contracts
+  - module: ai-task-domain
+    sourcePlanningTask: phase-70-advanced-ai-task-domain-implementation-planning
+    dependsOnModules:
+      - authorization-context
+    contractLadder:
+      - local_task_intent_only
+      - local_task_lifecycle_only
+      - local_request_policy_only
+      - local_evidence_reference_only
+      - local_observability_contract_only
+      - module_rollup_only
+    allowedBatchSlices:
+      - provider-agnostic AI task request contracts
+      - local lifecycle state summaries for queued, running, succeeded, failed, and blocked states
+      - redacted ai_call_log and audit_log reference contracts
+      - validation helpers that do not call providers
+    dataExposureRules:
+      - no raw prompt text
+      - no raw model response
+      - no provider payload
+      - ai_call_log is redacted reference evidence only
+      - audit_log is redacted reference evidence only
+    stopConditions:
+      - real provider call
+      - provider package or SDK change
+      - provider credential, env/secret, quota, staging/prod, cloud, deploy, payment, or external-service work
+      - Cost Calibration Gate execution
+    validationProfile: provider-agnostic focused unit tests plus default validation profile
+    evidenceStrategy: record provider-blocked boundary in every Batch and roll up redaction coverage at Module Run closeout
+  - module: personal-ai-generation
+    sourcePlanningTask: phase-71-advanced-personal-ai-generation-implementation-planning
+    dependsOnModules:
+      - authorization-context
+      - ai-task-domain
+    contractLadder:
+      - local_generation_request_only
+      - local_authorization_context_snapshot_only
+      - local_paper_context_only
+      - local_mock_exam_context_only
+      - local_generation_result_reference_only
+      - module_rollup_only
+    allowedBatchSlices:
+      - personal generation request validation without AI invocation
+      - paper and mock_exam context selection contracts
+      - authorization-gated local request summaries without permission model changes
+      - redacted ai_call_log evidence reference contracts
+    dataExposureRules:
+      - paper and mock_exam context can be referenced by public id only
+      - no full paper content in evidence
+      - no raw generated AI content
+      - no raw prompt text
+      - ai_call_log is redacted reference evidence only
+    stopConditions:
+      - AI generation execution
+      - raw prompt or generated content persistence
+      - provider/env/secret/deploy/payment/external-service work
+      - authorization permission model change
+      - schema, migration, dependency, repository, API route, or Server Action work
+      - Cost Calibration Gate execution
+    validationProfile: local request and redaction focused unit tests plus default validation profile
+    evidenceStrategy: keep evidence metadata-only and roll up personal flow boundaries before any provider-enabled task
+  - module: organization-training
+    sourcePlanningTask: phase-72-advanced-organization-training-implementation-planning
+    dependsOnModules:
+      - authorization-context
+      - ai-task-domain
+    contractLadder:
+      - local_training_scope_only
+      - local_training_draft_only
+      - local_publish_decision_only
+      - local_takedown_decision_only
+      - local_copy_contract_only
+      - local_employee_answer_lifecycle_only
+      - module_rollup_only
+    allowedBatchSlices:
+      - organization training draft and publish local contracts
+      - employee answer lifecycle local summaries
+      - takedown and copy decision contracts
+      - audit_log redacted reference contracts
+    dataExposureRules:
+      - organization and employee references use public identifiers only
+      - paper and mock_exam are context only
+      - employee subjective answer text must not appear in evidence
+      - audit_log is redacted reference evidence only
+    stopConditions:
+      - schema, migration, repository, API route, Server Action, dependency, provider, env/secret, deploy, payment, or external-service work
+      - real authorization permission model change
+      - raw employee answer text in evidence
+      - Cost Calibration Gate execution
+    validationProfile: organization training local contract focused tests plus default validation profile
+    evidenceStrategy: one short Batch evidence per lifecycle slice and a Module Run rollup for organization training boundaries
+  - module: organization-analytics
+    sourcePlanningTask: phase-73-advanced-organization-analytics-implementation-planning
+    dependsOnModules:
+      - organization-training
+    contractLadder:
+      - local_metric_scope_only
+      - local_aggregate_summary_only
+      - local_privacy_boundary_only
+      - local_export_readiness_only
+      - module_rollup_only
+    allowedBatchSlices:
+      - organization admin summary metric contracts
+      - privacy-preserving aggregate read models
+      - export readiness contracts without file generation or storage
+      - audit_log redacted reference contracts
+    dataExposureRules:
+      - aggregate outputs only unless a later approved task permits detail views
+      - no employee subjective answer text
+      - no raw answer payload
+      - audit_log is redacted reference evidence only
+    stopConditions:
+      - database aggregation query or repository work
+      - file export generation or object storage work
+      - schema, migration, dependency, provider, env/secret, deploy, payment, or external-service work
+      - Cost Calibration Gate execution
+    validationProfile: aggregate contract focused unit tests plus default validation profile
+    evidenceStrategy: prove aggregate-only and privacy boundary assertions in every Batch evidence
+  - module: ops-authorization-quota
+    sourcePlanningTask: phase-74-advanced-ops-auth-quota-implementation-planning
+    dependsOnModules:
+      - authorization-context
+      - ai-task-domain
+    contractLadder:
+      - local_ops_authorization_summary_only
+      - local_redeem_code_reference_only
+      - local_quota_ledger_contract_only
+      - local_redacted_governance_only
+      - module_rollup_only
+    allowedBatchSlices:
+      - operations-facing authorization summary contracts
+      - redeem_code redacted reference contracts
+      - quota ledger shape proposals without enforcement
+      - audit_log and ai_call_log redacted governance summaries
+    dataExposureRules:
+      - redeem_code is redacted reference evidence only
+      - audit_log and ai_call_log are redacted reference evidence only
+      - no plaintext redeem_code
+      - no quota enforcement behavior without separate approval
+    stopConditions:
+      - new quota rule or enforcement behavior
+      - real authorization permission model change
+      - plaintext redeem_code exposure
+      - schema, migration, dependency, repository, API route, Server Action, provider, env/secret, deploy, payment, or external-service work
+      - Cost Calibration Gate execution
+    validationProfile: ops authorization and redaction focused unit tests plus default validation profile
+    evidenceStrategy: keep quota work as contract-only until a separately approved implementation task exists
+  - module: retention-log-governance
+    sourcePlanningTask: phase-75-advanced-retention-log-governance-implementation-planning
+    dependsOnModules:
+      - ai-task-domain
+      - personal-ai-generation
+      - organization-training
+      - ops-authorization-quota
+    contractLadder:
+      - local_retention_policy_summary_only
+      - local_expired_hidden_contract_only
+      - local_recovery_boundary_only
+      - local_audit_log_reference_only
+      - local_ai_call_log_reference_only
+      - module_rollup_only
+    allowedBatchSlices:
+      - retention policy summary contracts
+      - expired_hidden and recovery boundary contracts
+      - audit_log redacted reference contracts
+      - ai_call_log redacted reference contracts
+      - evidence redaction assertion helpers
+    dataExposureRules:
+      - audit_log and ai_call_log are redacted reference evidence only
+      - no raw provider payload
+      - no raw prompts
+      - no raw answers
+      - no secrets, tokens, database URLs, or Authorization headers
+    stopConditions:
+      - destructive data operation
+      - actual retention deletion, recovery, or purge execution
+      - provider/env/secret/deploy/payment/external-service work
+      - schema, migration, dependency, repository, API route, or Server Action work
+      - Cost Calibration Gate execution
+    validationProfile: redaction and retention contract focused unit tests plus default validation profile
+    evidenceStrategy: every Batch evidence must include explicit redaction assertions and blocked gate status
+crossCuttingReviews:
+  schemaDependencyBlocker:
+    sourcePlanningTask: phase-76-advanced-code-stage-schema-dependency-blocker-review
+    role: Required blocker register before any Module Run asks to leave local contracts for schema, migration, dependency, package, or lockfile work.
+  securityRedactionReview:
+    sourcePlanningTask: phase-77-advanced-code-stage-security-redaction-review-plan
+    role: Required review input for Module Runs touching authorization, redeem_code, audit_log, ai_call_log, or evidence redaction.
+  localValidationPlanning:
+    sourcePlanningTask: phase-78-advanced-code-stage-local-validation-planning
+    role: Required validation profile input when Module Runs expand from pure local contracts into integrated local flows.
+futureBatchPolicy:
+  batch101AndLater:
+    defaultStartStep: Create or update a Module Run plan using this matrix before selecting concrete Batch slices.
+    noDocsOnlyApprovalPhaseByDefault: true
+    batchCommitsRemainRequired: true
+    moduleRunRollupRequired: true
+    pushRequiresExplicitApproval: true
+terminologyAnchors:
+  - Module Run
+  - authorization
+  - paper
+  - mock_exam
+  - redeem_code
+  - audit_log
+  - ai_call_log
+  - local_auto_candidate
+  - Cost Calibration Gate remains blocked

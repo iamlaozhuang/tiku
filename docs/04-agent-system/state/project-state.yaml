@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-100-authorization-reason-view-model-selector-local-contract
-updatedAt: "2026-06-08T07:43:00-07:00"
+  currentPhase: advanced-edition-domain-module-run-matrix
+updatedAt: "2026-06-08T08:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -56,13 +56,13 @@ repository:
   lastKnownMasterSha: 67665c986f50bcbf30553dffc1a7f71cd2d9bca8
   lastKnownOriginMasterSha: 67665c986f50bcbf30553dffc1a7f71cd2d9bca8
 currentTask:
-  id: batch-100-authorization-reason-view-model-selector-local-contract
+  id: advanced-edition-domain-module-run-matrix
   status: done
-  sourceStory: user-request-2026-06-08-batch-100-authorization-reason-view-model-selector-local-contract
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-authorization-reason-view-model-selector-local-contract-batch.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-view-model-selector-local-contract-batch.md
-  branch: codex/batch-100-authorization-reason-view-model-selector-local-contract
-  commitSha: 67665c986f50bcbf30553dffc1a7f71cd2d9bca8
+  sourceStory: user-request-2026-06-08-advanced-edition-domain-module-run-matrix
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-advanced-edition-domain-module-run-matrix.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-domain-module-run-matrix.md
+  branch: codex/advanced-domain-module-run-matrix
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -99,8 +99,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 100 local-only authorization reason view-model selector contract implementation has been merged to master,
-    pushed to origin/master, validated locally on master, and the short-lived batch branch has been cleaned up. The next
-    module batch can be proposed from the current advanced-edition authorization local contract queue. Cost Calibration
-    Gate remains blocked and must not be executed.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-view-model-selector-local-contract-master-validation.md
+    Advanced edition domain Module Run matrix is defined as a docs-only governance source of truth. Batch 101 and later
+    work should select a domain module, create or update a Module Run plan from the matrix, then batch implementation
+    slices under that Module Run instead of restarting full governance for every small Batch. Cost Calibration Gate
+    remains blocked and must not be executed.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-domain-module-run-matrix.md
