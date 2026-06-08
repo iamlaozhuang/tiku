@@ -52,6 +52,34 @@ Automatic claiming may only select a task when all conditions are true:
 
 If no eligible task exists, the automation loop stops and records the next recommended action as `no_executable_pending_task`.
 
+## Unattended Local Control Point
+
+Before a Codex unattended automation loop claims work, continues after an interruption, or starts the next local step, it
+must run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 -TaskId <task-id>
+```
+
+The script is the local stop-decision surface for unattended execution. A passing result must include:
+
+```text
+unattendedStopDecision: continue
+```
+
+A failing result must include:
+
+```text
+unattendedStopDecision: stop_for_hard_block
+```
+
+The loop must stop on non-zero exit and hand off to the user instead of trying to broaden scope. The script hard-blocks
+protected-branch edits, remote divergence, stale repository SHA recovery points, missing evidence or audit paths,
+blocked risk gates, and changed files outside `allowedFiles` or inside `blockedFiles`.
+
+This control point does not approve remote scheduling, thread creation, PR creation, push, provider, env/secret,
+staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, or Cost Calibration Gate execution.
+
 ## Task Kind Boundary Matrix
 
 | taskKind             | May auto-advance with docs-only approval | Requires separate approval before execution |
@@ -186,6 +214,9 @@ On interruption or a new session:
 3. Prefer durable state over chat memory.
 4. If a commit, merge, push, or cleanup was partially completed, reconcile Git reality before new work.
 5. If the same blocker recurs three times for one task, mark the task blocked and stop.
+
+For Module Run v2 unattended continuation, run the unattended readiness script after the recovery read and before any
+edit. If it returns `stop_for_hard_block`, stop even when the next local action looks obvious from chat context.
 
 ## Stop Conditions
 

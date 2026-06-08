@@ -31,6 +31,25 @@ Use these labels in handoff or evidence:
 
 Do not treat `suggest_new_thread` as permission to create or use a new thread.
 
+## Machine Decision Gate
+
+For Module Run v2 unattended control, use this local script before continuing a multi-Batch run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ThreadRolloverReadiness.ps1 -CompletedBatchCount <count>
+```
+
+The script emits one of the decision labels:
+
+- `continue_current_thread`: exit code `0`; current thread may continue when the task scope is still valid.
+- `suggest_new_thread`: exit code `0`; current thread may continue only after recording the suggestion and handoff
+  sources.
+- `require_new_thread`: non-zero exit; unattended execution must stop before the next implementation or module step.
+- `stop_for_human_handoff`: non-zero exit; state, approval, Git, or blocked-gate ambiguity requires user decision.
+
+When a non-zero decision is returned, do not treat it as a failed task implementation. Treat it as a controlled stop that
+protects context quality and approval boundaries.
+
 ## Continue Current Thread Criteria
 
 Continue in the current thread when all are true:
@@ -85,6 +104,9 @@ For Module Run v2, also require a new thread when:
 - the next work switches into schema, dependency, provider, env/secret, deploy, payment, external-service, or security
   review boundary;
 - context compaction occurred and durable state has not yet been reread.
+
+The machine gate implements these defaults. Continuing after Batch 6 is allowed only when the user explicitly requests
+continuation and a recovery audit has passed.
 
 ## Rollover Preparation Gate
 

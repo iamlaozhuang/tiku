@@ -290,6 +290,7 @@ localProviderSandboxGate:
     and is not approval for staging, prod, provider configuration, or secret handling.
 threadRolloverGate:
   purpose: Keep larger Module Run v2 batches from overloading a single thread.
+  machineDecisionScript: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
   thresholds:
     batches0To3: continue_current_thread by default when Git, evidence, and scope are clear
     afterBatch4: suggest_new_thread or generate a handoff before continuing
@@ -308,6 +309,10 @@ threadRolloverGate:
     - validation status
     - next recommended module
 automationHandoffPolicy:
+  unattendedStopDecisionScript: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+  unattendedDecisionLabels:
+    continue: proceed with the approved local task scope
+    stop_for_hard_block: stop and hand off before retrying or broadening scope
   nextModuleRunCandidate:
     trigger: Module Run closeout evidence is written and validation passes.
     reads:
@@ -327,13 +332,22 @@ automationHandoffPolicy:
     - execute Cost Calibration Gate
     - continue across execution modules without a new Module Run plan and human approval
 hookIntegrationMatrix:
-  status: partially_implemented_under_hardening
+  status: local_unattended_control_ready_after_validation
   implementationRequiresSeparateTaskApproval: true
   levels:
     advisory: report only; does not block commit or progression
     warning: progression may continue only when evidence explains the warning
     hard_block: stop commit, push, or module closeout until fixed or separately approved
   hooks:
+    unattended-pre-step:
+      strength: hard_block_after_unattended_control
+      plannedChecks:
+        - branch policy and protected branch stop
+        - remote divergence stop
+        - repository SHA recovery sync
+        - task plan, evidence, and audit paths
+        - changed-file scope against allowedFiles and blockedFiles
+        - blocked risk gate stop decision
     pre-work:
       strength: hard_block_after_mechanism_completion
       plannedChecks:
@@ -386,12 +400,15 @@ futureBatchPolicy:
     threadRolloverDecisionRequired: true
     nextModuleRunCandidateProposalRequiredAtCloseout: true
     pushRequiresExplicitApproval: true
+    unattendedPreStepDecisionRequired: true
 terminologyAnchors:
   - Module Run v2
   - localFullLoopGate
   - localProviderSandboxGate
   - threadRolloverGate
   - hookIntegrationMatrix
+  - unattendedStopDecision
+  - threadRolloverDecision
   - authorization
   - paper
   - mock_exam

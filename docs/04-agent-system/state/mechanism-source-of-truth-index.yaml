@@ -82,6 +82,17 @@ sopGroups:
       path: docs/04-agent-system/sop/skill-dispatch-and-thread-handoff-governance.md
     - id: skill-dispatch-matrix
       path: docs/04-agent-system/sop/skill-dispatch-matrix.md
+scriptControls:
+  - id: module-run-v2-unattended-readiness
+    path: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+    decisionOutput: unattendedStopDecision
+    role: local hard-block stop decision before unattended work continues
+  - id: module-run-v2-thread-rollover-readiness
+    path: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1
+    decisionOutput: threadRolloverDecision
+    role: local hard-block or advisory thread rollover decision for Module Run v2
 executionLogRoots:
   - id: evidence
     path: docs/05-execution-logs/evidence

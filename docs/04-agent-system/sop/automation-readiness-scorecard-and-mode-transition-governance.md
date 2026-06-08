@@ -48,6 +48,7 @@ Score readiness across these dimensions:
 | recovery readiness   | latest task plan, evidence, audit review, and handoff are recoverable                           | chat summary is the only recovery source                                         |
 | risk gate isolation  | blocked gates are named and excluded                                                            | provider, env/secret, staging/prod/cloud/deploy, payment, external-service need  |
 | approval clarity     | human approval scope is explicit for the proposed mode                                          | implied approval or old approval reused for new risk                             |
+| unattended control   | local stop-decision and thread-decision scripts pass                                            | no machine-readable continue/stop decision                                       |
 
 A single blocking example makes the overall result `blocked` until resolved or accepted by explicit human decision.
 
@@ -110,6 +111,14 @@ A mode transition task must:
 10. Commit the mode transition separately from implementation, dependency, schema, env/secret, provider, deploy, payment, or external-service work.
 
 Changing `automation.mode` must be the primary purpose of the task, not a side effect.
+
+`guarded_auto_candidate` may be proposed only after unattended control evidence shows:
+
+- `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` passes;
+- `Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1` passes;
+- the current task can produce `unattendedStopDecision: continue`;
+- required-new-thread decisions stop with a non-zero exit;
+- blocked gates remain excluded.
 
 ## Automatic Advancement Blockers
 
