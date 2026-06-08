@@ -4201,6 +4201,7 @@ tasks:
     moduleRunVersion: 2
     executionModule: ai-task-and-provider
     allowedFiles:
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
@@ -4231,9 +4232,119 @@ tasks:
       - blocked_gate
     validationCommands:
       - git diff --check
-      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
-      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'ai-task-and-provider','nextModuleRunCandidate','localFullLoopGate','Cost Calibration Gate remains blocked'
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - Select-String -Path docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'ai-task-and-provider','nextModuleRunCandidate','localFullLoopGate','localExperienceClosureGate','Cost Calibration Gate remains blocked'
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    status: pending
+    retryCount: 0
+  - id: module-run-v2-local-experience-closure-alignment
+    title: Module Run v2 Local Experience Closure Alignment
+    phase: module-run-v2-local-experience-closure-alignment
+    sourceStory: user-request-2026-06-08-local-experience-closure-alignment
+    dependencies:
+      - module-run-v2-autopilot-maturity-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested aligning the module-domain partition and Codex automation handoff with the target of a locally
+      runnable, locally verifiable experience loop. Scope is governance-only: matrix, project state, task queue,
+      planning logs, evidence, and audit review. This does not approve product implementation, scripts/hooks,
+      provider/env/secret, staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, tests,
+      e2e implementation, or Cost Calibration Gate execution.
+    taskKind: governance_alignment
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-local-experience-closure-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-closure-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-closure-alignment.md
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - module_run_planning
+      - local_experience_closure
+      - queue_planning
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-work -TaskId module-run-v2-local-experience-closure-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-local-experience-closure-alignment -PlannedFiles docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-local-experience-closure-alignment.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-closure-alignment.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-closure-alignment.md,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-local-experience-acceptance-planning.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-acceptance-planning.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-closure-alignment.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-local-experience-closure-alignment.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-local-experience-closure-alignment.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-acceptance-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-local-experience-acceptance-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-closure-alignment.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-local-experience-closure-alignment.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-local-experience-closure-alignment.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-acceptance-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-local-experience-acceptance-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - Select-String -Path docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-closure-alignment.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-local-experience-closure-alignment.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-local-experience-closure-alignment.md,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-acceptance-planning.md -Pattern 'localExperienceClosureGate','module-run-v2-ai-task-and-provider-planning','module-run-v2-local-experience-acceptance-planning','localFullLoopGate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-local-experience-closure-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-closure-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-closure-alignment.md
+    status: in_progress
+    retryCount: 0
+  - id: module-run-v2-local-experience-acceptance-planning
+    title: Module Run v2 Local Experience Acceptance Planning
+    phase: module-run-v2-local-experience-acceptance-planning
+    sourceStory: next-local-experience-closure-candidate-from-module-run-v2-local-experience-closure-alignment
+    dependencies:
+      - module-run-v2-ai-task-and-provider-planning
+    taskPlanPolicy: required
+    humanApproval: >-
+      Seeded as a proposal-only local acceptance planning task. This does not approve API/UI/browser/role-flow/e2e
+      implementation, provider/env/secret, staging/prod/cloud/deploy, payment, external-service, dependency, schema,
+      migration, product code, or Cost Calibration Gate execution.
+    taskKind: local_verification_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_experience_closure
+      - local_verification_planning
+      - automation_policy
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-acceptance-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-local-experience-acceptance-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+      - Select-String -Path docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-local-experience-acceptance-planning.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-local-experience-acceptance-planning.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-local-experience-acceptance-planning.md -Pattern 'localExperienceClosureGate','localFullLoopGate','e2e','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
     status: pending
     retryCount: 0

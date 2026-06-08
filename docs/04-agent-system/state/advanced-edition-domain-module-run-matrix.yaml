@@ -4,6 +4,7 @@ generatedByTask: advanced-edition-domain-module-run-matrix
 upgradedByTask: advanced-edition-module-run-v2-mechanism-upgrade
 generatedAt: "2026-06-08T08:05:00-07:00"
 upgradedAt: "2026-06-08T08:33:09-07:00"
+localExperienceClosureAlignedAt: "2026-06-08T14:59:56-07:00"
 purpose: >-
   Source-of-truth matrix for advancing advanced-edition work by Module Run v2: larger domain-level Batch combinations
   with local full-loop completion gates, stronger thread rollover rules, automation handoff, and hook integration
@@ -271,6 +272,110 @@ localFullLoopGate:
   completionRule: >-
     A Module Run is not complete merely because local contracts pass. It must reach the highest safe local level for
     that domain, then explicitly list L8 blocked remainders without claiming non-local readiness.
+localExperienceClosureGate:
+  purpose: >-
+    Cross-module orchestration layer for the user's target: advance the advanced-edition work toward a locally runnable,
+    locally verifiable experience loop instead of letting modules finish as isolated contracts.
+  governanceRole: orchestration_gate_not_business_module
+  completionTarget: local_experience_closed_loop_until_blocked
+  appliesTo:
+    - Module Run v2 planning
+    - nextModuleRunCandidate selection
+    - automation startup handoff
+    - local validation planning
+  experienceChains:
+    - chain: personal-learning-ai-experience
+      businessGoal: student can locally request and inspect a redacted AI task result reference in an approved flow
+      requiredModules:
+        - authorization-and-access
+        - ai-task-and-provider
+        - personal-learning-ai
+      minimumLocalFullLoopGate: L5
+      acceptanceBridgeRequiredBeforeClosure: true
+    - chain: organization-training-experience
+      businessGoal: admin and employee can locally traverse organization training lifecycle boundaries
+      requiredModules:
+        - authorization-and-access
+        - ai-task-and-provider
+        - organization-training
+        - organization-analytics
+      minimumLocalFullLoopGate: L6
+      acceptanceBridgeRequiredBeforeClosure: true
+    - chain: ops-governance-experience
+      businessGoal: operations-facing governance summaries and redacted references can be locally reviewed
+      requiredModules:
+        - authorization-and-access
+        - ai-task-and-provider
+        - ops-governance-and-retention
+      minimumLocalFullLoopGate: L6
+      acceptanceBridgeRequiredBeforeClosure: true
+    - chain: retention-recovery-experience
+      businessGoal: retention, hidden-expired, and recovery boundaries can be locally checked without destructive action
+      requiredModules:
+        - personal-learning-ai
+        - organization-training
+        - ops-governance-and-retention
+      minimumLocalFullLoopGate: L6
+      acceptanceBridgeRequiredBeforeClosure: true
+    - chain: cross-role-denial-and-redaction-experience
+      businessGoal: role denial, redaction, and evidence boundaries are locally visible across student/admin/employee/ops paths
+      requiredModules:
+        - authorization-and-access
+        - ai-task-and-provider
+        - personal-learning-ai
+        - organization-training
+        - organization-analytics
+        - ops-governance-and-retention
+      minimumLocalFullLoopGate: L6
+      acceptanceBridgeRequiredBeforeClosure: true
+  moduleRunPlanningRequiredFields:
+    - targetExperienceChain or explicit none-with-reason
+    - currentLocalFullLoopGateLevel
+    - targetLocalFullLoopGateLevel
+    - acceptanceBridgeNeeded
+    - userVisibleSurfaceNeeded
+    - focusedTestPlan
+    - blockedRemainder
+  promotionRule: >-
+    A Module Run may start at local contract or service level, but it must state how it advances one experience chain
+    toward L5/L6 local closure. Modules with L5/L6 minimums cannot be marked locally closed until a future approved
+    acceptance bridge task covers API or Server Action, UI/browser, and role-flow validation as applicable.
+  allowedOnlyWhenExplicitlyNamedByPlan:
+    - src/server/repositories/**
+    - src/server/mappers/**
+    - src/app/api/v1/**
+    - src/app/(student)/**
+    - src/app/(admin)/**
+    - tests/unit/**
+    - e2e/**
+  alwaysBlockedWithoutSeparateHumanApproval:
+    - schema or migration change
+    - dependency, package, or lockfile change
+    - provider, env/secret, staging/prod/cloud/deploy, payment, or external-service work
+    - Cost Calibration Gate execution
+  automationStartupRequirement: >-
+    When automation wakes with no current in-progress task, it must select or prepare a pending task that keeps
+    `localExperienceClosureGate` in scope. If another run owns the lease or a thread has in-progress work, automation
+    must stop with the existing-run decision instead of starting unrelated work.
+experienceClosureContribution:
+  authorization-and-access: >-
+    Foundation module for local user, organization, and role context. Future work should bridge L4 API or Server Action
+    contracts before downstream L5/L6 experience chains claim local closure.
+  ai-task-and-provider: >-
+    Provider-agnostic task lifecycle module. Future work should keep local mock or fixture behavior explicit and avoid
+    real provider calls unless a separately approved local sandbox task exists.
+  personal-learning-ai: >-
+    Student-facing experience module. Future work should identify the local UI/browser path and redacted result
+    reference path needed for L5 local closure.
+  organization-training: >-
+    Admin and employee role-flow module. Future work should map draft/publish/takedown/copy and employee answer
+    lifecycle into an approved L6 local role-flow path.
+  organization-analytics: >-
+    Aggregate reporting module. Future work should connect organization-training output to local summary or API
+    acceptance without exposing private answer payloads.
+  ops-governance-and-retention: >-
+    Operations and retention module. Future work should prove redaction, hidden-expired, recovery-boundary, and
+    governance summary behavior locally without destructive data action.
 localProviderSandboxGate:
   purpose: Allow carefully bounded local AI API validation without weakening provider, env/secret, or Cost Calibration Gate.
   approvalRequired: explicit user approval for the specific local provider sandbox call
@@ -354,6 +459,9 @@ automationHandoffPolicy:
       - task-queue.yaml
       - latest evidence and audit review
     output: proposal only; no cross-module implementation starts without a Module Run plan.
+    mustReference:
+      - localExperienceClosureGate
+      - target experience chain or explicit none-with-reason
   automationMay:
     - run automation startup readiness before unattended readiness or autopilot orchestration
     - detect that a Module Run appears complete from durable state
@@ -459,6 +567,7 @@ terminologyAnchors:
   - localProviderSandboxGate
   - threadRolloverGate
   - hookIntegrationMatrix
+  - localExperienceClosureGate
   - unattendedStopDecision
   - threadRolloverDecision
   - threadLaunchDecision
