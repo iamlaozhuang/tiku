@@ -328,6 +328,9 @@ automationHandoffPolicy:
     handoffGeneratorDryRun: New-ModuleRunV2ThreadHandoff.ps1 -DryRun does not write the requested output path
     autopilotDryRunHandoff: Invoke-ModuleRunV2Autopilot.ps1 -DryRunHandoff uses temporary handoff evidence outside the repository
     durableHandoffWrites: allowed only inside an approved closeout or handoff task
+  postPushStateReconciliation:
+    acceptedCloseoutAncestor: state repository SHA may be an ancestor of current master/origin when task is done or closed and Git is clean
+    hardBlock: non-ancestor SHA drift remains HARD_BLOCK_REPOSITORY_SHA_DRIFT
   nextModuleRunCandidate:
     trigger: Module Run closeout evidence is written and validation passes.
     reads:

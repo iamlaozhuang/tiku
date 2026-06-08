@@ -40,7 +40,7 @@ Score readiness across these dimensions:
 | -------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | governance stack     | required SOPs exist and have evidence/audit review                                              | missing lifecycle, retry, handoff, or gate SOP                                   |
 | task queue health    | tasks have dependencies, `taskKind`, allowed and blocked files, risk types, validation commands | ambiguous task, missing dependency, shared file conflict                         |
-| project state health | `project-state.yaml` recovery SHA agrees with Git or accepted post-closeout rule                | unknown drift, unpushed work, stale handoff                                      |
+| project state health | `project-state.yaml` recovery SHA agrees with Git or is an accepted closeout ancestor           | unknown drift, non-ancestor SHA drift, unpushed work, stale handoff              |
 | Git closeout health  | clean workspace, aligned `master` / `origin/master`, no unmerged short branch residue           | dirty tree, remote divergence, unknown worktree                                  |
 | validation health    | task gates and broader quality gates are available and recently passing                         | unavailable lint/typecheck/test/format when needed                               |
 | evidence hygiene     | evidence records commands, redaction, blocked gates, residual risks                             | secrets, raw prompts, raw answers, cleartext `redeem_code`, full `paper` content |

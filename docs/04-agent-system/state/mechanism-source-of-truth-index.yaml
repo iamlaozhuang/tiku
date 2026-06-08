@@ -87,7 +87,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
     decisionOutput: unattendedStopDecision
-    role: local hard-block stop decision before unattended work continues, including closeout recovery
+    role: local hard-block stop decision before unattended work continues, including closeout recovery and post-push ancestor reconciliation
   - id: module-run-v2-thread-rollover-readiness
     path: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1

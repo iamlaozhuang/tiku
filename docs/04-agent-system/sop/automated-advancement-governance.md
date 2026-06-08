@@ -198,6 +198,11 @@ For routine scheduler wakeups where the current task is already `done` or `close
 recovery before selecting the next task. If the closeout recovery sees a dirty worktree, remote divergence, missing
 evidence, or stale state that is not an accepted closeout recovery point, it must stop rather than write a new handoff.
 
+An accepted closeout recovery point may have `project-state.yaml` repository SHA values that are ancestors of the current
+`master` and `origin/master`, because the final closeout, validation repair, merge, and push commits can only be known
+after earlier evidence is written. This exception applies only when the current task is `done` or `closed`, Git is clean
+and aligned, and the task evidence/audit paths are present. Non-ancestor SHA drift remains a hard block.
+
 ## Per-Task Review And Commit Rule
 
 Each task must finish with:

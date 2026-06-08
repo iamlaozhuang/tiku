@@ -4040,3 +4040,68 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-hardening.md
     status: done
     retryCount: 0
+  - id: module-run-v2-post-push-state-reconciliation
+    title: Module Run v2 Post-Push State Reconciliation
+    phase: module-run-v2-post-push-state-reconciliation
+    sourceStory: user-request-2026-06-08-post-push-state-reconciliation
+    dependencies:
+      - module-run-v2-autopilot-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved implementing the four recommended fixes for post-push state reconciliation: accept safe closeout
+      ancestry, cover the final pushed SHA drift scenario, re-run autopilot dry-run, and close out with merge, push, and
+      cleanup. Scope is local mechanism scripts, governance state, SOPs, and execution logs only. This does not approve
+      provider, env/secret, staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, product
+      implementation, next-module implementation, or Cost Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - post_push_state_reconciliation
+      - autopilot_orchestration
+      - hard_block
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-work -TaskId module-run-v2-post-push-state-reconciliation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-post-push-state-reconciliation -PlannedFiles scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-post-push-state-reconciliation.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-push-state-reconciliation.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-post-push-state-reconciliation.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-post-push-state-reconciliation.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-post-push-state-reconciliation.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-post-push-state-reconciliation.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-post-push-state-reconciliation.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-post-push-state-reconciliation.md
+      - Select-String -Path docs\05-execution-logs\evidence\2026-06-08-module-run-v2-post-push-state-reconciliation.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-post-push-state-reconciliation.md -Pattern 'closeoutRecovery','ancestor','post-push','autopilotDecision','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-post-push-state-reconciliation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+    status: in_progress
+    retryCount: 0

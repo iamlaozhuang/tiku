@@ -233,6 +233,43 @@ tasks:
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_TASK_STATUS"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
 
+    $ancestorSha = ((& git rev-parse HEAD~1) -join "").Trim()
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $ancestorSha
+  lastKnownOriginMasterSha: $ancestorSha
+currentTask:
+  id: $taskId
+"@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
+
+    $ancestorRecoveryOutput = @(
+        & $scriptPath `
+            -TaskId $taskId `
+            -ProjectStatePath $projectStatePath `
+            -QueuePath $queuePath `
+            -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+            -CloseoutRecovery `
+            -AllowProtectedBranch `
+            -SkipRemoteAheadCheck
+    )
+    Assert-Contains -Output $ancestorRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR master"
+    Assert-Contains -Output $ancestorRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR origin/master"
+    Assert-Contains -Output $ancestorRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
+
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: not-a-valid-ancestor
+  lastKnownOriginMasterSha: not-a-valid-ancestor
+currentTask:
+  id: $taskId
+"@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_REPOSITORY_SHA_DRIFT" -Command {
+        & $scriptPath -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" -CloseoutRecovery -AllowProtectedBranch -SkipRemoteAheadCheck
+    }
+
     $dirtyProbePath = Join-Path -Path $PSScriptRoot -ChildPath "module-run-v2-unattended-readiness-smoke.tmp"
     try {
         "dirty probe" | Set-Content -LiteralPath $dirtyProbePath -Encoding UTF8
