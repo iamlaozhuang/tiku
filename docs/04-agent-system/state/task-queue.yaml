@@ -2586,17 +2586,17 @@ tasks:
       - blocked_gate
     subtasks:
       - id: authorization-window-reason-summary
-        status: planned
-        commitSha: null
+        status: done
+        commitSha: 66d0e481
       - id: authorization-context-reason-summary
-        status: planned
-        commitSha: null
+        status: done
+        commitSha: 9f2cd75d
       - id: authorization-source-reason-summary
-        status: planned
-        commitSha: null
+        status: done
+        commitSha: d194e9cc
       - id: authorization-access-reason-summary
-        status: planned
-        commitSha: null
+        status: done
+        commitSha: 73b485c4
     validationCommands:
       - npm.cmd run lint
       - npm.cmd run typecheck
@@ -2608,5 +2608,5 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-access-reason-local-contract-batch.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-access-reason-local-contract-batch.md
-    status: planned
+    status: done
     retryCount: 0

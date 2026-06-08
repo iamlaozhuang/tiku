@@ -57,7 +57,7 @@ repository:
   lastKnownOriginMasterSha: dbae9db7ea722ecb50133d0dcaa5bd3636203261
 currentTask:
   id: batch-96-authorization-access-reason-local-contract
-  status: planned
+  status: done
   sourceStory: user-request-2026-06-08-batch-96-authorization-access-reason-local-contract
   planPath: docs/05-execution-logs/task-plans/2026-06-08-authorization-access-reason-local-contract-batch.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-access-reason-local-contract-batch.md
@@ -99,9 +99,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 96 is implementing the authorization access reason local contract module batch as service-layer pure logic
-    only. It may summarize local reason_summary_only metadata for authorization windows, paper/mock_exam context,
-    personal_auth / org_auth sources, and redacted redeem_code / audit_log / ai_call_log references. Do not execute
-    dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions,
-    authorization permission model changes, repository/API route/Server Action work, or Cost Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/task-plans/2026-06-08-authorization-access-reason-local-contract-batch.md
+    Batch 96 completed local validation for the authorization access reason local contract module batch. It summarizes
+    reason_summary_only metadata for authorization windows, paper/mock_exam context, personal_auth / org_auth sources,
+    and redacted redeem_code / audit_log / ai_call_log references. Do not execute dependency, schema, migration,
+    provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions, authorization permission model
+    changes, repository/API route/Server Action work, or Cost Calibration Gate execution.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-authorization-access-reason-local-contract-batch.md
