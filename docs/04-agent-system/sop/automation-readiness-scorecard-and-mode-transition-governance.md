@@ -116,7 +116,11 @@ Changing `automation.mode` must be the primary purpose of the task, not a side e
 
 - `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` passes;
 - `Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1` passes;
+- `New-ModuleRunV2ThreadHandoff.Smoke.ps1` passes;
+- `Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1` passes;
+- `Invoke-ModuleRunV2Autopilot.Smoke.ps1` passes;
 - the current task can produce `unattendedStopDecision: continue`;
+- an approved launch scenario can produce `autopilotDecision: launch_new_thread`;
 - required-new-thread decisions stop with a non-zero exit;
 - blocked gates remain excluded.
 

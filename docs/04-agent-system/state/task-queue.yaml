@@ -3895,3 +3895,74 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
     status: done
     retryCount: 0
+  - id: module-run-v2-autopilot-orchestration-control
+    title: Module Run v2 Autopilot Orchestration Control
+    phase: module-run-v2-autopilot-orchestration-control
+    sourceStory: user-request-2026-06-08-autopilot-thread-launch-and-next-module-queue
+    dependencies:
+      - module-run-v2-unattended-automation-control
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested completing the three remaining automation layers for an autopilot-style flow: handoff generation,
+      automation orchestrator, and thread launch policy; then close out by commit, merge, push, and cleanup. Scope is
+      local mechanism scripts, governance state, SOPs, and execution logs. This does not approve provider, env/secret,
+      staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, product implementation, real
+      next-module implementation, or Cost Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
+      - scripts/agent-system/New-ModuleRunV2ThreadHandoff.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
+      - scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
+      - docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+      - docs/05-execution-logs/handoffs/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - autopilot_orchestration
+      - thread_launch_policy
+      - handoff_generation
+      - hard_block
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ThreadHandoff.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-work -TaskId module-run-v2-autopilot-orchestration-control
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-autopilot-orchestration-control -PlannedFiles scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1,scripts/agent-system/New-ModuleRunV2ThreadHandoff.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1,scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md,docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-orchestration-control.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-orchestration-control.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-orchestration-control.md,docs/05-execution-logs/handoffs/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write scripts\agent-system\New-ModuleRunV2ThreadHandoff.ps1 scripts\agent-system\New-ModuleRunV2ThreadHandoff.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ThreadLaunchPolicy.ps1 scripts\agent-system\Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-autopilot-orchestration-control.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autopilot-orchestration-control.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autopilot-orchestration-control.md docs\05-execution-logs\handoffs\2026-06-08-module-run-v2-autopilot-orchestration-control.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check scripts\agent-system\New-ModuleRunV2ThreadHandoff.ps1 scripts\agent-system\New-ModuleRunV2ThreadHandoff.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ThreadLaunchPolicy.ps1 scripts\agent-system\Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-autopilot-orchestration-control.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autopilot-orchestration-control.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autopilot-orchestration-control.md docs\05-execution-logs\handoffs\2026-06-08-module-run-v2-autopilot-orchestration-control.md
+      - Select-String -Path docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autopilot-orchestration-control.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autopilot-orchestration-control.md,docs\05-execution-logs\handoffs\2026-06-08-module-run-v2-autopilot-orchestration-control.md -Pattern 'handoffGenerator','autopilotDecision','threadLaunchDecision','create_thread','send_message_to_thread','nextModuleRunCandidate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-autopilot-orchestration-control
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+    status: in_progress
+    retryCount: 0

@@ -93,6 +93,21 @@ scriptControls:
     smokePath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1
     decisionOutput: threadRolloverDecision
     role: local hard-block or advisory thread rollover decision for Module Run v2
+  - id: module-run-v2-thread-handoff-generator
+    path: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
+    smokePath: scripts/agent-system/New-ModuleRunV2ThreadHandoff.Smoke.ps1
+    decisionOutput: handoffGenerator
+    role: generated thread handoff for Codex create_thread or send_message_to_thread usage
+  - id: module-run-v2-thread-launch-policy
+    path: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1
+    decisionOutput: threadLaunchDecision
+    role: maps rollover decisions and launch approval to thread launch actions
+  - id: module-run-v2-autopilot-orchestrator
+    path: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+    decisionOutput: autopilotDecision
+    role: combines stop decision, thread rollover, handoff generation, and launch policy
 executionLogRoots:
   - id: evidence
     path: docs/05-execution-logs/evidence

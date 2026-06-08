@@ -50,6 +50,32 @@ The script emits one of the decision labels:
 When a non-zero decision is returned, do not treat it as a failed task implementation. Treat it as a controlled stop that
 protects context quality and approval boundaries.
 
+## Thread Launch Policy Gate
+
+Thread rollover decisions become launch actions only through:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ThreadLaunchPolicy.ps1 -ThreadRolloverDecision <decision> -HandoffPath <path>
+```
+
+The policy emits `threadLaunchDecision`:
+
+- `continue_current_thread`: no thread launch is needed.
+- `prepare_handoff`: handoff should be generated, but no launch is approved.
+- `prepare_handoff_then_continue`: handoff is generated and current-thread continuation remains acceptable.
+- `launch_new_thread`: `create_thread` may be called with the generated handoff.
+- `stop_for_human_handoff`: stop because launch is required but approval, tool availability, or handoff is missing.
+
+The handoff generator is:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ThreadHandoff.ps1
+```
+
+Generated handoffs must include `create_thread` and `send_message_to_thread` instructions for Codex-level orchestration,
+but must not include secrets, raw prompts, provider payloads, database URLs, Authorization headers, cleartext
+`redeem_code`, or raw generated AI content.
+
 ## Continue Current Thread Criteria
 
 Continue in the current thread when all are true:
@@ -210,6 +236,10 @@ An agent must not:
 - carry uncommitted work into a new thread without a written handoff;
 - treat chat summary as the source of truth;
 - use thread rollover to bypass blocked gates.
+
+When a task explicitly approves autopilot thread launch and the Codex thread tool is available, the agent may consume
+`threadLaunchDecision: launch_new_thread` to call `create_thread` with the generated handoff. It must not start
+next-module implementation unless the handoff and new thread startup gate provide a fresh approved Module Run v2 plan.
 
 ## User Cooperation Model
 

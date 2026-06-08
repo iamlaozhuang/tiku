@@ -310,9 +310,19 @@ threadRolloverGate:
     - next recommended module
 automationHandoffPolicy:
   unattendedStopDecisionScript: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+  handoffGeneratorScript: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
+  threadLaunchPolicyScript: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
+  autopilotOrchestratorScript: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
   unattendedDecisionLabels:
     continue: proceed with the approved local task scope
     stop_for_hard_block: stop and hand off before retrying or broadening scope
+  autopilotDecisionLabels:
+    continue_current_thread: proceed inside current approved scope
+    prepare_handoff: generate handoff but do not launch a thread
+    prepare_handoff_then_continue: continue only after handoff is available
+    launch_new_thread: Codex agent layer may call create_thread with generated handoff
+    stop_for_hard_block: stop on hard block
+    stop_for_human_handoff: stop for user decision
   nextModuleRunCandidate:
     trigger: Module Run closeout evidence is written and validation passes.
     reads:
@@ -348,6 +358,14 @@ hookIntegrationMatrix:
         - task plan, evidence, and audit paths
         - changed-file scope against allowedFiles and blockedFiles
         - blocked risk gate stop decision
+    autopilot-orchestrator:
+      strength: hard_block_for_stop_decisions
+      plannedChecks:
+        - unattended stop decision
+        - thread rollover decision
+        - handoff generation
+        - thread launch policy
+        - create_thread only when launch policy returns launch_new_thread
     pre-work:
       strength: hard_block_after_mechanism_completion
       plannedChecks:
@@ -401,6 +419,7 @@ futureBatchPolicy:
     nextModuleRunCandidateProposalRequiredAtCloseout: true
     pushRequiresExplicitApproval: true
     unattendedPreStepDecisionRequired: true
+    autopilotDecisionRequiredBeforeThreadLaunch: true
 terminologyAnchors:
   - Module Run v2
   - localFullLoopGate
@@ -409,6 +428,8 @@ terminologyAnchors:
   - hookIntegrationMatrix
   - unattendedStopDecision
   - threadRolloverDecision
+  - threadLaunchDecision
+  - autopilotDecision
   - authorization
   - paper
   - mock_exam
