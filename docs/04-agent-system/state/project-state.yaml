@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: advanced-edition-module-run-v2-mechanism-upgrade
-updatedAt: "2026-06-08T08:38:46-07:00"
+  currentPhase: module-run-v2-hook-automation-readiness
+updatedAt: "2026-06-08T08:57:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: d273a3a8217119cbd8bc3d0946bb6d29c8f4024b
-  lastKnownOriginMasterSha: d273a3a8217119cbd8bc3d0946bb6d29c8f4024b
+  lastKnownMasterSha: d98e5f5de92dd85936f0eaaecd373d462436852b
+  lastKnownOriginMasterSha: d98e5f5de92dd85936f0eaaecd373d462436852b
 currentTask:
-  id: advanced-edition-module-run-v2-mechanism-upgrade
+  id: module-run-v2-hook-automation-readiness
   status: done
-  sourceStory: user-request-2026-06-08-module-run-v2-mechanism-upgrade
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
-  branch: codex/module-run-v2-mechanism-upgrade
+  sourceStory: user-request-2026-06-08-module-run-v2-hook-automation-readiness
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-hook-automation-readiness.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-readiness.md
+  branch: codex/module-run-v2-hook-automation-readiness
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,8 +99,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete the docs-only Module Run v2 mechanism upgrade, then use the upgraded matrix to propose Batch 101 as the
-    first execution Module Run plan. The next implementation Module Run should start from durable state, honor
-    localFullLoopGate, localProviderSandboxGate, threadRolloverGate, and hookIntegrationMatrix, and keep Cost Calibration
-    Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+    Complete the docs-only Module Run v2 hook and automation readiness audit. The next task may implement the first
+    advisory pre-work/pre-edit script only after separate approval. Hook implementation must not modify provider,
+    env/secret, staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, or Cost Calibration
+    Gate behavior.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-readiness.md
