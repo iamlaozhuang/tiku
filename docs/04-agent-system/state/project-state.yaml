@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-hook-automation-readiness
-updatedAt: "2026-06-08T08:57:06-07:00"
+  currentPhase: module-run-v2-pre-work-pre-edit-advisory
+updatedAt: "2026-06-08T09:08:55-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: d98e5f5de92dd85936f0eaaecd373d462436852b
-  lastKnownOriginMasterSha: d98e5f5de92dd85936f0eaaecd373d462436852b
+  lastKnownMasterSha: 318c65ec74388a7ba369f2d0665762d35864f485
+  lastKnownOriginMasterSha: 318c65ec74388a7ba369f2d0665762d35864f485
 currentTask:
-  id: module-run-v2-hook-automation-readiness
+  id: module-run-v2-pre-work-pre-edit-advisory
   status: done
-  sourceStory: user-request-2026-06-08-module-run-v2-hook-automation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-hook-automation-readiness.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-readiness.md
-  branch: codex/module-run-v2-hook-automation-readiness
+  sourceStory: user-request-2026-06-08-module-run-v2-pre-work-pre-edit-advisory
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
+  branch: codex/module-run-v2-pre-work-pre-edit-advisory
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,8 +99,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete the docs-only Module Run v2 hook and automation readiness audit. The next task may implement the first
-    advisory pre-work/pre-edit script only after separate approval. Hook implementation must not modify provider,
-    env/secret, staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, or Cost Calibration
-    Gate behavior.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-readiness.md
+    Complete the Module Run v2 pre-work/pre-edit advisory script implementation. This task may add scripts under
+    scripts/agent-system/** but must not modify .husky/** or make advisory checks hard-blocking. Next recommended work,
+    after validation, is to pilot the advisory script manually in the first Module Run v2 planning task.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
