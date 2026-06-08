@@ -27,6 +27,24 @@ param(
     [switch]$SkipUnattendedReadiness,
 
     [Parameter(Mandatory = $false)]
+    [switch]$CloseoutRecovery,
+
+    [Parameter(Mandatory = $false)]
+    [string[]]$ReadinessChangedFiles = @(),
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ProjectStatePath = "docs\04-agent-system\state\project-state.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$QueuePath = "docs\04-agent-system\state\task-queue.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]$NextModuleRunCandidate = "ai-task-and-provider",
 
@@ -78,10 +96,22 @@ if (-not $SkipUnattendedReadiness) {
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        ".\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1"
+        ".\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1",
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $MatrixPath
     )
     if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
         $readinessArgs += @("-TaskId", $TaskId)
+    }
+    if ($CloseoutRecovery) {
+        $readinessArgs += "-CloseoutRecovery"
+    }
+    if ($ReadinessChangedFiles.Count -gt 0) {
+        $readinessArgs += @("-ChangedFiles", ($ReadinessChangedFiles -join ","))
     }
 
     $readinessOutput = @(& powershell.exe @readinessArgs 2>&1)

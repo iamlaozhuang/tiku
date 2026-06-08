@@ -28,8 +28,8 @@ Cost Calibration Gate remains blocked.
 ### Batch 2: Autopilot Closeout Recovery
 
 - Goal: let autopilot recover from a completed task without unsafe `-SkipUnattendedReadiness`.
-- RED: pending.
-- GREEN: pending.
+- RED: completed-task autopilot recovery previously required `-SkipUnattendedReadiness`, bypassing the main stop-decision surface.
+- GREEN: `Invoke-ModuleRunV2Autopilot.Smoke.ps1` passes a `-CloseoutRecovery` fixture with a `done` task and observes `autopilotDecision: launch_new_thread` without skipping readiness.
 - Commit: pending.
 - localFullLoopGate: L1 target.
 

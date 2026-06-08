@@ -68,6 +68,54 @@ try {
     Assert-Contains -Output $launchOutput -Pattern "autopilotDecision: launch_new_thread"
     Assert-Contains -Output $launchOutput -Pattern "handoffPath:"
     Assert-Contains -Output $launchOutput -Pattern "Cost Calibration Gate remains blocked"
+
+    $taskId = "module-run-v2-autopilot-closeout-recovery-smoke"
+    $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
+    $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
+    $masterSha = ((& git rev-parse master) -join "").Trim()
+    $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $masterSha
+  lastKnownOriginMasterSha: $originMasterSha
+currentTask:
+  id: $taskId
+"@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    status: done
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    $closeoutRecoveryOutput = @(
+        & $scriptPath `
+            -TaskId $taskId `
+            -CompletedBatchCount 6 `
+            -CloseoutRecovery `
+            -ProjectStatePath $projectStatePath `
+            -QueuePath $queuePath `
+            -ReadinessChangedFiles "scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1" `
+            -HandoffPath $handoffPath `
+            -ThreadLaunchApproved `
+            -ThreadToolAvailable
+    )
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "autopilotDecision: launch_new_thread"
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "nextModuleRunCandidate: ai-task-and-provider"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
@@ -75,4 +123,3 @@ try {
 }
 
 Write-Output "Module Run v2 autopilot smoke passed"
-
