@@ -1452,3 +1452,55 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
     status: done
     retryCount: 0
+  - id: phase-79-closeout-readiness-audit
+    title: Phase 69-78 Closeout And Code Stage Readiness Audit
+    phase: phase-79-closeout-readiness-audit
+    sourceStory: user-request-2026-06-07-phase-79-closeout-readiness-audit
+    dependencies:
+      - phase-69-advanced-authorization-context-implementation-planning
+      - phase-70-advanced-ai-task-domain-implementation-planning
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+      - phase-72-advanced-organization-training-implementation-planning
+      - phase-73-advanced-organization-analytics-implementation-planning
+      - phase-74-advanced-ops-auth-quota-implementation-planning
+      - phase-75-advanced-retention-log-governance-implementation-planning
+      - phase-76-advanced-code-stage-schema-dependency-blocker-review
+      - phase-77-advanced-code-stage-security-redaction-review-plan
+      - phase-78-advanced-code-stage-local-validation-planning
+    taskPlanPolicy: required
+    humanApproval: User explicitly approved executing Phase 79 closeout audit, including short-lived branch creation, task plan, evidence, audit review, validation, commit, merge to master, push, and branch cleanup. Scope is docs/state/review/evidence closeout only; no product code, dependency, schema, migration, package, lockfile, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or Cost Calibration Gate execution.
+    taskKind: closeout
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-79-closeout-readiness-audit.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-79-closeout-readiness-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-79-closeout-readiness-audit.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - closeout
+      - governance_state
+      - evidence_integrity
+      - local_auto_candidate
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-79-closeout-readiness-audit.md docs\05-execution-logs\evidence\2026-06-07-phase-79-closeout-readiness-audit.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-79-closeout-readiness-audit.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-07-phase-79-closeout-readiness-audit.md,docs\05-execution-logs\evidence\2026-06-07-phase-79-closeout-readiness-audit.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-79-closeout-readiness-audit.md -Pattern 'Phase 69-78','code-stage readiness','local_auto_candidate','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked','provider','env/secret','staging/prod','payment','external-service'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-79-closeout-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-79-closeout-readiness-audit.md
+    status: done
+    retryCount: 0

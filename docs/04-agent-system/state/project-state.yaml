@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-78-advanced-code-stage-local-validation-planning
-updatedAt: "2026-06-07T15:42:11-07:00"
+  currentPhase: phase-79-closeout-readiness-audit
+updatedAt: "2026-06-07T19:58:51-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 3d4e6c3aa2d2dd07f4156cfe3264a2d99b608c96
-  lastKnownOriginMasterSha: 3d4e6c3aa2d2dd07f4156cfe3264a2d99b608c96
+  lastKnownMasterSha: 5c97ff98a9e3d0a9ea9f9c3d5186c519a75885f3
+  lastKnownOriginMasterSha: 5c97ff98a9e3d0a9ea9f9c3d5186c519a75885f3
 currentTask:
-  id: phase-78-advanced-code-stage-local-validation-planning
+  id: phase-79-closeout-readiness-audit
   status: done
-  sourceStory: docs/superpowers/plans/2026-06-06-advanced-edition-mvp-implementation-breakdown.md
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
-  branch: codex/phase-78-local-validation-planning
+  sourceStory: user-request-2026-06-07-phase-79-closeout-readiness-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-79-closeout-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-79-closeout-readiness-audit.md
+  branch: codex/phase-79-closeout-readiness-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,9 +99,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 78 local validation planning records future local-first validation levels for advanced edition code-stage tasks:
-    static gates, unit/service tests, provider-agnostic local integration, authorization and redaction checks, and evidence
-    safety. Phase 69-78 are now ready for final closeout review. Do not execute product implementation, dependency, schema,
-    migration, real provider calls, env/secret, staging/prod/cloud/deploy, payment, external-service actions, or Cost
-    Calibration Gate execution without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+    Phase 79 closeout audit confirms Phase 69-78 planning, blocked_gate, security_review, and local_verification planning
+    evidence is present and queue status is done. local_auto_candidate may continue only for queue-approved docs/state/review/evidence
+    tasks such as implementation_planning, local_verification planning, security_review planning, blocked_gate documentation, and
+    closeout audits. Do not execute product implementation, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy,
+    payment, external-service actions, authorization permission model changes, or Cost Calibration Gate execution without fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-79-closeout-readiness-audit.md
