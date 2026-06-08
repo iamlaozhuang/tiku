@@ -3273,3 +3273,61 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
     status: done
     retryCount: 0
+  - id: module-run-v2-pre-commit-scan-hardening
+    title: Module Run v2 Pre-Commit Scan Hardening
+    phase: module-run-v2-pre-commit-scan-hardening
+    sourceStory: user-request-2026-06-08-module-run-v2-pre-commit-scan-hardening
+    dependencies:
+      - module-run-v2-pre-work-pre-edit-advisory
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested advancing the next hook/automation hardening stage after the pre-work/pre-edit advisory script was
+      merged and pushed. Scope is limited to adding a pre-commit hard-block scanner and wiring it into the existing
+      `.husky/pre-commit` before the current lint-staged, lint, and typecheck commands. This task must not modify
+      package.json, lockfiles, product code, tests/e2e, schema, migration, src/db/schema/**, drizzle/**, .env.local,
+      .env.example, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, or execute Cost
+      Calibration Gate.
+    taskKind: implementation
+    allowedFiles:
+      - .husky/pre-commit
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - hook_governance
+      - pre_commit_hard_block
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-pre-commit-scan-hardening
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-pre-commit-scan-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-pre-commit-scan-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-pre-commit-scan-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-pre-commit-scan-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+      - Select-String -Path .husky\pre-commit,scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1,scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-pre-commit-scan-hardening.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-pre-commit-scan-hardening.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-pre-commit-scan-hardening.md -Pattern 'Module Run v2','pre-commit','HARD_BLOCK_BLOCKED_FILE','HARD_BLOCK_SENSITIVE_EVIDENCE','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+    status: done
+    retryCount: 0

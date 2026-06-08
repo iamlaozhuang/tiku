@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-pre-work-pre-edit-advisory
-updatedAt: "2026-06-08T09:08:55-07:00"
+  currentPhase: module-run-v2-pre-commit-scan-hardening
+updatedAt: "2026-06-08T09:34:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 318c65ec74388a7ba369f2d0665762d35864f485
-  lastKnownOriginMasterSha: 318c65ec74388a7ba369f2d0665762d35864f485
+  lastKnownMasterSha: 7e36228c8a5e15b2aea0cace8a3e5e8393eca74a
+  lastKnownOriginMasterSha: 7e36228c8a5e15b2aea0cace8a3e5e8393eca74a
 currentTask:
-  id: module-run-v2-pre-work-pre-edit-advisory
+  id: module-run-v2-pre-commit-scan-hardening
   status: done
-  sourceStory: user-request-2026-06-08-module-run-v2-pre-work-pre-edit-advisory
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
-  branch: codex/module-run-v2-pre-work-pre-edit-advisory
+  sourceStory: user-request-2026-06-08-module-run-v2-pre-commit-scan-hardening
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+  branch: codex/module-run-v2-pre-commit-scan-hardening
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,7 +99,6 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete the Module Run v2 pre-work/pre-edit advisory script implementation. This task may add scripts under
-    scripts/agent-system/** but must not modify .husky/** or make advisory checks hard-blocking. Next recommended work,
-    after validation, is to pilot the advisory script manually in the first Module Run v2 planning task.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
+    Pilot the Module Run v2 pre-commit hardening scanner in the next normal Module Run v2 planning or implementation
+    task before adding pre-push or module-closeout hard blocks. Do not push without explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md

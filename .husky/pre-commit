@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
 npm.cmd run lint-staged
 npm.cmd run lint
 npm.cmd run typecheck
