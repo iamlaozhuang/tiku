@@ -45,7 +45,7 @@ automation:
     autoMerge: false
   unattendedControl:
     target: guarded local unattended loop with hard-stop decisions
-    currentStatus: in_progress
+    currentStatus: ready_after_local_validation
     stopDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     threadDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
     remoteAutomationApproval: not_granted
@@ -70,12 +70,12 @@ repository:
   lastKnownOriginMasterSha: 663b61bebc8c5f33b8acc44e6f3a2c81be409974
 currentTask:
   id: module-run-v2-unattended-automation-control
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-unattended-automation-and-thread-control
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-unattended-automation-control.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
   branch: codex/module-run-v2-unattended-automation-control
-  commitSha: null
+  commitSha: 3749f449c627f2aafba523e19e4a34e83b40e23d
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -112,7 +112,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete the unattended automation control mechanism before entering the next business execution module. The next
-    business candidate remains `ai-task-and-provider` as a proposal only; do not cross modules without a fresh Module
-    Run v2 plan and explicit instruction. Cost Calibration Gate remains blocked.
+    Start a new thread before entering the next business execution module. The next business candidate remains
+    `ai-task-and-provider` as a proposal only; do not cross modules without a fresh Module Run v2 plan and explicit
+    instruction. Cost Calibration Gate remains blocked.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md

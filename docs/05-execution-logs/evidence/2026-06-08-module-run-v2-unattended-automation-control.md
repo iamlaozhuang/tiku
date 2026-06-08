@@ -15,7 +15,7 @@ Cost Calibration Gate remains blocked.
 - Goal: add a local hard-block readiness script that an unattended loop can run before claiming or continuing work.
 - RED: `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` did not exist and PowerShell failed with missing script path.
 - GREEN: `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` passed.
-- Commit: pending first local commit.
+- Commit: `3749f449c627f2aafba523e19e4a34e83b40e23d`
 - localFullLoopGate: L1.
 
 ## Batch 2: Thread Rollover Decision
@@ -24,7 +24,7 @@ Cost Calibration Gate remains blocked.
   `require_new_thread`, and `stop_for_human_handoff` outputs.
 - RED: `Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1` did not exist and PowerShell failed with missing script path.
 - GREEN: `Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1` passed.
-- Commit: pending first local commit.
+- Commit: `3749f449c627f2aafba523e19e4a34e83b40e23d`
 - localFullLoopGate: L1.
 
 ## unattendedStopDecision
@@ -89,13 +89,12 @@ Passed:
 - `npm.cmd run typecheck`
 - `git diff --check`
 - scoped `prettier --write`
-
-Pending final rerun after evidence closeout:
-
 - scoped `prettier --check`
 - required anchor check
-- module-closeout hard block
-- Git completion readiness
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-unattended-automation-control`
+- `Test-GitCompletionReadiness.ps1 -BaseBranch master`
+- pre-commit hard block
+- post-commit advisory
 
 ## L8 Blocked Remainder
 
@@ -111,3 +110,11 @@ cross-module implementation is approved by this evidence.
 
 Decision for this task: `suggest_new_thread` after closeout is reasonable because the next work changes from mechanism
 control back to a business Module Run candidate. A new thread is recommended before entering the next execution module.
+
+## Closeout
+
+- moduleRunVersion: 2
+- localFullLoopGate: L1 completed.
+- threadRolloverGate: `suggest_new_thread` now, `require_new_thread` before changing execution modules.
+- unattendedStopDecision: `continue` for this task after validation.
+- L8 blocked remainder recorded above.
