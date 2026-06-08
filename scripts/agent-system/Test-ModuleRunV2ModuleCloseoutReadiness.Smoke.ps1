@@ -48,27 +48,28 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing module-closeout readiness script: $scriptPath"
 }
 
-$taskId = "module-run-v2-pre-commit-scan-hardening"
-$existingEvidencePath = "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md"
-$existingAuditPath = "docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md"
+$taskId = "module-run-v2-authorization-and-access-pilot"
+$existingEvidencePath = "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-authorization-and-access-pilot.md"
+$existingAuditPath = "docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-authorization-and-access-pilot.md"
 
-$passOutput = @(& $scriptPath -TaskId $taskId -EvidencePath $existingEvidencePath -AuditReviewPath $existingAuditPath -AllowMissingThreadRolloverDecision -AllowMissingNextModuleRunCandidate)
+$passOutput = @(& $scriptPath -TaskId $taskId -EvidencePath $existingEvidencePath -AuditReviewPath $existingAuditPath)
 Assert-Contains -Output $passOutput -Pattern "Module Run v2 Module Closeout Readiness"
 Assert-Contains -Output $passOutput -Pattern "moduleCloseoutMode: hard_block"
 Assert-Contains -Output $passOutput -Pattern "OK_EVIDENCE_PATH"
 Assert-Contains -Output $passOutput -Pattern "OK_AUDIT_PATH"
+Assert-Contains -Output $passOutput -Pattern "OK_BATCH_EVIDENCE_RECORDED"
+Assert-Contains -Output $passOutput -Pattern "OK_RED_EVIDENCE_RECORDED"
+Assert-Contains -Output $passOutput -Pattern "OK_GREEN_EVIDENCE_RECORDED"
+Assert-Contains -Output $passOutput -Pattern "OK_BATCH_COMMIT_EVIDENCE_RECORDED"
+Assert-Contains -Output $passOutput -Pattern "OK_LOCAL_FULL_LOOP_GATE_RECORDED"
 Assert-Contains -Output $passOutput -Pattern "Cost Calibration Gate remains blocked"
 
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_EVIDENCE" -Command {
-    & $scriptPath -TaskId $taskId -EvidencePath "docs/05-execution-logs/evidence/missing-closeout-fixture.md" -AuditReviewPath $existingAuditPath -AllowMissingThreadRolloverDecision -AllowMissingNextModuleRunCandidate
+    & $scriptPath -TaskId $taskId -EvidencePath "docs/05-execution-logs/evidence/missing-closeout-fixture.md" -AuditReviewPath $existingAuditPath
 }
 
-Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_THREAD_ROLLOVER_DECISION" -Command {
-    & $scriptPath -TaskId $taskId -EvidencePath $existingEvidencePath -AuditReviewPath $existingAuditPath -AllowMissingNextModuleRunCandidate
-}
-
-Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_NEXT_MODULE_RUN_CANDIDATE" -Command {
-    & $scriptPath -TaskId $taskId -EvidencePath $existingEvidencePath -AuditReviewPath $existingAuditPath -AllowMissingThreadRolloverDecision
+Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_BATCH_EVIDENCE" -Command {
+    & $scriptPath -TaskId $taskId -EvidencePath "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md" -AuditReviewPath "docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md" -AllowMissingThreadRolloverDecision -AllowMissingNextModuleRunCandidate
 }
 
 Write-Output "Module Run v2 module-closeout readiness smoke passed"

@@ -202,6 +202,20 @@ function Test-ContentPattern {
     }
 }
 
+function Test-ModuleRunV2Evidence {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Content
+    )
+
+    Test-ContentPattern -Content $Content -Pattern "(?mi)\bBatch range\b|^#{2,4}\s*Batch\s+\d+|\bBatch\s+\d+\s*:" -MissingCode "HARD_BLOCK_MISSING_BATCH_EVIDENCE" -OkCode "OK_BATCH_EVIDENCE_RECORDED"
+    Test-ContentPattern -Content $Content -Pattern "(?mi)\bRED\b\s*:" -MissingCode "HARD_BLOCK_MISSING_RED_EVIDENCE" -OkCode "OK_RED_EVIDENCE_RECORDED"
+    Test-ContentPattern -Content $Content -Pattern "(?mi)\bGREEN\b\s*:" -MissingCode "HARD_BLOCK_MISSING_GREEN_EVIDENCE" -OkCode "OK_GREEN_EVIDENCE_RECORDED"
+    Test-ContentPattern -Content $Content -Pattern '(?mi)\bCommit:\s*`?[0-9a-f]{7,40}`?' -MissingCode "HARD_BLOCK_MISSING_BATCH_COMMIT_EVIDENCE" -OkCode "OK_BATCH_COMMIT_EVIDENCE_RECORDED"
+    Test-ContentPattern -Content $Content -Pattern "localFullLoopGate" -MissingCode "HARD_BLOCK_MISSING_LOCAL_FULL_LOOP_GATE" -OkCode "OK_LOCAL_FULL_LOOP_GATE_RECORDED"
+    Test-ContentPattern -Content $Content -Pattern "(?i)\bL8\b|blocked remainder|remain blocked|remains blocked" -MissingCode "HARD_BLOCK_MISSING_BLOCKED_REMAINDER" -OkCode "OK_BLOCKED_REMAINDER_RECORDED"
+}
+
 function Get-ValidationAnchor {
     param(
         [Parameter(Mandatory = $true)]
@@ -272,8 +286,10 @@ if ([string]::IsNullOrWhiteSpace($AuditReviewPath)) {
 }
 
 $validationCommands = @(Get-ListValues -Block $taskBlock -Key "validationCommands")
+$moduleRunVersion = Get-ScalarValue -Block $taskBlock -Key "moduleRunVersion"
 
 Write-Output "taskId: $TaskId"
+Write-Output "moduleRunVersion: $moduleRunVersion"
 
 Write-Section -Title "Module Run v2 Anchors"
 Test-ContentPattern -Content $matrixContent -Pattern "moduleRunVersion:\s*2" -MissingCode "HARD_BLOCK_MISSING_ANCHOR moduleRunVersion: 2" -OkCode "moduleRunVersion: 2"
@@ -326,6 +342,11 @@ if (-not [string]::IsNullOrWhiteSpace($evidenceContent)) {
         Write-Output "WARN_NEXT_MODULE_RUN_CANDIDATE_ALLOWED_MISSING"
     } else {
         Add-Finding "HARD_BLOCK_MISSING_NEXT_MODULE_RUN_CANDIDATE"
+    }
+
+    if ($moduleRunVersion -eq "2") {
+        Write-Section -Title "Module Run v2 Strict Evidence"
+        Test-ModuleRunV2Evidence -Content $evidenceContent
     }
 }
 
