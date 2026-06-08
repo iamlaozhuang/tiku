@@ -8,7 +8,7 @@
 
 ## Summary
 
-- Result: validation pass pending merge, push, and branch cleanup.
+- Result: validation pass; merged to `master`, pushed to `origin/master`, and short-lived branch cleanup completed.
 - Scope: local-only `authorization` read-model / service-contract module batch.
 - Product code changed: yes, within approved `src/server/models`, `src/server/contracts`, `src/server/validators`, `src/server/services`, and corresponding focused tests.
 - Dependency, package, lockfile, schema, migration, repository, API route, Server Action, scripts, e2e, provider, env/secret, staging/prod/cloud/deploy, payment, or external-service changed: no.
@@ -78,15 +78,21 @@
 
 ## Validation Results
 
-| Command                                              | Result | Notes                                                                                                                                     |
-| ---------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm.cmd run lint`                                   | pass   | ESLint completed with exit code 0.                                                                                                        |
-| `npm.cmd run typecheck`                              | pass   | `tsc --noEmit` completed with exit code 0.                                                                                                |
-| Batch focused unit tests                             | pass   | 6 test files passed; 14 tests passed.                                                                                                     |
-| `git diff --check`                                   | pass   | No whitespace errors reported.                                                                                                            |
-| Scoped Prettier check                                | pass   | Initial markdown formatting issue was fixed; final scoped check passed.                                                                   |
-| Required anchor check                                | pass   | Required terminology and blocked-gate anchors were found in code, tests, task plan, evidence, and audit review.                           |
-| `Test-GitCompletionReadiness.ps1 -BaseBranch master` | pass   | Final clean-branch inventory completed; compare is limited to Batch 94 source, tests, task plan, state, evidence, and audit review files. |
+| Command                                              | Result | Notes                                                                                                                                                   |
+| ---------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm.cmd run lint`                                   | pass   | ESLint completed with exit code 0.                                                                                                                      |
+| `npm.cmd run typecheck`                              | pass   | `tsc --noEmit` completed with exit code 0.                                                                                                              |
+| Batch focused unit tests                             | pass   | 6 test files passed; 14 tests passed.                                                                                                                   |
+| `git diff --check`                                   | pass   | No whitespace errors reported.                                                                                                                          |
+| Scoped Prettier check                                | pass   | Initial markdown formatting issue was fixed; final scoped check passed.                                                                                 |
+| Required anchor check                                | pass   | Required terminology and blocked-gate anchors were found in code, tests, task plan, evidence, and audit review.                                         |
+| `Test-GitCompletionReadiness.ps1 -BaseBranch master` | pass   | Final clean-branch inventory completed before merge; compare was limited to Batch 94 source, tests, task plan, state, evidence, and audit review files. |
+
+## Final Git State
+
+- Final `master` / `origin/master` SHA after Batch 94: `9acf7618a0f8611a8b831eb7286512bfc8463789`.
+- Final rollup evidence commit: `9acf7618` (`docs(authorization): add batch 94 rollup evidence`).
+- Short-lived branch `codex/batch-94-authorization-read-model-local-contract` was deleted after merge and push.
 
 ## Residual Gaps
 

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-94-authorization-read-model-local-contract
-updatedAt: "2026-06-08T00:36:00-07:00"
+  currentPhase: batch-94-post-merge-state-reconciliation
+updatedAt: "2026-06-08T00:53:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 90fc92ae725dd5f399d4b76ba8d4a3b2c74419fc
-  lastKnownOriginMasterSha: 90fc92ae725dd5f399d4b76ba8d4a3b2c74419fc
+  lastKnownMasterSha: 9acf7618a0f8611a8b831eb7286512bfc8463789
+  lastKnownOriginMasterSha: 9acf7618a0f8611a8b831eb7286512bfc8463789
 currentTask:
-  id: batch-94-authorization-read-model-local-contract
+  id: batch-94-post-merge-state-reconciliation
   status: done
-  sourceStory: user-request-2026-06-08-module-batch-94
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-authorization-read-model-local-contract-batch.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-read-model-local-contract-batch.md
-  branch: codex/batch-94-authorization-read-model-local-contract
+  sourceStory: user-request-2026-06-08-batch-94-state-reconciliation-and-batch-95-continuation
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-batch-94-post-merge-state-reconciliation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-batch-94-post-merge-state-reconciliation.md
+  branch: codex/batch-94-state-reconciliation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,8 +99,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 94 is implementing the authorization read-model local contract module batch as service-layer pure logic only.
+    Batch 94 post-merge state reconciliation corrected completed Git/evidence state. Next work may register and
+    execute Batch 95 only under a narrow module batch plan with local read-model / service-contract pure logic.
     Do not execute dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment,
     external-service actions, authorization permission model changes, repository/API route/Server Action work, or Cost
     Calibration Gate execution.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-authorization-read-model-local-contract-batch.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-batch-94-post-merge-state-reconciliation.md
