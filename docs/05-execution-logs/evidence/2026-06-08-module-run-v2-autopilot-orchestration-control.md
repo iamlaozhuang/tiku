@@ -135,3 +135,10 @@ business implementation.
 - threadLaunchDecision: ready.
 - autopilotDecision: `launch_new_thread` observed in approved/tool-available scenario.
 - L8 blocked remainder recorded above.
+
+## Post-Merge Validation Repair
+
+- RED: post-merge `master` validation showed `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` still expected
+  `unattendedStopDecision: continue` on protected branch.
+- GREEN: smoke now treats `master` / `main` as expected hard-block contexts and asserts `HARD_BLOCK_PROTECTED_BRANCH`.
+- Scope: smoke-only validation repair; no runtime business behavior changed.

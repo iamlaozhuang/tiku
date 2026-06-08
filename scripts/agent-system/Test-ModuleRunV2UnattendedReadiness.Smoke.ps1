@@ -47,6 +47,9 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing unattended readiness script: $scriptPath"
 }
 
+$currentBranch = ((& git branch --show-current) -join "").Trim()
+$isProtectedBranch = $currentBranch -eq "master" -or $currentBranch -eq "main"
+
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-unattended-readiness-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
 
@@ -102,18 +105,29 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
-    $passOutput = @(
-        & $scriptPath `
-            -TaskId $taskId `
-            -ProjectStatePath $projectStatePath `
-            -QueuePath $queuePath `
-            -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
-            -SkipRemoteAheadCheck
-    )
-    Assert-Contains -Output $passOutput -Pattern "Module Run v2 Unattended Readiness"
-    Assert-Contains -Output $passOutput -Pattern "unattendedReadinessMode: hard_block"
-    Assert-Contains -Output $passOutput -Pattern "unattendedStopDecision: continue"
-    Assert-Contains -Output $passOutput -Pattern "Cost Calibration Gate remains blocked"
+    if ($isProtectedBranch) {
+        Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH $currentBranch" -Command {
+            & $scriptPath `
+                -TaskId $taskId `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+                -SkipRemoteAheadCheck
+        }
+    } else {
+        $passOutput = @(
+            & $scriptPath `
+                -TaskId $taskId `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+                -SkipRemoteAheadCheck
+        )
+        Assert-Contains -Output $passOutput -Pattern "Module Run v2 Unattended Readiness"
+        Assert-Contains -Output $passOutput -Pattern "unattendedReadinessMode: hard_block"
+        Assert-Contains -Output $passOutput -Pattern "unattendedStopDecision: continue"
+        Assert-Contains -Output $passOutput -Pattern "Cost Calibration Gate remains blocked"
+    }
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH master" -Command {
         & $scriptPath -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentBranchOverride "master" -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" -SkipRemoteAheadCheck
@@ -163,4 +177,3 @@ currentTask:
 }
 
 Write-Output "Module Run v2 unattended readiness smoke passed"
-

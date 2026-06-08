@@ -3917,6 +3917,7 @@ tasks:
       - scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1
       - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
       - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
       - docs/04-agent-system/sop/automated-advancement-governance.md
       - docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
       - docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
