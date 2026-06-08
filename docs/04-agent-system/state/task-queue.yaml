@@ -2220,3 +2220,80 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-phase-93-org-auth-training-scope-summary.md
     status: done
     retryCount: 0
+  - id: batch-94-authorization-read-model-local-contract
+    title: Batch 94 Authorization Read Model Local Contract
+    phase: batch-94-authorization-read-model-local-contract
+    sourceStory: user-request-2026-06-08-module-batch-94
+    dependencies:
+      - phase-93-org-auth-training-scope-summary
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested switching to module batch advancement and explicitly authorized Module Batch 94
+      authorization-read-model-local-contract-batch. Scope is limited to src/server/models/**, contracts/**,
+      validators/**, services/**, corresponding *.test.ts, batch task plan, rollup evidence, audit review,
+      project-state.yaml, and task-queue.yaml. Dependency, package/lockfile, schema, migration, src/db/schema/**,
+      drizzle/**, .env.local, .env.example, scripts/**, e2e/**, repository, API route, Server Action, provider,
+      env/secret, staging/prod/cloud/deploy, payment, external-service, real authorization permission model changes,
+      and Cost Calibration Gate execution remain blocked.
+    taskKind: implementation
+    batchMode: module_batch
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-authorization-read-model-local-contract-batch.md
+      - docs/05-execution-logs/evidence/2026-06-08-authorization-read-model-local-contract-batch.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-authorization-read-model-local-contract-batch.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+    riskTypes:
+      - implementation
+      - authorization
+      - personal_auth
+      - org_auth
+      - redeem_code
+      - paper
+      - mock_exam
+      - audit_log
+      - ai_call_log
+      - authorization_permission
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+    subtasks:
+      - id: authorization-source-summary
+        status: done
+        commitSha: 9de37e6c
+      - id: authorization-scope-summary
+        status: done
+        commitSha: de8c4b33
+      - id: authorization-local-contract-summary
+        status: done
+        commitSha: d6deba9a
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- src/server/services/authorization-source-summary-service.test.ts src/server/validators/authorization-source-summary.test.ts src/server/services/authorization-scope-summary-service.test.ts src/server/validators/authorization-scope-summary.test.ts src/server/services/authorization-local-contract-summary-service.test.ts src/server/validators/authorization-local-contract-summary.test.ts
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check src\server\models\authorization-source-summary.ts src\server\contracts\authorization-source-summary-contract.ts src\server\validators\authorization-source-summary.ts src\server\validators\authorization-source-summary.test.ts src\server\services\authorization-source-summary-service.ts src\server\services\authorization-source-summary-service.test.ts src\server\models\authorization-scope-summary.ts src\server\contracts\authorization-scope-summary-contract.ts src\server\validators\authorization-scope-summary.ts src\server\validators\authorization-scope-summary.test.ts src\server\services\authorization-scope-summary-service.ts src\server\services\authorization-scope-summary-service.test.ts src\server\models\authorization-local-contract-summary.ts src\server\contracts\authorization-local-contract-summary-contract.ts src\server\validators\authorization-local-contract-summary.ts src\server\validators\authorization-local-contract-summary.test.ts src\server\services\authorization-local-contract-summary-service.ts src\server\services\authorization-local-contract-summary-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-authorization-read-model-local-contract-batch.md docs\05-execution-logs\evidence\2026-06-08-authorization-read-model-local-contract-batch.md docs\05-execution-logs\audits-reviews\2026-06-08-authorization-read-model-local-contract-batch.md
+      - Select-String -Path src\server\models\authorization-source-summary.ts,src\server\contracts\authorization-source-summary-contract.ts,src\server\validators\authorization-source-summary.ts,src\server\services\authorization-source-summary-service.ts,src\server\services\authorization-source-summary-service.test.ts,src\server\validators\authorization-source-summary.test.ts,src\server\models\authorization-scope-summary.ts,src\server\contracts\authorization-scope-summary-contract.ts,src\server\validators\authorization-scope-summary.ts,src\server\services\authorization-scope-summary-service.ts,src\server\services\authorization-scope-summary-service.test.ts,src\server\validators\authorization-scope-summary.test.ts,src\server\models\authorization-local-contract-summary.ts,src\server\contracts\authorization-local-contract-summary-contract.ts,src\server\validators\authorization-local-contract-summary.ts,src\server\services\authorization-local-contract-summary-service.ts,src\server\services\authorization-local-contract-summary-service.test.ts,src\server\validators\authorization-local-contract-summary.test.ts,docs\05-execution-logs\task-plans\2026-06-08-authorization-read-model-local-contract-batch.md,docs\05-execution-logs\evidence\2026-06-08-authorization-read-model-local-contract-batch.md,docs\05-execution-logs\audits-reviews\2026-06-08-authorization-read-model-local-contract-batch.md -Pattern 'authorization','personal_auth','org_auth','redeem_code','paper','mock_exam','audit_log','ai_call_log','scope_only','local_contract_only','redacted','redacted_reference','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-read-model-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-read-model-local-contract-batch.md
+    status: done
+    retryCount: 0
