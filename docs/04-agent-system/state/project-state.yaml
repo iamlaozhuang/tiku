@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-84-code-stage-narrow-scope-approval-decision-record
-updatedAt: "2026-06-07T20:46:42-07:00"
+  currentPhase: phase-85-first-implementation-slice-approval-draft
+updatedAt: "2026-06-07T20:54:17-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 209a3da4f2b80138e8bfe52845f6fe1f9eeac630
-  lastKnownOriginMasterSha: 209a3da4f2b80138e8bfe52845f6fe1f9eeac630
+  lastKnownMasterSha: ba3060d80d1e1997bf3f58da2f72e6ac1ff7fdac
+  lastKnownOriginMasterSha: ba3060d80d1e1997bf3f58da2f72e6ac1ff7fdac
 currentTask:
-  id: phase-84-code-stage-narrow-scope-approval-decision-record
+  id: phase-85-first-implementation-slice-approval-draft
   status: done
-  sourceStory: user-request-2026-06-07-phase-84-code-stage-narrow-scope-approval-decision-record
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-84-code-stage-narrow-scope-approval-decision-record.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-84-code-stage-narrow-scope-approval-decision-record.md
-  branch: codex/phase-84-code-stage-narrow-scope-approval-decision-record
+  sourceStory: user-request-2026-06-07-phase-85-first-implementation-slice-approval-draft
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-85-first-implementation-slice-approval-draft.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-85-first-implementation-slice-approval-draft.md
+  branch: codex/phase-85-first-implementation-slice-approval-draft
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,11 +99,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 84 records the code-stage narrow-scope approval decision boundary. Docs/state/review/evidence work may continue
-    under local_auto_candidate when queued and scoped. Stop before product code or code-stage queue seeding unless the
-    user grants fresh explicit approval naming the module, task kind, allowed files, blocked files, validation commands,
-    and high-risk exclusions. Do not execute dependency, schema, migration, provider, env/secret,
-    staging/prod/cloud/deploy, payment, external-service actions, authorization permission model changes, queue archive
-    move/delete, code-stage implementation, code-stage queue seeding, or Cost Calibration Gate execution without fresh
-    explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-84-code-stage-narrow-scope-approval-decision-record.md
+    Phase 85 drafts the first implementation slice approval template for an authorization context read-model /
+    service-contract planning boundary. This is an approval draft only and does not approve product implementation or
+    code-stage queue seeding. To proceed, the user must either approve the proposed slice with exact allowed files,
+    blocked files, validation commands, and high-risk exclusions, revise the slice, or continue with docs-only governance
+    preparation. Do not execute dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment,
+    external-service actions, authorization permission model changes, queue archive move/delete, code-stage
+    implementation, code-stage queue seeding, or Cost Calibration Gate execution without fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-85-first-implementation-slice-approval-draft.md
