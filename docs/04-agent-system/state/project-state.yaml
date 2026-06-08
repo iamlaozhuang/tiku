@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: module-run-v2-mechanism-completion
-updatedAt: "2026-06-08T12:35:00-07:00"
+updatedAt: "2026-06-08T13:10:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -56,11 +56,11 @@ repository:
   lastKnownMasterSha: 1ab334a71acbc1124f5fed8c23d37d149b7a7a57
   lastKnownOriginMasterSha: 1ab334a71acbc1124f5fed8c23d37d149b7a7a57
 currentTask:
-  id: module-run-v2-automation-readiness-scorecard-refresh
-  status: in_progress
+  id: module-run-v2-mechanism-completion
+  status: done
   sourceStory: user-request-2026-06-08-module-run-v2-mechanism-completion
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-completion.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
   branch: codex/module-run-v2-mechanism-completion
   commitSha: null
   prUrl: null
@@ -99,6 +99,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete Module Run v2 mechanism hardening before entering the next business execution module. After mechanism
-    closeout, evaluate `ai-task-and-provider` as a proposal only. Cost Calibration Gate remains blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-commit-advisory.md
+    Start a new thread before entering the next business execution module. Evaluate `ai-task-and-provider` as a
+    proposal only; do not cross modules without a fresh Module Run v2 plan and explicit instruction. Cost Calibration
+    Gate remains blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md

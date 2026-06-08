@@ -3504,8 +3504,12 @@ tasks:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-completion.md
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
       - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-*.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
       - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-*.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
       - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-*.md
     blockedFiles:
       - .env.local
@@ -3541,7 +3545,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
-    status: in_progress
+    status: done
     retryCount: 0
   - id: module-run-v2-mechanism-state-source-sync
     title: Module Run v2 Mechanism State Source Sync
@@ -3772,7 +3776,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
-    status: in_progress
+    status: done
     retryCount: 0
   - id: module-run-v2-evidence-redaction-scan-hardening
     title: Module Run v2 Evidence Redaction Scan Hardening
@@ -3784,6 +3788,7 @@ tasks:
     humanApproval: User approved expanding the pre-commit evidence redaction scanner for protected AI, provider, auth, and redeem_code-like content patterns.
     taskKind: implementation
     allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1
       - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
       - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
       - docs/04-agent-system/state/project-state.yaml
@@ -3822,5 +3827,5 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
-    status: pending
+    status: done
     retryCount: 0

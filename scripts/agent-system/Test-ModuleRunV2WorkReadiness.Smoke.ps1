@@ -47,43 +47,98 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing advisory script: $scriptPath"
 }
 
-$taskId = "module-run-v2-start-gate-hardening"
+$fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-work-readiness-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
 
-$preWorkOutput = @(& $scriptPath -Mode pre-work -TaskId $taskId)
-Assert-Contains -Output $preWorkOutput -Pattern "Module Run v2 Work Readiness"
-Assert-Contains -Output $preWorkOutput -Pattern "workReadinessMode: hard_block"
-Assert-Contains -Output $preWorkOutput -Pattern "checkMode: pre-work"
-Assert-Contains -Output $preWorkOutput -Pattern "taskId: $taskId"
-Assert-Contains -Output $preWorkOutput -Pattern "hookIntegrationMatrix: present"
-Assert-Contains -Output $preWorkOutput -Pattern "Cost Calibration Gate remains blocked"
-Assert-Contains -Output $preWorkOutput -Pattern "work readiness passed"
+try {
+    $taskId = "module-run-v2-work-readiness-smoke"
+    $doneTaskId = "module-run-v2-work-readiness-done"
+    $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
+    $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
 
-$plannedFiles = @(
-    "scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1",
-    "scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1",
-    "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-start-gate-hardening.md"
-)
+    @"
+schemaVersion: 1
+currentTask:
+  id: $taskId
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-mechanism-completion.md
+"@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
 
-$preEditOutput = @(& $scriptPath -Mode pre-edit -TaskId $taskId -PlannedFiles $plannedFiles)
-Assert-Contains -Output $preEditOutput -Pattern "checkMode: pre-edit"
-Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1"
-Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1"
-Assert-Contains -Output $preEditOutput -Pattern "work readiness passed"
+    @"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    status: in_progress
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
+    blockedFiles:
+      - .env.local
+      - package.json
+      - src/**
+      - e2e/**
+    riskTypes:
+      - hook_governance
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
+  - id: $doneTaskId
+    status: done
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - hook_governance
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
-Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_TASK_ID" -Command {
-    & $scriptPath -Mode pre-work
-}
+    $preWorkOutput = @(& $scriptPath -Mode pre-work -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath)
+    Assert-Contains -Output $preWorkOutput -Pattern "Module Run v2 Work Readiness"
+    Assert-Contains -Output $preWorkOutput -Pattern "workReadinessMode: hard_block"
+    Assert-Contains -Output $preWorkOutput -Pattern "checkMode: pre-work"
+    Assert-Contains -Output $preWorkOutput -Pattern "taskId: $taskId"
+    Assert-Contains -Output $preWorkOutput -Pattern "hookIntegrationMatrix: present"
+    Assert-Contains -Output $preWorkOutput -Pattern "Cost Calibration Gate remains blocked"
+    Assert-Contains -Output $preWorkOutput -Pattern "work readiness passed"
 
-Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_INACTIVE_TASK" -Command {
-    & $scriptPath -Mode pre-work -TaskId "module-run-v2-mechanism-state-source-sync"
-}
+    $plannedFiles = @(
+        "scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1",
+        "scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1",
+        "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md"
+    )
 
-Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PLANNED_OUT_OF_SCOPE" -Command {
-    & $scriptPath -Mode pre-edit -TaskId $taskId -PlannedFiles "README.md"
-}
+    $preEditOutput = @(& $scriptPath -Mode pre-edit -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -PlannedFiles $plannedFiles)
+    Assert-Contains -Output $preEditOutput -Pattern "checkMode: pre-edit"
+    Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1"
+    Assert-Contains -Output $preEditOutput -Pattern "OK_PLANNED_ALLOWED_FILE scripts/agent-system/Test-ModuleRunV2WorkReadiness.Smoke.ps1"
+    Assert-Contains -Output $preEditOutput -Pattern "work readiness passed"
 
-Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PLANNED_BLOCKED_FILE" -Command {
-    & $scriptPath -Mode pre-edit -TaskId $taskId -PlannedFiles ".env.local"
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_TASK_ID" -Command {
+        & $scriptPath -Mode pre-work -ProjectStatePath $projectStatePath -QueuePath $queuePath
+    }
+
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_INACTIVE_TASK" -Command {
+        & $scriptPath -Mode pre-work -TaskId $doneTaskId -ProjectStatePath $projectStatePath -QueuePath $queuePath
+    }
+
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PLANNED_OUT_OF_SCOPE" -Command {
+        & $scriptPath -Mode pre-edit -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -PlannedFiles "README.md"
+    }
+
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PLANNED_BLOCKED_FILE" -Command {
+        & $scriptPath -Mode pre-edit -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -PlannedFiles ".env.local"
+    }
+} finally {
+    if (Test-Path -LiteralPath $fixtureRoot) {
+        Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
+    }
 }
 
 Write-Output "Module Run v2 work readiness smoke passed"

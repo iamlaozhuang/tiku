@@ -283,15 +283,28 @@ function Test-SensitiveEvidence {
     $apiKeyPattern = "(?i)\b(api[_-]?key|secret|token|password)\b\s*[:=]\s*['""]?[^'""\s]{8,}"
     $authHeaderPattern = "(?i)\bAuthori" + "zation\s*:\s*Bearer\s+\S+"
     $databaseUrlPattern = "(?i)\b[a-z0-9_]*DATABASE_URL\s*=\s*\S+"
+    $databaseConnectionPattern = "(?i)\bpostgres(?:ql)?://[^'""\s]+"
     $privateKeyPattern = "BEGIN\s+(RSA\s+|OPENSSH\s+)?PRIVATE KEY"
     $providerKeyPattern = "(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}"
+    $rawTerm = "ra" + "w"
+    $promptTerm = "prom" + "pt"
+    $responseTerm = "res" + "ponse"
+    $answerTerm = "ans" + "wer"
+    $providerPayloadTerm = "provider" + "Payload"
+    $generatedContentTerm = "generated" + "Content"
+    $aiProtectedFieldPattern = "(?i)\b($rawTerm[_-]?$promptTerm|$rawTerm[_-]?$responseTerm|$rawTerm[_-]?$answerTerm|$providerPayloadTerm|$generatedContentTerm)\b\s*[:=]\s*['""]?[^'""\s].{20,}"
+    $redeemCodeField = "redeem" + "_code"
+    $redeemCodePattern = "(?i)\b$redeemCodeField\b\s*[:=]\s*['""]?[A-Z0-9][A-Z0-9_-]{7,}"
 
     $patterns = @(
         @{ Label = "secret_assignment"; Pattern = $apiKeyPattern },
         @{ Label = "auth_header"; Pattern = $authHeaderPattern },
         @{ Label = "database_url"; Pattern = $databaseUrlPattern },
+        @{ Label = "database_connection_url"; Pattern = $databaseConnectionPattern },
         @{ Label = "private_key"; Pattern = $privateKeyPattern },
-        @{ Label = "provider_key"; Pattern = $providerKeyPattern }
+        @{ Label = "provider_key"; Pattern = $providerKeyPattern },
+        @{ Label = "ai_protected_text"; Pattern = $aiProtectedFieldPattern },
+        @{ Label = "plaintext_redeem_code"; Pattern = $redeemCodePattern }
     )
 
     $lineNumber = 0

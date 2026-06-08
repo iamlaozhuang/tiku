@@ -79,6 +79,38 @@ try {
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BANNED_TERM" -Command {
         & $scriptPath -TaskId $taskId -ChangedFiles $termFixture -SkipScopeScan
     }
+
+    $aiTextFixture = Join-Path -Path $fixtureRoot -ChildPath "ai-protected-evidence.md"
+    $protectedAiField = ("ra" + "w" + "Prom" + "pt")
+    Set-Content -LiteralPath $aiTextFixture -Value "$protectedAiField`: This protected AI request text is long enough to require redaction." -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "ai_protected_text" -Command {
+        & $scriptPath -TaskId $taskId -ChangedFiles $aiTextFixture -SkipScopeScan
+    }
+
+    $payloadFixture = Join-Path -Path $fixtureRoot -ChildPath "provider-payload-evidence.md"
+    $payloadField = ("provider" + "Payload")
+    Set-Content -LiteralPath $payloadFixture -Value "$payloadField`: { ""request"": ""protected provider payload that must not be recorded"" }" -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "ai_protected_text" -Command {
+        & $scriptPath -TaskId $taskId -ChangedFiles $payloadFixture -SkipScopeScan
+    }
+
+    $redeemCodeFixture = Join-Path -Path $fixtureRoot -ChildPath "redeem-code-evidence.md"
+    $redeemCodeField = "redeem" + "_code"
+    Set-Content -LiteralPath $redeemCodeFixture -Value "$redeemCodeField`: ABCD-1234-EFGH" -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "plaintext_redeem_code" -Command {
+        & $scriptPath -TaskId $taskId -ChangedFiles $redeemCodeFixture -SkipScopeScan
+    }
+
+    $databaseUrlFixture = Join-Path -Path $fixtureRoot -ChildPath "database-url-evidence.md"
+    $databaseScheme = "post" + "gresql"
+    Set-Content -LiteralPath $databaseUrlFixture -Value "connection: ${databaseScheme}://user:pass@localhost:5432/tiku" -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "database_connection_url" -Command {
+        & $scriptPath -TaskId $taskId -ChangedFiles $databaseUrlFixture -SkipScopeScan
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
