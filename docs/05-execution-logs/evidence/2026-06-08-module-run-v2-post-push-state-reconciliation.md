@@ -46,7 +46,7 @@ Cost Calibration Gate remains blocked.
 - Goal: keep smoke fixtures valid during the post-merge, pre-push window where `master` is ahead of `origin/master`.
 - RED: master validation after fast-forward merge failed because smoke fixtures used `master~1`, which was not an ancestor of the still-unpushed `origin/master`.
 - GREEN: unattended, autopilot, and pre-push smoke fixtures now use `origin/master~1` as the common ancestor fixture, preserving coverage before and after push.
-- Commit: pending.
+- Commit: `341332a8`.
 - localFullLoopGate: L1 target.
 
 ## Validation
