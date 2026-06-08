@@ -73,12 +73,12 @@ repository:
   lastKnownOriginMasterSha: c6dc4acc5af1987c258e3c1841a60df13960454e
 currentTask:
   id: module-run-v2-autopilot-hardening
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-autopilot-hardening-1234
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-hardening.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-hardening.md
   branch: codex/module-run-v2-autopilot-hardening
-  commitSha: null
+  commitSha: e4e4feed
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -115,7 +115,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete Module Run v2 autopilot hardening for closeout recovery, dry-run handoff decisions, and Codex automation
-    configuration evidence before entering the next business execution module. The next business candidate remains
-    `ai-task-and-provider` as a proposal only. Cost Calibration Gate remains blocked.
+    Start a new guarded recovery cycle before entering the next business execution module. The next business candidate
+    remains `ai-task-and-provider` as a proposal only. Routine automation wakeups should use closeout recovery plus
+    dry-run handoff first. Cost Calibration Gate remains blocked.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-hardening.md

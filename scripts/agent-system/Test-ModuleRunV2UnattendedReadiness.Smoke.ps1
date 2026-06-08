@@ -232,22 +232,30 @@ tasks:
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_TASK_STATUS"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
 
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
+    $dirtyProbePath = Join-Path -Path $PSScriptRoot -ChildPath "module-run-v2-unattended-readiness-smoke.tmp"
     try {
-        $dirtyRecoveryOutput = @(
-            & powershell.exe `
-                -NoProfile `
-                -ExecutionPolicy Bypass `
-                -File $scriptPath `
-                -TaskId $taskId `
-                -ProjectStatePath $projectStatePath `
-                -QueuePath $queuePath `
-                -CloseoutRecovery `
-                -SkipRemoteAheadCheck 2>&1
-        )
+        "dirty probe" | Set-Content -LiteralPath $dirtyProbePath -Encoding UTF8
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $dirtyRecoveryOutput = @(
+                & powershell.exe `
+                    -NoProfile `
+                    -ExecutionPolicy Bypass `
+                    -File $scriptPath `
+                    -TaskId $taskId `
+                    -ProjectStatePath $projectStatePath `
+                    -QueuePath $queuePath `
+                    -CloseoutRecovery `
+                    -SkipRemoteAheadCheck 2>&1
+            )
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
     } finally {
-        $ErrorActionPreference = $previousErrorActionPreference
+        if (Test-Path -LiteralPath $dirtyProbePath) {
+            Remove-Item -LiteralPath $dirtyProbePath -Force
+        }
     }
     Assert-Contains -Output $dirtyRecoveryOutput -Pattern "HARD_BLOCK_CLOSEOUT_RECOVERY_DIRTY_WORKTREE"
 } finally {
