@@ -4479,3 +4479,60 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-stopped-automation-hygiene.md
     status: done
     retryCount: 0
+  - id: module-run-v2-autodrive-mechanism-html-doc
+    title: Module Run v2 Autodrive Mechanism HTML Documentation
+    phase: module-run-v2-autodrive-mechanism-html-doc
+    sourceStory: user-request-2026-06-08-autodrive-mechanism-html-doc
+    dependencies:
+      - module-run-v2-stopped-automation-hygiene
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested a complete and clear systemized HTML description of the existing automated execution mechanism,
+      including implementation documents, scripts, skills, hooks, and visual flow or architecture diagrams, placed in the
+      same directory as prior HTML documents. User then requested closeout by mechanism norms through short-lived branch
+      cleanup. Scope is documentation-only plus governance closeout logs/state/queue. This does not approve product code,
+      provider/env/secret, staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, product
+      e2e implementation, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    moduleRunVersion: 2
+    allowedFiles:
+      - archive/presentations/module-run-v2-autodrive-mechanism.html
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - documentation
+      - automation_policy
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-work -TaskId module-run-v2-autodrive-mechanism-html-doc
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-autodrive-mechanism-html-doc -PlannedFiles archive/presentations/module-run-v2-autodrive-mechanism.html,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown archive\presentations\module-run-v2-autodrive-mechanism.html docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown archive\presentations\module-run-v2-autodrive-mechanism.html docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+      - git diff --check
+      - Select-String -Path archive\presentations\module-run-v2-autodrive-mechanism.html,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md -Pattern 'Module Run v2','Test-ModuleRunV2AutomationStartupReadiness','Test-ModuleRunV2StoppedAutomationHygiene','implementationAutoSeedGate','threadRolloverGate','project-state.yaml','task-queue.yaml','Cost Calibration Gate'
+      - $blockedVisualOrTermPattern = '#000000|Inter|' + ('exam' + '_paper') + '|' + ('lic' + 'ense'); Select-String -Path archive\presentations\module-run-v2-autodrive-mechanism.html -Pattern $blockedVisualOrTermPattern -Quiet; if ($?) { if ($LASTEXITCODE -eq 0) { exit 1 } }; exit 0
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-autodrive-mechanism-html-doc
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+    status: done
+    retryCount: 0

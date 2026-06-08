@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tiku Module Run v2 自动驾驶机制说明</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --surface-soft: #f1f5f9;
+        --ink: #172033;
+        --ink-soft: #475569;
+        --ink-muted: #64748b;
+        --line: #d8dee8;
+        --line-strong: #b7c2d2;
+        --green: #087443;
+        --green-deep: #14532d;
+        --green-soft: #e8f7ef;
+        --blue: #2563eb;
+        --blue-soft: #eaf1ff;
+        --gold: #b45309;
+        --gold-soft: #fff4d6;
+        --red: #c2410c;
+        --red-soft: #fff0e7;
+        --teal: #0f766e;
+        --teal-soft: #e7f7f5;
+        --shadow: 0 18px 40px rgba(23, 32, 51, 0.11);
+        --font-main: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+        --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font-main);
+        line-height: 1.68;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      code,
+      .mono {
+        font-family: var(--font-mono);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 304px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #334155;
+        background: #172033;
+        color: #f1f5f9;
+        padding: 28px 22px;
+      }
+
+      .sidebar h1 {
+        margin: 0;
+        font-size: 21px;
+        line-height: 1.28;
+        letter-spacing: 0;
+      }
+
+      .sidebar .caption {
+        margin: 10px 0 24px;
+        color: #cbd5e1;
+        font-size: 13px;
+      }
+
+      .nav {
+        display: grid;
+        gap: 6px;
+      }
+
+      .nav a {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 8px;
+        align-items: center;
+        padding: 9px 10px;
+        border-radius: 8px;
+        color: #dbeafe;
+        font-size: 14px;
+        text-decoration: none;
+      }
+
+      .nav a:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .nav span {
+        color: #93c5fd;
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      main {
+        min-width: 0;
+      }
+
+      .hero {
+        background: #173326;
+        color: #f8fafc;
+        padding: 62px 56px 44px;
+      }
+
+      .hero-inner {
+        max-width: 1180px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 5px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        border-radius: 8px;
+        color: #fde68a;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .hero h2 {
+        max-width: 980px;
+        margin: 22px 0 16px;
+        font-size: 44px;
+        line-height: 1.16;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 940px;
+        margin: 0;
+        color: #dbe4ef;
+        font-size: 18px;
+      }
+
+      .status-bar {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 30px;
+      }
+
+      .status-card {
+        min-height: 112px;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .status-card strong {
+        display: block;
+        color: #ffffff;
+        font-size: 25px;
+        line-height: 1.15;
+      }
+
+      .status-card span {
+        display: block;
+        margin-top: 8px;
+        color: #cbd5e1;
+        font-size: 13px;
+      }
+
+      .content {
+        max-width: 1240px;
+        padding: 36px 56px 76px;
+      }
+
+      section {
+        margin-bottom: 44px;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: 58px 1fr;
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .section-num {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        background: var(--green);
+        color: #ffffff;
+        font-family: var(--font-mono);
+        font-weight: 900;
+      }
+
+      h3 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 28px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      h4 {
+        margin: 0 0 8px;
+        color: var(--ink);
+        font-size: 18px;
+        line-height: 1.35;
+      }
+
+      .lead {
+        margin: 8px 0 0;
+        color: var(--ink-soft);
+        font-size: 16px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .panel-body {
+        padding: 24px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card,
+      .callout {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 18px;
+      }
+
+      .card p,
+      .callout p,
+      .step p,
+      .small {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      .callout {
+        border-left: 5px solid var(--green);
+      }
+
+      .callout.blue {
+        border-left-color: var(--blue);
+        background: var(--blue-soft);
+      }
+
+      .callout.gold {
+        border-left-color: var(--gold);
+        background: var(--gold-soft);
+      }
+
+      .callout.red {
+        border-left-color: var(--red);
+        background: var(--red-soft);
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        margin-bottom: 10px;
+        padding: 3px 8px;
+        border-radius: 8px;
+        background: var(--green-soft);
+        color: var(--green-deep);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .tag.blue {
+        background: var(--blue-soft);
+        color: #1d4ed8;
+      }
+
+      .tag.gold {
+        background: var(--gold-soft);
+        color: #92400e;
+      }
+
+      .tag.red {
+        background: var(--red-soft);
+        color: #9a3412;
+      }
+
+      .tag.teal {
+        background: var(--teal-soft);
+        color: #115e59;
+      }
+
+      .architecture {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 14px;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .flow-node {
+        position: relative;
+        min-height: 132px;
+        padding: 14px 12px;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .flow-node::after {
+        content: "→";
+        position: absolute;
+        top: 42px;
+        right: -14px;
+        color: var(--ink-muted);
+        font-weight: 900;
+      }
+
+      .flow-node:last-child::after {
+        content: "";
+      }
+
+      .flow-node strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--green-deep);
+        font-size: 15px;
+      }
+
+      .flow-node span {
+        color: var(--ink-soft);
+        font-size: 12px;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 8px;
+        background: var(--surface);
+        font-size: 14px;
+      }
+
+      .table th {
+        background: #e2e8f0;
+        color: #334155;
+        text-align: left;
+        font-size: 13px;
+      }
+
+      .table th,
+      .table td {
+        border: 1px solid var(--line);
+        padding: 12px;
+        vertical-align: top;
+      }
+
+      .table td {
+        color: var(--ink-soft);
+      }
+
+      .checklist {
+        display: grid;
+        gap: 10px;
+      }
+
+      .check {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+        align-items: start;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .check mark {
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        background: var(--green-soft);
+        color: var(--green-deep);
+        font-weight: 900;
+      }
+
+      .check strong {
+        display: block;
+        margin-bottom: 2px;
+      }
+
+      .check span {
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      .decision-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .decision {
+        min-height: 106px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 13px;
+      }
+
+      .decision strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--ink);
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      .decision span {
+        color: var(--ink-soft);
+        font-size: 13px;
+      }
+
+      .footer-note {
+        margin-top: 42px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        color: var(--ink-muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 1080px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: relative;
+          height: auto;
+        }
+
+        .nav {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .hero,
+        .content {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+
+        .status-bar,
+        .grid-4,
+        .decision-grid,
+        .flow {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .flow-node::after {
+          display: none;
+        }
+
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero h2 {
+          font-size: 34px;
+        }
+
+        .nav,
+        .status-bar,
+        .grid-4,
+        .decision-grid,
+        .flow {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media print {
+        .layout {
+          display: block;
+        }
+
+        .sidebar {
+          display: none;
+        }
+
+        .hero {
+          padding: 34px;
+        }
+
+        .content {
+          padding: 28px;
+        }
+
+        section {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>Tiku Module Run v2 自动驾驶机制</h1>
+        <p class="caption">系统化说明 · local_auto_candidate · 2026-06-08</p>
+        <nav class="nav" aria-label="页面目录">
+          <a href="#summary"><span>01</span>总体结论</a>
+          <a href="#architecture"><span>02</span>机制架构</a>
+          <a href="#sources"><span>03</span>状态源</a>
+          <a href="#startup"><span>04</span>自动化启动</a>
+          <a href="#execution"><span>05</span>任务执行</a>
+          <a href="#thread"><span>06</span>线程控制</a>
+          <a href="#hooks"><span>07</span>Hooks 与门禁</a>
+          <a href="#cleanup"><span>08</span>残留清理</a>
+          <a href="#modules"><span>09</span>模块推进</a>
+          <a href="#boundaries"><span>10</span>硬阻断</a>
+          <a href="#skills"><span>11</span>技能与工具</a>
+          <a href="#operator"><span>12</span>操作手册</a>
+        </nav>
+      </aside>
+
+      <main>
+        <header class="hero">
+          <div class="hero-inner">
+            <div class="eyebrow">Module Run v2 · Codex Autodrive Operating Model</div>
+            <h2>从“定时醒来”到“安全推进”的无人值守自动执行机制</h2>
+            <p>
+              当前机制不是让 Codex 随机开工，而是让它在 Codex 自动化定时唤醒后，先读取仓库内的持久状态，再经过
+              startup、lease、scope、thread、closeout、hook、evidence 等多层门禁，只有在边界清晰且验证可落地时才继续推进。
+              遇到硬阻断、活跃线程、脏 worktree、高风险面或缺证据时，它必须停下并交接。
+            </p>
+            <div class="status-bar">
+              <div class="status-card">
+                <strong>ACTIVE</strong>
+                <span>Codex automation id: <span class="mono">tiku-module-run-v2-autopilot</span></span>
+              </div>
+              <div class="status-card">
+                <strong>hourly</strong>
+                <span>项目状态记录的自动化唤醒节奏</span>
+              </div>
+              <div class="status-card">
+                <strong>worktree</strong>
+                <span>自动化执行环境，配合 lease 避免互相干扰</span>
+              </div>
+              <div class="status-card">
+                <strong>guarded</strong>
+                <span>只允许本地安全推进，高风险动作保持 blocked</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="content">
+          <section id="summary">
+            <div class="section-head">
+              <div class="section-num">01</div>
+              <div>
+                <h3>总体结论</h3>
+                <p class="lead">自动驾驶机制已经形成闭环，但它的成熟形态是“受控无人值守”，不是无边界自治。</p>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="callout">
+                <h4>能自动做什么</h4>
+                <p>
+                  定时醒来、恢复状态、判断是否已有运行占用通道、选择或准备合法 pending 任务、生成 handoff、执行低风险本地任务、跑门禁、写 evidence、在允许范围内继续。
+                </p>
+              </div>
+              <div class="callout gold">
+                <h4>什么时候必须停</h4>
+                <p>
+                  远端领先、脏 worktree、active lease、缺 task plan/evidence、高风险面、scope 漂移、验证失败、需要新线程但 launch policy 不允许、Cost Calibration Gate 等场景必须停。
+                </p>
+              </div>
+              <div class="callout blue">
+                <h4>怎么保证不各干各的</h4>
+                <p>
+                  通过 automation lease、startup readiness、task-queue 状态、thread rollover、handoff 文件、Git inventory 和 stopped automation hygiene 共同协调。
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section id="architecture">
+            <div class="section-head">
+              <div class="section-num">02</div>
+              <div>
+                <h3>机制架构图</h3>
+                <p class="lead">Codex 自动化只是入口；真正的控制逻辑落在仓库内的 YAML、SOP、PowerShell 脚本、Git Hooks 与 evidence 中。</p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-body">
+                <div class="architecture" aria-label="机制架构图">
+                  <svg viewBox="0 0 1120 560" width="100%" height="560" role="img" aria-label="Tiku Module Run v2 自动驾驶机制架构">
+                    <defs>
+                      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"></path>
+                      </marker>
+                    </defs>
+
+                    <rect x="34" y="42" width="220" height="88" rx="8" fill="#e8f7ef" stroke="#087443" />
+                    <text x="144" y="76" text-anchor="middle" fill="#14532d" font-size="18" font-weight="800">Codex 自动化</text>
+                    <text x="144" y="104" text-anchor="middle" fill="#475569" font-size="13">hourly · worktree · ACTIVE</text>
+
+                    <rect x="330" y="42" width="230" height="88" rx="8" fill="#eaf1ff" stroke="#2563eb" />
+                    <text x="445" y="72" text-anchor="middle" fill="#1d4ed8" font-size="18" font-weight="800">启动控制面</text>
+                    <text x="445" y="100" text-anchor="middle" fill="#475569" font-size="13">startup + lease + hygiene</text>
+
+                    <rect x="650" y="42" width="220" height="88" rx="8" fill="#fff4d6" stroke="#b45309" />
+                    <text x="760" y="72" text-anchor="middle" fill="#92400e" font-size="18" font-weight="800">任务状态源</text>
+                    <text x="760" y="100" text-anchor="middle" fill="#475569" font-size="13">state + queue + matrix</text>
+
+                    <rect x="34" y="226" width="220" height="88" rx="8" fill="#f8fafc" stroke="#64748b" />
+                    <text x="144" y="258" text-anchor="middle" fill="#334155" font-size="18" font-weight="800">执行控制面</text>
+                    <text x="144" y="286" text-anchor="middle" fill="#475569" font-size="13">unattended + autopilot</text>
+
+                    <rect x="330" y="226" width="230" height="88" rx="8" fill="#e7f7f5" stroke="#0f766e" />
+                    <text x="445" y="258" text-anchor="middle" fill="#115e59" font-size="18" font-weight="800">线程与交接</text>
+                    <text x="445" y="286" text-anchor="middle" fill="#475569" font-size="13">rollover + handoff + launch policy</text>
+
+                    <rect x="650" y="226" width="220" height="88" rx="8" fill="#fff0e7" stroke="#c2410c" />
+                    <text x="760" y="258" text-anchor="middle" fill="#9a3412" font-size="18" font-weight="800">硬阻断面</text>
+                    <text x="760" y="286" text-anchor="middle" fill="#475569" font-size="13">provider/env/schema/deploy 等</text>
+
+                    <rect x="34" y="410" width="220" height="88" rx="8" fill="#ffffff" stroke="#b7c2d2" />
+                    <text x="144" y="442" text-anchor="middle" fill="#172033" font-size="18" font-weight="800">本地验证</text>
+                    <text x="144" y="470" text-anchor="middle" fill="#475569" font-size="13">lint · typecheck · tests · diff</text>
+
+                    <rect x="330" y="410" width="230" height="88" rx="8" fill="#ffffff" stroke="#b7c2d2" />
+                    <text x="445" y="442" text-anchor="middle" fill="#172033" font-size="18" font-weight="800">Evidence / Audit</text>
+                    <text x="445" y="470" text-anchor="middle" fill="#475569" font-size="13">task plan · evidence · review</text>
+
+                    <rect x="650" y="410" width="220" height="88" rx="8" fill="#ffffff" stroke="#b7c2d2" />
+                    <text x="760" y="442" text-anchor="middle" fill="#172033" font-size="18" font-weight="800">Git Hooks</text>
+                    <text x="760" y="470" text-anchor="middle" fill="#475569" font-size="13">pre-commit · post-commit · pre-push</text>
+
+                    <rect x="930" y="226" width="158" height="88" rx="8" fill="#fff0e7" stroke="#c2410c" />
+                    <text x="1009" y="258" text-anchor="middle" fill="#9a3412" font-size="18" font-weight="800">人工接管</text>
+                    <text x="1009" y="286" text-anchor="middle" fill="#475569" font-size="13">硬阻断 / 高风险审批</text>
+
+                    <path d="M 256 86 L 326 86" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 562 86 L 646 86" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 760 132 L 760 222" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 648 270 L 564 270" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 328 270 L 258 270" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 144 316 L 144 406" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 256 454 L 326 454" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 562 454 L 646 454" stroke="#475569" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 872 270 L 926 270" stroke="#c2410c" stroke-width="2.4" marker-end="url(#arrow)" />
+                    <path d="M 1009 226 C 1009 160 880 146 792 130" stroke="#c2410c" stroke-width="2.2" fill="none" marker-end="url(#arrow)" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="sources">
+            <div class="section-head">
+              <div class="section-num">03</div>
+              <div>
+                <h3>状态源：自动化不是靠聊天记忆推进</h3>
+                <p class="lead">每次醒来都必须从仓库里的持久文件恢复，而不是凭上一段对话继续。</p>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>状态源</th>
+                  <th>职责</th>
+                  <th>自动化如何使用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">AGENTS.md</td>
+                  <td>项目命名规范、Git 纪律、AI 执行纪律、禁区和交付 checklist。</td>
+                  <td>任何修改前必须读取；决定术语、分支、提交、验证和最终自检规则。</td>
+                </tr>
+                <tr>
+                  <td class="mono">docs/03-standards/code-taste-ten-commandments.md</td>
+                  <td>代码品味与交付底线。</td>
+                  <td>修改前读取，结束时输出品味合规自检。</td>
+                </tr>
+                <tr>
+                  <td class="mono">docs/02-architecture/adr/</td>
+                  <td>架构决策：技术栈、运行分层、多端契约、环境隔离、staging 边界。</td>
+                  <td>防止 Agent 越过既定架构，例如不直接返回 DB row、不绕过服务层、不触碰 staging/prod。</td>
+                </tr>
+                <tr>
+                  <td class="mono">project-state.yaml</td>
+                  <td>当前阶段、当前任务、自动化模式、Codex automation id、lease 路径、handoff。</td>
+                  <td>startup gate 的主要恢复点，用来判断当前任务、下一步和自动化批准状态。</td>
+                </tr>
+                <tr>
+                  <td class="mono">task-queue.yaml</td>
+                  <td>任务队列、依赖、allowedFiles、blockedFiles、riskTypes、validationCommands。</td>
+                  <td>任务领取、scope scan、pre-work、pre-edit、pre-commit 的判断依据。</td>
+                </tr>
+                <tr>
+                  <td class="mono">advanced-edition-domain-module-run-matrix.yaml</td>
+                  <td>Module Run v2 的 execution module、localFullLoopGate、threadRolloverGate、automationHandoffPolicy。</td>
+                  <td>决定模块推进顺序、批次边界、线程切换、下一模块候选和 blocked remainder。</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section id="startup">
+            <div class="section-head">
+              <div class="section-num">04</div>
+              <div>
+                <h3>自动化启动流程</h3>
+                <p class="lead">Codex 自动化醒来后的第一目标不是开工，而是判断“现在是否应该开工”。</p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-body">
+                <div class="flow">
+                  <div class="flow-node">
+                    <strong>定时醒来</strong>
+                    <span>Codex app automation 按项目状态记录的 hourly 节奏运行。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>读状态源</strong>
+                    <span>读取 state、queue、matrix、latest evidence。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>Startup Gate</strong>
+                    <span><code>Test-ModuleRunV2AutomationStartupReadiness.ps1</code></span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>Lease Gate</strong>
+                    <span><code>Test-ModuleRunV2AutomationLeaseReadiness.ps1</code></span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>Worktree Hygiene</strong>
+                    <span>发现 stale/dirty automation worktree 时停止。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>Queue Decision</strong>
+                    <span>continue_current_task / prepare_next_task / closeout_recovery。</span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>Autopilot</strong>
+                    <span><code>Invoke-ModuleRunV2Autopilot.ps1</code></span>
+                  </div>
+                  <div class="flow-node">
+                    <strong>Hard Stop</strong>
+                    <span>active lease、无合法任务、blocked gate、远端漂移则停。</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="decision-grid" style="margin-top: 18px">
+              <div class="decision"><strong>continue_current_task</strong><span>当前 task 为 in_progress，且启动门禁通过。</span></div>
+              <div class="decision"><strong>prepare_next_task</strong><span>当前 task 已 done，队列里有 pending 且可准备。</span></div>
+              <div class="decision"><strong>closeout_recovery</strong><span>当前 task 完成但需要恢复 closeout 对账。</span></div>
+              <div class="decision"><strong>stop_existing_run_active</strong><span>已有 non-expired lease，说明另一个运行拥有通道。</span></div>
+              <div class="decision"><strong>stop_for_hard_block</strong><span>启动门禁发现不可自动修复的问题。</span></div>
+              <div class="decision"><strong>no_executable_task</strong><span>没有合法 pending/in-progress 任务。</span></div>
+            </div>
+          </section>
+
+          <section id="execution">
+            <div class="section-head">
+              <div class="section-num">05</div>
+              <div>
+                <h3>任务执行机制</h3>
+                <p class="lead">执行不是“看到 pending 就改代码”，而是先过 pre-work/pre-edit，再按 Batch 或 task 的 focused scope 推进。</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>执行前硬门禁</h4>
+                  <div class="checklist">
+                    <div class="check"><mark>1</mark><div><strong>pre-work</strong><span><code>Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-work -TaskId &lt;task&gt;</code> 校验任务存在、未完成、路径齐全、分支合法。</span></div></div>
+                    <div class="check"><mark>2</mark><div><strong>pre-edit</strong><span>同脚本的 <code>-Mode pre-edit</code> 校验 planned files 是否都在 allowedFiles 且不碰 blockedFiles。</span></div></div>
+                    <div class="check"><mark>3</mark><div><strong>unattended</strong><span><code>Test-ModuleRunV2UnattendedReadiness.ps1</code> 判断是否可继续无人值守。</span></div></div>
+                    <div class="check"><mark>4</mark><div><strong>implementation auto-seed</strong><span><code>Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1</code> 控制 planning 后是否可进入低风险实现。</span></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>执行中约束</h4>
+                  <table class="table">
+                    <tbody>
+                      <tr>
+                        <td class="mono">allowedFiles</td>
+                        <td>唯一允许触碰的文件面。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">blockedFiles</td>
+                        <td>只要触碰就硬阻断，除非任务有新的明确批准。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">riskTypes</td>
+                        <td>决定是否需要人工批准或额外 evidence。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">validationCommands</td>
+                        <td>完成前必须运行并记录的验证命令。</td>
+                      </tr>
+                      <tr>
+                        <td class="mono">taskKind</td>
+                        <td>区分 docs_only、implementation、local_verification、closeout、blocked_gate 等执行性质。</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="thread">
+            <div class="section-head">
+              <div class="section-num">06</div>
+              <div>
+                <h3>线程控制与 handoff</h3>
+                <p class="lead">“新线程”不是普通脚本能直接创建的动作，而是 PowerShell 产出决策，Codex agent layer 再调用线程工具。</p>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="card">
+                <span class="tag">决策脚本</span>
+                <h4><code>Test-ModuleRunV2ThreadRolloverReadiness.ps1</code></h4>
+                <p>根据 Batch 数、上下文压力、高风险边界和 closeout 状态给出 continue/suggest/require new thread。</p>
+              </div>
+              <div class="card">
+                <span class="tag blue">交接生成</span>
+                <h4><code>New-ModuleRunV2ThreadHandoff.ps1</code></h4>
+                <p>生成包含 current module、completed batches、latest SHA、evidence、blocked gates、next allowed task 的 handoff。</p>
+              </div>
+              <div class="card">
+                <span class="tag gold">启动策略</span>
+                <h4><code>Test-ModuleRunV2ThreadLaunchPolicy.ps1</code></h4>
+                <p>只有返回 launch_new_thread，且 Codex 线程工具可用时，agent layer 才可调用 create_thread。</p>
+              </div>
+            </div>
+
+            <div class="callout" style="margin-top: 18px">
+              <h4>关键边界</h4>
+              <p>
+                PowerShell 脚本不直接创建 Codex 线程；它只输出机器可读的决策。真正的线程创建由 Codex 的
+                <span class="mono">create_thread</span> / <span class="mono">send_message_to_thread</span> 工具执行，并且必须满足 launch policy。
+              </p>
+            </div>
+          </section>
+
+          <section id="hooks">
+            <div class="section-head">
+              <div class="section-num">07</div>
+              <div>
+                <h3>Hooks 与门禁实现</h3>
+                <p class="lead">Hook 层保证“人或 Agent 想跳过流程”时，本地 Git 也会拦住关键风险。</p>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>层级</th>
+                  <th>实现文件</th>
+                  <th>强度</th>
+                  <th>检查内容</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>pre-work / pre-edit</td>
+                  <td class="mono">Test-ModuleRunV2WorkReadiness.ps1</td>
+                  <td>hard block</td>
+                  <td>TaskId、计划/evidence/audit 路径、分支、allowedFiles、blockedFiles。</td>
+                </tr>
+                <tr>
+                  <td>pre-commit</td>
+                  <td class="mono">.husky/pre-commit<br />Test-ModuleRunV2PreCommitHardening.ps1</td>
+                  <td>hard block</td>
+                  <td>scope scan、敏感 evidence、术语禁用、lint-staged、lint、typecheck。</td>
+                </tr>
+                <tr>
+                  <td>post-commit</td>
+                  <td class="mono">Test-ModuleRunV2PostCommitReadiness.ps1</td>
+                  <td>advisory</td>
+                  <td>last commit、changed files、task/evidence/audit inventory、scope summary。</td>
+                </tr>
+                <tr>
+                  <td>pre-push</td>
+                  <td class="mono">.husky/pre-push<br />Test-ModuleRunV2PrePushReadiness.ps1</td>
+                  <td>hard block</td>
+                  <td>GitCompletionReadiness、远端领先、state SHA 祖先关系、evidence/audit 存在。</td>
+                </tr>
+                <tr>
+                  <td>module-closeout</td>
+                  <td class="mono">Test-ModuleRunV2ModuleCloseoutReadiness.ps1</td>
+                  <td>hard block</td>
+                  <td>Batch、RED/GREEN、commit、localFullLoopGate、threadRolloverGate、nextModuleRunCandidate、L8 remainder。</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section id="cleanup">
+            <div class="section-head">
+              <div class="section-num">08</div>
+              <div>
+                <h3>停止后的残留清理机制</h3>
+                <p class="lead">当自动化醒来发现“已有线程在工作”而停止时，它不能随手删东西；必须先盘点、分类、再只清理可证明安全的残留。</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>盘点脚本</h4>
+                  <p class="small">
+                    <code>Test-ModuleRunV2StoppedAutomationHygiene.ps1</code> 默认只读，检查 automation lease、Codex worktree root、system temp 里的 dry-run handoff 目录。
+                  </p>
+                  <div class="decision-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 14px">
+                    <div class="decision"><strong>clean</strong><span>无残留或无需要处理的对象。</span></div>
+                    <div class="decision"><strong>cleanup_available</strong><span>发现可安全清理对象，但未执行清理。</span></div>
+                    <div class="decision"><strong>cleanup_completed</strong><span>显式 <code>-Cleanup</code> 后完成安全清理。</span></div>
+                    <div class="decision"><strong>stop_dirty_worktree</strong><span>有未提交改动，必须人工检查。</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>清理边界</h4>
+                  <div class="checklist">
+                    <div class="check"><mark>✓</mark><div><strong>可清理</strong><span>expired clean lease、stale clean automation worktree、<code>tiku-autopilot-handoff-*</code> temp dir。</span></div></div>
+                    <div class="check"><mark>×</mark><div><strong>不可清理</strong><span>active lease、invalid lease、dirty worktree、仓库源码、env 文件、依赖文件、schema、migration、evidence logs。</span></div></div>
+                    <div class="check"><mark>!</mark><div><strong>路径约束</strong><span>所有删除都必须在 Codex automation root 或系统 temp root 内完成。</span></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="modules">
+            <div class="section-head">
+              <div class="section-num">09</div>
+              <div>
+                <h3>模块推进模型：需求到模块到任务到批次</h3>
+                <p class="lead">Module Run v2 把高级版推进拆成 execution module，再由每个 Module Run 内部批量推进 3-6 个小 Batch。</p>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>execution module</th>
+                  <th>当前定位</th>
+                  <th>目标 localFullLoopGate</th>
+                  <th>关键阻断</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">authorization-and-access</td>
+                  <td>用户、组织、授权上下文基础模块；Batch 94-100 是历史基线。</td>
+                  <td>L4 local API or Server Action contract</td>
+                  <td>不得改变真实 permission model，不新增角色/权限/配额。</td>
+                </tr>
+                <tr>
+                  <td class="mono">ai-task-and-provider</td>
+                  <td>下一候选模块；先做 provider-agnostic lifecycle，不执行真实 provider。</td>
+                  <td>L2 unit 起步，后续桥接本地体验链</td>
+                  <td>provider/env/secret、raw prompt/response、Cost Calibration Gate blocked。</td>
+                </tr>
+                <tr>
+                  <td class="mono">personal-learning-ai</td>
+                  <td>学生侧个人学习 AI 体验链。</td>
+                  <td>L5 local UI/browser</td>
+                  <td>不生成、不保存、不暴露原始 AI 内容。</td>
+                </tr>
+                <tr>
+                  <td class="mono">organization-training</td>
+                  <td>组织训练、管理员与员工角色流。</td>
+                  <td>L6 role_flow</td>
+                  <td>不得暴露员工主观作答文本或完整 paper 内容。</td>
+                </tr>
+                <tr>
+                  <td class="mono">organization-analytics</td>
+                  <td>聚合统计和隐私保护分析。</td>
+                  <td>L5 local UI/browser</td>
+                  <td>不得暴露非聚合员工细节或私有作答 payload。</td>
+                </tr>
+                <tr>
+                  <td class="mono">ops-governance-and-retention</td>
+                  <td>运营治理、保留、恢复边界、redacted reference。</td>
+                  <td>L6 role_flow</td>
+                  <td>不得执行真实删除、恢复、清理或破坏性数据动作。</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section id="boundaries">
+            <div class="section-head">
+              <div class="section-num">10</div>
+              <div>
+                <h3>硬阻断边界</h3>
+                <p class="lead">这些边界是自动驾驶稳定性的核心：宁可停下，也不能悄悄越界。</p>
+              </div>
+            </div>
+
+            <div class="grid-4">
+              <div class="card"><span class="tag red">blocked</span><h4>Cost Calibration Gate</h4><p>仍保持 blocked，不执行 provider 成本测量或真实样本调用。</p></div>
+              <div class="card"><span class="tag red">blocked</span><h4>env / secret</h4><p>不读、不写、不复制、不记录 `.env.local`、key、token、数据库 URL。</p></div>
+              <div class="card"><span class="tag red">blocked</span><h4>schema / migration</h4><p>不改 `src/db/schema/**`、`drizzle/**`，不执行 destructive data action。</p></div>
+              <div class="card"><span class="tag red">blocked</span><h4>provider / deploy</h4><p>不触碰 real provider、staging/prod/cloud/deploy/payment/external-service。</p></div>
+            </div>
+          </section>
+
+          <section id="skills">
+            <div class="section-head">
+              <div class="section-num">11</div>
+              <div>
+                <h3>技能、工具与落地手段</h3>
+                <p class="lead">机制落地不依赖单一工具，而是由 Codex app capability、仓库脚本、Git Hooks 和技能调度共同完成。</p>
+              </div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>手段</th>
+                  <th>用于什么</th>
+                  <th>落地位置</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Codex app automation</td>
+                  <td>按配置定时唤醒，在新线程/工作环境中启动自动化运行。</td>
+                  <td>Codex 应用层；项目内通过 <span class="mono">project-state.yaml</span> 记录 id、schedule、status、executionEnvironment。</td>
+                </tr>
+                <tr>
+                  <td>Thread tools</td>
+                  <td>当 launch policy 允许时，由 agent layer 创建或发送新线程。</td>
+                  <td><span class="mono">create_thread</span> / <span class="mono">send_message_to_thread</span> 等 Codex 线程工具。</td>
+                </tr>
+                <tr>
+                  <td>Skill dispatch</td>
+                  <td>根据任务选择浏览器、Playwright、文档、设计、安全等能力。</td>
+                  <td><span class="mono">docs/04-agent-system/sop/skill-dispatch-matrix.md</span> 与 Codex skills。</td>
+                </tr>
+                <tr>
+                  <td>PowerShell gates</td>
+                  <td>把流程判断机器化，返回 pass/fail 和决策标签。</td>
+                  <td><span class="mono">scripts/agent-system/*.ps1</span>。</td>
+                </tr>
+                <tr>
+                  <td>Husky hooks</td>
+                  <td>在 commit/push 时强制执行本地硬阻断。</td>
+                  <td><span class="mono">.husky/pre-commit</span>、<span class="mono">.husky/pre-push</span>、post-commit advisory。</td>
+                </tr>
+                <tr>
+                  <td>Evidence files</td>
+                  <td>把“为什么能继续/为什么必须停”沉淀为可审查事实。</td>
+                  <td><span class="mono">docs/05-execution-logs/task-plans</span>、<span class="mono">evidence</span>、<span class="mono">audits-reviews</span>。</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section id="operator">
+            <div class="section-head">
+              <div class="section-num">12</div>
+              <div>
+                <h3>操作手册：如何判断自动驾驶是否能继续</h3>
+                <p class="lead">给人和 Agent 的共同检查清单。</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>自动化醒来时</h4>
+                  <div class="checklist">
+                    <div class="check"><mark>1</mark><div><strong>先跑 startup</strong><span><code>Test-ModuleRunV2AutomationStartupReadiness.ps1</code>。</span></div></div>
+                    <div class="check"><mark>2</mark><div><strong>确认 lease</strong><span>no_active_lease 或 expired_lease_reclaimable 才能继续；active lease 必须停。</span></div></div>
+                    <div class="check"><mark>3</mark><div><strong>确认任务</strong><span>只接 pending 且依赖完成的任务，或继续 in_progress 的当前任务。</span></div></div>
+                    <div class="check"><mark>4</mark><div><strong>确认 scope</strong><span>planned files 必须完全匹配 allowedFiles，不得碰 blockedFiles。</span></div></div>
+                    <div class="check"><mark>5</mark><div><strong>确认 thread</strong><span>需要新线程时先生成 handoff，再由 launch policy 决定是否调用线程工具。</span></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-body">
+                  <h4>任务收尾时</h4>
+                  <div class="checklist">
+                    <div class="check"><mark>1</mark><div><strong>跑 focused tests</strong><span>机制任务跑 smoke；业务任务先 RED 后 GREEN。</span></div></div>
+                    <div class="check"><mark>2</mark><div><strong>跑全局门禁</strong><span>lint、typecheck、diff、prettier、anchor check。</span></div></div>
+                    <div class="check"><mark>3</mark><div><strong>写 closeout evidence</strong><span>Batch、RED/GREEN、commit、localFullLoopGate、threadRolloverGate、nextModuleRunCandidate、L8 remainder。</span></div></div>
+                    <div class="check"><mark>4</mark><div><strong>跑 closeout</strong><span><code>Test-ModuleRunV2ModuleCloseoutReadiness.ps1</code>。</span></div></div>
+                    <div class="check"><mark>5</mark><div><strong>push 前确认</strong><span><code>Test-ModuleRunV2PrePushReadiness.ps1</code>，Husky pre-push 还会再跑一次。</span></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="callout gold" style="margin-top: 18px">
+              <h4>当前下一步</h4>
+              <p>
+                当前机制收口后，startup readiness 的合理结果应是 <span class="mono">prepare_next_task</span>，下一队列候选仍是
+                <span class="mono">module-run-v2-ai-task-and-provider-planning</span>。它可以被准备为下一轮 Module Run v2 规划，但不能自动越过 provider/env/secret、staging/prod/cloud/deploy、payment、external-service 或 Cost Calibration Gate。
+              </p>
+            </div>
+          </section>
+
+          <div class="footer-note">
+            <strong>资料来源：</strong>
+            <span class="mono">AGENTS.md</span>、
+            <span class="mono">docs/03-standards/code-taste-ten-commandments.md</span>、
+            <span class="mono">docs/02-architecture/adr/</span>、
+            <span class="mono">docs/04-agent-system/state/project-state.yaml</span>、
+            <span class="mono">docs/04-agent-system/state/task-queue.yaml</span>、
+            <span class="mono">docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml</span>、
+            <span class="mono">docs/04-agent-system/sop/automated-advancement-governance.md</span>、
+            <span class="mono">scripts/agent-system/*.ps1</span> 与 Git Hooks。本文档为静态 HTML，不依赖外部 CDN、网络服务或真实 provider。
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
