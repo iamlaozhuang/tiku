@@ -41,6 +41,14 @@ Cost Calibration Gate remains blocked.
 - Commit: `13f6fbd6`.
 - localFullLoopGate: L1 target.
 
+## Batch 4: Post-Merge Origin Fixture Repair
+
+- Goal: keep smoke fixtures valid during the post-merge, pre-push window where `master` is ahead of `origin/master`.
+- RED: master validation after fast-forward merge failed because smoke fixtures used `master~1`, which was not an ancestor of the still-unpushed `origin/master`.
+- GREEN: unattended, autopilot, and pre-push smoke fixtures now use `origin/master~1` as the common ancestor fixture, preserving coverage before and after push.
+- Commit: pending.
+- localFullLoopGate: L1 target.
+
 ## Validation
 
 Passed:
@@ -61,7 +69,7 @@ Passed:
 
 ## threadRolloverGate
 
-- Completed batch count: 3.
+- Completed batch count: 4.
 - Decision posture: stay within current thread for closeout; after merge/push cleanup, recommend a new thread before the next business Module Run.
 
 ## nextModuleRunCandidate

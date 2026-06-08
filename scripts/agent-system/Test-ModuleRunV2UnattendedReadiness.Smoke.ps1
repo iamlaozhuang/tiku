@@ -233,7 +233,7 @@ tasks:
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_TASK_STATUS"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
 
-    $ancestorSha = ((& git rev-parse master~1) -join "").Trim()
+    $ancestorSha = ((& git rev-parse origin/master~1) -join "").Trim()
     @"
 schemaVersion: 1
 repository:

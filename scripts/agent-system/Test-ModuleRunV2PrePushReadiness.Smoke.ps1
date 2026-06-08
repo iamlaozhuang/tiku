@@ -72,7 +72,7 @@ $fixtureTaskId = "module-run-v2-pre-push-post-push-ancestor-smoke"
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "tiku-module-run-v2-pre-push-smoke"
 $fixtureProjectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
 $fixtureQueuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
-$ancestorSha = ((& git rev-parse master~1) -join "").Trim()
+$ancestorSha = ((& git rev-parse origin/master~1) -join "").Trim()
 
 if ([string]::IsNullOrWhiteSpace($ancestorSha)) {
     throw "Missing master ancestor fixture SHA"

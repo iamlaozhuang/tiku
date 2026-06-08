@@ -9,6 +9,7 @@ Status: APPROVE
 - Closeout recovery now accepts repository SHA ancestry only for `done` / `closed` task recovery and still blocks non-ancestor drift.
 - Autopilot dry-run coverage reaches `autopilotDecision: launch_new_thread` for the accepted post-push recovery shape.
 - Pre-push readiness now checks `project-state.yaml` repository SHAs against `master` and `origin/master`, accepting only completed-task ancestor drift and hard-blocking non-ancestor drift.
+- Post-merge smoke fixtures now account for the pre-push window where local `master` is ahead of `origin/master`.
 
 ## Required Checks
 
