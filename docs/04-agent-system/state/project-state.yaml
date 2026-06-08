@@ -85,7 +85,7 @@ currentTask:
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
   branch: codex/module-run-v2-autopilot-maturity-hardening
-  commitSha: 4fab13ff
+  commitSha: 2d7afe39
   prUrl: null
   retryCount: 0
   lastFailurePath: null
