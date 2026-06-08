@@ -3395,3 +3395,79 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
     status: done
     retryCount: 0
+  - id: module-run-v2-authorization-and-access-pilot
+    title: Module Run v2 Authorization And Access Pilot
+    phase: module-run-v2-authorization-and-access-pilot
+    sourceStory: user-request-2026-06-08-module-run-v2-authorization-and-access-pilot
+    dependencies:
+      - module-run-v2-hook-automation-hardening-sequence
+      - batch-100-authorization-reason-view-model-selector-local-contract
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested the first real business Module Run v2 pilot for execution module `authorization-and-access`, starting
+      from Batch 101 and treating Batch 94-100 as completed historical baseline. User authorized automatic
+      fast-forward merge to master and push after all validation passes. Scope must not include Cost Calibration Gate,
+      provider, env/secret, staging/prod/cloud/deploy, payment, external-service, dependency, package/lockfile, schema,
+      migration, `src/db/schema/**`, drizzle, `.env.local`, `.env.example`, e2e, real permission-model changes, new
+      roles, permissions, quotas, entitlement rules, AI content generation, DB row returns, or auto-increment id exposure.
+    taskKind: implementation
+    executionModule: authorization-and-access
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/authorization-reason-selector-api-contract.ts
+      - src/server/contracts/authorization-reason-selector-api-contract-contract.ts
+      - src/server/validators/authorization-reason-selector-api-contract.ts
+      - src/server/validators/authorization-reason-selector-api-contract.test.ts
+      - src/server/services/authorization-reason-selector-api-contract-service.ts
+      - src/server/services/authorization-reason-selector-api-contract-service.test.ts
+      - src/server/services/authorization-reason-selector-route.ts
+      - src/server/services/authorization-reason-selector-route.test.ts
+      - src/server/models/authorization-reason-selector-action-contract.ts
+      - src/server/contracts/authorization-reason-selector-action-contract-contract.ts
+      - src/server/validators/authorization-reason-selector-action-contract.ts
+      - src/server/validators/authorization-reason-selector-action-contract.test.ts
+      - src/server/services/authorization-reason-selector-action-contract-service.ts
+      - src/server/services/authorization-reason-selector-action-contract-service.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - src/app/**
+      - src/server/repositories/**
+    riskTypes:
+      - module_run_v2
+      - authorization
+      - local_api_contract
+      - local_server_action_contract
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-authorization-and-access-pilot -PlannedFiles src/server/models/authorization-reason-selector-api-contract.ts,src/server/contracts/authorization-reason-selector-api-contract-contract.ts,src/server/validators/authorization-reason-selector-api-contract.ts,src/server/validators/authorization-reason-selector-api-contract.test.ts,src/server/services/authorization-reason-selector-api-contract-service.ts,src/server/services/authorization-reason-selector-api-contract-service.test.ts,src/server/services/authorization-reason-selector-route.ts,src/server/services/authorization-reason-selector-route.test.ts,src/server/models/authorization-reason-selector-action-contract.ts,src/server/contracts/authorization-reason-selector-action-contract-contract.ts,src/server/validators/authorization-reason-selector-action-contract.ts,src/server/validators/authorization-reason-selector-action-contract.test.ts,src/server/services/authorization-reason-selector-action-contract-service.ts,src/server/services/authorization-reason-selector-action-contract-service.test.ts,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-authorization-and-access-pilot.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-authorization-and-access-pilot.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+      - npm.cmd run test:unit -- src/server/services/authorization-reason-selector-api-contract-service.test.ts src/server/validators/authorization-reason-selector-api-contract.test.ts src/server/services/authorization-reason-selector-route.test.ts src/server/services/authorization-reason-selector-action-contract-service.test.ts src/server/validators/authorization-reason-selector-action-contract.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write src\server\models\authorization-reason-selector-api-contract.ts src\server\contracts\authorization-reason-selector-api-contract-contract.ts src\server\validators\authorization-reason-selector-api-contract.ts src\server\validators\authorization-reason-selector-api-contract.test.ts src\server\services\authorization-reason-selector-api-contract-service.ts src\server\services\authorization-reason-selector-api-contract-service.test.ts src\server\services\authorization-reason-selector-route.ts src\server\services\authorization-reason-selector-route.test.ts src\server\models\authorization-reason-selector-action-contract.ts src\server\contracts\authorization-reason-selector-action-contract-contract.ts src\server\validators\authorization-reason-selector-action-contract.ts src\server\validators\authorization-reason-selector-action-contract.test.ts src\server\services\authorization-reason-selector-action-contract-service.ts src\server\services\authorization-reason-selector-action-contract-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-authorization-and-access-pilot.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-authorization-and-access-pilot.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-authorization-and-access-pilot.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check src\server\models\authorization-reason-selector-api-contract.ts src\server\contracts\authorization-reason-selector-api-contract-contract.ts src\server\validators\authorization-reason-selector-api-contract.ts src\server\validators\authorization-reason-selector-api-contract.test.ts src\server\services\authorization-reason-selector-api-contract-service.ts src\server\services\authorization-reason-selector-api-contract-service.test.ts src\server\services\authorization-reason-selector-route.ts src\server\services\authorization-reason-selector-route.test.ts src\server\models\authorization-reason-selector-action-contract.ts src\server\contracts\authorization-reason-selector-action-contract-contract.ts src\server\validators\authorization-reason-selector-action-contract.ts src\server\validators\authorization-reason-selector-action-contract.test.ts src\server\services\authorization-reason-selector-action-contract-service.ts src\server\services\authorization-reason-selector-action-contract-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-authorization-and-access-pilot.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-authorization-and-access-pilot.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-authorization-and-access-pilot.md
+      - Select-String -Path src\server\models\authorization-reason-selector-api-contract.ts,src\server\contracts\authorization-reason-selector-api-contract-contract.ts,src\server\validators\authorization-reason-selector-api-contract.ts,src\server\services\authorization-reason-selector-api-contract-service.ts,src\server\services\authorization-reason-selector-api-contract-service.test.ts,src\server\validators\authorization-reason-selector-api-contract.test.ts,src\server\services\authorization-reason-selector-route.ts,src\server\services\authorization-reason-selector-route.test.ts,src\server\models\authorization-reason-selector-action-contract.ts,src\server\contracts\authorization-reason-selector-action-contract-contract.ts,src\server\validators\authorization-reason-selector-action-contract.ts,src\server\services\authorization-reason-selector-action-contract-service.ts,src\server\services\authorization-reason-selector-action-contract-service.test.ts,src\server\validators\authorization-reason-selector-action-contract.test.ts,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-authorization-and-access-pilot.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-authorization-and-access-pilot.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-authorization-and-access-pilot.md -Pattern 'Module Run v2','authorization','personal_auth','org_auth','paper','mock_exam','redeem_code','audit_log','ai_call_log','local_api_contract_only','local_server_action_contract_only','redacted_reference','threadRolloverGate','nextModuleRunCandidate','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-authorization-and-access-pilot
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+    status: in_progress
+    retryCount: 0
