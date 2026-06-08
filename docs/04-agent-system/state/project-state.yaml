@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: phase-79-closeout-readiness-audit
-updatedAt: "2026-06-07T19:58:51-07:00"
+  currentPhase: phase-80-post-closeout-state-reconciliation
+updatedAt: "2026-06-07T20:24:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -53,15 +53,15 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 5c97ff98a9e3d0a9ea9f9c3d5186c519a75885f3
-  lastKnownOriginMasterSha: 5c97ff98a9e3d0a9ea9f9c3d5186c519a75885f3
+  lastKnownMasterSha: 668a34ff94ab916a547560ce8a0967061cd1c19a
+  lastKnownOriginMasterSha: 668a34ff94ab916a547560ce8a0967061cd1c19a
 currentTask:
-  id: phase-79-closeout-readiness-audit
+  id: phase-80-post-closeout-state-reconciliation
   status: done
-  sourceStory: user-request-2026-06-07-phase-79-closeout-readiness-audit
-  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-79-closeout-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-79-closeout-readiness-audit.md
-  branch: codex/phase-79-closeout-readiness-audit
+  sourceStory: user-request-2026-06-07-phase-80-post-closeout-state-reconciliation
+  planPath: docs/05-execution-logs/task-plans/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+  branch: codex/phase-80-post-closeout-state-reconciliation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -99,9 +99,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 79 closeout audit confirms Phase 69-78 planning, blocked_gate, security_review, and local_verification planning
-    evidence is present and queue status is done. local_auto_candidate may continue only for queue-approved docs/state/review/evidence
-    tasks such as implementation_planning, local_verification planning, security_review planning, blocked_gate documentation, and
-    closeout audits. Do not execute product implementation, dependency, schema, migration, provider, env/secret, staging/prod/cloud/deploy,
-    payment, external-service actions, authorization permission model changes, or Cost Calibration Gate execution without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-79-closeout-readiness-audit.md
+    Phase 80 reconciles project-state repository recovery SHA values to the Phase 79 pushed baseline
+    668a34ff94ab916a547560ce8a0967061cd1c19a. local_auto_candidate may continue only for queue-approved
+    docs/state/review/evidence tasks such as closeout audits, state reconciliation, blocked_gate documentation,
+    security_review planning, and local_verification planning. Do not execute product implementation, dependency,
+    schema, migration, provider, env/secret, staging/prod/cloud/deploy, payment, external-service actions,
+    authorization permission model changes, or Cost Calibration Gate execution without fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-07-phase-80-post-closeout-state-reconciliation.md

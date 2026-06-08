@@ -1504,3 +1504,46 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-79-closeout-readiness-audit.md
     status: done
     retryCount: 0
+  - id: phase-80-post-closeout-state-reconciliation
+    title: Phase 80 Post Closeout State Reconciliation
+    phase: phase-80-post-closeout-state-reconciliation
+    sourceStory: user-request-2026-06-07-phase-80-post-closeout-state-reconciliation
+    dependencies:
+      - phase-79-closeout-readiness-audit
+    taskPlanPolicy: required
+    humanApproval: User approved continuing after Phase 79 for docs/state/review/evidence serial work and explicitly requested execution plus follow-up recommendations. Scope is post-closeout state reconciliation only; no product code, dependency, schema, migration, package, lockfile, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, authorization permission model change, or Cost Calibration Gate execution.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - governance_state
+      - evidence_integrity
+      - post_closeout
+      - local_auto_candidate
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-07-phase-80-post-closeout-state-reconciliation.md docs\05-execution-logs\evidence\2026-06-07-phase-80-post-closeout-state-reconciliation.md docs\05-execution-logs\audits-reviews\2026-06-07-phase-80-post-closeout-state-reconciliation.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-07-phase-80-post-closeout-state-reconciliation.md,docs\05-execution-logs\evidence\2026-06-07-phase-80-post-closeout-state-reconciliation.md,docs\05-execution-logs\audits-reviews\2026-06-07-phase-80-post-closeout-state-reconciliation.md -Pattern 'Phase 79','668a34ff','post-closeout','local_auto_candidate','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked','provider','env/secret','staging/prod','payment','external-service'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+    status: done
+    retryCount: 0
