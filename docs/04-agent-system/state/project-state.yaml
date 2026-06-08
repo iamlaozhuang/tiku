@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: batch-95-authorization-display-local-contract
-updatedAt: "2026-06-08T01:18:00-07:00"
+updatedAt: "2026-06-08T01:21:28-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -57,7 +57,7 @@ repository:
   lastKnownOriginMasterSha: eff453de343d739dcd118393812f244c55776ae7
 currentTask:
   id: batch-95-authorization-display-local-contract
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-batch-94-state-reconciliation-and-batch-95-continuation
   planPath: docs/05-execution-logs/task-plans/2026-06-08-authorization-display-local-contract-batch.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-display-local-contract-batch.md
