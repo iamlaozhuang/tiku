@@ -49,6 +49,7 @@ Score readiness across these dimensions:
 | risk gate isolation  | blocked gates are named and excluded                                                            | provider, env/secret, staging/prod/cloud/deploy, payment, external-service need  |
 | approval clarity     | human approval scope is explicit for the proposed mode                                          | implied approval or old approval reused for new risk                             |
 | unattended control   | local stop-decision and thread-decision scripts pass                                            | no machine-readable continue/stop decision                                       |
+| automation startup   | lease and startup readiness scripts pass and Codex automation state matches project state       | active lease, stale worktree, or `remoteAutomationApproval: not_granted`         |
 
 A single blocking example makes the overall result `blocked` until resolved or accepted by explicit human decision.
 
@@ -119,7 +120,10 @@ Changing `automation.mode` must be the primary purpose of the task, not a side e
 - `New-ModuleRunV2ThreadHandoff.Smoke.ps1` passes;
 - `Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1` passes;
 - `Invoke-ModuleRunV2Autopilot.Smoke.ps1` passes;
+- `Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1` passes;
+- `Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1` passes;
 - the current task can produce `unattendedStopDecision: continue`;
+- scheduled startup can produce `startupDecision: continue_current_task`, `prepare_next_task`, or `closeout_recovery`;
 - an approved launch scenario can produce `autopilotDecision: launch_new_thread`;
 - required-new-thread decisions stop with a non-zero exit;
 - blocked gates remain excluded.
@@ -136,6 +140,7 @@ Automatic advancement remains blocked when any item is true:
 - dependency, package, lockfile, CLI, SDK, schema, migration, destructive data operation, or `drizzle-kit push` is needed without approval;
 - authorization permission model changes are needed without a dedicated approval path;
 - Git state, branch ownership, worktree ownership, or remote alignment is ambiguous;
+- a scheduler wakeup sees an active automation lease, a stale automation worktree, or no executable queue task;
 - required skill/plugin is unavailable and no approved fallback exists;
 - evidence would expose protected content;
 - current approval scope does not name the proposed automation mode.

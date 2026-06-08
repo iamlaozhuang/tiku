@@ -4108,3 +4108,132 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-push-state-reconciliation.md
     status: done
     retryCount: 0
+  - id: module-run-v2-autopilot-maturity-hardening
+    title: Module Run v2 Autopilot Maturity Hardening
+    phase: module-run-v2-autopilot-maturity-hardening
+    sourceStory: user-request-2026-06-08-autopilot-maturity-hardening-12345
+    dependencies:
+      - module-run-v2-post-push-state-reconciliation
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved implementing the five recommended maturity fixes in order: automation run lease, automation startup
+      readiness, project-state to Codex automation configuration sync, next-module planning task seed, and worktree
+      hygiene. Scope is local mechanism scripts, governance state, SOPs, execution logs, and the existing Codex
+      automation configuration. This does not approve provider, env/secret, staging/prod/cloud/deploy, payment,
+      external-service, dependency, schema, migration, product implementation, next-module implementation, or Cost
+      Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
+      - docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
+      - docs/04-agent-system/sop/codex-app-readiness-audit-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - autopilot_orchestration
+      - automation_lease
+      - startup_readiness
+      - worktree_hygiene
+      - queue_planning
+      - hard_block
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-work -TaskId module-run-v2-autopilot-maturity-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-autopilot-maturity-hardening -PlannedFiles scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md,docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md,docs/04-agent-system/sop/codex-app-readiness-audit-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-maturity-hardening.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-maturity-hardening.md,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2AutomationLeaseReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\sop\codex-app-readiness-audit-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-autopilot-maturity-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autopilot-maturity-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autopilot-maturity-hardening.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2AutomationLeaseReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\sop\automation-readiness-scorecard-and-mode-transition-governance.md docs\04-agent-system\sop\codex-app-readiness-audit-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-autopilot-maturity-hardening.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autopilot-maturity-hardening.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autopilot-maturity-hardening.md docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - Select-String -Path docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autopilot-maturity-hardening.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autopilot-maturity-hardening.md,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'automationLease','startupDecision','worktreeHygiene','module-run-v2-ai-task-and-provider-planning','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-autopilot-maturity-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+    status: in_progress
+    retryCount: 0
+  - id: module-run-v2-ai-task-and-provider-planning
+    title: Module Run v2 AI Task And Provider Planning
+    phase: module-run-v2-ai-task-and-provider-planning
+    sourceStory: nextModuleRunCandidate-from-module-run-v2-autopilot-maturity-hardening
+    dependencies:
+      - module-run-v2-autopilot-maturity-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      Seeded as a proposal-only next Module Run planning task by the approved autopilot maturity hardening work. This
+      does not approve implementation, provider calls, provider configuration, env/secret, staging/prod/cloud/deploy,
+      payment, external-service, dependency, schema, migration, product code, e2e work, or Cost Calibration Gate
+      execution.
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    executionModule: ai-task-and-provider
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - module_run_planning
+      - automation_policy
+      - provider_blocked
+      - env_secret_blocked
+      - deploy_blocked
+      - schema_blocked
+      - dependency_blocked
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'ai-task-and-provider','nextModuleRunCandidate','localFullLoopGate','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    status: pending
+    retryCount: 0

@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-post-push-state-reconciliation
-updatedAt: "2026-06-08T17:20:00-07:00"
+  currentPhase: module-run-v2-autopilot-maturity-hardening
+updatedAt: "2026-06-08T14:16:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -45,13 +45,20 @@ automation:
     autoMerge: false
   unattendedControl:
     target: guarded local unattended loop with hard-stop decisions
-    currentStatus: post_push_state_reconciliation_ready_after_local_validation
+    currentStatus: autopilot_maturity_hardening_in_progress
     stopDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     threadDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
     handoffGeneratorScriptPath: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
     threadLaunchPolicyScriptPath: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
     autopilotOrchestratorScriptPath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
-    remoteAutomationApproval: not_granted
+    startupReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+    leaseReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.ps1
+    leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
+    remoteAutomationApproval: lease_guarded_local_readiness_and_planning
+    codexAutomationId: tiku-module-run-v2-autopilot
+    codexAutomationStatus: ACTIVE
+    codexAutomationSchedule: hourly
+    codexAutomationExecutionEnvironment: worktree
     defaultStopOn:
       - hard block
       - blocked gate
@@ -69,16 +76,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: f128cc03f5b22248ac75e88a037dab5de5bf2125
-  lastKnownOriginMasterSha: f128cc03f5b22248ac75e88a037dab5de5bf2125
+  lastKnownMasterSha: c6fa4c977907fcdeb023af0b6140f2e57d84a165
+  lastKnownOriginMasterSha: c6fa4c977907fcdeb023af0b6140f2e57d84a165
 currentTask:
-  id: module-run-v2-post-push-state-reconciliation
-  status: done
-  sourceStory: user-request-2026-06-08-post-push-state-reconciliation
-  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-post-push-state-reconciliation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-push-state-reconciliation.md
-  branch: codex/module-run-v2-post-push-state-reconciliation
-  commitSha: 341332a8
+  id: module-run-v2-autopilot-maturity-hardening
+  status: in_progress
+  sourceStory: user-request-2026-06-08-autopilot-maturity-hardening-12345
+  planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+  branch: codex/module-run-v2-autopilot-maturity-hardening
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -115,7 +122,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Post-push state reconciliation hardening is ready for closeout: routine automation wakeups can distinguish accepted
-    completed-task closeout ancestry from real SHA drift. The next business candidate remains `ai-task-and-provider` as
-    a proposal only. Cost Calibration Gate remains blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+    Autopilot maturity hardening is in progress: add lease, startup readiness, Codex automation state sync, next planning
+    task seed, and worktree hygiene before allowing unattended Module Run v2 continuation. Cost Calibration Gate remains
+    blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md

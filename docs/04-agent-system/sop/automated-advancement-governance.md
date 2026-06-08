@@ -159,6 +159,39 @@ A batch closeout review must confirm all task evidence, changed files, and Git i
 
 ## Module-To-Module Automation Handoff
 
+## Automation Startup Boundary
+
+Every scheduled Codex automation wakeup must first run:
+
+```text
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+```
+
+The startup gate coordinates:
+
+- local automation lease readiness;
+- protected branch and repository state;
+- current task and pending task status from `task-queue.yaml`;
+- Codex automation approval state from `project-state.yaml`;
+- stale or dirty automation worktree detection;
+- blocked gate anchors.
+
+Automation may continue only when the startup gate returns one of these zero-exit decisions:
+
+- `startupDecision: continue_current_task`;
+- `startupDecision: prepare_next_task`;
+- `startupDecision: closeout_recovery`.
+
+Automation must stop when the startup gate returns:
+
+- `startupDecision: stop_existing_run_active`;
+- `startupDecision: stop_for_hard_block`;
+- `startupDecision: no_executable_task`.
+
+The startup gate does not create threads, write handoffs, delete worktrees, or modify source files. It only decides
+whether the automation wakeup is allowed to proceed to the existing autopilot orchestrator or to a proposal-only planning
+step.
+
 After Module Run v2 closeout, automation may generate a `nextModuleRunCandidate` proposal. The proposal is a planning
 artifact only; it is not approval to start implementation in the next module.
 
@@ -274,6 +307,10 @@ On interruption or a new session:
 
 For Module Run v2 unattended continuation, run the unattended readiness script after the recovery read and before any
 edit. If it returns `stop_for_hard_block`, stop even when the next local action looks obvious from chat context.
+
+For Codex scheduled automation, run the automation startup readiness script before unattended readiness or autopilot
+orchestration. If it returns `stop_existing_run_active`, another human or automation run owns the lane and the scheduler
+must exit without editing or launching a new thread.
 
 ## Stop Conditions
 

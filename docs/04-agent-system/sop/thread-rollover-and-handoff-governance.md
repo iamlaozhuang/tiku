@@ -173,6 +173,9 @@ Module Run v2 handoff must additionally record:
 
 ## New Thread Startup Gate
 
+Before creating or resuming a Codex automation thread, the launching agent must run the automation startup readiness gate.
+If it returns `stop_existing_run_active`, `stop_for_hard_block`, or `no_executable_task`, no new thread may be created.
+
 A receiving thread must start by reading:
 
 1. `AGENTS.md`.
@@ -246,6 +249,13 @@ When a task explicitly approves autopilot thread launch and the Codex thread too
 next-module implementation unless the handoff and new thread startup gate provide a fresh approved Module Run v2 plan.
 If the launch decision came from `-DryRunHandoff`, the agent may use it as readiness evidence only; a receiving thread
 requires a durable redacted handoff or a newly generated approved handoff before implementation begins.
+
+For scheduled automation, thread creation is legal only after all of these are true:
+
+- `startupDecision` allows continuation or next-task preparation;
+- no active non-expired automation lease exists;
+- stale or dirty automation worktrees have been hard-stopped or cleaned under a separate approved cleanup action;
+- `threadLaunchDecision: launch_new_thread` is produced from a durable handoff and explicit launch approval.
 
 ## User Cooperation Model
 

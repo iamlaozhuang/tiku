@@ -310,6 +310,8 @@ threadRolloverGate:
     - next recommended module
 automationHandoffPolicy:
   unattendedStopDecisionScript: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+  automationLeaseReadinessScript: scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.ps1
+  automationStartupReadinessScript: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
   handoffGeneratorScript: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
   threadLaunchPolicyScript: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
   autopilotOrchestratorScript: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
@@ -324,6 +326,19 @@ automationHandoffPolicy:
     launch_new_thread: Codex agent layer may call create_thread with generated handoff
     stop_for_hard_block: stop on hard block
     stop_for_human_handoff: stop for user decision
+  startupDecisionLabels:
+    continue_current_task: scheduled automation may continue the current in-progress task
+    prepare_next_task: scheduled automation may prepare the pending planning task only
+    closeout_recovery: scheduled automation may run closeout recovery before selecting the next task
+    stop_existing_run_active: another human or automation run owns the lane
+    stop_for_hard_block: startup gate found unsafe state
+    no_executable_task: queue and state have no legal action
+  leaseDecisionLabels:
+    no_active_lease: no durable lease exists
+    expired_lease_reclaimable: expired lease can be reclaimed when the worktree is clean or unavailable
+    stop_existing_run_active: non-expired lease blocks the scheduler wakeup
+    stop_expired_dirty_lease: expired lease worktree has uncommitted changes and must be inspected
+    stop_invalid_lease: lease file is malformed
   dryRunControls:
     handoffGeneratorDryRun: New-ModuleRunV2ThreadHandoff.ps1 -DryRun does not write the requested output path
     autopilotDryRunHandoff: Invoke-ModuleRunV2Autopilot.ps1 -DryRunHandoff uses temporary handoff evidence outside the repository
@@ -340,11 +355,13 @@ automationHandoffPolicy:
       - latest evidence and audit review
     output: proposal only; no cross-module implementation starts without a Module Run plan.
   automationMay:
+    - run automation startup readiness before unattended readiness or autopilot orchestration
     - detect that a Module Run appears complete from durable state
     - generate the next Module Run draft proposal
     - update handoff proposal and blocked remainder wording
     - mark provider, env/secret, staging/prod, deploy, payment, or Cost Calibration Gate work as blocked remainder
   automationMustNot:
+    - ignore an active lease, stale automation worktree, or no-executable-task startup decision
     - modify schema, migration, dependency, env/secret, provider config, deploy config, payment, or external-service surfaces
     - read or record secrets
     - execute Cost Calibration Gate
@@ -374,6 +391,14 @@ hookIntegrationMatrix:
         - handoff generation
         - thread launch policy
         - create_thread only when launch policy returns launch_new_thread
+    automation-startup:
+      strength: hard_block_before_scheduler_continuation
+      plannedChecks:
+        - automation lease readiness
+        - current task and pending task inventory
+        - Codex automation approval state
+        - stale or dirty automation worktree stop
+        - blocked gate anchors
     pre-work:
       strength: hard_block_after_mechanism_completion
       plannedChecks:

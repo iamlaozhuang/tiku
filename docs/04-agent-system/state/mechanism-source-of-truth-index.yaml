@@ -108,6 +108,16 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
     decisionOutput: autopilotDecision
     role: combines stop decision, thread rollover, handoff generation, launch policy, closeout recovery, and dry-run handoff
+  - id: module-run-v2-automation-lease-readiness
+    path: scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1
+    decisionOutput: automationLeaseDecision
+    role: hard-blocks scheduled automation when a non-expired run lease or expired dirty worktree exists
+  - id: module-run-v2-automation-startup-readiness
+    path: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+    decisionOutput: startupDecision
+    role: single scheduler startup gate for lease, state, queue, worktree hygiene, and blocked gate anchors
 executionLogRoots:
   - id: evidence
     path: docs/05-execution-logs/evidence
