@@ -2,7 +2,7 @@ schemaVersion: 1
 project:
   name: tiku
   currentPhase: module-run-v2-local-experience-closure-alignment
-updatedAt: "2026-06-08T14:59:56-07:00"
+updatedAt: "2026-06-08T15:06:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -80,12 +80,12 @@ repository:
   lastKnownOriginMasterSha: acbe8b6223c849d7d3853a93f0f61a7f768b05eb
 currentTask:
   id: module-run-v2-local-experience-closure-alignment
-  status: in_progress
+  status: done
   sourceStory: user-request-2026-06-08-local-experience-closure-alignment
   planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-local-experience-closure-alignment.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-closure-alignment.md
   branch: codex/module-run-v2-local-experience-closure-alignment
-  commitSha: null
+  commitSha: 0ff0788f
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -122,10 +122,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Local experience closure alignment is in progress. This task keeps development aimed at a locally runnable,
-    locally verifiable experience loop by adding `localExperienceClosureGate` to the Module Run v2 matrix and by
-    tightening the next queued `module-run-v2-ai-task-and-provider-planning` task so automation must plan against
-    downstream local UI/API/e2e readiness instead of isolated contract work. Do not start product implementation,
-    provider/env/deploy/payment/external-service work, schema/migration/dependency changes, or Cost Calibration Gate
-    execution. After closeout, automation may prepare the next pending planning task from the queue.
+    Local experience closure alignment is complete. The next queued task remains
+    `module-run-v2-ai-task-and-provider-planning`, but it must now apply `localExperienceClosureGate` and state the
+    downstream local experience chain before any implementation is proposed. After that, the queued
+    `module-run-v2-local-experience-acceptance-planning` task should plan the local API/UI/browser/role-flow/e2e
+    acceptance bridge. Automation startup may prepare the next pending planning task if no lease or in-progress thread
+    owns the lane. Do not start product implementation, provider/env/deploy/payment/external-service work,
+    schema/migration/dependency changes, or Cost Calibration Gate execution.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-closure-alignment.md

@@ -20,7 +20,7 @@
 - RED: project state still pointed at completed `module-run-v2-autopilot-maturity-hardening` and stale repository SHA.
 - GREEN: project state now points at `module-run-v2-local-experience-closure-alignment`, repository SHA matches
   `acbe8b6223c849d7d3853a93f0f61a7f768b05eb`, and task queue registers the current in-progress task.
-- Commit: pending.
+- Commit: `0ff0788f`.
 - localFullLoopGate: L1.
 
 ### Batch 2: Domain Matrix Closure Gate
@@ -28,7 +28,7 @@
 - RED: execution modules could progress as isolated service contracts without naming a local experience chain.
 - GREEN: matrix now defines `localExperienceClosureGate`, experience chains, promotion rules, automation startup
   requirement, and each module's contribution to local experience closure.
-- Commit: pending.
+- Commit: `0ff0788f`.
 - localFullLoopGate: L1.
 
 ### Batch 3: Automation-Ready Follow-Up Queue
@@ -36,7 +36,7 @@
 - RED: the next pending `ai-task-and-provider` task did not require `localExperienceClosureGate`.
 - GREEN: the next pending `ai-task-and-provider` planning task must apply `localExperienceClosureGate`, and
   `module-run-v2-local-experience-acceptance-planning` is queued as a proposal-only follow-up task.
-- Commit: pending.
+- Commit: `0ff0788f`.
 - localFullLoopGate: L1.
 
 ## Validation Log
@@ -54,6 +54,8 @@
   `module-run-v2-local-experience-acceptance-planning`, `localFullLoopGate`, and
   `Cost Calibration Gate remains blocked`.
 - Passed: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-local-experience-closure-alignment`.
+- Passed: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-local-experience-closure-alignment`.
+- Passed: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master`.
 
 ## Automation Startup Fit
 
