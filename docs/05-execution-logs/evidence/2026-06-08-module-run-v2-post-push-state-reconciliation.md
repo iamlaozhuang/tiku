@@ -19,7 +19,7 @@ Cost Calibration Gate remains blocked.
 - Goal: accept post-push state SHA ancestry only for completed-task closeout recovery.
 - RED: closeout recovery on clean aligned master stopped with `HARD_BLOCK_REPOSITORY_SHA_DRIFT` when state SHA was an ancestor of pushed HEAD.
 - GREEN: `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` passes with `OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR master`, `OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR origin/master`, and non-ancestor drift hard block coverage.
-- Commit: pending.
+- Commit: `0edebd78`.
 - localFullLoopGate: L1 target.
 
 ## Batch 2: Autopilot Dry-Run Recovery
@@ -27,6 +27,17 @@ Cost Calibration Gate remains blocked.
 - Goal: prove routine autopilot dry-run can continue after post-push closeout ancestry reconciliation.
 - RED: autopilot dry-run previously stopped with `autopilotDecision: stop_for_hard_block` when state SHA lagged behind pushed HEAD.
 - GREEN: `Invoke-ModuleRunV2Autopilot.Smoke.ps1` passes with a post-push ancestor fixture and reaches `autopilotDecision: launch_new_thread`.
+- Commit: `80252f77`.
+- localFullLoopGate: L1 target.
+
+## Batch 3: Pre-Push State Drift Coverage
+
+- Goal: make pre-push hard block distinguish accepted post-push ancestry from real repository SHA drift.
+- RED: pre-push readiness previously checked evidence/audit and Git inventory but did not compare `project-state.yaml` repository SHAs with `master` / `origin/master`.
+- GREEN: `Test-ModuleRunV2PrePushReadiness.Smoke.ps1` passes with `OK_PRE_PUSH_STATE_SHA_ANCESTOR master`, `OK_PRE_PUSH_STATE_SHA_ANCESTOR origin/master`, and `HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT` coverage for non-ancestor state drift.
+- Command:
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.Smoke.ps1`
+- Result: pass.
 - Commit: pending.
 - localFullLoopGate: L1 target.
 

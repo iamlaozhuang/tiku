@@ -146,6 +146,54 @@ function Test-RequiredPath {
     Write-Output "$OkCode $Path"
 }
 
+function Get-ProjectScalar {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Lines,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Key
+    )
+
+    foreach ($line in $Lines) {
+        if ($line -match "^\s+$([regex]::Escape($Key)):\s*(.+)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
+function Test-GitAncestor {
+    param(
+        [Parameter(Mandatory = $true)][string]$AncestorSha,
+        [Parameter(Mandatory = $true)][string]$DescendantSha
+    )
+
+    if ([string]::IsNullOrWhiteSpace($AncestorSha) -or [string]::IsNullOrWhiteSpace($DescendantSha)) {
+        return $false
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & git cat-file -e "$AncestorSha^{commit}" 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            return $false
+        }
+
+        & git cat-file -e "$DescendantSha^{commit}" 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            return $false
+        }
+
+        & git merge-base --is-ancestor $AncestorSha $DescendantSha 2>$null
+        return $LASTEXITCODE -eq 0
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 
 Write-Section -Title "Module Run v2 Pre-Push Readiness"
@@ -174,6 +222,8 @@ $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
 if ($taskBlock.Count -eq 0) {
     throw "Task not found in queue: $TaskId"
 }
+
+$taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
 
 if ([string]::IsNullOrWhiteSpace($EvidencePath)) {
     $EvidencePath = Get-ScalarValue -Block $taskBlock -Key "evidencePath"
@@ -232,6 +282,33 @@ if (-not $SkipRemoteAheadCheck -and -not [string]::IsNullOrWhiteSpace($currentBr
                 Add-Finding "HARD_BLOCK_REMOTE_AHEAD $upstream remoteAhead=$remoteAheadCount"
             }
         }
+    }
+}
+
+$masterSha = ((& git rev-parse master) -join "").Trim()
+$originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+$stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
+$stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
+$canUseCloseoutShaAncestry = $taskStatus -in @("done", "closed")
+
+Write-Output "master: $masterSha"
+Write-Output "originMaster: $originMasterSha"
+Write-Output "stateMaster: $stateMasterSha"
+Write-Output "stateOriginMaster: $stateOriginMasterSha"
+
+if ($stateMasterSha -ne $masterSha) {
+    if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
+        Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR master"
+    } else {
+        Add-Finding "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT master"
+    }
+}
+
+if ($stateOriginMasterSha -ne $originMasterSha) {
+    if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
+        Write-Output "OK_PRE_PUSH_STATE_SHA_ANCESTOR origin/master"
+    } else {
+        Add-Finding "HARD_BLOCK_PRE_PUSH_REPOSITORY_SHA_DRIFT origin/master"
     }
 }
 
