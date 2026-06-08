@@ -2610,3 +2610,106 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-access-reason-local-contract-batch.md
     status: done
     retryCount: 0
+  - id: batch-97-authorization-reason-presentation-local-contract
+    title: Batch 97 Authorization Reason Presentation Local Contract
+    phase: batch-97-authorization-reason-presentation-local-contract
+    sourceStory: user-request-2026-06-08-batch-97-authorization-reason-presentation-local-contract
+    dependencies:
+      - batch-96-authorization-access-reason-local-contract
+    taskPlanPolicy: required
+    humanApproval: >-
+      User explicitly approved creating and executing Batch 97 module scope and implementation batch. Scope is limited
+      to local-only authorization reason presentation read-model / service-contract pure logic under
+      src/server/models/**, src/server/contracts/**, src/server/validators/**, src/server/services/**, corresponding
+      focused *.test.ts, batch task plan, rollup evidence, audit review, project-state.yaml, and task-queue.yaml. It
+      may transform Batch 96 reason_summary_only data into local_presentation_only contracts for authorization reason
+      items, paper/mock_exam context, and redacted redeem_code / audit_log / ai_call_log references. Dependency,
+      package/lockfile, schema, migration, src/db/schema/**, drizzle/**, .env.local, .env.example, scripts/**, e2e/**,
+      repository, API route, Server Action, provider, env/secret, staging/prod/cloud/deploy, payment, external-service,
+      real authorization permission model changes, and Cost Calibration Gate execution remain blocked.
+    taskKind: implementation
+    batchMode: module_batch
+    allowedFiles:
+      - src/server/models/authorization-reason-item-presentation.ts
+      - src/server/contracts/authorization-reason-item-presentation-contract.ts
+      - src/server/validators/authorization-reason-item-presentation.ts
+      - src/server/validators/authorization-reason-item-presentation.test.ts
+      - src/server/services/authorization-reason-item-presentation-service.ts
+      - src/server/services/authorization-reason-item-presentation-service.test.ts
+      - src/server/models/authorization-reason-context-presentation.ts
+      - src/server/contracts/authorization-reason-context-presentation-contract.ts
+      - src/server/validators/authorization-reason-context-presentation.ts
+      - src/server/validators/authorization-reason-context-presentation.test.ts
+      - src/server/services/authorization-reason-context-presentation-service.ts
+      - src/server/services/authorization-reason-context-presentation-service.test.ts
+      - src/server/models/authorization-reason-evidence-presentation.ts
+      - src/server/contracts/authorization-reason-evidence-presentation-contract.ts
+      - src/server/validators/authorization-reason-evidence-presentation.ts
+      - src/server/validators/authorization-reason-evidence-presentation.test.ts
+      - src/server/services/authorization-reason-evidence-presentation-service.ts
+      - src/server/services/authorization-reason-evidence-presentation-service.test.ts
+      - src/server/models/authorization-reason-presentation-summary.ts
+      - src/server/contracts/authorization-reason-presentation-summary-contract.ts
+      - src/server/validators/authorization-reason-presentation-summary.ts
+      - src/server/validators/authorization-reason-presentation-summary.test.ts
+      - src/server/services/authorization-reason-presentation-summary-service.ts
+      - src/server/services/authorization-reason-presentation-summary-service.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-authorization-reason-presentation-local-contract-batch.md
+      - docs/05-execution-logs/evidence/2026-06-08-authorization-reason-presentation-local-contract-batch.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-authorization-reason-presentation-local-contract-batch.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+    riskTypes:
+      - implementation
+      - authorization
+      - personal_auth
+      - org_auth
+      - redeem_code
+      - paper
+      - mock_exam
+      - audit_log
+      - ai_call_log
+      - authorization_permission
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - schema_migration
+      - dependency
+      - blocked_gate
+    subtasks:
+      - id: authorization-reason-item-presentation
+        status: pending
+        commitSha: null
+      - id: authorization-reason-context-presentation
+        status: pending
+        commitSha: null
+      - id: authorization-reason-evidence-presentation
+        status: pending
+        commitSha: null
+      - id: authorization-reason-presentation-summary
+        status: pending
+        commitSha: null
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- src/server/services/authorization-reason-item-presentation-service.test.ts src/server/validators/authorization-reason-item-presentation.test.ts src/server/services/authorization-reason-context-presentation-service.test.ts src/server/validators/authorization-reason-context-presentation.test.ts src/server/services/authorization-reason-evidence-presentation-service.test.ts src/server/validators/authorization-reason-evidence-presentation.test.ts src/server/services/authorization-reason-presentation-summary-service.test.ts src/server/validators/authorization-reason-presentation-summary.test.ts
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write src\server\models\authorization-reason-item-presentation.ts src\server\contracts\authorization-reason-item-presentation-contract.ts src\server\validators\authorization-reason-item-presentation.ts src\server\validators\authorization-reason-item-presentation.test.ts src\server\services\authorization-reason-item-presentation-service.ts src\server\services\authorization-reason-item-presentation-service.test.ts src\server\models\authorization-reason-context-presentation.ts src\server\contracts\authorization-reason-context-presentation-contract.ts src\server\validators\authorization-reason-context-presentation.ts src\server\validators\authorization-reason-context-presentation.test.ts src\server\services\authorization-reason-context-presentation-service.ts src\server\services\authorization-reason-context-presentation-service.test.ts src\server\models\authorization-reason-evidence-presentation.ts src\server\contracts\authorization-reason-evidence-presentation-contract.ts src\server\validators\authorization-reason-evidence-presentation.ts src\server\validators\authorization-reason-evidence-presentation.test.ts src\server\services\authorization-reason-evidence-presentation-service.ts src\server\services\authorization-reason-evidence-presentation-service.test.ts src\server\models\authorization-reason-presentation-summary.ts src\server\contracts\authorization-reason-presentation-summary-contract.ts src\server\validators\authorization-reason-presentation-summary.ts src\server\validators\authorization-reason-presentation-summary.test.ts src\server\services\authorization-reason-presentation-summary-service.ts src\server\services\authorization-reason-presentation-summary-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-authorization-reason-presentation-local-contract-batch.md docs\05-execution-logs\evidence\2026-06-08-authorization-reason-presentation-local-contract-batch.md docs\05-execution-logs\audits-reviews\2026-06-08-authorization-reason-presentation-local-contract-batch.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check src\server\models\authorization-reason-item-presentation.ts src\server\contracts\authorization-reason-item-presentation-contract.ts src\server\validators\authorization-reason-item-presentation.ts src\server\validators\authorization-reason-item-presentation.test.ts src\server\services\authorization-reason-item-presentation-service.ts src\server\services\authorization-reason-item-presentation-service.test.ts src\server\models\authorization-reason-context-presentation.ts src\server\contracts\authorization-reason-context-presentation-contract.ts src\server\validators\authorization-reason-context-presentation.ts src\server\validators\authorization-reason-context-presentation.test.ts src\server\services\authorization-reason-context-presentation-service.ts src\server\services\authorization-reason-context-presentation-service.test.ts src\server\models\authorization-reason-evidence-presentation.ts src\server\contracts\authorization-reason-evidence-presentation-contract.ts src\server\validators\authorization-reason-evidence-presentation.ts src\server\validators\authorization-reason-evidence-presentation.test.ts src\server\services\authorization-reason-evidence-presentation-service.ts src\server\services\authorization-reason-evidence-presentation-service.test.ts src\server\models\authorization-reason-presentation-summary.ts src\server\contracts\authorization-reason-presentation-summary-contract.ts src\server\validators\authorization-reason-presentation-summary.ts src\server\validators\authorization-reason-presentation-summary.test.ts src\server\services\authorization-reason-presentation-summary-service.ts src\server\services\authorization-reason-presentation-summary-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-authorization-reason-presentation-local-contract-batch.md docs\05-execution-logs\evidence\2026-06-08-authorization-reason-presentation-local-contract-batch.md docs\05-execution-logs\audits-reviews\2026-06-08-authorization-reason-presentation-local-contract-batch.md
+      - Select-String -Path src\server\models\authorization-reason-item-presentation.ts,src\server\contracts\authorization-reason-item-presentation-contract.ts,src\server\validators\authorization-reason-item-presentation.ts,src\server\services\authorization-reason-item-presentation-service.ts,src\server\services\authorization-reason-item-presentation-service.test.ts,src\server\validators\authorization-reason-item-presentation.test.ts,src\server\models\authorization-reason-context-presentation.ts,src\server\contracts\authorization-reason-context-presentation-contract.ts,src\server\validators\authorization-reason-context-presentation.ts,src\server\services\authorization-reason-context-presentation-service.ts,src\server\services\authorization-reason-context-presentation-service.test.ts,src\server\validators\authorization-reason-context-presentation.test.ts,src\server\models\authorization-reason-evidence-presentation.ts,src\server\contracts\authorization-reason-evidence-presentation-contract.ts,src\server\validators\authorization-reason-evidence-presentation.ts,src\server\services\authorization-reason-evidence-presentation-service.ts,src\server\services\authorization-reason-evidence-presentation-service.test.ts,src\server\validators\authorization-reason-evidence-presentation.test.ts,src\server\models\authorization-reason-presentation-summary.ts,src\server\contracts\authorization-reason-presentation-summary-contract.ts,src\server\validators\authorization-reason-presentation-summary.ts,src\server\services\authorization-reason-presentation-summary-service.ts,src\server\services\authorization-reason-presentation-summary-service.test.ts,src\server\validators\authorization-reason-presentation-summary.test.ts,docs\05-execution-logs\task-plans\2026-06-08-authorization-reason-presentation-local-contract-batch.md,docs\05-execution-logs\evidence\2026-06-08-authorization-reason-presentation-local-contract-batch.md,docs\05-execution-logs\audits-reviews\2026-06-08-authorization-reason-presentation-local-contract-batch.md -Pattern 'authorization','personal_auth','org_auth','redeem_code','paper','mock_exam','audit_log','ai_call_log','reason_summary_only','local_presentation_only','redacted','redacted_reference','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-presentation-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-reason-presentation-local-contract-batch.md
+    status: in_progress
+    retryCount: 0
