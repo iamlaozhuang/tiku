@@ -88,6 +88,16 @@ After the unattended local control point is available, a guarded Codex autopilot
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 -TaskId <task-id>
 ```
 
+Routine wakeups after a completed or closed current task should use closeout recovery and dry-run handoff first:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 -TaskId <task-id> -CloseoutRecovery -DryRunHandoff
+```
+
+`-DryRunHandoff` may write a temporary handoff outside the repository so the launch policy can validate handoff presence.
+It must not modify `docs/05-execution-logs/handoffs/**`. Durable handoff writes are allowed only inside an approved
+closeout or handoff task.
+
 This orchestrator combines:
 
 - `Test-ModuleRunV2UnattendedReadiness.ps1`;
@@ -111,6 +121,8 @@ tool availability, and launch approval in the active task or user instruction.
 
 The PowerShell script does not directly create Codex threads. In Codex, the agent layer consumes `launch_new_thread` and
 uses `create_thread` or `send_message_to_thread` only when the thread launch policy allows it.
+
+Dry-run launch decisions are advisory unless a durable handoff was explicitly produced by an approved closeout flow.
 
 ## Task Kind Boundary Matrix
 
@@ -181,6 +193,10 @@ decision is `require_new_thread` before entering the next execution module.
 When autopilot orchestration is approved for the current task, the closeout flow may generate a handoff and return
 `autopilotDecision: launch_new_thread`. The new thread must still start with recovery audit and a fresh Module Run v2
 plan before business implementation.
+
+For routine scheduler wakeups where the current task is already `done` or `closed`, automation should run closeout
+recovery before selecting the next task. If the closeout recovery sees a dirty worktree, remote divergence, missing
+evidence, or stale state that is not an accepted closeout recovery point, it must stop rather than write a new handoff.
 
 ## Per-Task Review And Commit Rule
 

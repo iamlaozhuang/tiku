@@ -315,6 +315,7 @@ automationHandoffPolicy:
   autopilotOrchestratorScript: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
   unattendedDecisionLabels:
     continue: proceed with the approved local task scope
+    closeout_recovery: recover from a completed or closed task before choosing the next step
     stop_for_hard_block: stop and hand off before retrying or broadening scope
   autopilotDecisionLabels:
     continue_current_thread: proceed inside current approved scope
@@ -323,6 +324,10 @@ automationHandoffPolicy:
     launch_new_thread: Codex agent layer may call create_thread with generated handoff
     stop_for_hard_block: stop on hard block
     stop_for_human_handoff: stop for user decision
+  dryRunControls:
+    handoffGeneratorDryRun: New-ModuleRunV2ThreadHandoff.ps1 -DryRun does not write the requested output path
+    autopilotDryRunHandoff: Invoke-ModuleRunV2Autopilot.ps1 -DryRunHandoff uses temporary handoff evidence outside the repository
+    durableHandoffWrites: allowed only inside an approved closeout or handoff task
   nextModuleRunCandidate:
     trigger: Module Run closeout evidence is written and validation passes.
     reads:
@@ -342,7 +347,7 @@ automationHandoffPolicy:
     - execute Cost Calibration Gate
     - continue across execution modules without a new Module Run plan and human approval
 hookIntegrationMatrix:
-  status: local_unattended_control_ready_after_validation
+  status: local_unattended_control_ready_after_dry_run_hardening
   implementationRequiresSeparateTaskApproval: true
   levels:
     advisory: report only; does not block commit or progression

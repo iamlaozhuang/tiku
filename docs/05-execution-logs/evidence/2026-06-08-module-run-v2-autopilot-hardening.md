@@ -45,10 +45,45 @@ Cost Calibration Gate remains blocked.
 ### Batch 4: Automation Configuration Evidence
 
 - Goal: update Codex automation prompt and record ACTIVE configuration plus local dry-run loop evidence.
-- RED: pending.
-- GREEN: pending.
+- RED: automation was ACTIVE, but routine wakeups did not explicitly prefer `-CloseoutRecovery` plus `-DryRunHandoff`; direct decision checks could write tracked handoff files.
+- GREEN: Codex automation `tiku-module-run-v2-autopilot` remains ACTIVE and now instructs routine wakeups to use closeout recovery plus dry-run handoff before durable handoff writes.
+- GREEN: local dry-run autopilot observed `autopilotDecision: launch_new_thread`, `dryRunHandoff: enabled`, `nextModuleRunCandidate: ai-task-and-provider`, and left `git status --short --branch` clean.
 - Commit: pending.
 - localFullLoopGate: L1 target.
+
+## Automation Configuration
+
+- automationId: `tiku-module-run-v2-autopilot`
+- status: `ACTIVE`
+- schedule: hourly
+- executionEnvironment: `worktree`
+- cwd: `D:\tiku`
+- model: `gpt-5.5`
+- reasoningEffort: `high`
+- prompt refresh: routine wakeups prefer `-CloseoutRecovery` and `-DryRunHandoff`; durable handoff writes require an approved closeout or handoff task.
+
+## Dry-Run Autopilot Evidence
+
+Command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 -TaskId module-run-v2-autopilot-hardening -CompletedBatchCount 6 -CloseoutRecovery -ReadinessChangedFiles scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1 -DryRunHandoff -ThreadLaunchApproved -ThreadToolAvailable
+```
+
+Observed:
+
+```text
+autopilotDecision: launch_new_thread
+dryRunHandoff: enabled
+nextModuleRunCandidate: ai-task-and-provider
+Cost Calibration Gate remains blocked
+```
+
+Clean check after dry-run:
+
+```text
+## codex/module-run-v2-autopilot-hardening
+```
 
 ## L8 Blocked Remainder
 

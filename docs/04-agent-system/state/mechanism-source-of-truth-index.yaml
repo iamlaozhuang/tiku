@@ -87,7 +87,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
     decisionOutput: unattendedStopDecision
-    role: local hard-block stop decision before unattended work continues
+    role: local hard-block stop decision before unattended work continues, including closeout recovery
   - id: module-run-v2-thread-rollover-readiness
     path: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.Smoke.ps1
@@ -97,7 +97,7 @@ scriptControls:
     path: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
     smokePath: scripts/agent-system/New-ModuleRunV2ThreadHandoff.Smoke.ps1
     decisionOutput: handoffGenerator
-    role: generated thread handoff for Codex create_thread or send_message_to_thread usage
+    role: generated or dry-run thread handoff for Codex create_thread or send_message_to_thread usage
   - id: module-run-v2-thread-launch-policy
     path: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.Smoke.ps1
@@ -107,7 +107,7 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
     decisionOutput: autopilotDecision
-    role: combines stop decision, thread rollover, handoff generation, and launch policy
+    role: combines stop decision, thread rollover, handoff generation, launch policy, closeout recovery, and dry-run handoff
 executionLogRoots:
   - id: evidence
     path: docs/05-execution-logs/evidence

@@ -45,7 +45,7 @@ automation:
     autoMerge: false
   unattendedControl:
     target: guarded local unattended loop with hard-stop decisions
-    currentStatus: autopilot_hardening_in_progress
+    currentStatus: autopilot_hardening_ready_after_local_dry_run_validation
     stopDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     threadDecisionScriptPath: scripts/agent-system/Test-ModuleRunV2ThreadRolloverReadiness.ps1
     handoffGeneratorScriptPath: scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1

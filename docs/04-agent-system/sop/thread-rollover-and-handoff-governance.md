@@ -72,6 +72,10 @@ The handoff generator is:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ThreadHandoff.ps1
 ```
 
+Use `-DryRun` for readiness checks that only need to inspect the would-be decision inventory. Dry-run mode must not
+create or update the requested output path. Autopilot dry-run handoff may use a temporary file outside the repository so
+`Test-ModuleRunV2ThreadLaunchPolicy.ps1` can validate handoff presence without dirtying tracked files.
+
 Generated handoffs must include `create_thread` and `send_message_to_thread` instructions for Codex-level orchestration,
 but must not include secrets, raw prompts, provider payloads, database URLs, Authorization headers, cleartext
 `redeem_code`, or raw generated AI content.
@@ -240,6 +244,8 @@ An agent must not:
 When a task explicitly approves autopilot thread launch and the Codex thread tool is available, the agent may consume
 `threadLaunchDecision: launch_new_thread` to call `create_thread` with the generated handoff. It must not start
 next-module implementation unless the handoff and new thread startup gate provide a fresh approved Module Run v2 plan.
+If the launch decision came from `-DryRunHandoff`, the agent may use it as readiness evidence only; a receiving thread
+requires a durable redacted handoff or a newly generated approved handoff before implementation begins.
 
 ## User Cooperation Model
 
