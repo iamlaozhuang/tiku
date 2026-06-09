@@ -166,6 +166,46 @@ function Get-TaskListValues {
     return $values.ToArray()
 }
 
+function Get-TaskValidationLifecycleCommands {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$IncludedPhases
+    )
+
+    $commands = New-Object System.Collections.Generic.List[string]
+    $insideSection = $false
+    $currentPhase = ""
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s{4}validationCommandLifecycle:\s*$") {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if (-not $insideSection) {
+            continue
+        }
+
+        if ($line -match "^\s{6}-\s+phase:\s*(.+?)\s*$") {
+            $currentPhase = Remove-ValueQuotes -Value $Matches[1]
+            continue
+        }
+
+        if ($line -match "^\s{8}command:\s*(.+?)\s*$") {
+            $command = Remove-ValueQuotes -Value $Matches[1]
+            if ($IncludedPhases -contains $currentPhase) {
+                $commands.Add($command)
+            }
+        }
+    }
+
+    return $commands.ToArray()
+}
+
 function Get-CurrentTaskId {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
 
@@ -317,7 +357,7 @@ function Get-TargetTaskBlockOrStop {
 function Assert-TaskDependenciesComplete {
     param(
         [Parameter(Mandatory = $true)][object]$QueueContext,
-        [Parameter(Mandatory = $true)][string[]]$TaskBlock,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
         [Parameter(Mandatory = $true)][string]$TargetTaskId
     )
 
@@ -386,7 +426,7 @@ function Set-ProjectStateCurrentTask {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][string]$TargetTaskId,
-        [Parameter(Mandatory = $true)][string[]]$TaskBlock
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock
     )
 
     $lines = @(Get-Content -LiteralPath $Path)
@@ -661,7 +701,16 @@ try {
             Assert-SchemaReady -TargetTaskId $targetTask
             $queueContext = Get-QueueContext
             $taskBlock = @(Get-TargetTaskBlockOrStop -QueueContext $queueContext -TargetTaskId $targetTask)
-            $validationCommands = @(Get-TaskListValues -Block $taskBlock -Key "validationCommands")
+            $validationLifecycleCommands = @(Get-TaskValidationLifecycleCommands -Block $taskBlock -IncludedPhases @("post_edit", "closeout"))
+            $validationCommands = @()
+            if ($validationLifecycleCommands.Count -gt 0) {
+                $validationCommands = $validationLifecycleCommands
+                Write-Output "validationLifecycleMode: phase_filtered"
+                Write-Output "validationLifecycleIncludedPhases: post_edit,closeout"
+            } else {
+                $validationCommands = @(Get-TaskListValues -Block $taskBlock -Key "validationCommands")
+                Write-Output "validationLifecycleMode: legacy_validationCommands"
+            }
             if ($validationCommands.Count -eq 0) {
                 Write-SerialExecutorResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "task has no validation commands" -ExitCode 1 -TargetTaskId $targetTask
             }

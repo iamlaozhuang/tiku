@@ -72,6 +72,7 @@ function New-ReconcileFixture {
     @"
 schemaVersion: 1
 repository:
+  shaSemantics: accepted_ancestor_checkpoint
   lastKnownMasterSha: $baseSha
   lastKnownOriginMasterSha: $baseSha
 currentTask:
@@ -110,17 +111,22 @@ try {
         if ($dryRunResult.ExitCode -ne 0) {
             throw "Expected dry-run reconcile to pass.`n$($dryRunResult.Output -join "`n")"
         }
-        Assert-Contains -Output $dryRunResult.Output -Pattern "postCloseoutStateReconcileDecision: ready_to_reconcile"
+        Assert-Contains -Output $dryRunResult.Output -Pattern "postCloseoutStateReconcileDecision: checkpoint_accepted"
+        Assert-Contains -Output $dryRunResult.Output -Pattern "postCloseoutStateReconcileAction: confirm_accepted_ancestor_checkpoint"
 
         $executeResult = Invoke-Reconcile -ProjectStatePath $readyFixture.StatePath -Execute
         if ($executeResult.ExitCode -ne 0) {
             throw "Expected execute reconcile to pass.`n$($executeResult.Output -join "`n")"
         }
-        Assert-Contains -Output $executeResult.Output -Pattern "postCloseoutStateReconcileDecision: reconciled"
+        Assert-Contains -Output $executeResult.Output -Pattern "postCloseoutStateReconcileDecision: checkpoint_confirmed"
         $updatedState = @(Get-Content -LiteralPath $readyFixture.StatePath)
-        Assert-Contains -Output $updatedState -Pattern "lastKnownMasterSha: $($readyFixture.CloseoutSha)"
-        Assert-Contains -Output $updatedState -Pattern "lastKnownOriginMasterSha: $($readyFixture.CloseoutSha)"
-        Assert-Contains -Output $updatedState -Pattern "commitSha: $($readyFixture.CloseoutSha)"
+        Assert-Contains -Output $updatedState -Pattern "lastKnownMasterSha: $($readyFixture.BaseSha)"
+        Assert-Contains -Output $updatedState -Pattern "lastKnownOriginMasterSha: $($readyFixture.BaseSha)"
+        Assert-Contains -Output $updatedState -Pattern "commitSha: pending-local-commit"
+        $postExecuteStatus = @(& git status --porcelain)
+        if ($postExecuteStatus.Count -ne 0) {
+            throw "Expected execute reconcile to leave the worktree clean.`n$($postExecuteStatus -join "`n")"
+        }
     } finally {
         Pop-Location
     }

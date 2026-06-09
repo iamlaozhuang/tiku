@@ -31,6 +31,13 @@ param(
     [switch]$ParkCurrentWorktree,
 
     [Parameter(Mandatory = $false)]
+    [switch]$SummaryOnly,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateRange(1, 50)]
+    [int]$SummarySampleLimit = 5,
+
+    [Parameter(Mandatory = $false)]
     [string]$ParkingTargetRef = "origin/master"
 )
 
@@ -74,6 +81,14 @@ function Add-HardBlock {
     Write-Output "HARD_BLOCK $Decision $Message"
 }
 
+function Write-Detail {
+    param([Parameter(Mandatory = $true)][string]$Message)
+
+    if (-not $SummaryOnly) {
+        Write-Output $Message
+    }
+}
+
 function Add-CleanupCandidate {
     param(
         [Parameter(Mandatory = $true)][string]$Kind,
@@ -81,7 +96,7 @@ function Add-CleanupCandidate {
     )
 
     $script:cleanupCandidates.Add([pscustomobject]@{ Kind = $Kind; Path = $Path })
-    Write-Output "cleanupCandidate: $Kind $Path"
+    Write-Detail -Message "cleanupCandidate: $Kind $Path"
 }
 
 function Add-RunRegistryCleanupCandidate {
@@ -91,7 +106,7 @@ function Add-RunRegistryCleanupCandidate {
     )
 
     $script:cleanupCandidates.Add([pscustomobject]@{ Kind = "run_registry"; Path = $Path })
-    Write-Output "runRegistryCleanupCandidate: $RunId $Path"
+    Write-Detail -Message "runRegistryCleanupCandidate: $RunId $Path"
 }
 
 function Test-RunRegistryHeartbeatExpired {
@@ -120,7 +135,7 @@ function Add-CleanupAction {
     )
 
     $script:cleanupActions.Add([pscustomobject]@{ Kind = $Kind; Path = $Path })
-    Write-Output "cleanupAction: $Kind $Path"
+    Write-Detail -Message "cleanupAction: $Kind $Path"
 }
 
 function Add-RunRegistryCleanupAction {
@@ -130,7 +145,28 @@ function Add-RunRegistryCleanupAction {
     )
 
     $script:cleanupActions.Add([pscustomobject]@{ Kind = "run_registry"; Path = $Path })
-    Write-Output "runRegistryCleanupAction: $RunId $Path"
+    Write-Detail -Message "runRegistryCleanupAction: $RunId $Path"
+}
+
+function Write-ObjectSummary {
+    param(
+        [Parameter(Mandatory = $true)][string]$Prefix,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Items
+    )
+
+    if (-not $SummaryOnly -or $Items.Count -eq 0) {
+        return
+    }
+
+    $groups = @($Items | Group-Object -Property Kind | Sort-Object Name)
+    foreach ($group in $groups) {
+        Write-Output "$($Prefix)KindCount: $($group.Name)=$($group.Count)"
+    }
+
+    $sampleItems = @($Items | Select-Object -First $SummarySampleLimit)
+    foreach ($item in $sampleItems) {
+        Write-Output "$($Prefix)Sample: $($item.Kind) $($item.Path)"
+    }
 }
 
 function Add-ParkingAction {
@@ -241,6 +277,9 @@ function Write-HygieneResult {
     Write-Output "stoppedAutomationHygieneCleanupCandidateCount: $($script:cleanupCandidates.Count)"
     Write-Output "stoppedAutomationHygieneCleanupActionCount: $($script:cleanupActions.Count)"
     Write-Output "stoppedAutomationHygieneParkingActionCount: $($script:parkingActions.Count)"
+    Write-Output "stoppedAutomationHygieneSummaryOnly: $($SummaryOnly.ToString().ToLowerInvariant())"
+    Write-ObjectSummary -Prefix "stoppedAutomationHygieneCleanupCandidate" -Items $script:cleanupCandidates.ToArray()
+    Write-ObjectSummary -Prefix "stoppedAutomationHygieneCleanupAction" -Items $script:cleanupActions.ToArray()
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
 
@@ -301,6 +340,7 @@ $parkingActions = New-Object System.Collections.Generic.List[object]
 Write-Section -Title "Module Run v2 Stopped Automation Hygiene"
 Write-Output "stoppedAutomationHygieneMode: hard_block"
 Write-Output "cleanupMode: $(if ($Cleanup) { "cleanup" } else { "read_only" })"
+Write-Output "summaryOnly: $($SummaryOnly.ToString().ToLowerInvariant())"
 if ($ParkCurrentWorktree) {
     Write-Output "parkingMode: enabled"
     Write-Output "parkingTargetRef: $ParkingTargetRef"
@@ -378,12 +418,12 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
         $redactedHandoffPath = [string]$registryJson.redactedHandoffPath
         $registryWorktreePath = [string]$registryJson.worktreePath
         $registryHeartbeatAtUtc = [string]$registryJson.heartbeatAtUtc
-        Write-Output "runRegistry: $($registryFile.FullName)"
-        Write-Output "runRegistryRunId: $runId"
-        Write-Output "runRegistryStatus: $runStatus"
-        Write-Output "runRegistryCleanupPolicy: $cleanupPolicy"
-        Write-Output "runRegistryWorktreePath: $registryWorktreePath"
-        Write-Output "runRegistryHeartbeatAtUtc: $registryHeartbeatAtUtc"
+        Write-Detail -Message "runRegistry: $($registryFile.FullName)"
+        Write-Detail -Message "runRegistryRunId: $runId"
+        Write-Detail -Message "runRegistryStatus: $runStatus"
+        Write-Detail -Message "runRegistryCleanupPolicy: $cleanupPolicy"
+        Write-Detail -Message "runRegistryWorktreePath: $registryWorktreePath"
+        Write-Detail -Message "runRegistryHeartbeatAtUtc: $registryHeartbeatAtUtc"
 
         if ($runStatus -eq "cleanup_ready" -and $cleanupPolicy -eq "cleanup_ready") {
             Add-RunRegistryCleanupCandidate -RunId $runId -Path $registryFile.FullName
@@ -443,8 +483,8 @@ if (-not (Test-Path -LiteralPath $AutomationWorktreeRoot)) {
             }
         }
 
-        Write-Output "automationWorktree: $worktreeFullPath"
-        Write-Output "automationWorktreeHead: $($worktree.Head)"
+        Write-Detail -Message "automationWorktree: $worktreeFullPath"
+        Write-Detail -Message "automationWorktreeHead: $($worktree.Head)"
 
         if (Test-GitWorktreeDirty -Path $worktreeFullPath) {
             Add-HardBlock -Decision "stop_dirty_worktree" -Message "automation worktree has uncommitted changes"
@@ -503,7 +543,7 @@ if (-not (Test-Path -LiteralPath $TempRoot)) {
     $handoffDirs = @(Get-ChildItem -LiteralPath $TempRoot -Directory -Filter "tiku-autopilot-handoff-*" -ErrorAction SilentlyContinue)
     foreach ($handoffDir in $handoffDirs) {
         $handoffFullPath = ConvertTo-FullPath -Path $handoffDir.FullName
-        Write-Output "dryRunHandoffTempDir: $handoffFullPath"
+        Write-Detail -Message "dryRunHandoffTempDir: $handoffFullPath"
         Add-CleanupCandidate -Kind "dry_run_handoff_temp" -Path $handoffFullPath
         if ($Cleanup) {
             Remove-SafeDirectory -Path $handoffFullPath -AllowedRoot $TempRoot -Kind "dry_run_handoff_temp"

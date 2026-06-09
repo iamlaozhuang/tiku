@@ -8,7 +8,14 @@ param(
     [string]$BranchPattern = "codex/*",
 
     [Parameter(Mandatory = $false)]
-    [switch]$Cleanup
+    [switch]$Cleanup,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$SummaryOnly,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateRange(1, 50)]
+    [int]$SummarySampleLimit = 5
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,9 +31,21 @@ function Write-BranchHygieneResult {
     Write-Output "== Module Run v2 Branch Hygiene =="
     Write-Output "branchHygieneDecision: $Decision"
     Write-Output "cleanupRequested: $($Cleanup.ToString().ToLowerInvariant())"
+    Write-Output "summaryOnly: $($SummaryOnly.ToString().ToLowerInvariant())"
     Write-Output "branchHygieneMergedCandidateCount: $($script:mergedCandidates.Count)"
     Write-Output "branchHygieneUnmergedReviewCount: $($script:unmergedReview.Count)"
     Write-Output "branchHygieneCleanupActionCount: $($script:cleanupActions.Count)"
+    if ($SummaryOnly) {
+        foreach ($branch in @($script:mergedCandidates | Select-Object -First $SummarySampleLimit)) {
+            Write-Output "branchHygieneMergedCandidateSample: $branch"
+        }
+        foreach ($branch in @($script:unmergedReview | Select-Object -First $SummarySampleLimit)) {
+            Write-Output "branchHygieneUnmergedReviewSample: $branch"
+        }
+        foreach ($branch in @($script:cleanupActions | Select-Object -First $SummarySampleLimit)) {
+            Write-Output "branchHygieneCleanupActionSample: $branch"
+        }
+    }
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
@@ -52,6 +71,7 @@ try {
     Write-Output "== Branch Inventory =="
     Write-Output "baseBranch: $BaseBranch"
     Write-Output "branchPattern: $BranchPattern"
+    Write-Output "summaryOnly: $($SummaryOnly.ToString().ToLowerInvariant())"
 
     $baseSha = ((& git rev-parse $BaseBranch 2>$null) -join "").Trim()
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($baseSha)) {
@@ -64,6 +84,13 @@ try {
 
     $branches = @(Get-LocalBranches -Pattern $BranchPattern)
     foreach ($branch in $branches) {
+        if ($branch -eq $currentBranch) {
+            if (-not $SummaryOnly) {
+                Write-Output "branchHygieneSkippedCurrent: $branch"
+            }
+            continue
+        }
+
         $branchSha = ((& git rev-parse $branch 2>$null) -join "").Trim()
         if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($branchSha)) {
             Write-Output "branchHygieneHardBlock: unresolved $branch"
@@ -73,7 +100,9 @@ try {
         & git merge-base --is-ancestor $branch $BaseBranch 2>$null
         $isMerged = $LASTEXITCODE -eq 0
         if ($isMerged) {
-            Write-Output "branchCleanupCandidate: $branch $branchSha"
+            if (-not $SummaryOnly) {
+                Write-Output "branchCleanupCandidate: $branch $branchSha"
+            }
             $script:mergedCandidates.Add($branch)
             if ($Cleanup) {
                 if ($branch -eq $currentBranch) {
@@ -84,11 +113,15 @@ try {
                 if ($LASTEXITCODE -ne 0) {
                     Write-BranchHygieneResult -Decision "stop_for_hard_block" -Reason "git branch -d failed for $branch" -ExitCode 1
                 }
-                Write-Output "branchCleanupAction: deleted $branch"
+                if (-not $SummaryOnly) {
+                    Write-Output "branchCleanupAction: deleted $branch"
+                }
                 $script:cleanupActions.Add($branch)
             }
         } else {
-            Write-Output "branchManualReviewRequired: $branch $branchSha"
+            if (-not $SummaryOnly) {
+                Write-Output "branchManualReviewRequired: $branch $branchSha"
+            }
             $script:unmergedReview.Add($branch)
         }
     }

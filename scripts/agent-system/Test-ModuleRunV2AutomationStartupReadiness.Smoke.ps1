@@ -69,6 +69,7 @@ automation:
   unattendedControl:
     remoteAutomationApproval: $RemoteAutomationApproval
 repository:
+  shaSemantics: accepted_ancestor_checkpoint
   lastKnownMasterSha: $stateMasterSha
   lastKnownOriginMasterSha: $stateOriginMasterSha
 currentTask:
@@ -164,7 +165,7 @@ terminologyAnchors:
     Assert-Contains -Output $pendingOutput -Pattern "startupDecision: prepare_next_task"
     Assert-Contains -Output $pendingOutput -Pattern "startupStateWarning: lastKnownMasterSha is an accepted ancestor of master"
     Assert-Contains -Output $pendingOutput -Pattern "startupStateWarning: currentTask.commitSha is a placeholder"
-    Assert-Contains -Output $pendingOutput -Pattern "postCloseoutStateReconciliation: recommended"
+    Assert-Contains -Output $pendingOutput -Pattern "startupStateCheckpoint: accepted_ancestor_checkpoint"
 
     Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning"
     $closeoutOutput = @(
@@ -176,7 +177,7 @@ terminologyAnchors:
             -SkipLeaseCheck `
             -SkipWorktreeHygieneCheck
     )
-    Assert-Contains -Output $closeoutOutput -Pattern "startupDecision: closeout_recovery"
+    Assert-Contains -Output $closeoutOutput -Pattern "startupDecision: no_executable_task"
 
     Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "not_granted"
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_AUTOMATION_APPROVAL_NOT_GRANTED" -Command {

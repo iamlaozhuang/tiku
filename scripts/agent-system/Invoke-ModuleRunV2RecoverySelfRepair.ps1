@@ -171,12 +171,12 @@ try {
             $reconcileOutput = @(Invoke-PostCloseoutStateReconcile)
             $reconcileOutput | ForEach-Object { Write-Output $_ }
             $reconcileDecision = Get-KeyValue -Lines $reconcileOutput -Key "postCloseoutStateReconcileDecision"
-            if ($LASTEXITCODE -ne 0 -or $reconcileDecision -notin @("reconciled", "already_current")) {
-                Write-RecoveryResult -Decision "stop_for_hard_block" -RepairAction "reconcile_post_closeout_state_sha" -Reason "post-closeout state reconciliation failed" -ExitCode 1 -StartupDecision $startupDecision
+            if ($LASTEXITCODE -ne 0 -or $reconcileDecision -notin @("checkpoint_confirmed", "checkpoint_accepted", "already_current")) {
+                Write-RecoveryResult -Decision "stop_for_hard_block" -RepairAction "confirm_post_closeout_checkpoint" -Reason "post-closeout checkpoint confirmation failed" -ExitCode 1 -StartupDecision $startupDecision
             }
-            Write-RecoveryResult -Decision "self_repair_executed" -RepairAction "reconcile_post_closeout_state_sha" -Reason "post-closeout state SHA reconciliation executed; rerun startup readiness" -ExitCode 0 -StartupDecision $startupDecision
+            Write-RecoveryResult -Decision "self_repair_executed" -RepairAction "confirm_post_closeout_checkpoint" -Reason "post-closeout checkpoint confirmation executed without state writes; rerun startup readiness" -ExitCode 0 -StartupDecision $startupDecision
         }
-        Write-RecoveryResult -Decision "self_repair_ready" -RepairAction "reconcile_post_closeout_state_sha" -Reason "post-closeout state SHA drift is repairable when Git reality is an accepted ancestor path" -ExitCode 0 -StartupDecision $startupDecision
+        Write-RecoveryResult -Decision "self_repair_ready" -RepairAction "confirm_post_closeout_checkpoint" -Reason "post-closeout checkpoint is confirmable without self-referential state writes" -ExitCode 0 -StartupDecision $startupDecision
     }
 
     if ($Execute) {
@@ -187,7 +187,11 @@ try {
         Write-RecoveryResult -Decision "continue_without_repair" -RepairAction "none" -Reason "startup is executable and no recovery repair must run first" -ExitCode 0 -StartupDecision $startupDecision
     }
 
-    if ($startupDecision -in @("stop_for_manual_decision", "no_executable_task")) {
+    if ($startupDecision -eq "no_executable_task") {
+        Write-RecoveryResult -Decision "continue_without_repair" -RepairAction "none" -Reason "startup is idle because no executable task is available" -ExitCode 0 -StartupDecision $startupDecision
+    }
+
+    if ($startupDecision -eq "stop_for_manual_decision") {
         Write-RecoveryResult -Decision "manual_required" -RepairAction "none" -Reason "startup requires a human decision or has no executable task" -ExitCode 1 -StartupDecision $startupDecision
     }
 

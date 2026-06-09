@@ -95,6 +95,12 @@ function Set-SectionScalar {
     return $updatedLines.ToArray()
 }
 
+function Test-AcceptedCheckpointSemantics {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value)
+
+    return [string]::IsNullOrWhiteSpace($Value) -or $Value -eq "accepted_ancestor_checkpoint"
+}
+
 function Test-PlaceholderCommitSha {
     param([Parameter(Mandatory = $false)][AllowEmptyString()][string]$Value)
 
@@ -141,6 +147,7 @@ try {
     $currentEvidencePath = Get-SectionScalar -Lines $projectStateLines -Section "currentTask" -Key "evidencePath"
     $currentAuditReviewPath = Get-SectionScalar -Lines $projectStateLines -Section "currentTask" -Key "auditReviewPath"
     $currentCommitSha = Get-SectionScalar -Lines $projectStateLines -Section "currentTask" -Key "commitSha"
+    $repositoryShaSemantics = Get-SectionScalar -Lines $projectStateLines -Section "repository" -Key "shaSemantics"
 
     if (-not [string]::IsNullOrWhiteSpace($TaskId) -and $currentTaskId -ne $TaskId) {
         Write-ReconcileResult -Decision "manual_required" -Action "none" -Reason "requested task does not match project-state currentTask" -ExitCode 1
@@ -176,7 +183,12 @@ try {
     Write-Output "stateOriginMasterSha: $stateOriginMasterSha"
     Write-Output "actualMasterSha: $actualMasterSha"
     Write-Output "actualOriginMasterSha: $actualOriginMasterSha"
+    Write-Output "repositoryShaSemantics: $(if ([string]::IsNullOrWhiteSpace($repositoryShaSemantics)) { "accepted_ancestor_checkpoint" } else { $repositoryShaSemantics })"
     Write-Output "currentTaskCommitSha: $currentCommitSha"
+
+    if (-not (Test-AcceptedCheckpointSemantics -Value $repositoryShaSemantics)) {
+        Write-ReconcileResult -Decision "manual_required" -Action "none" -Reason "repository SHA semantics are not accepted_ancestor_checkpoint" -ExitCode 1
+    }
 
     $needsUpdate = $false
     if ($stateMasterSha -ne $actualMasterSha) {
@@ -203,16 +215,10 @@ try {
     }
 
     if (-not $Execute) {
-        Write-ReconcileResult -Decision "ready_to_reconcile" -Action "update_project_state_sha" -Reason "post-closeout state SHA drift is accepted and ready for explicit execution" -ExitCode 0
+        Write-ReconcileResult -Decision "checkpoint_accepted" -Action "confirm_accepted_ancestor_checkpoint" -Reason "post-closeout state checkpoint is accepted as an ancestor and does not require a self-referential state write" -ExitCode 0
     }
 
-    $updatedLines = $projectStateLines
-    $updatedLines = Set-SectionScalar -Lines $updatedLines -Section "repository" -Key "lastKnownMasterSha" -Value $actualMasterSha
-    $updatedLines = Set-SectionScalar -Lines $updatedLines -Section "repository" -Key "lastKnownOriginMasterSha" -Value $actualOriginMasterSha
-    $updatedLines = Set-SectionScalar -Lines $updatedLines -Section "currentTask" -Key "commitSha" -Value $actualMasterSha
-    Set-Content -LiteralPath $ProjectStatePath -Value $updatedLines -Encoding UTF8
-
-    Write-ReconcileResult -Decision "reconciled" -Action "update_project_state_sha" -Reason "project-state repository SHAs and currentTask commitSha were reconciled to Git reality" -ExitCode 0
+    Write-ReconcileResult -Decision "checkpoint_confirmed" -Action "confirm_accepted_ancestor_checkpoint" -Reason "accepted ancestor checkpoint was confirmed without writing self-referential project-state SHAs" -ExitCode 0
 } catch {
     Write-Output "HARD_BLOCK_ERROR $($_.Exception.Message)"
     Write-ReconcileResult -Decision "stop_for_hard_block" -Action "none" -Reason "post-closeout state reconcile encountered an error" -ExitCode 1

@@ -86,7 +86,7 @@ Cost Calibration Gate remains blocked
         throw "Expected post-closeout recovery decision to pass"
     }
     Assert-Contains -Output $postCloseoutResult.Output -Pattern "recoverySelfRepairDecision: self_repair_ready"
-    Assert-Contains -Output $postCloseoutResult.Output -Pattern "repairAction: reconcile_post_closeout_state_sha"
+    Assert-Contains -Output $postCloseoutResult.Output -Pattern "repairAction: confirm_post_closeout_checkpoint"
 
     $manualStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-manual.txt"
     @"
@@ -95,10 +95,10 @@ reason: no in-progress or pending task is available
 Cost Calibration Gate remains blocked
 "@ | Set-Content -LiteralPath $manualStartupPath -Encoding UTF8
     $manualResult = Invoke-Recovery -StartupOutputPath $manualStartupPath
-    if ($manualResult.ExitCode -eq 0) {
-        throw "Expected no executable task recovery decision to fail"
+    if ($manualResult.ExitCode -ne 0) {
+        throw "Expected no executable task recovery decision to pass"
     }
-    Assert-Contains -Output $manualResult.Output -Pattern "recoverySelfRepairDecision: manual_required"
+    Assert-Contains -Output $manualResult.Output -Pattern "recoverySelfRepairDecision: continue_without_repair"
 
     $hardBlockStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-hard-block.txt"
     @"

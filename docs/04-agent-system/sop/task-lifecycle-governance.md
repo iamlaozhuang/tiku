@@ -99,6 +99,17 @@ Docs-only tasks must not claim runtime behavior changed.
 
 Validation must start with the task-specific commands in `task-queue.yaml`.
 
+When a task declares `validationCommandLifecycle`, validators and local executors must treat it as the authoritative
+phase map:
+
+- `pre_edit`: entry-gate commands that may be recorded as evidence, but must not be rerun as post-closeout proof.
+- `post_edit`: targeted smoke or focused verification after implementation edits.
+- `closeout`: final proof before approved closeout, commit, merge, push, or cleanup.
+
+If `validationCommandLifecycle` is present, serial validation and closeout readiness use only `post_edit` and `closeout`
+commands. Legacy `validationCommands` remains required for compatibility and human readability, but it is not approval
+to bypass lifecycle phase rules or rerun pre-edit gates after a task is already closed.
+
 Then run broader gates as relevant:
 
 - `git diff --check` for every changed task;

@@ -23,6 +23,7 @@ taskAutodrivePolicy:
         - open_recovery_plan
         - run_closeout_recovery
         - reconcile_post_closeout_state
+        - confirm_post_closeout_checkpoint
     blockedAgentActions:
       requiredValues:
         - merge
@@ -103,6 +104,32 @@ closeoutPolicy:
     requiredFields:
       - deleteShortBranch
       - parkWorktree
+postCloseoutState:
+  repositoryShaSemantics:
+    allowedValues:
+      - accepted_ancestor_checkpoint
+    default: accepted_ancestor_checkpoint
+    meaning: project-state repository SHAs are durable accepted checkpoints; they do not need to equal the commit that stores the state file.
+  currentTaskCommitShaSemantics:
+    allowedValues:
+      - task_closeout_checkpoint_or_pending_local_commit
+    default: task_closeout_checkpoint_or_pending_local_commit
+    meaning: currentTask.commitSha may be a pending placeholder before closeout or an accepted task closeout checkpoint after closeout.
+  reconcileTransaction:
+    decisionOutputs:
+      - already_current
+      - checkpoint_accepted
+      - checkpoint_confirmed
+      - manual_required
+      - stop_for_hard_block
+    writePolicy: no_self_referential_sha_write
+validationLifecycle:
+  optionalField: validationCommandLifecycle
+  phases:
+    - pre_edit
+    - post_edit
+    - closeout
+  executionRule: serial validation and closeout readiness use post_edit and closeout commands when this field is present; pre_edit commands are entry-gate evidence only.
 registryLifecycle:
   statusField: runStatus
   allowedStatuses:

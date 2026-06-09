@@ -120,7 +120,7 @@ Cost Calibration Gate remains blocked
         if ($postCloseoutRecoveryResult.ExitCode -ne 0) {
             throw "Post-closeout recovery probe failed"
         }
-        Assert-Contains -Output $postCloseoutRecoveryResult.Output -Pattern "repairAction: reconcile_post_closeout_state_sha"
+        Assert-Contains -Output $postCloseoutRecoveryResult.Output -Pattern "repairAction: confirm_post_closeout_checkpoint"
 
         $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
         @"
@@ -188,7 +188,7 @@ read order:
         $branchHygieneScriptPath = Join-Path -Path $scriptRoot -ChildPath "Test-ModuleRunV2BranchHygiene.ps1"
         Push-Location -LiteralPath $branchHygieneRepo
         try {
-            $branchHygieneResult = Invoke-Script -Path $branchHygieneScriptPath -Arguments @("-BaseBranch", "master")
+            $branchHygieneResult = Invoke-Script -Path $branchHygieneScriptPath -Arguments @("-BaseBranch", "master", "-SummaryOnly")
         } finally {
             Pop-Location
         }
@@ -196,6 +196,7 @@ read order:
             throw "Branch hygiene clean probe failed"
         }
         Assert-Contains -Output $branchHygieneResult.Output -Pattern "branchHygieneDecision: clean"
+        Assert-Contains -Output $branchHygieneResult.Output -Pattern "summaryOnly: true"
     } finally {
         if (Test-Path -LiteralPath $fixtureRoot) {
             Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

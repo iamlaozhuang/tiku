@@ -170,6 +170,43 @@ function Get-TaskListValues {
     return $values.ToArray()
 }
 
+function Get-TaskValidationLifecycleCommands {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block)
+
+    $commands = New-Object System.Collections.Generic.List[object]
+    $insideSection = $false
+    $currentPhase = ""
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s{4}validationCommandLifecycle:\s*$") {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if (-not $insideSection) {
+            continue
+        }
+
+        if ($line -match "^\s{6}-\s+phase:\s*(.+?)\s*$") {
+            $currentPhase = Remove-ValueQuotes -Value $Matches[1]
+            continue
+        }
+
+        if ($line -match "^\s{8}command:\s*(.+?)\s*$") {
+            $commands.Add([pscustomobject]@{
+                Phase = $currentPhase
+                Command = Remove-ValueQuotes -Value $Matches[1]
+            })
+        }
+    }
+
+    return $commands.ToArray()
+}
+
 function Test-TaskSectionPresent {
     param(
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
@@ -260,6 +297,7 @@ try {
     $blockedFiles = @(Get-TaskListValues -Block $taskBlock -Key "blockedFiles")
     $riskTypes = @(Get-TaskListValues -Block $taskBlock -Key "riskTypes")
     $validationCommands = @(Get-TaskListValues -Block $taskBlock -Key "validationCommands")
+    $validationLifecycleCommands = @(Get-TaskValidationLifecycleCommands -Block $taskBlock)
 
     Write-Section -Title "Task"
     Write-Output "status: $status"
@@ -268,6 +306,7 @@ try {
     Write-Output "blockedFileCount: $($blockedFiles.Count)"
     Write-Output "riskTypeCount: $($riskTypes.Count)"
     Write-Output "validationCommandCount: $($validationCommands.Count)"
+    Write-Output "validationLifecycleCommandCount: $($validationLifecycleCommands.Count)"
 
     if ($status -notin @("pending", "in_progress")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_TASK_STATUS $TaskId status=$status"
@@ -292,6 +331,21 @@ try {
     }
     if ($validationCommands.Count -eq 0) {
         Add-Finding "HARD_BLOCK_MISSING_VALIDATION_COMMANDS $TaskId"
+    }
+    if ($validationLifecycleCommands.Count -gt 0) {
+        $validLifecyclePhases = @("pre_edit", "post_edit", "closeout")
+        $hasRunnableCompletionPhase = $false
+        foreach ($validationLifecycleCommand in $validationLifecycleCommands) {
+            if ($validationLifecycleCommand.Phase -notin $validLifecyclePhases) {
+                Add-Finding "HARD_BLOCK_INVALID_VALIDATION_LIFECYCLE_PHASE $($validationLifecycleCommand.Phase)"
+            }
+            if ($validationLifecycleCommand.Phase -in @("post_edit", "closeout")) {
+                $hasRunnableCompletionPhase = $true
+            }
+        }
+        if (-not $hasRunnableCompletionPhase) {
+            Add-Finding "HARD_BLOCK_VALIDATION_LIFECYCLE_MISSING_COMPLETION_PHASE $TaskId"
+        }
     }
 
     $blockedRiskTypes = @(

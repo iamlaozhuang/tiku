@@ -208,6 +208,13 @@ try {
     Assert-Contains -Output $registryCleanupAvailableOutput -Pattern "runRegistryCleanupCandidate:"
     Assert-Contains -Output $registryCleanupAvailableOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_available"
 
+    $registrySummaryOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -SummaryOnly)
+    Assert-Contains -Output $registrySummaryOutput -Pattern "stoppedAutomationHygieneSummaryOnly: true"
+    Assert-Contains -Output $registrySummaryOutput -Pattern "stoppedAutomationHygieneCleanupCandidateKindCount:"
+    if (($registrySummaryOutput -join "`n") -match "runRegistryCleanupCandidate:") {
+        throw "Expected SummaryOnly output to suppress detailed run registry cleanup candidate lines."
+    }
+
     $registryCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -Cleanup)
     Assert-Contains -Output $registryCleanupOutput -Pattern "runRegistryCleanupAction:"
     Assert-Contains -Output $registryCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"

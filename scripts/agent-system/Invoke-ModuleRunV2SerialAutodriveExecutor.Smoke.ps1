@@ -92,7 +92,8 @@ function Write-SmokeFiles {
         [Parameter(Mandatory = $false)][string]$CurrentStatus = "in_progress",
         [Parameter(Mandatory = $false)][string]$NextStatus = "pending",
         [Parameter(Mandatory = $false)][string]$NextDependencies = "",
-        [Parameter(Mandatory = $false)][string]$ValidationCommand = "powershell.exe -NoProfile -Command `"Write-Output safe-validation`""
+        [Parameter(Mandatory = $false)][string]$ValidationCommand = "powershell.exe -NoProfile -Command `"Write-Output safe-validation`"",
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$ValidationLifecycleBlock = ""
     )
 
     $caseRoot = Join-Path -Path $Root -ChildPath ("case-" + [guid]::NewGuid().ToString("N"))
@@ -190,6 +191,7 @@ tasks:
       - automation_policy
     validationCommands:
       - $ValidationCommand
+$ValidationLifecycleBlock
     evidencePath: docs/current-evidence.md
     auditReviewPath: docs/current-audit.md
     status: $CurrentStatus
@@ -261,6 +263,7 @@ $nextDependencyBlock
       - automation_policy
     validationCommands:
       - $ValidationCommand
+$ValidationLifecycleBlock
     evidencePath: docs/next-evidence.md
     auditReviewPath: docs/next-audit.md
     status: $NextStatus
@@ -345,6 +348,24 @@ agentActionTask: current-task
     }
     Assert-Contains -Output $validationRunResult.Output -Pattern "serialExecutorDecision: validation_passed"
     Assert-Contains -Output $validationRunResult.Output -Pattern "validationOutput: safe-validation"
+
+    $validationLifecycleBlock = @"
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -Command `"Write-Output pre-edit-validation`"
+      - phase: closeout
+        command: powershell.exe -NoProfile -Command `"Write-Output closeout-validation`"
+"@
+    $lifecycleFiles = Write-SmokeFiles -Root $smokeRoot -ValidationCommand "powershell.exe -NoProfile -Command `"Write-Output legacy-validation`"" -ValidationLifecycleBlock $validationLifecycleBlock
+    $lifecycleRunResult = Invoke-SerialExecutor -ProjectStatePath $lifecycleFiles.StatePath -QueuePath $lifecycleFiles.QueuePath -SchemaPath $lifecycleFiles.SchemaPath -Action "run_validation" -ActionTask "current-task" -RunValidation
+    if ($lifecycleRunResult.ExitCode -ne 0) {
+        throw "Validation lifecycle fixture failed.`n$($lifecycleRunResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $lifecycleRunResult.Output -Pattern "validationLifecycleMode: phase_filtered"
+    Assert-Contains -Output $lifecycleRunResult.Output -Pattern "validationOutput: closeout-validation"
+    if (($lifecycleRunResult.Output -join "`n") -match "pre-edit-validation|legacy-validation") {
+        throw "Expected validation lifecycle mode to skip pre_edit and legacy validation commands."
+    }
 
     $blockedFiles = Write-SmokeFiles -Root $smokeRoot -ValidationCommand "drizzle-kit push"
     $blockedResult = Invoke-SerialExecutor -ProjectStatePath $blockedFiles.StatePath -QueuePath $blockedFiles.QueuePath -SchemaPath $blockedFiles.SchemaPath -Action "run_validation" -ActionTask "current-task"

@@ -130,6 +130,48 @@ function Get-ListValues {
     return $values.ToArray()
 }
 
+function Get-ValidationLifecycleCommands {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Block,
+
+        [Parameter(Mandatory = $true)]
+        [string[]]$IncludedPhases
+    )
+
+    $commands = New-Object System.Collections.Generic.List[string]
+    $insideSection = $false
+    $currentPhase = ""
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s+validationCommandLifecycle:\s*$") {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if (-not $insideSection) {
+            continue
+        }
+
+        if ($line -match "^\s+-\s+phase:\s*(.+)\s*$") {
+            $currentPhase = $Matches[1].Trim()
+            continue
+        }
+
+        if ($line -match "^\s+command:\s*(.+)\s*$") {
+            if ($IncludedPhases -contains $currentPhase) {
+                $commands.Add($Matches[1].Trim())
+            }
+        }
+    }
+
+    return $commands.ToArray()
+}
+
 function Get-CurrentTaskId {
     param(
         [Parameter(Mandatory = $true)]
@@ -238,8 +280,8 @@ function Get-ValidationAnchor {
         return "Test-GitCompletionReadiness|GitCompletionReadiness"
     }
 
-    if ($Command -match "Test-ModuleRunV2") {
-        $scriptName = [regex]::Match($Command, "Test-ModuleRunV2[A-Za-z0-9]+").Value
+    if ($Command -match "(Test|Invoke)-ModuleRunV2") {
+        $scriptName = [regex]::Match($Command, "(Test|Invoke)-ModuleRunV2[A-Za-z0-9]+").Value
         if (-not [string]::IsNullOrWhiteSpace($scriptName)) {
             return [regex]::Escape($scriptName)
         }
@@ -285,7 +327,16 @@ if ([string]::IsNullOrWhiteSpace($AuditReviewPath)) {
     $AuditReviewPath = Get-ScalarValue -Block $taskBlock -Key "auditReviewPath"
 }
 
-$validationCommands = @(Get-ListValues -Block $taskBlock -Key "validationCommands")
+$validationLifecycleCommands = @(Get-ValidationLifecycleCommands -Block $taskBlock -IncludedPhases @("post_edit", "closeout"))
+$validationCommands = @()
+if ($validationLifecycleCommands.Count -gt 0) {
+    $validationCommands = $validationLifecycleCommands
+    Write-Output "validationLifecycleMode: phase_filtered"
+    Write-Output "validationLifecycleIncludedPhases: post_edit,closeout"
+} else {
+    $validationCommands = @(Get-ListValues -Block $taskBlock -Key "validationCommands")
+    Write-Output "validationLifecycleMode: legacy_validationCommands"
+}
 $moduleRunVersion = Get-ScalarValue -Block $taskBlock -Key "moduleRunVersion"
 
 Write-Output "taskId: $TaskId"

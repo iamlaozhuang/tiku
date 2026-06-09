@@ -120,17 +120,17 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
     decisionOutput: recoverySelfRepairDecision
-    role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, recovery plan, post-closeout state reconciliation, or quiet active-owner exit
+    role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, recovery plan, post-closeout checkpoint confirmation, quiet idle, or quiet active-owner exit
   - id: module-run-v2-post-closeout-state-reconcile
     path: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
     decisionOutput: postCloseoutStateReconcileDecision
-    role: bounded transaction for updating project-state repository SHAs and current task commit SHA only when Git is clean, master and origin/master are aligned, and old state SHAs are accepted ancestors
+    role: bounded confirmation gate for accepted ancestor checkpoints; it verifies clean Git, master/origin alignment, evidence/audit, and ancestor SHAs without writing self-referential current HEAD values back into committed project-state
   - id: module-run-v2-branch-hygiene
     path: scripts/agent-system/Test-ModuleRunV2BranchHygiene.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2BranchHygiene.Smoke.ps1
     decisionOutput: branchHygieneDecision
-    role: classifies local codex branch residue into merged cleanup candidates and unmerged manual review candidates without deleting branches by default
+    role: classifies local codex branch residue into merged cleanup candidates and unmerged manual review candidates without deleting branches by default; supports summary-only output for scheduled automation
   - id: module-run-v2-autodrive-control-loop-acceptance
     path: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
@@ -175,7 +175,7 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
     decisionOutput: serialExecutorDecision
-    role: guardian-first serial executor for claim_task, continue_task, and run_validation with explicit Execute or RunValidation gates
+    role: guardian-first serial executor for claim_task, continue_task, and lifecycle-aware run_validation with explicit Execute or RunValidation gates
   - id: module-run-v2-parallel-coordinator-executor
     path: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.Smoke.ps1

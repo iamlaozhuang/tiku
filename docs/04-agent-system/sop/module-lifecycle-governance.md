@@ -76,6 +76,8 @@ Break modules into tasks by these rules:
 
 - each task must be independently reviewable;
 - each task must declare `taskKind`, `allowedFiles`, `blockedFiles`, `riskTypes`, and `validationCommands`;
+- mechanism tasks that need phase-specific validation should also declare `validationCommandLifecycle` with `pre_edit`,
+  `post_edit`, and `closeout` phases so runners do not rerun entry gates after closeout;
 - docs-only tasks must not change product behavior;
 - implementation tasks must map to one requirement chain, acceptance scenario, or horizontal failure scenario;
 - dependency, schema, migration, authorization permission model, provider, env/secret, staging/prod/cloud/deploy, payment, and external-service tasks must be isolated and approval-gated;

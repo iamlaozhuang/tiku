@@ -18,11 +18,17 @@ function Assert-Contains {
 }
 
 function Invoke-BranchHygiene {
-    param([Parameter(Mandatory = $false)][switch]$Cleanup)
+    param(
+        [Parameter(Mandatory = $false)][switch]$Cleanup,
+        [Parameter(Mandatory = $false)][switch]$SummaryOnly
+    )
 
     $arguments = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $scriptPath, "-BaseBranch", "master")
     if ($Cleanup) {
         $arguments += "-Cleanup"
+    }
+    if ($SummaryOnly) {
+        $arguments += "-SummaryOnly"
     }
 
     $previousErrorActionPreference = $ErrorActionPreference
@@ -65,6 +71,28 @@ try {
         Assert-Contains -Output $dryRunResult.Output -Pattern "branchHygieneDecision: cleanup_available"
         Assert-Contains -Output $dryRunResult.Output -Pattern "branchCleanupCandidate: codex/merged-smoke"
         Assert-Contains -Output $dryRunResult.Output -Pattern "branchManualReviewRequired: codex/unmerged-smoke"
+
+        $summaryResult = Invoke-BranchHygiene -SummaryOnly
+        if ($summaryResult.ExitCode -ne 0) {
+            throw "Expected summary branch hygiene with cleanup candidate to pass.`n$($summaryResult.Output -join "`n")"
+        }
+        Assert-Contains -Output $summaryResult.Output -Pattern "branchHygieneDecision: cleanup_available"
+        Assert-Contains -Output $summaryResult.Output -Pattern "summaryOnly: true"
+        Assert-Contains -Output $summaryResult.Output -Pattern "branchHygieneMergedCandidateSample: codex/merged-smoke"
+        if (($summaryResult.Output -join "`n") -match "branchCleanupCandidate: codex/merged-smoke") {
+            throw "Expected SummaryOnly branch hygiene output to suppress detailed branch cleanup candidate lines."
+        }
+
+        & git switch codex/merged-smoke | Out-Null
+        $currentBranchSummary = Invoke-BranchHygiene -SummaryOnly
+        if ($currentBranchSummary.ExitCode -eq 0) {
+            throw "Expected current-branch summary to require manual review because only the unmerged branch remains actionable.`n$($currentBranchSummary.Output -join "`n")"
+        }
+        Assert-Contains -Output $currentBranchSummary.Output -Pattern "branchHygieneDecision: manual_required"
+        if (($currentBranchSummary.Output -join "`n") -match "branchHygieneMergedCandidateSample: codex/merged-smoke") {
+            throw "Expected branch hygiene to skip the current branch as a cleanup candidate."
+        }
+        & git switch master | Out-Null
 
         $cleanupResult = Invoke-BranchHygiene -Cleanup
         if ($cleanupResult.ExitCode -ne 0) {

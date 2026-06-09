@@ -129,7 +129,12 @@ Every new queue task should declare `taskPlanPolicy: required`, `taskPlanPolicy:
 - Use `evidence_only` for readiness, closeout, and state-only tasks when the queue intentionally does not allow `docs/05-execution-logs/task-plans/**`.
 - Use `skipped_with_reason` only when a human instruction explicitly prevents a plan, and record the reason in evidence.
 
-New queue tasks should also declare a lightweight `taskKind` label. This is an execution hint for startup reports, validation selection, and handoff clarity. It is not a replacement for `allowedFiles`, `blockedFiles`, `riskTypes`, or `validationCommands`.
+New queue tasks should also declare a lightweight `taskKind` label. This is an execution hint for startup reports,
+validation selection, and handoff clarity. It is not a replacement for `allowedFiles`, `blockedFiles`, `riskTypes`, or
+`validationCommands`.
+
+For phase-sensitive automation tasks, add `validationCommandLifecycle`. `pre_edit` commands are entry evidence only;
+`post_edit` and `closeout` commands are the runnable validation set for serial executors and closeout readiness.
 
 Allowed `taskKind` values:
 

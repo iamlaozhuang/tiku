@@ -544,17 +544,17 @@ try {
     $actualOriginMasterSha = ((& git rev-parse origin/master 2>$null) -join "").Trim()
     if ($stateMasterSha -ne $actualMasterSha -and (Test-GitAncestor -Ancestor $stateMasterSha -Descendant $actualMasterSha)) {
         Write-Output "startupStateWarning: lastKnownMasterSha is an accepted ancestor of master"
-        Write-Output "postCloseoutStateReconciliation: recommended master"
+        Write-Output "startupStateCheckpoint: accepted_ancestor_checkpoint master"
     }
     if ($stateOriginMasterSha -ne $actualOriginMasterSha -and (Test-GitAncestor -Ancestor $stateOriginMasterSha -Descendant $actualOriginMasterSha)) {
         Write-Output "startupStateWarning: lastKnownOriginMasterSha is an accepted ancestor of origin/master"
-        Write-Output "postCloseoutStateReconciliation: recommended origin/master"
+        Write-Output "startupStateCheckpoint: accepted_ancestor_checkpoint origin/master"
     }
 
     $currentTaskCommitSha = Get-ProjectScalar -Lines $projectStateLines -Key "commitSha"
     if (Test-PlaceholderCommitSha -Value $currentTaskCommitSha) {
         Write-Output "startupStateWarning: currentTask.commitSha is a placeholder"
-        Write-Output "postCloseoutStateReconciliation: recommended currentTask.commitSha"
+        Write-Output "startupStateCheckpoint: accepted_ancestor_checkpoint currentTask.commitSha"
     }
 
     if ($matrixContent -notmatch "Cost Calibration Gate remains blocked") {
@@ -590,10 +590,10 @@ try {
     }
 
     if ($taskStatus -in @("done", "closed")) {
-        Write-StartupResult -Decision "closeout_recovery" -Reason "current task is closed out and no pending task is available" -ExitCode 0
+        Write-StartupResult -Decision "no_executable_task" -Reason "current task is already closed and no pending task is available" -ExitCode 0
     }
 
-    Write-StartupResult -Decision "no_executable_task" -Reason "no in-progress or pending task is available" -ExitCode 1
+    Write-StartupResult -Decision "no_executable_task" -Reason "no in-progress or pending task is available" -ExitCode 0
 } catch {
     Write-Output "HARD_BLOCK_ERROR $($_.Exception.Message)"
     Write-StartupResult -Decision "stop_for_hard_block" -Reason "startup readiness encountered an error" -ExitCode 1

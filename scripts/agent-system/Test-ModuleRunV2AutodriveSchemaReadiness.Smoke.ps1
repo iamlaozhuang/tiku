@@ -148,6 +148,11 @@ try {
       - automation_policy
     validationCommands:
       - git diff --check
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -Command `"Write-Output pre-edit`"
+      - phase: closeout
+        command: git diff --check
     evidencePath: docs/evidence.md
     auditReviewPath: docs/audit.md
     status: in_progress
@@ -159,6 +164,7 @@ try {
         throw "Full schema fixture failed unexpectedly.`n$($fullOutput -join "`n")"
     }
     Assert-Contains -Output $fullOutput -Pattern "autodriveSchemaDecision: can_autodrive"
+    Assert-Contains -Output $fullOutput -Pattern "validationLifecycleCommandCount: 2"
 
     $proposalTaskBlock = $fullTaskBlock -replace "(?ms)\s{4}autodrivePolicy:.*?\s{4}capabilities:", "    capabilities:"
     $proposalFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $proposalTaskBlock

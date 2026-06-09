@@ -72,4 +72,74 @@ Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_BATCH_EVIDENCE" -Comma
     & $scriptPath -TaskId $taskId -EvidencePath "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md" -AuditReviewPath "docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md" -AllowMissingThreadRolloverDecision -AllowMissingNextModuleRunCandidate
 }
 
+$fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-closeout-lifecycle-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
+try {
+    $statePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
+    $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
+    $matrixPath = Join-Path -Path $fixtureRoot -ChildPath "matrix.yaml"
+    $evidencePath = Join-Path -Path $fixtureRoot -ChildPath "evidence.md"
+    $auditPath = Join-Path -Path $fixtureRoot -ChildPath "audit.md"
+
+    @"
+schemaVersion: 1
+currentTask:
+  id: lifecycle-task
+"@ | Set-Content -LiteralPath $statePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+moduleRunVersion: 2
+threadRolloverGate:
+  enabled: true
+automationHandoffPolicy:
+  enabled: true
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $matrixPath -Encoding UTF8
+
+    @"
+result: pass
+Cost Calibration Gate remains blocked
+closeout-validation
+"@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
+    Set-Content -LiteralPath $auditPath -Value "APPROVE" -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: lifecycle-task
+    title: Lifecycle Task
+    moduleRunVersion: 1
+    validationCommands:
+      - pre-edit-validation
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: pre-edit-validation
+      - phase: closeout
+        command: closeout-validation
+    evidencePath: $($evidencePath.Replace("\", "\\"))
+    auditReviewPath: $($auditPath.Replace("\", "\\"))
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    $lifecycleOutput = @(
+        & $scriptPath `
+            -TaskId "lifecycle-task" `
+            -ProjectStatePath $statePath `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath `
+            -AllowMissingThreadRolloverDecision `
+            -AllowMissingNextModuleRunCandidate
+    )
+    Assert-Contains -Output $lifecycleOutput -Pattern "validationLifecycleMode: phase_filtered"
+    Assert-Contains -Output $lifecycleOutput -Pattern "OK_VALIDATION_RECORDED closeout-validation"
+    if (($lifecycleOutput -join "`n") -match "HARD_BLOCK_VALIDATION_NOT_RECORDED pre-edit-validation") {
+        throw "Expected closeout readiness to ignore pre_edit validation lifecycle commands."
+    }
+} finally {
+    if (Test-Path -LiteralPath $fixtureRoot) {
+        Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
+    }
+}
+
 Write-Output "Module Run v2 module-closeout readiness smoke passed"

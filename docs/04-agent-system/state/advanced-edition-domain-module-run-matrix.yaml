@@ -514,7 +514,7 @@ automationHandoffPolicy:
   autopilotOrchestratorScript: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
   unattendedDecisionLabels:
     continue: proceed with the approved local task scope
-    closeout_recovery: recover from a completed or closed task before choosing the next step
+    closeout_recovery: recover only from an actionable incomplete closeout transaction before choosing the next step
     stop_for_hard_block: stop and hand off before retrying or broadening scope
   autopilotDecisionLabels:
     continue_current_thread: proceed inside current approved scope
@@ -530,7 +530,7 @@ automationHandoffPolicy:
     prepare_seeded_implementation_task:
       scheduled automation may prepare a pending implementation task only after
       implementationAutoSeedGate passes
-    closeout_recovery: scheduled automation may run closeout recovery before selecting the next task
+    closeout_recovery: scheduled automation may run closeout recovery only for actionable incomplete closeout state
     stop_existing_run_active: another human or automation run owns the lane
     stop_for_hard_block: startup gate found unsafe state
     no_executable_task: queue and state have no legal action

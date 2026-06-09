@@ -158,7 +158,9 @@ The runner may automatically continue only through these already-gated actions:
 - leave the repository alone when `exit_active_owner_present` or an active lease owns the lane;
 - run stopped-automation hygiene cleanup when startup returns `cleanup_stale_artifacts`;
 - rerun startup after successful cleanup;
-- route `closeout_recovery` to the bounded closeout recovery path before selecting the next task;
+- route `closeout_recovery` to the bounded closeout recovery path only when there is an actionable closeout recovery
+  transaction;
+- treat `no_executable_task` as a quiet idle state when the current task is already closed and no pending task exists;
 - execute approved closeout only through `Invoke-ModuleRunV2Autopilot.ps1` and the existing structured
   `closeoutPolicy`;
 - surface `prepare_next_task`, `continue_current_task`, `prepare_parallel_workers`, `launch_new_thread`, or
@@ -185,27 +187,44 @@ The gate consumes `startupDecision` and emits `recoverySelfRepairDecision` plus 
 - `self_repair_ready`: a bounded repair action is available, such as
   `repairAction: run_stopped_automation_hygiene_cleanup`,
   `repairAction: adopt_recoverable_run_after_redacted_handoff_audit`, `repairAction: open_recovery_plan`, or
-  `repairAction: reconcile_post_closeout_state_sha`.
+  `repairAction: confirm_post_closeout_checkpoint`.
 - `continue_without_repair`: startup can proceed without a repair step.
 - `exit_active_owner_present`: another active owner or lease owns the lane; scheduled automation exits quietly.
 - `manual_required`: recovery requires a human decision.
 - `stop_for_hard_block`: the state is unsafe or blocked.
 
 The gate is decision-only by default. `cleanup_stale_artifacts` is not a reason to stop indefinitely; it is routed to the
-stopped-automation hygiene gate. State SHA reconciliation is repairable only when startup has already identified an
-accepted post-closeout ancestor path. Dirty unknown worktrees, invalid leases, blocked gates, provider/env/schema/deploy
-needs, and unsafe cleanup paths remain hard stops.
+stopped-automation hygiene gate. Accepted post-closeout ancestor checkpoints are confirmable without writing new current
+HEAD values back into committed state files. Dirty unknown worktrees, invalid leases, blocked gates,
+provider/env/schema/deploy needs, and unsafe cleanup paths remain hard stops.
 
-When the only repair action is `reconcile_post_closeout_state_sha`, execution is allowed only through:
+When the only repair action is `confirm_post_closeout_checkpoint`, execution is allowed only through:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1 -TaskId <task-id> -Execute
 ```
 
-That transaction updates only `project-state.yaml` repository SHAs and the current task commit SHA. It requires a clean
-Git worktree, `master` and `origin/master` alignment, current task status `done` or `closed`, existing evidence/audit
-paths, and recorded SHAs that are equal to or accepted ancestors of Git reality. It must not claim a new task, edit queue
-status, merge, push, clean branches, create handoffs, or perform product implementation.
+That transaction confirms `project-state.yaml` repository SHAs and the current task commit SHA as accepted checkpoints.
+It requires a clean Git worktree, `master` and `origin/master` alignment, current task status `done` or `closed`,
+existing evidence/audit paths, and recorded SHAs that are equal to or accepted ancestors of Git reality. It must not write
+self-referential current HEAD values into committed state, claim a new task, edit queue status, merge, push, clean
+branches, create handoffs, or perform product implementation.
+
+## Post-Closeout Checkpoint Model
+
+Committed durable state cannot safely require `project-state.yaml` to contain the exact commit that stores
+`project-state.yaml`; that invariant is self-referential and becomes stale after every state commit. Module Run v2 uses
+`accepted_ancestor_checkpoint` semantics instead:
+
+- `repository.lastKnownMasterSha` and `repository.lastKnownOriginMasterSha` are accepted ancestor checkpoints, not an
+  exact current-HEAD assertion.
+- `currentTask.commitSha` may be `pending-local-commit` before closeout or an accepted task closeout checkpoint after
+  closeout.
+- `Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1` confirms the checkpoint and returns `checkpoint_accepted` or
+  `checkpoint_confirmed`; it does not write new self-referential SHAs.
+- Startup may warn with `startupStateCheckpoint: accepted_ancestor_checkpoint`, but that warning is not a repair loop.
+- A clean closed task with no pending successor returns `startupDecision: no_executable_task` and scheduled automation
+  exits quietly.
 
 ## Autodrive Control-Loop Acceptance
 
@@ -562,13 +581,13 @@ to `cleanup_stale_artifacts` before next-task selection, because the stopped-aut
 `stale_clean_worktree` cleanup candidates. Expired `status: active` registry files whose heartbeat is stale and whose
 worktree path is missing are classified as `expired_active_missing_worktree` cleanup candidates by stopped-automation
 hygiene; fresh active heartbeats remain active-owner no-ops. Invalid paths, active leases, remote divergence, dirty
-worktrees, failed cleanup actions, and non-ancestor state drift remain hard blocks unless a narrower post-closeout SHA
-handoff exception applies.
+worktrees, failed cleanup actions, and non-ancestor state drift remain hard blocks unless a narrower post-closeout
+checkpoint exception applies.
 
 If startup sees state SHA values that are accepted ancestors of current Git reality, it should emit a
-`startupStateWarning` and `postCloseoutStateReconciliation` recommendation instead of blocking. Placeholder current-task
-commit values such as `pending-local-commit` must not be copied into handoff content; handoff generation should fall
-back to the current Git HEAD and mark the fallback.
+`startupStateWarning` and `startupStateCheckpoint: accepted_ancestor_checkpoint` instead of blocking or starting a state
+write loop. Placeholder current-task commit values such as `pending-local-commit` must not be copied into handoff
+content; handoff generation should fall back to the current Git HEAD and mark the fallback.
 
 After Module Run v2 closeout, automation may generate a `nextModuleRunCandidate` proposal. The proposal is a planning
 artifact only; it is not approval to start implementation in the next module.
