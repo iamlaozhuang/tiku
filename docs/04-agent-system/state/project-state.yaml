@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-unattended-blocker-hardening
-updatedAt: "2026-06-09T03:06:20-07:00"
+  currentPhase: module-run-v2-stale-clean-worktree-autocleanup-routing
+updatedAt: "2026-06-09T03:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,16 +77,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: fb6f3c28405f6e1939ce4a71490ce176762a3bea
-  lastKnownOriginMasterSha: fb6f3c28405f6e1939ce4a71490ce176762a3bea
+  lastKnownMasterSha: df78b24e3d7e59884d3b00aaf3e0b98701bc7c9a
+  lastKnownOriginMasterSha: df78b24e3d7e59884d3b00aaf3e0b98701bc7c9a
 currentTask:
-  id: module-run-v2-unattended-blocker-hardening
-  status: closed
-  sourceStory: user-request-2026-06-09-unattended-autopilot-blocker-review
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-unattended-blocker-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-unattended-blocker-hardening.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-unattended-blocker-hardening.md
-  branch: codex/module-run-v2-unattended-blocker-hardening
+  id: module-run-v2-stale-clean-worktree-autocleanup-routing
+  status: done
+  sourceStory: user-request-2026-06-09-stale-clean-worktree-autocleanup-routing
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+  branch: codex/module-run-v2-stale-clean-worktree-autocleanup-routing
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -124,8 +124,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete `module-run-v2-unattended-blocker-hardening` to remove repeat autopilot blockers found across the recent
-    closeout/recovery threads, then resume the next local-first Module Run candidate only after startup readiness passes.
-    Provider/env/deploy, payment/external-service, schema/migration/dependency changes, e2e work, force push, and Cost
-    Calibration Gate execution remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-unattended-blocker-hardening.md
+    Complete `module-run-v2-stale-clean-worktree-autocleanup-routing` so startup can route safe stale clean automation
+    worktrees into the stopped-automation hygiene cleanup flow before selecting the next pending task. Provider/env/deploy,
+    payment/external-service, schema/migration/dependency changes, e2e work, force push, and Cost Calibration Gate
+    execution remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md

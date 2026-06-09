@@ -259,7 +259,7 @@ terminologyAnchors:
     }
     Assert-Contains -Output $recoverableWorktreeOutput -Pattern "RECOVERABLE_AUTOMATION_WORKTREE_STALE_CLEAN"
     Assert-Contains -Output $recoverableWorktreeOutput -Pattern "recoverableAutomationWorktreeCount: 1"
-    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "startupDecision: prepare_next_task"
+    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "startupDecision: cleanup_stale_artifacts"
 
     $handoffRoot = Join-Path -Path $fixtureRoot -ChildPath "handoffs"
     $runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"

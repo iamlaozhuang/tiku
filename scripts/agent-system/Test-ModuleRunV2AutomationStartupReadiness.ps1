@@ -501,7 +501,7 @@ try {
             "-ExecutionPolicy",
             "Bypass",
             "-File",
-            ".\scripts\agent-system\Test-ModuleRunV2AutomationLeaseReadiness.ps1"
+            (Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2AutomationLeaseReadiness.ps1")
         )
         if (-not [string]::IsNullOrWhiteSpace($LeasePath)) {
             $leaseArgs += @("-LeasePath", $LeasePath)
@@ -567,6 +567,7 @@ try {
 
     if ($recoverableFindings.Count -gt 0) {
         Write-Output "recoverableAutomationWorktreeCount: $($recoverableFindings.Count)"
+        Write-StartupResult -Decision "cleanup_stale_artifacts" -Reason "clean stale automation worktree cleanup is available" -ExitCode 0
     }
 
     $taskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $TaskId)

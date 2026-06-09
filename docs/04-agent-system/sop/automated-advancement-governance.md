@@ -125,6 +125,17 @@ uses `create_thread` or `send_message_to_thread` only when the thread launch pol
 
 Dry-run launch decisions are advisory unless a durable handoff was explicitly produced by an approved closeout flow.
 
+When startup returns `startupDecision: cleanup_stale_artifacts`, automation must run the stopped-automation hygiene gate
+before unattended readiness, handoff generation, or next-task selection. The cleanup command is limited to:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup
+```
+
+Only proceed when cleanup completes without hard blocks and startup readiness is rerun successfully afterward. If cleanup
+fails, or startup still returns `cleanup_stale_artifacts`, stop and report the artifact class instead of broadening
+cleanup scope.
+
 ## Task Kind Boundary Matrix
 
 | taskKind             | May auto-advance with docs-only approval | Requires separate approval before execution |
@@ -246,8 +257,11 @@ automation worktrees are routed by the registry:
 - dirty worktree with an unsafe or inconsistent registry -> `stop_for_hard_block`.
 
 Clean registry entries marked `status: cleanup_ready` with `cleanupPolicy: cleanup_ready` route startup to
-`cleanup_stale_artifacts`. Invalid paths, active leases, remote divergence, and non-ancestor state drift remain hard
-blocks unless a narrower post-closeout SHA handoff exception applies.
+`cleanup_stale_artifacts`. Clean stale automation worktrees under the Codex automation worktree root also route startup
+to `cleanup_stale_artifacts` before next-task selection, because the stopped-automation hygiene gate can classify them as
+`stale_clean_worktree` cleanup candidates. Invalid paths, active leases, remote divergence, dirty worktrees, failed
+cleanup actions, and non-ancestor state drift remain hard blocks unless a narrower post-closeout SHA handoff exception
+applies.
 
 If startup sees state SHA values that are accepted ancestors of current Git reality, it should emit a
 `startupStateWarning` and `postCloseoutStateReconciliation` recommendation instead of blocking. Placeholder current-task

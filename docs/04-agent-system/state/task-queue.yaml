@@ -4961,3 +4961,73 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-empty-scope-scan-repair.md
     status: done
     retryCount: 0
+  - id: module-run-v2-stale-clean-worktree-autocleanup-routing
+    title: Module Run v2 Stale Clean Worktree Autocleanup Routing
+    phase: module-run-v2-stale-clean-worktree-autocleanup-routing
+    sourceStory: user-request-2026-06-09-stale-clean-worktree-autocleanup-routing
+    dependencies:
+      - module-run-v2-empty-scope-scan-repair
+    taskPlanPolicy: required
+    humanApproval: >-
+      User explicitly requested implementing the proposed mechanism hardening items 1-4: route clean stale automation
+      worktrees to cleanup before next-task selection, delegate cleanup to the stopped-automation hygiene script, rerun
+      startup after cleanup, and keep the current worktree parked on origin/master before continuing. Scope is limited to
+      local automation scripts, smoke tests, SOP/state/queue alignment, task plan, evidence, and audit review. This does
+      not approve product code, provider/env/secret, staging/prod/cloud/deploy, payment, external-service, dependency,
+      schema, migration, product e2e implementation, dirty worktree deletion, or Cost Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - startup_readiness
+      - autopilot_orchestration
+      - stopped_automation_hygiene
+      - cleanup_safety
+      - worktree_hygiene
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-stale-clean-worktree-autocleanup-routing -PlannedFiles scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\thread-rollover-and-handoff-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1,scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md -Pattern 'cleanup_stale_artifacts','stale_clean_worktree','stoppedAutomationHygieneDecision','cleanup_completed','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-stale-clean-worktree-autocleanup-routing
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+    status: done
+    retryCount: 0

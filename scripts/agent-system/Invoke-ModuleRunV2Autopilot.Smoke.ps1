@@ -13,7 +13,7 @@ function Assert-Contains {
 
     $matched = $Output | Where-Object { $_ -match $Pattern }
     if ($matched.Count -eq 0) {
-        throw "Expected output pattern not found: $Pattern"
+        throw "Expected output pattern not found: $Pattern`nActual output:`n$($Output -join "`n")"
     }
 }
 
@@ -164,6 +164,106 @@ tasks:
     if (Test-Path -LiteralPath $repoHandoffPath) {
         throw "Dry-run autopilot handoff must not write the requested repository handoff path."
     }
+
+    $startupRepo = Join-Path -Path $fixtureRoot -ChildPath "startup-cleanup-repo"
+    $startupWorktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "startup-cleanup-worktrees"
+    $startupRunRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "startup-cleanup-runs"
+    $startupHandoffRoot = Join-Path -Path $fixtureRoot -ChildPath "startup-cleanup-handoffs"
+    New-Item -ItemType Directory -Path $startupRepo, $startupWorktreeRoot, $startupRunRegistryRoot, $startupHandoffRoot | Out-Null
+    & git -C $startupRepo init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize autopilot startup cleanup fixture repository."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $startupRepo -ChildPath "README.md") -Value "autopilot startup baseline" -Encoding UTF8
+    & git -C $startupRepo add README.md | Out-Null
+    & git -C $startupRepo -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "autopilot startup baseline" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit autopilot startup cleanup baseline."
+    }
+    $autopilotStaleWorktreePath = Join-Path -Path $startupWorktreeRoot -ChildPath "stale-clean"
+    & git -C $startupRepo worktree add -b codex/autopilot-stale-clean-smoke $autopilotStaleWorktreePath HEAD | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create autopilot startup cleanup stale worktree."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $startupRepo -ChildPath "README.md") -Value "autopilot startup advanced" -Encoding UTF8
+    & git -C $startupRepo add README.md | Out-Null
+    & git -C $startupRepo -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "autopilot startup advanced" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to advance autopilot startup cleanup fixture."
+    }
+    $startupOriginMasterSha = ((& git -C $startupRepo rev-parse HEAD) -join "").Trim()
+    & git -C $startupRepo update-ref refs/remotes/origin/master $startupOriginMasterSha
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create autopilot startup cleanup origin/master ref."
+    }
+
+    $startupProjectStatePath = Join-Path -Path $fixtureRoot -ChildPath "startup-cleanup-project-state.yaml"
+    $startupQueuePath = Join-Path -Path $fixtureRoot -ChildPath "startup-cleanup-task-queue.yaml"
+    $startupMatrixPath = Join-Path -Path $fixtureRoot -ChildPath "startup-cleanup-matrix.yaml"
+    @"
+schemaVersion: 2
+moduleRunVersion: 2
+automationHandoffPolicy:
+  startupReadiness: required
+threadRolloverGate:
+  enabled: true
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $startupMatrixPath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+automation:
+  unattendedControl:
+    remoteAutomationApproval: lease_guarded_local_readiness_and_planning
+repository:
+  lastKnownMasterSha: $startupOriginMasterSha
+  lastKnownOriginMasterSha: $startupOriginMasterSha
+currentTask:
+  id: module-run-v2-autopilot-startup-cleanup-smoke
+  commitSha: $startupOriginMasterSha
+"@ | Set-Content -LiteralPath $startupProjectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: module-run-v2-autopilot-startup-cleanup-smoke
+    status: in_progress
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autopilot-startup-cleanup-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autopilot-startup-cleanup-smoke.md
+"@ | Set-Content -LiteralPath $startupQueuePath -Encoding UTF8
+
+    Push-Location -LiteralPath $startupRepo
+    try {
+        $startupCleanupOutput = @(
+            & $scriptPath `
+                -RunStartupReadiness `
+                -StartupProjectStatePath $startupProjectStatePath `
+                -StartupQueuePath $startupQueuePath `
+                -StartupMatrixPath $startupMatrixPath `
+                -StartupAutomationWorktreeRoot $startupWorktreeRoot `
+                -StartupRunRegistryRoot $startupRunRegistryRoot `
+                -StartupHandoffRoot $startupHandoffRoot `
+                -AllowProtectedBranch `
+                -SkipUnattendedReadiness `
+                -CompletedBatchCount 2 `
+                -HandoffPath $handoffPath
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $startupCleanupOutput -Pattern "startupDecision: cleanup_stale_artifacts"
+    Assert-Contains -Output $startupCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    Assert-Contains -Output $startupCleanupOutput -Pattern "autopilotDecision: continue_current_thread"
 
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {

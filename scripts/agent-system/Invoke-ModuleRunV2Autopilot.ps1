@@ -30,6 +30,9 @@ param(
     [switch]$CloseoutRecovery,
 
     [Parameter(Mandatory = $false)]
+    [switch]$RunStartupReadiness,
+
+    [Parameter(Mandatory = $false)]
     [switch]$AllowProtectedBranch,
 
     [Parameter(Mandatory = $false)]
@@ -49,6 +52,24 @@ param(
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [string]$StartupProjectStatePath = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$StartupQueuePath = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$StartupMatrixPath = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$StartupAutomationWorktreeRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$StartupRunRegistryRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$StartupHandoffRoot = "",
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
@@ -168,6 +189,77 @@ function Test-ApprovedCloseoutContinuation {
     return Test-CloseoutAuthorizationText -Text $Statement
 }
 
+function Invoke-StartupReadinessGate {
+    $effectiveProjectStatePath = if ([string]::IsNullOrWhiteSpace($StartupProjectStatePath)) { $ProjectStatePath } else { $StartupProjectStatePath }
+    $effectiveQueuePath = if ([string]::IsNullOrWhiteSpace($StartupQueuePath)) { $QueuePath } else { $StartupQueuePath }
+    $effectiveMatrixPath = if ([string]::IsNullOrWhiteSpace($StartupMatrixPath)) { $MatrixPath } else { $StartupMatrixPath }
+
+    $startupArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2AutomationStartupReadiness.ps1"),
+        "-ProjectStatePath",
+        $effectiveProjectStatePath,
+        "-QueuePath",
+        $effectiveQueuePath,
+        "-MatrixPath",
+        $effectiveMatrixPath
+    )
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        $startupArgs += @("-TaskId", $TaskId)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($StartupAutomationWorktreeRoot)) {
+        $startupArgs += @("-AutomationWorktreeRoot", $StartupAutomationWorktreeRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($StartupRunRegistryRoot)) {
+        $startupArgs += @("-RunRegistryRoot", $StartupRunRegistryRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($StartupHandoffRoot)) {
+        $startupArgs += @("-HandoffRoot", $StartupHandoffRoot)
+    }
+    if ($AllowProtectedBranch) {
+        $startupArgs += "-AllowProtectedBranch"
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        return @(& powershell.exe @startupArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
+function Invoke-StoppedAutomationCleanup {
+    $cleanupArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2StoppedAutomationHygiene.ps1"),
+        "-Cleanup"
+    )
+    if (-not [string]::IsNullOrWhiteSpace($StartupAutomationWorktreeRoot)) {
+        $cleanupArgs += @("-AutomationWorktreeRoot", $StartupAutomationWorktreeRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($StartupRunRegistryRoot)) {
+        $cleanupArgs += @("-RunRegistryRoot", $StartupRunRegistryRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($StartupHandoffRoot)) {
+        $cleanupArgs += @("-HandoffRoot", $StartupHandoffRoot)
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        return @(& powershell.exe @cleanupArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Write-AutopilotResult {
     param(
         [Parameter(Mandatory = $true)][string]$Decision,
@@ -187,6 +279,35 @@ function Write-AutopilotResult {
     Write-Output "Cost Calibration Gate remains blocked"
     Remove-DryRunHandoffTempRoot
     exit $ExitCode
+}
+
+if ($RunStartupReadiness) {
+    $startupOutput = @(Invoke-StartupReadinessGate)
+    $startupOutput | ForEach-Object { Write-Output $_ }
+    $startupDecision = Get-DecisionValue -Output $startupOutput -Key "startupDecision"
+    if ([string]::IsNullOrWhiteSpace($startupDecision)) {
+        Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "startup readiness decision was not readable" -ExitCode 1
+    }
+
+    if ($startupDecision -eq "cleanup_stale_artifacts") {
+        $cleanupOutput = @(Invoke-StoppedAutomationCleanup)
+        $cleanupOutput | ForEach-Object { Write-Output $_ }
+        $cleanupDecision = Get-DecisionValue -Output $cleanupOutput -Key "stoppedAutomationHygieneDecision"
+        if ($LASTEXITCODE -ne 0 -or $cleanupDecision -ne "cleanup_completed") {
+            Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "stale automation artifact cleanup failed" -ExitCode 1
+        }
+
+        $startupOutput = @(Invoke-StartupReadinessGate)
+        $startupOutput | ForEach-Object { Write-Output $_ }
+        $startupDecision = Get-DecisionValue -Output $startupOutput -Key "startupDecision"
+        if ($startupDecision -eq "cleanup_stale_artifacts" -or [string]::IsNullOrWhiteSpace($startupDecision)) {
+            Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "startup readiness did not advance after cleanup" -ExitCode 1
+        }
+    }
+
+    if ($startupDecision -in @("stop_existing_run_active", "stop_for_hard_block", "stop_for_manual_decision", "no_executable_task")) {
+        Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "startup readiness stopped autopilot" -ExitCode 1
+    }
 }
 
 if (-not $SkipUnattendedReadiness) {

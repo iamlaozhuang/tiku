@@ -277,7 +277,8 @@ For scheduled automation, thread creation is legal only after all of these are t
 - no active non-expired automation lease exists;
 - dirty automation worktrees have been classified as `exit_active_owner_present`, `adopt_recoverable_run`,
   `open_recovery_plan`, `stop_for_manual_decision`, or a hard block; clean stale worktrees have been reported as
-  `recoverableAutomationWorktree` or routed to `cleanup_stale_artifacts`;
+  `recoverableAutomationWorktree` or routed to `cleanup_stale_artifacts`, and any available stale-clean cleanup has been
+  completed by `Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup` before next-task selection;
 - `threadLaunchDecision: launch_new_thread` is produced from a durable handoff and explicit launch approval.
 
 When a thread finishes an approved automation-owned task, it should leave the current worktree in
