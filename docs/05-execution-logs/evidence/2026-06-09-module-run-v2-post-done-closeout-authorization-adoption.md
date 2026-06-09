@@ -133,6 +133,9 @@ pre-push readiness passed.
 - `Invoke-ModuleRunV2ApprovedCloseout.ps1`, `Invoke-ModuleRunV2Autopilot.ps1`,
   `Test-ModuleRunV2UnattendedReadiness.ps1`, `Test-ModuleRunV2PrePushReadiness.ps1`, and the unattended readiness smoke
   now tolerate Git CRLF warnings from scoped child-process output long enough to inspect the mechanism result.
+- `Invoke-ModuleRunV2ApprovedCloseout.ps1` now detects when `master` is already checked out in a separate clean worktree
+  and uses that worktree for the fast-forward merge and push instead of requiring the automation worktree to switch to
+  `master`.
 - Re-ran the final mechanism smoke and gate set after the warning-handling repair:
 
 ```text

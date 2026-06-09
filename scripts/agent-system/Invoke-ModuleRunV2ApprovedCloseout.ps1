@@ -207,6 +207,38 @@ function Invoke-GitCommand {
     }
 }
 
+function Get-BranchWorktreePath {
+    param([Parameter(Mandatory = $true)][string]$Branch)
+
+    $worktreeLines = @(& git worktree list --porcelain)
+    $currentWorktreePath = ""
+    foreach ($line in $worktreeLines) {
+        if ($line -match "^worktree\s+(.+)$") {
+            $currentWorktreePath = $Matches[1].Trim()
+            continue
+        }
+
+        if ($line -eq "branch refs/heads/$Branch" -and -not [string]::IsNullOrWhiteSpace($currentWorktreePath)) {
+            return $currentWorktreePath
+        }
+    }
+
+    return ""
+}
+
+function Assert-CleanWorktree {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $statusOutput = @(& git -C $Path status --porcelain)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to inspect base branch worktree: $Path"
+    }
+
+    if ($statusOutput.Count -gt 0) {
+        throw "Base branch worktree is dirty and cannot receive approved closeout merge: $Path"
+    }
+}
+
 function Test-CloseoutAuthorizationText {
     param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text)
 
@@ -394,13 +426,27 @@ Invoke-GitCommand -Arguments @("commit", "-m", $commitMessage)
 $commitSha = ((& git rev-parse HEAD) -join "").Trim()
 Write-Output "commitSha: $commitSha"
 
-Invoke-GitCommand -Arguments @("switch", $BaseBranch)
+$currentWorktreeRoot = ((& git rev-parse --show-toplevel) -join "").Trim()
+$baseBranchWorktreePath = Get-BranchWorktreePath -Branch $BaseBranch
 
-Invoke-GitCommand -Arguments @("merge", "--ff-only", $currentBranch)
+if (
+    -not [string]::IsNullOrWhiteSpace($baseBranchWorktreePath) -and
+    (Resolve-Path -LiteralPath $baseBranchWorktreePath).Path -ne (Resolve-Path -LiteralPath $currentWorktreeRoot).Path
+) {
+    Assert-CleanWorktree -Path $baseBranchWorktreePath
+    Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "merge", "--ff-only", $currentBranch)
+    Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "push", "origin", $BaseBranch)
+    Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "fetch", "origin")
+    Invoke-GitCommand -Arguments @("fetch", "origin")
+} else {
+    Invoke-GitCommand -Arguments @("switch", $BaseBranch)
 
-Invoke-GitCommand -Arguments @("push", "origin", $BaseBranch)
+    Invoke-GitCommand -Arguments @("merge", "--ff-only", $currentBranch)
 
-Invoke-GitCommand -Arguments @("fetch", "origin")
+    Invoke-GitCommand -Arguments @("push", "origin", $BaseBranch)
+
+    Invoke-GitCommand -Arguments @("fetch", "origin")
+}
 
 Invoke-GitCommand -Arguments @("switch", "--detach", "origin/$BaseBranch")
 
