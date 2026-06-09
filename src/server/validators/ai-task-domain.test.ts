@@ -9,6 +9,7 @@ describe("AI task domain validator", () => {
         userPublicId: " user_public_123 ",
         authorizationPublicId: " personal_auth_public_123 ",
         aiFuncType: "kn_recommendation",
+        taskStatus: " running ",
         questionPublicId: " question_public_123 ",
         answerRecordPublicId: null,
         paperPublicId: " paper_public_123 ",
@@ -24,6 +25,7 @@ describe("AI task domain validator", () => {
         userPublicId: "user_public_123",
         authorizationPublicId: "personal_auth_public_123",
         aiFuncType: "kn_recommendation",
+        taskStatus: "running",
         questionPublicId: "question_public_123",
         answerRecordPublicId: null,
         paperPublicId: "paper_public_123",
@@ -40,6 +42,27 @@ describe("AI task domain validator", () => {
         userPublicId: "user_public_123",
         authorizationPublicId: "personal_auth_public_123",
         aiFuncType: "invalid_ai_func",
+        taskStatus: "pending",
+        questionPublicId: "question_public_123",
+        answerRecordPublicId: null,
+        paperPublicId: null,
+        mockExamPublicId: null,
+        auditLogPublicId: null,
+        aiCallLogPublicId: null,
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid AI task domain input.",
+    });
+  });
+
+  it("rejects unsupported AI task lifecycle status", () => {
+    expect(
+      normalizeAiTaskDomainInput({
+        userPublicId: "user_public_123",
+        authorizationPublicId: "personal_auth_public_123",
+        aiFuncType: "hint",
+        taskStatus: "provider_streaming",
         questionPublicId: "question_public_123",
         answerRecordPublicId: null,
         paperPublicId: null,

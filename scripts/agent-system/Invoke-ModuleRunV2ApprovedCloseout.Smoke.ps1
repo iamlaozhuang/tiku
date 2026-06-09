@@ -78,7 +78,7 @@ try {
             '    title: Approved Closeout Smoke',
             '    status: done',
             '    taskKind: implementation',
-            '    humanApproval: User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation.',
+            '    humanApproval: User approved only the local implementation; closeout approval is supplied after status done.',
             '    allowedFiles:',
             '      - docs/04-agent-system/state/project-state.yaml',
             '      - docs/04-agent-system/state/task-queue.yaml',
@@ -136,10 +136,12 @@ try {
                 -TaskId "module-run-v2-closeout-smoke" `
                 -ProjectStatePath "docs/04-agent-system/state/project-state.yaml" `
                 -QueuePath "docs/04-agent-system/state/task-queue.yaml" `
-                -MatrixPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" 2>&1
+                -MatrixPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" `
+                -CloseoutAuthorizationStatement "User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation." 2>&1
         )
 
         Assert-Contains -Output $output -Pattern "approvedCloseoutContinuation: enabled"
+        Assert-Contains -Output $output -Pattern "closeoutAuthorizationSource: statement"
         Assert-Contains -Output $output -Pattern "mergeTarget: master"
         Assert-Contains -Output $output -Pattern "pushTarget: origin/master"
         Assert-Contains -Output $output -Pattern "automationWorktreeParking: detached origin/master"

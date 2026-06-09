@@ -4310,7 +4310,85 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-ai-task-lifecycle-local-contract
     evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
-    status: pending
+    status: done
+    retryCount: 0
+  - id: module-run-v2-post-done-closeout-authorization-adoption
+    title: Module Run v2 Post-Done Closeout Authorization Adoption
+    phase: module-run-v2-post-done-closeout-authorization-adoption
+    sourceStory: user-request-2026-06-09-post-done-closeout-authorization-adoption
+    dependencies:
+      - module-run-v2-ai-task-lifecycle-local-contract
+    taskPlanPolicy: required
+    humanApproval: >-
+      User explicitly requested a mechanism repair first, then automatic closeout of the current branch. User authorized
+      committing work results, fast-forward merge into `master`, push `origin/master`, short-lived branch cleanup, and
+      park the automation worktree during mechanism operation. Scope is limited to adopting fresh closeout authorization
+      for a completed dirty task, approved closeout/autopilot scripts and smoke tests, governance state/queue/logs, and
+      the already verified carried files from `module-run-v2-ai-task-lifecycle-local-contract`. This does not approve
+      provider calls, provider configuration, env/secret, staging/prod/cloud/deploy, payment, external-service,
+      dependency, package, lockfile, schema, migration, API, UI, e2e, force push, or Cost Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - src/server/contracts/ai-task-domain-contract.ts
+      - src/server/models/ai-task-domain.ts
+      - src/server/validators/ai-task-domain.ts
+      - src/server/validators/ai-task-domain.test.ts
+      - src/server/services/ai-task-domain-service.ts
+      - src/server/services/ai-task-domain-service.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/app/api/v1/**
+      - src/app/(student)/**
+      - src/app/(admin)/**
+      - e2e/**
+    riskTypes:
+      - automation_policy
+      - approved_closeout
+      - post_done_authorization
+      - worktree_hygiene
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-post-done-closeout-authorization-adoption -PlannedFiles scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,src/server/contracts/ai-task-domain-contract.ts,src/server/models/ai-task-domain.ts,src/server/validators/ai-task-domain.ts,src/server/validators/ai-task-domain.test.ts,src/server/services/ai-task-domain-service.ts,src/server/services/ai-task-domain-service.test.ts,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - npm.cmd run test:unit -- src/server/validators/ai-task-domain.test.ts src/server/services/ai-task-domain-service.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 src\server\contracts\ai-task-domain-contract.ts src\server\models\ai-task-domain.ts src\server\validators\ai-task-domain.ts src\server\validators\ai-task-domain.test.ts src\server\services\ai-task-domain-service.ts src\server\services\ai-task-domain-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+      - Select-String -Path scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1,scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1,scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1,scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md -Pattern 'CloseoutAuthorizationStatement','approvedCloseoutContinuation','post-done closeout authorization','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-post-done-closeout-authorization-adoption
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+    status: closed
     retryCount: 0
   - id: module-run-v2-closeout-continuity-hardening
     title: Module Run v2 Closeout Continuity Hardening

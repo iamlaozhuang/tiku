@@ -56,7 +56,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$HandoffPath = "docs\05-execution-logs\handoffs\2026-06-08-module-run-v2-autopilot-orchestration-control.md"
+    [string]$HandoffPath = "docs\05-execution-logs\handoffs\2026-06-08-module-run-v2-autopilot-orchestration-control.md",
+
+    [Parameter(Mandatory = $false)]
+    [string]$CloseoutAuthorizationStatement = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -137,19 +140,32 @@ function Get-ScalarValue {
     return ""
 }
 
-function Test-ApprovedCloseoutContinuation {
-    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+function Test-CloseoutAuthorizationText {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text)
 
-    $taskText = ($TaskBlock -join "`n")
-    if ($taskText -notmatch "(?i)humanApproval:") {
+    if ([string]::IsNullOrWhiteSpace($Text)) {
         return $false
     }
 
-    $hasCommit = $taskText -match "(?i)\bcommit\b"
-    $hasMerge = $taskText -match "(?i)\bmerge\b"
-    $hasPush = $taskText -match "(?i)\bpush\b"
-    $hasCleanup = $taskText -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
+    $hasCommit = $Text -match "(?i)\bcommit\b"
+    $hasMerge = $Text -match "(?i)\bmerge\b"
+    $hasPush = $Text -match "(?i)\bpush\b"
+    $hasCleanup = $Text -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
     return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
+}
+
+function Test-ApprovedCloseoutContinuation {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$TaskBlock,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$Statement = ""
+    )
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -match "(?i)humanApproval:" -and (Test-CloseoutAuthorizationText -Text $taskText)) {
+        return $true
+    }
+
+    return Test-CloseoutAuthorizationText -Text $Statement
 }
 
 function Write-AutopilotResult {
@@ -193,6 +209,9 @@ if (-not $SkipUnattendedReadiness) {
     if ($CloseoutRecovery) {
         $readinessArgs += "-CloseoutRecovery"
     }
+    if (-not [string]::IsNullOrWhiteSpace($CloseoutAuthorizationStatement)) {
+        $readinessArgs += @("-CloseoutAuthorizationStatement", $CloseoutAuthorizationStatement)
+    }
     if ($AllowProtectedBranch) {
         $readinessArgs += "-AllowProtectedBranch"
     }
@@ -200,7 +219,13 @@ if (-not $SkipUnattendedReadiness) {
         $readinessArgs += @("-ChangedFiles", ($ReadinessChangedFiles -join ","))
     }
 
-    $readinessOutput = @(& powershell.exe @readinessArgs 2>&1)
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $readinessOutput = @(& powershell.exe @readinessArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
     if ($LASTEXITCODE -ne 0) {
         $readinessOutput | ForEach-Object { Write-Output $_ }
         Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "unattended readiness failed" -ExitCode 1
@@ -213,10 +238,16 @@ if ($CloseoutRecovery -and -not [string]::IsNullOrWhiteSpace($TaskId)) {
     $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
     $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
     $dirtyFiles = @(& git status --porcelain)
-    if ($taskStatus -in @("done", "closed") -and $dirtyFiles.Count -gt 0 -and (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock)) {
-        $closeoutOutput = @(
-            & (Join-Path -Path $agentSystemRoot -ChildPath "Invoke-ModuleRunV2ApprovedCloseout.ps1") -TaskId $TaskId -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath 2>&1
-        )
+    if ($taskStatus -in @("done", "closed") -and $dirtyFiles.Count -gt 0 -and (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock -Statement $CloseoutAuthorizationStatement)) {
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $closeoutOutput = @(
+                & (Join-Path -Path $agentSystemRoot -ChildPath "Invoke-ModuleRunV2ApprovedCloseout.ps1") -TaskId $TaskId -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath -CloseoutAuthorizationStatement $CloseoutAuthorizationStatement 2>&1
+            )
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
         if ($LASTEXITCODE -ne 0) {
             $closeoutOutput | ForEach-Object { Write-Output $_ }
             Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "approved closeout execution failed" -ExitCode 1

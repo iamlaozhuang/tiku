@@ -36,7 +36,10 @@ param(
     [switch]$CloseoutRecovery,
 
     [Parameter(Mandatory = $false)]
-    [switch]$SkipRemoteAheadCheck
+    [switch]$SkipRemoteAheadCheck,
+
+    [Parameter(Mandatory = $false)]
+    [string]$CloseoutAuthorizationStatement = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -140,19 +143,32 @@ function Get-ScalarValueFromText {
     return ""
 }
 
-function Test-ApprovedCloseoutContinuation {
-    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+function Test-CloseoutAuthorizationText {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text)
 
-    $taskText = ($TaskBlock -join "`n")
-    if ($taskText -notmatch "(?i)humanApproval:") {
+    if ([string]::IsNullOrWhiteSpace($Text)) {
         return $false
     }
 
-    $hasCommit = $taskText -match "(?i)\bcommit\b"
-    $hasMerge = $taskText -match "(?i)\bmerge\b"
-    $hasPush = $taskText -match "(?i)\bpush\b"
-    $hasCleanup = $taskText -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
+    $hasCommit = $Text -match "(?i)\bcommit\b"
+    $hasMerge = $Text -match "(?i)\bmerge\b"
+    $hasPush = $Text -match "(?i)\bpush\b"
+    $hasCleanup = $Text -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
     return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
+}
+
+function Test-ApprovedCloseoutContinuation {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$TaskBlock,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$Statement = ""
+    )
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -match "(?i)humanApproval:" -and (Test-CloseoutAuthorizationText -Text $taskText)) {
+        return $true
+    }
+
+    return Test-CloseoutAuthorizationText -Text $Statement
 }
 
 function Get-CurrentTaskId {
@@ -543,7 +559,7 @@ try {
     Write-RunRegistryHeartbeat -Root $RunRegistryRoot -TaskId $TaskId -Branch $currentBranch -WorktreePath $currentWorktreePath -FilesToScan $filesToScan
     $explicitFilesToScan = @(Expand-FileInputs -Files $ChangedFiles)
     if ($CloseoutRecovery -and $explicitFilesToScan.Count -eq 0 -and $filesToScan.Count -gt 0) {
-        if (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock) {
+        if (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock -Statement $CloseoutAuthorizationStatement) {
             Write-Output "OK_APPROVED_CLOSEOUT_DIRTY_WORKTREE files=$($filesToScan.Count)"
             Write-Output "approvedCloseoutContinuation: enabled"
         } else {

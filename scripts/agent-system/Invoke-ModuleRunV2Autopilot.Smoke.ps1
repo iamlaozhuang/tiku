@@ -53,7 +53,7 @@ New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
 try {
     $handoffPath = Join-Path -Path $fixtureRoot -ChildPath "handoff.md"
 
-    $continueOutput = @(& $scriptPath -CompletedBatchCount 2 -SkipUnattendedReadiness -HandoffPath $handoffPath)
+    $continueOutput = @(& $scriptPath -CompletedBatchCount 2 -SkipUnattendedReadiness -HandoffPath $handoffPath -CloseoutAuthorizationStatement "User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation.")
     Assert-Contains -Output $continueOutput -Pattern "autopilotDecision: continue_current_thread"
 
     $suggestOutput = @(& $scriptPath -CompletedBatchCount 4 -SkipUnattendedReadiness -HandoffPath $handoffPath)

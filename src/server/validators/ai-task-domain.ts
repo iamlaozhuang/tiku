@@ -1,5 +1,9 @@
 import { aiFuncTypeValues, type AiFuncType } from "../models/ai-rag";
-import type { AiTaskDomainInput } from "../models/ai-task-domain";
+import {
+  aiTaskDomainStatusValues,
+  type AiTaskDomainInput,
+  type AiTaskDomainStatus,
+} from "../models/ai-task-domain";
 
 export type AiTaskDomainValidationResult =
   | {
@@ -42,6 +46,17 @@ function normalizeAiFuncType(value: unknown): AiFuncType | null {
     : null;
 }
 
+function normalizeAiTaskDomainStatus(
+  value: unknown,
+): AiTaskDomainStatus | null {
+  const text = normalizeRequiredText(value);
+
+  return text !== null &&
+    aiTaskDomainStatusValues.includes(text as AiTaskDomainStatus)
+    ? (text as AiTaskDomainStatus)
+    : null;
+}
+
 export function normalizeAiTaskDomainInput(
   input: unknown,
 ): AiTaskDomainValidationResult {
@@ -57,12 +72,14 @@ export function normalizeAiTaskDomainInput(
     input.authorizationPublicId,
   );
   const aiFuncType = normalizeAiFuncType(input.aiFuncType);
+  const taskStatus = normalizeAiTaskDomainStatus(input.taskStatus);
   const questionPublicId = normalizeRequiredText(input.questionPublicId);
 
   if (
     userPublicId === null ||
     authorizationPublicId === null ||
     aiFuncType === null ||
+    taskStatus === null ||
     questionPublicId === null
   ) {
     return {
@@ -77,6 +94,7 @@ export function normalizeAiTaskDomainInput(
       userPublicId,
       authorizationPublicId,
       aiFuncType,
+      taskStatus,
       questionPublicId,
       answerRecordPublicId: normalizeOptionalText(input.answerRecordPublicId),
       paperPublicId: normalizeOptionalText(input.paperPublicId),

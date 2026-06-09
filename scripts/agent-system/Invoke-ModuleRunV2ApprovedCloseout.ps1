@@ -16,7 +16,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$BaseBranch = "master"
+    [string]$BaseBranch = "master",
+
+    [Parameter(Mandatory = $false)]
+    [string]$CloseoutAuthorizationStatement = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -174,9 +177,16 @@ function Get-MatchingPattern {
 }
 
 function Get-ChangedFiles {
-    $stagedFiles = @(& git diff --cached --name-only --diff-filter=ACMR)
-    $workingTreeFiles = @(& git diff --name-only --diff-filter=ACMR)
-    $untrackedFiles = @(& git ls-files --others --exclude-standard)
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $stagedFiles = @(& git diff --cached --name-only --diff-filter=ACMR 2>$null)
+        $workingTreeFiles = @(& git diff --name-only --diff-filter=ACMR 2>$null)
+        $untrackedFiles = @(& git ls-files --others --exclude-standard 2>$null)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
     return @($stagedFiles + $workingTreeFiles + $untrackedFiles | Sort-Object -Unique)
 }
 
@@ -197,19 +207,36 @@ function Invoke-GitCommand {
     }
 }
 
-function Test-ApprovedCloseoutContinuation {
-    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+function Test-CloseoutAuthorizationText {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text)
 
-    $taskText = ($TaskBlock -join "`n")
-    if ($taskText -notmatch "(?i)humanApproval:") {
+    if ([string]::IsNullOrWhiteSpace($Text)) {
         return $false
     }
 
-    $hasCommit = $taskText -match "(?i)\bcommit\b"
-    $hasMerge = $taskText -match "(?i)\bmerge\b"
-    $hasPush = $taskText -match "(?i)\bpush\b"
-    $hasCleanup = $taskText -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
+    $hasCommit = $Text -match "(?i)\bcommit\b"
+    $hasMerge = $Text -match "(?i)\bmerge\b"
+    $hasPush = $Text -match "(?i)\bpush\b"
+    $hasCleanup = $Text -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
     return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
+}
+
+function Get-ApprovedCloseoutAuthorizationSource {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$TaskBlock,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$Statement = ""
+    )
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -match "(?i)humanApproval:" -and (Test-CloseoutAuthorizationText -Text $taskText)) {
+        return "task"
+    }
+
+    if (Test-CloseoutAuthorizationText -Text $Statement) {
+        return "statement"
+    }
+
+    return ""
 }
 
 function Update-QueueStatus {
@@ -307,7 +334,8 @@ if ($taskStatus -notin @("done", "closed")) {
     throw "Approved closeout requires task status done or closed. Actual: $taskStatus"
 }
 
-if (-not (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock)) {
+$closeoutAuthorizationSource = Get-ApprovedCloseoutAuthorizationSource -TaskBlock $taskBlock -Statement $CloseoutAuthorizationStatement
+if ([string]::IsNullOrWhiteSpace($closeoutAuthorizationSource)) {
     throw "Task does not record explicit approved closeout continuation."
 }
 
@@ -336,6 +364,7 @@ foreach ($changedFile in $changedFiles) {
 }
 
 Write-Output "approvedCloseoutContinuation: enabled"
+Write-Output "closeoutAuthorizationSource: $closeoutAuthorizationSource"
 Write-Output "taskId: $TaskId"
 Write-Output "branch: $currentBranch"
 Write-Output "changedFiles: $($changedFiles.Count)"
@@ -356,10 +385,7 @@ Update-ProjectStateCloseout -Path $ProjectStatePath -TargetTaskId $TaskId
 
 $postStateChangedFiles = @(Get-ChangedFiles)
 foreach ($changedFile in $postStateChangedFiles) {
-    & git add --all -- $changedFile
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to stage closeout file: $changedFile"
-    }
+    Invoke-GitCommand -Arguments @("add", "--all", "--", $changedFile)
 }
 
 $commitMessage = "chore(task): close out $TaskId"

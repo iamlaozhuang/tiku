@@ -249,7 +249,13 @@ if ($matrixContent -match "Cost Calibration Gate remains blocked") {
 }
 
 Write-Section -Title "Git Readiness"
-$gitReadinessOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path -Path $PSScriptRoot -ChildPath "Test-GitCompletionReadiness.ps1") -BaseBranch master)
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+try {
+    $gitReadinessOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path -Path $PSScriptRoot -ChildPath "Test-GitCompletionReadiness.ps1") -BaseBranch master 2>&1)
+} finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+}
 if ($LASTEXITCODE -ne 0) {
     Add-Finding "HARD_BLOCK_GIT_READINESS_FAILED"
 } else {

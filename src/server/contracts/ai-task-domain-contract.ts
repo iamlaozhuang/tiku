@@ -1,5 +1,8 @@
 import type { AiFuncType } from "../models/ai-rag";
-import type { AiTaskDomainRuntimeStatus } from "../models/ai-task-domain";
+import type {
+  AiTaskDomainRuntimeStatus,
+  AiTaskDomainStatus,
+} from "../models/ai-task-domain";
 
 export type AiTaskDomainContextDto = {
   questionPublicId: string;
@@ -19,6 +22,7 @@ export type AiTaskDomainDto = {
   authorizationPublicId: string;
   aiFuncType: AiFuncType;
   runtimeStatus: AiTaskDomainRuntimeStatus;
+  taskStatus: AiTaskDomainStatus;
   taskContext: AiTaskDomainContextDto;
   evidenceReferences: AiTaskDomainEvidenceReferencesDto;
 };

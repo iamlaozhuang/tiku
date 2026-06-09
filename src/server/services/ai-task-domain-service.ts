@@ -15,6 +15,7 @@ function mapAiTaskDomainToDto(input: AiTaskDomainInput): AiTaskDomainDto {
     authorizationPublicId: input.authorizationPublicId,
     aiFuncType: input.aiFuncType,
     runtimeStatus: "local_contract_only",
+    taskStatus: input.taskStatus,
     taskContext: {
       questionPublicId: input.questionPublicId,
       answerRecordPublicId: input.answerRecordPublicId,

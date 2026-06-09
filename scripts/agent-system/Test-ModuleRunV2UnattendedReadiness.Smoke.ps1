@@ -410,7 +410,7 @@ tasks:
   - id: $taskId
     status: done
     taskKind: implementation
-    humanApproval: User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation.
+    humanApproval: User approved only the local implementation; closeout approval is supplied after status done.
     allowedFiles:
       - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
       - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
@@ -430,18 +430,25 @@ tasks:
     $approvedDirtyProbePath = Join-Path -Path $PSScriptRoot -ChildPath "module-run-v2-unattended-readiness-approved-closeout.tmp"
     try {
         "approved dirty probe" | Set-Content -LiteralPath $approvedDirtyProbePath -Encoding UTF8
-        $approvedDirtyRecoveryOutput = @(
-            & powershell.exe `
-                -NoProfile `
-                -ExecutionPolicy Bypass `
-                -File $scriptPath `
-                -TaskId $taskId `
-                -ProjectStatePath $projectStatePath `
-                -QueuePath $queuePath `
-                -CloseoutRecovery `
-                -AllowProtectedBranch `
-                -SkipRemoteAheadCheck 2>&1
-        )
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $approvedDirtyRecoveryOutput = @(
+                & powershell.exe `
+                    -NoProfile `
+                    -ExecutionPolicy Bypass `
+                    -File $scriptPath `
+                    -TaskId $taskId `
+                    -ProjectStatePath $projectStatePath `
+                    -QueuePath $queuePath `
+                    -CloseoutRecovery `
+                    -CloseoutAuthorizationStatement "User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation." `
+                    -AllowProtectedBranch `
+                    -SkipRemoteAheadCheck 2>&1
+            )
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
     } finally {
         if (Test-Path -LiteralPath $approvedDirtyProbePath) {
             Remove-Item -LiteralPath $approvedDirtyProbePath -Force
