@@ -226,6 +226,27 @@ merge, push, clean branches, write env files, call providers, run database work,
 only tells the Codex agent layer which next action is permitted by existing gates. Agent-layer execution must still obey
 the task queue, allowed files, blocked files, validation commands, evidence, and closeout policy.
 
+## Codex Thread Bridge Control
+
+When the dispatcher or autopilot surfaces `launch_new_thread`, the Codex agent layer must pass the thread bridge before
+using any Codex thread-management tool:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2CodexThreadBridgeReadiness.ps1 -ThreadRolloverDecision <decision> -HandoffPath <path> -ThreadLaunchApproved -ThreadToolAvailable
+```
+
+The bridge emits `threadBridgeDecision` and `codexThreadAction`. Only `threadBridgeDecision:
+ready_for_agent_thread_launch` with `codexThreadAction: create_thread` is executable by the Codex agent layer, and even
+then the script itself has not created a thread. `exit_active_owner_present` is a normal guardian no-op: automation
+should leave the active development lane alone. `manual_required` and `stop_for_hard_block` must stop the run instead of
+retrying with broader scope.
+
+The bridge enforces durable-handoff minimums before launch readiness: latest task plan, evidence, audit review, blocked
+gates, and recovery read order must be present; evidence redaction rules still apply. A launch hint never approves worker
+worktree creation, branch creation, product implementation, closeout, merge, push, cleanup, env/secret/provider work,
+local DB operation, schema/migration, dependency changes, deploy, external-service action, PR creation, force push, or
+Cost Calibration Gate.
+
 ## Serial Autodrive Executor Control
 
 The serial executor is the first bounded agent-action transaction layer:

@@ -270,6 +270,30 @@ next-module implementation unless the handoff and new thread startup gate provid
 If the launch decision came from `-DryRunHandoff`, the agent may use it as readiness evidence only; a receiving thread
 requires a durable redacted handoff or a newly generated approved handoff before implementation begins.
 
+## Codex Thread Bridge Readiness Gate
+
+Before the Codex agent layer calls `create_thread`, it must pass the bridge gate:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2CodexThreadBridgeReadiness.ps1 -ThreadRolloverDecision <decision> -HandoffPath <path>
+```
+
+The bridge consumes startup readiness when supplied, the thread launch policy, and the durable handoff. It emits
+`threadBridgeDecision` and `codexThreadAction`:
+
+- `ready_for_agent_thread_launch` plus `codexThreadAction: create_thread`: the agent layer may create a new Codex
+  thread with the verified redacted handoff.
+- `continue_current_thread`: no new thread should be created.
+- `prepare_handoff`: create or refresh the handoff before any launch decision is executable.
+- `exit_active_owner_present`: a healthy owner or active lease owns the lane; scheduled automation should exit quietly.
+- `manual_required`: a human handoff or approval is missing.
+- `stop_for_hard_block`: startup, policy, handoff shape, or redaction is unsafe.
+
+The bridge script is not a thread tool. It must not create, fork, message, archive, or switch Codex threads. It only
+prepares the explicit agent-layer action hint after verifying that the handoff exists, includes durable read order,
+references latest plan/evidence/audit, preserves blocked gates, and contains no secrets, raw prompts, provider payloads,
+database URLs, Authorization headers, cleartext `redeem_code`, or raw generated AI content.
+
 For scheduled automation, thread creation is legal only after all of these are true:
 
 - `startupDecision` allows continuation or next-task preparation;

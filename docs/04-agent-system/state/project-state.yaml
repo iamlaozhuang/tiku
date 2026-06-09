@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-autodrive-phase-4
-updatedAt: "2026-06-09T08:53:26-07:00"
+  currentPhase: module-run-v2-autodrive-phase-5
+updatedAt: "2026-06-09T09:04:19-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -59,6 +59,7 @@ automation:
     agentActionDispatcherScriptPath: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
     serialAutodriveExecutorScriptPath: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
     parallelCoordinatorExecutorScriptPath: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1
+    codexThreadBridgeReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2CodexThreadBridgeReadiness.ps1
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
     codexAutomationId: tiku-module-run-v2-autopilot
@@ -85,13 +86,13 @@ repository:
   lastKnownMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
   lastKnownOriginMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
 currentTask:
-  id: module-run-v2-autodrive-phase-4
+  id: module-run-v2-autodrive-phase-5
   status: closed
   sourceStory: user-request-2026-06-09-unattended-autodrive-phase-3-8
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-4.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-4.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-4.md
-  branch: codex/module-run-v2-autodrive-phase-4
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-5.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-5.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-5.md
+  branch: codex/module-run-v2-autodrive-phase-5
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -129,7 +130,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 4 has implemented the parallel coordinator executor governance layer. It may close out through local commit,
+    Phase 5 is implementing the Codex thread bridge readiness gate. It may close out through local commit,
     fast-forward merge, push, and short branch cleanup after validation, while product implementation and high-risk
     actions remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-4.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-5.md
