@@ -5177,3 +5177,81 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-policy-hardening.md
     status: closed
     retryCount: 0
+  - id: module-run-v2-parallel-coordinator-readiness
+    title: Module Run v2 Parallel Coordinator Readiness
+    phase: module-run-v2-parallel-coordinator-readiness
+    sourceStory: user-request-2026-06-09-parallel-coordinator-readiness
+    dependencies:
+      - module-run-v2-closeout-policy-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested reviewing and implementing the `coordinator + file locks + worker isolation + serial integration`
+      upgrade path for Module Run v2. Scope is limited to local automation scripts, smoke tests, SOP/state/queue
+      alignment, task plan, evidence, and audit review. This does not approve product code, provider/env/secret,
+      staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, product e2e implementation,
+      thread creation, worktree creation, cleanup, closeout, PR creation, force push, or Cost Calibration Gate execution.
+      On 2026-06-09 the user requested continuing until the mechanism upgrade is landed; this authorizes local
+      validation environment repair with the existing frozen lockfile and a local reviewable commit only. Merge, push,
+      PR creation, cleanup, thread/worktree creation, package or lockfile changes, provider/env/secret,
+      staging/prod/cloud/deploy, payment, external-service, schema/migration, product e2e, force push, and Cost
+      Calibration Gate execution remain blocked.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1
+      - docs/04-agent-system/sop/parallel-work-governance.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - parallel_coordination
+      - file_lock
+      - worker_isolation
+      - serial_integration
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-parallel-coordinator-readiness -PlannedFiles scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1,scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1,docs/04-agent-system/sop/parallel-work-governance.md,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-parallel-coordinator-readiness.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-coordinator-readiness.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1 docs\04-agent-system\sop\parallel-work-governance.md docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-parallel-coordinator-readiness.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-parallel-coordinator-readiness.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1 docs\04-agent-system\sop\parallel-work-governance.md docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-parallel-coordinator-readiness.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-parallel-coordinator-readiness.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1,scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1,docs\04-agent-system\sop\parallel-work-governance.md,docs\04-agent-system\sop\automated-advancement-governance.md,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-parallel-coordinator-readiness.md -Pattern 'parallelDecision','fileLock','coordinator','workerIsolation','serialIntegration','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-parallel-coordinator-readiness
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+    status: done
+    retryCount: 0

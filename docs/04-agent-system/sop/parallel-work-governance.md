@@ -56,6 +56,60 @@ Parallel work may start only when all conditions are true:
 
 If any entry condition fails, use serial execution.
 
+## Executable Parallel Readiness Gate
+
+Before a coordinator assigns workers, it must run the local read-only readiness gate:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1 -CandidateTaskIds <task-a,task-b> -CoordinatorTaskId <coordinator-task>
+```
+
+The gate emits `parallelDecision`:
+
+| Decision                      | Exit | Meaning                                                                 |
+| ----------------------------- | ---- | ----------------------------------------------------------------------- |
+| `can_assign_workers`          | 0    | candidates are isolated and file locks do not overlap                   |
+| `use_serial_execution`        | 0    | work is safe to continue only through the coordinator's serial workflow |
+| `stop_for_file_lock_conflict` | 1    | two or more write scopes can touch the same path                        |
+| `stop_for_blocked_gate`       | 1    | a candidate needs a blocked or high-risk gate                           |
+| `stop_for_hard_block`         | 1    | task metadata, durable state, or dependency readiness is invalid        |
+
+The gate is a guardian control, not an executor. It reads `project-state.yaml` and `task-queue.yaml`, classifies
+candidate tasks, emits a file-lock table, and stops before any ambiguous assignment. It does not create branches,
+worktrees, Codex threads, handoffs, commits, merges, pushes, cleanup actions, provider calls, dependency changes,
+schema/migration work, or Cost Calibration Gate activity.
+
+`use_serial_execution` is not a failure. It is the expected answer when a candidate touches shared coordinator-owned
+state, scripts, global automation SOPs, dependency manifests, or any other scope where parallel worker overhead would
+cost more time or token budget than it saves.
+
+## Durable Parallel Approval Schema
+
+Parallel approval is durable only when the task queue or task plan records:
+
+```text
+parallelBatchId:
+coordinatorTaskId:
+candidateTaskIds:
+baseSha:
+allowedParallelActions:
+blockedParallelActions:
+workerIsolation:
+serialIntegration:
+fileLocks:
+  - taskId:
+    branch:
+    worktree:
+    allowedFiles:
+    blockedFiles:
+    evidencePath:
+    auditReviewPath:
+mergeOrder:
+```
+
+Absent this schema, Codex automation must treat parallel work as unapproved and fall back to serial execution or a
+proposal-only response.
+
 ## Coordinator Role
 
 The coordinator is the only actor allowed to:

@@ -118,6 +118,11 @@ scriptControls:
     smokePath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
     decisionOutput: startupDecision
     role: single scheduler startup gate for lease, state, queue, worktree hygiene, and blocked gate anchors
+  - id: module-run-v2-parallel-readiness
+    path: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1
+    decisionOutput: parallelDecision
+    role: read-only coordinator gate for candidate task classification, file-lock conflict detection, worker isolation, and serial integration fallback
 executionLogRoots:
   - id: evidence
     path: docs/05-execution-logs/evidence

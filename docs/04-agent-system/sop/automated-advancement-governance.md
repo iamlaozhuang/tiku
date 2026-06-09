@@ -136,6 +136,36 @@ Only proceed when cleanup completes without hard blocks and startup readiness is
 fails, or startup still returns `cleanup_stale_artifacts`, stop and report the artifact class instead of broadening
 cleanup scope.
 
+## Parallel Coordinator Control Point
+
+Codex automation is a guardian first and a worker launcher only when durable approval says so. When startup readiness or
+run registry evidence shows another non-expired owner is actively progressing the same repository, the automation loop
+must exit or adopt through the existing recovery path instead of running parallel assignment. It must not interrupt a
+healthy active development thread.
+
+Before any approved parallel batch assigns workers, the coordinator must run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1 -CandidateTaskIds <task-a,task-b> -CoordinatorTaskId <coordinator-task>
+```
+
+The script is read-only and produces `parallelDecision`:
+
+- `can_assign_workers`: continue to worker assignment only if the durable parallel approval schema is present.
+- `use_serial_execution`: continue in the current coordinator thread, without creating workers.
+- `stop_for_file_lock_conflict`: stop and repair the planned batch or use serial execution.
+- `stop_for_blocked_gate`: stop for explicit human decision.
+- `stop_for_hard_block`: stop because task metadata, durable state, or dependency readiness is invalid.
+
+Parallel work must save enough elapsed time to justify coordination overhead. If the candidate set is small, touches
+shared state, or would require repeated handoffs, the automation loop should choose `use_serial_execution` even when
+the work is technically separable.
+
+The parallel readiness gate does not approve thread creation, worktree creation, branch creation, closeout, cleanup,
+merge, push, PR creation, dependency/package/lockfile changes, schema/migration work, provider/env/secret work,
+staging/prod/cloud/deploy work, payment work, external-service work, product e2e work, or Cost Calibration Gate
+execution.
+
 ## Task Kind Boundary Matrix
 
 | taskKind             | May auto-advance with docs-only approval | Requires separate approval before execution |
