@@ -61,6 +61,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $script:dryRunHandoffTempRoot = ""
+$agentSystemRoot = $PSScriptRoot
 
 function Remove-DryRunHandoffTempRoot {
     if ([string]::IsNullOrWhiteSpace($script:dryRunHandoffTempRoot)) {
@@ -119,7 +120,7 @@ if (-not $SkipUnattendedReadiness) {
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        ".\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1",
+        (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2UnattendedReadiness.ps1"),
         "-ProjectStatePath",
         $ProjectStatePath,
         "-QueuePath",
@@ -152,7 +153,7 @@ $threadArgs = @(
     "-ExecutionPolicy",
     "Bypass",
     "-File",
-    ".\scripts\agent-system\Test-ModuleRunV2ThreadRolloverReadiness.ps1",
+    (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2ThreadRolloverReadiness.ps1"),
     "-CompletedBatchCount",
     "$CompletedBatchCount"
 )
@@ -189,7 +190,7 @@ if ($DryRunHandoff) {
 }
 
 $handoffOutput = @(
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\agent-system\New-ModuleRunV2ThreadHandoff.ps1" -OutputPath $effectiveHandoffPath -Decision $threadDecision -Reason "autopilot thread rollover decision" -NextModuleRunCandidate $NextModuleRunCandidate 2>&1
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path -Path $agentSystemRoot -ChildPath "New-ModuleRunV2ThreadHandoff.ps1") -OutputPath $effectiveHandoffPath -Decision $threadDecision -Reason "autopilot thread rollover decision" -NextModuleRunCandidate $NextModuleRunCandidate 2>&1
 )
 if ($LASTEXITCODE -ne 0) {
     $handoffOutput | ForEach-Object { Write-Output $_ }
@@ -201,7 +202,7 @@ $policyArgs = @(
     "-ExecutionPolicy",
     "Bypass",
     "-File",
-    ".\scripts\agent-system\Test-ModuleRunV2ThreadLaunchPolicy.ps1",
+    (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2ThreadLaunchPolicy.ps1"),
     "-ThreadRolloverDecision",
     $threadDecision,
     "-HandoffPath",

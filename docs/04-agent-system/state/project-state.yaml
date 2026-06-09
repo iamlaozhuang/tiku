@@ -1,8 +1,8 @@
 schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-automation-handoff-contract-hardening
-updatedAt: "2026-06-08T23:35:00-07:00"
+  currentPhase: module-run-v2-empty-scope-scan-repair
+updatedAt: "2026-06-09T00:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,16 +77,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: e96f765b8223c4e4f8a2a2f5bd48b4a2de6224f8
-  lastKnownOriginMasterSha: e96f765b8223c4e4f8a2a2f5bd48b4a2de6224f8
+  lastKnownMasterSha: 0cd18306399b4aaca358a07c93d6c8b899af553e
+  lastKnownOriginMasterSha: 0cd18306399b4aaca358a07c93d6c8b899af553e
 currentTask:
-  id: module-run-v2-automation-handoff-contract-hardening
+  id: module-run-v2-empty-scope-scan-repair
   status: done
-  sourceStory: user-request-2026-06-09-automation-handoff-contract-hardening
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-automation-handoff-contract-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-automation-handoff-contract-hardening.md
-  branch: codex/module-run-v2-automation-handoff-contract-hardening
-  commitSha: pending-final-local-commit
+  sourceStory: user-request-2026-06-09-empty-scope-scan-repair
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+  branch: codex/module-run-v2-empty-scope-scan-repair
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -123,9 +123,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Automation handoff contract hardening is locally validated and ready for closeout. The next queued task remains
-    `module-run-v2-ai-task-and-provider-planning`; future automation startup should use the new run registry heartbeat,
-    redacted handoff envelope adoption, startup decision routing, cleanup-ready janitor behavior, post-closeout ancestor
-    SHA handoff, and parked clean automation worktree rules. Product code, provider/env/deploy/payment/external-service,
+    Empty scope scan repair is locally validated. Rerun closeout recovery dry-run autopilot from a clean worktree, then
+    continue only according to its startup and autopilot decisions. The next queued task remains
+    `module-run-v2-ai-task-and-provider-planning`. Product code, provider/env/deploy/payment/external-service,
     schema/migration/dependency changes, and Cost Calibration Gate execution remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-automation-handoff-contract-hardening.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md

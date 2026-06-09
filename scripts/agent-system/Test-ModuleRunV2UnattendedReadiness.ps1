@@ -301,7 +301,9 @@ function Write-RunRegistryHeartbeat {
         [Parameter(Mandatory = $true)][string]$TaskId,
         [Parameter(Mandatory = $true)][string]$Branch,
         [Parameter(Mandatory = $true)][string]$WorktreePath,
-        [Parameter(Mandatory = $true)][string[]]$FilesToScan
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [string[]]$FilesToScan
     )
 
     if ([string]::IsNullOrWhiteSpace($Root)) {

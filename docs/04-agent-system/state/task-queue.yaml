@@ -4606,3 +4606,62 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-automation-handoff-contract-hardening.md
     status: done
     retryCount: 0
+  - id: module-run-v2-empty-scope-scan-repair
+    title: Module Run v2 Empty Scope Scan Repair
+    phase: module-run-v2-empty-scope-scan-repair
+    sourceStory: user-request-2026-06-09-empty-scope-scan-repair
+    dependencies:
+      - module-run-v2-automation-handoff-contract-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested a narrow mechanism repair task and plan before fixing the closeout recovery dry-run blocker. Scope
+      is limited to unattended readiness and autopilot scripts, their smoke tests, state/queue, task plan, evidence, and
+      audit review. This does not approve product code, provider/env/secret, staging/prod/cloud/deploy, payment,
+      external-service, dependency, schema, migration, product e2e implementation, or Cost Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - unattended_readiness
+      - autopilot_orchestration
+      - closeout_recovery
+      - run_registry
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-empty-scope-scan-repair -PlannedFiles scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-empty-scope-scan-repair.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 -CloseoutRecovery -DryRunHandoff
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-empty-scope-scan-repair.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-empty-scope-scan-repair.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-empty-scope-scan-repair.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-empty-scope-scan-repair.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-empty-scope-scan-repair.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-empty-scope-scan-repair.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1,scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-empty-scope-scan-repair.md -Pattern 'AllowEmptyCollection','filesToScan: 0','closeoutRecovery','DryRunHandoff','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+    status: done
+    retryCount: 0

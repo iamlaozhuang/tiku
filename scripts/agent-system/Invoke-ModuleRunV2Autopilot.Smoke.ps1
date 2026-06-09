@@ -117,6 +117,38 @@ tasks:
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "autopilotDecision: launch_new_thread"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "nextModuleRunCandidate: ai-task-and-provider"
 
+    $cleanWorktreePath = Join-Path -Path $fixtureRoot -ChildPath "clean-autopilot-worktree"
+    try {
+        & git worktree add --detach $cleanWorktreePath HEAD | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to create clean autopilot smoke worktree."
+        }
+
+        Push-Location -LiteralPath $cleanWorktreePath
+        try {
+            $cleanDryRunCloseoutOutput = @(
+                & $scriptPath `
+                    -TaskId $taskId `
+                    -CompletedBatchCount 6 `
+                    -CloseoutRecovery `
+                    -ProjectStatePath $projectStatePath `
+                    -QueuePath $queuePath `
+                    -HandoffPath $handoffPath `
+                    -DryRunHandoff `
+                    -ThreadLaunchApproved `
+                    -ThreadToolAvailable
+            )
+        } finally {
+            Pop-Location
+        }
+    } finally {
+        if (Test-Path -LiteralPath $cleanWorktreePath) {
+            & git worktree remove -f $cleanWorktreePath | Out-Null
+        }
+    }
+    Assert-Contains -Output $cleanDryRunCloseoutOutput -Pattern "dryRunHandoff: enabled"
+    Assert-Contains -Output $cleanDryRunCloseoutOutput -Pattern "autopilotDecision: launch_new_thread"
+
     $repoHandoffPath = Join-Path -Path $fixtureRoot -ChildPath "repo-handoff.md"
     $dryRunLaunchOutput = @(
         & $scriptPath `

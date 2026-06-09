@@ -269,6 +269,38 @@ currentTask:
     Assert-Contains -Output $ancestorRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR origin/master"
     Assert-Contains -Output $ancestorRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
 
+    $cleanWorktreePath = Join-Path -Path $fixtureRoot -ChildPath "clean-worktree"
+    try {
+        & git worktree add --detach $cleanWorktreePath HEAD | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to create clean smoke worktree."
+        }
+
+        Push-Location -LiteralPath $cleanWorktreePath
+        try {
+            $cleanCloseoutRecoveryOutput = @(
+                & $scriptPath `
+                    -TaskId $taskId `
+                    -ProjectStatePath $projectStatePath `
+                    -QueuePath $queuePath `
+                    -MatrixPath (Join-Path -Path $cleanWorktreePath -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml") `
+                    -RunRegistryRoot $runRegistryRoot `
+                    -CloseoutRecovery `
+                    -AllowProtectedBranch `
+                    -SkipRemoteAheadCheck
+            )
+        } finally {
+            Pop-Location
+        }
+    } finally {
+        if (Test-Path -LiteralPath $cleanWorktreePath) {
+            & git worktree remove -f $cleanWorktreePath | Out-Null
+        }
+    }
+    Assert-Contains -Output $cleanCloseoutRecoveryOutput -Pattern "filesToScan: 0"
+    Assert-Contains -Output $cleanCloseoutRecoveryOutput -Pattern "runRegistryHeartbeat: wrote"
+    Assert-Contains -Output $cleanCloseoutRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
+
     $candidateTaskId = "module-run-v2-ai-task-and-provider-planning"
     @"
 schemaVersion: 1
