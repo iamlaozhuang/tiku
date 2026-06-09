@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-stale-clean-worktree-autocleanup-routing
+  currentPhase: module-run-v2-approved-closeout-clean-ahead-support
 updatedAt: "2026-06-09T03:35:00-07:00"
 architecture:
   status: complete
@@ -80,14 +80,14 @@ repository:
   lastKnownMasterSha: df78b24e3d7e59884d3b00aaf3e0b98701bc7c9a
   lastKnownOriginMasterSha: df78b24e3d7e59884d3b00aaf3e0b98701bc7c9a
 currentTask:
-  id: module-run-v2-stale-clean-worktree-autocleanup-routing
+  id: module-run-v2-approved-closeout-clean-ahead-support
   status: done
-  sourceStory: user-request-2026-06-09-stale-clean-worktree-autocleanup-routing
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+  sourceStory: user-request-2026-06-09-approved-closeout-clean-ahead-support
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
   branch: codex/module-run-v2-stale-clean-worktree-autocleanup-routing
-  commitSha: bdb066f6
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

@@ -157,6 +157,103 @@ try {
         if (-not [string]::IsNullOrWhiteSpace($branchAfter)) {
             throw "Expected approved closeout smoke worktree to be detached."
         }
+
+        & git switch master | Out-Null
+
+        $projectStateText = @(
+            'schemaVersion: 1',
+            'project:',
+            '  name: tiku',
+            '  currentPhase: module-run-v2-clean-ahead-closeout-smoke',
+            'updatedAt: "2026-06-09T08:45:00-07:00"',
+            'repository:',
+            "  lastKnownMasterSha: $initialSha",
+            "  lastKnownOriginMasterSha: $initialSha",
+            'currentTask:',
+            '  id: module-run-v2-clean-ahead-closeout-smoke',
+            '  status: done',
+            '  sourceStory: smoke',
+            '  planPath: docs/05-execution-logs/task-plans/clean-ahead-smoke.md',
+            '  evidencePath: docs/05-execution-logs/evidence/clean-ahead-smoke.md',
+            '  auditReviewPath: docs/05-execution-logs/audits-reviews/clean-ahead-smoke.md',
+            '  branch: codex/module-run-v2-clean-ahead-closeout-smoke',
+            '  commitSha: pending-local-commit'
+        )
+        $projectStateText | Set-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Encoding UTF8
+
+        $queueText = @(
+            'schemaVersion: 1',
+            'tasks:',
+            '  - id: module-run-v2-clean-ahead-closeout-smoke',
+            '    title: Approved Closeout Clean Ahead Smoke',
+            '    status: done',
+            '    taskKind: implementation',
+            '    humanApproval: User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation.',
+            '    allowedFiles:',
+            '      - docs/04-agent-system/state/project-state.yaml',
+            '      - docs/04-agent-system/state/task-queue.yaml',
+            '      - docs/05-execution-logs/evidence/clean-ahead-smoke.md',
+            '      - docs/05-execution-logs/audits-reviews/clean-ahead-smoke.md',
+            '    blockedFiles:',
+            '      - .env.local',
+            '      - src/**',
+            '    riskTypes:',
+            '      - automation_policy',
+            '    validationCommands:',
+            '      - git diff --check',
+            '    evidencePath: docs/05-execution-logs/evidence/clean-ahead-smoke.md',
+            '    auditReviewPath: docs/05-execution-logs/audits-reviews/clean-ahead-smoke.md'
+        )
+        $queueText | Set-Content -LiteralPath "docs/04-agent-system/state/task-queue.yaml" -Encoding UTF8
+
+        @(
+            '# Approved Closeout Clean Ahead Smoke Evidence',
+            'result: pass',
+            'RED: recorded',
+            'GREEN: recorded',
+            'Commit: `abcdef2`',
+            'localFullLoopGate: L2',
+            'blocked remainder: Cost Calibration Gate remains blocked',
+            'threadRolloverGate: continue_current_thread',
+            'nextModuleRunCandidate: ai-task-and-provider',
+            'git diff --check',
+            'Cost Calibration Gate remains blocked'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/evidence/clean-ahead-smoke.md" -Encoding UTF8
+
+        @(
+            '# Approved Closeout Clean Ahead Smoke Audit',
+            'APPROVE'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/audits-reviews/clean-ahead-smoke.md" -Encoding UTF8
+
+        & git add .
+        & git commit -m "chore(smoke): seed clean ahead closeout fixture" | Out-Null
+        & git push origin master | Out-Null
+
+        $cleanAheadBaseSha = ((& git rev-parse HEAD) -join "").Trim()
+        & git switch -c codex/module-run-v2-clean-ahead-closeout-smoke | Out-Null
+        Add-Content -LiteralPath "docs/05-execution-logs/evidence/clean-ahead-smoke.md" -Value "clean ahead branch work committed"
+        & git add "docs/05-execution-logs/evidence/clean-ahead-smoke.md"
+        & git commit -m "docs(smoke): commit clean ahead work" | Out-Null
+
+        $cleanStatus = @(& git status --porcelain)
+        if ($cleanStatus.Count -ne 0) {
+            throw "Expected clean ahead smoke branch to have no uncommitted files."
+        }
+
+        $cleanAheadOutput = @(
+            & $scriptPath `
+                -TaskId "module-run-v2-clean-ahead-closeout-smoke" `
+                -ProjectStatePath "docs/04-agent-system/state/project-state.yaml" `
+                -QueuePath "docs/04-agent-system/state/task-queue.yaml" `
+                -MatrixPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" `
+                -CloseoutAuthorizationStatement "User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation." 2>&1
+        )
+
+        Assert-Contains -Output $cleanAheadOutput -Pattern "cleanAheadBranch: true"
+        Assert-Contains -Output $cleanAheadOutput -Pattern "branchCommitsAhead: 1"
+        Assert-Contains -Output $cleanAheadOutput -Pattern "mergeTarget: master"
+        Assert-Contains -Output $cleanAheadOutput -Pattern "pushTarget: origin/master"
+        Assert-Contains -Output $cleanAheadOutput -Pattern "branchCleanup: deleted codex/module-run-v2-clean-ahead-closeout-smoke"
     } finally {
         Pop-Location
     }

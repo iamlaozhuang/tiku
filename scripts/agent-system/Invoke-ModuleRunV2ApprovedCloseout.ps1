@@ -190,6 +190,24 @@ function Get-ChangedFiles {
     return @($stagedFiles + $workingTreeFiles + $untrackedFiles | Sort-Object -Unique)
 }
 
+function Get-BranchCommitsAhead {
+    param([Parameter(Mandatory = $true)][string]$BaseBranch)
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $aheadCountOutput = ((& git rev-list --count "$BaseBranch..HEAD" 2>$null) -join "").Trim()
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($aheadCountOutput)) {
+        throw "Unable to inspect branch commits ahead of $BaseBranch."
+    }
+
+    return [int]$aheadCountOutput
+}
+
 function Invoke-GitCommand {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
 
@@ -379,7 +397,9 @@ if ([string]::IsNullOrWhiteSpace($currentBranch) -or $currentBranch -in @("maste
 $allowedFiles = @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
 $blockedFiles = @(Get-ListValues -Block $taskBlock -Key "blockedFiles")
 $changedFiles = @(Get-ChangedFiles)
-if ($changedFiles.Count -eq 0) {
+$branchCommitsAhead = Get-BranchCommitsAhead -BaseBranch $BaseBranch
+$cleanAheadBranch = $changedFiles.Count -eq 0 -and $branchCommitsAhead -gt 0
+if ($changedFiles.Count -eq 0 -and -not $cleanAheadBranch) {
     throw "Approved closeout found no changed files."
 }
 
@@ -400,6 +420,8 @@ Write-Output "closeoutAuthorizationSource: $closeoutAuthorizationSource"
 Write-Output "taskId: $TaskId"
 Write-Output "branch: $currentBranch"
 Write-Output "changedFiles: $($changedFiles.Count)"
+Write-Output "branchCommitsAhead: $branchCommitsAhead"
+Write-Output "cleanAheadBranch: $($cleanAheadBranch.ToString().ToLowerInvariant())"
 
 $scriptRoot = $PSScriptRoot
 & (Join-Path -Path $scriptRoot -ChildPath "Test-ModuleRunV2ModuleCloseoutReadiness.ps1") -TaskId $TaskId -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath

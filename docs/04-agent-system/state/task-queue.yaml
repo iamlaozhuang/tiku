@@ -5031,3 +5031,62 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
     status: done
     retryCount: 0
+  - id: module-run-v2-approved-closeout-clean-ahead-support
+    title: Module Run v2 Approved Closeout Clean Ahead Support
+    phase: module-run-v2-approved-closeout-clean-ahead-support
+    sourceStory: user-request-2026-06-09-approved-closeout-clean-ahead-support
+    dependencies:
+      - module-run-v2-stale-clean-worktree-autocleanup-routing
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved this task to strengthen the approved closeout mechanism so a completed clean branch that is already
+      ahead of master/origin master can still execute approved closeout: commit already completed, fast-forward merge to
+      master, push origin/master, perform short-lived branch cleanup, and park the automation worktree. User explicitly
+      does not approve PR creation, force push, deploy, env/secret, provider, dependency, schema/migration, e2e, or Cost
+      Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - approved_closeout
+      - merge_push_cleanup
+      - automation_policy
+      - worktree_hygiene
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-approved-closeout-clean-ahead-support -PlannedFiles scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+      - Select-String -Path scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md -Pattern 'cleanAheadBranch','branchCommitsAhead','Approved closeout found no changed files','approved closeout executed','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-approved-closeout-clean-ahead-support
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+    status: done
+    retryCount: 0

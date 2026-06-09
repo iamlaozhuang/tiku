@@ -359,6 +359,10 @@ still rerun module-closeout readiness, pre-push readiness, and scope checks firs
 force push, dependency changes, provider work, env/secret work, deploy, payment, external-service action, or Cost
 Calibration Gate execution.
 
+Approved closeout may start from either a dirty task-scoped closeout worktree or a clean short-lived branch that already
+has committed task work ahead of the base branch. A clean branch with no commits ahead of the base is not an executable
+closeout candidate.
+
 ## Blocked Gate Enforcement
 
 The following remain blocked unless a task records fresh explicit approval:
