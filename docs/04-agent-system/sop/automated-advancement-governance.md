@@ -780,10 +780,15 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 `-Cleanup` may remove only expired clean lease files, run registry files explicitly marked `cleanup_ready`, expired
 `active` registry files with stale heartbeat and missing worktree path, their redacted handoff envelopes inside the
-configured handoff root, stale clean automation worktrees inside the Codex automation worktree root, and dry-run handoff
-temp directories named `tiku-autopilot-handoff-*` inside the system temp root. It must not delete dirty worktrees, source
-files, repository `.git` data outside `git worktree remove`, env files, product code, dependency files, schema,
-migration, or evidence logs.
+configured handoff root, stale clean automation worktrees inside the Codex automation worktree root, orphan automation
+worktree directories inside that root that are no longer registered by Git and contain no `.git` metadata, and dry-run
+handoff temp directories named `tiku-autopilot-handoff-*` inside the system temp root. It must not delete dirty
+worktrees, orphan directories that still contain Git metadata, paths outside the approved roots, source files in the
+primary repository, env files, schema, migration, or evidence logs.
+
+If `git worktree remove --force` partially succeeds and leaves a non-Git orphan directory under the automation worktree
+root, the hygiene gate must keep classifying it as `orphan_worktree_directory` until it is removed or blocked for manual
+inspection. A later read-only pass must not report `clean` while such a residue still exists.
 
 At the end of an automation-owned run, the current clean non-protected automation worktree should be explicitly parked
 with `automationWorktreeParking`: detach the current worktree to `origin/master` or the configured parking target after

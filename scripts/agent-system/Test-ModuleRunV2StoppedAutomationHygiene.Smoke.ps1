@@ -258,6 +258,29 @@ try {
     if (Test-Path -LiteralPath $expiredActiveRunPath) {
         throw "Expected expired active missing-worktree run registry file to be removed."
     }
+
+    $orphanWorktreeDir = Join-Path -Path $worktreeRoot -ChildPath "orphan-slot\tiku"
+    New-Item -ItemType Directory -Path (Join-Path -Path $orphanWorktreeDir -ChildPath "src") | Out-Null
+    Set-Content -LiteralPath (Join-Path -Path $orphanWorktreeDir -ChildPath "package.json") -Value "{ `"private`": true }" -Encoding UTF8
+    $orphanNodeModulesTarget = Join-Path -Path $fixtureRoot -ChildPath "orphan-node-modules-target"
+    New-Item -ItemType Directory -Path $orphanNodeModulesTarget | Out-Null
+    $orphanNodeModulesPath = Join-Path -Path $orphanWorktreeDir -ChildPath "node_modules"
+    try {
+        New-Item -ItemType Junction -Path $orphanNodeModulesPath -Target $orphanNodeModulesTarget | Out-Null
+    } catch {
+        New-Item -ItemType Directory -Path $orphanNodeModulesPath | Out-Null
+    }
+
+    $orphanAvailableOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -SummaryOnly)
+    Assert-Contains -Output $orphanAvailableOutput -Pattern "orphan_worktree_directory"
+    Assert-Contains -Output $orphanAvailableOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_available"
+
+    $orphanCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -Cleanup -SummaryOnly)
+    Assert-Contains -Output $orphanCleanupOutput -Pattern "orphan_worktree_directory"
+    Assert-Contains -Output $orphanCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    if (Test-Path -LiteralPath $orphanWorktreeDir) {
+        throw "Expected orphan automation worktree directory to be removed."
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

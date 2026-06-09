@@ -126,6 +126,11 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
     decisionOutput: postCloseoutStateReconcileDecision
     role: bounded confirmation gate for accepted ancestor checkpoints; it verifies clean Git, master/origin alignment, evidence/audit, and ancestor SHAs without writing self-referential current HEAD values back into committed project-state
+  - id: module-run-v2-stopped-automation-hygiene
+    path: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+    decisionOutput: stoppedAutomationHygieneDecision
+    role: classifies stopped automation residue into active-owner stops, dirty/manual stops, or bounded cleanup candidates including expired registry files, stale clean worktrees, and non-Git orphan worktree directories inside the automation worktree root
   - id: module-run-v2-branch-hygiene
     path: scripts/agent-system/Test-ModuleRunV2BranchHygiene.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2BranchHygiene.Smoke.ps1

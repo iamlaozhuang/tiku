@@ -6543,3 +6543,150 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-post-closeout-lifecycle-hardening.md
     status: closed
     retryCount: 0
+  - id: module-run-v2-orphan-worktree-cleanup-hardening
+    title: Module Run v2 Orphan Worktree Cleanup Hardening
+    phase: module-run-v2-orphan-worktree-cleanup-hardening
+    sourceStory: user-request-2026-06-09-unattended-autodrive-orphan-worktree-cleanup-hardening
+    dependencies:
+      - module-run-v2-post-closeout-lifecycle-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      User authorized organizing and executing a serial mechanism task to fix all remaining Module Run v2 control-loop
+      card points found during self-check. During bounded stopped-automation cleanup, git worktree removal exposed a
+      partial cleanup gap: Git registration can disappear while a non-Git orphan automation worktree directory remains.
+      Scope is local mechanism scripts, smoke tests, SOP/state/schema/index updates, evidence, audit review, paused
+      Codex automation prompt alignment, safe cleanup of detected automation-root residue through the governed hygiene
+      script, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup after validation.
+      This does not approve product implementation, dependency/package/lockfile changes, env/secret writes, real
+      provider calls, real local Docker DB operations, project material/paper/paper_asset resource reads for tests,
+      schema/migration, e2e, staging/prod/cloud/deploy, payment, external-service, PR/force push, destructive DB
+      operation, or Cost Calibration Gate execution.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - run_validation
+        - write_evidence
+        - local_commit
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 6
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - stopped_automation_hygiene
+      - run_registry_lifecycle
+      - worktree_cleanup
+      - evidence_integrity
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-orphan-worktree-cleanup-hardening -PlannedFiles scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId module-run-v2-orphan-worktree-cleanup-hardening
+      - phase: closeout
+        command: npm.cmd run lint
+      - phase: closeout
+        command: npm.cmd run typecheck
+      - phase: closeout
+        command: git diff --check
+      - phase: closeout
+        command: node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - phase: closeout
+        command: node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - phase: closeout
+        command: Select-String -Path scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\state\autodrive-control-schema.yaml,docs\04-agent-system\state\mechanism-source-of-truth-index.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md -Pattern 'orphan_worktree_directory','Remove-ReparsePoint','stoppedAutomationHygieneDecision','Cost Calibration Gate remains blocked'
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-orphan-worktree-cleanup-hardening
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-orphan-worktree-cleanup-hardening -PlannedFiles scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId module-run-v2-orphan-worktree-cleanup-hardening
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\state\autodrive-control-schema.yaml,docs\04-agent-system\state\mechanism-source-of-truth-index.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md -Pattern 'orphan_worktree_directory','Remove-ReparsePoint','stoppedAutomationHygieneDecision','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-orphan-worktree-cleanup-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+    status: closed
+    retryCount: 0

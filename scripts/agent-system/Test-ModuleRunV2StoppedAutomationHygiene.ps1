@@ -264,9 +264,136 @@ function Remove-SafeDirectory {
     }
 
     if (Test-Path -LiteralPath $Path) {
-        Remove-Item -LiteralPath $Path -Recurse -Force
+        Remove-SafeDirectoryTree -Path $Path
         Add-CleanupAction -Kind $Kind -Path $Path
     }
+}
+
+function Remove-SafeDirectoryTree {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    $item = Get-Item -LiteralPath $Path -Force
+    if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+        Remove-ReparsePoint -Path $item.FullName -IsDirectory $item.PSIsContainer
+        return
+    }
+
+    $children = @(Get-ChildItem -LiteralPath $Path -Force -ErrorAction SilentlyContinue)
+    foreach ($child in $children) {
+        if (($child.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {
+            Remove-ReparsePoint -Path $child.FullName -IsDirectory $child.PSIsContainer
+            continue
+        }
+
+        Remove-Item -LiteralPath $child.FullName -Recurse -Force
+    }
+
+    Remove-Item -LiteralPath $Path -Force
+}
+
+function Remove-ReparsePoint {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][bool]$IsDirectory
+    )
+
+    if ($IsDirectory) {
+        [System.IO.Directory]::Delete($Path, $false)
+        return
+    }
+
+    [System.IO.File]::Delete($Path)
+}
+
+function Test-DirectoryLooksLikeAutomationWorktreeResidue {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $workspaceAnchors = @(
+        "AGENTS.md",
+        "package.json",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "src",
+        "scripts",
+        "docs"
+    )
+
+    foreach ($anchor in $workspaceAnchors) {
+        if (Test-Path -LiteralPath (Join-Path -Path $Path -ChildPath $anchor)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-DirectoryHasGitMetadata {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    return (Test-Path -LiteralPath (Join-Path -Path $Path -ChildPath ".git"))
+}
+
+function Get-OrphanAutomationWorktreeDirectories {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$RegisteredWorktreePaths,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$CurrentWorktreePath
+    )
+
+    if (-not (Test-Path -LiteralPath $Root)) {
+        return @()
+    }
+
+    $registered = New-Object "System.Collections.Generic.HashSet[string]" ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($registeredPath in $RegisteredWorktreePaths) {
+        if (-not [string]::IsNullOrWhiteSpace($registeredPath)) {
+            [void]$registered.Add((ConvertTo-FullPath -Path $registeredPath))
+        }
+    }
+
+    $currentFullPath = ""
+    if (-not [string]::IsNullOrWhiteSpace($CurrentWorktreePath)) {
+        $currentFullPath = ConvertTo-FullPath -Path $CurrentWorktreePath
+    }
+
+    $candidates = New-Object System.Collections.Generic.List[object]
+    $firstLevelDirs = @(Get-ChildItem -LiteralPath $Root -Directory -Force -ErrorAction SilentlyContinue)
+    foreach ($firstLevelDir in $firstLevelDirs) {
+        $pathsToCheck = New-Object System.Collections.Generic.List[string]
+        $pathsToCheck.Add($firstLevelDir.FullName)
+
+        $secondLevelDirs = @(Get-ChildItem -LiteralPath $firstLevelDir.FullName -Directory -Force -ErrorAction SilentlyContinue)
+        foreach ($secondLevelDir in $secondLevelDirs) {
+            $pathsToCheck.Add($secondLevelDir.FullName)
+        }
+
+        foreach ($pathToCheck in $pathsToCheck) {
+            $fullPath = ConvertTo-FullPath -Path $pathToCheck
+            if ($registered.Contains($fullPath)) {
+                continue
+            }
+
+            if (-not [string]::IsNullOrWhiteSpace($currentFullPath) -and $fullPath -eq $currentFullPath) {
+                continue
+            }
+
+            if (-not (Test-PathInsideRoot -Path $fullPath -Root $Root)) {
+                continue
+            }
+
+            if (-not (Test-DirectoryLooksLikeAutomationWorktreeResidue -Path $fullPath)) {
+                continue
+            }
+
+            $candidates.Add([pscustomobject]@{ Path = $fullPath; HasGitMetadata = (Test-DirectoryHasGitMetadata -Path $fullPath) })
+        }
+    }
+
+    return $candidates.ToArray()
 }
 
 function Write-HygieneResult {
@@ -498,6 +625,8 @@ if (-not (Test-Path -LiteralPath $AutomationWorktreeRoot)) {
                     & git worktree remove --force $worktreeFullPath | Out-Null
                     if ($LASTEXITCODE -eq 0) {
                         Add-CleanupAction -Kind "stale_clean_worktree" -Path $worktreeFullPath
+                    } elseif ((Test-Path -LiteralPath $worktreeFullPath) -and -not (Test-DirectoryHasGitMetadata -Path $worktreeFullPath)) {
+                        Remove-SafeDirectory -Path $worktreeFullPath -AllowedRoot $AutomationWorktreeRoot -Kind "orphan_worktree_directory"
                     } else {
                         Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "git worktree remove failed"
                     }
@@ -505,6 +634,20 @@ if (-not (Test-Path -LiteralPath $AutomationWorktreeRoot)) {
                     Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "worktree path is outside automation root"
                 }
             }
+        }
+    }
+
+    $registeredWorktreePaths = @($worktrees | ForEach-Object { [string]$_.Path })
+    $orphanWorktreeDirectories = @(Get-OrphanAutomationWorktreeDirectories -Root $AutomationWorktreeRoot -RegisteredWorktreePaths $registeredWorktreePaths -CurrentWorktreePath $currentWorktree)
+    foreach ($orphanWorktreeDirectory in $orphanWorktreeDirectories) {
+        if ($orphanWorktreeDirectory.HasGitMetadata) {
+            Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "orphan automation directory has Git metadata and needs manual inspection"
+            continue
+        }
+
+        Add-CleanupCandidate -Kind "orphan_worktree_directory" -Path $orphanWorktreeDirectory.Path
+        if ($Cleanup) {
+            Remove-SafeDirectory -Path $orphanWorktreeDirectory.Path -AllowedRoot $AutomationWorktreeRoot -Kind "orphan_worktree_directory"
         }
     }
 }
