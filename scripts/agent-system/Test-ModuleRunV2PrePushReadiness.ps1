@@ -295,7 +295,7 @@ $masterSha = ((& git rev-parse master) -join "").Trim()
 $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
 $stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
 $stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
-$canUseCloseoutShaAncestry = $taskStatus -in @("done", "closed")
+$canUseCloseoutShaAncestry = $taskStatus -in @("done", "closed", "ready_for_closeout")
 
 Write-Output "master: $masterSha"
 Write-Output "originMaster: $originMasterSha"

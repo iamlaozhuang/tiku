@@ -456,6 +456,78 @@ tasks:
     }
     Assert-Contains -Output $approvedDirtyRecoveryOutput -Pattern "OK_APPROVED_CLOSEOUT_DIRTY_WORKTREE"
     Assert-Contains -Output $approvedDirtyRecoveryOutput -Pattern "approvedCloseoutContinuation: enabled"
+
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $masterSha
+  lastKnownOriginMasterSha: $originMasterSha
+currentTask:
+  id: $taskId
+"@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    status: ready_for_closeout
+    taskKind: implementation
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    blockedFiles:
+      - .env.local
+      - package.json
+      - src/**
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    $structuredPolicyProbePath = Join-Path -Path $PSScriptRoot -ChildPath "module-run-v2-unattended-readiness-structured-policy.tmp"
+    try {
+        "structured closeout policy probe" | Set-Content -LiteralPath $structuredPolicyProbePath -Encoding UTF8
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $structuredPolicyOutput = @(
+                & powershell.exe `
+                    -NoProfile `
+                    -ExecutionPolicy Bypass `
+                    -File $scriptPath `
+                    -TaskId $taskId `
+                    -ProjectStatePath $projectStatePath `
+                    -QueuePath $queuePath `
+                    -CloseoutRecovery `
+                    -AllowProtectedBranch `
+                    -SkipRemoteAheadCheck 2>&1
+            )
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+    } finally {
+        if (Test-Path -LiteralPath $structuredPolicyProbePath) {
+            Remove-Item -LiteralPath $structuredPolicyProbePath -Force
+        }
+    }
+    Assert-Contains -Output $structuredPolicyOutput -Pattern "structuredCloseoutPolicy: approved"
+    Assert-Contains -Output $structuredPolicyOutput -Pattern "OK_APPROVED_CLOSEOUT_DIRTY_WORKTREE"
+    Assert-Contains -Output $structuredPolicyOutput -Pattern "approvedCloseoutContinuation: enabled"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

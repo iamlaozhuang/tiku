@@ -271,6 +271,25 @@ function Test-CloseoutAuthorizationText {
     return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
 }
 
+function Test-StructuredCloseoutPolicy {
+    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -notmatch "(?im)^\s+closeoutPolicy:\s*$") {
+        return $false
+    }
+
+    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$"
+    $hasMergeTarget = $taskText -match "(?im)^\s+fastForwardMerge:\s*$" -and $taskText -match "(?im)^\s+targetBranch:\s*master\s*$"
+    $hasPushTarget = $taskText -match "(?im)^\s+push:\s*$" -and $taskText -match "(?im)^\s+target:\s*origin/master\s*$"
+    $hasCleanup = $taskText -match "(?im)^\s+cleanup:\s*$" `
+        -and $taskText -match "(?im)^\s+deleteShortBranch:\s*true\s*$" `
+        -and $taskText -match "(?im)^\s+parkWorktree:\s*true\s*$"
+    $approvedCount = ([regex]::Matches($taskText, "(?im)^\s+approved:\s*true\s*$")).Count
+
+    return $hasLocalCommit -and $hasMergeTarget -and $hasPushTarget -and $hasCleanup -and $approvedCount -ge 2
+}
+
 function Get-ApprovedCloseoutAuthorizationSource {
     param(
         [Parameter(Mandatory = $true)][string[]]$TaskBlock,
@@ -278,6 +297,10 @@ function Get-ApprovedCloseoutAuthorizationSource {
     )
 
     $taskText = ($TaskBlock -join "`n")
+    if (Test-StructuredCloseoutPolicy -TaskBlock $TaskBlock) {
+        return "structuredCloseoutPolicy"
+    }
+
     if ($taskText -match "(?i)humanApproval:" -and (Test-CloseoutAuthorizationText -Text $taskText)) {
         return "task"
     }
@@ -380,8 +403,12 @@ if ($taskBlock.Count -eq 0) {
 }
 
 $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
-if ($taskStatus -notin @("done", "closed")) {
-    throw "Approved closeout requires task status done or closed. Actual: $taskStatus"
+$hasStructuredCloseoutPolicy = Test-StructuredCloseoutPolicy -TaskBlock $taskBlock
+if ($taskStatus -notin @("done", "closed", "ready_for_closeout")) {
+    throw "Approved closeout requires task status done, closed, or ready_for_closeout. Actual: $taskStatus"
+}
+if ($taskStatus -eq "ready_for_closeout" -and -not $hasStructuredCloseoutPolicy) {
+    throw "Approved closeout requires structured closeoutPolicy when status is ready_for_closeout."
 }
 
 $closeoutAuthorizationSource = Get-ApprovedCloseoutAuthorizationSource -TaskBlock $taskBlock -Statement $CloseoutAuthorizationStatement

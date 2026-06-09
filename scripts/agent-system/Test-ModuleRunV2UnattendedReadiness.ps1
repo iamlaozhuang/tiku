@@ -157,6 +157,25 @@ function Test-CloseoutAuthorizationText {
     return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
 }
 
+function Test-StructuredCloseoutPolicy {
+    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -notmatch "(?im)^\s+closeoutPolicy:\s*$") {
+        return $false
+    }
+
+    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$"
+    $hasMergeTarget = $taskText -match "(?im)^\s+fastForwardMerge:\s*$" -and $taskText -match "(?im)^\s+targetBranch:\s*master\s*$"
+    $hasPushTarget = $taskText -match "(?im)^\s+push:\s*$" -and $taskText -match "(?im)^\s+target:\s*origin/master\s*$"
+    $hasCleanup = $taskText -match "(?im)^\s+cleanup:\s*$" `
+        -and $taskText -match "(?im)^\s+deleteShortBranch:\s*true\s*$" `
+        -and $taskText -match "(?im)^\s+parkWorktree:\s*true\s*$"
+    $approvedCount = ([regex]::Matches($taskText, "(?im)^\s+approved:\s*true\s*$")).Count
+
+    return $hasLocalCommit -and $hasMergeTarget -and $hasPushTarget -and $hasCleanup -and $approvedCount -ge 2
+}
+
 function Test-ApprovedCloseoutContinuation {
     param(
         [Parameter(Mandatory = $true)][string[]]$TaskBlock,
@@ -164,6 +183,10 @@ function Test-ApprovedCloseoutContinuation {
     )
 
     $taskText = ($TaskBlock -join "`n")
+    if (Test-StructuredCloseoutPolicy -TaskBlock $TaskBlock) {
+        return $true
+    }
+
     if ($taskText -match "(?i)humanApproval:" -and (Test-CloseoutAuthorizationText -Text $taskText)) {
         return $true
     }
@@ -423,7 +446,8 @@ try {
 
     $taskBlockForRecovery = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
     $taskStatusForRecovery = Get-ScalarValue -Block $taskBlockForRecovery -Key "status"
-    $canUseCloseoutShaAncestry = $CloseoutRecovery -and $taskStatusForRecovery -in @("done", "closed")
+    $taskHasStructuredCloseoutPolicyForRecovery = Test-StructuredCloseoutPolicy -TaskBlock $taskBlockForRecovery
+    $canUseCloseoutShaAncestry = $CloseoutRecovery -and ($taskStatusForRecovery -in @("done", "closed") -or ($taskStatusForRecovery -eq "ready_for_closeout" -and $taskHasStructuredCloseoutPolicyForRecovery))
     $projectCurrentTaskBlock = @(Get-TaskBlock -Lines $queueLines -Id $projectCurrentTaskId)
     $projectCurrentTaskStatus = Get-ScalarValue -Block $projectCurrentTaskBlock -Key "status"
     $projectCurrentTaskEvidencePath = Get-ScalarValue -Block $projectCurrentTaskBlock -Key "evidencePath"
@@ -520,8 +544,15 @@ try {
     Write-Output "evidencePath: $evidencePath"
     Write-Output "auditReviewPath: $auditReviewPath"
 
-    if ($CloseoutRecovery -and $taskStatus -in @("done", "closed")) {
+    $hasStructuredCloseoutPolicy = Test-StructuredCloseoutPolicy -TaskBlock $taskBlock
+    if ($hasStructuredCloseoutPolicy) {
+        Write-Output "structuredCloseoutPolicy: approved"
+    }
+
+    if ($CloseoutRecovery -and ($taskStatus -in @("done", "closed") -or ($taskStatus -eq "ready_for_closeout" -and $hasStructuredCloseoutPolicy))) {
         Write-Output "OK_CLOSEOUT_RECOVERY_TASK_STATUS $TaskId status=$taskStatus"
+    } elseif ($taskStatus -eq "ready_for_closeout" -and -not $hasStructuredCloseoutPolicy) {
+        Add-Finding "HARD_BLOCK_CLOSEOUT_POLICY_INCOMPLETE $TaskId status=$taskStatus"
     } elseif ($taskStatus -notin @("pending", "in_progress")) {
         Add-Finding "HARD_BLOCK_UNATTENDED_TASK_STATUS $TaskId status=$taskStatus"
     }
@@ -608,7 +639,7 @@ try {
         exit 1
     }
 
-    if ($CloseoutRecovery -and $taskStatus -in @("done", "closed")) {
+    if ($CloseoutRecovery -and ($taskStatus -in @("done", "closed") -or ($taskStatus -eq "ready_for_closeout" -and $hasStructuredCloseoutPolicy))) {
         Write-Output "unattendedStopDecision: closeout_recovery"
     } else {
         Write-Output "unattendedStopDecision: continue"

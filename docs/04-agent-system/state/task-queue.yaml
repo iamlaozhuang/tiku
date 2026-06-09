@@ -4485,6 +4485,7 @@ tasks:
       - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
       - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
       - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
       - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
       - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
       - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
@@ -5093,5 +5094,86 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
     evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+    status: closed
+    retryCount: 0
+  - id: module-run-v2-closeout-policy-hardening
+    title: Module Run v2 Closeout Policy Hardening
+    phase: module-run-v2-closeout-policy-hardening
+    sourceStory: user-request-2026-06-09-closeout-policy-hardening
+    dependencies:
+      - module-run-v2-approved-closeout-clean-ahead-support
+    taskPlanPolicy: required
+    humanApproval: >-
+      User agreed to the recommended mechanism hardening task to make prior closeout authorization executable through
+      durable machine-readable policy. Scope is limited to local automation scripts, smoke tests, SOP/state/queue, task
+      plan, evidence, and audit review. This does not approve product code, provider/env/secret,
+      staging/prod/cloud/deploy, payment, external-service, dependency, schema, migration, product e2e implementation,
+      force push, PR creation, or Cost Calibration Gate execution. On 2026-06-09 the user approved formal closeout:
+      local commit, fast-forward merge to master, push origin/master, short-lived branch cleanup, and automation
+      worktree parking.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-closeout-policy-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-policy-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-policy-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - closeout_policy
+      - approved_closeout
+      - automation_policy
+      - merge_push_cleanup
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-closeout-policy-hardening -PlannedFiles scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/task-lifecycle-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-closeout-policy-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-policy-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-policy-hardening.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 -TaskId module-run-v2-closeout-policy-hardening -ChangedFiles scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/task-lifecycle-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-closeout-policy-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-policy-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-policy-hardening.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-closeout-policy-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-closeout-policy-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-closeout-policy-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-closeout-policy-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-closeout-policy-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-closeout-policy-hardening.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1,scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1,scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\sop\task-lifecycle-governance.md,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-closeout-policy-hardening.md -Pattern 'closeoutPolicy','ready_for_closeout','structuredCloseoutPolicy','cleanAheadBranch','closeout_executed','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-closeout-policy-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-policy-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-policy-hardening.md
     status: closed
     retryCount: 0

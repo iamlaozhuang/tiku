@@ -354,10 +354,29 @@ Automation must not infer approval for one action from approval for another. Evi
 Pushing `master`, creating or updating PRs, force-with-lease operations, deploy actions, and cloud changes require explicit human approval.
 
 When a completed task explicitly authorizes commit, fast-forward merge into `master`, push `origin/master`, short-lived
-branch cleanup, and automation worktree parking, guarded automation may execute that exact local closeout path. It must
-still rerun module-closeout readiness, pre-push readiness, and scope checks first. It must not broaden to PR creation,
-force push, dependency changes, provider work, env/secret work, deploy, payment, external-service action, or Cost
-Calibration Gate execution.
+branch cleanup, and automation worktree parking, guarded automation may execute that exact local closeout path. The
+preferred durable approval is a structured task `closeoutPolicy`:
+
+```yaml
+status: ready_for_closeout
+closeoutPolicy:
+  localCommit: approved
+  fastForwardMerge:
+    approved: true
+    targetBranch: master
+  push:
+    approved: true
+    target: origin/master
+  cleanup:
+    deleteShortBranch: true
+    parkWorktree: true
+```
+
+`ready_for_closeout` without this complete policy is not executable. A complete policy allows closeout from dirty
+task-scoped files or from a clean short-lived branch that already has task commits ahead of the base branch. Automation
+must still rerun module-closeout readiness, pre-push readiness, and scope checks first. It must not broaden to PR
+creation, force push, dependency changes, provider work, env/secret work, deploy, payment, external-service action, or
+Cost Calibration Gate execution.
 
 Approved closeout may start from either a dirty task-scoped closeout worktree or a clean short-lived branch that already
 has committed task work ahead of the base branch. A clean branch with no commits ahead of the base is not an executable

@@ -171,7 +171,7 @@ try {
             "  lastKnownOriginMasterSha: $initialSha",
             'currentTask:',
             '  id: module-run-v2-clean-ahead-closeout-smoke',
-            '  status: done',
+            '  status: ready_for_closeout',
             '  sourceStory: smoke',
             '  planPath: docs/05-execution-logs/task-plans/clean-ahead-smoke.md',
             '  evidencePath: docs/05-execution-logs/evidence/clean-ahead-smoke.md',
@@ -186,9 +186,19 @@ try {
             'tasks:',
             '  - id: module-run-v2-clean-ahead-closeout-smoke',
             '    title: Approved Closeout Clean Ahead Smoke',
-            '    status: done',
+            '    status: ready_for_closeout',
             '    taskKind: implementation',
-            '    humanApproval: User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation.',
+            '    closeoutPolicy:',
+            '      localCommit: approved',
+            '      fastForwardMerge:',
+            '        approved: true',
+            '        targetBranch: master',
+            '      push:',
+            '        approved: true',
+            '        target: origin/master',
+            '      cleanup:',
+            '        deleteShortBranch: true',
+            '        parkWorktree: true',
             '    allowedFiles:',
             '      - docs/04-agent-system/state/project-state.yaml',
             '      - docs/04-agent-system/state/task-queue.yaml',
@@ -245,10 +255,10 @@ try {
                 -TaskId "module-run-v2-clean-ahead-closeout-smoke" `
                 -ProjectStatePath "docs/04-agent-system/state/project-state.yaml" `
                 -QueuePath "docs/04-agent-system/state/task-queue.yaml" `
-                -MatrixPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" `
-                -CloseoutAuthorizationStatement "User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation." 2>&1
+                -MatrixPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" 2>&1
         )
 
+        Assert-Contains -Output $cleanAheadOutput -Pattern "closeoutAuthorizationSource: structuredCloseoutPolicy"
         Assert-Contains -Output $cleanAheadOutput -Pattern "cleanAheadBranch: true"
         Assert-Contains -Output $cleanAheadOutput -Pattern "branchCommitsAhead: 1"
         Assert-Contains -Output $cleanAheadOutput -Pattern "mergeTarget: master"

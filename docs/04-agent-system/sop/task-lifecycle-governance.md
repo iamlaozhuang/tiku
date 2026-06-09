@@ -185,8 +185,31 @@ One task normally maps to one focused commit.
 Closeout covers local merge, remote push, branch cleanup, worktree cleanup, and final handoff. These are separate actions even when one user approval authorizes the whole round.
 
 For guarded automation, closeout may execute unattended only when the task records explicit approval for commit, merge,
-push, cleanup, and automation worktree parking. A completed task without that wording must still stop for human
-decision, even if the remaining Git actions look routine.
+push, cleanup, and automation worktree parking. Prefer a structured `closeoutPolicy` over prose. A completed task
+without that durable policy or equivalent explicit approval must still stop for human decision, even if the remaining
+Git actions look routine.
+
+Use `ready_for_closeout` when implementation and validation are done but the final Git actions are intentionally left
+to approved automation. `ready_for_closeout` is executable only with a complete task-scoped `closeoutPolicy`:
+
+```yaml
+status: ready_for_closeout
+closeoutPolicy:
+  localCommit: approved
+  fastForwardMerge:
+    approved: true
+    targetBranch: master
+  push:
+    approved: true
+    target: origin/master
+  cleanup:
+    deleteShortBranch: true
+    parkWorktree: true
+```
+
+The policy authorizes only that exact path. PR creation, force push, dependency changes, provider work, env/secret
+work, deploy, payment, external-service action, and Cost Calibration Gate execution remain blocked unless separately
+approved by the active task.
 
 Closeout must record:
 

@@ -175,6 +175,25 @@ function Test-CloseoutAuthorizationText {
     return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
 }
 
+function Test-StructuredCloseoutPolicy {
+    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -notmatch "(?im)^\s+closeoutPolicy:\s*$") {
+        return $false
+    }
+
+    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$"
+    $hasMergeTarget = $taskText -match "(?im)^\s+fastForwardMerge:\s*$" -and $taskText -match "(?im)^\s+targetBranch:\s*master\s*$"
+    $hasPushTarget = $taskText -match "(?im)^\s+push:\s*$" -and $taskText -match "(?im)^\s+target:\s*origin/master\s*$"
+    $hasCleanup = $taskText -match "(?im)^\s+cleanup:\s*$" `
+        -and $taskText -match "(?im)^\s+deleteShortBranch:\s*true\s*$" `
+        -and $taskText -match "(?im)^\s+parkWorktree:\s*true\s*$"
+    $approvedCount = ([regex]::Matches($taskText, "(?im)^\s+approved:\s*true\s*$")).Count
+
+    return $hasLocalCommit -and $hasMergeTarget -and $hasPushTarget -and $hasCleanup -and $approvedCount -ge 2
+}
+
 function Test-ApprovedCloseoutContinuation {
     param(
         [Parameter(Mandatory = $true)][string[]]$TaskBlock,
@@ -182,11 +201,29 @@ function Test-ApprovedCloseoutContinuation {
     )
 
     $taskText = ($TaskBlock -join "`n")
+    if (Test-StructuredCloseoutPolicy -TaskBlock $TaskBlock) {
+        return $true
+    }
+
     if ($taskText -match "(?i)humanApproval:" -and (Test-CloseoutAuthorizationText -Text $taskText)) {
         return $true
     }
 
     return Test-CloseoutAuthorizationText -Text $Statement
+}
+
+function Get-BranchCommitsAhead {
+    $aheadOutput = @(& git rev-list --count "master..HEAD" 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $aheadOutput.Count -eq 0) {
+        return 0
+    }
+
+    $aheadText = ($aheadOutput -join "").Trim()
+    if ($aheadText -notmatch "^\d+$") {
+        return 0
+    }
+
+    return [int]$aheadText
 }
 
 function Invoke-StartupReadinessGate {
@@ -359,7 +396,10 @@ if ($CloseoutRecovery -and -not [string]::IsNullOrWhiteSpace($TaskId)) {
     $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
     $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
     $dirtyFiles = @(& git status --porcelain)
-    if ($taskStatus -in @("done", "closed") -and $dirtyFiles.Count -gt 0 -and (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock -Statement $CloseoutAuthorizationStatement)) {
+    $branchCommitsAhead = Get-BranchCommitsAhead
+    $hasCloseoutPolicy = Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock -Statement $CloseoutAuthorizationStatement
+    $isCloseoutStatus = $taskStatus -in @("done", "closed") -or ($taskStatus -eq "ready_for_closeout" -and (Test-StructuredCloseoutPolicy -TaskBlock $taskBlock))
+    if ($isCloseoutStatus -and $hasCloseoutPolicy -and ($dirtyFiles.Count -gt 0 -or $branchCommitsAhead -gt 0)) {
         $previousErrorActionPreference = $ErrorActionPreference
         $ErrorActionPreference = "Continue"
         try {

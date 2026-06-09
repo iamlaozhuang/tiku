@@ -265,6 +265,166 @@ tasks:
     Assert-Contains -Output $startupCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
     Assert-Contains -Output $startupCleanupOutput -Pattern "autopilotDecision: continue_current_thread"
 
+    $policyRepo = Join-Path -Path $fixtureRoot -ChildPath "policy-closeout-repo"
+    $policyOriginRoot = Join-Path -Path $fixtureRoot -ChildPath "policy-closeout-origin.git"
+    New-Item -ItemType Directory -Path $policyRepo | Out-Null
+    & git init --bare $policyOriginRoot | Out-Null
+    & git -C $policyRepo init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize autopilot policy closeout fixture repository."
+    }
+
+    Push-Location -LiteralPath $policyRepo
+    try {
+        & git config user.name "Codex"
+        & git config user.email "codex@example.com"
+        & git config core.autocrlf false
+        & git remote add origin $policyOriginRoot
+
+        New-Item -ItemType Directory -Path "docs/04-agent-system/state" -Force | Out-Null
+        New-Item -ItemType Directory -Path "docs/05-execution-logs/evidence" -Force | Out-Null
+        New-Item -ItemType Directory -Path "docs/05-execution-logs/audits-reviews" -Force | Out-Null
+
+        @(
+            "schemaVersion: 2",
+            "moduleRunVersion: 2",
+            "automationHandoffPolicy:",
+            "  autopilotDecisionLabels:",
+            "    closeout_executed: approved closeout executed",
+            "threadRolloverGate:",
+            "  purpose: smoke",
+            "terminologyAnchors:",
+            "  - Cost Calibration Gate remains blocked",
+            "Cost Calibration Gate remains blocked"
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" -Encoding UTF8
+
+        @(
+            '# Autopilot Policy Closeout Smoke Evidence',
+            'result: pass',
+            'RED: recorded',
+            'GREEN: recorded',
+            'Commit: `abcdef3`',
+            'localFullLoopGate: L2',
+            'blocked remainder: Cost Calibration Gate remains blocked',
+            'threadRolloverGate: continue_current_thread',
+            'nextModuleRunCandidate: ai-task-and-provider',
+            'git diff --check',
+            'Cost Calibration Gate remains blocked'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/evidence/policy-closeout-smoke.md" -Encoding UTF8
+
+        @(
+            '# Autopilot Policy Closeout Smoke Audit',
+            'APPROVE'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/audits-reviews/policy-closeout-smoke.md" -Encoding UTF8
+
+        @(
+            'schemaVersion: 1',
+            'tasks:',
+            '  - id: module-run-v2-autopilot-policy-closeout-smoke',
+            '    title: Autopilot Policy Closeout Smoke',
+            '    status: ready_for_closeout',
+            '    taskKind: implementation',
+            '    closeoutPolicy:',
+            '      localCommit: approved',
+            '      fastForwardMerge:',
+            '        approved: true',
+            '        targetBranch: master',
+            '      push:',
+            '        approved: true',
+            '        target: origin/master',
+            '      cleanup:',
+            '        deleteShortBranch: true',
+            '        parkWorktree: true',
+            '    allowedFiles:',
+            '      - docs/04-agent-system/state/project-state.yaml',
+            '      - docs/04-agent-system/state/task-queue.yaml',
+            '      - docs/05-execution-logs/evidence/policy-closeout-smoke.md',
+            '      - docs/05-execution-logs/audits-reviews/policy-closeout-smoke.md',
+            '    blockedFiles:',
+            '      - .env.local',
+            '      - src/**',
+            '    riskTypes:',
+            '      - automation_policy',
+            '    validationCommands:',
+            '      - git diff --check',
+            '    evidencePath: docs/05-execution-logs/evidence/policy-closeout-smoke.md',
+            '    auditReviewPath: docs/05-execution-logs/audits-reviews/policy-closeout-smoke.md'
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/task-queue.yaml" -Encoding UTF8
+
+        @(
+            'schemaVersion: 1',
+            'project:',
+            '  name: tiku',
+            '  currentPhase: module-run-v2-autopilot-policy-closeout-smoke',
+            'updatedAt: "2026-06-09T09:20:00-07:00"',
+            'repository:',
+            '  lastKnownMasterSha: initial',
+            '  lastKnownOriginMasterSha: initial',
+            'currentTask:',
+            '  id: module-run-v2-autopilot-policy-closeout-smoke',
+            '  status: ready_for_closeout',
+            '  sourceStory: smoke',
+            '  planPath: docs/05-execution-logs/task-plans/policy-closeout-smoke.md',
+            '  evidencePath: docs/05-execution-logs/evidence/policy-closeout-smoke.md',
+            '  auditReviewPath: docs/05-execution-logs/audits-reviews/policy-closeout-smoke.md',
+            '  branch: codex/module-run-v2-autopilot-policy-closeout-smoke',
+            '  commitSha: pending-local-commit'
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Encoding UTF8
+
+        & git add .
+        & git commit -m "chore(smoke): seed autopilot policy closeout fixture" | Out-Null
+        & git branch -M master
+        & git push -u origin master | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to push autopilot policy closeout baseline."
+        }
+
+        $policyInitialSha = ((& git rev-parse HEAD) -join "").Trim()
+        @(
+            'schemaVersion: 1',
+            'project:',
+            '  name: tiku',
+            '  currentPhase: module-run-v2-autopilot-policy-closeout-smoke',
+            'updatedAt: "2026-06-09T09:20:00-07:00"',
+            'repository:',
+            "  lastKnownMasterSha: $policyInitialSha",
+            "  lastKnownOriginMasterSha: $policyInitialSha",
+            'currentTask:',
+            '  id: module-run-v2-autopilot-policy-closeout-smoke',
+            '  status: ready_for_closeout',
+            '  sourceStory: smoke',
+            '  planPath: docs/05-execution-logs/task-plans/policy-closeout-smoke.md',
+            '  evidencePath: docs/05-execution-logs/evidence/policy-closeout-smoke.md',
+            '  auditReviewPath: docs/05-execution-logs/audits-reviews/policy-closeout-smoke.md',
+            '  branch: codex/module-run-v2-autopilot-policy-closeout-smoke',
+            '  commitSha: pending-local-commit'
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Encoding UTF8
+        & git add "docs/04-agent-system/state/project-state.yaml"
+        & git commit -m "chore(smoke): sync autopilot policy closeout sha" | Out-Null
+        & git push origin master | Out-Null
+
+        & git switch -c codex/module-run-v2-autopilot-policy-closeout-smoke | Out-Null
+        Add-Content -LiteralPath "docs/05-execution-logs/evidence/policy-closeout-smoke.md" -Value "dirty policy closeout work"
+
+        $policyProjectStatePath = Join-Path -Path $policyRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+        $policyQueuePath = Join-Path -Path $policyRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+        $policyMatrixPath = Join-Path -Path $policyRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+        $policyCloseoutOutput = @(
+            & $scriptPath `
+                -TaskId "module-run-v2-autopilot-policy-closeout-smoke" `
+                -CompletedBatchCount 2 `
+                -CloseoutRecovery `
+                -ProjectStatePath $policyProjectStatePath `
+                -QueuePath $policyQueuePath `
+                -MatrixPath $policyMatrixPath 2>&1
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $policyCloseoutOutput -Pattern "closeoutAuthorizationSource: structuredCloseoutPolicy"
+    Assert-Contains -Output $policyCloseoutOutput -Pattern "autopilotDecision: closeout_executed"
+    Assert-Contains -Output $policyCloseoutOutput -Pattern "automationWorktreeParking: detached origin/master"
+
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
