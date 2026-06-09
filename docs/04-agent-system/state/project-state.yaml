@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-autodrive-phase-0-2
-updatedAt: "2026-06-09T08:31:35-07:00"
+  currentPhase: module-run-v2-autodrive-phase-3
+updatedAt: "2026-06-09T08:45:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -57,6 +57,7 @@ automation:
     autodriveSchemaPath: docs/04-agent-system/state/autodrive-control-schema.yaml
     autodriveSchemaReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
     agentActionDispatcherScriptPath: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
+    serialAutodriveExecutorScriptPath: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
     codexAutomationId: tiku-module-run-v2-autopilot
@@ -83,13 +84,13 @@ repository:
   lastKnownMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
   lastKnownOriginMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
 currentTask:
-  id: module-run-v2-autodrive-phase-0-2
+  id: module-run-v2-autodrive-phase-3
   status: closed
-  sourceStory: user-request-2026-06-09-unattended-autodrive-global-plan
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-0-2.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-0-2.md
-  branch: codex/module-run-v2-autodrive-phase-0-2
+  sourceStory: user-request-2026-06-09-unattended-autodrive-phase-3-8
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-3.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-3.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-3.md
+  branch: codex/module-run-v2-autodrive-phase-3
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -127,7 +128,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 0-2 is implementing the durable unattended autodrive schema and dry-run agent action dispatcher. This batch
-    does not approve product implementation, local DB operation, provider/env/secret, schema/migration, worker creation,
-    merge, push, cleanup, deploy, or Cost Calibration Gate actions.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+    Phase 3 has implemented the serial autodrive executor governance layer. It may close out through local commit,
+    fast-forward merge, push, and short branch cleanup after validation, while product implementation and high-risk
+    actions remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-3.md

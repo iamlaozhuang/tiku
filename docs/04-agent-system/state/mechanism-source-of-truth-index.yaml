@@ -141,6 +141,11 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
     decisionOutput: agentAction
     role: dry-run bridge from runner decisions to explicit Codex agent-layer actions
+  - id: module-run-v2-serial-autodrive-executor
+    path: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+    decisionOutput: serialExecutorDecision
+    role: guardian-first serial executor for claim_task, continue_task, and run_validation with explicit Execute or RunValidation gates
 executionLogRoots:
   - id: evidence
     path: docs/05-execution-logs/evidence

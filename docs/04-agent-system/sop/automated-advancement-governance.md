@@ -226,6 +226,40 @@ merge, push, clean branches, write env files, call providers, run database work,
 only tells the Codex agent layer which next action is permitted by existing gates. Agent-layer execution must still obey
 the task queue, allowed files, blocked files, validation commands, evidence, and closeout policy.
 
+## Serial Autodrive Executor Control
+
+The serial executor is the first bounded agent-action transaction layer:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 -TaskId <task-id>
+```
+
+It consumes `agentAction` from the dispatcher and emits `serialExecutorDecision`. The executor is guardian-first:
+advisory decisions are read-only by default, and state writes happen only when the caller passes `-Execute`. Validation
+commands are executed only when the caller passes `-RunValidation`.
+
+Supported decisions:
+
+- `ready_to_continue`: same-thread continuation is allowed after schema and status checks.
+- `ready_to_claim`: a pending task is schema-ready and dependency-complete, but queue/project state has not been
+  written.
+- `task_claimed`: `-Execute` updated the pending task to `in_progress` and synchronized `project-state.yaml`.
+- `validation_ready`: validation commands passed the blocked-command safety filter, but were not executed.
+- `validation_passed`: `-RunValidation` executed all safe validation commands successfully.
+- `blocked_command`: a validation command attempted an out-of-scope surface such as env/secret, provider, DB,
+  migration, deploy, dependency mutation, Git push/merge, destructive cleanup, or Cost Calibration Gate.
+- `idle`: another active owner exists or no executable task is available, so automation leaves the lane alone.
+- `manual_required`, `proposal_only`, or `stop_for_hard_block`: the executor stops instead of widening scope.
+
+`claim_task` requires `pending` status, completed dependencies, `can_autodrive` schema readiness, and explicit
+`-Execute`. `continue_task` requires `in_progress` status and `can_autodrive`. `run_validation` reads only the target
+task's declared `validationCommands` and blocks risky command text before execution.
+
+The serial executor does not implement product code, launch threads, create worktrees, assign parallel workers, merge,
+push, clean branches, write env files, call providers, operate Docker databases, read project resources, modify schema
+or migrations, deploy, create PRs, or execute Cost Calibration Gate. Those actions remain separate phases or
+task-specific approvals.
+
 ## Local Capability Authorization Model
 
 To make local development close more loops without weakening safety, future tasks may grant specific local capabilities:
