@@ -50,6 +50,9 @@ param(
     [int]$AutoSeedMaxBatchCount = 8,
 
     [Parameter(Mandatory = $false)]
+    [switch]$ContinueAfterAutoSeed,
+
+    [Parameter(Mandatory = $false)]
     [string[]]$ParallelCandidateTaskIds = @(),
 
     [Parameter(Mandatory = $false)]
@@ -478,6 +481,10 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
             $seedSelfReviewDecision = Get-DecisionValue -Output $seedSelfReviewResult.Output -Key "seedSelfReviewDecision"
             if ($seedSelfReviewDecision -ne "passed") {
                 Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_seed_self_review_failure" -Reason "seeded task self-review failed" -StepCount $stepIndex -ExitCode 1 -NextTask $seedModule
+            }
+
+            if (-not $ContinueAfterAutoSeed) {
+                Write-RunnerResult -Decision "seed_transaction_applied" -NextAction "closeout_auto_seed_transaction" -Reason "auto-seed transaction completed and must be closed out before claiming seeded work" -StepCount $stepIndex -ExitCode 0 -NextTask $seedModule
             }
 
             continue

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-auto-seed-bridge
-updatedAt: "2026-06-09T12:05:00-07:00"
+  currentPhase: module-run-v2-autodrive-activation
+updatedAt: "2026-06-09T12:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -69,7 +69,7 @@ automation:
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
     codexAutomationId: tiku-module-run-v2-autopilot
-    codexAutomationStatus: PAUSED
+    codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
     codexAutomationExecutionEnvironment: worktree
     defaultStopOn:
@@ -90,16 +90,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ef1a3ab7075b1e4100fe83af19bd4611dd2bb723
-  lastKnownOriginMasterSha: ef1a3ab7075b1e4100fe83af19bd4611dd2bb723
+  lastKnownMasterSha: 4d8ef2b14354ab011a6f5573b83a977a8cba545f
+  lastKnownOriginMasterSha: 4d8ef2b14354ab011a6f5573b83a977a8cba545f
 currentTask:
-  id: module-run-v2-auto-seed-bridge
+  id: module-run-v2-autodrive-activation
   status: done
-  sourceStory: user-goal-2026-06-09-module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-auto-seed-bridge.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-auto-seed-bridge.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-auto-seed-bridge.md
-  branch: codex/module-run-v2-auto-seed-bridge
+  sourceStory: user-goal-2026-06-09-unattended-autodrive-activation
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-activation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
+  branch: codex/module-run-v2-autodrive-activation
   commitShaSemantics: task_closeout_checkpoint_or_pending_local_commit
   commitSha: pending-local-commit
   prUrl: null
@@ -138,6 +138,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Module Run v2 auto-seed bridge is ready for approved local commit, fast-forward merge, push, and cleanup. Keep Codex
-    automation paused until final activation is separately verified.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-auto-seed-bridge.md
+    Module Run v2 unattended autodrive is active after the auto-seed bridge closeout. The Codex app automation must use the
+    runner with guarded auto-seed approval, keep guardian-first startup checks, and leave high-risk capability gates blocked
+    until task-specific approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md

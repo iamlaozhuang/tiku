@@ -13,6 +13,15 @@ param(
     [switch]$Apply,
 
     [Parameter(Mandatory = $false)]
+    [switch]$SkipSeedExecutionLog,
+
+    [Parameter(Mandatory = $false)]
+    [string]$SeedEvidencePath = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$SeedAuditReviewPath = "",
+
+    [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [string]$ProjectStatePath = "docs\04-agent-system\state\project-state.yaml",
 
@@ -221,6 +230,114 @@ function New-SeedTaskBlock {
 "@
 }
 
+function ConvertTo-SafeSlug {
+    param([Parameter(Mandatory = $true)][string]$Text)
+
+    $slug = ($Text.ToLowerInvariant() -replace "[^a-z0-9-]+", "-").Trim("-")
+    if ([string]::IsNullOrWhiteSpace($slug)) {
+        return "unknown-module"
+    }
+
+    return $slug
+}
+
+function Write-SeedExecutionLogs {
+    param(
+        [Parameter(Mandatory = $true)][string]$ModuleId,
+        [Parameter(Mandatory = $true)][string]$SourcePlanningTask,
+        [Parameter(Mandatory = $true)][string[]]$CandidateTaskIds,
+        [Parameter(Mandatory = $true)][string[]]$TargetClosureItems,
+        [Parameter(Mandatory = $true)][string]$ApprovalText
+    )
+
+    if ($SkipSeedExecutionLog) {
+        return [pscustomobject]@{
+            EvidencePath = ""
+            AuditReviewPath = ""
+        }
+    }
+
+    $datePrefix = Get-Date -Format "yyyy-MM-dd"
+    $moduleSlug = ConvertTo-SafeSlug -Text $ModuleId
+    if ([string]::IsNullOrWhiteSpace($SeedEvidencePath)) {
+        $SeedEvidencePath = "docs\05-execution-logs\evidence\$datePrefix-module-run-v2-auto-seed-$moduleSlug.md"
+    }
+    if ([string]::IsNullOrWhiteSpace($SeedAuditReviewPath)) {
+        $SeedAuditReviewPath = "docs\05-execution-logs\audits-reviews\$datePrefix-module-run-v2-auto-seed-$moduleSlug.md"
+    }
+
+    $evidenceDirectory = Split-Path -Path $SeedEvidencePath -Parent
+    $auditDirectory = Split-Path -Path $SeedAuditReviewPath -Parent
+    if (-not [string]::IsNullOrWhiteSpace($evidenceDirectory)) {
+        New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
+    }
+    if (-not [string]::IsNullOrWhiteSpace($auditDirectory)) {
+        New-Item -ItemType Directory -Force -Path $auditDirectory | Out-Null
+    }
+
+    $candidateLines = New-Object System.Collections.Generic.List[string]
+    for ($index = 0; $index -lt $CandidateTaskIds.Count; $index++) {
+        $targetClosure = if ($index -lt $TargetClosureItems.Count) { $TargetClosureItems[$index] } else { "unspecified" }
+        $candidateLines.Add("- ``$($CandidateTaskIds[$index])``: $targetClosure")
+    }
+
+    $safeApprovalText = ConvertTo-YamlScalarText -Text $ApprovalText
+    $candidateText = ($candidateLines.ToArray()) -join "`n"
+    $evidenceContent = @"
+# Module Run v2 Auto-Seed Evidence: $ModuleId
+
+## Summary
+
+The auto-seed transaction appended guarded pending implementation tasks for ``$ModuleId``.
+
+## Source
+
+- sourcePlanningTask: ``$SourcePlanningTask``
+- approvalAnchor: ``autoDriveLocalImplementationApproval``
+- approvalStatement: $safeApprovalText
+
+## Seeded Tasks
+
+$candidateText
+
+## Boundary
+
+- Cost Calibration Gate remains blocked.
+- Local Docker database use remains task_approval_required.
+- Project resource reads remain task_approval_required.
+- Provider calls remain blocked_without_task_approval.
+- Schema migration remains blocked_without_task_approval.
+
+## Closeout Requirement
+
+This seed transaction must be committed and integrated before any seeded implementation task is claimed.
+"@
+
+    $auditContent = @"
+# Module Run v2 Auto-Seed Audit Review: $ModuleId
+
+## Decision
+
+Passed for guarded queue seeding.
+
+## Checks
+
+- `autoDriveLocalImplementationApproval` is recorded.
+- Seeded tasks are pending implementation tasks.
+- High-risk capabilities remain blocked or task-specific.
+- Cost Calibration Gate remains blocked.
+- Seed transaction must close out before seeded implementation work starts.
+"@
+
+    Set-Content -LiteralPath $SeedEvidencePath -Value $evidenceContent -Encoding UTF8
+    Set-Content -LiteralPath $SeedAuditReviewPath -Value $auditContent -Encoding UTF8
+
+    return [pscustomobject]@{
+        EvidencePath = $SeedEvidencePath
+        AuditReviewPath = $SeedAuditReviewPath
+    }
+}
+
 try {
     Write-Section -Title "Module Run v2 Implementation Seed Transaction"
     Write-Output "seedTransactionMode: $(if ($Apply) { "apply" } else { "plan_only" })"
@@ -294,6 +411,12 @@ try {
 
     $appendText = "`n" + (($taskBlocks.ToArray()) -join "`n")
     Add-Content -LiteralPath $QueuePath -Value $appendText -Encoding UTF8
+    $executionLogs = Write-SeedExecutionLogs `
+        -ModuleId $moduleId `
+        -SourcePlanningTask $sourcePlanningTask `
+        -CandidateTaskIds $candidateTaskIds `
+        -TargetClosureItems $targetClosureItems `
+        -ApprovalText $ApprovalStatement
 
     Write-Section -Title "Applied"
     foreach ($candidateTaskId in $candidateTaskIds) {
@@ -301,6 +424,12 @@ try {
     }
     Write-Output "seededTaskCount: $($candidateTaskIds.Count)"
     Write-Output "autoDriveLocalImplementationApproval: recorded"
+    if (-not [string]::IsNullOrWhiteSpace($executionLogs.EvidencePath)) {
+        Write-Output "seedEvidencePath: $($executionLogs.EvidencePath)"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($executionLogs.AuditReviewPath)) {
+        Write-Output "seedAuditReviewPath: $($executionLogs.AuditReviewPath)"
+    }
 
     Write-SeedTransactionResult -Decision "seeded" -Reason "implementation tasks were appended as pending queue entries" -ExitCode 0
 } catch {

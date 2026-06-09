@@ -7014,3 +7014,146 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-auto-seed-bridge.md
     status: done
     retryCount: 0
+  - id: module-run-v2-autodrive-activation
+    title: Module Run v2 Unattended Autodrive Activation
+    phase: module-run-v2-autodrive-activation
+    sourceStory: user-goal-2026-06-09-unattended-autodrive-activation
+    dependencies:
+      - module-run-v2-auto-seed-bridge
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User set an active goal to implement the Module Run v2 three-layer auto-seed bridge, self-check and repair the latest
+      mechanism until no unreasonable breakpoints remain, then start unattended autodrive. This activation records the
+      durable state transition from PAUSED to ACTIVE and authorizes the existing Codex automation to run the guarded runner
+      with autoDriveLocalImplementationApproval only for low-risk local implementation task seeding. It does not approve
+      dependency/package/lockfile changes, schema/migration, env/secret writes, provider calls, deploy, payment,
+      external-service work, real local Docker DB operations, project resource reads for tests, destructive DB operations,
+      PR/force push, or Cost Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: approved_after_validation
+        targetBranch: master
+      push:
+        approved: approved_after_validation
+        target: origin/master
+      cleanup:
+        deleteShortBranch: approved_after_merge
+        parkWorktree: approved_after_master_validation
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - run_validation
+        - write_evidence
+        - local_commit
+        - seed_implementation_tasks
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 8
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: closed
+      cleanupPolicy: cleanup_ready
+      redactionRequired: true
+    taskKind: automation_activation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-activation.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - automation_activation
+      - implementation_auto_seed
+      - queue_seed_transaction
+      - startup_readiness
+      - evidence_integrity
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-autodrive-activation -PlannedFiles scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1,scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1,scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-activation.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -AllowProtectedBranch -MaxSteps 2
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 -AllowProtectedBranch
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -AllowProtectedBranch -MaxSteps 2
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1 -SummaryOnly
+      - phase: closeout
+        command: npm.cmd run lint
+      - phase: closeout
+        command: npm.cmd run typecheck
+      - phase: closeout
+        command: git diff --check
+      - phase: closeout
+        command: 'Select-String -Path docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-autodrive-activation.md -Pattern ''codexAutomationStatus: ACTIVE'',''autoDriveLocalImplementationApproval'',''Cost Calibration Gate remains blocked'''
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-autodrive-activation -PlannedFiles scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1,scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1,scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-activation.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -AllowProtectedBranch -MaxSteps 2
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 -AllowProtectedBranch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1 -SummaryOnly
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - 'Select-String -Path docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-autodrive-activation.md -Pattern ''codexAutomationStatus: ACTIVE'',''autoDriveLocalImplementationApproval'',''Cost Calibration Gate remains blocked'''
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
+    status: done
+    retryCount: 0

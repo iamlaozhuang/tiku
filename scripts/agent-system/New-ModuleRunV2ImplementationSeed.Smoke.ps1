@@ -128,14 +128,23 @@ try {
             -ProjectStatePath $fixture.ProjectStatePath `
             -QueuePath $fixture.QueuePath `
             -MatrixPath $fixture.MatrixPath `
-            -ApprovalStatement "autoDriveLocalImplementationApproval: smoke-approved low-risk local implementation seed"
+            -ApprovalStatement "autoDriveLocalImplementationApproval: smoke-approved low-risk local implementation seed" `
+            -SeedEvidencePath (Join-Path -Path $fixtureRoot -ChildPath "seed-evidence.md") `
+            -SeedAuditReviewPath (Join-Path -Path $fixtureRoot -ChildPath "seed-audit.md")
     )
     Assert-Contains -Output $applyOutput -Pattern "seedTransactionDecision: seeded"
     Assert-Contains -Output $applyOutput -Pattern "seededTaskCount: 2"
+    Assert-Contains -Output $applyOutput -Pattern "seedEvidencePath:"
+    Assert-Contains -Output $applyOutput -Pattern "seedAuditReviewPath:"
 
     $queueAfterApply = Get-Content -LiteralPath $fixture.QueuePath -Raw
     if ($queueAfterApply -notmatch "seededImplementationTask:\s*true" -or $queueAfterApply -notmatch "status:\s*pending") {
         throw "Applied seed transaction did not write pending seeded tasks."
+    }
+
+    $seedEvidenceContent = Get-Content -LiteralPath (Join-Path -Path $fixtureRoot -ChildPath "seed-evidence.md") -Raw
+    if ($seedEvidenceContent -notmatch "authorization-and-access" -or $seedEvidenceContent -notmatch "batch-101-authorization-and-access") {
+        throw "Seed evidence did not record concrete seeded task values."
     }
 
     $selfReviewOutput = @(

@@ -276,6 +276,9 @@ try {
         "prepare_next_task" {
             Resolve-SchemaControlledAction -Action "claim_task" -TargetTaskId $runnerNextTask -Reason "runner found a pending task that is schema-ready"
         }
+        "seed_transaction_applied" {
+            Write-AgentActionResult -Decision "ready" -Action "closeout_auto_seed_transaction" -Reason "runner applied a seed transaction that must be committed before seeded work is claimed" -ExitCode 0 -TargetTaskId $runnerNextTask
+        }
         "continue_current_task" {
             $targetTask = if ([string]::IsNullOrWhiteSpace($TaskId)) { $runnerNextTask } else { $TaskId }
             Resolve-SchemaControlledAction -Action "continue_task" -TargetTaskId $targetTask -Reason "runner allows same-thread continuation and schema is ready"

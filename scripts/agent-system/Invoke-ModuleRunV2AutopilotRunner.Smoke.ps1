@@ -342,8 +342,28 @@ tasks:
     }
     Assert-Contains -Output $seedApplyOutput -Pattern "seedTransactionDecision: seeded"
     Assert-Contains -Output $seedApplyOutput -Pattern "seedSelfReviewDecision: passed"
-    Assert-Contains -Output $seedApplyOutput -Pattern "runnerDecision: prepare_next_task"
-    Assert-Contains -Output $seedApplyOutput -Pattern "runnerNextAction: agent_claim_next_task"
+    Assert-Contains -Output $seedApplyOutput -Pattern "runnerDecision: seed_transaction_applied"
+    Assert-Contains -Output $seedApplyOutput -Pattern "runnerNextAction: closeout_auto_seed_transaction"
+
+    Push-Location -LiteralPath $seedApplyRepo
+    try {
+        $seedApplyContinueOutput = @(
+            & $runnerPath `
+                -TaskId "runner-closed" `
+                -ProjectStatePath $seedApplyProjectStatePath `
+                -QueuePath $seedApplyQueuePath `
+                -MatrixPath $seedApplyMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-continue-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-continue-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-continue-handoffs") `
+                -SkipUnattendedReadiness `
+                -MaxSteps 2
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $seedApplyContinueOutput -Pattern "runnerDecision: prepare_next_task"
+    Assert-Contains -Output $seedApplyContinueOutput -Pattern "runnerNextAction: agent_claim_next_task"
 
     $parallelRepo = Join-Path -Path $fixtureRoot -ChildPath "parallel-repo"
     $parallelSha = Initialize-SmokeRepo -Path $parallelRepo

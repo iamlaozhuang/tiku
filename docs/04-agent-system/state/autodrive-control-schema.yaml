@@ -113,7 +113,9 @@ autoSeedBridge:
       - Cost Calibration Gate remains blocked
   runnerBridge:
     noExecutableTaskWithoutApproval: seed_proposal_available
-    noExecutableTaskWithApproval: seed_transaction_then_startup_retry
+    noExecutableTaskWithApproval: seed_transaction_applied
+    postSeedDefault: closeout_auto_seed_transaction_before_claiming_seeded_work
+    continueAfterAutoSeedOverride: ContinueAfterAutoSeed
     seedApplyParameter: AllowAutoSeed
     approvalParameter: AutoSeedApprovalStatement
     maxBatchParameter: AutoSeedMaxBatchCount
