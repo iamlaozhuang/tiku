@@ -195,6 +195,29 @@ stopped-automation hygiene gate. State SHA reconciliation is repairable only whe
 accepted post-closeout ancestor path. Dirty unknown worktrees, invalid leases, blocked gates, provider/env/schema/deploy
 needs, and unsafe cleanup paths remain hard stops.
 
+## Autodrive Control-Loop Acceptance
+
+The local acceptance gate for the mechanism chain is:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+```
+
+It emits `autodriveAcceptanceDecision`:
+
+- `accepted_with_guardrails`: required control-loop layers are present, local guardrail probes pass, and the mechanism is
+  guardian-first.
+- `stop_for_hard_block`: a required layer, safety boundary, or probe is missing or unsafe.
+
+The gate checks these layers without executing business implementation: startup readiness, recovery self-repair, agent
+action dispatch, serial executor, parallel coordinator, local capability gate, Codex thread bridge, and approved
+closeout. It also verifies that recoverable cleanup routes through `repairAction`, provider calls remain blocked without
+task-specific approval, and thread launch remains a bridge output rather than a script-level thread-tool call.
+
+Acceptance is not approval for product implementation, broad cleanup, unknown worktree deletion, provider/env/schema
+work, DB/resource operations, dependency changes, deploy, PR creation, force push, Codex thread/worktree creation, or
+Cost Calibration Gate execution.
+
 ## Durable Autodrive Schema And Agent Action Dispatch
 
 Unattended local development may advance only when the target task carries a durable autodrive schema. The schema source

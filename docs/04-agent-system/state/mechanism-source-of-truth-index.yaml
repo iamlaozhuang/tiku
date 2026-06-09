@@ -121,6 +121,11 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
     decisionOutput: recoverySelfRepairDecision
     role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, recovery plan, post-closeout state reconciliation, or quiet active-owner exit
+  - id: module-run-v2-autodrive-control-loop-acceptance
+    path: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+    decisionOutput: autodriveAcceptanceDecision
+    role: local acceptance gate for the guardian-first autodrive control loop, including startup, recovery, dispatcher, serial, parallel, capability, thread bridge, and approved closeout boundaries
   - id: module-run-v2-autopilot-orchestrator
     path: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
