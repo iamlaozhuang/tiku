@@ -72,6 +72,18 @@ capabilities:
     costCalibrationGate:
       default: blocked
       approvedValue: not_supported_by_default
+  gate:
+    scriptPath: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
+    decisionOutput: localCapabilityDecision
+    adapterActionOutput: adapterAction
+    allowedIntents:
+      - declare_adapter
+      - use_capability
+    decisions:
+      - adapter_contract_ready
+      - capability_ready
+      - manual_required
+      - stop_for_hard_block
 closeoutPolicy:
   localCommit:
     allowedValues:

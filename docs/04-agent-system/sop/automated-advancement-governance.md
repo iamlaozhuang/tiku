@@ -296,6 +296,28 @@ To make local development close more loops without weakening safety, future task
 These approvals are not inferred from the runner existing. They must be recorded in the task queue, task plan, and
 evidence before the corresponding local action is executed.
 
+Before a task uses any local capability, the agent layer must pass the local capability gate:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId <task-id> -Capability <capability> -Intent <declare_adapter|use_capability>
+```
+
+The gate emits `localCapabilityDecision` and `adapterAction`:
+
+- `adapter_contract_ready`: the adapter boundary may be documented or wired into later automation, but no real local
+  action is approved.
+- `capability_ready`: the task records the approved capability value. The script still performs no Docker, resource,
+  env, provider, schema, migration, or external-service action.
+- `manual_required`: task-specific approval, destination confirmation, quota/cost statement, or redaction rule is
+  missing.
+- `stop_for_hard_block`: the capability state is unsafe, unknown, or refers to a blocked gate.
+
+`localDockerDatabase` readiness does not approve schema/migration, destructive data operations, or staging/prod
+connections. `projectResourceRead` readiness does not approve recording full `paper` content, raw answer text, or
+cleartext `redeem_code`. `providerKey` readiness does not approve env/secret writes or secret output. `providerCall`
+readiness does not approve real provider calls unless the task separately records local validation approval, quota/cost
+limits, and evidence redaction rules. Cost Calibration Gate remains blocked.
+
 ## Parallel Coordinator Control Point
 
 Codex automation is a guardian first and a worker launcher only when durable approval says so. When startup readiness or

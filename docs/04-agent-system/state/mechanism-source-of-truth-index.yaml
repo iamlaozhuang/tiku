@@ -111,6 +111,11 @@ scriptControls:
     smokePath: scripts/agent-system/Test-ModuleRunV2CodexThreadBridgeReadiness.Smoke.ps1
     decisionOutput: threadBridgeDecision
     role: verifies startup lane ownership, launch policy, and redacted durable handoff before the Codex agent layer may call create_thread
+  - id: module-run-v2-local-capability-gate
+    path: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
+    decisionOutput: localCapabilityDecision
+    role: classifies local Docker DB, project resource read, provider key destination, provider call, schema migration, and Cost Calibration Gate capability readiness without executing those capabilities
   - id: module-run-v2-autopilot-orchestrator
     path: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
