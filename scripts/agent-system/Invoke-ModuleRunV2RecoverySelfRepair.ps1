@@ -14,6 +14,14 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
+    [string]$ProjectStatePath = "docs\04-agent-system\state\project-state.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$PostCloseoutStateReconcileScriptPath = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [string]$NextModuleRunCandidate = "full-autodrive-control-loop-acceptance"
 )
 
@@ -109,11 +117,32 @@ function Get-StartupOutput {
     return @(& powershell.exe @startupArgs 2>&1)
 }
 
-try {
-    if ($Execute) {
-        Write-RecoveryResult -Decision "manual_required" -RepairAction "execution_requires_task_specific_approval" -Reason "Phase 7 implements recovery decisions only; execution is intentionally disabled" -ExitCode 1 -StartupDecision "not_evaluated"
+function Invoke-PostCloseoutStateReconcile {
+    if ([string]::IsNullOrWhiteSpace($PostCloseoutStateReconcileScriptPath)) {
+        $PostCloseoutStateReconcileScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1"
+    }
+    if (-not (Test-Path -LiteralPath $PostCloseoutStateReconcileScriptPath)) {
+        throw "Post-closeout state reconcile script is missing: $PostCloseoutStateReconcileScriptPath"
     }
 
+    $reconcileArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $PostCloseoutStateReconcileScriptPath,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-Execute"
+    )
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        $reconcileArgs += @("-TaskId", $TaskId)
+    }
+
+    return @(& powershell.exe @reconcileArgs 2>&1)
+}
+
+try {
     $startupOutput = @(Get-StartupOutput)
     $startupDecision = Get-KeyValue -Lines $startupOutput -Key "startupDecision"
     if ([string]::IsNullOrWhiteSpace($startupDecision)) {
@@ -138,7 +167,20 @@ try {
     }
 
     if ($hasPostCloseoutStateReconciliation -and $startupDecision -eq "closeout_recovery") {
+        if ($Execute) {
+            $reconcileOutput = @(Invoke-PostCloseoutStateReconcile)
+            $reconcileOutput | ForEach-Object { Write-Output $_ }
+            $reconcileDecision = Get-KeyValue -Lines $reconcileOutput -Key "postCloseoutStateReconcileDecision"
+            if ($LASTEXITCODE -ne 0 -or $reconcileDecision -notin @("reconciled", "already_current")) {
+                Write-RecoveryResult -Decision "stop_for_hard_block" -RepairAction "reconcile_post_closeout_state_sha" -Reason "post-closeout state reconciliation failed" -ExitCode 1 -StartupDecision $startupDecision
+            }
+            Write-RecoveryResult -Decision "self_repair_executed" -RepairAction "reconcile_post_closeout_state_sha" -Reason "post-closeout state SHA reconciliation executed; rerun startup readiness" -ExitCode 0 -StartupDecision $startupDecision
+        }
         Write-RecoveryResult -Decision "self_repair_ready" -RepairAction "reconcile_post_closeout_state_sha" -Reason "post-closeout state SHA drift is repairable when Git reality is an accepted ancestor path" -ExitCode 0 -StartupDecision $startupDecision
+    }
+
+    if ($Execute) {
+        Write-RecoveryResult -Decision "manual_required" -RepairAction "execution_requires_task_specific_approval" -Reason "requested recovery action is not executable by this self-repair gate" -ExitCode 1 -StartupDecision $startupDecision
     }
 
     if ($startupDecision -in @("continue_current_task", "prepare_next_task", "closeout_recovery")) {

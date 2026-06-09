@@ -697,6 +697,9 @@ try {
         "run_hygiene_cleanup" {
             Write-SerialExecutorResult -Decision "handoff_to_hygiene_gate" -Action "run_hygiene_cleanup" -Reason "serial executor does not broaden cleanup; use the stopped-automation hygiene gate" -ExitCode 0
         }
+        "run_closeout_recovery" {
+            Write-SerialExecutorResult -Decision "handoff_to_closeout_recovery" -Action "run_closeout_recovery" -Reason "closeout recovery remains bounded by unattended readiness, approved closeout, and post-closeout state reconcile gates" -ExitCode 0 -TargetTaskId (Get-ResolvedTargetTaskId -CandidateTaskId $agentActionTask)
+        }
         "adopt_recoverable_run" {
             Write-SerialExecutorResult -Decision "handoff_to_recovery" -Action "adopt_recoverable_run" -Reason "recovery adoption is handled by the startup and handoff gates" -ExitCode 0
         }

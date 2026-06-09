@@ -61,6 +61,28 @@ function Get-DecisionValue {
     return ""
 }
 
+function Get-CurrentTaskId {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $insideCurrentTask = $false
+    foreach ($line in $Lines) {
+        if ($line -match "^currentTask:\s*$") {
+            $insideCurrentTask = $true
+            continue
+        }
+
+        if ($insideCurrentTask -and $line -match "^\S") {
+            break
+        }
+
+        if ($insideCurrentTask -and $line -match "^\s+id:\s*(.+?)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
 function Invoke-ExternalCommand {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
 
@@ -257,6 +279,11 @@ try {
         "continue_current_task" {
             $targetTask = if ([string]::IsNullOrWhiteSpace($TaskId)) { $runnerNextTask } else { $TaskId }
             Resolve-SchemaControlledAction -Action "continue_task" -TargetTaskId $targetTask -Reason "runner allows same-thread continuation and schema is ready"
+        }
+        "closeout_recovery" {
+            $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
+            $targetTask = if ([string]::IsNullOrWhiteSpace($TaskId)) { Get-CurrentTaskId -Lines $projectStateLines } else { $TaskId }
+            Write-AgentActionResult -Decision "ready" -Action "run_closeout_recovery" -Reason "runner selected bounded closeout recovery before next-task selection" -ExitCode 0 -TargetTaskId $targetTask
         }
         "prepare_parallel_workers" {
             $targetTask = if ([string]::IsNullOrWhiteSpace($ParallelCoordinatorTaskId)) { $TaskId } else { $ParallelCoordinatorTaskId }

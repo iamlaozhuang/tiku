@@ -45,6 +45,9 @@ function Write-AcceptanceResult {
     Write-Output "parallelBoundary: manifest_only_serial_integration"
     Write-Output "serialBoundary: validation_filter_before_execution"
     Write-Output "closeoutBoundary: structured_closeout_policy_only"
+    Write-Output "reconcileBoundary: accepted_ancestor_state_reconcile_only"
+    Write-Output "branchHygieneBoundary: merged_cleanup_unmerged_manual_review"
+    Write-Output "diagnosticBoundary: no_write_readiness_available"
     Write-Output "nextModuleRunCandidate: $NextModuleRunCandidate"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
@@ -74,7 +77,9 @@ try {
         @{ Id = "parallel_coordinator"; Path = "Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1" },
         @{ Id = "local_capability_gate"; Path = "Test-ModuleRunV2LocalCapabilityGate.ps1" },
         @{ Id = "codex_thread_bridge"; Path = "Test-ModuleRunV2CodexThreadBridgeReadiness.ps1" },
-        @{ Id = "approved_closeout"; Path = "Invoke-ModuleRunV2ApprovedCloseout.ps1" }
+        @{ Id = "approved_closeout"; Path = "Invoke-ModuleRunV2ApprovedCloseout.ps1" },
+        @{ Id = "post_closeout_state_reconcile"; Path = "Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1" },
+        @{ Id = "branch_hygiene"; Path = "Test-ModuleRunV2BranchHygiene.ps1" }
     )
 
     foreach ($requiredScript in $requiredScripts) {
@@ -103,6 +108,19 @@ Cost Calibration Gate remains blocked
         }
         Assert-Contains -Output $recoveryResult.Output -Pattern "recoverySelfRepairDecision: self_repair_ready"
         Assert-Contains -Output $recoveryResult.Output -Pattern "repairAction: run_stopped_automation_hygiene_cleanup"
+
+        $postCloseoutStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-post-closeout.txt"
+        @"
+startupDecision: closeout_recovery
+startupStateWarning: lastKnownMasterSha is an accepted ancestor of master
+postCloseoutStateReconciliation: recommended master
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $postCloseoutStartupPath -Encoding UTF8
+        $postCloseoutRecoveryResult = Invoke-Script -Path $recoveryScriptPath -Arguments @("-StartupOutputPath", $postCloseoutStartupPath)
+        if ($postCloseoutRecoveryResult.ExitCode -ne 0) {
+            throw "Post-closeout recovery probe failed"
+        }
+        Assert-Contains -Output $postCloseoutRecoveryResult.Output -Pattern "repairAction: reconcile_post_closeout_state_sha"
 
         $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
         @"
@@ -159,6 +177,25 @@ read order:
         }
         Assert-Contains -Output $threadBridgeResult.Output -Pattern "threadBridgeDecision: ready_for_agent_thread_launch"
         Assert-Contains -Output $threadBridgeResult.Output -Pattern "codexThreadAction: create_thread"
+
+        $branchHygieneRepo = Join-Path -Path $fixtureRoot -ChildPath "branch-hygiene-repo"
+        New-Item -ItemType Directory -Path $branchHygieneRepo | Out-Null
+        & git -C $branchHygieneRepo init | Out-Null
+        & git -C $branchHygieneRepo branch -M master | Out-Null
+        Set-Content -LiteralPath (Join-Path -Path $branchHygieneRepo -ChildPath "README.md") -Value "branch hygiene baseline" -Encoding UTF8
+        & git -C $branchHygieneRepo add README.md | Out-Null
+        & git -C $branchHygieneRepo -c user.name="Tiku Acceptance" -c user.email="tiku-acceptance@example.invalid" commit -m "branch hygiene baseline" | Out-Null
+        $branchHygieneScriptPath = Join-Path -Path $scriptRoot -ChildPath "Test-ModuleRunV2BranchHygiene.ps1"
+        Push-Location -LiteralPath $branchHygieneRepo
+        try {
+            $branchHygieneResult = Invoke-Script -Path $branchHygieneScriptPath -Arguments @("-BaseBranch", "master")
+        } finally {
+            Pop-Location
+        }
+        if ($branchHygieneResult.ExitCode -ne 0) {
+            throw "Branch hygiene clean probe failed"
+        }
+        Assert-Contains -Output $branchHygieneResult.Output -Pattern "branchHygieneDecision: clean"
     } finally {
         if (Test-Path -LiteralPath $fixtureRoot) {
             Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

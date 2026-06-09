@@ -21,6 +21,8 @@ taskAutodrivePolicy:
         - prepare_parallel_workers
         - adopt_recoverable_run
         - open_recovery_plan
+        - run_closeout_recovery
+        - reconcile_post_closeout_state
     blockedAgentActions:
       requiredValues:
         - merge
@@ -113,6 +115,10 @@ registryLifecycle:
   allowedCleanupPolicies:
     - none
     - cleanup_ready
+  cleanupCandidateKinds:
+    - stale_clean_worktree
+    - expired_active_missing_worktree
+    - cleanup_ready_registry
   redactionRequired: true
 parallelBatch:
   requiredForParallelWorkers: true

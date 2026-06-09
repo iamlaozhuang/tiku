@@ -39,6 +39,9 @@ param(
     [switch]$SkipRemoteAheadCheck,
 
     [Parameter(Mandatory = $false)]
+    [switch]$NoWrite,
+
+    [Parameter(Mandatory = $false)]
     [string]$CloseoutAuthorizationStatement = ""
 )
 
@@ -411,6 +414,9 @@ $findings = New-Object System.Collections.Generic.List[string]
 try {
     Write-Section -Title "Module Run v2 Unattended Readiness"
     Write-Output "unattendedReadinessMode: hard_block"
+    if ($NoWrite) {
+        Write-Output "noWrite: enabled"
+    }
     if ($CloseoutRecovery) {
         Write-Output "closeoutRecovery: enabled"
     }
@@ -587,7 +593,11 @@ try {
     $filesToScan = @(Get-ChangedFilesForScan -ExplicitFiles $ChangedFiles)
     Write-Output "filesToScan: $($filesToScan.Count)"
     $currentWorktreePath = ((& git rev-parse --show-toplevel) -join "").Trim()
-    Write-RunRegistryHeartbeat -Root $RunRegistryRoot -TaskId $TaskId -Branch $currentBranch -WorktreePath $currentWorktreePath -FilesToScan $filesToScan
+    if ($NoWrite) {
+        Write-Output "runRegistryHeartbeat: skipped_no_write"
+    } else {
+        Write-RunRegistryHeartbeat -Root $RunRegistryRoot -TaskId $TaskId -Branch $currentBranch -WorktreePath $currentWorktreePath -FilesToScan $filesToScan
+    }
     $explicitFilesToScan = @(Expand-FileInputs -Files $ChangedFiles)
     if ($CloseoutRecovery -and $explicitFilesToScan.Count -eq 0 -and $filesToScan.Count -gt 0) {
         if (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock -Statement $CloseoutAuthorizationStatement) {

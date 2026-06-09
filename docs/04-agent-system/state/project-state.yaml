@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-autodrive-phase-8
-updatedAt: "2026-06-09T09:24:27-07:00"
+  currentPhase: module-run-v2-recovery-chain-hardening
+updatedAt: "2026-06-09T10:01:53-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -66,7 +66,7 @@ automation:
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
     codexAutomationId: tiku-module-run-v2-autopilot
-    codexAutomationStatus: ACTIVE
+    codexAutomationStatus: PAUSED
     codexAutomationSchedule: hourly
     codexAutomationExecutionEnvironment: worktree
     defaultStopOn:
@@ -86,16 +86,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 0dbf79ada28ec14556f97e6b6f6c69af262cb373
-  lastKnownOriginMasterSha: 0dbf79ada28ec14556f97e6b6f6c69af262cb373
+  lastKnownMasterSha: 4830f768d6e54b0723cf76c6d61a5112c7b68015
+  lastKnownOriginMasterSha: 4830f768d6e54b0723cf76c6d61a5112c7b68015
 currentTask:
-  id: module-run-v2-autodrive-phase-8
+  id: module-run-v2-recovery-chain-hardening
   status: closed
-  sourceStory: user-request-2026-06-09-unattended-autodrive-phase-3-8
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-8.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-8.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-8.md
-  branch: codex/module-run-v2-autodrive-phase-8
+  sourceStory: user-request-2026-06-09-unattended-autodrive-recovery-chain-hardening
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-recovery-chain-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-recovery-chain-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-recovery-chain-hardening.md
+  branch: codex/module-run-v2-recovery-chain-hardening
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -133,6 +133,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 8 is implementing the Module Run v2 autodrive control-loop acceptance gate. It validates the mechanism chain
-    and guardrails without starting business implementation or executing blocked high-risk actions.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-8.md
+    Implement the Module Run v2 recovery-chain hardening task: closeout recovery dispatch, post-closeout state
+    reconciliation, no-write diagnostics, registry lifecycle cleanup classification, branch hygiene, and Codex
+    automation prompt alignment.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-recovery-chain-hardening.md

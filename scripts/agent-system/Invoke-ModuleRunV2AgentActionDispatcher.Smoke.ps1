@@ -74,6 +74,7 @@ currentTask:
         - run_validation
         - write_evidence
         - local_commit
+        - run_closeout_recovery
       blockedAgentActions:
         - merge
         - push
@@ -165,6 +166,7 @@ $autodrivePolicy
         - run_validation
         - write_evidence
         - local_commit
+        - run_closeout_recovery
       blockedAgentActions:
         - merge
         - push
@@ -269,6 +271,17 @@ runnerNextTask: next-task
         throw "Proposal dispatcher fixture failed.`n$($proposalOutput -join "`n")"
     }
     Assert-Contains -Output $proposalOutput -Pattern "agentAction: propose_schema_repair"
+
+    $closeoutRecoveryRunner = Write-RunnerOutput -Root $smokeRoot -Name "closeout-recovery" -Content @"
+runnerDecision: closeout_recovery
+runnerNextAction: run_closeout_recovery_autopilot
+"@
+    $closeoutRecoveryOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dispatcherScriptPath -TaskId current-task -RunnerOutputPath $closeoutRecoveryRunner -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Closeout-recovery dispatcher fixture failed.`n$($closeoutRecoveryOutput -join "`n")"
+    }
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "agentAction: run_closeout_recovery"
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "agentActionTask: current-task"
 
     $activeOwnerRunner = Write-RunnerOutput -Root $smokeRoot -Name "active-owner" -Content @"
 runnerDecision: exit_active_owner_present

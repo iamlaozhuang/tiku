@@ -217,6 +217,40 @@ try {
     if (Test-Path -LiteralPath $cleanupHandoffPath) {
         throw "Expected cleanup-ready handoff file to be removed."
     }
+
+    $missingActiveWorktree = Join-Path -Path $fixtureRoot -ChildPath "missing-active-worktree"
+    $expiredActiveRunPath = Join-Path -Path $runRegistryRoot -ChildPath "expired-active-missing.json"
+    @"
+{
+  "runId": "expired-active-missing-run",
+  "automationId": "tiku-module-run-v2-autopilot",
+  "threadRole": "scheduled",
+  "taskId": "module-run-v2-expired-active-missing-worktree",
+  "branch": "codex/expired-active-missing",
+  "worktreePath": "$($missingActiveWorktree.Replace("\", "\\"))",
+  "status": "active",
+  "heartbeatAtUtc": "2026-06-08T19:00:00Z",
+  "phase": "readiness",
+  "changedFiles": [],
+  "lastSafeCheckpoint": "heartbeat expired",
+  "nextRecommendedAction": "janitor cleanup",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $expiredActiveRunPath -Encoding UTF8
+
+    $expiredActiveAvailableOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -ActiveRunHeartbeatMinutes 30)
+    Assert-Contains -Output $expiredActiveAvailableOutput -Pattern "expired_active_missing_worktree"
+    Assert-Contains -Output $expiredActiveAvailableOutput -Pattern "runRegistryCleanupCandidate:"
+    Assert-Contains -Output $expiredActiveAvailableOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_available"
+
+    $expiredActiveCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -ActiveRunHeartbeatMinutes 30 -Cleanup)
+    Assert-Contains -Output $expiredActiveCleanupOutput -Pattern "runRegistryCleanupAction:"
+    Assert-Contains -Output $expiredActiveCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    if (Test-Path -LiteralPath $expiredActiveRunPath) {
+        throw "Expected expired active missing-worktree run registry file to be removed."
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

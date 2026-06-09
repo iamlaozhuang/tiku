@@ -158,6 +158,7 @@ The runner may automatically continue only through these already-gated actions:
 - leave the repository alone when `exit_active_owner_present` or an active lease owns the lane;
 - run stopped-automation hygiene cleanup when startup returns `cleanup_stale_artifacts`;
 - rerun startup after successful cleanup;
+- route `closeout_recovery` to the bounded closeout recovery path before selecting the next task;
 - execute approved closeout only through `Invoke-ModuleRunV2Autopilot.ps1` and the existing structured
   `closeoutPolicy`;
 - surface `prepare_next_task`, `continue_current_task`, `prepare_parallel_workers`, `launch_new_thread`, or
@@ -195,6 +196,17 @@ stopped-automation hygiene gate. State SHA reconciliation is repairable only whe
 accepted post-closeout ancestor path. Dirty unknown worktrees, invalid leases, blocked gates, provider/env/schema/deploy
 needs, and unsafe cleanup paths remain hard stops.
 
+When the only repair action is `reconcile_post_closeout_state_sha`, execution is allowed only through:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1 -TaskId <task-id> -Execute
+```
+
+That transaction updates only `project-state.yaml` repository SHAs and the current task commit SHA. It requires a clean
+Git worktree, `master` and `origin/master` alignment, current task status `done` or `closed`, existing evidence/audit
+paths, and recorded SHAs that are equal to or accepted ancestors of Git reality. It must not claim a new task, edit queue
+status, merge, push, clean branches, create handoffs, or perform product implementation.
+
 ## Autodrive Control-Loop Acceptance
 
 The local acceptance gate for the mechanism chain is:
@@ -210,9 +222,10 @@ It emits `autodriveAcceptanceDecision`:
 - `stop_for_hard_block`: a required layer, safety boundary, or probe is missing or unsafe.
 
 The gate checks these layers without executing business implementation: startup readiness, recovery self-repair, agent
-action dispatch, serial executor, parallel coordinator, local capability gate, Codex thread bridge, and approved
-closeout. It also verifies that recoverable cleanup routes through `repairAction`, provider calls remain blocked without
-task-specific approval, and thread launch remains a bridge output rather than a script-level thread-tool call.
+action dispatch, serial executor, parallel coordinator, local capability gate, Codex thread bridge, approved closeout,
+post-closeout state reconciliation, and branch hygiene. It also verifies that recoverable cleanup routes through
+`repairAction`, provider calls remain blocked without task-specific approval, thread launch remains a bridge output
+rather than a script-level thread-tool call, and local diagnostics can run without taking run-registry ownership.
 
 Acceptance is not approval for product implementation, broad cleanup, unknown worktree deletion, provider/env/schema
 work, DB/resource operations, dependency changes, deploy, PR creation, force push, Codex thread/worktree creation, or
@@ -262,6 +275,7 @@ surface these actions:
 - `launch_new_thread`;
 - `claim_task`;
 - `continue_task`;
+- `run_closeout_recovery`;
 - `prepare_parallel_workers`;
 - `propose_schema_repair`;
 - `request_manual_decision`;
@@ -314,6 +328,8 @@ Supported decisions:
 - `task_claimed`: `-Execute` updated the pending task to `in_progress` and synchronized `project-state.yaml`.
 - `validation_ready`: validation commands passed the blocked-command safety filter, but were not executed.
 - `validation_passed`: `-RunValidation` executed all safe validation commands successfully.
+- `handoff_to_closeout_recovery`: closeout recovery is recognized, but the executor delegates to unattended readiness,
+  approved closeout, and post-closeout state reconciliation gates.
 - `blocked_command`: a validation command attempted an out-of-scope surface such as env/secret, provider, DB,
   migration, deploy, dependency mutation, Git push/merge, destructive cleanup, or Cost Calibration Gate.
 - `idle`: another active owner exists or no executable task is available, so automation leaves the lane alone.
@@ -348,6 +364,10 @@ Before a task uses any local capability, the agent layer must pass the local cap
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId <task-id> -Capability <capability> -Intent <declare_adapter|use_capability>
 ```
+
+Use `-Intent declare_adapter` when the task only defines capability-gate or adapter mechanics. Use `-Intent
+use_capability` only when the task explicitly approves using that local capability in validation. Do not use an `-Action`
+argument; the durable contract is capability plus intent.
 
 The gate emits `localCapabilityDecision` and `adapterAction`:
 
@@ -515,6 +535,16 @@ record with `runId`, `automationId`, `threadRole`, `taskId`, `branch`, `worktree
 `redactedHandoffPath`. It must not contain secrets, provider payloads, raw prompts, raw generated AI content, DB URLs,
 Authorization headers, plaintext `redeem_code`, or full `paper` content.
 
+Diagnostic checks that should not claim ownership must pass `-NoWrite`:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 -TaskId <task-id> -NoWrite
+```
+
+With `-NoWrite`, the gate must emit `runRegistryHeartbeat: skipped_no_write`. Scheduled automation should write a
+heartbeat only when it is actually entering or owning the current lane; recovery audits and human-invoked diagnostics
+should prefer `-NoWrite`.
+
 Clean stale automation worktrees are `recoverableAutomationWorktree` findings, not hard blocks. A stale worktree is
 recoverable only when it is under the configured automation worktree root and `git status --porcelain` is clean. Dirty
 automation worktrees are routed by the registry:
@@ -529,9 +559,11 @@ automation worktrees are routed by the registry:
 Clean registry entries marked `status: cleanup_ready` with `cleanupPolicy: cleanup_ready` route startup to
 `cleanup_stale_artifacts`. Clean stale automation worktrees under the Codex automation worktree root also route startup
 to `cleanup_stale_artifacts` before next-task selection, because the stopped-automation hygiene gate can classify them as
-`stale_clean_worktree` cleanup candidates. Invalid paths, active leases, remote divergence, dirty worktrees, failed
-cleanup actions, and non-ancestor state drift remain hard blocks unless a narrower post-closeout SHA handoff exception
-applies.
+`stale_clean_worktree` cleanup candidates. Expired `status: active` registry files whose heartbeat is stale and whose
+worktree path is missing are classified as `expired_active_missing_worktree` cleanup candidates by stopped-automation
+hygiene; fresh active heartbeats remain active-owner no-ops. Invalid paths, active leases, remote divergence, dirty
+worktrees, failed cleanup actions, and non-ancestor state drift remain hard blocks unless a narrower post-closeout SHA
+handoff exception applies.
 
 If startup sees state SHA values that are accepted ancestors of current Git reality, it should emit a
 `startupStateWarning` and `postCloseoutStateReconciliation` recommendation instead of blocking. Placeholder current-task
@@ -727,11 +759,12 @@ Cleanup is explicit:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup
 ```
 
-`-Cleanup` may remove only expired clean lease files, run registry files explicitly marked `cleanup_ready`, their
-redacted handoff envelopes inside the configured handoff root, stale clean automation worktrees inside the Codex
-automation worktree root, and dry-run handoff temp directories named `tiku-autopilot-handoff-*` inside the system temp
-root. It must not delete dirty worktrees, source files, repository `.git` data outside `git worktree remove`, env files,
-product code, dependency files, schema, migration, or evidence logs.
+`-Cleanup` may remove only expired clean lease files, run registry files explicitly marked `cleanup_ready`, expired
+`active` registry files with stale heartbeat and missing worktree path, their redacted handoff envelopes inside the
+configured handoff root, stale clean automation worktrees inside the Codex automation worktree root, and dry-run handoff
+temp directories named `tiku-autopilot-handoff-*` inside the system temp root. It must not delete dirty worktrees, source
+files, repository `.git` data outside `git worktree remove`, env files, product code, dependency files, schema,
+migration, or evidence logs.
 
 At the end of an automation-owned run, the current clean non-protected automation worktree should be explicitly parked
 with `automationWorktreeParking`: detach the current worktree to `origin/master` or the configured parking target after
@@ -742,6 +775,17 @@ aligned with the target ref so the next Codex automation startup can safely igno
 If the hygiene gate returns `stop_existing_run_active`, automation must leave the active run alone. If it returns
 `stop_dirty_worktree`, `stop_invalid_lease`, or `stop_manual_cleanup_required`, automation must stop and report the
 artifact class for manual inspection instead of attempting repair.
+
+Local `codex/` branch residue is classified separately by:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1
+```
+
+The branch hygiene gate is dry-run by default. It emits `branchCleanupCandidate` only when a local branch matching
+`codex/*` is already merged into the configured base branch, and emits `branchManualReviewRequired` for unmerged local
+branches. `-Cleanup` may delete only merged local candidates through `git branch -d`; unmerged branches are never force
+deleted by this gate and require manual review.
 
 ## Stop Conditions
 

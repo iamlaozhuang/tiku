@@ -85,6 +85,7 @@ Cost Calibration Gate remains blocked
     if ($postCloseoutResult.ExitCode -ne 0) {
         throw "Expected post-closeout recovery decision to pass"
     }
+    Assert-Contains -Output $postCloseoutResult.Output -Pattern "recoverySelfRepairDecision: self_repair_ready"
     Assert-Contains -Output $postCloseoutResult.Output -Pattern "repairAction: reconcile_post_closeout_state_sha"
 
     $manualStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-manual.txt"

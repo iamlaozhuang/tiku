@@ -39,9 +39,14 @@ if ($acceptanceResult.ExitCode -ne 0) {
 }
 Assert-Contains -Output $acceptanceResult.Output -Pattern "autodriveAcceptanceDecision: accepted_with_guardrails"
 Assert-Contains -Output $acceptanceResult.Output -Pattern "controlLoopLayer: startup_readiness"
+Assert-Contains -Output $acceptanceResult.Output -Pattern "controlLoopLayer: post_closeout_state_reconcile"
+Assert-Contains -Output $acceptanceResult.Output -Pattern "controlLoopLayer: branch_hygiene"
 Assert-Contains -Output $acceptanceResult.Output -Pattern "selfRepair: cleanup_stale_artifacts_routed_to_repairAction"
 Assert-Contains -Output $acceptanceResult.Output -Pattern "capabilityBoundary: provider_call_blocked_without_task_approval"
 Assert-Contains -Output $acceptanceResult.Output -Pattern "threadBridgeBoundary: bridge_only_no_thread_tool"
+Assert-Contains -Output $acceptanceResult.Output -Pattern "reconcileBoundary: accepted_ancestor_state_reconcile_only"
+Assert-Contains -Output $acceptanceResult.Output -Pattern "branchHygieneBoundary: merged_cleanup_unmerged_manual_review"
+Assert-Contains -Output $acceptanceResult.Output -Pattern "diagnosticBoundary: no_write_readiness_available"
 Assert-Contains -Output $acceptanceResult.Output -Pattern "Cost Calibration Gate remains blocked"
 
 $missingRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-autodrive-missing-root-" + [guid]::NewGuid().ToString("N"))

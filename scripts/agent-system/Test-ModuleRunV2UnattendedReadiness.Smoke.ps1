@@ -139,6 +139,25 @@ tasks:
         if ($registryText -notmatch '"status":\s*"active"' -or $registryText -notmatch '"taskId":\s*"module-run-v2-unattended-readiness-smoke"') {
             throw "Expected run registry heartbeat to record active task state."
         }
+
+        $registryCountBeforeNoWrite = @(Get-ChildItem -LiteralPath $runRegistryRoot -Filter "*.json").Count
+        $noWriteOutput = @(
+            & $scriptPath `
+                -TaskId $taskId `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+                -RunRegistryRoot $runRegistryRoot `
+                -SkipRemoteAheadCheck `
+                -NoWrite
+        )
+        Assert-Contains -Output $noWriteOutput -Pattern "noWrite: enabled"
+        Assert-Contains -Output $noWriteOutput -Pattern "runRegistryHeartbeat: skipped_no_write"
+        Assert-Contains -Output $noWriteOutput -Pattern "unattendedStopDecision: continue"
+        $registryCountAfterNoWrite = @(Get-ChildItem -LiteralPath $runRegistryRoot -Filter "*.json").Count
+        if ($registryCountAfterNoWrite -ne $registryCountBeforeNoWrite) {
+            throw "Expected -NoWrite unattended readiness to avoid writing a run registry heartbeat."
+        }
     }
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH master" -Command {

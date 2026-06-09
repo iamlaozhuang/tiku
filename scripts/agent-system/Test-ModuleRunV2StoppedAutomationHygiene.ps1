@@ -21,6 +21,10 @@ param(
     [string]$NowUtc = "",
 
     [Parameter(Mandatory = $false)]
+    [ValidateRange(1, 10080)]
+    [int]$ActiveRunHeartbeatMinutes = 30,
+
+    [Parameter(Mandatory = $false)]
     [switch]$Cleanup,
 
     [Parameter(Mandatory = $false)]
@@ -88,6 +92,25 @@ function Add-RunRegistryCleanupCandidate {
 
     $script:cleanupCandidates.Add([pscustomobject]@{ Kind = "run_registry"; Path = $Path })
     Write-Output "runRegistryCleanupCandidate: $RunId $Path"
+}
+
+function Test-RunRegistryHeartbeatExpired {
+    param(
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$HeartbeatAtUtc,
+        [Parameter(Mandatory = $true)][DateTimeOffset]$Now,
+        [Parameter(Mandatory = $true)][int]$HeartbeatMinutes
+    )
+
+    if ([string]::IsNullOrWhiteSpace($HeartbeatAtUtc)) {
+        return $true
+    }
+
+    try {
+        $heartbeatAt = [DateTimeOffset]::Parse($HeartbeatAtUtc).ToUniversalTime()
+        return $heartbeatAt.AddMinutes($HeartbeatMinutes) -lt $Now
+    } catch {
+        return $false
+    }
 }
 
 function Add-CleanupAction {
@@ -289,6 +312,7 @@ Write-Output "tempRoot: $TempRoot"
 Write-Output "runRegistryRoot: $RunRegistryRoot"
 Write-Output "handoffRoot: $HandoffRoot"
 Write-Output "nowUtc: $($effectiveNow.ToString("o"))"
+Write-Output "activeRunHeartbeatMinutes: $ActiveRunHeartbeatMinutes"
 
 Write-Section -Title "Lease Inventory"
 if (-not (Test-Path -LiteralPath $LeasePath)) {
@@ -352,10 +376,14 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
         $runStatus = [string]$registryJson.status
         $cleanupPolicy = [string]$registryJson.cleanupPolicy
         $redactedHandoffPath = [string]$registryJson.redactedHandoffPath
+        $registryWorktreePath = [string]$registryJson.worktreePath
+        $registryHeartbeatAtUtc = [string]$registryJson.heartbeatAtUtc
         Write-Output "runRegistry: $($registryFile.FullName)"
         Write-Output "runRegistryRunId: $runId"
         Write-Output "runRegistryStatus: $runStatus"
         Write-Output "runRegistryCleanupPolicy: $cleanupPolicy"
+        Write-Output "runRegistryWorktreePath: $registryWorktreePath"
+        Write-Output "runRegistryHeartbeatAtUtc: $registryHeartbeatAtUtc"
 
         if ($runStatus -eq "cleanup_ready" -and $cleanupPolicy -eq "cleanup_ready") {
             Add-RunRegistryCleanupCandidate -RunId $runId -Path $registryFile.FullName
@@ -375,6 +403,20 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
                 Remove-SafeFile -Path $registryFile.FullName -AllowedRoot $RunRegistryRoot -Kind "run_registry"
                 if (-not (Test-Path -LiteralPath $registryFile.FullName)) {
                     Add-RunRegistryCleanupAction -RunId $runId -Path $registryFile.FullName
+                }
+            }
+        }
+
+        if ($runStatus -eq "active" -and (Test-RunRegistryHeartbeatExpired -HeartbeatAtUtc $registryHeartbeatAtUtc -Now $effectiveNow -HeartbeatMinutes $ActiveRunHeartbeatMinutes)) {
+            if ([string]::IsNullOrWhiteSpace($registryWorktreePath) -or -not (Test-Path -LiteralPath $registryWorktreePath)) {
+                Add-CleanupCandidate -Kind "expired_active_missing_worktree" -Path $registryFile.FullName
+                Add-RunRegistryCleanupCandidate -RunId $runId -Path $registryFile.FullName
+
+                if ($Cleanup) {
+                    Remove-SafeFile -Path $registryFile.FullName -AllowedRoot $RunRegistryRoot -Kind "expired_active_missing_worktree"
+                    if (-not (Test-Path -LiteralPath $registryFile.FullName)) {
+                        Add-RunRegistryCleanupAction -RunId $runId -Path $registryFile.FullName
+                    }
                 }
             }
         }

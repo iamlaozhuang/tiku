@@ -6202,3 +6202,142 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-8.md
     status: closed
     retryCount: 0
+  - id: module-run-v2-recovery-chain-hardening
+    title: Module Run v2 Recovery Chain Hardening
+    phase: module-run-v2-recovery-chain-hardening
+    sourceStory: user-request-2026-06-09-unattended-autodrive-recovery-chain-hardening
+    dependencies:
+      - module-run-v2-autodrive-phase-8
+    taskPlanPolicy: required
+    humanApproval: >-
+      User approved organizing and executing a serial mechanism fix task for all identified Module Run v2 autodrive
+      recovery-chain gaps. Scope is local mechanism scripts, smoke tests, SOP/state/schema/index updates, evidence,
+      audit review, paused Codex automation prompt alignment, local commit, fast-forward merge to master, push
+      origin/master, and short-branch cleanup after validation. This does not approve product implementation,
+      dependency/package/lockfile changes, env/secret writes, real provider calls, real local Docker DB operations,
+      project material/paper/paper_asset resource reads for tests, schema/migration, e2e, staging/prod/cloud/deploy,
+      payment, external-service, PR/force push, destructive DB operation, or Cost Calibration Gate execution.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - open_recovery_plan
+        - run_validation
+        - write_evidence
+        - local_commit
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 8
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2BranchHygiene.ps1
+      - scripts/agent-system/Test-ModuleRunV2BranchHygiene.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-recovery-chain-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-recovery-chain-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-recovery-chain-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - recovery_self_repair
+      - closeout_recovery
+      - post_closeout_state_reconciliation
+      - stopped_automation_hygiene
+      - run_registry_lifecycle
+      - branch_hygiene
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-recovery-chain-hardening -PlannedFiles scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1,scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1,scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1,scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1,scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2BranchHygiene.ps1,scripts/agent-system/Test-ModuleRunV2BranchHygiene.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-recovery-chain-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-recovery-chain-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-recovery-chain-hardening.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 -NoWrite -CloseoutRecovery
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-recovery-chain-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-recovery-chain-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-recovery-chain-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-recovery-chain-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-recovery-chain-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-recovery-chain-hardening.md
+      - Select-String -Path scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.ps1,scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1,scripts\agent-system\Invoke-ModuleRunV2RecoverySelfRepair.ps1,scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1,scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1,scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-recovery-chain-hardening.md -Pattern 'closeout_recovery','reconcile_post_closeout_state_sha','NoWrite','expired_active_missing_worktree','branchHygieneDecision','-Intent','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-recovery-chain-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-recovery-chain-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-recovery-chain-hardening.md
+    status: closed
+    retryCount: 0

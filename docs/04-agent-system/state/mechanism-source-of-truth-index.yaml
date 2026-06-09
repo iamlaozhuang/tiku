@@ -121,6 +121,16 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
     decisionOutput: recoverySelfRepairDecision
     role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, recovery plan, post-closeout state reconciliation, or quiet active-owner exit
+  - id: module-run-v2-post-closeout-state-reconcile
+    path: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
+    decisionOutput: postCloseoutStateReconcileDecision
+    role: bounded transaction for updating project-state repository SHAs and current task commit SHA only when Git is clean, master and origin/master are aligned, and old state SHAs are accepted ancestors
+  - id: module-run-v2-branch-hygiene
+    path: scripts/agent-system/Test-ModuleRunV2BranchHygiene.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2BranchHygiene.Smoke.ps1
+    decisionOutput: branchHygieneDecision
+    role: classifies local codex branch residue into merged cleanup candidates and unmerged manual review candidates without deleting branches by default
   - id: module-run-v2-autodrive-control-loop-acceptance
     path: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1

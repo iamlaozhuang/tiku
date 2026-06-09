@@ -149,6 +149,7 @@ tasks:
         - run_validation
         - write_evidence
         - local_commit
+        - run_closeout_recovery
       blockedAgentActions:
         - merge
         - push
@@ -219,6 +220,7 @@ $nextDependencyBlock
         - run_validation
         - write_evidence
         - local_commit
+        - run_closeout_recovery
       blockedAgentActions:
         - merge
         - push
@@ -306,6 +308,13 @@ agentActionTask: current-task
     }
     Assert-Contains -Output $continueResult.Output -Pattern "serialExecutorDecision: ready_to_continue"
     Assert-Contains -Output $continueResult.Output -Pattern "serialExecutorAction: continue_task"
+
+    $closeoutRecoveryResult = Invoke-SerialExecutor -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath -Action "run_closeout_recovery" -ActionTask "current-task"
+    if ($closeoutRecoveryResult.ExitCode -ne 0) {
+        throw "Closeout-recovery fixture failed.`n$($closeoutRecoveryResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $closeoutRecoveryResult.Output -Pattern "serialExecutorDecision: handoff_to_closeout_recovery"
+    Assert-Contains -Output $closeoutRecoveryResult.Output -Pattern "serialExecutorAction: run_closeout_recovery"
 
     $claimReadyFiles = Write-SmokeFiles -Root $smokeRoot -CurrentStatus "closed" -NextDependencies "current-task"
     $claimReadyResult = Invoke-SerialExecutor -ProjectStatePath $claimReadyFiles.StatePath -QueuePath $claimReadyFiles.QueuePath -SchemaPath $claimReadyFiles.SchemaPath -Action "claim_task" -ActionTask "next-task"
