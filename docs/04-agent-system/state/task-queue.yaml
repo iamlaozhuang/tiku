@@ -5404,3 +5404,118 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autopilot-runner-control.md
     status: done
     retryCount: 0
+  - id: module-run-v2-autodrive-phase-0-2
+    title: Module Run v2 Autodrive Phase 0-2
+    phase: module-run-v2-autodrive-phase-0-2
+    sourceStory: user-request-2026-06-09-unattended-autodrive-global-plan
+    dependencies:
+      - module-run-v2-autopilot-runner-control
+    taskPlanPolicy: required
+    humanApproval: >-
+      User agreed to first write a durable global implementation plan and then execute Phase 0-2. Scope is limited to
+      local mechanism scripts, smoke tests, SOP/state/queue alignment, task plan, evidence, audit review, and a local
+      reviewable commit. This does not approve product implementation, local Docker DB operation, project resource
+      ingestion, env/secret writes, provider calls, dependency/package/lockfile changes, schema/migration, e2e, merge,
+      push, PR creation, branch cleanup, worktree cleanup, deploy, external-service action, payment, or Cost Calibration
+      Gate execution.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+        - local_commit
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 6
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-global-implementation-plan.md
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - autodrive_schema
+      - agent_action_dispatch
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-autodrive-phase-0-2 -PlannedFiles docs/04-agent-system/state/autodrive-control-schema.yaml,scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1,scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-global-implementation-plan.md,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-0-2.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown docs\04-agent-system\state\autodrive-control-schema.yaml scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.ps1 scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-autodrive-global-implementation-plan.md docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-autodrive-phase-0-2.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-autodrive-phase-0-2.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-autodrive-phase-0-2.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\state\autodrive-control-schema.yaml scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.ps1 scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-autodrive-global-implementation-plan.md docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-autodrive-phase-0-2.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-autodrive-phase-0-2.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-autodrive-phase-0-2.md
+      - Select-String -Path docs\04-agent-system\state\autodrive-control-schema.yaml,scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1,scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.ps1,scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-autodrive-phase-0-2.md -Pattern 'autodriveSchemaDecision','agentAction','proposal_only','can_autodrive','active owner','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-autodrive-phase-0-2
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+    status: done
+    retryCount: 0

@@ -1,0 +1,132 @@
+schemaVersion: 1
+generatedByTask: module-run-v2-autodrive-phase-0-2
+purpose: Durable control schema for Module Run v2 unattended local autodrive. This file defines required approval and lifecycle fields. It does not approve product implementation or high-risk actions by itself.
+taskAutodrivePolicy:
+  requiredForAutonomousAction: true
+  fields:
+    mode:
+      allowedValues:
+        - proposal_only
+        - guarded_serial
+        - guarded_parallel
+        - closeout_only
+    allowedAgentActions:
+      allowedValues:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+        - local_commit
+        - prepare_parallel_workers
+        - adopt_recoverable_run
+        - open_recovery_plan
+    blockedAgentActions:
+      requiredValues:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+    maxAutonomousSteps:
+      default: 3
+      maximum: 10
+    stopOn:
+      requiredValues:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+capabilities:
+  defaultState: denied
+  fields:
+    localDockerDatabase:
+      default: task_approval_required
+      approvedValue: approved_local_dev_only
+      blockedActions:
+        - schema_migration
+        - destructive_data_operation
+        - staging_prod_connection
+    projectResourceRead:
+      default: task_approval_required
+      approvedValue: approved_read_only_redacted
+      protectedContent:
+        - full_paper_content
+        - raw_answer_text
+        - cleartext_redeem_code
+    providerKey:
+      default: env_destination_confirmation_required
+      approvedValue: approved_confirmed_local_destination
+    providerCall:
+      default: blocked_without_task_approval
+      approvedValue: approved_redacted_local_validation
+    schemaMigration:
+      default: blocked_without_task_approval
+      approvedValue: approved_migration_plan
+    costCalibrationGate:
+      default: blocked
+      approvedValue: not_supported_by_default
+closeoutPolicy:
+  localCommit:
+    allowedValues:
+      - approved
+      - not_approved
+  fastForwardMerge:
+    requiredFields:
+      - approved
+      - targetBranch
+  push:
+    requiredFields:
+      - approved
+      - target
+  cleanup:
+    requiredFields:
+      - deleteShortBranch
+      - parkWorktree
+registryLifecycle:
+  statusField: runStatus
+  allowedStatuses:
+    - active
+    - recoverable
+    - stopped
+    - abandoned
+    - cleanup_ready
+    - closed
+  allowedCleanupPolicies:
+    - none
+    - cleanup_ready
+  redactionRequired: true
+parallelBatch:
+  requiredForParallelWorkers: true
+  fields:
+    - parallelBatchId
+    - coordinatorTaskId
+    - candidateTaskIds
+    - baseSha
+    - allowedParallelActions
+    - blockedParallelActions
+    - workerIsolation
+    - serialIntegration
+    - fileLocks
+    - mergeOrder
+evidenceMinimum:
+  requiredAnchors:
+    - RED
+    - GREEN
+    - localFullLoopGate
+    - blocked remainder
+    - threadRolloverGate
+    - nextModuleRunCandidate
+    - Cost Calibration Gate remains blocked
+forbiddenClaims:
+  - This schema does not approve product code.
+  - This schema does not approve local Docker database operations without task approval.
+  - This schema does not approve env or secret writes.
+  - This schema does not approve provider calls.
+  - This schema does not approve dependency, schema, migration, deploy, push, PR, or Cost Calibration Gate execution.

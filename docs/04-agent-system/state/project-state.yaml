@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-autopilot-runner-control
-updatedAt: "2026-06-09T14:35:00-07:00"
+  currentPhase: module-run-v2-autodrive-phase-0-2
+updatedAt: "2026-06-09T08:25:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -54,6 +54,9 @@ automation:
     startupReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
     leaseReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.ps1
     stoppedAutomationHygieneScriptPath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+    autodriveSchemaPath: docs/04-agent-system/state/autodrive-control-schema.yaml
+    autodriveSchemaReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+    agentActionDispatcherScriptPath: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
     codexAutomationId: tiku-module-run-v2-autopilot
@@ -80,13 +83,13 @@ repository:
   lastKnownMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
   lastKnownOriginMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
 currentTask:
-  id: module-run-v2-autopilot-runner-control
+  id: module-run-v2-autodrive-phase-0-2
   status: done
-  sourceStory: user-request-2026-06-09-unattended-autodrive-runner
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autopilot-runner-control.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autopilot-runner-control.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autopilot-runner-control.md
-  branch: codex/module-run-v2-autopilot-runner-control
+  sourceStory: user-request-2026-06-09-unattended-autodrive-global-plan
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+  branch: codex/module-run-v2-autodrive-phase-0-2
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -124,8 +127,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Local implementation for `module-run-v2-autopilot-runner-control` is ready for a reviewable local commit. The runner
-    consumes startup, cleanup, closeout, parallel, handoff, and stop decisions as a bounded local state machine, while
-    leaving product implementation, local DB operation, provider/env/secret, schema/migration, worker creation, merge,
-    push, cleanup, deploy, and Cost Calibration Gate actions blocked without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autopilot-runner-control.md
+    Phase 0-2 is implementing the durable unattended autodrive schema and dry-run agent action dispatcher. This batch
+    does not approve product implementation, local DB operation, provider/env/secret, schema/migration, worker creation,
+    merge, push, cleanup, deploy, or Cost Calibration Gate actions.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md

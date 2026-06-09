@@ -171,6 +171,61 @@ evidence.
 `exit_active_owner_present` and `no_executable_task` are normal no-op terminal decisions for scheduled automation. They
 should not be treated as failed development work.
 
+## Durable Autodrive Schema And Agent Action Dispatch
+
+Unattended local development may advance only when the target task carries a durable autodrive schema. The schema source
+of truth is:
+
+```powershell
+docs\04-agent-system\state\autodrive-control-schema.yaml
+```
+
+Before the agent layer treats a runner decision as executable, it must run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId <task-id>
+```
+
+The schema gate emits `autodriveSchemaDecision`:
+
+| Decision              | Meaning                                                                                       |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| `can_autodrive`       | The task has safe base metadata, explicit autodrive policy, capabilities, closeout, registry. |
+| `proposal_only`       | The task is not yet executable by unattended autodrive; propose schema repair or use manual.  |
+| `stop_for_hard_block` | Base task metadata, risk gates, or capability values are unsafe.                              |
+
+Missing advanced autodrive fields are proposal-only when the base task metadata is otherwise safe. Missing base task
+metadata, high-risk gates, unsafe capability values, and missing durable files remain hard blocks.
+
+The runner-to-agent bridge is:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.ps1 -TaskId <task-id>
+```
+
+The dispatcher consumes `runnerDecision` and emits `agentAction`. It is a dry-run decision bridge by default. It may
+surface these actions:
+
+- `idle_active_owner_present`;
+- `idle_no_executable_task`;
+- `run_hygiene_cleanup`;
+- `adopt_recoverable_run`;
+- `open_recovery_plan`;
+- `review_handoff`;
+- `launch_new_thread`;
+- `claim_task`;
+- `continue_task`;
+- `prepare_parallel_workers`;
+- `propose_schema_repair`;
+- `request_manual_decision`;
+- `request_human_handoff`;
+- `stop_for_hard_block`.
+
+The dispatcher does not write product code, claim queue state, create branches, create worktrees, create Codex threads,
+merge, push, clean branches, write env files, call providers, run database work, or execute Cost Calibration Gate. It
+only tells the Codex agent layer which next action is permitted by existing gates. Agent-layer execution must still obey
+the task queue, allowed files, blocked files, validation commands, evidence, and closeout policy.
+
 ## Local Capability Authorization Model
 
 To make local development close more loops without weakening safety, future tasks may grant specific local capabilities:
