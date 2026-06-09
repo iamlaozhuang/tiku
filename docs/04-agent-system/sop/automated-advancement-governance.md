@@ -493,6 +493,29 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 If the gate fails, automation stops and reports the hard block. A passed gate is approval to continue only to the named
 candidate task; it is not approval for unrelated implementation, high-risk surfaces, or cross-module work.
 
+When startup returns `startupDecision: no_executable_task`, the autopilot runner may bridge into the three-layer
+auto-seed path:
+
+1. `Get-ModuleRunV2ImplementationSeedProposal.ps1` reads the matrix, queue, and project state and emits
+   `seedProposalDecision`. It is read-only and may return `proposal_available` without writing durable state.
+2. `New-ModuleRunV2ImplementationSeed.ps1` appends pending queue entries only when called with apply mode and an explicit
+   `autoDriveLocalImplementationApproval` approval statement. Without apply, it is proposal-only.
+3. `Test-ModuleRunV2ImplementationSeedSelfReview.ps1` hard-blocks if coverage, required task metadata, allowed/blocked
+   files, validation commands, redaction anchors, or blocked gate wording are incomplete.
+
+Seeded implementation tasks must include `Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1` in their validation
+commands so the existing planning-to-implementation gate is rechecked before execution, not only at seed time.
+
+Runner behavior is:
+
+- no executable task plus proposal available but no explicit seed approval -> `runnerDecision: seed_proposal_available`;
+- no executable task plus explicit seed approval -> seed transaction, seed self-review, then retry startup readiness;
+- no candidate -> quiet `runnerDecision: no_executable_task`;
+- any self-review or transaction failure -> hard block or manual decision.
+
+This bridge is not approval to unpause Codex automation, start provider/env/secret work, change dependencies, change
+schema or migrations, perform DB operations, deploy, or execute Cost Calibration Gate.
+
 ## Serial Batch Execution
 
 A serial batch may advance multiple tasks in one run only when the user approval names the batch scope and every task is independently reviewable.
@@ -614,7 +637,8 @@ Automation may:
 - detect that all Batches in the current Module Run appear complete;
 - propose the next execution module;
 - draft the next Module Run plan outline;
-- seed low-risk local implementation tasks after `implementationAutoSeedGate` passes;
+- seed low-risk local implementation tasks after `implementationAutoSeedGate` passes and the three-layer auto-seed bridge
+  passes proposal, transaction, and self-review;
 - update handoff wording;
 - mark provider, env/secret, staging/prod, deploy, payment, external-service, and Cost Calibration Gate work as blocked
   remainder.

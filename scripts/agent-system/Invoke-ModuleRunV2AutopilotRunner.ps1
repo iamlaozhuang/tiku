@@ -40,6 +40,16 @@ param(
     [switch]$PlanOnly,
 
     [Parameter(Mandatory = $false)]
+    [switch]$AllowAutoSeed,
+
+    [Parameter(Mandatory = $false)]
+    [string]$AutoSeedApprovalStatement = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateRange(1, 8)]
+    [int]$AutoSeedMaxBatchCount = 8,
+
+    [Parameter(Mandatory = $false)]
     [string[]]$ParallelCandidateTaskIds = @(),
 
     [Parameter(Mandatory = $false)]
@@ -285,6 +295,77 @@ function Invoke-AutopilotControl {
     return Invoke-ExternalCommand -Arguments $autopilotArgs
 }
 
+function Invoke-SeedProposal {
+    $seedProposalArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "Get-ModuleRunV2ImplementationSeedProposal.ps1"),
+        "-MaxBatchCount",
+        "$AutoSeedMaxBatchCount",
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $MatrixPath
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        $seedProposalArgs += @("-TaskId", $TaskId)
+    }
+
+    return Invoke-ExternalCommand -Arguments $seedProposalArgs
+}
+
+function Invoke-SeedTransaction {
+    $seedTransactionArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "New-ModuleRunV2ImplementationSeed.ps1"),
+        "-Apply",
+        "-MaxBatchCount",
+        "$AutoSeedMaxBatchCount",
+        "-ApprovalStatement",
+        $AutoSeedApprovalStatement,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $MatrixPath
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        $seedTransactionArgs += @("-TaskId", $TaskId)
+    }
+
+    return Invoke-ExternalCommand -Arguments $seedTransactionArgs
+}
+
+function Invoke-SeedSelfReview {
+    param([Parameter(Mandatory = $true)][string]$ExpectedModule)
+
+    $seedSelfReviewArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2ImplementationSeedSelfReview.ps1"),
+        "-ExpectedModule",
+        $ExpectedModule,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $MatrixPath
+    )
+
+    return Invoke-ExternalCommand -Arguments $seedSelfReviewArgs
+}
+
 function Write-RunnerResult {
     param(
         [Parameter(Mandatory = $true)]
@@ -361,7 +442,56 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
     }
 
     if ($startupDecision -eq "no_executable_task") {
-        Write-RunnerResult -Decision "no_executable_task" -NextAction "idle_no_pending_task" -Reason "no executable task is available" -StepCount $stepIndex -ExitCode 0
+        Write-Section -Title "Runner Step $stepIndex Seed Proposal"
+        $seedProposalResult = Invoke-SeedProposal
+        $seedProposalResult.Output | ForEach-Object { Write-Output $_ }
+        $seedProposalDecision = Get-DecisionValue -Output $seedProposalResult.Output -Key "seedProposalDecision"
+
+        if ([string]::IsNullOrWhiteSpace($seedProposalDecision)) {
+            Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_seed_proposal_failure" -Reason "seed proposal decision was not readable" -StepCount $stepIndex -ExitCode 1
+        }
+
+        if ($seedProposalDecision -eq "proposal_available") {
+            $seedModule = Get-FirstValue -Output $seedProposalResult.Output -Key "seedModule"
+            if ($PlanOnly -or -not $AllowAutoSeed) {
+                Write-RunnerResult -Decision "seed_proposal_available" -NextAction "request_auto_seed_approval" -Reason "no executable task exists and a guarded seed proposal is available" -StepCount $stepIndex -ExitCode 0 -NextTask $seedModule
+            }
+
+            if ([string]::IsNullOrWhiteSpace($AutoSeedApprovalStatement) -or $AutoSeedApprovalStatement -notmatch "autoDriveLocalImplementationApproval") {
+                Write-RunnerResult -Decision "stop_for_manual_decision" -NextAction "request_auto_seed_approval" -Reason "auto-seed apply requires explicit autoDriveLocalImplementationApproval" -StepCount $stepIndex -ExitCode 1 -NextTask $seedModule
+            }
+
+            Write-Section -Title "Runner Step $stepIndex Seed Transaction"
+            $seedTransactionResult = Invoke-SeedTransaction
+            $seedTransactionResult.Output | ForEach-Object { Write-Output $_ }
+            $seedTransactionDecision = Get-DecisionValue -Output $seedTransactionResult.Output -Key "seedTransactionDecision"
+            if ($seedTransactionDecision -ne "seeded") {
+                if ($seedTransactionDecision -eq "manual_required") {
+                    Write-RunnerResult -Decision "stop_for_manual_decision" -NextAction "request_auto_seed_approval" -Reason "seed transaction requires manual approval" -StepCount $stepIndex -ExitCode 1 -NextTask $seedModule
+                }
+                Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_seed_transaction_failure" -Reason "seed transaction did not complete" -StepCount $stepIndex -ExitCode 1 -NextTask $seedModule
+            }
+
+            Write-Section -Title "Runner Step $stepIndex Seed Self Review"
+            $seedSelfReviewResult = Invoke-SeedSelfReview -ExpectedModule $seedModule
+            $seedSelfReviewResult.Output | ForEach-Object { Write-Output $_ }
+            $seedSelfReviewDecision = Get-DecisionValue -Output $seedSelfReviewResult.Output -Key "seedSelfReviewDecision"
+            if ($seedSelfReviewDecision -ne "passed") {
+                Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_seed_self_review_failure" -Reason "seeded task self-review failed" -StepCount $stepIndex -ExitCode 1 -NextTask $seedModule
+            }
+
+            continue
+        }
+
+        if ($seedProposalDecision -eq "no_seed_candidate") {
+            Write-RunnerResult -Decision "no_executable_task" -NextAction "idle_no_pending_task" -Reason "no executable task or seed candidate is available" -StepCount $stepIndex -ExitCode 0
+        }
+
+        if ($seedProposalDecision -eq "executable_task_exists") {
+            Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_startup_seed_inventory_mismatch" -Reason "seed proposal saw executable work after startup returned no executable task" -StepCount $stepIndex -ExitCode 1
+        }
+
+        Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_seed_proposal_block" -Reason "seed proposal returned a blocking or unknown decision" -StepCount $stepIndex -ExitCode 1
     }
 
     if ($startupDecision -eq "prepare_next_task") {

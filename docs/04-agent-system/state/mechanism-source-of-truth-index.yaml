@@ -165,7 +165,22 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
     decisionOutput: runnerDecision
-    role: bounded local control loop over startup readiness, hygiene cleanup, autopilot, parallel, closeout, handoff, and stop decisions
+    role: bounded local control loop over startup readiness, hygiene cleanup, auto-seed bridge, autopilot, parallel, closeout, handoff, and stop decisions
+  - id: module-run-v2-implementation-seed-proposal
+    path: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+    smokePath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.Smoke.ps1
+    decisionOutput: seedProposalDecision
+    role: read-only bridge from no_executable_task to the next seedable Module Run v2 execution module proposal
+  - id: module-run-v2-implementation-seed-transaction
+    path: scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+    smokePath: scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1
+    decisionOutput: seedTransactionDecision
+    role: guarded queue append transaction for pending low-risk local implementation tasks after explicit autoDriveLocalImplementationApproval
+  - id: module-run-v2-implementation-seed-self-review
+    path: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
+    decisionOutput: seedSelfReviewDecision
+    role: hard-block self-review for seeded task coverage, metadata, safe file scope, validation commands, and redaction anchors
   - id: module-run-v2-autodrive-schema-readiness
     path: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1

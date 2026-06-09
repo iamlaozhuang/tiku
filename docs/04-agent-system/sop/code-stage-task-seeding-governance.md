@@ -78,6 +78,14 @@ sourceStory:
 dependencies:
 taskPlanPolicy:
 humanApproval:
+autoDriveLocalImplementationApproval:
+seededByTask:
+seededImplementationTask:
+seededExecutionModule:
+targetClosureItem:
+localExperienceClosureGate:
+localFullLoopGate:
+blockedRemainder:
 taskKind:
 allowedFiles:
 blockedFiles:
@@ -89,6 +97,15 @@ retryCount:
 ```
 
 Use `pending` status for newly seeded tasks. Do not mark a seeded task `done` unless it has already been executed with evidence.
+
+Module Run v2 automatic seeding uses a three-layer transaction:
+
+- seed proposal: `Get-ModuleRunV2ImplementationSeedProposal.ps1` is read-only and chooses the next seedable execution
+  module only when no executable task exists;
+- seed transaction: `New-ModuleRunV2ImplementationSeed.ps1` writes pending tasks only with explicit
+  `autoDriveLocalImplementationApproval`;
+- seed self-review: `Test-ModuleRunV2ImplementationSeedSelfReview.ps1` validates coverage, metadata, safety boundaries,
+  validation commands, redaction, and blocked gates before automation may return to task claiming.
 
 ## Scope Split Rules
 
@@ -209,6 +226,7 @@ Before committing seeded queue entries, audit review must confirm:
 - every new task has a source requirement;
 - every dependency is meaningful;
 - every task kind is correct;
+- every Module Run v2 automatic seed transaction has `seedSelfReviewDecision: passed`;
 - `allowedFiles` and `blockedFiles` are concrete;
 - high-risk surfaces have separate approval gates;
 - validation commands are concrete;

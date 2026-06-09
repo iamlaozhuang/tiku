@@ -24,6 +24,7 @@ taskAutodrivePolicy:
         - run_closeout_recovery
         - reconcile_post_closeout_state
         - confirm_post_closeout_checkpoint
+        - seed_implementation_tasks
     blockedAgentActions:
       requiredValues:
         - merge
@@ -72,6 +73,50 @@ startupDiagnostics:
     - clean
     - advisory_unavailable
   executionRule: startup diagnostics are advisory unless startupDecision itself returns a hard block or cleanup transaction.
+autoSeedBridge:
+  purpose: Bridge no_executable_task into a guarded proposal or approved queue seed transaction.
+  defaultMode: proposal_only
+  proposalLayer:
+    scriptPath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+    decisionOutput: seedProposalDecision
+    decisions:
+      - proposal_available
+      - executable_task_exists
+      - no_seed_candidate
+      - stop_for_hard_block
+    writePolicy: read_only
+  transactionLayer:
+    scriptPath: scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+    decisionOutput: seedTransactionDecision
+    decisions:
+      - plan_only
+      - seeded
+      - manual_required
+      - no_seed_candidate
+      - executable_task_exists
+      - stop_for_hard_block
+    writePolicy: apply_requires_autoDriveLocalImplementationApproval
+  selfReviewLayer:
+    scriptPath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
+    decisionOutput: seedSelfReviewDecision
+    decisions:
+      - passed
+      - stop_for_hard_block
+    requiredChecks:
+      - targetLocalClosure coverage
+      - required task metadata
+      - autoDriveLocalImplementationApproval
+      - safe allowedFiles and blockedFiles
+      - Test-ModuleRunV2ImplementationAutoSeedReadiness command
+      - validation command minimums
+      - redactionRequired
+      - Cost Calibration Gate remains blocked
+  runnerBridge:
+    noExecutableTaskWithoutApproval: seed_proposal_available
+    noExecutableTaskWithApproval: seed_transaction_then_startup_retry
+    seedApplyParameter: AllowAutoSeed
+    approvalParameter: AutoSeedApprovalStatement
+    maxBatchParameter: AutoSeedMaxBatchCount
 capabilities:
   defaultState: denied
   fields:

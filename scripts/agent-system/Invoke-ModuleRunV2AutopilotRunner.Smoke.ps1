@@ -74,6 +74,43 @@ Cost Calibration Gate remains blocked
 "@ | Set-Content -LiteralPath $Path -Encoding UTF8
 }
 
+function Write-SmokeSeedMatrix {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    @"
+schemaVersion: 2
+moduleRunVersion: 2
+mode:
+  firstEligibleImplementationBatchNumber: 101
+automationHandoffPolicy:
+  runner: required
+threadRolloverGate:
+  enabled: true
+sourcePlanningModules:
+  - module: authorization-context
+    sourcePlanningTask: phase-69-advanced-authorization-context-implementation-planning
+    v2ExecutionModule: authorization-and-access
+executionModules:
+  - module: authorization-and-access
+    sourceModules:
+      - authorization-context
+    localFullLoopMinimum: L4
+    targetLocalClosure:
+      - authorization read-model and display contracts
+      - personal_auth and org_auth local summaries
+implementationAutoSeedGate:
+  enabled: true
+localExperienceClosureGate:
+  enabled: true
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $Path -Encoding UTF8
+}
+
 function Write-SmokeProjectState {
     param(
         [Parameter(Mandatory = $true)]
@@ -212,6 +249,101 @@ tasks:
     }
     Assert-Contains -Output $pendingOutput -Pattern "runnerDecision: prepare_next_task"
     Assert-Contains -Output $pendingOutput -Pattern "runnerNextTask: runner-next"
+
+    $seedProposalRepo = Join-Path -Path $fixtureRoot -ChildPath "seed-proposal-repo"
+    $seedProposalSha = Initialize-SmokeRepo -Path $seedProposalRepo
+    $seedProposalProjectStatePath = Join-Path -Path $seedProposalRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $seedProposalQueuePath = Join-Path -Path $seedProposalRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $seedProposalMatrixPath = Join-Path -Path $seedProposalRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    Write-SmokeSeedMatrix -Path $seedProposalMatrixPath
+    Write-SmokeProjectState -Path $seedProposalProjectStatePath -TaskId "runner-closed" -Sha $seedProposalSha
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-closed
+    status: closed
+    taskKind: implementation
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-closed.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-closed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-closed.md
+"@ | Set-Content -LiteralPath $seedProposalQueuePath -Encoding UTF8
+
+    Push-Location -LiteralPath $seedProposalRepo
+    try {
+        $seedProposalOutput = @(
+            & $runnerPath `
+                -TaskId "runner-closed" `
+                -ProjectStatePath $seedProposalProjectStatePath `
+                -QueuePath $seedProposalQueuePath `
+                -MatrixPath $seedProposalMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-proposal-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-proposal-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-proposal-handoffs") `
+                -SkipUnattendedReadiness `
+                -MaxSteps 2
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $seedProposalOutput -Pattern "runnerDecision: seed_proposal_available"
+    Assert-Contains -Output $seedProposalOutput -Pattern "runnerNextAction: request_auto_seed_approval"
+    Assert-Contains -Output $seedProposalOutput -Pattern "seedProposalDecision: proposal_available"
+
+    $seedApplyRepo = Join-Path -Path $fixtureRoot -ChildPath "seed-apply-repo"
+    $seedApplySha = Initialize-SmokeRepo -Path $seedApplyRepo
+    $seedApplyProjectStatePath = Join-Path -Path $seedApplyRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $seedApplyQueuePath = Join-Path -Path $seedApplyRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $seedApplyMatrixPath = Join-Path -Path $seedApplyRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    Write-SmokeSeedMatrix -Path $seedApplyMatrixPath
+    Write-SmokeProjectState -Path $seedApplyProjectStatePath -TaskId "runner-closed" -Sha $seedApplySha
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-closed
+    status: closed
+    taskKind: implementation
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-closed.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-closed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-closed.md
+"@ | Set-Content -LiteralPath $seedApplyQueuePath -Encoding UTF8
+
+    Push-Location -LiteralPath $seedApplyRepo
+    try {
+        $seedApplyOutput = @(
+            & $runnerPath `
+                -TaskId "runner-closed" `
+                -ProjectStatePath $seedApplyProjectStatePath `
+                -QueuePath $seedApplyQueuePath `
+                -MatrixPath $seedApplyMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-apply-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-apply-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-apply-handoffs") `
+                -SkipUnattendedReadiness `
+                -AllowAutoSeed `
+                -AutoSeedApprovalStatement "autoDriveLocalImplementationApproval: smoke-approved runner auto-seed" `
+                -MaxSteps 3
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $seedApplyOutput -Pattern "seedTransactionDecision: seeded"
+    Assert-Contains -Output $seedApplyOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $seedApplyOutput -Pattern "runnerDecision: prepare_next_task"
+    Assert-Contains -Output $seedApplyOutput -Pattern "runnerNextAction: agent_claim_next_task"
 
     $parallelRepo = Join-Path -Path $fixtureRoot -ChildPath "parallel-repo"
     $parallelSha = Initialize-SmokeRepo -Path $parallelRepo

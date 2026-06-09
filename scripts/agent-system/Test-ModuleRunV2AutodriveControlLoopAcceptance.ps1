@@ -44,6 +44,7 @@ function Write-AcceptanceResult {
     Write-Output "threadBridgeBoundary: bridge_only_no_thread_tool"
     Write-Output "parallelBoundary: manifest_only_serial_integration"
     Write-Output "serialBoundary: validation_filter_before_execution"
+    Write-Output "autoSeedBoundary: proposal_transaction_self_review"
     Write-Output "closeoutBoundary: structured_closeout_policy_only"
     Write-Output "reconcileBoundary: accepted_ancestor_state_reconcile_only"
     Write-Output "branchHygieneBoundary: merged_cleanup_unmerged_manual_review"
@@ -79,7 +80,10 @@ try {
         @{ Id = "codex_thread_bridge"; Path = "Test-ModuleRunV2CodexThreadBridgeReadiness.ps1" },
         @{ Id = "approved_closeout"; Path = "Invoke-ModuleRunV2ApprovedCloseout.ps1" },
         @{ Id = "post_closeout_state_reconcile"; Path = "Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1" },
-        @{ Id = "branch_hygiene"; Path = "Test-ModuleRunV2BranchHygiene.ps1" }
+        @{ Id = "branch_hygiene"; Path = "Test-ModuleRunV2BranchHygiene.ps1" },
+        @{ Id = "implementation_seed_proposal"; Path = "Get-ModuleRunV2ImplementationSeedProposal.ps1" },
+        @{ Id = "implementation_seed_transaction"; Path = "New-ModuleRunV2ImplementationSeed.ps1" },
+        @{ Id = "implementation_seed_self_review"; Path = "Test-ModuleRunV2ImplementationSeedSelfReview.ps1" }
     )
 
     foreach ($requiredScript in $requiredScripts) {
