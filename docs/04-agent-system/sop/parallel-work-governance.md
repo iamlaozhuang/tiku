@@ -88,6 +88,33 @@ The gate enforces durable parallel approval. If isolated candidate tasks lack `p
 state, scripts, global automation SOPs, dependency manifests, or any other scope where parallel worker overhead would
 cost more time or token budget than it saves.
 
+## Parallel Coordinator Executor
+
+The coordinator executor is the manifest layer after readiness:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1 -CandidateTaskIds <task-a,task-b> -CoordinatorTaskId <coordinator-task>
+```
+
+It consumes `parallelDecision` and emits `parallelCoordinatorDecision`:
+
+| Decision                      | Exit | Meaning                                                            |
+| ----------------------------- | ---- | ------------------------------------------------------------------ |
+| `assignment_manifest_ready`   | 0    | readiness approved manifest-only worker assignment                 |
+| `use_serial_execution`        | 0    | continue in the coordinator thread without creating workers        |
+| `stop_for_file_lock_conflict` | 1    | repair file locks or choose serial execution before assigning work |
+| `stop_for_blocked_gate`       | 1    | stop for explicit human decision before blocked/high-risk work     |
+| `stop_for_hard_block`         | 1    | readiness output, durable files, or metadata are invalid           |
+
+The executor may print a `workerAssignmentManifest` with coordinator id, worker task ids, readiness level, proposed
+`codex/` branch name, file locks, and `serialIntegration` order. This manifest is advisory to the Codex agent layer. It
+does not create Codex threads, create branches, create worktrees, write durable handoffs, merge branches, push, clean
+resources, or update task state.
+
+`assignment_manifest_ready` is not approval to launch workers by itself. Worker launch still requires the thread bridge
+policy, durable handoff, and task-specific allowed files. The coordinator remains the only owner of project state,
+queue state, final evidence, and serial integration.
+
 ## Durable Parallel Approval Schema
 
 Parallel approval is durable only when the task queue or task plan records:

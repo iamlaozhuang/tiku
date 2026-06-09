@@ -146,6 +146,11 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
     decisionOutput: serialExecutorDecision
     role: guardian-first serial executor for claim_task, continue_task, and run_validation with explicit Execute or RunValidation gates
+  - id: module-run-v2-parallel-coordinator-executor
+    path: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.Smoke.ps1
+    decisionOutput: parallelCoordinatorDecision
+    role: manifest-only coordinator executor that converts approved parallel readiness into workerAssignmentManifest and serialIntegration guidance
 executionLogRoots:
   - id: evidence
     path: docs/05-execution-logs/evidence

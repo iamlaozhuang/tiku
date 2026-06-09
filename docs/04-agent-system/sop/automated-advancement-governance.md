@@ -311,6 +311,11 @@ prepare_parallel_workers`. `parallelDecision: use_serial_execution` maps to `aut
 continue_current_thread`. Any blocking parallel decision stops autopilot before worker launch. Autopilot still does not
 create workers, branches, worktrees, or Codex threads from this decision alone.
 
+When a parallel coordinator executor is present, it may turn `parallelDecision: can_assign_workers` into a
+`workerAssignmentManifest` and `parallelCoordinatorDecision: assignment_manifest_ready`. This still does not launch
+workers. It only gives the Codex agent layer a redacted, auditable assignment table that must pass the thread bridge and
+worker isolation policies before any new thread or worktree action occurs.
+
 ## Task Kind Boundary Matrix
 
 | taskKind             | May auto-advance with docs-only approval | Requires separate approval before execution |
