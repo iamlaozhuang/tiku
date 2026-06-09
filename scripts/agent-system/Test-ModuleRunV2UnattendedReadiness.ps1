@@ -18,6 +18,9 @@ param(
     [string[]]$ChangedFiles = @(),
 
     [Parameter(Mandatory = $false)]
+    [string]$RunRegistryRoot = "",
+
+    [Parameter(Mandatory = $false)]
     [string]$CurrentBranchOverride = "",
 
     [Parameter(Mandatory = $false)]
@@ -279,6 +282,61 @@ function Test-GitAncestor {
     }
 }
 
+function Get-StablePathHash {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($Value.ToLowerInvariant())
+        $hashBytes = $sha256.ComputeHash($bytes)
+        return ([System.BitConverter]::ToString($hashBytes)).Replace("-", "").ToLowerInvariant()
+    } finally {
+        $sha256.Dispose()
+    }
+}
+
+function Write-RunRegistryHeartbeat {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][string]$Branch,
+        [Parameter(Mandatory = $true)][string]$WorktreePath,
+        [Parameter(Mandatory = $true)][string[]]$FilesToScan
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Root)) {
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $Root)) {
+        New-Item -ItemType Directory -Path $Root -Force | Out-Null
+    }
+
+    $worktreeHash = Get-StablePathHash -Value $WorktreePath
+    $registryPath = Join-Path -Path $Root -ChildPath "$worktreeHash.json"
+    $runRegistry = [ordered]@{
+        runId = $worktreeHash
+        automationId = "tiku-module-run-v2-autopilot"
+        threadRole = "interactive"
+        taskId = $TaskId
+        branch = $Branch
+        worktreePath = $WorktreePath
+        status = "active"
+        heartbeatAtUtc = ([DateTimeOffset]::UtcNow.ToString("o"))
+        phase = "readiness"
+        changedFiles = @($FilesToScan)
+        lastSafeCheckpoint = "unattended readiness started"
+        nextRecommendedAction = "continue current task after gates pass"
+        safeToAdopt = $false
+        cleanupPolicy = "none"
+        redactedHandoffPath = $null
+    }
+
+    $runRegistry | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $registryPath -Encoding UTF8
+    Write-Output "runRegistryHeartbeat: wrote"
+    Write-Output "runRegistryPath: $registryPath"
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 
 try {
@@ -302,9 +360,14 @@ try {
     $projectStateLines = @(Get-Content -Path $ProjectStatePath)
     $queueLines = @(Get-Content -Path $QueuePath)
     $matrixContent = Get-Content -Path $MatrixPath -Raw
+    if ([string]::IsNullOrWhiteSpace($RunRegistryRoot)) {
+        $RunRegistryRoot = Join-Path -Path $env:USERPROFILE -ChildPath ".codex\tiku\automation-runs"
+    }
+    Write-Output "runRegistryRoot: $RunRegistryRoot"
 
+    $projectCurrentTaskId = Get-CurrentTaskId -Lines $projectStateLines
     if ([string]::IsNullOrWhiteSpace($TaskId)) {
-        $TaskId = Get-CurrentTaskId -Lines $projectStateLines
+        $TaskId = $projectCurrentTaskId
     }
 
     Write-Output "taskId: $TaskId"
@@ -315,6 +378,10 @@ try {
     $taskBlockForRecovery = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
     $taskStatusForRecovery = Get-ScalarValue -Block $taskBlockForRecovery -Key "status"
     $canUseCloseoutShaAncestry = $CloseoutRecovery -and $taskStatusForRecovery -in @("done", "closed")
+    $projectCurrentTaskBlock = @(Get-TaskBlock -Lines $queueLines -Id $projectCurrentTaskId)
+    $projectCurrentTaskStatus = Get-ScalarValue -Block $projectCurrentTaskBlock -Key "status"
+    $projectCurrentTaskEvidencePath = Get-ScalarValue -Block $projectCurrentTaskBlock -Key "evidencePath"
+    $projectCurrentTaskAuditReviewPath = Get-ScalarValue -Block $projectCurrentTaskBlock -Key "auditReviewPath"
 
     $currentBranch = $CurrentBranchOverride.Trim()
     if ([string]::IsNullOrWhiteSpace($currentBranch)) {
@@ -334,6 +401,15 @@ try {
     $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
     $stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
     $stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
+    $canUsePostCloseoutHandoffShaAncestry = (-not [string]::IsNullOrWhiteSpace($projectCurrentTaskId)) `
+        -and $projectCurrentTaskId -ne $TaskId `
+        -and $projectCurrentTaskStatus -in @("done", "closed") `
+        -and $taskStatusForRecovery -in @("pending", "in_progress") `
+        -and $masterSha -eq $originMasterSha `
+        -and (-not [string]::IsNullOrWhiteSpace($projectCurrentTaskEvidencePath)) `
+        -and (-not [string]::IsNullOrWhiteSpace($projectCurrentTaskAuditReviewPath)) `
+        -and (Test-Path -LiteralPath $projectCurrentTaskEvidencePath) `
+        -and (Test-Path -LiteralPath $projectCurrentTaskAuditReviewPath)
     Write-Output "master: $masterSha"
     Write-Output "originMaster: $originMasterSha"
     Write-Output "stateMaster: $stateMasterSha"
@@ -343,6 +419,8 @@ try {
         if ($stateMasterSha -ne $masterSha) {
             if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
                 Write-Output "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR master"
+            } elseif ($canUsePostCloseoutHandoffShaAncestry -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
+                Write-Output "OK_POST_CLOSEOUT_HANDOFF_SHA_ANCESTOR master"
             } else {
                 Add-Finding "HARD_BLOCK_REPOSITORY_SHA_DRIFT master"
             }
@@ -350,6 +428,8 @@ try {
         if ($stateOriginMasterSha -ne $originMasterSha) {
             if ($canUseCloseoutShaAncestry -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
                 Write-Output "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR origin/master"
+            } elseif ($canUsePostCloseoutHandoffShaAncestry -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
+                Write-Output "OK_POST_CLOSEOUT_HANDOFF_SHA_ANCESTOR origin/master"
             } else {
                 Add-Finding "HARD_BLOCK_REPOSITORY_SHA_DRIFT origin/master"
             }
@@ -429,6 +509,8 @@ try {
     Write-Section -Title "Scope Scan"
     $filesToScan = @(Get-ChangedFilesForScan -ExplicitFiles $ChangedFiles)
     Write-Output "filesToScan: $($filesToScan.Count)"
+    $currentWorktreePath = ((& git rev-parse --show-toplevel) -join "").Trim()
+    Write-RunRegistryHeartbeat -Root $RunRegistryRoot -TaskId $TaskId -Branch $currentBranch -WorktreePath $currentWorktreePath -FilesToScan $filesToScan
     $explicitFilesToScan = @(Expand-FileInputs -Files $ChangedFiles)
     if ($CloseoutRecovery -and $explicitFilesToScan.Count -eq 0 -and $filesToScan.Count -gt 0) {
         Add-Finding "HARD_BLOCK_CLOSEOUT_RECOVERY_DIRTY_WORKTREE files=$($filesToScan.Count)"

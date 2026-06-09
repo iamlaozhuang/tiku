@@ -18,6 +18,15 @@ param(
     [string]$AutomationWorktreeRoot = "",
 
     [Parameter(Mandatory = $false)]
+    [string]$RunRegistryRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$HandoffRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [int]$ActiveRunHeartbeatMinutes = 120,
+
+    [Parameter(Mandatory = $false)]
     [switch]$SkipLeaseCheck,
 
     [Parameter(Mandatory = $false)]
@@ -40,6 +49,13 @@ function Add-Finding {
     param([Parameter(Mandatory = $true)][string]$Message)
 
     $script:findings.Add($Message)
+    Write-Output $Message
+}
+
+function Add-RecoverableFinding {
+    param([Parameter(Mandatory = $true)][string]$Message)
+
+    $script:recoverableFindings.Add($Message)
     Write-Output $Message
 }
 
@@ -185,10 +201,98 @@ function Test-GitDirty {
     return $status.Count -gt 0
 }
 
+function Get-RunRegistryEntries {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    if (-not (Test-Path -LiteralPath $Root)) {
+        return @()
+    }
+
+    $entries = New-Object System.Collections.Generic.List[object]
+    $registryFiles = @(Get-ChildItem -LiteralPath $Root -Filter "*.json" -File -ErrorAction SilentlyContinue)
+    foreach ($registryFile in $registryFiles) {
+        try {
+            $registryJson = Get-Content -LiteralPath $registryFile.FullName -Raw | ConvertFrom-Json
+            $entries.Add([pscustomobject]@{ Path = $registryFile.FullName; Value = $registryJson })
+        } catch {
+            Write-Output "runRegistryInvalid: $($registryFile.FullName)"
+        }
+    }
+
+    return $entries.ToArray()
+}
+
+function Find-RunRegistryByWorktree {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Entries,
+        [Parameter(Mandatory = $true)][string]$WorktreePath
+    )
+
+    $worktreeFullPath = ConvertTo-FullPath -Path $WorktreePath
+    foreach ($entry in $Entries) {
+        $entryWorktreePath = [string]$entry.Value.worktreePath
+        if ([string]::IsNullOrWhiteSpace($entryWorktreePath)) {
+            continue
+        }
+
+        if ((ConvertTo-FullPath -Path $entryWorktreePath) -eq $worktreeFullPath) {
+            return $entry
+        }
+    }
+
+    return $null
+}
+
+function Test-RunHeartbeatActive {
+    param(
+        [Parameter(Mandatory = $true)][object]$Run,
+        [Parameter(Mandatory = $true)][int]$HeartbeatMinutes
+    )
+
+    $heartbeatAtText = [string]$Run.heartbeatAtUtc
+    if ([string]::IsNullOrWhiteSpace($heartbeatAtText)) {
+        return $false
+    }
+
+    try {
+        $heartbeatAt = [DateTimeOffset]::Parse($heartbeatAtText).ToUniversalTime()
+        return $heartbeatAt.AddMinutes($HeartbeatMinutes) -gt [DateTimeOffset]::UtcNow
+    } catch {
+        return $false
+    }
+}
+
+function Test-RedactedHandoffReady {
+    param(
+        [Parameter(Mandatory = $true)][object]$Run,
+        [Parameter(Mandatory = $true)][string]$AllowedRoot
+    )
+
+    $handoffPath = [string]$Run.redactedHandoffPath
+    if ([string]::IsNullOrWhiteSpace($handoffPath) -or -not (Test-Path -LiteralPath $handoffPath)) {
+        return $false
+    }
+
+    if ([string]::IsNullOrWhiteSpace($AllowedRoot) -or -not (Test-Path -LiteralPath $AllowedRoot)) {
+        return $true
+    }
+
+    $handoffFullPath = ConvertTo-FullPath -Path $handoffPath
+    $allowedRootFullPath = ConvertTo-FullPath -Path $AllowedRoot
+    if (-not $allowedRootFullPath.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+        $allowedRootFullPath = $allowedRootFullPath + [System.IO.Path]::DirectorySeparatorChar
+    }
+
+    return $handoffFullPath.StartsWith($allowedRootFullPath, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
 function Test-AutomationWorktreeHygiene {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
-        [Parameter(Mandatory = $true)][string]$CurrentWorktree
+        [Parameter(Mandatory = $true)][string]$CurrentWorktree,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$RunRegistryEntries,
+        [Parameter(Mandatory = $true)][string]$AllowedHandoffRoot,
+        [Parameter(Mandatory = $true)][int]$HeartbeatMinutes
     )
 
     if (-not (Test-Path -LiteralPath $Root)) {
@@ -235,19 +339,77 @@ function Test-AutomationWorktreeHygiene {
 
         Write-Output "automationWorktree: $worktreeFullPath"
         Write-Output "automationWorktreeHead: $($worktree.Head)"
+        $runRegistryEntry = Find-RunRegistryByWorktree -Entries $RunRegistryEntries -WorktreePath $worktreeFullPath
+        $runRegistry = $null
+        if ($null -ne $runRegistryEntry) {
+            $runRegistry = $runRegistryEntry.Value
+            Write-Output "runRegistryPath: $($runRegistryEntry.Path)"
+            Write-Output "runRegistryStatus: $([string]$runRegistry.status)"
+            Write-Output "runRegistryTaskId: $([string]$runRegistry.taskId)"
+        }
 
         if (Test-GitDirty -Path $worktreeFullPath) {
+            if ($null -eq $runRegistry) {
+                $script:startupOverrideDecision = "stop_for_manual_decision"
+                $script:startupOverrideReason = "dirty automation worktree has no run registry handoff"
+                $script:startupOverrideExitCode = 1
+                Write-Output "MANUAL_DECISION_DIRTY_WORKTREE_NO_REGISTRY $worktreeFullPath"
+                return
+            }
+
+            $runStatus = [string]$runRegistry.status
+            $safeToAdopt = [bool]$runRegistry.safeToAdopt
+            $hasReadyHandoff = Test-RedactedHandoffReady -Run $runRegistry -AllowedRoot $AllowedHandoffRoot
+
+            if ($runStatus -eq "active" -and (Test-RunHeartbeatActive -Run $runRegistry -HeartbeatMinutes $HeartbeatMinutes)) {
+                $script:startupOverrideDecision = "exit_active_owner_present"
+                $script:startupOverrideReason = "active run registry owner has a fresh heartbeat"
+                $script:startupOverrideExitCode = 1
+                Write-Output "ACTIVE_OWNER_PRESENT $worktreeFullPath"
+                Write-Output "heartbeatAtUtc: $([string]$runRegistry.heartbeatAtUtc)"
+                return
+            }
+
+            if ($safeToAdopt -and $hasReadyHandoff -and $runStatus -in @("recoverable", "stopped", "abandoned")) {
+                $script:startupOverrideDecision = "adopt_recoverable_run"
+                $script:startupOverrideReason = "dirty automation worktree has an adoptable redacted handoff"
+                $script:startupOverrideExitCode = 0
+                Write-Output "ADOPT_RECOVERABLE_RUN $worktreeFullPath"
+                Write-Output "redactedHandoffPath: $([string]$runRegistry.redactedHandoffPath)"
+                return
+            }
+
+            if ($runStatus -in @("recoverable", "stopped", "abandoned")) {
+                $script:startupOverrideDecision = "open_recovery_plan"
+                $script:startupOverrideReason = "dirty automation worktree has registry but no adoptable redacted handoff"
+                $script:startupOverrideExitCode = 0
+                Write-Output "OPEN_RECOVERY_PLAN $worktreeFullPath"
+                return
+            }
+
             Add-Finding "HARD_BLOCK_AUTOMATION_WORKTREE_DIRTY $worktreeFullPath"
             continue
         }
 
+        if ($null -ne $runRegistry -and [string]$runRegistry.status -eq "cleanup_ready" -and [string]$runRegistry.cleanupPolicy -eq "cleanup_ready") {
+            $script:startupOverrideDecision = "cleanup_stale_artifacts"
+            $script:startupOverrideReason = "clean automation worktree is marked cleanup_ready in run registry"
+            $script:startupOverrideExitCode = 0
+            Write-Output "CLEANUP_STALE_ARTIFACTS $worktreeFullPath"
+            return
+        }
+
         if (-not [string]::IsNullOrWhiteSpace($originMasterSha) -and $worktree.Head -ne $originMasterSha) {
-            Add-Finding "HARD_BLOCK_AUTOMATION_WORKTREE_STALE $worktreeFullPath"
+            Add-RecoverableFinding "RECOVERABLE_AUTOMATION_WORKTREE_STALE_CLEAN $worktreeFullPath"
         }
     }
 }
 
 $findings = New-Object System.Collections.Generic.List[string]
+$recoverableFindings = New-Object System.Collections.Generic.List[string]
+$startupOverrideDecision = ""
+$startupOverrideReason = ""
+$startupOverrideExitCode = 1
 
 try {
     Write-Section -Title "Module Run v2 Automation Startup Readiness"
@@ -262,6 +424,12 @@ try {
     if ([string]::IsNullOrWhiteSpace($AutomationWorktreeRoot)) {
         $AutomationWorktreeRoot = Join-Path -Path $env:USERPROFILE -ChildPath ".codex\worktrees"
     }
+    if ([string]::IsNullOrWhiteSpace($RunRegistryRoot)) {
+        $RunRegistryRoot = Join-Path -Path $env:USERPROFILE -ChildPath ".codex\tiku\automation-runs"
+    }
+    if ([string]::IsNullOrWhiteSpace($HandoffRoot)) {
+        $HandoffRoot = Join-Path -Path $env:USERPROFILE -ChildPath ".codex\tiku\handoffs"
+    }
 
     $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
@@ -274,6 +442,8 @@ try {
 
     Write-Output "taskId: $TaskId"
     Write-Output "automationWorktreeRoot: $AutomationWorktreeRoot"
+    Write-Output "runRegistryRoot: $RunRegistryRoot"
+    Write-Output "handoffRoot: $HandoffRoot"
 
     $currentBranch = ((& git branch --show-current) -join "").Trim()
     if ([string]::IsNullOrWhiteSpace($currentBranch)) {
@@ -314,7 +484,12 @@ try {
     if (-not $SkipWorktreeHygieneCheck) {
         Write-Section -Title "Worktree Hygiene"
         $currentWorktree = ((& git rev-parse --show-toplevel) -join "").Trim()
-        Test-AutomationWorktreeHygiene -Root $AutomationWorktreeRoot -CurrentWorktree $currentWorktree
+        $runRegistryEntries = @(Get-RunRegistryEntries -Root $RunRegistryRoot)
+        Write-Output "runRegistryCount: $($runRegistryEntries.Count)"
+        Test-AutomationWorktreeHygiene -Root $AutomationWorktreeRoot -CurrentWorktree $currentWorktree -RunRegistryEntries $runRegistryEntries -AllowedHandoffRoot $HandoffRoot -HeartbeatMinutes $ActiveRunHeartbeatMinutes
+        if (-not [string]::IsNullOrWhiteSpace($startupOverrideDecision)) {
+            Write-StartupResult -Decision $startupOverrideDecision -Reason $startupOverrideReason -ExitCode $startupOverrideExitCode
+        }
     }
 
     $remoteAutomationApproval = Get-ProjectScalar -Lines $projectStateLines -Key "remoteAutomationApproval"
@@ -330,6 +505,10 @@ try {
 
     if ($findings.Count -gt 0) {
         Write-StartupResult -Decision "stop_for_hard_block" -Reason "startup readiness failed with $($findings.Count) finding(s)" -ExitCode 1
+    }
+
+    if ($recoverableFindings.Count -gt 0) {
+        Write-Output "recoverableAutomationWorktreeCount: $($recoverableFindings.Count)"
     }
 
     $taskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $TaskId)

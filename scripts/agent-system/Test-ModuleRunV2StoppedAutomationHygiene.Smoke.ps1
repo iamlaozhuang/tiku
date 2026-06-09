@@ -51,7 +51,9 @@ $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("ti
 $leaseRoot = Join-Path -Path $fixtureRoot -ChildPath "lease-root"
 $worktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "worktrees"
 $tempRoot = Join-Path -Path $fixtureRoot -ChildPath "temp"
-New-Item -ItemType Directory -Path $leaseRoot, $worktreeRoot, $tempRoot | Out-Null
+$runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"
+$handoffRoot = Join-Path -Path $fixtureRoot -ChildPath "handoffs"
+New-Item -ItemType Directory -Path $leaseRoot, $worktreeRoot, $tempRoot, $runRegistryRoot, $handoffRoot | Out-Null
 
 try {
     $now = "2026-06-08T20:00:00Z"
@@ -139,6 +141,82 @@ try {
     if (Test-Path -LiteralPath $handoffDir) {
         throw "Expected dry-run handoff temp directory to be removed."
     }
+
+    $parkingRepo = Join-Path -Path $fixtureRoot -ChildPath "parking-repo"
+    New-Item -ItemType Directory -Path $parkingRepo | Out-Null
+    & git -C $parkingRepo init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize parking fixture repository."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $parkingRepo -ChildPath "README.md") -Value "parking baseline" -Encoding UTF8
+    & git -C $parkingRepo add README.md | Out-Null
+    & git -C $parkingRepo -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "parking baseline" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit parking fixture baseline."
+    }
+    $parkingTargetSha = ((& git -C $parkingRepo rev-parse HEAD) -join "").Trim()
+    & git -C $parkingRepo update-ref refs/remotes/origin/master $parkingTargetSha
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create parking fixture origin/master ref."
+    }
+    & git -C $parkingRepo switch -c codex/parking-smoke | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create parking fixture task branch."
+    }
+
+    Push-Location $parkingRepo
+    try {
+        $parkingOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -NowUtc $now -ParkCurrentWorktree -ParkingTargetRef "origin/master")
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $parkingOutput -Pattern "automationWorktreeParking: completed"
+    Assert-Contains -Output $parkingOutput -Pattern "parkingTargetRef: origin/master"
+    $parkedBranch = ((& git -C $parkingRepo branch --show-current) -join "").Trim()
+    if (-not [string]::IsNullOrWhiteSpace($parkedBranch)) {
+        throw "Expected parking fixture repository to be detached after parking, got branch: $parkedBranch"
+    }
+    $parkedHead = ((& git -C $parkingRepo rev-parse HEAD) -join "").Trim()
+    if ($parkedHead -ne $parkingTargetSha) {
+        throw "Expected parked HEAD $parkingTargetSha, got $parkedHead"
+    }
+
+    $cleanupHandoffPath = Join-Path -Path $handoffRoot -ChildPath "cleanup-ready.md"
+    Set-Content -LiteralPath $cleanupHandoffPath -Value "task:`nstatus: cleanup_ready`ncleanup allowed: yes" -Encoding UTF8
+    $cleanupRunPath = Join-Path -Path $runRegistryRoot -ChildPath "cleanup-ready.json"
+    @"
+{
+  "runId": "cleanup-ready-run",
+  "automationId": "tiku-module-run-v2-autopilot",
+  "threadRole": "scheduled",
+  "taskId": "module-run-v2-automation-handoff-contract-hardening",
+  "branch": "codex/cleanup-ready",
+  "worktreePath": "$($parkingRepo.Replace("\", "\\"))",
+  "status": "cleanup_ready",
+  "heartbeatAtUtc": "2026-06-08T19:30:00Z",
+  "phase": "closeout",
+  "changedFiles": [],
+  "lastSafeCheckpoint": "closeout recorded",
+  "nextRecommendedAction": "janitor cleanup",
+  "safeToAdopt": false,
+  "cleanupPolicy": "cleanup_ready",
+  "redactedHandoffPath": "$($cleanupHandoffPath.Replace("\", "\\"))"
+}
+"@ | Set-Content -LiteralPath $cleanupRunPath -Encoding UTF8
+
+    $registryCleanupAvailableOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now)
+    Assert-Contains -Output $registryCleanupAvailableOutput -Pattern "runRegistryCleanupCandidate:"
+    Assert-Contains -Output $registryCleanupAvailableOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_available"
+
+    $registryCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -Cleanup)
+    Assert-Contains -Output $registryCleanupOutput -Pattern "runRegistryCleanupAction:"
+    Assert-Contains -Output $registryCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    if (Test-Path -LiteralPath $cleanupRunPath) {
+        throw "Expected cleanup-ready run registry file to be removed."
+    }
+    if (Test-Path -LiteralPath $cleanupHandoffPath) {
+        throw "Expected cleanup-ready handoff file to be removed."
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
@@ -146,4 +224,3 @@ try {
 }
 
 Write-Output "Module Run v2 stopped automation hygiene smoke passed"
-

@@ -220,11 +220,31 @@ allowed next task:
 forbidden scope:
 validation:
 git state:
+run registry:
+adoption allowed:
+cleanup allowed:
 read order:
 user decision needed:
 ```
 
 Keep the handoff short enough for a new thread to read quickly, but precise enough to prevent scope drift.
+
+For automation recovery, the same content becomes a redacted handoff envelope when referenced by a run registry entry.
+The envelope lives under `%USERPROFILE%\.codex\tiku\handoffs` unless an approved durable repository handoff task says
+otherwise. Its paired run registry entry must record `redactedHandoffPath`, `safeToAdopt`, and `cleanupPolicy`.
+
+Adoption is allowed only when:
+
+- the source worktree is dirty but has a run registry entry with `status: recoverable`, `stopped`, or `abandoned`;
+- `safeToAdopt: true`;
+- `redactedHandoffPath` exists and contains no sensitive material;
+- the receiving thread performs the normal recovery audit before edits.
+
+Cleanup is allowed only when the registry says `status: cleanup_ready` and `cleanupPolicy: cleanup_ready`. Cleanup may
+remove the external run registry file and redacted handoff envelope through
+`Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup`; it must not infer permission to delete dirty worktrees,
+source files, evidence logs, env/secret files, product code, schema, migration, dependency files, or external-service
+configuration.
 
 ## Agent Autonomy Boundary
 
@@ -253,9 +273,18 @@ requires a durable redacted handoff or a newly generated approved handoff before
 For scheduled automation, thread creation is legal only after all of these are true:
 
 - `startupDecision` allows continuation or next-task preparation;
+- `startupDecision: adopt_recoverable_run` is paired with a redacted handoff when adoption is the path;
 - no active non-expired automation lease exists;
-- stale or dirty automation worktrees have been hard-stopped or cleaned under a separate approved cleanup action;
+- dirty automation worktrees have been classified as `exit_active_owner_present`, `adopt_recoverable_run`,
+  `open_recovery_plan`, `stop_for_manual_decision`, or a hard block; clean stale worktrees have been reported as
+  `recoverableAutomationWorktree` or routed to `cleanup_stale_artifacts`;
 - `threadLaunchDecision: launch_new_thread` is produced from a durable handoff and explicit launch approval.
+
+When a thread finishes an approved automation-owned task, it should leave the current worktree in
+`automationWorktreeParking` state whenever possible: clean, detached, and aligned with `origin/master` or the configured
+parking target. The receiving thread must still perform recovery audit from durable files and must treat
+`postCloseoutHandoffSha` as a narrow SHA-handoff exception only when the previous durable task is terminal and evidence
+plus audit review are present.
 
 ## User Cooperation Model
 

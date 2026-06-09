@@ -58,6 +58,8 @@ try {
     $blockedTaskId = "module-run-v2-unattended-readiness-blocked-risk"
     $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
+    $runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"
+    New-Item -ItemType Directory -Path $runRegistryRoot | Out-Null
     $masterSha = ((& git rev-parse master) -join "").Trim()
     $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
 
@@ -121,12 +123,22 @@ tasks:
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $queuePath `
                 -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+                -RunRegistryRoot $runRegistryRoot `
                 -SkipRemoteAheadCheck
         )
         Assert-Contains -Output $passOutput -Pattern "Module Run v2 Unattended Readiness"
         Assert-Contains -Output $passOutput -Pattern "unattendedReadinessMode: hard_block"
+        Assert-Contains -Output $passOutput -Pattern "runRegistryHeartbeat: wrote"
         Assert-Contains -Output $passOutput -Pattern "unattendedStopDecision: continue"
         Assert-Contains -Output $passOutput -Pattern "Cost Calibration Gate remains blocked"
+        $registryFiles = @(Get-ChildItem -LiteralPath $runRegistryRoot -Filter "*.json")
+        if ($registryFiles.Count -eq 0) {
+            throw "Expected unattended readiness to write a run registry heartbeat."
+        }
+        $registryText = Get-Content -LiteralPath $registryFiles[0].FullName -Raw
+        if ($registryText -notmatch '"status":\s*"active"' -or $registryText -notmatch '"taskId":\s*"module-run-v2-unattended-readiness-smoke"') {
+            throw "Expected run registry heartbeat to record active task state."
+        }
     }
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH master" -Command {
@@ -256,6 +268,68 @@ currentTask:
     Assert-Contains -Output $ancestorRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR master"
     Assert-Contains -Output $ancestorRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR origin/master"
     Assert-Contains -Output $ancestorRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
+
+    $candidateTaskId = "module-run-v2-ai-task-and-provider-planning"
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $ancestorSha
+  lastKnownOriginMasterSha: $ancestorSha
+currentTask:
+  id: $taskId
+"@ | Set-Content -LiteralPath $projectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    status: done
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    blockedFiles:
+      - .env.local
+      - package.json
+      - src/**
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
+  - id: $candidateTaskId
+    status: pending
+    taskKind: implementation_planning
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    blockedFiles:
+      - .env.local
+      - package.json
+      - src/**
+    riskTypes:
+      - queue_planning
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    $postCloseoutHandoffOutput = @(
+        & $scriptPath `
+            -TaskId $candidateTaskId `
+            -ProjectStatePath $projectStatePath `
+            -QueuePath $queuePath `
+            -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+            -AllowProtectedBranch `
+            -SkipRemoteAheadCheck
+    )
+    Assert-Contains -Output $postCloseoutHandoffOutput -Pattern "OK_POST_CLOSEOUT_HANDOFF_SHA_ANCESTOR master"
+    Assert-Contains -Output $postCloseoutHandoffOutput -Pattern "OK_POST_CLOSEOUT_HANDOFF_SHA_ANCESTOR origin/master"
+    Assert-Contains -Output $postCloseoutHandoffOutput -Pattern "unattendedStopDecision: continue"
 
     @"
 schemaVersion: 1

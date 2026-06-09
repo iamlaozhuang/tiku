@@ -202,6 +202,7 @@ The startup gate coordinates:
 - current task and pending task status from `task-queue.yaml`;
 - Codex automation approval state from `project-state.yaml`;
 - stale or dirty automation worktree detection;
+- external run registry and redacted handoff envelope state under `%USERPROFILE%\.codex\tiku`;
 - blocked gate anchors.
 
 Automation may continue only when the startup gate returns one of these zero-exit decisions:
@@ -209,16 +210,43 @@ Automation may continue only when the startup gate returns one of these zero-exi
 - `startupDecision: continue_current_task`;
 - `startupDecision: prepare_next_task`;
 - `startupDecision: closeout_recovery`.
+- `startupDecision: adopt_recoverable_run`;
+- `startupDecision: open_recovery_plan`;
+- `startupDecision: cleanup_stale_artifacts`.
 
 Automation must stop when the startup gate returns:
 
+- `startupDecision: exit_active_owner_present`;
 - `startupDecision: stop_existing_run_active`;
 - `startupDecision: stop_for_hard_block`;
+- `startupDecision: stop_for_manual_decision`;
 - `startupDecision: no_executable_task`.
 
 The startup gate does not create threads, write handoffs, delete worktrees, or modify source files. It only decides
 whether the automation wakeup is allowed to proceed to the existing autopilot orchestrator or to a proposal-only planning
 step.
+
+`Test-ModuleRunV2UnattendedReadiness.ps1` writes a `runRegistryHeartbeat` to
+`%USERPROFILE%\.codex\tiku\automation-runs` for the current worktree. The registry entry is a redacted local control
+record with `runId`, `automationId`, `threadRole`, `taskId`, `branch`, `worktreePath`, `status`, `heartbeatAtUtc`,
+`phase`, `changedFiles`, `lastSafeCheckpoint`, `nextRecommendedAction`, `safeToAdopt`, `cleanupPolicy`, and
+`redactedHandoffPath`. It must not contain secrets, provider payloads, raw prompts, raw generated AI content, DB URLs,
+Authorization headers, plaintext `redeem_code`, or full `paper` content.
+
+Clean stale automation worktrees are `recoverableAutomationWorktree` findings, not hard blocks. A stale worktree is
+recoverable only when it is under the configured automation worktree root and `git status --porcelain` is clean. Dirty
+automation worktrees are routed by the registry:
+
+- fresh `status: active` heartbeat -> `exit_active_owner_present`;
+- `status: recoverable|stopped|abandoned`, `safeToAdopt: true`, and existing redacted handoff ->
+  `adopt_recoverable_run`;
+- `status: recoverable|stopped|abandoned` without an adoptable handoff -> `open_recovery_plan`;
+- no registry ownership -> `stop_for_manual_decision`;
+- dirty worktree with an unsafe or inconsistent registry -> `stop_for_hard_block`.
+
+Clean registry entries marked `status: cleanup_ready` with `cleanupPolicy: cleanup_ready` route startup to
+`cleanup_stale_artifacts`. Invalid paths, active leases, remote divergence, and non-ancestor state drift remain hard
+blocks unless a narrower post-closeout SHA handoff exception applies.
 
 After Module Run v2 closeout, automation may generate a `nextModuleRunCandidate` proposal. The proposal is a planning
 artifact only; it is not approval to start implementation in the next module.
@@ -265,6 +293,11 @@ An accepted closeout recovery point may have `project-state.yaml` repository SHA
 `master` and `origin/master`, because the final closeout, validation repair, merge, and push commits can only be known
 after earlier evidence is written. This exception applies only when the current task is `done` or `closed`, Git is clean
 and aligned, and the task evidence/audit paths are present. Non-ancestor SHA drift remains a hard block.
+
+The same `postCloseoutHandoffSha` exception may be used by the next pending task when `project-state.yaml` still names a
+durable current task that is `done` or `closed`, that current task's evidence and audit review exist, `master` and
+`origin/master` are aligned, and the recorded SHAs are ancestors of current Git reality. This exception is only a handoff
+rule; it does not waive task scope, blocked files, risk gates, or validation.
 
 ## Per-Task Review And Commit Rule
 
@@ -354,6 +387,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 This gate is read-only by default. It inventories:
 
 - the configured automation lease file;
+- run registry files under `%USERPROFILE%\.codex\tiku\automation-runs`;
+- redacted handoff envelopes under `%USERPROFILE%\.codex\tiku\handoffs`;
 - Codex automation worktrees under the configured worktree root;
 - temporary dry-run handoff directories under the system temp root.
 
@@ -368,10 +403,17 @@ Cleanup is explicit:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup
 ```
 
-`-Cleanup` may remove only expired clean lease files, stale clean automation worktrees inside the Codex automation
-worktree root, and dry-run handoff temp directories named `tiku-autopilot-handoff-*` inside the system temp root. It must
-not delete dirty worktrees, source files, repository `.git` data outside `git worktree remove`, env files, product code,
-dependency files, schema, migration, or evidence logs.
+`-Cleanup` may remove only expired clean lease files, run registry files explicitly marked `cleanup_ready`, their
+redacted handoff envelopes inside the configured handoff root, stale clean automation worktrees inside the Codex
+automation worktree root, and dry-run handoff temp directories named `tiku-autopilot-handoff-*` inside the system temp
+root. It must not delete dirty worktrees, source files, repository `.git` data outside `git worktree remove`, env files,
+product code, dependency files, schema, migration, or evidence logs.
+
+At the end of an automation-owned run, the current clean non-protected automation worktree should be explicitly parked
+with `automationWorktreeParking`: detach the current worktree to `origin/master` or the configured parking target after
+all evidence, validation, commit, merge, push, and branch cleanup decisions that are approved for the task are complete.
+Parking must refuse dirty worktrees and protected `master` / `main` branches. A parked worktree is clean, detached, and
+aligned with the target ref so the next Codex automation startup can safely ignore it as already接手-ready residue.
 
 If the hygiene gate returns `stop_existing_run_active`, automation must leave the active run alone. If it returns
 `stop_dirty_worktree`, `stop_invalid_lease`, or `stop_manual_cleanup_required`, automation must stop and report the

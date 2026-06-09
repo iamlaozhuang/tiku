@@ -192,6 +192,165 @@ terminologyAnchors:
             -AllowProtectedBranch `
             -SkipWorktreeHygieneCheck
     }
+
+    $parkingRepo = Join-Path -Path $fixtureRoot -ChildPath "startup-repo"
+    $startupWorktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "startup-worktrees"
+    New-Item -ItemType Directory -Path $parkingRepo, $startupWorktreeRoot | Out-Null
+    & git -C $parkingRepo init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize startup fixture repository."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $parkingRepo -ChildPath "README.md") -Value "startup baseline" -Encoding UTF8
+    & git -C $parkingRepo add README.md | Out-Null
+    & git -C $parkingRepo -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "startup baseline" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit startup fixture baseline."
+    }
+    $staleWorktreePath = Join-Path -Path $startupWorktreeRoot -ChildPath "stale-clean"
+    & git -C $parkingRepo worktree add -b codex/stale-clean-smoke $staleWorktreePath HEAD | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create startup fixture stale worktree."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $parkingRepo -ChildPath "README.md") -Value "startup advanced" -Encoding UTF8
+    & git -C $parkingRepo add README.md | Out-Null
+    & git -C $parkingRepo -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "startup advanced" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to advance startup fixture master."
+    }
+    $startupOriginMasterSha = ((& git -C $parkingRepo rev-parse HEAD) -join "").Trim()
+    & git -C $parkingRepo update-ref refs/remotes/origin/master $startupOriginMasterSha
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create startup fixture origin/master ref."
+    }
+    Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludePendingTask
+    Push-Location $parkingRepo
+    try {
+        $recoverableWorktreeOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -AutomationWorktreeRoot $startupWorktreeRoot `
+                -AllowProtectedBranch `
+                -SkipLeaseCheck
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "RECOVERABLE_AUTOMATION_WORKTREE_STALE_CLEAN"
+    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "recoverableAutomationWorktreeCount: 1"
+    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "startupDecision: prepare_next_task"
+
+    $handoffRoot = Join-Path -Path $fixtureRoot -ChildPath "handoffs"
+    $runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"
+    New-Item -ItemType Directory -Path $handoffRoot, $runRegistryRoot | Out-Null
+
+    $dirtyRepo = Join-Path -Path $fixtureRoot -ChildPath "dirty-owner-repo"
+    $dirtyWorktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "dirty-owner-worktrees"
+    New-Item -ItemType Directory -Path $dirtyRepo, $dirtyWorktreeRoot | Out-Null
+    & git -C $dirtyRepo init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize dirty owner fixture repository."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $dirtyRepo -ChildPath "README.md") -Value "dirty baseline" -Encoding UTF8
+    & git -C $dirtyRepo add README.md | Out-Null
+    & git -C $dirtyRepo -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "dirty baseline" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit dirty owner fixture baseline."
+    }
+    $dirtyOriginSha = ((& git -C $dirtyRepo rev-parse HEAD) -join "").Trim()
+    & git -C $dirtyRepo update-ref refs/remotes/origin/master $dirtyOriginSha
+    $dirtyOwnerPath = Join-Path -Path $dirtyWorktreeRoot -ChildPath "dirty-owner"
+    & git -C $dirtyRepo worktree add -b codex/dirty-owner-smoke $dirtyOwnerPath HEAD | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create dirty owner fixture worktree."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $dirtyOwnerPath -ChildPath "handoff.txt") -Value "dirty handoff" -Encoding UTF8
+    Push-Location $dirtyRepo
+    try {
+        Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludePendingTask
+
+        $activeRunPath = Join-Path -Path $runRegistryRoot -ChildPath "active-run.json"
+        @"
+{
+  "runId": "active-run",
+  "automationId": "tiku-module-run-v2-autopilot",
+  "threadRole": "interactive",
+  "taskId": "module-run-v2-automation-handoff-contract-hardening",
+  "branch": "codex/dirty-owner-smoke",
+  "worktreePath": "$($dirtyOwnerPath.Replace("\", "\\"))",
+  "status": "active",
+  "heartbeatAtUtc": "2999-06-09T00:00:00Z",
+  "phase": "editing",
+  "changedFiles": ["handoff.txt"],
+  "lastSafeCheckpoint": "before validation",
+  "nextRecommendedAction": "wait for active owner",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $activeRunPath -Encoding UTF8
+
+        Invoke-ExpectFailure -ExpectedPattern "startupDecision: exit_active_owner_present" -Command {
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -AutomationWorktreeRoot $dirtyWorktreeRoot `
+                -RunRegistryRoot $runRegistryRoot `
+                -AllowProtectedBranch `
+                -SkipLeaseCheck
+        }
+
+        $adoptHandoffPath = Join-Path -Path $handoffRoot -ChildPath "adoptable.md"
+        Set-Content -LiteralPath $adoptHandoffPath -Value "task:`nstatus: stopped`nadoption allowed: yes" -Encoding UTF8
+        @"
+{
+  "runId": "adoptable-run",
+  "automationId": "tiku-module-run-v2-autopilot",
+  "threadRole": "recovery",
+  "taskId": "module-run-v2-automation-handoff-contract-hardening",
+  "branch": "codex/dirty-owner-smoke",
+  "worktreePath": "$($dirtyOwnerPath.Replace("\", "\\"))",
+  "status": "recoverable",
+  "heartbeatAtUtc": "2026-06-09T00:00:00Z",
+  "phase": "handoff",
+  "changedFiles": ["handoff.txt"],
+  "lastSafeCheckpoint": "redacted handoff written",
+  "nextRecommendedAction": "adopt recoverable run",
+  "safeToAdopt": true,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": "$($adoptHandoffPath.Replace("\", "\\"))"
+}
+"@ | Set-Content -LiteralPath $activeRunPath -Encoding UTF8
+
+        $adoptOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -AutomationWorktreeRoot $dirtyWorktreeRoot `
+                -RunRegistryRoot $runRegistryRoot `
+                -AllowProtectedBranch `
+                -SkipLeaseCheck
+        )
+        Assert-Contains -Output $adoptOutput -Pattern "startupDecision: adopt_recoverable_run"
+        Assert-Contains -Output $adoptOutput -Pattern "redactedHandoffPath:"
+
+        Remove-Item -LiteralPath $activeRunPath -Force
+        Invoke-ExpectFailure -ExpectedPattern "startupDecision: stop_for_manual_decision" -Command {
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -AutomationWorktreeRoot $dirtyWorktreeRoot `
+                -RunRegistryRoot $runRegistryRoot `
+                -AllowProtectedBranch `
+                -SkipLeaseCheck
+        }
+    } finally {
+        Pop-Location
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

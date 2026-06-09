@@ -12,10 +12,22 @@ param(
     [string]$TempRoot = "",
 
     [Parameter(Mandatory = $false)]
+    [string]$RunRegistryRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$HandoffRoot = "",
+
+    [Parameter(Mandatory = $false)]
     [string]$NowUtc = "",
 
     [Parameter(Mandatory = $false)]
-    [switch]$Cleanup
+    [switch]$Cleanup,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$ParkCurrentWorktree,
+
+    [Parameter(Mandatory = $false)]
+    [string]$ParkingTargetRef = "origin/master"
 )
 
 $ErrorActionPreference = "Stop"
@@ -68,6 +80,16 @@ function Add-CleanupCandidate {
     Write-Output "cleanupCandidate: $Kind $Path"
 }
 
+function Add-RunRegistryCleanupCandidate {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$RunId
+    )
+
+    $script:cleanupCandidates.Add([pscustomobject]@{ Kind = "run_registry"; Path = $Path })
+    Write-Output "runRegistryCleanupCandidate: $RunId $Path"
+}
+
 function Add-CleanupAction {
     param(
         [Parameter(Mandatory = $true)][string]$Kind,
@@ -76,6 +98,28 @@ function Add-CleanupAction {
 
     $script:cleanupActions.Add([pscustomobject]@{ Kind = $Kind; Path = $Path })
     Write-Output "cleanupAction: $Kind $Path"
+}
+
+function Add-RunRegistryCleanupAction {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$RunId
+    )
+
+    $script:cleanupActions.Add([pscustomobject]@{ Kind = "run_registry"; Path = $Path })
+    Write-Output "runRegistryCleanupAction: $RunId $Path"
+}
+
+function Add-ParkingAction {
+    param(
+        [Parameter(Mandatory = $true)][string]$TargetRef,
+        [Parameter(Mandatory = $true)][string]$TargetSha
+    )
+
+    $script:parkingActions.Add([pscustomobject]@{ TargetRef = $TargetRef; TargetSha = $TargetSha })
+    Write-Output "automationWorktreeParking: completed"
+    Write-Output "parkingTargetRef: $TargetRef"
+    Write-Output "parkingTargetSha: $TargetSha"
 }
 
 function Test-GitWorktreeDirty {
@@ -173,6 +217,7 @@ function Write-HygieneResult {
     Write-Output "stoppedAutomationHygieneHardBlockCount: $($script:hardBlocks.Count)"
     Write-Output "stoppedAutomationHygieneCleanupCandidateCount: $($script:cleanupCandidates.Count)"
     Write-Output "stoppedAutomationHygieneCleanupActionCount: $($script:cleanupActions.Count)"
+    Write-Output "stoppedAutomationHygieneParkingActionCount: $($script:parkingActions.Count)"
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
 
@@ -182,7 +227,7 @@ function Write-HygieneResult {
         exit 1
     }
 
-    if ($Cleanup -and $script:cleanupActions.Count -gt 0) {
+    if (($Cleanup -and $script:cleanupActions.Count -gt 0) -or ($ParkCurrentWorktree -and $script:parkingActions.Count -gt 0)) {
         Write-Output "stoppedAutomationHygieneDecision: cleanup_completed"
         exit 0
     }
@@ -212,6 +257,14 @@ if ([string]::IsNullOrWhiteSpace($TempRoot)) {
     $TempRoot = [System.IO.Path]::GetTempPath()
 }
 
+if ([string]::IsNullOrWhiteSpace($RunRegistryRoot)) {
+    $RunRegistryRoot = Join-Path -Path $env:USERPROFILE -ChildPath ".codex\tiku\automation-runs"
+}
+
+if ([string]::IsNullOrWhiteSpace($HandoffRoot)) {
+    $HandoffRoot = Join-Path -Path $env:USERPROFILE -ChildPath ".codex\tiku\handoffs"
+}
+
 $effectiveNow = [DateTimeOffset]::UtcNow
 if (-not [string]::IsNullOrWhiteSpace($NowUtc)) {
     $effectiveNow = [DateTimeOffset]::Parse($NowUtc).ToUniversalTime()
@@ -220,14 +273,21 @@ if (-not [string]::IsNullOrWhiteSpace($NowUtc)) {
 $hardBlocks = New-Object System.Collections.Generic.List[object]
 $cleanupCandidates = New-Object System.Collections.Generic.List[object]
 $cleanupActions = New-Object System.Collections.Generic.List[object]
+$parkingActions = New-Object System.Collections.Generic.List[object]
 
 Write-Section -Title "Module Run v2 Stopped Automation Hygiene"
 Write-Output "stoppedAutomationHygieneMode: hard_block"
 Write-Output "cleanupMode: $(if ($Cleanup) { "cleanup" } else { "read_only" })"
+if ($ParkCurrentWorktree) {
+    Write-Output "parkingMode: enabled"
+    Write-Output "parkingTargetRef: $ParkingTargetRef"
+}
 Write-Output "leasePath: $LeasePath"
 Write-Output "leaseCleanupRoot: $LeaseCleanupRoot"
 Write-Output "automationWorktreeRoot: $AutomationWorktreeRoot"
 Write-Output "tempRoot: $TempRoot"
+Write-Output "runRegistryRoot: $RunRegistryRoot"
+Write-Output "handoffRoot: $HandoffRoot"
 Write-Output "nowUtc: $($effectiveNow.ToString("o"))"
 
 Write-Section -Title "Lease Inventory"
@@ -271,6 +331,52 @@ if (-not (Test-Path -LiteralPath $LeasePath)) {
             }
         } catch {
             Add-HardBlock -Decision "stop_invalid_lease" -Message "lease expiresAtUtc is not parseable"
+        }
+    }
+}
+
+Write-Section -Title "Run Registry Inventory"
+if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
+    Write-Output "runRegistryStatus: root_missing"
+} else {
+    $registryFiles = @(Get-ChildItem -LiteralPath $RunRegistryRoot -Filter "*.json" -File -ErrorAction SilentlyContinue)
+    foreach ($registryFile in $registryFiles) {
+        try {
+            $registryJson = Get-Content -LiteralPath $registryFile.FullName -Raw | ConvertFrom-Json
+        } catch {
+            Add-HardBlock -Decision "stop_invalid_lease" -Message "run registry file is not valid JSON: $($registryFile.FullName)"
+            continue
+        }
+
+        $runId = [string]$registryJson.runId
+        $runStatus = [string]$registryJson.status
+        $cleanupPolicy = [string]$registryJson.cleanupPolicy
+        $redactedHandoffPath = [string]$registryJson.redactedHandoffPath
+        Write-Output "runRegistry: $($registryFile.FullName)"
+        Write-Output "runRegistryRunId: $runId"
+        Write-Output "runRegistryStatus: $runStatus"
+        Write-Output "runRegistryCleanupPolicy: $cleanupPolicy"
+
+        if ($runStatus -eq "cleanup_ready" -and $cleanupPolicy -eq "cleanup_ready") {
+            Add-RunRegistryCleanupCandidate -RunId $runId -Path $registryFile.FullName
+
+            if (-not [string]::IsNullOrWhiteSpace($redactedHandoffPath)) {
+                if (-not (Test-PathInsideRoot -Path $redactedHandoffPath -Root $HandoffRoot)) {
+                    Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "redacted handoff path is outside handoff root"
+                } elseif (Test-Path -LiteralPath $redactedHandoffPath) {
+                    Add-CleanupCandidate -Kind "redacted_handoff" -Path $redactedHandoffPath
+                }
+            }
+
+            if ($Cleanup) {
+                if (-not [string]::IsNullOrWhiteSpace($redactedHandoffPath) -and (Test-Path -LiteralPath $redactedHandoffPath)) {
+                    Remove-SafeFile -Path $redactedHandoffPath -AllowedRoot $HandoffRoot -Kind "redacted_handoff"
+                }
+                Remove-SafeFile -Path $registryFile.FullName -AllowedRoot $RunRegistryRoot -Kind "run_registry"
+                if (-not (Test-Path -LiteralPath $registryFile.FullName)) {
+                    Add-RunRegistryCleanupAction -RunId $runId -Path $registryFile.FullName
+                }
+            }
         }
     }
 }
@@ -321,6 +427,33 @@ if (-not (Test-Path -LiteralPath $AutomationWorktreeRoot)) {
     }
 }
 
+if ($ParkCurrentWorktree) {
+    Write-Section -Title "Current Worktree Parking"
+    $currentWorktree = ((& git rev-parse --show-toplevel 2>$null) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($currentWorktree)) {
+        Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "current path is not inside a Git worktree"
+    } elseif (Test-GitWorktreeDirty -Path $currentWorktree) {
+        Add-HardBlock -Decision "stop_dirty_worktree" -Message "current worktree has uncommitted changes and cannot be parked"
+    } else {
+        $currentBranch = ((& git branch --show-current 2>$null) -join "").Trim()
+        if ($currentBranch -in @("master", "main")) {
+            Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "refusing to park protected branch $currentBranch"
+        } else {
+            $parkingTargetSha = ((& git rev-parse $ParkingTargetRef 2>$null) -join "").Trim()
+            if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($parkingTargetSha)) {
+                Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "parking target ref is not resolvable"
+            } else {
+                & git switch --detach $ParkingTargetRef | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "git switch --detach parking target failed"
+                } else {
+                    Add-ParkingAction -TargetRef $ParkingTargetRef -TargetSha $parkingTargetSha
+                }
+            }
+        }
+    }
+}
+
 Write-Section -Title "Dry-Run Handoff Temp Inventory"
 if (-not (Test-Path -LiteralPath $TempRoot)) {
     Write-Output "tempRootStatus: missing"
@@ -337,4 +470,3 @@ if (-not (Test-Path -LiteralPath $TempRoot)) {
 }
 
 Write-HygieneResult -Reason "stopped automation hygiene inventory completed"
-
