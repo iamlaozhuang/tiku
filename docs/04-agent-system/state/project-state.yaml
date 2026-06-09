@@ -87,7 +87,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
   branch: codex/module-run-v2-stale-clean-worktree-autocleanup-routing
-  commitSha: pending-local-commit
+  commitSha: bdb066f6
   prUrl: null
   retryCount: 0
   lastFailurePath: null

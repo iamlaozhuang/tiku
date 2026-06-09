@@ -39,6 +39,7 @@ prepare_next_task`.
 - Batch range: single local mechanism hardening batch for task
   `module-run-v2-stale-clean-worktree-autocleanup-routing`.
 - Commit: `df78b24e3d7e59884d3b00aaf3e0b98701bc7c9a` was the recovered master/origin baseline before this task branch.
+- implementationCommit: `bdb066f6 docs(agent): harden stale worktree cleanup routing`.
 - Startup readiness now routes any clean stale automation worktree finding to `startupDecision: cleanup_stale_artifacts`
   before next-task selection.
 - Autopilot now supports explicit `-RunStartupReadiness`. When startup returns `cleanup_stale_artifacts`, it runs
