@@ -7,6 +7,7 @@ upgradedAt: "2026-06-08T08:33:09-07:00"
 localExperienceClosureAlignedAt: "2026-06-08T14:59:56-07:00"
 planningToImplementationAutodriveAlignedAt: "2026-06-08T15:16:06-07:00"
 stoppedAutomationHygieneAlignedAt: "2026-06-08T15:30:38-07:00"
+localExperienceAcceptancePlannedAt: "2026-06-09T04:04:58-07:00"
 purpose: >-
   Source-of-truth matrix for advancing advanced-edition work by Module Run v2: larger domain-level Batch combinations
   with local full-loop completion gates, stronger thread rollover rules, automation handoff, and hook integration
@@ -359,6 +360,44 @@ localExperienceClosureGate:
     When automation wakes with no current in-progress task, it must select or prepare a pending task that keeps
     `localExperienceClosureGate` in scope. If another run owns the lease or a thread has in-progress work, automation
     must stop with the existing-run decision instead of starting unrelated work.
+  acceptanceBridgePlan:
+    status: proposal_only
+    generatedByTask: module-run-v2-local-experience-acceptance-planning
+    purpose: >-
+      Name the local API, Server Action, UI/browser, role-flow, and e2e bridge tasks needed before any L5/L6 experience
+      chain can claim local closure.
+    currentPriorityChain: personal-learning-ai-experience
+    bridgeSequence:
+      - step: local_api_or_server_action_contract
+        targetLocalFullLoopGate: L4
+        candidateTask: module-run-v2-personal-ai-local-transport-contract-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - src/app/api/v1/**
+          - server action surfaces
+          - repository or mapper expansion
+      - step: local_ui_browser_entry
+        targetLocalFullLoopGate: L5
+        candidateTask: module-run-v2-personal-ai-local-ui-browser-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - src/app/(student)/**
+          - browser verification
+          - visible result-reference flow
+      - step: local_role_flow_and_e2e_readiness
+        targetLocalFullLoopGate: L6
+        candidateTask: module-run-v2-cross-role-local-flow-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - role-flow verification
+          - e2e/**
+          - cross-role denial and redaction checks
+    hardBlocks:
+      - provider, env/secret, staging/prod/cloud/deploy, payment, or external-service work
+      - dependency, package, lockfile, schema, or migration work
+      - raw prompt, raw response, raw generated AI content, provider payload, secret, token, database URL, Authorization header,
+        plaintext redeem_code, full paper content, or raw answer text in evidence
+      - Cost Calibration Gate execution
 implementationAutoSeedGate:
   purpose: >-
     Let a completed Module Run v2 planning task seed and hand off executable low-risk local implementation tasks without
