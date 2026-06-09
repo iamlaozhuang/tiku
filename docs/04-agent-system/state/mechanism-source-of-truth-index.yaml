@@ -116,6 +116,11 @@ scriptControls:
     smokePath: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
     decisionOutput: localCapabilityDecision
     role: classifies local Docker DB, project resource read, provider key destination, provider call, schema migration, and Cost Calibration Gate capability readiness without executing those capabilities
+  - id: module-run-v2-recovery-self-repair
+    path: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
+    decisionOutput: recoverySelfRepairDecision
+    role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, recovery plan, post-closeout state reconciliation, or quiet active-owner exit
   - id: module-run-v2-autopilot-orchestrator
     path: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1

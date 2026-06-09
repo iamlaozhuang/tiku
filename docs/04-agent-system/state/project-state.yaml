@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-autodrive-phase-6
-updatedAt: "2026-06-09T09:10:55-07:00"
+  currentPhase: module-run-v2-autodrive-phase-7
+updatedAt: "2026-06-09T09:18:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -61,6 +61,7 @@ automation:
     parallelCoordinatorExecutorScriptPath: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1
     codexThreadBridgeReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2CodexThreadBridgeReadiness.ps1
     localCapabilityGateScriptPath: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
+    recoverySelfRepairScriptPath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
     codexAutomationId: tiku-module-run-v2-autopilot
@@ -84,16 +85,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 9a1238144a9b7baf9c34b50238b546669e24ff6b
-  lastKnownOriginMasterSha: 9a1238144a9b7baf9c34b50238b546669e24ff6b
+  lastKnownMasterSha: a9d82dd8a14e8695ffbbb139e8271b8c9c801b91
+  lastKnownOriginMasterSha: a9d82dd8a14e8695ffbbb139e8271b8c9c801b91
 currentTask:
-  id: module-run-v2-autodrive-phase-6
+  id: module-run-v2-autodrive-phase-7
   status: closed
   sourceStory: user-request-2026-06-09-unattended-autodrive-phase-3-8
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-6.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-6.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-6.md
-  branch: codex/module-run-v2-autodrive-phase-6
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-7.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-7.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-7.md
+  branch: codex/module-run-v2-autodrive-phase-7
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -131,7 +132,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 6 is implementing the local capability gate for Docker DB, project resource, DeepSeek key destination, and
-    provider-call adapter readiness. It must not execute real DB operations, read project materials, write env files,
-    call providers, or weaken blocked gates.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-6.md
+    Phase 7 is implementing the recovery self-repair decision gate. It may classify stale clean automation artifacts,
+    accepted post-closeout SHA drift, placeholder commit values, active owner no-ops, and hard blocks, but it must not
+    execute broad cleanup or touch business/high-risk surfaces in this Phase.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-7.md

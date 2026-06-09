@@ -171,6 +171,30 @@ evidence.
 `exit_active_owner_present` and `no_executable_task` are normal no-op terminal decisions for scheduled automation. They
 should not be treated as failed development work.
 
+## Recovery Self-Repair Control
+
+Before a recovery pass treats a startup finding as a stop, the agent layer may run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2RecoverySelfRepair.ps1 -TaskId <task-id>
+```
+
+The gate consumes `startupDecision` and emits `recoverySelfRepairDecision` plus `repairAction`:
+
+- `self_repair_ready`: a bounded repair action is available, such as
+  `repairAction: run_stopped_automation_hygiene_cleanup`,
+  `repairAction: adopt_recoverable_run_after_redacted_handoff_audit`, `repairAction: open_recovery_plan`, or
+  `repairAction: reconcile_post_closeout_state_sha`.
+- `continue_without_repair`: startup can proceed without a repair step.
+- `exit_active_owner_present`: another active owner or lease owns the lane; scheduled automation exits quietly.
+- `manual_required`: recovery requires a human decision.
+- `stop_for_hard_block`: the state is unsafe or blocked.
+
+The gate is decision-only by default. `cleanup_stale_artifacts` is not a reason to stop indefinitely; it is routed to the
+stopped-automation hygiene gate. State SHA reconciliation is repairable only when startup has already identified an
+accepted post-closeout ancestor path. Dirty unknown worktrees, invalid leases, blocked gates, provider/env/schema/deploy
+needs, and unsafe cleanup paths remain hard stops.
+
 ## Durable Autodrive Schema And Agent Action Dispatch
 
 Unattended local development may advance only when the target task carries a durable autodrive schema. The schema source
