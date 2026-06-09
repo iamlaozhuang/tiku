@@ -147,6 +147,11 @@ Choose validation commands by changed surface:
 
 If a command is unavailable, evidence must record the reason and residual risk.
 
+For unattended worktrees, record `localToolingReadiness` separately from product validation. A fresh clean worktree that
+lacks `node_modules`, local binary shims, or other already-approved local tooling is a local tooling readiness gap, not
+a product behavior failure. Automation may use an existing approved local tooling surface or a task-approved tooling
+repair, but it must not install dependencies, change package files, or mutate lockfiles without the dependency gate.
+
 For docs-only governance, closeout, evidence, audit review, task plan, task queue, and project state changes, apply this formatting order:
 
 1. Write final local validation level, blocked environment work, and residual gap wording.

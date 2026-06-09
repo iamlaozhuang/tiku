@@ -48,16 +48,32 @@ function Write-FixtureState {
         [Parameter(Mandatory = $true)][string]$QueuePath,
         [Parameter(Mandatory = $true)][string]$CurrentTaskStatus,
         [Parameter(Mandatory = $true)][string]$RemoteAutomationApproval,
-        [Parameter(Mandatory = $false)][switch]$IncludePendingTask
+        [Parameter(Mandatory = $false)][switch]$IncludePendingTask,
+        [Parameter(Mandatory = $false)][switch]$IncludeStaleStateWarnings
     )
+
+    $actualMasterSha = ((& git rev-parse master) -join "").Trim()
+    $actualOriginMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+    $stateMasterSha = $actualMasterSha
+    $stateOriginMasterSha = $actualOriginMasterSha
+    $currentTaskCommitSha = $actualMasterSha
+    if ($IncludeStaleStateWarnings) {
+        $stateMasterSha = ((& git rev-parse "$actualMasterSha~1") -join "").Trim()
+        $stateOriginMasterSha = ((& git rev-parse "$actualOriginMasterSha~1") -join "").Trim()
+        $currentTaskCommitSha = "pending-local-commit"
+    }
 
     @"
 schemaVersion: 1
 automation:
   unattendedControl:
     remoteAutomationApproval: $RemoteAutomationApproval
+repository:
+  lastKnownMasterSha: $stateMasterSha
+  lastKnownOriginMasterSha: $stateOriginMasterSha
 currentTask:
   id: module-run-v2-autopilot-maturity-hardening
+  commitSha: $currentTaskCommitSha
 "@ | Set-Content -LiteralPath $ProjectStatePath -Encoding UTF8
 
     $pendingBlock = ""
@@ -133,8 +149,9 @@ terminologyAnchors:
             -SkipWorktreeHygieneCheck
     )
     Assert-Contains -Output $continueOutput -Pattern "startupDecision: continue_current_task"
+    Assert-Contains -Output $continueOutput -Pattern "localToolingReadiness:"
 
-    Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludePendingTask
+    Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludePendingTask -IncludeStaleStateWarnings
     $pendingOutput = @(
         & $scriptPath `
             -ProjectStatePath $projectStatePath `
@@ -145,6 +162,9 @@ terminologyAnchors:
             -SkipWorktreeHygieneCheck
     )
     Assert-Contains -Output $pendingOutput -Pattern "startupDecision: prepare_next_task"
+    Assert-Contains -Output $pendingOutput -Pattern "startupStateWarning: lastKnownMasterSha is an accepted ancestor of master"
+    Assert-Contains -Output $pendingOutput -Pattern "startupStateWarning: currentTask.commitSha is a placeholder"
+    Assert-Contains -Output $pendingOutput -Pattern "postCloseoutStateReconciliation: recommended"
 
     Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning"
     $closeoutOutput = @(

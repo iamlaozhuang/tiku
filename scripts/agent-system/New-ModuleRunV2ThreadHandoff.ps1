@@ -74,6 +74,16 @@ function Write-Section {
     Write-Output "== $Title =="
 }
 
+function Test-PlaceholderCommitSha {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value)
+
+    return [string]::IsNullOrWhiteSpace($Value) -or
+        $Value -eq "null" -or
+        $Value -eq "pending-local-commit" -or
+        $Value -eq "pending-closeout-commit" -or
+        $Value -match "^pending-"
+}
+
 if (-not (Test-Path -LiteralPath $ProjectStatePath)) {
     throw "Missing project state file: $ProjectStatePath"
 }
@@ -87,13 +97,15 @@ $planPath = Get-IndentedScalar -Lines $projectStateLines -Section "currentTask" 
 $evidencePath = Get-IndentedScalar -Lines $projectStateLines -Section "currentTask" -Key "evidencePath"
 $branch = Get-IndentedScalar -Lines $projectStateLines -Section "currentTask" -Key "branch"
 $commitSha = Get-IndentedScalar -Lines $projectStateLines -Section "currentTask" -Key "commitSha"
+$fallbackCommitSha = "not_used"
 
 if ([string]::IsNullOrWhiteSpace($branch)) {
     $branch = ((& git branch --show-current) -join "").Trim()
 }
 
-if ([string]::IsNullOrWhiteSpace($commitSha) -or $commitSha -eq "null") {
+if (Test-PlaceholderCommitSha -Value $commitSha) {
     $commitSha = ((& git rev-parse HEAD) -join "").Trim()
+    $fallbackCommitSha = "git_head"
 }
 
 $gitStatus = ((& git status --short --branch) -join " | ").Trim()
@@ -145,6 +157,7 @@ Write-Output "handoffGenerator: $handoffGeneratorMode"
 Write-Output "handoffPath: $OutputPath"
 Write-Output "threadRolloverDecision: $Decision"
 Write-Output "nextModuleRunCandidate: $NextModuleRunCandidate"
+Write-Output "fallbackCommitSha: $fallbackCommitSha"
 Write-Output "threadToolHint: create_thread"
 Write-Output "threadToolHint: send_message_to_thread"
 Write-Output "Cost Calibration Gate remains blocked"

@@ -249,6 +249,11 @@ Clean registry entries marked `status: cleanup_ready` with `cleanupPolicy: clean
 `cleanup_stale_artifacts`. Invalid paths, active leases, remote divergence, and non-ancestor state drift remain hard
 blocks unless a narrower post-closeout SHA handoff exception applies.
 
+If startup sees state SHA values that are accepted ancestors of current Git reality, it should emit a
+`startupStateWarning` and `postCloseoutStateReconciliation` recommendation instead of blocking. Placeholder current-task
+commit values such as `pending-local-commit` must not be copied into handoff content; handoff generation should fall
+back to the current Git HEAD and mark the fallback.
+
 After Module Run v2 closeout, automation may generate a `nextModuleRunCandidate` proposal. The proposal is a planning
 artifact only; it is not approval to start implementation in the next module.
 

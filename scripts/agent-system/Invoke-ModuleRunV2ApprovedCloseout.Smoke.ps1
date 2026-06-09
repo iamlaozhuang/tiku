@@ -146,6 +146,7 @@ try {
         Assert-Contains -Output $output -Pattern "pushTarget: origin/master"
         Assert-Contains -Output $output -Pattern "automationWorktreeParking: detached origin/master"
         Assert-Contains -Output $output -Pattern "branchCleanup: deleted codex/module-run-v2-closeout-smoke"
+        Assert-Contains -Output $output -Pattern "postCloseoutStateReconciliation:"
 
         $queueAfter = Get-Content -Raw "docs/04-agent-system/state/task-queue.yaml"
         if ($queueAfter -notmatch "status:\s*closed") {

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-closeout-continuity-hardening
-updatedAt: "2026-06-09T02:48:35-07:00"
+  currentPhase: module-run-v2-unattended-blocker-hardening
+updatedAt: "2026-06-09T03:06:20-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,16 +77,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: b8f0871ac87accdd54c051f79179404982760229
-  lastKnownOriginMasterSha: b8f0871ac87accdd54c051f79179404982760229
+  lastKnownMasterSha: fb6f3c28405f6e1939ce4a71490ce176762a3bea
+  lastKnownOriginMasterSha: fb6f3c28405f6e1939ce4a71490ce176762a3bea
 currentTask:
-  id: module-run-v2-post-done-closeout-authorization-adoption
+  id: module-run-v2-unattended-blocker-hardening
   status: closed
-  sourceStory: user-request-2026-06-09-post-done-closeout-authorization-adoption
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
-  branch: codex/module-run-v2-ai-task-lifecycle-local-contract
+  sourceStory: user-request-2026-06-09-unattended-autopilot-blocker-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-unattended-blocker-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-unattended-blocker-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-unattended-blocker-hardening.md
+  branch: codex/module-run-v2-unattended-blocker-hardening
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -124,8 +124,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete `module-run-v2-post-done-closeout-authorization-adoption`, then use the repaired approved closeout path to
-    commit, fast-forward merge to `master`, push `origin/master`, and clean/park the current branch. Provider/env/deploy,
-    payment/external-service, schema/migration/dependency changes, e2e work, force push, and Cost Calibration Gate
-    execution remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+    Complete `module-run-v2-unattended-blocker-hardening` to remove repeat autopilot blockers found across the recent
+    closeout/recovery threads, then resume the next local-first Module Run candidate only after startup readiness passes.
+    Provider/env/deploy, payment/external-service, schema/migration/dependency changes, e2e work, force push, and Cost
+    Calibration Gate execution remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-unattended-blocker-hardening.md

@@ -286,6 +286,36 @@ function Test-RedactedHandoffReady {
     return $handoffFullPath.StartsWith($allowedRootFullPath, [System.StringComparison]::OrdinalIgnoreCase)
 }
 
+function Test-PlaceholderCommitSha {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value)
+
+    return [string]::IsNullOrWhiteSpace($Value) -or
+        $Value -eq "null" -or
+        $Value -eq "pending-local-commit" -or
+        $Value -eq "pending-closeout-commit" -or
+        $Value -match "^pending-"
+}
+
+function Test-GitAncestor {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Ancestor,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Descendant
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Ancestor) -or [string]::IsNullOrWhiteSpace($Descendant)) {
+        return $false
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & git merge-base --is-ancestor $Ancestor $Descendant 2>$null
+        return $LASTEXITCODE -eq 0
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Test-AutomationWorktreeHygiene {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
@@ -456,6 +486,15 @@ try {
         Add-Finding "HARD_BLOCK_PROTECTED_BRANCH $currentBranch"
     }
 
+    if ((Test-Path -LiteralPath "package.json") -and -not (Test-Path -LiteralPath "node_modules")) {
+        Write-Output "localToolingReadiness: missing_node_modules"
+        Write-Output "startupStateWarning: local JS tooling is unavailable in this worktree"
+    } elseif (Test-Path -LiteralPath "package.json") {
+        Write-Output "localToolingReadiness: node_modules_present"
+    } else {
+        Write-Output "localToolingReadiness: not_applicable"
+    }
+
     if (-not $SkipLeaseCheck) {
         $leaseArgs = @(
             "-NoProfile",
@@ -497,6 +536,25 @@ try {
     Write-Output "remoteAutomationApproval: $remoteAutomationApproval"
     if ($remoteAutomationApproval -eq "not_granted" -or [string]::IsNullOrWhiteSpace($remoteAutomationApproval)) {
         Add-Finding "HARD_BLOCK_AUTOMATION_APPROVAL_NOT_GRANTED"
+    }
+
+    $stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
+    $stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
+    $actualMasterSha = ((& git rev-parse master 2>$null) -join "").Trim()
+    $actualOriginMasterSha = ((& git rev-parse origin/master 2>$null) -join "").Trim()
+    if ($stateMasterSha -ne $actualMasterSha -and (Test-GitAncestor -Ancestor $stateMasterSha -Descendant $actualMasterSha)) {
+        Write-Output "startupStateWarning: lastKnownMasterSha is an accepted ancestor of master"
+        Write-Output "postCloseoutStateReconciliation: recommended master"
+    }
+    if ($stateOriginMasterSha -ne $actualOriginMasterSha -and (Test-GitAncestor -Ancestor $stateOriginMasterSha -Descendant $actualOriginMasterSha)) {
+        Write-Output "startupStateWarning: lastKnownOriginMasterSha is an accepted ancestor of origin/master"
+        Write-Output "postCloseoutStateReconciliation: recommended origin/master"
+    }
+
+    $currentTaskCommitSha = Get-ProjectScalar -Lines $projectStateLines -Key "commitSha"
+    if (Test-PlaceholderCommitSha -Value $currentTaskCommitSha) {
+        Write-Output "startupStateWarning: currentTask.commitSha is a placeholder"
+        Write-Output "postCloseoutStateReconciliation: recommended currentTask.commitSha"
     }
 
     if ($matrixContent -notmatch "Cost Calibration Gate remains blocked") {
