@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-parallel-autopilot-integration
-updatedAt: "2026-06-09T14:15:00-07:00"
+  currentPhase: module-run-v2-autopilot-runner-control
+updatedAt: "2026-06-09T14:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -80,13 +80,13 @@ repository:
   lastKnownMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
   lastKnownOriginMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
 currentTask:
-  id: module-run-v2-parallel-autopilot-integration
+  id: module-run-v2-autopilot-runner-control
   status: done
-  sourceStory: user-request-2026-06-09-parallel-autopilot-integration
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-parallel-autopilot-integration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-autopilot-integration.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-autopilot-integration.md
-  branch: codex/module-run-v2-parallel-autopilot-integration
+  sourceStory: user-request-2026-06-09-unattended-autodrive-runner
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autopilot-runner-control.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autopilot-runner-control.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autopilot-runner-control.md
+  branch: codex/module-run-v2-autopilot-runner-control
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -124,9 +124,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Local implementation for `module-run-v2-parallel-autopilot-integration` is ready for a reviewable local commit.
-    Autopilot now calls parallel readiness only when explicit candidate ids are provided, and durable parallel approval
-    schema is required before `can_assign_workers`. Do not merge, push, clean branches or worktrees, create threads or
-    worktrees, change package/lockfiles, run provider, env, deploy, payment, external-service, schema/migration, product
-    e2e, force push, or Cost Calibration Gate actions without fresh explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+    Local implementation for `module-run-v2-autopilot-runner-control` is ready for a reviewable local commit. The runner
+    consumes startup, cleanup, closeout, parallel, handoff, and stop decisions as a bounded local state machine, while
+    leaving product implementation, local DB operation, provider/env/secret, schema/migration, worker creation, merge,
+    push, cleanup, deploy, and Cost Calibration Gate actions blocked without fresh explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autopilot-runner-control.md

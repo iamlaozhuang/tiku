@@ -137,6 +137,55 @@ Only proceed when cleanup completes without hard blocks and startup readiness is
 fails, or startup still returns `cleanup_stale_artifacts`, stop and report the artifact class instead of broadening
 cleanup scope.
 
+## Autopilot Runner Control Loop
+
+The one-shot autopilot orchestrator is wrapped by a bounded runner control loop:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -TaskId <task-id>
+```
+
+The runner is the local automation state machine. It repeatedly consumes:
+
+- `startupDecision` from `Test-ModuleRunV2AutomationStartupReadiness.ps1`;
+- `stoppedAutomationHygieneDecision` from `Test-ModuleRunV2StoppedAutomationHygiene.ps1`;
+- `autopilotDecision` from `Invoke-ModuleRunV2Autopilot.ps1`.
+
+It emits `runnerDecision`, `runnerNextAction`, and `runnerStepCount`.
+
+The runner may automatically continue only through these already-gated actions:
+
+- leave the repository alone when `exit_active_owner_present` or an active lease owns the lane;
+- run stopped-automation hygiene cleanup when startup returns `cleanup_stale_artifacts`;
+- rerun startup after successful cleanup;
+- execute approved closeout only through `Invoke-ModuleRunV2Autopilot.ps1` and the existing structured
+  `closeoutPolicy`;
+- surface `prepare_next_task`, `continue_current_task`, `prepare_parallel_workers`, `launch_new_thread`, or
+  `prepare_handoff` for the Codex agent layer.
+
+The runner does not itself write product code, claim tasks, create Codex threads, create worker worktrees, perform serial
+branch integration, merge, push, deploy, write env files, call providers, run local database schema/migration actions, or
+execute Cost Calibration Gate. Those remain agent-layer or task-specific actions that require separate approval and
+evidence.
+
+`exit_active_owner_present` and `no_executable_task` are normal no-op terminal decisions for scheduled automation. They
+should not be treated as failed development work.
+
+## Local Capability Authorization Model
+
+To make local development close more loops without weakening safety, future tasks may grant specific local capabilities:
+
+| Capability                       | Default runner state                    | Required approval before use                                                                 |
+| -------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Local Docker database            | `task_approval_required`                | task-specific local DB validation approval, with schema/migration/destructive work separated |
+| Project `material`/`paper` input | `task_approval_required`                | read-only resource use approval and evidence redaction rules                                 |
+| DeepSeek API key destination     | `env_destination_confirmation_required` | confirmed local env-file destination and secret handling approval                            |
+| Real provider call               | `blocked_without_task_approval`         | provider validation approval, quota/cost statement, and redacted evidence                    |
+| Schema or migration action       | `blocked_without_task_approval`         | migration plan, backup/rollback boundary, and explicit DB operation approval                 |
+
+These approvals are not inferred from the runner existing. They must be recorded in the task queue, task plan, and
+evidence before the corresponding local action is executed.
+
 ## Parallel Coordinator Control Point
 
 Codex automation is a guardian first and a worker launcher only when durable approval says so. When startup readiness or
