@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: module-run-v2-autodrive-phase-0-2
-updatedAt: "2026-06-09T08:25:00-07:00"
+updatedAt: "2026-06-09T08:31:35-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -84,7 +84,7 @@ repository:
   lastKnownOriginMasterSha: 7e3449830ab6d5f96fdaf706acffe57a246cb64e
 currentTask:
   id: module-run-v2-autodrive-phase-0-2
-  status: done
+  status: closed
   sourceStory: user-request-2026-06-09-unattended-autodrive-global-plan
   planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-phase-0-2.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md
