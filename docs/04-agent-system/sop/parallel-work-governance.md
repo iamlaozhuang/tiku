@@ -79,6 +79,11 @@ candidate tasks, emits a file-lock table, and stops before any ambiguous assignm
 worktrees, Codex threads, handoffs, commits, merges, pushes, cleanup actions, provider calls, dependency changes,
 schema/migration work, or Cost Calibration Gate activity.
 
+The gate enforces durable parallel approval. If isolated candidate tasks lack `parallelBatchId`, `coordinatorTaskId`,
+`candidateTaskIds`, `baseSha`, `allowedParallelActions`, `blockedParallelActions`, `workerIsolation`,
+`serialIntegration`, `fileLocks`, and `mergeOrder`, it must return `use_serial_execution` instead of
+`can_assign_workers`.
+
 `use_serial_execution` is not a failure. It is the expected answer when a candidate touches shared coordinator-owned
 state, scripts, global automation SOPs, dependency manifests, or any other scope where parallel worker overhead would
 cost more time or token budget than it saves.

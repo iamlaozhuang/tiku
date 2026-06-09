@@ -56,6 +56,105 @@ try {
     $continueOutput = @(& $scriptPath -CompletedBatchCount 2 -SkipUnattendedReadiness -HandoffPath $handoffPath -CloseoutAuthorizationStatement "User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation.")
     Assert-Contains -Output $continueOutput -Pattern "autopilotDecision: continue_current_thread"
 
+    $parallelProjectStatePath = Join-Path -Path $fixtureRoot -ChildPath "parallel-project-state.yaml"
+    $parallelQueuePath = Join-Path -Path $fixtureRoot -ChildPath "parallel-task-queue.yaml"
+    @"
+schemaVersion: 1
+currentTask:
+  id: coordinator-task
+"@ | Set-Content -LiteralPath $parallelProjectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+parallelBatchId: smoke-parallel-batch
+coordinatorTaskId: coordinator-task
+candidateTaskIds:
+  - docs-worker-a
+  - docs-worker-b
+baseSha: fixture-base-sha
+allowedParallelActions:
+  - classify_candidates
+  - assign_workers
+blockedParallelActions:
+  - create_thread
+  - create_worktree
+  - merge
+  - push
+workerIsolation: required
+serialIntegration: required
+fileLocks:
+  - taskId: docs-worker-a
+    branch: codex/docs-worker-a
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-a.md
+    blockedFiles:
+      - package.json
+    evidencePath: docs/05-execution-logs/evidence/worker-a.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/worker-a.md
+  - taskId: docs-worker-b
+    branch: codex/docs-worker-b
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-b.md
+    blockedFiles:
+      - package.json
+    evidencePath: docs/05-execution-logs/evidence/worker-b.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/worker-b.md
+mergeOrder:
+  - docs-worker-a
+  - docs-worker-b
+tasks:
+  - id: closed-foundation
+    status: closed
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/evidence/closed-foundation.md
+    blockedFiles:
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+  - id: docs-worker-a
+    status: pending
+    taskKind: docs_only
+    dependencies:
+      - closed-foundation
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-a.md
+    blockedFiles:
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+  - id: docs-worker-b
+    status: pending
+    taskKind: docs_only
+    dependencies:
+      - closed-foundation
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-b.md
+    blockedFiles:
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+"@ | Set-Content -LiteralPath $parallelQueuePath -Encoding UTF8
+
+    $parallelOutput = @(
+        & $scriptPath `
+            -SkipUnattendedReadiness `
+            -ProjectStatePath $parallelProjectStatePath `
+            -QueuePath $parallelQueuePath `
+            -ParallelCandidateTaskIds "docs-worker-a,docs-worker-b" `
+            -ParallelCoordinatorTaskId "coordinator-task" `
+            -HandoffPath $handoffPath
+    )
+    Assert-Contains -Output $parallelOutput -Pattern "parallelDecision: can_assign_workers"
+    Assert-Contains -Output $parallelOutput -Pattern "parallelApproval: present"
+    Assert-Contains -Output $parallelOutput -Pattern "autopilotDecision: prepare_parallel_workers"
+
     $suggestOutput = @(& $scriptPath -CompletedBatchCount 4 -SkipUnattendedReadiness -HandoffPath $handoffPath)
     Assert-Contains -Output $suggestOutput -Pattern "autopilotDecision: prepare_handoff_then_continue"
     Assert-Contains -Output $suggestOutput -Pattern "nextModuleRunCandidate: ai-task-and-provider"

@@ -64,6 +64,44 @@ currentTask:
 
     @"
 schemaVersion: 1
+parallelBatchId: smoke-parallel-batch
+coordinatorTaskId: coordinator-task
+candidateTaskIds:
+  - docs-worker-a
+  - docs-worker-b
+baseSha: fixture-base-sha
+allowedParallelActions:
+  - classify_candidates
+  - assign_workers
+blockedParallelActions:
+  - create_thread
+  - create_worktree
+  - merge
+  - push
+workerIsolation: required
+serialIntegration: required
+fileLocks:
+  - taskId: docs-worker-a
+    branch: codex/docs-worker-a
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-a.md
+      - docs/05-execution-logs/evidence/worker-a.md
+    blockedFiles:
+      - package.json
+    evidencePath: docs/05-execution-logs/evidence/worker-a.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/worker-a.md
+  - taskId: docs-worker-b
+    branch: codex/docs-worker-b
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-b.md
+      - docs/05-execution-logs/evidence/worker-b.md
+    blockedFiles:
+      - package.json
+    evidencePath: docs/05-execution-logs/evidence/worker-b.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/worker-b.md
+mergeOrder:
+  - docs-worker-a
+  - docs-worker-b
 tasks:
   - id: closed-foundation
     status: closed
@@ -161,6 +199,7 @@ tasks:
     )
     Assert-Contains -Output $passOutput -Pattern "Module Run v2 Parallel Readiness"
     Assert-Contains -Output $passOutput -Pattern "parallelDecision: can_assign_workers"
+    Assert-Contains -Output $passOutput -Pattern "parallelApproval: present"
     Assert-Contains -Output $passOutput -Pattern "coordinator: required"
     Assert-Contains -Output $passOutput -Pattern "workerIsolation: required"
     Assert-Contains -Output $passOutput -Pattern "serialIntegration: required"
@@ -169,6 +208,61 @@ tasks:
     Assert-Contains -Output $passOutput -Pattern "fileLock: docs-worker-a docs/04-agent-system/sop/worker-a.md"
     Assert-Contains -Output $passOutput -Pattern "fileLock: docs-worker-b docs/04-agent-system/sop/worker-b.md"
     Assert-Contains -Output $passOutput -Pattern "Cost Calibration Gate remains blocked"
+
+    $queueWithoutApprovalPath = Join-Path -Path $fixtureRoot -ChildPath "task-queue-without-approval.yaml"
+    @"
+schemaVersion: 1
+tasks:
+  - id: closed-foundation
+    status: closed
+    taskKind: docs_only
+    allowedFiles:
+      - docs/05-execution-logs/evidence/closed-foundation.md
+    blockedFiles:
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+  - id: docs-worker-a
+    status: pending
+    taskKind: docs_only
+    dependencies:
+      - closed-foundation
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-a.md
+      - docs/05-execution-logs/evidence/worker-a.md
+    blockedFiles:
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+  - id: docs-worker-b
+    status: pending
+    taskKind: docs_only
+    dependencies:
+      - closed-foundation
+    allowedFiles:
+      - docs/04-agent-system/sop/worker-b.md
+      - docs/05-execution-logs/evidence/worker-b.md
+    blockedFiles:
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+"@ | Set-Content -LiteralPath $queueWithoutApprovalPath -Encoding UTF8
+
+    $missingApprovalOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $projectStatePath `
+            -QueuePath $queueWithoutApprovalPath `
+            -CandidateTaskIds "docs-worker-a,docs-worker-b" `
+            -CoordinatorTaskId "coordinator-task"
+    )
+    Assert-Contains -Output $missingApprovalOutput -Pattern "parallelDecision: use_serial_execution"
+    Assert-Contains -Output $missingApprovalOutput -Pattern "parallelApproval: missing"
 
     Invoke-ExpectFailure -ExpectedPattern "parallelDecision: stop_for_file_lock_conflict" -Command {
         & $scriptPath `

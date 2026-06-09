@@ -5255,3 +5255,80 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
     status: done
     retryCount: 0
+  - id: module-run-v2-parallel-autopilot-integration
+    title: Module Run v2 Parallel Autopilot Integration
+    phase: module-run-v2-parallel-autopilot-integration
+    sourceStory: user-request-2026-06-09-parallel-autopilot-integration
+    dependencies:
+      - module-run-v2-parallel-coordinator-readiness
+    taskPlanPolicy: required
+    humanApproval: >-
+      User requested planning the next optimization stage, reviewing it, and implementing it when sound. Scope is
+      limited to local automation scripts, smoke tests, SOP/state/queue alignment, task plan, evidence, and audit
+      review. This does not approve product code, provider/env/secret, staging/prod/cloud/deploy, payment,
+      external-service, dependency, package/lockfile changes, schema, migration, product e2e implementation, thread
+      creation, worktree creation, cleanup, merge, push, PR creation, force push, or Cost Calibration Gate execution.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - docs/04-agent-system/sop/parallel-work-governance.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - parallel_coordination
+      - autopilot_integration
+      - durable_approval
+      - file_lock
+      - worker_isolation
+      - serial_integration
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-parallel-autopilot-integration -PlannedFiles scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1,scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs/04-agent-system/sop/parallel-work-governance.md,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-parallel-autopilot-integration.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-autopilot-integration.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\parallel-work-governance.md docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-parallel-autopilot-integration.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-parallel-autopilot-integration.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-parallel-autopilot-integration.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 docs\04-agent-system\sop\parallel-work-governance.md docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-parallel-autopilot-integration.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-parallel-autopilot-integration.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-parallel-autopilot-integration.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2ParallelReadiness.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1,scripts\agent-system\Test-ModuleRunV2ParallelReadiness.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1,docs\04-agent-system\sop\parallel-work-governance.md,docs\04-agent-system\sop\automated-advancement-governance.md,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-parallel-autopilot-integration.md -Pattern 'parallelDecision','parallelApproval','prepare_parallel_workers','durable parallel approval','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-parallel-autopilot-integration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+    status: done
+    retryCount: 0

@@ -107,15 +107,16 @@ This orchestrator combines:
 
 It emits a machine-readable `autopilotDecision`:
 
-| Decision                        | Meaning                                                                   |
-| ------------------------------- | ------------------------------------------------------------------------- |
-| `continue_current_thread`       | Continue the approved local task in the current thread.                   |
-| `closeout_executed`             | Approved commit/merge/push/cleanup finished; rerun startup for next task. |
-| `prepare_handoff`               | Prepare handoff before continuing; no thread launch is approved.          |
-| `prepare_handoff_then_continue` | Handoff is prepared and same-thread continuation remains controlled.      |
-| `launch_new_thread`             | Codex may call `create_thread` with the generated handoff content.        |
-| `stop_for_hard_block`           | Stop immediately because a hard block was found.                          |
-| `stop_for_human_handoff`        | Stop and wait for user decision because safe automation cannot proceed.   |
+| Decision                        | Meaning                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `continue_current_thread`       | Continue the approved local task in the current thread.                                          |
+| `closeout_executed`             | Approved commit/merge/push/cleanup finished; rerun startup for next task.                        |
+| `prepare_handoff`               | Prepare handoff before continuing; no thread launch is approved.                                 |
+| `prepare_handoff_then_continue` | Handoff is prepared and same-thread continuation remains controlled.                             |
+| `prepare_parallel_workers`      | Parallel readiness approved candidate assignment; worker creation remains separately controlled. |
+| `launch_new_thread`             | Codex may call `create_thread` with the generated handoff content.                               |
+| `stop_for_hard_block`           | Stop immediately because a hard block was found.                                                 |
+| `stop_for_human_handoff`        | Stop and wait for user decision because safe automation cannot proceed.                          |
 
 `launch_new_thread` is not produced by chat memory alone. It requires a handoff file, a thread rollover decision, thread
 tool availability, and launch approval in the active task or user instruction.
@@ -165,6 +166,12 @@ The parallel readiness gate does not approve thread creation, worktree creation,
 merge, push, PR creation, dependency/package/lockfile changes, schema/migration work, provider/env/secret work,
 staging/prod/cloud/deploy work, payment work, external-service work, product e2e work, or Cost Calibration Gate
 execution.
+
+When `Invoke-ModuleRunV2Autopilot.ps1` receives explicit parallel candidate ids, it must invoke this gate before thread
+rollover or handoff preparation. `parallelDecision: can_assign_workers` maps to `autopilotDecision:
+prepare_parallel_workers`. `parallelDecision: use_serial_execution` maps to `autopilotDecision:
+continue_current_thread`. Any blocking parallel decision stops autopilot before worker launch. Autopilot still does not
+create workers, branches, worktrees, or Codex threads from this decision alone.
 
 ## Task Kind Boundary Matrix
 

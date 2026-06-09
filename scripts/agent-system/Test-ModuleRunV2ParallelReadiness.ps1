@@ -408,6 +408,47 @@ function Get-TaskReadiness {
     }
 }
 
+function Test-DurableParallelApproval {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$CandidateIds,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$CoordinatorId
+    )
+
+    $requiredAnchors = @(
+        "parallelBatchId:",
+        "coordinatorTaskId:",
+        "candidateTaskIds:",
+        "baseSha:",
+        "allowedParallelActions:",
+        "blockedParallelActions:",
+        "workerIsolation:",
+        "serialIntegration:",
+        "fileLocks:",
+        "mergeOrder:"
+    )
+
+    foreach ($requiredAnchor in $requiredAnchors) {
+        if ($Content -notmatch "(?m)^\s*$([regex]::Escape($requiredAnchor))") {
+            return $false
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($CoordinatorId) -and $Content -notmatch "(?m)^\s*coordinatorTaskId:\s*$([regex]::Escape($CoordinatorId))\s*$") {
+        return $false
+    }
+
+    foreach ($candidateId in $CandidateIds) {
+        $candidateListPattern = "(?m)^\s*-\s*$([regex]::Escape($candidateId))\s*$"
+        $fileLockPattern = "(?m)^\s*(?:-\s*)?taskId:\s*$([regex]::Escape($candidateId))\s*$"
+        if ($Content -notmatch $candidateListPattern -or $Content -notmatch $fileLockPattern) {
+            return $false
+        }
+    }
+
+    return $true
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 $taskRecords = New-Object System.Collections.Generic.List[object]
 $fileLocks = New-Object System.Collections.Generic.List[object]
@@ -430,6 +471,7 @@ try {
 
     $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
+    $queueContent = ($queueLines -join "`n")
     $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
 
     if ([string]::IsNullOrWhiteSpace($CoordinatorTaskId)) {
@@ -452,6 +494,15 @@ try {
     if ($CandidateTaskIds.Count -eq 0) {
         Add-Finding -Message "HARD_BLOCK_NO_CANDIDATE_TASKS"
         Write-ParallelResult -Decision "stop_for_hard_block" -Reason "no candidate task ids were provided or recoverable" -ExitCode 1
+    }
+
+    $parallelApprovalPresent = Test-DurableParallelApproval -Content $queueContent -CandidateIds $CandidateTaskIds -CoordinatorId $CoordinatorTaskId
+    if ($parallelApprovalPresent) {
+        Write-Output "parallelApproval: present"
+        Write-Output "durable parallel approval: present"
+    } else {
+        Write-Output "parallelApproval: missing"
+        Write-Output "durable parallel approval: missing"
     }
 
     foreach ($candidateTaskId in $CandidateTaskIds) {
@@ -589,6 +640,10 @@ try {
     $serialOnlyTaskRecords = @($taskRecords | Where-Object { $_.Level -eq "serial_only" })
     if ($serialOnlyTaskRecords.Count -gt 0) {
         Write-ParallelResult -Decision "use_serial_execution" -Reason "one or more candidates need coordinator-owned serial scope" -ExitCode 0
+    }
+
+    if (-not $parallelApprovalPresent) {
+        Write-ParallelResult -Decision "use_serial_execution" -Reason "durable parallel approval schema is missing" -ExitCode 0
     }
 
     Write-ParallelResult -Decision "can_assign_workers" -Reason "candidate tasks are isolated and file locks do not overlap" -ExitCode 0

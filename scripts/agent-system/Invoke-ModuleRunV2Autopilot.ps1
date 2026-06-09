@@ -39,6 +39,12 @@ param(
     [switch]$DryRunHandoff,
 
     [Parameter(Mandatory = $false)]
+    [string[]]$ParallelCandidateTaskIds = @(),
+
+    [Parameter(Mandatory = $false)]
+    [string]$ParallelCoordinatorTaskId = "",
+
+    [Parameter(Mandatory = $false)]
     [string[]]$ReadinessChangedFiles = @(),
 
     [Parameter(Mandatory = $false)]
@@ -86,6 +92,17 @@ param(
 $ErrorActionPreference = "Stop"
 $script:dryRunHandoffTempRoot = ""
 $agentSystemRoot = $PSScriptRoot
+
+$expandedParallelCandidateTaskIds = New-Object System.Collections.Generic.List[string]
+foreach ($parallelCandidateTaskIdInput in $ParallelCandidateTaskIds) {
+    foreach ($parallelCandidateTaskIdPart in ($parallelCandidateTaskIdInput -split ",")) {
+        $trimmedParallelCandidateTaskId = $parallelCandidateTaskIdPart.Trim()
+        if (-not [string]::IsNullOrWhiteSpace($trimmedParallelCandidateTaskId)) {
+            $expandedParallelCandidateTaskIds.Add($trimmedParallelCandidateTaskId)
+        }
+    }
+}
+$ParallelCandidateTaskIds = $expandedParallelCandidateTaskIds.ToArray()
 
 function Remove-DryRunHandoffTempRoot {
     if ([string]::IsNullOrWhiteSpace($script:dryRunHandoffTempRoot)) {
@@ -417,6 +434,48 @@ if ($CloseoutRecovery -and -not [string]::IsNullOrWhiteSpace($TaskId)) {
         $closeoutOutput | ForEach-Object { Write-Output $_ }
         Write-AutopilotResult -Decision "closeout_executed" -Reason "approved closeout executed; rerun startup readiness for the next task" -ExitCode 0
     }
+}
+
+if ($ParallelCandidateTaskIds.Count -gt 0) {
+    $parallelArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        (Join-Path -Path $agentSystemRoot -ChildPath "Test-ModuleRunV2ParallelReadiness.ps1"),
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-CandidateTaskIds",
+        ($ParallelCandidateTaskIds -join ",")
+    )
+    if (-not [string]::IsNullOrWhiteSpace($ParallelCoordinatorTaskId)) {
+        $parallelArgs += @("-CoordinatorTaskId", $ParallelCoordinatorTaskId)
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $parallelOutput = @(& powershell.exe @parallelArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    $parallelOutput | ForEach-Object { Write-Output $_ }
+    $parallelDecision = Get-DecisionValue -Output $parallelOutput -Key "parallelDecision"
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($parallelDecision)) {
+        Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "parallel readiness failed" -ExitCode 1
+    }
+
+    if ($parallelDecision -eq "can_assign_workers") {
+        Write-AutopilotResult -Decision "prepare_parallel_workers" -Reason "parallel readiness approved candidate assignment; worker creation remains separately controlled" -ExitCode 0
+    }
+
+    if ($parallelDecision -eq "use_serial_execution") {
+        Write-AutopilotResult -Decision "continue_current_thread" -Reason "parallel readiness selected serial coordinator execution" -ExitCode 0
+    }
+
+    Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "parallel readiness returned a blocking decision" -ExitCode 1
 }
 
 $threadArgs = @(
