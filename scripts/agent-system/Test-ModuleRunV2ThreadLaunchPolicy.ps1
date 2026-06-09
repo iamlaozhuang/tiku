@@ -17,7 +17,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$NextModuleRunCandidate = "ai-task-and-provider"
+    [string]$NextModuleRunCandidate = "no-executable-task-seed-or-approve-next-task"
 )
 
 $ErrorActionPreference = "Stop"
@@ -71,4 +71,3 @@ if ($ThreadRolloverDecision -eq "require_new_thread") {
 }
 
 Write-Result -Decision "stop_for_human_handoff" -Reason "thread rollover gate requested human handoff" -ExitCode 1
-

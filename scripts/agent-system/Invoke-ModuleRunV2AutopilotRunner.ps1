@@ -71,7 +71,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$NextModuleRunCandidate = "ai-task-and-provider",
+    [string]$NextModuleRunCandidate = "no-executable-task-seed-or-approve-next-task",
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]

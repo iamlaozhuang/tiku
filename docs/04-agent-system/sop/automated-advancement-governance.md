@@ -50,7 +50,9 @@ Automatic claiming may only select a task when all conditions are true:
 - no active branch or worktree already owns the same file scope;
 - the previous completed task has either been committed or has evidence explaining why it remains uncommitted.
 
-If no eligible task exists, the automation loop stops and records the next recommended action as `no_executable_pending_task`.
+If no eligible task exists, the automation loop stops as a quiet idle state and records the next recommended action as
+`no-executable-task-seed-or-approve-next-task`. This is not a failed development run and must not trigger retries,
+thread creation, or speculative task claiming.
 
 ## Unattended Local Control Point
 
@@ -267,14 +269,16 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 The schema gate emits `autodriveSchemaDecision`:
 
-| Decision              | Meaning                                                                                       |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| `can_autodrive`       | The task has safe base metadata, explicit autodrive policy, capabilities, closeout, registry. |
-| `proposal_only`       | The task is not yet executable by unattended autodrive; propose schema repair or use manual.  |
-| `stop_for_hard_block` | Base task metadata, risk gates, or capability values are unsafe.                              |
+| Decision                     | Meaning                                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| `can_autodrive`              | The task has safe base metadata, explicit autodrive policy, capabilities, closeout, registry.   |
+| `proposal_only`              | The task is not yet executable by unattended autodrive; propose schema repair or use manual.    |
+| `not_executable_closed_task` | The named task is terminal and should be treated as idle diagnostic state, not executable work. |
+| `stop_for_hard_block`        | Base task metadata, risk gates, or capability values are unsafe.                                |
 
 Missing advanced autodrive fields are proposal-only when the base task metadata is otherwise safe. Missing base task
-metadata, high-risk gates, unsafe capability values, and missing durable files remain hard blocks.
+metadata, high-risk gates, unsafe capability values, and missing durable files remain hard blocks. Terminal task statuses
+`done`, `closed`, `pushed`, and `merged` are valid audit targets but are not executable autodrive targets.
 
 The runner-to-agent bridge is:
 
@@ -523,6 +527,8 @@ The startup gate coordinates:
 - current task and pending task status from `task-queue.yaml`;
 - Codex automation approval state from `project-state.yaml`;
 - stale or dirty automation worktree detection;
+- local JS tooling readiness detail for lint/typecheck/Prettier availability;
+- local `codex/*` branch hygiene advisory counts;
 - external run registry and redacted handoff envelope state under `%USERPROFILE%\.codex\tiku`;
 - blocked gate anchors.
 
@@ -543,9 +549,10 @@ Automation must stop when the startup gate returns:
 - `startupDecision: stop_for_manual_decision`;
 - `startupDecision: no_executable_task`.
 
-The startup gate does not create threads, write handoffs, delete worktrees, or modify source files. It only decides
-whether the automation wakeup is allowed to proceed to the existing autopilot orchestrator or to a proposal-only planning
-step.
+The startup gate does not create threads, write handoffs, delete worktrees, delete branches, or modify source files. It
+only decides whether the automation wakeup is allowed to proceed to the existing autopilot orchestrator or to a
+proposal-only planning step. Branch hygiene output from startup is advisory; cleanup still belongs to
+`Test-ModuleRunV2BranchHygiene.ps1 -Cleanup` and requires an approved cleanup path.
 
 `Test-ModuleRunV2UnattendedReadiness.ps1` writes a `runRegistryHeartbeat` to
 `%USERPROFILE%\.codex\tiku\automation-runs` for the current worktree. The registry entry is a redacted local control
@@ -580,9 +587,11 @@ Clean registry entries marked `status: cleanup_ready` with `cleanupPolicy: clean
 to `cleanup_stale_artifacts` before next-task selection, because the stopped-automation hygiene gate can classify them as
 `stale_clean_worktree` cleanup candidates. Expired `status: active` registry files whose heartbeat is stale and whose
 worktree path is missing are classified as `expired_active_missing_worktree` cleanup candidates by stopped-automation
-hygiene; fresh active heartbeats remain active-owner no-ops. Invalid paths, active leases, remote divergence, dirty
-worktrees, failed cleanup actions, and non-ancestor state drift remain hard blocks unless a narrower post-closeout
-checkpoint exception applies.
+hygiene. Expired `active` registry files whose task is terminal or no longer present in the active queue, whose worktree
+is clean or non-Git, and whose registry has no redacted handoff are classified as `expired_active_terminal_registry`
+cleanup candidates; cleanup may remove only the registry file, not the worktree. Fresh active heartbeats remain
+active-owner no-ops. Invalid paths, active leases, remote divergence, dirty worktrees, failed cleanup actions, and
+non-ancestor state drift remain hard blocks unless a narrower post-closeout checkpoint exception applies.
 
 If startup sees state SHA values that are accepted ancestors of current Git reality, it should emit a
 `startupStateWarning` and `startupStateCheckpoint: accepted_ancestor_checkpoint` instead of blocking or starting a state
@@ -779,12 +788,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 ```
 
 `-Cleanup` may remove only expired clean lease files, run registry files explicitly marked `cleanup_ready`, expired
-`active` registry files with stale heartbeat and missing worktree path, their redacted handoff envelopes inside the
-configured handoff root, stale clean automation worktrees inside the Codex automation worktree root, orphan automation
-worktree directories inside that root that are no longer registered by Git and contain no `.git` metadata, and dry-run
-handoff temp directories named `tiku-autopilot-handoff-*` inside the system temp root. It must not delete dirty
-worktrees, orphan directories that still contain Git metadata, paths outside the approved roots, source files in the
-primary repository, env files, schema, migration, or evidence logs.
+`active` registry files with stale heartbeat and missing worktree path, expired active terminal registry files that no
+longer own executable work, their redacted handoff envelopes inside the configured handoff root, stale clean automation
+worktrees inside the Codex automation worktree root, orphan automation worktree directories inside that root that are no
+longer registered by Git and contain no `.git` metadata, and dry-run handoff temp directories named
+`tiku-autopilot-handoff-*` inside the system temp root. It must not delete dirty worktrees, orphan directories that still
+contain Git metadata, paths outside the approved roots, source files in the primary repository, env files, schema,
+migration, or evidence logs.
 
 If `git worktree remove --force` partially succeeds and leaves a non-Git orphan directory under the automation worktree
 root, the hygiene gate must keep classifying it as `orphan_worktree_directory` until it is removed or blocked for manual

@@ -5,7 +5,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$NextModuleRunCandidate = "phase-3-8-mechanism-closeout"
+    [string]$NextModuleRunCandidate = "no-executable-task-seed-or-approve-next-task"
 )
 
 $ErrorActionPreference = "Stop"

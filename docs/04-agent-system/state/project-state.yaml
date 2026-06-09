@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-orphan-worktree-cleanup-hardening
-updatedAt: "2026-06-09T10:57:39-07:00"
+  currentPhase: module-run-v2-idle-and-hygiene-hardening-closed
+updatedAt: "2026-06-09T11:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -87,16 +87,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fa00ad4b0978dcc0a9a85ff6d479549e6071c816
-  lastKnownOriginMasterSha: fa00ad4b0978dcc0a9a85ff6d479549e6071c816
+  lastKnownMasterSha: ef1a3ab7075b1e4100fe83af19bd4611dd2bb723
+  lastKnownOriginMasterSha: ef1a3ab7075b1e4100fe83af19bd4611dd2bb723
 currentTask:
-  id: module-run-v2-orphan-worktree-cleanup-hardening
+  id: module-run-v2-idle-and-hygiene-hardening
   status: closed
-  sourceStory: user-request-2026-06-09-unattended-autodrive-orphan-worktree-cleanup-hardening
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
-  branch: codex/module-run-v2-orphan-worktree-cleanup-hardening
+  sourceStory: user-request-2026-06-09-module-run-v2-full-self-check-follow-up
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+  branch: codex/module-run-v2-idle-and-hygiene-hardening
   commitShaSemantics: task_closeout_checkpoint_or_pending_local_commit
   commitSha: pending-local-commit
   prUrl: null
@@ -135,7 +135,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Finish the Module Run v2 orphan worktree cleanup hardening task: stopped-automation hygiene should detect and
-    safely remove non-Git orphan automation worktree directories after partial git worktree cleanup, while preserving
-    hard stops for Git metadata, dirty worktrees, and unsafe paths.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+    Module Run v2 idle and hygiene hardening is ready for approved closeout. After commit, fast-forward merge, push, and
+    current short-branch cleanup, leave automation paused unless the user separately approves unpausing or new task
+    seeding.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md

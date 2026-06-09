@@ -130,7 +130,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
     decisionOutput: stoppedAutomationHygieneDecision
-    role: classifies stopped automation residue into active-owner stops, dirty/manual stops, or bounded cleanup candidates including expired registry files, stale clean worktrees, and non-Git orphan worktree directories inside the automation worktree root
+    role: classifies stopped automation residue into active-owner stops, dirty/manual stops, or bounded cleanup candidates including cleanup-ready registry files, expired missing-worktree registry files, expired terminal-task registry files, stale clean worktrees, and non-Git orphan worktree directories inside the automation worktree root
   - id: module-run-v2-branch-hygiene
     path: scripts/agent-system/Test-ModuleRunV2BranchHygiene.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2BranchHygiene.Smoke.ps1
@@ -155,7 +155,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
     decisionOutput: startupDecision
-    role: single scheduler startup gate for lease, state, queue, worktree hygiene, and blocked gate anchors
+    role: single scheduler startup gate for lease, state, queue, worktree hygiene, local tooling readiness, branch hygiene advisories, run registry state, and blocked gate anchors
   - id: module-run-v2-parallel-readiness
     path: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1
@@ -170,7 +170,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
     decisionOutput: autodriveSchemaDecision
-    role: read-only durable schema gate that classifies tasks as can_autodrive, proposal_only, or hard-blocked
+    role: read-only durable schema gate that classifies tasks as can_autodrive, proposal_only, not_executable_closed_task, or hard-blocked
   - id: module-run-v2-agent-action-dispatcher
     path: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1

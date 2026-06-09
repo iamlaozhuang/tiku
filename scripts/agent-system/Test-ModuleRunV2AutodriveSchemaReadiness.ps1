@@ -308,6 +308,11 @@ try {
     Write-Output "validationCommandCount: $($validationCommands.Count)"
     Write-Output "validationLifecycleCommandCount: $($validationLifecycleCommands.Count)"
 
+    if ($status -in @("done", "closed", "pushed", "merged")) {
+        Write-Output "not_executable_closed_task: $TaskId status=$status"
+        Write-AutodriveSchemaResult -Decision "not_executable_closed_task" -Reason "task is terminal and should be treated as idle, not executable autodrive work" -ExitCode 0
+    }
+
     if ($status -notin @("pending", "in_progress")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_TASK_STATUS $TaskId status=$status"
     }

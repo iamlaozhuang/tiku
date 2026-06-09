@@ -20,7 +20,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$NextModuleRunCandidate = "resilient-recovery-self-repair"
+    [string]$NextModuleRunCandidate = "no-executable-task-seed-or-approve-next-task"
 )
 
 $ErrorActionPreference = "Stop"

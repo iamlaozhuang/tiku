@@ -38,7 +38,10 @@ Task kinds may use a subset:
 | `implementation` | `pending -> claimed -> planned -> implemented -> validated -> reviewed -> committed -> closed` |
 | `closeout`       | `pending -> claimed -> validated -> reviewed -> merged -> pushed -> closed`                    |
 
-Legacy `done` remains acceptable only when evidence exists and the task predates this model.
+Legacy `done` remains acceptable only when evidence exists and the task predates this model. Terminal statuses
+`done`, `closed`, `pushed`, and `merged` are audit and recovery states, not executable work states. Readiness tools may
+inspect them, but must report an idle diagnostic such as `not_executable_closed_task` instead of treating the task as
+eligible for editing.
 
 ## Task Entry Gate
 
@@ -53,6 +56,10 @@ Before editing, the agent must confirm:
 - code-stage queue seeding is not implied unless explicitly approved.
 
 If any entry condition fails, stop and record the blocker before editing.
+
+If the named task is already terminal, the entry gate must not start pre-edit execution, create a new branch, or rewrite
+task state. It should return an idle diagnostic and require either a pending successor task or a fresh human-approved
+repair/closeout task before any further edits.
 
 ## Planning Gate
 
@@ -109,6 +116,10 @@ phase map:
 If `validationCommandLifecycle` is present, serial validation and closeout readiness use only `post_edit` and `closeout`
 commands. Legacy `validationCommands` remains required for compatibility and human readability, but it is not approval
 to bypass lifecycle phase rules or rerun pre-edit gates after a task is already closed.
+
+Pre-edit readiness on a terminal task is valid only as a recovery diagnostic. It must not emit a normal
+`work readiness passed` execution signal; it should emit `workReadinessDecision: not_executable_closed_task` and exit
+without editing.
 
 Then run broader gates as relevant:
 

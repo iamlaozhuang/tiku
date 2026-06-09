@@ -157,7 +157,7 @@ tasks:
 
     $suggestOutput = @(& $scriptPath -CompletedBatchCount 4 -SkipUnattendedReadiness -HandoffPath $handoffPath)
     Assert-Contains -Output $suggestOutput -Pattern "autopilotDecision: prepare_handoff_then_continue"
-    Assert-Contains -Output $suggestOutput -Pattern "nextModuleRunCandidate: ai-task-and-provider"
+    Assert-Contains -Output $suggestOutput -Pattern "nextModuleRunCandidate: no-executable-task-seed-or-approve-next-task"
 
     Invoke-ExpectFailure -ExpectedPattern "autopilotDecision: stop_for_human_handoff" -Command {
         & $scriptPath -CompletedBatchCount 6 -SkipUnattendedReadiness -HandoffPath $handoffPath
@@ -214,7 +214,7 @@ tasks:
             -ThreadToolAvailable
     )
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "autopilotDecision: launch_new_thread"
-    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "nextModuleRunCandidate: ai-task-and-provider"
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "nextModuleRunCandidate: no-executable-task-seed-or-approve-next-task"
 
     $cleanWorktreePath = Join-Path -Path $fixtureRoot -ChildPath "clean-autopilot-worktree"
     try {
@@ -406,7 +406,7 @@ tasks:
             'localFullLoopGate: L2',
             'blocked remainder: Cost Calibration Gate remains blocked',
             'threadRolloverGate: continue_current_thread',
-            'nextModuleRunCandidate: ai-task-and-provider',
+            'nextModuleRunCandidate: no-executable-task-seed-or-approve-next-task',
             'git diff --check',
             'Cost Calibration Gate remains blocked'
         ) | Set-Content -LiteralPath "docs/05-execution-logs/evidence/policy-closeout-smoke.md" -Encoding UTF8

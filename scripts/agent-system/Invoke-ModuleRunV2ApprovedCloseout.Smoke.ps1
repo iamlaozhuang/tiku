@@ -104,7 +104,7 @@ try {
             'localFullLoopGate: L2',
             'blocked remainder: Cost Calibration Gate remains blocked',
             'threadRolloverGate: continue_current_thread',
-            'nextModuleRunCandidate: ai-task-and-provider',
+            'nextModuleRunCandidate: no-executable-task-seed-or-approve-next-task',
             'git diff --check',
             'Cost Calibration Gate remains blocked'
         ) | Set-Content -LiteralPath "docs/05-execution-logs/evidence/approved-closeout-smoke.md" -Encoding UTF8
@@ -225,7 +225,7 @@ try {
             'localFullLoopGate: L2',
             'blocked remainder: Cost Calibration Gate remains blocked',
             'threadRolloverGate: continue_current_thread',
-            'nextModuleRunCandidate: ai-task-and-provider',
+            'nextModuleRunCandidate: no-executable-task-seed-or-approve-next-task',
             'git diff --check',
             'Cost Calibration Gate remains blocked'
         ) | Set-Content -LiteralPath "docs/05-execution-logs/evidence/clean-ahead-smoke.md" -Encoding UTF8

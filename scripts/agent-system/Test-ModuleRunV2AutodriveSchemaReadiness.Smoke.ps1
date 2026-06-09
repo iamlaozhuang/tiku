@@ -166,6 +166,15 @@ try {
     Assert-Contains -Output $fullOutput -Pattern "autodriveSchemaDecision: can_autodrive"
     Assert-Contains -Output $fullOutput -Pattern "validationLifecycleCommandCount: 2"
 
+    $closedTaskBlock = $fullTaskBlock -replace "status: in_progress", "status: closed"
+    $closedFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $closedTaskBlock
+    $closedOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $closedFiles.StatePath -QueuePath $closedFiles.QueuePath -SchemaPath $closedFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Closed-task schema fixture should be an idle diagnostic, not a hard block.`n$($closedOutput -join "`n")"
+    }
+    Assert-Contains -Output $closedOutput -Pattern "not_executable_closed_task"
+    Assert-Contains -Output $closedOutput -Pattern "autodriveSchemaDecision: not_executable_closed_task"
+
     $proposalTaskBlock = $fullTaskBlock -replace "(?ms)\s{4}autodrivePolicy:.*?\s{4}capabilities:", "    capabilities:"
     $proposalFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $proposalTaskBlock
     $proposalOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $proposalFiles.StatePath -QueuePath $proposalFiles.QueuePath -SchemaPath $proposalFiles.SchemaPath)

@@ -6690,3 +6690,177 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
     status: closed
     retryCount: 0
+  - id: module-run-v2-idle-and-hygiene-hardening
+    title: Module Run v2 Idle And Hygiene Hardening
+    phase: module-run-v2-idle-and-hygiene-hardening
+    sourceStory: user-request-2026-06-09-module-run-v2-full-self-check-follow-up
+    dependencies:
+      - module-run-v2-orphan-worktree-cleanup-hardening
+    taskPlanPolicy: required
+    humanApproval: >-
+      User asked to organize and execute a serial mechanism task to fix the full-control-loop self-check issues:
+      audit-only closed-task diagnostics should not look like unsafe execution failures, stale run registry noise should
+      be recoverable when it no longer owns a lane, startup should surface merged branch cleanup and local tooling
+      readiness without blocking, nextModuleRunCandidate wording should be consistent, and project-state handoff should
+      not tell agents to finish an already closed task. This approval covers local mechanism scripts, smoke tests,
+      SOP/state/schema/index updates, task plan, evidence, and audit review. It does not approve unpausing Codex
+      automation, product implementation, dependency/package/lockfile changes, env/secret writes, real provider calls,
+      real local Docker DB operations, project material/paper/paper_asset resource reads for tests, schema/migration,
+      e2e, staging/prod/cloud/deploy, payment, external-service, PR/force push, destructive DB operation, Cost
+      Calibration Gate execution, or final push/merge without separate closeout approval. On 2026-06-09, the user asked
+      whether commit/merge/push and short-branch cleanup were appropriate and approved execution if suitable; suitability
+      checks passed, so local commit, fast-forward merge to master, push origin/master, and deletion of this short-lived
+      local branch are approved. This does not approve cleanup of unrelated historical registry or branch residue.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - continue_task
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 6
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
+      - scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
+      - scripts/agent-system/Test-ModuleRunV2CodexThreadBridgeReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - startup_readiness
+      - stopped_automation_hygiene
+      - run_registry_lifecycle
+      - branch_hygiene
+      - local_tooling_readiness
+      - evidence_integrity
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-idle-and-hygiene-hardening -PlannedFiles scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1,scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1,scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1,scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1,scripts/agent-system/Test-ModuleRunV2CodexThreadBridgeReadiness.ps1,scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/task-lifecycle-governance.md,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1 -SummaryOnly
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId module-run-v2-idle-and-hygiene-hardening
+      - phase: closeout
+        command: npm.cmd run lint
+      - phase: closeout
+        command: npm.cmd run typecheck
+      - phase: closeout
+        command: git diff --check
+      - phase: closeout
+        command: node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - phase: closeout
+        command: node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - phase: closeout
+        command: Select-String -Path scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1,scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1,scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\state\autodrive-control-schema.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md -Pattern 'not_executable_closed_task','expired_active_terminal_registry','startupBranchHygieneDecision','localToolingReadiness','no-executable-task-seed-or-approve-next-task','Cost Calibration Gate remains blocked'
+      - phase: closeout
+        command: Select-String -Path scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 -Pattern 'no-executable-task-seed-or-approve-next-task'
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-idle-and-hygiene-hardening -PlannedFiles scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2WorkReadiness.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1,scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1,scripts/agent-system/New-ModuleRunV2ThreadHandoff.ps1,scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1,scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1,scripts/agent-system/Test-ModuleRunV2CodexThreadBridgeReadiness.ps1,scripts/agent-system/Test-ModuleRunV2ThreadLaunchPolicy.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/task-lifecycle-governance.md,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/04-agent-system/state/mechanism-source-of-truth-index.yaml,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1 -SummaryOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId module-run-v2-idle-and-hygiene-hardening
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+      - Select-String -Path scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1,scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1,scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1,scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\state\autodrive-control-schema.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-idle-and-hygiene-hardening.md -Pattern 'not_executable_closed_task','expired_active_terminal_registry','startupBranchHygieneDecision','localToolingReadiness','no-executable-task-seed-or-approve-next-task','Cost Calibration Gate remains blocked'
+      - Select-String -Path scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 -Pattern 'no-executable-task-seed-or-approve-next-task'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+    status: closed
+    retryCount: 0

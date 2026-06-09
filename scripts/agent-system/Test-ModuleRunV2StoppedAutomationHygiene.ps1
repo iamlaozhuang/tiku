@@ -18,6 +18,9 @@ param(
     [string]$HandoffRoot = "",
 
     [Parameter(Mandatory = $false)]
+    [string]$QueuePath = "docs\04-agent-system\state\task-queue.yaml",
+
+    [Parameter(Mandatory = $false)]
     [string]$NowUtc = "",
 
     [Parameter(Mandatory = $false)]
@@ -188,17 +191,23 @@ function Test-GitWorktreeDirty {
         return $false
     }
 
-    $insideWorktree = ((& git -C $Path rev-parse --is-inside-work-tree 2>$null) -join "").Trim()
-    if ($LASTEXITCODE -ne 0 -or $insideWorktree -ne "true") {
-        return $false
-    }
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $insideWorktree = ((& git -C $Path rev-parse --is-inside-work-tree 2>$null) -join "").Trim()
+        if ($LASTEXITCODE -ne 0 -or $insideWorktree -ne "true") {
+            return $false
+        }
 
-    $status = @(& git -C $Path status --porcelain 2>$null)
-    if ($LASTEXITCODE -ne 0) {
-        return $true
-    }
+        $status = @(& git -C $Path status --porcelain 2>$null)
+        if ($LASTEXITCODE -ne 0) {
+            return $true
+        }
 
-    return $status.Count -gt 0
+        return $status.Count -gt 0
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
 }
 
 function Get-GitWorktrees {
@@ -231,6 +240,35 @@ function Get-GitWorktrees {
     }
 
     return $worktrees.ToArray()
+}
+
+function Get-TaskStatusFromQueue {
+    param([Parameter(Mandatory = $false)][AllowEmptyString()][string]$TaskId)
+
+    if ([string]::IsNullOrWhiteSpace($TaskId) -or $script:taskQueueLinesForRegistry.Count -eq 0) {
+        return ""
+    }
+
+    $insideTask = $false
+    foreach ($line in $script:taskQueueLinesForRegistry) {
+        if ($line -match "^\s+- id:\s+(.+?)\s*$") {
+            $insideTask = $Matches[1].Trim() -eq $TaskId
+            continue
+        }
+
+        if ($insideTask -and $line -match "^\s+status:\s*(.+?)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return "missing_from_active_queue"
+}
+
+function Test-RunRegistryTaskTerminal {
+    param([Parameter(Mandatory = $false)][AllowEmptyString()][string]$TaskId)
+
+    $taskStatus = Get-TaskStatusFromQueue -TaskId $TaskId
+    return $taskStatus -in @("done", "closed", "pushed", "merged", "missing_from_active_queue")
 }
 
 function Remove-SafeFile {
@@ -463,6 +501,10 @@ $hardBlocks = New-Object System.Collections.Generic.List[object]
 $cleanupCandidates = New-Object System.Collections.Generic.List[object]
 $cleanupActions = New-Object System.Collections.Generic.List[object]
 $parkingActions = New-Object System.Collections.Generic.List[object]
+$taskQueueLinesForRegistry = @()
+if (-not [string]::IsNullOrWhiteSpace($QueuePath) -and (Test-Path -LiteralPath $QueuePath)) {
+    $taskQueueLinesForRegistry = @(Get-Content -LiteralPath $QueuePath)
+}
 
 Write-Section -Title "Module Run v2 Stopped Automation Hygiene"
 Write-Output "stoppedAutomationHygieneMode: hard_block"
@@ -478,6 +520,7 @@ Write-Output "automationWorktreeRoot: $AutomationWorktreeRoot"
 Write-Output "tempRoot: $TempRoot"
 Write-Output "runRegistryRoot: $RunRegistryRoot"
 Write-Output "handoffRoot: $HandoffRoot"
+Write-Output "queuePath: $QueuePath"
 Write-Output "nowUtc: $($effectiveNow.ToString("o"))"
 Write-Output "activeRunHeartbeatMinutes: $ActiveRunHeartbeatMinutes"
 
@@ -545,9 +588,11 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
         $redactedHandoffPath = [string]$registryJson.redactedHandoffPath
         $registryWorktreePath = [string]$registryJson.worktreePath
         $registryHeartbeatAtUtc = [string]$registryJson.heartbeatAtUtc
+        $registryTaskId = [string]$registryJson.taskId
         Write-Detail -Message "runRegistry: $($registryFile.FullName)"
         Write-Detail -Message "runRegistryRunId: $runId"
         Write-Detail -Message "runRegistryStatus: $runStatus"
+        Write-Detail -Message "runRegistryTaskId: $registryTaskId"
         Write-Detail -Message "runRegistryCleanupPolicy: $cleanupPolicy"
         Write-Detail -Message "runRegistryWorktreePath: $registryWorktreePath"
         Write-Detail -Message "runRegistryHeartbeatAtUtc: $registryHeartbeatAtUtc"
@@ -581,6 +626,18 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
 
                 if ($Cleanup) {
                     Remove-SafeFile -Path $registryFile.FullName -AllowedRoot $RunRegistryRoot -Kind "expired_active_missing_worktree"
+                    if (-not (Test-Path -LiteralPath $registryFile.FullName)) {
+                        Add-RunRegistryCleanupAction -RunId $runId -Path $registryFile.FullName
+                    }
+                }
+            } elseif ((Test-RunRegistryTaskTerminal -TaskId $registryTaskId) -and
+                -not (Test-GitWorktreeDirty -Path $registryWorktreePath) -and
+                [string]::IsNullOrWhiteSpace($redactedHandoffPath)) {
+                Add-CleanupCandidate -Kind "expired_active_terminal_registry" -Path $registryFile.FullName
+                Add-RunRegistryCleanupCandidate -RunId $runId -Path $registryFile.FullName
+
+                if ($Cleanup) {
+                    Remove-SafeFile -Path $registryFile.FullName -AllowedRoot $RunRegistryRoot -Kind "expired_active_terminal_registry"
                     if (-not (Test-Path -LiteralPath $registryFile.FullName)) {
                         Add-RunRegistryCleanupAction -RunId $runId -Path $registryFile.FullName
                     }

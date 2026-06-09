@@ -46,6 +46,32 @@ taskAutodrivePolicy:
         - out_of_scope_change
         - dirty_unknown_worktree
         - active_owner_present
+schemaReadiness:
+  decisionOutput: autodriveSchemaDecision
+  decisions:
+    - can_autodrive
+    - proposal_only
+    - not_executable_closed_task
+    - stop_for_hard_block
+  terminalTaskStatuses:
+    - done
+    - closed
+    - pushed
+    - merged
+  idleCandidateValue: no-executable-task-seed-or-approve-next-task
+  executionRule: terminal task diagnostics are zero-exit idle results and must not be treated as executable autodrive work.
+startupDiagnostics:
+  localToolingReadinessValues:
+    - not_applicable
+    - missing_node_modules
+    - degraded
+    - ready
+  branchHygieneAdvisoryDecisions:
+    - cleanup_available
+    - manual_review_available
+    - clean
+    - advisory_unavailable
+  executionRule: startup diagnostics are advisory unless startupDecision itself returns a hard block or cleanup transaction.
 capabilities:
   defaultState: denied
   fields:
@@ -146,6 +172,7 @@ registryLifecycle:
     - stale_clean_worktree
     - orphan_worktree_directory
     - expired_active_missing_worktree
+    - expired_active_terminal_registry
     - cleanup_ready_registry
   redactionRequired: true
 parallelBatch:

@@ -22,7 +22,7 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$NextModuleRunCandidate = "full-autodrive-control-loop-acceptance"
+    [string]$NextModuleRunCandidate = "no-executable-task-seed-or-approve-next-task"
 )
 
 $ErrorActionPreference = "Stop"

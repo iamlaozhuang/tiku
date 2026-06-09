@@ -331,11 +331,8 @@ try {
     Write-Output "evidencePath: $evidencePath"
     Write-Output "auditReviewPath: $auditReviewPath"
 
-    if ($taskStatus -in @("done", "closed", "pushed")) {
-        Add-Finding "HARD_BLOCK_INACTIVE_TASK $TaskId status=$taskStatus"
-    }
-
-    if ($taskStatus -notin @("pending", "in_progress")) {
+    $isTerminalTask = $taskStatus -in @("done", "closed", "pushed", "merged")
+    if ((-not $isTerminalTask) -and $taskStatus -notin @("pending", "in_progress")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_TASK_STATUS $TaskId status=$taskStatus"
     }
 
@@ -410,6 +407,13 @@ try {
     }
 
     Write-Section -Title "Result"
+    if ($isTerminalTask) {
+        Write-Output "workReadinessDecision: not_executable_closed_task"
+        Write-Output "workReadinessAction: idle_no_executable_task"
+        Write-Output "reason: task is terminal and should not enter pre-edit execution"
+        exit 0
+    }
+
     if ($findings.Count -gt 0) {
         Write-Output "work readiness failed with $($findings.Count) finding(s)"
         exit 1

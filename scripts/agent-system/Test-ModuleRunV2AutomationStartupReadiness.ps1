@@ -201,6 +201,76 @@ function Test-GitDirty {
     return $status.Count -gt 0
 }
 
+function Test-LocalToolingReady {
+    if (-not (Test-Path -LiteralPath "package.json")) {
+        Write-Output "localToolingReadiness: not_applicable"
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath "node_modules")) {
+        Write-Output "localToolingReadiness: missing_node_modules"
+        Write-Output "startupStateWarning: local JS tooling is unavailable in this worktree"
+        return
+    }
+
+    $requiredToolingPaths = @(
+        "node_modules\.bin\eslint.cmd",
+        "node_modules\.bin\tsc.cmd",
+        "node_modules\.bin\prettier.cmd",
+        "node_modules\typescript\package.json",
+        "node_modules\prettier\bin\prettier.cjs"
+    )
+
+    $missingToolingPaths = @($requiredToolingPaths | Where-Object { -not (Test-Path -LiteralPath $_) })
+    if ($missingToolingPaths.Count -eq 0) {
+        Write-Output "localToolingReadiness: ready"
+        return
+    }
+
+    Write-Output "localToolingReadiness: degraded"
+    foreach ($missingToolingPath in $missingToolingPaths) {
+        Write-Output "localToolingMissing: $missingToolingPath"
+    }
+    Write-Output "startupStateWarning: local JS tooling is partially unavailable in this worktree"
+}
+
+function Write-BranchHygieneAdvisory {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$CurrentBranch)
+
+    $mergedBranches = @(& git branch --merged master --list "codex/*" --format="%(refname:short)" 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        Write-Output "startupBranchHygieneDecision: advisory_unavailable"
+        return
+    }
+
+    $unmergedBranches = @(& git branch --no-merged master --list "codex/*" --format="%(refname:short)" 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        Write-Output "startupBranchHygieneDecision: advisory_unavailable"
+        return
+    }
+
+    $mergedCandidates = @($mergedBranches | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_) -and $_.Trim() -ne $CurrentBranch
+    })
+    $unmergedReview = @($unmergedBranches | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_) -and $_.Trim() -ne $CurrentBranch
+    })
+
+    Write-Output "startupBranchHygieneMergedCandidateCount: $($mergedCandidates.Count)"
+    Write-Output "startupBranchHygieneUnmergedReviewCount: $($unmergedReview.Count)"
+    if ($mergedCandidates.Count -gt 0) {
+        Write-Output "startupBranchHygieneDecision: cleanup_available"
+        Write-Output "startupBranchHygieneAction: run Test-ModuleRunV2BranchHygiene.ps1 -SummaryOnly before optional merged-only cleanup"
+        return
+    }
+    if ($unmergedReview.Count -gt 0) {
+        Write-Output "startupBranchHygieneDecision: manual_review_available"
+        return
+    }
+
+    Write-Output "startupBranchHygieneDecision: clean"
+}
+
 function Get-RunRegistryEntries {
     param([Parameter(Mandatory = $true)][string]$Root)
 
@@ -486,14 +556,8 @@ try {
         Add-Finding "HARD_BLOCK_PROTECTED_BRANCH $currentBranch"
     }
 
-    if ((Test-Path -LiteralPath "package.json") -and -not (Test-Path -LiteralPath "node_modules")) {
-        Write-Output "localToolingReadiness: missing_node_modules"
-        Write-Output "startupStateWarning: local JS tooling is unavailable in this worktree"
-    } elseif (Test-Path -LiteralPath "package.json") {
-        Write-Output "localToolingReadiness: node_modules_present"
-    } else {
-        Write-Output "localToolingReadiness: not_applicable"
-    }
+    Test-LocalToolingReady
+    Write-BranchHygieneAdvisory -CurrentBranch $currentBranch
 
     if (-not $SkipLeaseCheck) {
         $leaseArgs = @(

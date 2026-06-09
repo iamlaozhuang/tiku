@@ -54,6 +54,13 @@ $tempRoot = Join-Path -Path $fixtureRoot -ChildPath "temp"
 $runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"
 $handoffRoot = Join-Path -Path $fixtureRoot -ChildPath "handoffs"
 New-Item -ItemType Directory -Path $leaseRoot, $worktreeRoot, $tempRoot, $runRegistryRoot, $handoffRoot | Out-Null
+$queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
+@"
+schemaVersion: 1
+tasks:
+  - id: closed-terminal-task
+    status: closed
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
 try {
     $now = "2026-06-08T20:00:00Z"
@@ -257,6 +264,42 @@ try {
     Assert-Contains -Output $expiredActiveCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
     if (Test-Path -LiteralPath $expiredActiveRunPath) {
         throw "Expected expired active missing-worktree run registry file to be removed."
+    }
+
+    $expiredTerminalRunPath = Join-Path -Path $runRegistryRoot -ChildPath "expired-active-terminal.json"
+    @"
+{
+  "runId": "expired-active-terminal-run",
+  "automationId": "tiku-module-run-v2-autopilot",
+  "threadRole": "scheduled",
+  "taskId": "closed-terminal-task",
+  "branch": "codex/expired-active-terminal",
+  "worktreePath": "$($activeWorktree.Replace("\", "\\"))",
+  "status": "active",
+  "heartbeatAtUtc": "2026-06-08T19:00:00Z",
+  "phase": "readiness",
+  "changedFiles": [],
+  "lastSafeCheckpoint": "heartbeat expired",
+  "nextRecommendedAction": "janitor cleanup",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $expiredTerminalRunPath -Encoding UTF8
+
+    $expiredTerminalAvailableOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -QueuePath $queuePath -NowUtc $now -ActiveRunHeartbeatMinutes 30)
+    Assert-Contains -Output $expiredTerminalAvailableOutput -Pattern "expired_active_terminal_registry"
+    Assert-Contains -Output $expiredTerminalAvailableOutput -Pattern "runRegistryCleanupCandidate:"
+    Assert-Contains -Output $expiredTerminalAvailableOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_available"
+
+    $expiredTerminalCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -QueuePath $queuePath -NowUtc $now -ActiveRunHeartbeatMinutes 30 -Cleanup)
+    Assert-Contains -Output $expiredTerminalCleanupOutput -Pattern "runRegistryCleanupAction:"
+    Assert-Contains -Output $expiredTerminalCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    if (Test-Path -LiteralPath $expiredTerminalRunPath) {
+        throw "Expected expired active terminal run registry file to be removed."
+    }
+    if (-not (Test-Path -LiteralPath $activeWorktree)) {
+        throw "Expired active terminal registry cleanup must not remove the existing clean worktree."
     }
 
     $orphanWorktreeDir = Join-Path -Path $worktreeRoot -ChildPath "orphan-slot\tiku"
