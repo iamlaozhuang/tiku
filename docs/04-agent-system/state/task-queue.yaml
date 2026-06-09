@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 tasks:
   - id: phase-1-api-contract-baseline
     title: API Contract Baseline
@@ -4192,13 +4192,18 @@ tasks:
     dependencies:
       - module-run-v2-autopilot-maturity-hardening
     taskPlanPolicy: required
+    planPath: docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
     humanApproval: >-
       Seeded as the next Module Run planning task by the approved autopilot maturity hardening work and upgraded by the
       planning-to-implementation autodrive hardening. This planning task may seed low-risk local implementation tasks
       only when `implementationAutoSeedGate` passes and every seeded task records
       `autoDriveLocalImplementationApproval`. The planning task itself must not execute product implementation,
       provider calls, provider configuration, env/secret, staging/prod/cloud/deploy, payment, external-service,
-      dependency, schema, migration, product e2e work, or Cost Calibration Gate execution.
+      dependency, schema, migration, product e2e work, or Cost Calibration Gate execution. User later gave explicit
+      closeout approval for this completed planning task's local docs/state scope: after validation, automation may
+      create one focused commit, fast-forward merge into `master`, push `origin/master`, perform short-lived branch
+      cleanup, park the automation worktree, and then continue only through guarded startup recovery into the seeded
+      next task.
     taskKind: implementation_planning
     moduleRunVersion: 2
     executionModule: ai-task-and-provider
@@ -4206,6 +4211,7 @@ tasks:
       - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
       - docs/05-execution-logs/task-plans/**
       - docs/05-execution-logs/evidence/**
       - docs/05-execution-logs/audits-reviews/**
@@ -4239,7 +4245,149 @@ tasks:
       - Select-String -Path docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md -Pattern 'ai-task-and-provider','nextModuleRunCandidate','localFullLoopGate','localExperienceClosureGate','implementationAutoSeedGate','autoDriveLocalImplementationApproval','Cost Calibration Gate remains blocked'
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    status: done
+    retryCount: 0
+  - id: module-run-v2-ai-task-lifecycle-local-contract
+    title: Module Run v2 AI Task Lifecycle Local Contract
+    phase: module-run-v2-ai-task-lifecycle-local-contract
+    sourceStory: module-run-v2-ai-task-and-provider-planning
+    dependencies:
+      - module-run-v2-ai-task-and-provider-planning
+    taskPlanPolicy: required
+    planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: Seeded by the approved Module Run v2 AI task and provider planning task
+      after `implementationAutoSeedGate` planning evidence. Scope is limited to local provider-agnostic
+      `ai-task-domain` contract, model, validator, service, same-directory focused tests, and task governance logs. This
+      does not approve provider calls, provider configuration, env/secret, staging/prod/cloud/deploy, payment,
+      external-service, dependency, package, lockfile, schema, migration, repository, mapper, REST API, Server Action,
+      UI/browser, e2e, or Cost Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    executionModule: ai-task-and-provider
+    localFullLoopGate: L2
+    allowedFiles:
+      - src/server/contracts/ai-task-domain-contract.ts
+      - src/server/models/ai-task-domain.ts
+      - src/server/validators/ai-task-domain.ts
+      - src/server/validators/ai-task-domain.test.ts
+      - src/server/services/ai-task-domain-service.ts
+      - src/server/services/ai-task-domain-service.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/app/api/v1/**
+      - src/app/(student)/**
+      - src/app/(admin)/**
+      - e2e/**
+    riskTypes:
+      - ai_task_domain
+      - local_contract
+      - local_validation
+      - redaction
+      - evidence_integrity
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/validators/ai-task-domain.test.ts src/server/services/ai-task-domain-service.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown src\server\contracts\ai-task-domain-contract.ts src\server\models\ai-task-domain.ts src\server\validators\ai-task-domain.ts src\server\validators\ai-task-domain.test.ts src\server\services\ai-task-domain-service.ts src\server\services\ai-task-domain-service.test.ts docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - Select-String -Path src\server\contracts\ai-task-domain-contract.ts,src\server\models\ai-task-domain.ts,src\server\validators\ai-task-domain.ts,src\server\services\ai-task-domain-service.ts,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md -Pattern 'ai-task-domain','localFullLoopGate','provider-agnostic','audit_log','ai_call_log','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-ai-task-lifecycle-local-contract
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
     status: pending
+    retryCount: 0
+  - id: module-run-v2-closeout-continuity-hardening
+    title: Module Run v2 Closeout Continuity Hardening
+    phase: module-run-v2-closeout-continuity-hardening
+    sourceStory: user-request-2026-06-09-closeout-continuity-hardening
+    dependencies:
+      - module-run-v2-ai-task-and-provider-planning
+    taskPlanPolicy: required
+    planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+    humanApproval: >-
+      User explicitly requested repairing the current automation breakpoint so guarded Module Run v2 automation can
+      safely continue through approved task closeout instead of stopping before commit/merge/push/cleanup. This task may
+      update local mechanism scripts, smoke tests, SOP/state/queue, and execution logs so that a completed task with
+      explicit closeout approval can execute one focused commit, fast-forward merge into `master`, push
+      `origin/master`, clean the short-lived branch, park the automation worktree, and continue through startup
+      recovery to the next queued task. Scope is limited to automation mechanism files and the current planning task's
+      durable approval wording. It does not approve product code, dependency/package/lockfile changes, schema/migration,
+      provider/env/secret, staging/prod/cloud/deploy, payment, external-service, e2e implementation, or Cost
+      Calibration Gate execution.
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - automation_policy
+      - closeout_recovery
+      - git_closeout
+      - startup_readiness
+      - worktree_hygiene
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2WorkReadiness.ps1 -Mode pre-edit -TaskId module-run-v2-closeout-continuity-hardening -PlannedFiles scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1,scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1,scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1,scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1,scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1,docs/04-agent-system/sop/automated-advancement-governance.md,docs/04-agent-system/sop/task-lifecycle-governance.md,docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml,docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md,docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-closeout-continuity-hardening.md,docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-continuity-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --write --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-closeout-continuity-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-closeout-continuity-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-closeout-continuity-hardening.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1 scripts\agent-system\Invoke-ModuleRunV2Autopilot.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1 scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.Smoke.ps1 docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\sop\task-lifecycle-governance.md docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\evidence\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-ai-task-and-provider-planning.md docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md docs\05-execution-logs\task-plans\2026-06-09-module-run-v2-closeout-continuity-hardening.md docs\05-execution-logs\evidence\2026-06-09-module-run-v2-closeout-continuity-hardening.md docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-closeout-continuity-hardening.md
+      - Select-String -Path scripts\agent-system\Invoke-ModuleRunV2Autopilot.ps1,scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.ps1,scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1,scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1,scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1,docs\04-agent-system\sop\automated-advancement-governance.md,docs\04-agent-system\sop\task-lifecycle-governance.md,docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-closeout-continuity-hardening.md -Pattern 'approvedCloseoutContinuation','automationWorktreeParking','closeoutRecovery','implementationAutoSeedGate','Cost Calibration Gate remains blocked'
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+    status: closed
     retryCount: 0
   - id: module-run-v2-local-experience-closure-alignment
     title: Module Run v2 Local Experience Closure Alignment

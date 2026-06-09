@@ -107,14 +107,15 @@ This orchestrator combines:
 
 It emits a machine-readable `autopilotDecision`:
 
-| Decision                        | Meaning                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------- |
-| `continue_current_thread`       | Continue the approved local task in the current thread.                 |
-| `prepare_handoff`               | Prepare handoff before continuing; no thread launch is approved.        |
-| `prepare_handoff_then_continue` | Handoff is prepared and same-thread continuation remains controlled.    |
-| `launch_new_thread`             | Codex may call `create_thread` with the generated handoff content.      |
-| `stop_for_hard_block`           | Stop immediately because a hard block was found.                        |
-| `stop_for_human_handoff`        | Stop and wait for user decision because safe automation cannot proceed. |
+| Decision                        | Meaning                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------- |
+| `continue_current_thread`       | Continue the approved local task in the current thread.                   |
+| `closeout_executed`             | Approved commit/merge/push/cleanup finished; rerun startup for next task. |
+| `prepare_handoff`               | Prepare handoff before continuing; no thread launch is approved.          |
+| `prepare_handoff_then_continue` | Handoff is prepared and same-thread continuation remains controlled.      |
+| `launch_new_thread`             | Codex may call `create_thread` with the generated handoff content.        |
+| `stop_for_hard_block`           | Stop immediately because a hard block was found.                          |
+| `stop_for_human_handoff`        | Stop and wait for user decision because safe automation cannot proceed.   |
 
 `launch_new_thread` is not produced by chat memory alone. It requires a handoff file, a thread rollover decision, thread
 tool availability, and launch approval in the active task or user instruction.
@@ -289,6 +290,11 @@ For routine scheduler wakeups where the current task is already `done` or `close
 recovery before selecting the next task. If the closeout recovery sees a dirty worktree, remote divergence, missing
 evidence, or stale state that is not an accepted closeout recovery point, it must stop rather than write a new handoff.
 
+The only dirty-worktree exception is `approvedCloseoutContinuation`: the completed task itself must record explicit
+approval for commit, merge, push, cleanup, and worktree parking. In that shape, unattended readiness may return
+`closeout_recovery`, and autopilot may invoke `Invoke-ModuleRunV2ApprovedCloseout.ps1` to complete the local Git
+closeout before startup selects the next pending task.
+
 An accepted closeout recovery point may have `project-state.yaml` repository SHA values that are ancestors of the current
 `master` and `origin/master`, because the final closeout, validation repair, merge, and push commits can only be known
 after earlier evidence is written. This exception applies only when the current task is `done` or `closed`, Git is clean
@@ -327,6 +333,12 @@ Automation must not infer approval for one action from approval for another. Evi
 - residual branch or worktree if cleanup is deferred.
 
 Pushing `master`, creating or updating PRs, force-with-lease operations, deploy actions, and cloud changes require explicit human approval.
+
+When a completed task explicitly authorizes commit, fast-forward merge into `master`, push `origin/master`, short-lived
+branch cleanup, and automation worktree parking, guarded automation may execute that exact local closeout path. It must
+still rerun module-closeout readiness, pre-push readiness, and scope checks first. It must not broaden to PR creation,
+force push, dependency changes, provider work, env/secret work, deploy, payment, external-service action, or Cost
+Calibration Gate execution.
 
 ## Blocked Gate Enforcement
 

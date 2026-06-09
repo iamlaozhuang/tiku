@@ -210,8 +210,8 @@ if ($LASTEXITCODE -ne 0 -or $insideWorkTree.Trim() -ne "true") {
     throw "Module Run v2 pre-push readiness must run inside a Git worktree."
 }
 
-$projectStateLines = @(Get-Content -Path $ProjectStatePath)
-$queueLines = @(Get-Content -Path $QueuePath)
+$projectStateLines = @(Get-Content -Path $ProjectStatePath | Where-Object { $_ -ne "" })
+$queueLines = @(Get-Content -Path $QueuePath | Where-Object { $_ -ne "" })
 $matrixContent = Get-Content -Path $MatrixPath -Raw
 
 if ([string]::IsNullOrWhiteSpace($TaskId)) {
@@ -249,7 +249,7 @@ if ($matrixContent -match "Cost Calibration Gate remains blocked") {
 }
 
 Write-Section -Title "Git Readiness"
-$gitReadinessOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\scripts\agent-system\Test-GitCompletionReadiness.ps1" -BaseBranch master)
+$gitReadinessOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path -Path $PSScriptRoot -ChildPath "Test-GitCompletionReadiness.ps1") -BaseBranch master)
 if ($LASTEXITCODE -ne 0) {
     Add-Finding "HARD_BLOCK_GIT_READINESS_FAILED"
 } else {

@@ -93,6 +93,65 @@ function Get-DecisionValue {
     return ""
 }
 
+function Get-TaskBlock {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Lines,
+        [Parameter(Mandatory = $true)][string]$Id
+    )
+
+    $startIndex = -1
+    for ($lineIndex = 0; $lineIndex -lt $Lines.Count; $lineIndex++) {
+        if ($Lines[$lineIndex] -match "^\s+- id:\s+$([regex]::Escape($Id))\s*$") {
+            $startIndex = $lineIndex
+            break
+        }
+    }
+
+    if ($startIndex -lt 0) {
+        return @()
+    }
+
+    $endIndex = $Lines.Count
+    for ($lineIndex = $startIndex + 1; $lineIndex -lt $Lines.Count; $lineIndex++) {
+        if ($Lines[$lineIndex] -match "^\s+- id:\s+\S+") {
+            $endIndex = $lineIndex
+            break
+        }
+    }
+
+    return $Lines[$startIndex..($endIndex - 1)]
+}
+
+function Get-ScalarValue {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Block,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s+$([regex]::Escape($Key)):\s*(.*)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
+function Test-ApprovedCloseoutContinuation {
+    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -notmatch "(?i)humanApproval:") {
+        return $false
+    }
+
+    $hasCommit = $taskText -match "(?i)\bcommit\b"
+    $hasMerge = $taskText -match "(?i)\bmerge\b"
+    $hasPush = $taskText -match "(?i)\bpush\b"
+    $hasCleanup = $taskText -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
+    return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
+}
+
 function Write-AutopilotResult {
     param(
         [Parameter(Mandatory = $true)][string]$Decision,
@@ -145,6 +204,26 @@ if (-not $SkipUnattendedReadiness) {
     if ($LASTEXITCODE -ne 0) {
         $readinessOutput | ForEach-Object { Write-Output $_ }
         Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "unattended readiness failed" -ExitCode 1
+    }
+}
+
+if ($CloseoutRecovery -and -not [string]::IsNullOrWhiteSpace($TaskId)) {
+    $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
+    $queueLines = @(Get-Content -LiteralPath $QueuePath)
+    $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
+    $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
+    $dirtyFiles = @(& git status --porcelain)
+    if ($taskStatus -in @("done", "closed") -and $dirtyFiles.Count -gt 0 -and (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock)) {
+        $closeoutOutput = @(
+            & (Join-Path -Path $agentSystemRoot -ChildPath "Invoke-ModuleRunV2ApprovedCloseout.ps1") -TaskId $TaskId -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath 2>&1
+        )
+        if ($LASTEXITCODE -ne 0) {
+            $closeoutOutput | ForEach-Object { Write-Output $_ }
+            Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "approved closeout execution failed" -ExitCode 1
+        }
+
+        $closeoutOutput | ForEach-Object { Write-Output $_ }
+        Write-AutopilotResult -Decision "closeout_executed" -Reason "approved closeout executed; rerun startup readiness for the next task" -ExitCode 0
     }
 }
 

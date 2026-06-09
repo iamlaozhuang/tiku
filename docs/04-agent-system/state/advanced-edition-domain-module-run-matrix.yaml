@@ -479,6 +479,7 @@ automationHandoffPolicy:
     stop_for_hard_block: stop and hand off before retrying or broadening scope
   autopilotDecisionLabels:
     continue_current_thread: proceed inside current approved scope
+    closeout_executed: approved local closeout executed; rerun startup readiness for next task selection
     prepare_handoff: generate handoff but do not launch a thread
     prepare_handoff_then_continue: continue only after handoff is available
     launch_new_thread: Codex agent layer may call create_thread with generated handoff
@@ -529,6 +530,8 @@ automationHandoffPolicy:
   automationMay:
     - run automation startup readiness before unattended readiness or autopilot orchestration
     - detect that a Module Run appears complete from durable state
+    - execute approvedCloseoutContinuation only when commit, merge, push, cleanup, and worktree parking are explicitly
+      approved for the completed task and closeout readiness plus pre-push readiness pass
     - generate the next Module Run draft proposal
     - seed low-risk local implementation tasks when implementationAutoSeedGate passes
     - update handoff proposal and blocked remainder wording
@@ -537,6 +540,7 @@ automationHandoffPolicy:
       Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup
   automationMustNot:
     - ignore an active lease, stale automation worktree, or no-executable-task startup decision
+    - infer closeout approval from a generic planning or implementation approval without explicit commit/merge/push/cleanup wording
     - clean dirty automation worktrees or invalid lease files without manual inspection
     - modify schema, migration, dependency, env/secret, provider config, deploy config, payment, or external-service surfaces
     - read or record secrets

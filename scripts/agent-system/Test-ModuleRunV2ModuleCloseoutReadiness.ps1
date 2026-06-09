@@ -264,8 +264,8 @@ if ($LASTEXITCODE -ne 0 -or $insideWorkTree.Trim() -ne "true") {
     throw "Module Run v2 module-closeout readiness must run inside a Git worktree."
 }
 
-$projectStateLines = @(Get-Content -Path $ProjectStatePath)
-$queueLines = @(Get-Content -Path $QueuePath)
+$projectStateLines = @(Get-Content -Path $ProjectStatePath | Where-Object { $_ -ne "" })
+$queueLines = @(Get-Content -Path $QueuePath | Where-Object { $_ -ne "" })
 $matrixContent = Get-Content -Path $MatrixPath -Raw
 
 if ([string]::IsNullOrWhiteSpace($TaskId)) {

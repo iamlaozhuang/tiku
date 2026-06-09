@@ -184,6 +184,10 @@ One task normally maps to one focused commit.
 
 Closeout covers local merge, remote push, branch cleanup, worktree cleanup, and final handoff. These are separate actions even when one user approval authorizes the whole round.
 
+For guarded automation, closeout may execute unattended only when the task records explicit approval for commit, merge,
+push, cleanup, and automation worktree parking. A completed task without that wording must still stop for human
+decision, even if the remaining Git actions look routine.
+
 Closeout must record:
 
 - implementation or docs commit SHA;

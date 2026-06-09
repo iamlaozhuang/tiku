@@ -127,6 +127,34 @@ function Get-ListValues {
     return $values.ToArray()
 }
 
+function Get-ScalarValueFromText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Text,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    if ($Text -match "(?ms)^\s+$([regex]::Escape($Key)):\s*(.+?)\s*(?:^\s+\S[^:]*:\s*|$)") {
+        return $Matches[1].Trim()
+    }
+
+    return ""
+}
+
+function Test-ApprovedCloseoutContinuation {
+    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -notmatch "(?i)humanApproval:") {
+        return $false
+    }
+
+    $hasCommit = $taskText -match "(?i)\bcommit\b"
+    $hasMerge = $taskText -match "(?i)\bmerge\b"
+    $hasPush = $taskText -match "(?i)\bpush\b"
+    $hasCleanup = $taskText -match "(?i)\bcleanup\b|short-?lived branch cleanup|park the automation worktree"
+    return $hasCommit -and $hasMerge -and $hasPush -and $hasCleanup
+}
+
 function Get-CurrentTaskId {
     param([Parameter(Mandatory = $true)][string[]]$Lines)
 
@@ -515,7 +543,12 @@ try {
     Write-RunRegistryHeartbeat -Root $RunRegistryRoot -TaskId $TaskId -Branch $currentBranch -WorktreePath $currentWorktreePath -FilesToScan $filesToScan
     $explicitFilesToScan = @(Expand-FileInputs -Files $ChangedFiles)
     if ($CloseoutRecovery -and $explicitFilesToScan.Count -eq 0 -and $filesToScan.Count -gt 0) {
-        Add-Finding "HARD_BLOCK_CLOSEOUT_RECOVERY_DIRTY_WORKTREE files=$($filesToScan.Count)"
+        if (Test-ApprovedCloseoutContinuation -TaskBlock $taskBlock) {
+            Write-Output "OK_APPROVED_CLOSEOUT_DIRTY_WORKTREE files=$($filesToScan.Count)"
+            Write-Output "approvedCloseoutContinuation: enabled"
+        } else {
+            Add-Finding "HARD_BLOCK_CLOSEOUT_RECOVERY_DIRTY_WORKTREE files=$($filesToScan.Count)"
+        }
     }
     foreach ($changedFile in $filesToScan) {
         $blockedPattern = Get-MatchingPattern -Path $changedFile -Patterns $blockedFiles

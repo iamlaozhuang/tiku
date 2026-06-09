@@ -1,8 +1,8 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-empty-scope-scan-repair
-updatedAt: "2026-06-09T00:00:00-07:00"
+  currentPhase: module-run-v2-closeout-continuity-hardening
+updatedAt: "2026-06-09T01:12:53-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -77,15 +77,16 @@ taskSource:
 taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
-  lastKnownMasterSha: 0cd18306399b4aaca358a07c93d6c8b899af553e
-  lastKnownOriginMasterSha: 0cd18306399b4aaca358a07c93d6c8b899af553e
+  lastKnownMasterSha: a6d6be6361998517b22e6db01cec594c1c550210
+  lastKnownOriginMasterSha: a6d6be6361998517b22e6db01cec594c1c550210
 currentTask:
-  id: module-run-v2-empty-scope-scan-repair
-  status: done
-  sourceStory: user-request-2026-06-09-empty-scope-scan-repair
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-empty-scope-scan-repair.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md
-  branch: codex/module-run-v2-empty-scope-scan-repair
+  id: module-run-v2-closeout-continuity-hardening
+  status: closed
+  sourceStory: user-request-2026-06-09-closeout-continuity-hardening
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+  branch: codex/module-run-v2-ai-task-provider-planning
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -123,8 +124,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Empty scope scan repair is locally validated. Rerun closeout recovery dry-run autopilot from a clean worktree, then
-    continue only according to its startup and autopilot decisions. The next queued task remains
-    `module-run-v2-ai-task-and-provider-planning`. Product code, provider/env/deploy/payment/external-service,
-    schema/migration/dependency changes, and Cost Calibration Gate execution remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+    Repair the closeout continuity breakpoint first: allow guarded automation to execute approved commit, fast-forward
+    merge, push, cleanup, and startup handoff continuation when a completed task records explicit closeout approval.
+    After this mechanism task passes, re-run closeout recovery for
+    `module-run-v2-ai-task-and-provider-planning` and only then continue to
+    `module-run-v2-ai-task-lifecycle-local-contract`. Provider/env/deploy, payment/external-service,
+    schema/migration/dependency changes, e2e work, and Cost Calibration Gate execution remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-continuity-hardening.md

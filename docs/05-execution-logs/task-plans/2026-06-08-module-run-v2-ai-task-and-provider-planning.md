@@ -6,56 +6,74 @@
 - Task kind: `implementation_planning`
 - Execution module candidate: `ai-task-and-provider`
 - Dependency: `module-run-v2-autopilot-maturity-hardening`
-- Goal: draft the next Module Run v2 plan proposal after automation maturity hardening closes out.
-- Local experience closure: this planning task must apply `localExperienceClosureGate` and explain how
-  `ai-task-and-provider` advances a locally runnable experience chain instead of stopping at isolated contracts.
+- Branch: `codex/module-run-v2-ai-task-provider-planning`
+- Goal: prepare the next Module Run v2 plan for provider-agnostic AI task lifecycle work and seed only low-risk local
+  implementation work when `implementationAutoSeedGate` passes.
 
-## Scope
+## Recovery And Readiness
 
-Allowed:
+- Startup readiness passed with `startupDecision: prepare_next_task`.
+- Closeout recovery dry-run autopilot returned `autopilotDecision: continue_current_thread`.
+- Unattended readiness for this task returned `unattendedStopDecision: continue`.
+- Pre-edit readiness initially found `HARD_BLOCK_MISSING_TASK_PLAN_PATH`; the queue metadata repair added the concrete
+  plan path and the concrete allowed task-plan file.
+- Pre-edit readiness then passed for the planning files and seeded task placeholder files.
 
-- Read durable state, latest evidence, latest audit review, and Module Run v2 matrix.
-- Evaluate whether `ai-task-and-provider` is still the best `nextModuleRunCandidate`.
-- Draft a proposal-only Module Run v2 plan with Batches, localFullLoopGate targets, allowed files, blocked files, and stop conditions.
-- Identify the target experience chain, acceptance bridge needs, and local mock or fixture path needed before any future
-  local UI/browser or e2e-ready work can be approved.
-- If planning succeeds and `implementationAutoSeedGate` passes, seed low-risk local implementation tasks with
-  `autoDriveLocalImplementationApproval` so automation can continue without another manual restart.
-- Update project/task state only for planning status.
+## nextModuleRunCandidate Decision
 
-Blocked:
+`ai-task-and-provider` remains the correct `nextModuleRunCandidate`.
 
-- Product implementation.
-- Provider call or provider configuration.
-- Env/secret reading or changes.
-- Staging/prod/cloud/deploy, payment, external-service work.
-- Dependency, package, lockfile, schema, migration, `src/db/schema/**`, `drizzle/**`, and `e2e/**`.
-- Cost Calibration Gate execution.
+Reasons:
 
-Auto-seed boundary:
+- `authorization-and-access` has already established local redacted `authorization`, `personal_auth`, `org_auth`,
+  `redeem_code`, `audit_log`, and `ai_call_log` reference patterns.
+- `personal-learning-ai`, `organization-training`, and `ops-governance-and-retention` all depend on
+  `ai-task-and-provider` for a provider-agnostic lifecycle before they can claim higher local experience closure.
+- Existing code already has a minimal `ai-task-domain` read model; the next safe Batch should extend that local contract
+  instead of jumping to repository, API, UI, provider, schema, or e2e surfaces.
 
-- May seed implementation tasks only after evidence records `implementationAutoSeedGate`.
-- Seeded implementation tasks must stay within approved local surfaces unless
-  `localExperienceAcceptanceBridgeApproved` is explicitly recorded.
-- Seeded implementation tasks must include focused tests, localFullLoopGate target, allowed files, blocked files, stop
-  conditions, evidence path, and audit review path.
+## localExperienceClosureGate
 
-## Planning Inputs
+- Target experience chain: `personal-learning-ai-experience`.
+- Current localFullLoopGate level: L2-ready local contract and unit-test surface.
+- Target localFullLoopGate level for this seeded implementation: L2.
+- Acceptance bridge needed: yes, but not in the seeded task. API, Server Action, UI/browser, role-flow, and e2e bridge
+  work require a later `localExperienceAcceptanceBridgeApproved` task.
+- User-visible surface needed: not for this Batch. The seeded task only strengthens the service contract that later
+  user-visible flows will consume.
+- Blocked remainder: L5/L6 local closure remains blocked until a future acceptance bridge task is approved.
 
-- `docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml`
-- `docs/04-agent-system/state/project-state.yaml`
-- `docs/04-agent-system/state/task-queue.yaml`
-- `localExperienceClosureGate` in `docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml`
-- latest closeout evidence and audit review from `module-run-v2-autopilot-maturity-hardening`
+## Candidate Batches
 
-## Validation
+1. `module-run-v2-ai-task-lifecycle-local-contract`
+   - Purpose: extend the existing local `ai-task-domain` contract with provider-agnostic lifecycle, redacted context,
+     and deterministic local validation.
+   - localFullLoopGate: L2.
+   - Surfaces: `src/server/contracts/**`, `src/server/models/**`, `src/server/validators/**`, `src/server/services/**`,
+     same-directory focused tests, and governance logs.
+   - Seeded now: yes, with `autoDriveLocalImplementationApproval`.
+2. Future local audit/reference Batch
+   - Purpose: connect lifecycle output to existing redacted `audit_log` and `ai_call_log` reference contracts.
+   - Seeded now: no. It should wait until Batch 1 lands.
+3. Future local provider sandbox proposal
+   - Purpose: document a local-only sandbox call policy.
+   - Seeded now: no. Any actual local provider sandbox call still needs explicit user approval.
 
-- `git diff --check`
-- scoped prettier check for changed planning docs/state files
-- required anchor check for `ai-task-and-provider`, `nextModuleRunCandidate`, `localFullLoopGate`,
-  `localExperienceClosureGate`, `implementationAutoSeedGate`, `autoDriveLocalImplementationApproval`, and
-  `Cost Calibration Gate remains blocked`
+## implementationAutoSeedGate
+
+Seeded implementation task:
+
+- seededImplementationTask: `module-run-v2-ai-task-lifecycle-local-contract`
+- autoDriveLocalImplementationApproval: recorded in `task-queue.yaml`.
+- focused tests:
+  - `npm.cmd run test:unit -- src/server/validators/ai-task-domain.test.ts src/server/services/ai-task-domain-service.test.ts`
+- localFullLoopGate: L2.
+- Bridge approval: not used; no bridge surfaces are included.
 
 ## Stop Conditions
 
-Stop immediately if planning would require provider/env/secret/deploy/payment/external-service, schema/migration, dependency, product implementation, or Cost Calibration Gate execution.
+Stop immediately if the work needs provider calls, provider configuration, env/secret access, staging/prod/cloud/deploy,
+payment, external-service work, dependency/package/lockfile changes, schema/migration work, repository/API/UI/e2e bridge
+surfaces without approval, or Cost Calibration Gate execution.
+
+Cost Calibration Gate remains blocked.

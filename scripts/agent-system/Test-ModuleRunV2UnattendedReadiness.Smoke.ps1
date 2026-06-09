@@ -403,6 +403,52 @@ currentTask:
         }
     }
     Assert-Contains -Output $dirtyRecoveryOutput -Pattern "HARD_BLOCK_CLOSEOUT_RECOVERY_DIRTY_WORKTREE"
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    status: done
+    taskKind: implementation
+    humanApproval: User approved this completed task to commit, merge into master, push origin/master, perform short-lived branch cleanup, and park the automation worktree after validation.
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
+      - docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    blockedFiles:
+      - .env.local
+      - package.json
+      - src/**
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    $approvedDirtyProbePath = Join-Path -Path $PSScriptRoot -ChildPath "module-run-v2-unattended-readiness-approved-closeout.tmp"
+    try {
+        "approved dirty probe" | Set-Content -LiteralPath $approvedDirtyProbePath -Encoding UTF8
+        $approvedDirtyRecoveryOutput = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -TaskId $taskId `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -CloseoutRecovery `
+                -AllowProtectedBranch `
+                -SkipRemoteAheadCheck 2>&1
+        )
+    } finally {
+        if (Test-Path -LiteralPath $approvedDirtyProbePath) {
+            Remove-Item -LiteralPath $approvedDirtyProbePath -Force
+        }
+    }
+    Assert-Contains -Output $approvedDirtyRecoveryOutput -Pattern "OK_APPROVED_CLOSEOUT_DIRTY_WORKTREE"
+    Assert-Contains -Output $approvedDirtyRecoveryOutput -Pattern "approvedCloseoutContinuation: enabled"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

@@ -164,6 +164,7 @@ tasks:
     if (Test-Path -LiteralPath $repoHandoffPath) {
         throw "Dry-run autopilot handoff must not write the requested repository handoff path."
     }
+
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
