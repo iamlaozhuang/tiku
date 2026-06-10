@@ -494,6 +494,8 @@ try {
     }
     $stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
     $stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
+    $repositoryShaSemantics = Get-ProjectScalar -Lines $projectStateLines -Key "shaSemantics"
+    $canUseAcceptedAncestorCheckpoint = $repositoryShaSemantics -eq "accepted_ancestor_checkpoint"
     $canUsePostCloseoutHandoffShaAncestry = (-not [string]::IsNullOrWhiteSpace($projectCurrentTaskId)) `
         -and $projectCurrentTaskId -ne $TaskId `
         -and $projectCurrentTaskStatus -in @("done", "closed") `
@@ -514,6 +516,8 @@ try {
                 Write-Output "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR master"
             } elseif ($canUsePostCloseoutHandoffShaAncestry -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
                 Write-Output "OK_POST_CLOSEOUT_HANDOFF_SHA_ANCESTOR master"
+            } elseif ($canUseAcceptedAncestorCheckpoint -and (Test-GitAncestor -AncestorSha $stateMasterSha -DescendantSha $masterSha)) {
+                Write-Output "OK_REPOSITORY_SHA_ANCESTOR_CHECKPOINT master"
             } else {
                 Add-Finding "HARD_BLOCK_REPOSITORY_SHA_DRIFT master"
             }
@@ -523,6 +527,8 @@ try {
                 Write-Output "OK_CLOSEOUT_RECOVERY_SHA_ANCESTOR origin/master"
             } elseif ($canUsePostCloseoutHandoffShaAncestry -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
                 Write-Output "OK_POST_CLOSEOUT_HANDOFF_SHA_ANCESTOR origin/master"
+            } elseif ($canUseAcceptedAncestorCheckpoint -and (Test-GitAncestor -AncestorSha $stateOriginMasterSha -DescendantSha $originMasterSha)) {
+                Write-Output "OK_REPOSITORY_SHA_ANCESTOR_CHECKPOINT origin/master"
             } else {
                 Add-Finding "HARD_BLOCK_REPOSITORY_SHA_DRIFT origin/master"
             }

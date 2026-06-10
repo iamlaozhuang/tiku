@@ -20,6 +20,10 @@ APPROVE: mechanism-scoped repair is ready for local commit, fast-forward merge, 
   dependency, env/secret, schema, migration, material, paper_asset, and requirement-story changes.
 - Unattended readiness smoke no longer depends on live `origin/master` alignment when testing post-closeout handoff SHA
   ancestry; it now uses explicit test SHA overrides backed by real local commits.
+- Serial unattended readiness now matches startup readiness for explicit `accepted_ancestor_checkpoint` repository SHA
+  semantics, while still rejecting invalid or non-ancestor repository drift.
+- Post-commit advisory helpers now tolerate blank YAML separator lines and no longer emit the prior `Lines` binding
+  advisory error.
 - The next primary autopilot startup can proceed to `batch-101` task claim.
 - No business implementation, dependency, package, lockfile, env/secret, provider, schema, migration, Docker DB, deploy,
   PR, force-push, or Cost Calibration Gate action was performed.

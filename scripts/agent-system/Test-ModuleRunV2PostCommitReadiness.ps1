@@ -26,6 +26,8 @@ function Write-Section {
 function Get-TaskBlock {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Lines,
 
         [Parameter(Mandatory = $true)]
@@ -58,6 +60,8 @@ function Get-TaskBlock {
 function Get-ScalarValue {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Block,
 
         [Parameter(Mandatory = $true)]
@@ -76,6 +80,8 @@ function Get-ScalarValue {
 function Get-ListValues {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Block,
 
         [Parameter(Mandatory = $true)]
@@ -107,6 +113,8 @@ function Get-ListValues {
 function Get-CurrentTaskId {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Lines
     )
 
@@ -164,6 +172,8 @@ function Get-MatchingPattern {
         [string]$Path,
 
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Patterns
     )
 

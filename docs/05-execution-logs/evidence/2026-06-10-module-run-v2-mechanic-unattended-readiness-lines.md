@@ -97,6 +97,43 @@ Follow-up repair:
 - Re-ran `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1`: pass,
   `Module Run v2 unattended readiness smoke passed`.
 
+## Accepted Checkpoint Readiness Alignment
+
+The final next-autopilot takeover probe found one more mechanism gap before push:
+
+- `Test-ModuleRunV2AutomationStartupReadiness.ps1 -AllowProtectedBranch -SkipLeaseCheck` accepted
+  `repository.shaSemantics: accepted_ancestor_checkpoint` and returned `startupDecision: prepare_next_task`.
+- The serial `Test-ModuleRunV2UnattendedReadiness.ps1` check for pending `batch-101` still required exact
+  `lastKnownMasterSha` / `lastKnownOriginMasterSha` equality and hard-blocked with `HARD_BLOCK_REPOSITORY_SHA_DRIFT`.
+
+Follow-up repair:
+
+- `Test-ModuleRunV2UnattendedReadiness.ps1` now accepts repository SHA drift only when
+  `shaSemantics: accepted_ancestor_checkpoint` is explicitly present and the recorded state SHA is a real Git ancestor
+  of the current `master` or `origin/master`.
+- Invalid or non-ancestor SHAs still hard-block.
+- Added smoke coverage for a pending task under accepted ancestor checkpoint semantics.
+- Re-ran the real no-write readiness probe for `batch-101`: pass,
+  `OK_REPOSITORY_SHA_ANCESTOR_CHECKPOINT master`,
+  `OK_REPOSITORY_SHA_ANCESTOR_CHECKPOINT origin/master`, and `unattendedStopDecision: continue`.
+
+## Post-Commit Advisory Blank-Line Repair
+
+The successful follow-up commit surfaced a non-blocking post-commit advisory defect:
+
+- `Test-ModuleRunV2PostCommitReadiness.ps1` emitted
+  `ADVISORY_ERROR Cannot bind argument to parameter 'Lines' because it is an empty string.`
+- Root cause matched the original readiness failure: YAML files with blank separator lines were passed into helper
+  parameters that did not allow empty string array elements.
+
+Follow-up repair:
+
+- Added empty-string and empty-collection tolerance to the post-commit advisory YAML helper parameters.
+- Added smoke coverage with blank lines in temporary `project-state.yaml` and `task-queue.yaml` fixtures.
+- Re-ran `Test-ModuleRunV2PostCommitReadiness.Smoke.ps1`: pass,
+  `Module Run v2 post-commit readiness smoke passed`.
+- Re-ran the real post-commit advisory: pass, `post-commit advisory completed`.
+
 ## Next Autopilot Takeover
 
 Current durable state is ready for the next primary autopilot startup:

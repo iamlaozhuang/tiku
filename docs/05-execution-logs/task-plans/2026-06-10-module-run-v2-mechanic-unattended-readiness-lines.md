@@ -47,6 +47,9 @@ Related mechanism drift: active mechanism state still wrote or declared the hist
   task's allowed file list.
 - Stabilize the unattended readiness smoke so post-closeout handoff ancestry coverage does not depend on whether local
   `master` is temporarily ahead of `origin/master` before the allowed push.
+- Align serial unattended readiness with startup readiness for explicit `accepted_ancestor_checkpoint` repository SHA
+  semantics, requiring real Git ancestry before continuing.
+- Repair the post-commit advisory blank-line parser defect surfaced by the follow-up mechanism commit.
 - Keep edits limited to mechanism scripts/state and execution logs.
 
 ## Validation Plan

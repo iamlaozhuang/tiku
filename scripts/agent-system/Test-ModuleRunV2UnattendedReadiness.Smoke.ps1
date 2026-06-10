@@ -63,6 +63,10 @@ try {
     $runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"
     New-Item -ItemType Directory -Path $runRegistryRoot | Out-Null
     $headSha = ((& git rev-parse HEAD) -join "").Trim()
+    $ancestorSha = ((& git rev-parse HEAD~1 2>$null) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($ancestorSha)) {
+        $ancestorSha = $headSha
+    }
     $masterSha = ((& git rev-parse master) -join "").Trim()
     $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
 
@@ -217,6 +221,56 @@ tasks:
         Assert-Contains -Output $pendingClaimOutput -Pattern "unattendedStopDecision: continue"
     }
 
+    $checkpointTaskId = "module-run-v2-unattended-readiness-accepted-checkpoint"
+    $checkpointProjectStatePath = Join-Path -Path $fixtureRoot -ChildPath "checkpoint-project-state.yaml"
+    $checkpointQueuePath = Join-Path -Path $fixtureRoot -ChildPath "checkpoint-task-queue.yaml"
+    @"
+schemaVersion: 1
+repository:
+  shaSemantics: accepted_ancestor_checkpoint
+  lastKnownMasterSha: $ancestorSha
+  lastKnownOriginMasterSha: $ancestorSha
+currentTask:
+  id: $checkpointTaskId
+"@ | Set-Content -LiteralPath $checkpointProjectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: $checkpointTaskId
+    status: pending
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/module-run-v2-unattended-readiness-accepted-checkpoint.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/module-run-v2-unattended-readiness-accepted-checkpoint.md
+"@ | Set-Content -LiteralPath $checkpointQueuePath -Encoding UTF8
+
+    $checkpointOutput = @(
+        & $scriptPath `
+            -TaskId $checkpointTaskId `
+            -ProjectStatePath $checkpointProjectStatePath `
+            -QueuePath $checkpointQueuePath `
+            -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+            -MasterShaOverride $headSha `
+            -OriginMasterShaOverride $headSha `
+            -AllowProtectedBranch `
+            -SkipRemoteAheadCheck `
+            -NoWrite
+    )
+    Assert-Contains -Output $checkpointOutput -Pattern "OK_REPOSITORY_SHA_ANCESTOR_CHECKPOINT master"
+    Assert-Contains -Output $checkpointOutput -Pattern "OK_REPOSITORY_SHA_ANCESTOR_CHECKPOINT origin/master"
+    Assert-Contains -Output $checkpointOutput -Pattern "OK_EVIDENCE_PATH_DECLARED"
+    Assert-Contains -Output $checkpointOutput -Pattern "OK_AUDIT_PATH_DECLARED"
+    Assert-Contains -Output $checkpointOutput -Pattern "unattendedStopDecision: continue"
+
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH master" -Command {
         & $scriptPath -TaskId $taskId -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentBranchOverride "master" -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" -SkipRemoteAheadCheck
     }
@@ -321,10 +375,6 @@ tasks:
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_TASK_STATUS"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
 
-    $ancestorSha = ((& git rev-parse HEAD~1 2>$null) -join "").Trim()
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($ancestorSha)) {
-        $ancestorSha = $headSha
-    }
     @"
 schemaVersion: 1
 repository:
