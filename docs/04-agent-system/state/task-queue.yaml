@@ -7975,5 +7975,5 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-registry-finalizer-validation-lifecycle-hardening.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-registry-finalizer-validation-lifecycle-hardening.md
-    status: ready_for_closeout
+    status: done
     retryCount: 0

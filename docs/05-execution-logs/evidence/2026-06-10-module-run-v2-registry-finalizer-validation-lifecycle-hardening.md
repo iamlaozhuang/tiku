@@ -8,7 +8,13 @@
 
 **result:** pass
 
+result: pass
+
 ## Summary
+
+Batch 102:
+
+Mechanic Lane B:
 
 Lane B implements mechanism-only hardening after Lane A closed `batch-102`.
 
@@ -18,6 +24,21 @@ Lane B implements mechanism-only hardening after Lane A closed `batch-102`.
 - Serial validation failures write terminal registry state through the finalizer.
 
 Cost Calibration Gate remains blocked.
+
+## RED
+
+RED: batch-102 stopped with a dirty owner worktree whose focused gates passed, while broad baseline validation failed outside task scope and the run registry stayed `active/readiness` with empty `changedFiles`.
+
+The mechanism failure mode was reproducible in startup classification: a dirty active owner with `safeToAdopt: false` could remain a stale active-owner stop instead of a governed validation-surface owner-recovery decision.
+
+## GREEN
+
+GREEN: mechanism smokes now cover the repair.
+
+- Finalizer smoke records real changed files and cleanup-ready terminal state.
+- Startup smoke covers focused pass plus advisory broad baseline failure with dirty owner and `safeToAdopt: false`, expecting `manual_required_owner_recovery` instead of stale active owner.
+- Seed and self-review smokes require `validationCommandLifecycle`.
+- Serial executor smoke records finalizer output on validation failure.
 
 ## Validation Results
 
@@ -40,11 +61,17 @@ Cost Calibration Gate remains blocked.
 
 No dependency install, package/lockfile edit, env/secret access, provider call, DB operation, e2e, deploy, payment, PR, force push, or Cost Calibration Gate action was performed.
 
-Commit: pending-local-commit.
+Commit: b6bbff22.
 
 ## Next Autopilot Handoff
 
-Pending closeout proof.
+Pending post-merge next-autopilot takeover proof.
+
+localFullLoopGate: mechanism L4 local control-loop validation.
+
+threadRolloverGate: continue current mechanic thread through closeout; no new Codex thread launch is required.
+
+nextModuleRunCandidate: pending next-autopilot takeover proof after merge and push.
 
 ## Redaction Check
 
