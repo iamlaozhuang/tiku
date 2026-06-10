@@ -111,6 +111,8 @@ phase map:
 
 - `pre_edit`: entry-gate commands that may be recorded as evidence, but must not be rerun as post-closeout proof.
 - `post_edit`: targeted smoke or focused verification after implementation edits.
+- `advisory_baseline`: broad repository health probes that can document unrelated failures but do not block closeout
+  unless the task explicitly promotes them to hard gates.
 - `closeout`: final proof before approved closeout, commit, merge, push, or cleanup.
 
 If `validationCommandLifecycle` is present, serial validation and closeout readiness use only `post_edit` and `closeout`

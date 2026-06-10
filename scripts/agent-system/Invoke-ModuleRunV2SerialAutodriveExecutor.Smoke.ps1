@@ -64,6 +64,9 @@ function Invoke-SerialExecutor {
     if ($RunValidation) {
         $arguments += "-RunValidation"
     }
+    if (-not [string]::IsNullOrWhiteSpace($script:serialSmokeRunRegistryRoot)) {
+        $arguments += @("-RunRegistryRoot", $script:serialSmokeRunRegistryRoot)
+    }
 
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
@@ -299,6 +302,9 @@ function Write-DispatcherOutput {
 
 $smokeRoot = New-SmokeRoot
 try {
+    $script:serialSmokeRunRegistryRoot = Join-Path -Path $smokeRoot -ChildPath "automation-runs"
+    New-Item -ItemType Directory -Path $script:serialSmokeRunRegistryRoot -Force | Out-Null
+
     $files = Write-SmokeFiles -Root $smokeRoot
 
     $dispatcherOutputPath = Write-DispatcherOutput -Root $smokeRoot -Name "continue" -Content @"
@@ -348,6 +354,15 @@ agentActionTask: current-task
     }
     Assert-Contains -Output $validationRunResult.Output -Pattern "serialExecutorDecision: validation_passed"
     Assert-Contains -Output $validationRunResult.Output -Pattern "validationOutput: safe-validation"
+
+    $validationFailFiles = Write-SmokeFiles -Root $smokeRoot -ValidationCommand "powershell.exe -NoProfile -Command `"Write-Output failing-validation; exit 7`""
+    $validationFailResult = Invoke-SerialExecutor -ProjectStatePath $validationFailFiles.StatePath -QueuePath $validationFailFiles.QueuePath -SchemaPath $validationFailFiles.SchemaPath -Action "run_validation" -ActionTask "current-task" -RunValidation
+    if ($validationFailResult.ExitCode -eq 0) {
+        throw "Validation-failure fixture unexpectedly passed.`n$($validationFailResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $validationFailResult.Output -Pattern "serialExecutorDecision: validation_failed"
+    Assert-Contains -Output $validationFailResult.Output -Pattern "runRegistryFinalizerOutput: runRegistryFinalizer: wrote"
+    Assert-Contains -Output $validationFailResult.Output -Pattern "runRegistryFinalizerOutput: closeoutTransactionState: closeout_pending_evidence"
 
     $validationLifecycleBlock = @"
     validationCommandLifecycle:

@@ -257,6 +257,20 @@ validationSurface:
     - no_owner_recovery_needed
     - manual_required_owner_recovery
   executionRule: stale dirty active run registries with safeToAdopt=false must not be auto-adopted or cleaned; startup may use this read-only classifier to produce manual_required_owner_recovery instead of a generic hard block.
+runRegistryFinalizer:
+  scriptPath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
+  smokePath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1
+  decisionOutput: runRegistryFinalizer
+  requiredTerminalFields:
+    - changedFiles
+    - phase
+    - blockerKind
+    - evidencePath
+    - auditReviewPath
+    - closeoutTransactionState
+    - safeToAdopt
+    - cleanupPolicy
+  executionRule: before an automation thread exits on a stopped, recoverable, cleanup-ready, or closed state, write the terminal run registry through the finalizer so startup can classify owner recovery, closeout recovery, cleanup, or idle without stale active-owner ambiguity.
 registryLifecycle:
   statusField: runStatus
   allowedStatuses:

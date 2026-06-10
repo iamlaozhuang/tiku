@@ -438,6 +438,47 @@ function Test-RedactedHandoffReady {
     return $handoffFullPath.StartsWith($allowedRootFullPath, [System.StringComparison]::OrdinalIgnoreCase)
 }
 
+function Resolve-WorktreeLocalPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$WorktreePath,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Path
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
+
+    if ([System.IO.Path]::IsPathRooted($Path)) {
+        return $Path
+    }
+
+    return (Join-Path -Path $WorktreePath -ChildPath $Path)
+}
+
+function Test-TaskEvidenceAuditPresent {
+    param(
+        [Parameter(Mandatory = $true)][string]$TaskId,
+        [Parameter(Mandatory = $true)][string]$WorktreePath
+    )
+
+    if ($null -eq $script:startupTaskBlocks) {
+        return $false
+    }
+
+    $taskBlock = @(Get-TaskBlock -Blocks $script:startupTaskBlocks -Id $TaskId)
+    if ($taskBlock.Count -eq 0) {
+        return $false
+    }
+
+    $evidencePath = Resolve-WorktreeLocalPath -WorktreePath $WorktreePath -Path (Get-ScalarValue -Block $taskBlock -Key "evidencePath")
+    $auditReviewPath = Resolve-WorktreeLocalPath -WorktreePath $WorktreePath -Path (Get-ScalarValue -Block $taskBlock -Key "auditReviewPath")
+
+    return -not [string]::IsNullOrWhiteSpace($evidencePath) -and
+        -not [string]::IsNullOrWhiteSpace($auditReviewPath) -and
+        (Test-Path -LiteralPath $evidencePath) -and
+        (Test-Path -LiteralPath $auditReviewPath)
+}
+
 function Test-PlaceholderCommitSha {
     param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value)
 
@@ -556,6 +597,38 @@ function Test-AutomationWorktreeHygiene {
             $safeToAdopt = [bool]$runRegistry.safeToAdopt
             $hasReadyHandoff = Test-RedactedHandoffReady -Run $runRegistry -AllowedRoot $AllowedHandoffRoot
 
+            $hasEvidenceAudit = Test-TaskEvidenceAuditPresent -TaskId ([string]$runRegistry.taskId) -WorktreePath $worktreeFullPath
+            if ($runStatus -eq "active" -and -not $safeToAdopt -and $hasEvidenceAudit) {
+                Write-Output "validationSurfacePreHeartbeat: evidence_audit_present"
+                $validationSurfaceResult = Invoke-ValidationSurfaceReadiness -TargetTaskId ([string]$runRegistry.taskId) -WorktreePath $worktreeFullPath
+                $validationSurfaceResult.Output | ForEach-Object { Write-Output $_ }
+                $ownerRecoveryDecision = Get-OutputValue -Output $validationSurfaceResult.Output -Key "ownerRecoveryDecision"
+                $validationSurfaceDecision = Get-OutputValue -Output $validationSurfaceResult.Output -Key "validationSurfaceDecision"
+                $closeoutTransactionState = Get-OutputValue -Output $validationSurfaceResult.Output -Key "closeoutTransactionState"
+                $nextAutopilotExpectedAction = Get-OutputValue -Output $validationSurfaceResult.Output -Key "nextAutopilotExpectedAction"
+                if ($validationSurfaceResult.ExitCode -eq 0 -and $ownerRecoveryDecision -eq "manual_required_owner_recovery") {
+                    $script:startupOverrideDecision = "manual_required_owner_recovery"
+                    $script:startupOverrideReason = "dirty active run requires owner recovery after validation-surface classification; validation=$validationSurfaceDecision; closeout=$closeoutTransactionState"
+                    $script:startupOverrideExitCode = 1
+                    Write-Output "MANUAL_REQUIRED_OWNER_RECOVERY $worktreeFullPath"
+                    Write-Output "validationSurfaceDecision: $validationSurfaceDecision"
+                    Write-Output "closeoutTransactionState: $closeoutTransactionState"
+                    return
+                }
+
+                if ($validationSurfaceResult.ExitCode -eq 0 -and $nextAutopilotExpectedAction -eq "closeout_recovery") {
+                    $script:startupOverrideDecision = "closeout_recovery"
+                    $script:startupOverrideReason = "dirty active run has closeout-ready evidence after validation-surface classification"
+                    $script:startupOverrideExitCode = 0
+                    Write-Output "CLOSEOUT_RECOVERY_READY $worktreeFullPath"
+                    Write-Output "validationSurfaceDecision: $validationSurfaceDecision"
+                    Write-Output "closeoutTransactionState: $closeoutTransactionState"
+                    return
+                }
+            } elseif ($runStatus -eq "active" -and -not $safeToAdopt) {
+                Write-Output "validationSurfacePreHeartbeat: skipped_missing_evidence_or_audit"
+            }
+
             if ($runStatus -eq "active" -and (Test-RunHeartbeatActive -Run $runRegistry -HeartbeatMinutes $HeartbeatMinutes)) {
                 $script:startupOverrideDecision = "exit_active_owner_present"
                 $script:startupOverrideReason = "active run registry owner has a fresh heartbeat"
@@ -563,23 +636,6 @@ function Test-AutomationWorktreeHygiene {
                 Write-Output "ACTIVE_OWNER_PRESENT $worktreeFullPath"
                 Write-Output "heartbeatAtUtc: $([string]$runRegistry.heartbeatAtUtc)"
                 return
-            }
-
-            if ($runStatus -eq "active" -and -not $safeToAdopt) {
-                $validationSurfaceResult = Invoke-ValidationSurfaceReadiness -TargetTaskId ([string]$runRegistry.taskId) -WorktreePath $worktreeFullPath
-                $validationSurfaceResult.Output | ForEach-Object { Write-Output $_ }
-                $ownerRecoveryDecision = Get-OutputValue -Output $validationSurfaceResult.Output -Key "ownerRecoveryDecision"
-                $validationSurfaceDecision = Get-OutputValue -Output $validationSurfaceResult.Output -Key "validationSurfaceDecision"
-                $closeoutTransactionState = Get-OutputValue -Output $validationSurfaceResult.Output -Key "closeoutTransactionState"
-                if ($validationSurfaceResult.ExitCode -eq 0 -and $ownerRecoveryDecision -eq "manual_required_owner_recovery") {
-                    $script:startupOverrideDecision = "manual_required_owner_recovery"
-                    $script:startupOverrideReason = "expired dirty active run requires owner recovery; validation=$validationSurfaceDecision; closeout=$closeoutTransactionState"
-                    $script:startupOverrideExitCode = 1
-                    Write-Output "MANUAL_REQUIRED_OWNER_RECOVERY $worktreeFullPath"
-                    Write-Output "validationSurfaceDecision: $validationSurfaceDecision"
-                    Write-Output "closeoutTransactionState: $closeoutTransactionState"
-                    return
-                }
             }
 
             if ($safeToAdopt -and $hasReadyHandoff -and $runStatus -in @("recoverable", "stopped", "abandoned")) {
@@ -647,6 +703,7 @@ try {
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
     $matrixContent = Get-Content -LiteralPath $MatrixPath -Raw
     $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
+    $script:startupTaskBlocks = $taskBlocks
 
     if ([string]::IsNullOrWhiteSpace($TaskId)) {
         $TaskId = Get-CurrentTaskId -Lines $projectStateLines

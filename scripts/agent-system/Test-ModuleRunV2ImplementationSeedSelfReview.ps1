@@ -349,7 +349,16 @@ try {
             }
         }
 
-        $validationText = $validationCommands -join "`n"
+        $validationText = if ($blockText -match "validationCommandLifecycle") { $blockText } else { $validationCommands -join "`n" }
+        if ($blockText -notmatch "validationCommandLifecycle") {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_VALIDATION_LIFECYCLE $seedTaskId"
+        }
+        if ($blockText -notmatch "phase:\s*advisory_baseline") {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_ADVISORY_BASELINE $seedTaskId"
+        }
+        if ($blockText -match "phase:\s*post_edit\s+command:\s*npm\.cmd run test -- --run focused") {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_BROAD_BASELINE_AS_POST_EDIT $seedTaskId"
+        }
         if ($validationText -notmatch "npm\.cmd run lint") {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_LINT $seedTaskId"
         }

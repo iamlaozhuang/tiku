@@ -126,6 +126,11 @@ scriptControls:
     smokePath: scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
     decisionOutput: validationSurfaceDecision
     role: read-only classifier for focused validation satisfaction, unrelated baseline failures, closeout transaction state, and safeToAdopt=false owner recovery boundaries
+  - id: module-run-v2-run-registry-finalizer
+    path: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
+    smokePath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1
+    decisionOutput: runRegistryFinalizer
+    role: terminal writer for run registry state before thread exit; records real changed files, phase, blocker kind, evidence/audit paths, closeout transaction state, safeToAdopt, and cleanup policy
   - id: module-run-v2-post-closeout-state-reconcile
     path: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1

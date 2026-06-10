@@ -406,6 +406,82 @@ Cost Calibration Gate remains blocked
                 -MatrixPath $matrixPath `
                 -AutomationWorktreeRoot $dirtyWorktreeRoot `
                 -RunRegistryRoot $runRegistryRoot `
+                -HandoffRoot $handoffRoot `
+                -AllowProtectedBranch `
+                -SkipLeaseCheck
+        }
+
+        New-Item -ItemType Directory -Path (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\evidence"), (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\audits-reviews") -Force | Out-Null
+        @"
+schemaVersion: 1
+tasks:
+  - id: module-run-v2-active-owner-validation-lifecycle
+    status: in_progress
+    taskKind: implementation
+    moduleRunVersion: 2
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/example.test.ts
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-active-owner-validation-lifecycle
+    evidencePath: docs/05-execution-logs/evidence/active-owner-validation-lifecycle.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/active-owner-validation-lifecycle.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+        @"
+result: pass
+Batch 102:
+RED: focused validation failed before implementation.
+GREEN: focused unit tests passed, 2 files / 4 tests.
+npm.cmd run lint: pass
+npm.cmd run typecheck: pass
+npm.cmd run test:unit -- src/server/services/example.test.ts: pass
+git diff --check: pass
+npm.cmd run test -- --run focused: advisory baseline failed with unrelated existing failures.
+localFullLoopGate: L4
+blocked remainder: high-risk work remains separately gated.
+threadRolloverGate: continue current thread.
+nextModuleRunCandidate: batch-103.
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\evidence\active-owner-validation-lifecycle.md") -Encoding UTF8
+        @"
+Review status: PENDING
+"@ | Set-Content -LiteralPath (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\audits-reviews\active-owner-validation-lifecycle.md") -Encoding UTF8
+        @"
+{
+  "runId": "fresh-active-validation-lifecycle",
+  "automationId": "tiku-module-run-v2-autopilot-2",
+  "threadRole": "interactive",
+  "taskId": "module-run-v2-active-owner-validation-lifecycle",
+  "branch": "codex/dirty-owner-smoke",
+  "worktreePath": "$($dirtyOwnerPath.Replace("\", "\\"))",
+  "status": "active",
+  "heartbeatAtUtc": "2999-06-09T00:00:00Z",
+  "phase": "editing",
+  "changedFiles": ["handoff.txt"],
+  "lastSafeCheckpoint": "focused gates passed before broad advisory failure",
+  "nextRecommendedAction": "classify validation surface before owner recovery",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $activeRunPath -Encoding UTF8
+
+        Invoke-ExpectFailure -ExpectedPattern "startupDecision: manual_required_owner_recovery" -Command {
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -AutomationWorktreeRoot $dirtyWorktreeRoot `
+                -RunRegistryRoot $runRegistryRoot `
+                -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
                 -SkipLeaseCheck
         }
@@ -425,7 +501,6 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
-        New-Item -ItemType Directory -Path (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\evidence"), (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\audits-reviews") -Force | Out-Null
         @"
 result: pass
 Batch 101:
@@ -472,6 +547,7 @@ Review status: PENDING
                 -MatrixPath $matrixPath `
                 -AutomationWorktreeRoot $dirtyWorktreeRoot `
                 -RunRegistryRoot $runRegistryRoot `
+                -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
                 -SkipLeaseCheck `
                 -ActiveRunHeartbeatMinutes 30
@@ -506,6 +582,7 @@ Review status: PENDING
                 -MatrixPath $matrixPath `
                 -AutomationWorktreeRoot $dirtyWorktreeRoot `
                 -RunRegistryRoot $runRegistryRoot `
+                -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
                 -SkipLeaseCheck
         )
@@ -520,6 +597,7 @@ Review status: PENDING
                 -MatrixPath $matrixPath `
                 -AutomationWorktreeRoot $dirtyWorktreeRoot `
                 -RunRegistryRoot $runRegistryRoot `
+                -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
                 -SkipLeaseCheck
         }

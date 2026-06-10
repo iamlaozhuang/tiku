@@ -599,12 +599,21 @@ With `-NoWrite`, the gate must emit `runRegistryHeartbeat: skipped_no_write`. Sc
 heartbeat only when it is actually entering or owning the current lane; recovery audits and human-invoked diagnostics
 should prefer `-NoWrite`.
 
+Before an automation thread exits on a terminal or owner-recovery state, it must run
+`Set-ModuleRunV2RunRegistryFinalizer.ps1` for its current worktree. The finalizer writes the true `changedFiles`,
+`phase`, `blockerKind`, `evidencePath`, `auditReviewPath`, `closeoutTransactionState`, `safeToAdopt`, and
+`cleanupPolicy` fields. A thread that stops after focused gates pass but advisory baseline fails must finalize as
+`status: stopped`, `safeToAdopt: false`, and `cleanupPolicy: none` unless a redacted handoff explicitly permits
+adoption. A closed and clean run may finalize as `status: cleanup_ready` only after evidence proves merge/push/parking
+completed.
+
 Clean stale automation worktrees are `recoverableAutomationWorktree` findings, not hard blocks. A stale worktree is
 recoverable only when it is under the configured automation worktree root and `git status --porcelain` is clean. Dirty
 automation worktrees are routed by the registry:
 
 - fresh `status: active` heartbeat -> `exit_active_owner_present`;
-- stale `status: active`, dirty worktree, and `safeToAdopt: false` -> run the read-only validation-surface classifier and
+- `status: active`, dirty worktree, `safeToAdopt: false`, and existing evidence/audit -> run the read-only
+  validation-surface classifier before the heartbeat shortcut and
   return `manual_required_owner_recovery` when evidence shows validation-surface mismatch, unrelated baseline failure, or
   pending closeout transaction state;
 - `status: recoverable|stopped|abandoned`, `safeToAdopt: true`, and existing redacted handoff ->

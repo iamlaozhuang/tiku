@@ -141,6 +141,12 @@ try {
     if ($queueAfterApply -notmatch "seededImplementationTask:\s*true" -or $queueAfterApply -notmatch "status:\s*pending") {
         throw "Applied seed transaction did not write pending seeded tasks."
     }
+    if ($queueAfterApply -notmatch "validationCommandLifecycle:" -or $queueAfterApply -notmatch "phase:\s*advisory_baseline") {
+        throw "Applied seed transaction did not write lifecycle-aware advisory baseline validation."
+    }
+    if ($queueAfterApply -match "phase:\s*post_edit\s+command:\s*npm\.cmd run test -- --run focused") {
+        throw "Applied seed transaction wrote broad baseline as a post_edit hard gate."
+    }
 
     $seedEvidenceContent = Get-Content -LiteralPath (Join-Path -Path $fixtureRoot -ChildPath "seed-evidence.md") -Raw
     if ($seedEvidenceContent -notmatch "authorization-and-access" -or $seedEvidenceContent -notmatch "batch-101-authorization-and-access") {

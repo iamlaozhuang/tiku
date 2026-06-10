@@ -24,6 +24,9 @@ param(
     [string]$SchemaPath = "docs\04-agent-system\state\autodrive-control-schema.yaml",
 
     [Parameter(Mandatory = $false)]
+    [string]$RunRegistryRoot = "",
+
+    [Parameter(Mandatory = $false)]
     [switch]$Execute,
 
     [Parameter(Mandatory = $false)]
@@ -573,6 +576,61 @@ function Invoke-ValidationCommand {
     }
 }
 
+function Invoke-RunRegistryFinalizer {
+    param(
+        [Parameter(Mandatory = $true)][string]$TargetTaskId,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
+        [Parameter(Mandatory = $true)][string]$Phase,
+        [Parameter(Mandatory = $true)][string]$BlockerKind,
+        [Parameter(Mandatory = $true)][string]$CloseoutTransactionState,
+        [Parameter(Mandatory = $true)][string]$NextRecommendedAction
+    )
+
+    $finalizerPath = Join-Path -Path $agentSystemRoot -ChildPath "Set-ModuleRunV2RunRegistryFinalizer.ps1"
+    if (-not (Test-Path -LiteralPath $finalizerPath)) {
+        Write-Output "runRegistryFinalizer: missing"
+        return
+    }
+
+    $evidencePath = Get-TaskScalarValue -Block $TaskBlock -Key "evidencePath"
+    $auditReviewPath = Get-TaskScalarValue -Block $TaskBlock -Key "auditReviewPath"
+    $finalizerArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $finalizerPath,
+        "-TaskId",
+        $TargetTaskId,
+        "-Status",
+        "stopped",
+        "-Phase",
+        $Phase,
+        "-BlockerKind",
+        $BlockerKind,
+        "-EvidencePath",
+        $evidencePath,
+        "-AuditReviewPath",
+        $auditReviewPath,
+        "-CloseoutTransactionState",
+        $CloseoutTransactionState,
+        "-CleanupPolicy",
+        "none",
+        "-NextRecommendedAction",
+        $NextRecommendedAction
+    )
+    if (-not [string]::IsNullOrWhiteSpace($RunRegistryRoot)) {
+        $finalizerArgs += @("-RunRegistryRoot", $RunRegistryRoot)
+    }
+
+    $finalizerOutput = @(
+        & powershell.exe @finalizerArgs 2>&1
+    )
+    foreach ($line in $finalizerOutput) {
+        Write-Output "runRegistryFinalizerOutput: $line"
+    }
+}
+
 function Get-ResolvedTargetTaskId {
     param([Parameter(Mandatory = $false)][AllowEmptyString()][string]$CandidateTaskId)
 
@@ -721,6 +779,7 @@ try {
                 if (-not $safety.IsSafe) {
                     Write-Output "blocked command: $validationCommand"
                     Write-Output "blockedPattern: $($safety.Pattern)"
+                    Invoke-RunRegistryFinalizer -TargetTaskId $targetTask -TaskBlock $taskBlock -Phase "validation_safety" -BlockerKind "blocked_validation_command" -CloseoutTransactionState "unknown" -NextRecommendedAction "manual_required_owner_recovery"
                     Write-SerialExecutorResult -Decision "blocked_command" -Action "run_validation" -Reason "validation command is outside the local safe command allowlist" -ExitCode 1 -TargetTaskId $targetTask
                 }
 
@@ -737,6 +796,7 @@ try {
                 $validationResult = Invoke-ValidationCommand -Command $validationCommand
                 $validationResult.Output | ForEach-Object { Write-Output "validationOutput: $_" }
                 if ($validationResult.ExitCode -ne 0) {
+                    Invoke-RunRegistryFinalizer -TargetTaskId $targetTask -TaskBlock $taskBlock -Phase "validation_failed" -BlockerKind "validation_command_failed" -CloseoutTransactionState "closeout_pending_evidence" -NextRecommendedAction "manual_required_owner_recovery"
                     Write-SerialExecutorResult -Decision "validation_failed" -Action "run_validation" -Reason "validation command failed: $validationCommand" -ExitCode 1 -TargetTaskId $targetTask
                 }
             }
