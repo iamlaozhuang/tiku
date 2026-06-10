@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
-updatedAt: "2026-06-10T02:17:00-07:00"
+  currentPhase: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+updatedAt: "2026-06-10T04:13:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -93,15 +93,14 @@ repository:
   lastKnownMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
   lastKnownOriginMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
 currentTask:
-  id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
-  status: done
+  id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+  status: in_progress
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-10-batch-101-authorization-read-model-display-contracts.md
-  evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
-  branch: codex/module-run-v2-autopilot-2026-06-10
-  commitShaSemantics: task_closeout_checkpoint_or_pending_local_commit
-  commitSha: 6bd71249948329e2828abbf986b396fb2ab67375
+  planPath: docs/05-execution-logs/task-plans/2026-06-10-batch-102-personal-auth-org-auth-local-summaries.md
+  evidencePath: docs/05-execution-logs/evidence/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  branch: codex/batch-102-owner-recovery
+  commitSha: pending-initial-owner-recovery-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

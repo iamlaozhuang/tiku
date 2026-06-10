@@ -7408,16 +7408,16 @@ tasks:
     localFullLoopGate: L4
     blockedRemainder: high-risk work remains separately gated
     closeoutPolicy:
-      localCommit: not_approved
+      localCommit: approved
       fastForwardMerge:
-        approved: not_approved
+        approved: true
         targetBranch: master
       push:
-        approved: not_approved
+        approved: true
         target: origin/master
       cleanup:
-        deleteShortBranch: not_approved
-        parkWorktree: not_approved
+        deleteShortBranch: true
+        parkWorktree: true
     autodrivePolicy:
       mode: guarded_serial
       allowedAgentActions:
@@ -7481,6 +7481,21 @@ tasks:
       - local_validation
       - evidence_redaction
       - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/authorization-source-type-summary-service.test.ts src/server/validators/authorization-source-type-summary.test.ts
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
       - npm.cmd run lint
@@ -7490,7 +7505,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
     evidencePath: docs/05-execution-logs/evidence/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
-    status: pending
+    status: in_progress
     retryCount: 0
   - id: batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c
     title: Module Run v2 authorization-and-access implementation seed
