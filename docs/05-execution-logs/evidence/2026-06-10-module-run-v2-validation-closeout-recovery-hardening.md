@@ -4,7 +4,7 @@ Task: `module-run-v2-validation-closeout-recovery-hardening`
 
 Branch: `codex/module-run-v2-validation-closeout-recovery`
 
-Commit: `pending-local-commit`
+Commit: `3fc91623d98c0ba25b2fadd2607374959677c48a`
 
 ## Scope
 

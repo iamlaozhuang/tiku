@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: module-run-v2-validation-closeout-recovery-hardening
-updatedAt: "2026-06-10T01:58:09-07:00"
+updatedAt: "2026-06-10T02:07:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -101,7 +101,7 @@ currentTask:
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
   branch: codex/module-run-v2-validation-closeout-recovery
   commitShaSemantics: task_closeout_checkpoint_or_pending_local_commit
-  commitSha: pending-local-commit
+  commitSha: 3fc91623d98c0ba25b2fadd2607374959677c48a
   prUrl: null
   retryCount: 0
   lastFailurePath: null
