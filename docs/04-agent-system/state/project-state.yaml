@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: module-run-v2-autopilot-loop-hardening
-updatedAt: "2026-06-10T12:24:00-07:00"
+updatedAt: "2026-06-10T11:07:04-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -206,7 +206,7 @@ repository:
   lastKnownOriginMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
 currentTask:
   id: module-run-v2-autopilot-loop-hardening
-  status: done
+  status: closed
   sourceStory: user-approved-2026-06-10-autopilot-loop-hardening
   planPath: docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-autopilot-loop-hardening.md
   evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-autopilot-loop-hardening.md
