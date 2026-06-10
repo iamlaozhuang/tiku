@@ -79,6 +79,24 @@ Initial `npm.cmd run lint` and `npm.cmd run typecheck` attempts with only `D:\ti
 because package resolution still starts from the current worktree. No dependency install was performed; a temporary
 junction to `D:\tiku\node_modules` was created and removed.
 
+## Post-Merge Smoke Fixture Hardening
+
+After fast-forward merging the first mechanism commit to local `master`, the focused unattended readiness smoke exposed a
+second mechanism-only test fixture defect:
+
+- `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1` expected
+  `OK_POST_CLOSEOUT_HANDOFF_SHA_ANCESTOR master`.
+- The fixture used repository `origin/master` state directly, so a legitimate local `master...origin/master [ahead 1]`
+  closeout state made the post-closeout handoff case fail closed even though the readiness logic was healthy.
+
+Follow-up repair:
+
+- Added explicit `MasterShaOverride` and `OriginMasterShaOverride` test seams to the readiness script, matching existing
+  branch and remote-ahead override patterns.
+- Updated the smoke to use real local `HEAD`/`HEAD~1` SHAs as a synchronized repository fixture.
+- Re-ran `Test-ModuleRunV2UnattendedReadiness.Smoke.ps1`: pass,
+  `Module Run v2 unattended readiness smoke passed`.
+
 ## Next Autopilot Takeover
 
 Current durable state is ready for the next primary autopilot startup:

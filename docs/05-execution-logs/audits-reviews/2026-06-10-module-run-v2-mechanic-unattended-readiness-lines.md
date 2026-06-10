@@ -18,6 +18,8 @@ APPROVE: mechanism-scoped repair is ready for local commit, fast-forward merge, 
   mechanism writes.
 - Pre-commit hardening now has a bounded `mechanic_repair` scope for mechanism-only repairs and still blocks product,
   dependency, env/secret, schema, migration, material, paper_asset, and requirement-story changes.
+- Unattended readiness smoke no longer depends on live `origin/master` alignment when testing post-closeout handoff SHA
+  ancestry; it now uses explicit test SHA overrides backed by real local commits.
 - The next primary autopilot startup can proceed to `batch-101` task claim.
 - No business implementation, dependency, package, lockfile, env/secret, provider, schema, migration, Docker DB, deploy,
   PR, force-push, or Cost Calibration Gate action was performed.

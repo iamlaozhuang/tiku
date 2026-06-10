@@ -28,6 +28,12 @@ param(
     [int]$RemoteAheadCountOverride = -1,
 
     [Parameter(Mandatory = $false)]
+    [string]$MasterShaOverride = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$OriginMasterShaOverride = "",
+
+    [Parameter(Mandatory = $false)]
     [switch]$AllowRepositoryShaDrift,
 
     [Parameter(Mandatory = $false)]
@@ -478,8 +484,14 @@ try {
         Add-Finding "HARD_BLOCK_PROTECTED_BRANCH $currentBranch"
     }
 
-    $masterSha = ((& git rev-parse master) -join "").Trim()
-    $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+    $masterSha = $MasterShaOverride.Trim()
+    if ([string]::IsNullOrWhiteSpace($masterSha)) {
+        $masterSha = ((& git rev-parse master) -join "").Trim()
+    }
+    $originMasterSha = $OriginMasterShaOverride.Trim()
+    if ([string]::IsNullOrWhiteSpace($originMasterSha)) {
+        $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+    }
     $stateMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownMasterSha"
     $stateOriginMasterSha = Get-ProjectScalar -Lines $projectStateLines -Key "lastKnownOriginMasterSha"
     $canUsePostCloseoutHandoffShaAncestry = (-not [string]::IsNullOrWhiteSpace($projectCurrentTaskId)) `

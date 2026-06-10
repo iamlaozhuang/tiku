@@ -45,6 +45,8 @@ Related mechanism drift: active mechanism state still wrote or declared the hist
 - Align active mechanism state and smoke fixtures to the primary visible autopilot id.
 - Add a bounded `mechanic_repair` pre-commit scope so mechanism repairs are not forced through the previous business
   task's allowed file list.
+- Stabilize the unattended readiness smoke so post-closeout handoff ancestry coverage does not depend on whether local
+  `master` is temporarily ahead of `origin/master` before the allowed push.
 - Keep edits limited to mechanism scripts/state and execution logs.
 
 ## Validation Plan

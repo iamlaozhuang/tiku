@@ -62,6 +62,7 @@ try {
     $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
     $runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"
     New-Item -ItemType Directory -Path $runRegistryRoot | Out-Null
+    $headSha = ((& git rev-parse HEAD) -join "").Trim()
     $masterSha = ((& git rev-parse master) -join "").Trim()
     $originMasterSha = ((& git rev-parse origin/master) -join "").Trim()
 
@@ -320,7 +321,10 @@ tasks:
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "OK_CLOSEOUT_RECOVERY_TASK_STATUS"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "unattendedStopDecision: closeout_recovery"
 
-    $ancestorSha = ((& git rev-parse origin/master~1) -join "").Trim()
+    $ancestorSha = ((& git rev-parse HEAD~1 2>$null) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($ancestorSha)) {
+        $ancestorSha = $headSha
+    }
     @"
 schemaVersion: 1
 repository:
@@ -337,6 +341,8 @@ currentTask:
             -QueuePath $queuePath `
             -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
             -CloseoutRecovery `
+            -MasterShaOverride $headSha `
+            -OriginMasterShaOverride $headSha `
             -AllowProtectedBranch `
             -SkipRemoteAheadCheck
     )
@@ -361,6 +367,8 @@ currentTask:
                     -MatrixPath (Join-Path -Path $cleanWorktreePath -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml") `
                     -RunRegistryRoot $runRegistryRoot `
                     -CloseoutRecovery `
+                    -MasterShaOverride $headSha `
+                    -OriginMasterShaOverride $headSha `
                     -AllowProtectedBranch `
                     -SkipRemoteAheadCheck
             )
@@ -431,6 +439,8 @@ tasks:
             -ProjectStatePath $projectStatePath `
             -QueuePath $queuePath `
             -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+            -MasterShaOverride $headSha `
+            -OriginMasterShaOverride $headSha `
             -AllowProtectedBranch `
             -SkipRemoteAheadCheck
     )
