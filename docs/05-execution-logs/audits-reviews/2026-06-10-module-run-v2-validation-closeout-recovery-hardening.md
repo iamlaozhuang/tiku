@@ -20,8 +20,8 @@ No blocking findings.
 - Focused mechanism smokes passed.
 - Autodrive schema and control-loop acceptance smokes passed.
 - `git diff --check`, `npm.cmd run lint`, and `npm.cmd run typecheck` passed using existing local dependencies only.
-- Startup/runner/dispatcher/recovery proof against current durable state leaves the fresh active owner alone.
-- Stale-heartbeat pressure proof routes the same protected owner to `manual_required_owner_recovery`.
+- Startup/runner/dispatcher/recovery proof first left the fresh active owner alone, then after the heartbeat aged past
+  the default threshold routed the same protected owner to `manual_required_owner_recovery`.
 
 ## Safety Review
 

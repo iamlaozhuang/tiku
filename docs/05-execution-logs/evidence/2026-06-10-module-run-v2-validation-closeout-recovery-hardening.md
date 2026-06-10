@@ -49,7 +49,7 @@ false`, producing `startupDecision: manual_required_owner_recovery` only when th
 
 ## Next Autopilot Takeover Proof
 
-Default current durable state:
+Earlier current durable state while the active heartbeat was still fresh:
 
 - `startupDecision: exit_active_owner_present`
 - `runnerDecision: exit_active_owner_present`
@@ -71,6 +71,18 @@ Forced stale-heartbeat pressure check against the same durable state with `-Acti
 - Next expected action after heartbeat expiry: manual-required owner recovery, not auto-adoption, cleanup, task claim, or
   hard-block ambiguity.
 
+Final post-commit proof against current durable state after the heartbeat aged past the default threshold:
+
+- `startupDecision: manual_required_owner_recovery`
+- `runnerDecision: manual_required_owner_recovery`
+- `runnerNextAction: request_owner_recovery`
+- `agentActionDecision: manual_required`
+- `agentAction: request_manual_decision`
+- `recoverySelfRepairDecision: manual_required`
+- `repairAction: open_owner_recovery_plan`
+- Next expected action: manual-required owner recovery. The next autopilot can start steadily, but it must stop at the
+  owner-recovery boundary instead of adopting or cleaning the dirty batch-101 worktree.
+
 ## Automation Registration
 
 - Primary visible autopilot `tiku-module-run-v2-autopilot-2`: `status = "ACTIVE"`.
@@ -82,5 +94,5 @@ Forced stale-heartbeat pressure check against the same durable state with `-Acti
 
 - Current batch-101 owner worktrees remain untouched.
 - Cost Calibration Gate remains blocked.
-- The next autopilot is expected to idle while the active owner heartbeat remains fresh; if that heartbeat expires, it is
-  expected to ask for owner recovery.
+- The next autopilot is currently expected to ask for owner recovery because the protected dirty active owner heartbeat
+  has aged past the default threshold.
