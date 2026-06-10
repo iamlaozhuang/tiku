@@ -181,6 +181,16 @@ scriptControls:
     smokePath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
     decisionOutput: seedSelfReviewDecision
     role: hard-block self-review for seeded task coverage, metadata, safe file scope, validation commands, and redaction anchors
+  - id: module-run-v2-seed-transaction-recovery-readiness
+    path: scripts/agent-system/Test-ModuleRunV2SeedTransactionRecoveryReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2SeedTransactionRecoveryReadiness.Smoke.ps1
+    decisionOutput: seedRecoveryDecision
+    role: read-only classifier for dirty automation worktrees that contain only a staged Module Run v2 auto-seed transaction
+  - id: module-run-v2-recoverable-seed-transaction-closeout
+    path: scripts/agent-system/Invoke-ModuleRunV2RecoverableSeedTransactionCloseout.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverableSeedTransactionCloseout.Smoke.ps1
+    decisionOutput: recoverableSeedCloseoutDecision
+    role: deterministic closeout executor that replays verified seed task blocks into the current queue, commits, fast-forward merges, pushes, and optionally removes the verified seed worktree
   - id: module-run-v2-autodrive-schema-readiness
     path: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1

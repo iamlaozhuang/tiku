@@ -262,6 +262,93 @@ terminologyAnchors:
     Assert-Contains -Output $recoverableWorktreeOutput -Pattern "recoverableAutomationWorktreeCount: 1"
     Assert-Contains -Output $recoverableWorktreeOutput -Pattern "startupDecision: cleanup_stale_artifacts"
 
+    $seedRepo = Join-Path -Path $fixtureRoot -ChildPath "seed-recovery-repo"
+    $seedWorktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "seed-recovery-worktrees"
+    New-Item -ItemType Directory -Path $seedRepo, $seedWorktreeRoot | Out-Null
+    & git -C $seedRepo init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize seed recovery startup fixture repository."
+    }
+    New-Item -ItemType Directory -Path (Join-Path -Path $seedRepo -ChildPath "docs\04-agent-system\state") | Out-Null
+    @"
+schemaVersion: 1
+currentTask:
+  id: closed-current
+"@ | Set-Content -LiteralPath (Join-Path -Path $seedRepo -ChildPath "docs\04-agent-system\state\project-state.yaml") -Encoding UTF8
+    @"
+schemaVersion: 1
+tasks:
+  - id: closed-current
+    status: closed
+    taskKind: automation_activation
+"@ | Set-Content -LiteralPath (Join-Path -Path $seedRepo -ChildPath "docs\04-agent-system\state\task-queue.yaml") -Encoding UTF8
+    @"
+schemaVersion: 2
+moduleRunVersion: 2
+mode:
+  firstEligibleImplementationBatchNumber: 101
+sourcePlanningModules:
+  - module: authorization-context
+    sourcePlanningTask: closed-current
+    v2ExecutionModule: authorization-and-access
+executionModules:
+  - module: authorization-and-access
+    sourceModules:
+      - authorization-context
+    localFullLoopMinimum: L4
+    targetLocalClosure:
+      - authorization read-model and display contracts
+      - personal_auth and org_auth local summaries
+implementationAutoSeedGate:
+  enabled: true
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath (Join-Path -Path $seedRepo -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml") -Encoding UTF8
+    & git -C $seedRepo add docs | Out-Null
+    & git -C $seedRepo -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "seed recovery startup baseline" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit seed recovery startup baseline."
+    }
+    $seedOriginMasterSha = ((& git -C $seedRepo rev-parse HEAD) -join "").Trim()
+    & git -C $seedRepo update-ref refs/remotes/origin/master $seedOriginMasterSha
+    $seedDirtyPath = Join-Path -Path $seedWorktreeRoot -ChildPath "seed-dirty"
+    & git -C $seedRepo worktree add --detach $seedDirtyPath HEAD | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create seed recovery dirty worktree."
+    }
+    $seedTransactionScript = Join-Path -Path $PSScriptRoot -ChildPath "New-ModuleRunV2ImplementationSeed.ps1"
+    & $seedTransactionScript `
+        -Apply `
+        -ProjectStatePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\project-state.yaml") `
+        -QueuePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\task-queue.yaml") `
+        -MatrixPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml") `
+        -ApprovalStatement "autoDriveLocalImplementationApproval: startup smoke approval" `
+        -SeedEvidencePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\05-execution-logs\evidence\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md") `
+        -SeedAuditReviewPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md") | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create seed recovery startup transaction."
+    }
+    & git -C $seedDirtyPath add docs | Out-Null
+    Push-Location $seedRepo
+    try {
+        Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludePendingTask
+        $seedRecoveryStartupOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml") `
+                -AutomationWorktreeRoot $seedWorktreeRoot `
+                -AllowProtectedBranch `
+                -SkipLeaseCheck
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $seedRecoveryStartupOutput -Pattern "seedRecoveryDecision: recoverable_seed_transaction"
+    Assert-Contains -Output $seedRecoveryStartupOutput -Pattern "RECOVERABLE_SEED_TRANSACTION_WORKTREE"
+    Assert-Contains -Output $seedRecoveryStartupOutput -Pattern "startupDecision: adopt_recoverable_run"
+
     $handoffRoot = Join-Path -Path $fixtureRoot -ChildPath "handoffs"
     $runRegistryRoot = Join-Path -Path $fixtureRoot -ChildPath "runs"
     New-Item -ItemType Directory -Path $handoffRoot, $runRegistryRoot | Out-Null

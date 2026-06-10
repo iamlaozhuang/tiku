@@ -159,7 +159,8 @@ function Write-AgentActionResult {
         [Parameter(Mandatory = $true)][string]$Action,
         [Parameter(Mandatory = $true)][string]$Reason,
         [Parameter(Mandatory = $true)][int]$ExitCode,
-        [Parameter(Mandatory = $false)][string]$TargetTaskId = ""
+        [Parameter(Mandatory = $false)][string]$TargetTaskId = "",
+        [Parameter(Mandatory = $false)][string]$SeedWorktreePath = ""
     )
 
     Write-Section -Title "Module Run v2 Agent Action Dispatcher"
@@ -167,6 +168,9 @@ function Write-AgentActionResult {
     Write-Output "agentAction: $Action"
     if (-not [string]::IsNullOrWhiteSpace($TargetTaskId)) {
         Write-Output "agentActionTask: $TargetTaskId"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($SeedWorktreePath)) {
+        Write-Output "agentActionSeedWorktreePath: $SeedWorktreePath"
     }
     Write-Output "reason: $Reason"
     Write-Output "active owner: leave_alone"
@@ -239,6 +243,8 @@ try {
     $runnerDecision = Get-DecisionValue -Output $runnerOutput -Key "runnerDecision"
     $runnerNextAction = Get-DecisionValue -Output $runnerOutput -Key "runnerNextAction"
     $runnerNextTask = Get-DecisionValue -Output $runnerOutput -Key "runnerNextTask"
+    $seedTransactionRecovery = Get-DecisionValue -Output $runnerOutput -Key "seedTransactionRecovery"
+    $seedTransactionWorktreePath = Get-DecisionValue -Output $runnerOutput -Key "seedTransactionWorktreePath"
 
     Write-Section -Title "Runner Decision"
     Write-Output "runnerDecision: $runnerDecision"
@@ -259,6 +265,9 @@ try {
             Write-AgentActionResult -Decision "ready" -Action "run_hygiene_cleanup" -Reason "safe cleanup is available through hygiene gate" -ExitCode 0
         }
         "adopt_recoverable_run" {
+            if ($seedTransactionRecovery -eq "ready" -and -not [string]::IsNullOrWhiteSpace($seedTransactionWorktreePath)) {
+                Write-AgentActionResult -Decision "ready" -Action "closeout_recoverable_auto_seed_transaction" -Reason "startup found a recoverable auto-seed transaction" -ExitCode 0 -SeedWorktreePath $seedTransactionWorktreePath
+            }
             Write-AgentActionResult -Decision "ready" -Action "adopt_recoverable_run" -Reason "startup found an adoptable run" -ExitCode 0
         }
         "open_recovery_plan" {

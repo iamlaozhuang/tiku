@@ -322,7 +322,7 @@ Passed for guarded queue seeding.
 
 ## Checks
 
-- `autoDriveLocalImplementationApproval` is recorded.
+- ``autoDriveLocalImplementationApproval`` is recorded.
 - Seeded tasks are pending implementation tasks.
 - High-risk capabilities remain blocked or task-specific.
 - Cost Calibration Gate remains blocked.

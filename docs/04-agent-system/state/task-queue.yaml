@@ -5463,8 +5463,8 @@ tasks:
       schemaMigration: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
-      cleanupPolicy: none
+      runStatus: closed
+      cleanupPolicy: cleanup_ready
       redactionRequired: true
     taskKind: implementation
     moduleRunVersion: 2
@@ -7155,5 +7155,120 @@ tasks:
       - 'Select-String -Path docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\2026-06-09-module-run-v2-autodrive-activation.md -Pattern ''codexAutomationStatus: ACTIVE'',''autoDriveLocalImplementationApproval'',''Cost Calibration Gate remains blocked'''
     evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
+    status: done
+    retryCount: 0
+  - id: module-run-v2-autodrive-seed-recovery-hardening
+    title: Module Run v2 autodrive seed recovery hardening
+    phase: module-run-v2-autodrive-seed-recovery-hardening
+    sourceStory: user-goal-2026-06-09-autodrive-seed-transaction-recovery
+    dependencies:
+      - module-run-v2-autodrive-activation
+    humanApproval: >-
+      User approved planning and executing the serial mechanism hardening needed for the next Codex automation run to
+      recover the observed auto-seed transaction residue without broadening high-risk gates.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - run_validation
+        - write_evidence
+        - local_commit
+        - adopt_recoverable_run
+        - run_closeout_recovery
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 8
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: automation_hardening
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2SeedTransactionRecoveryReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2SeedTransactionRecoveryReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2RecoverableSeedTransactionCloseout.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2RecoverableSeedTransactionCloseout.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - startup_readiness
+      - queue_seed_transaction
+      - evidence_integrity
+      - recovery_adoption
+      - hygiene_cleanup
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2SeedTransactionRecoveryReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2RecoverableSeedTransactionCloseout.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
     status: done
     retryCount: 0

@@ -293,6 +293,19 @@ runnerNextAction: leave_active_owner_alone
     }
     Assert-Contains -Output $activeOwnerOutput -Pattern "agentAction: idle_active_owner_present"
 
+    $recoverableSeedRunner = Write-RunnerOutput -Root $smokeRoot -Name "recoverable-seed" -Content @"
+runnerDecision: adopt_recoverable_run
+runnerNextAction: agent_adopt_recoverable_run
+seedTransactionRecovery: ready
+seedTransactionWorktreePath: C:\Users\jzzhu\.codex\worktrees\ec30\tiku
+"@
+    $recoverableSeedOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dispatcherScriptPath -RunnerOutputPath $recoverableSeedRunner -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Recoverable seed dispatcher fixture failed.`n$($recoverableSeedOutput -join "`n")"
+    }
+    Assert-Contains -Output $recoverableSeedOutput -Pattern "agentAction: closeout_recoverable_auto_seed_transaction"
+    Assert-Contains -Output $recoverableSeedOutput -Pattern "agentActionSeedWorktreePath:"
+
     $hardBlockRunner = Write-RunnerOutput -Root $smokeRoot -Name "hard-block" -Content @"
 runnerDecision: stop_for_hard_block
 runnerNextAction: report_startup_hard_block

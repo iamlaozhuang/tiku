@@ -60,6 +60,80 @@ Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BLOCKED_FILE package.json" -Co
     & $scriptPath -TaskId $taskId -ChangedFiles "package.json"
 }
 
+$seedFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-commit-seed-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $seedFixtureRoot | Out-Null
+try {
+    & git -C $seedFixtureRoot init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize seed pre-commit fixture repository."
+    }
+
+    New-Item -ItemType Directory -Path `
+        (Join-Path -Path $seedFixtureRoot -ChildPath "docs\04-agent-system\state"), `
+        (Join-Path -Path $seedFixtureRoot -ChildPath "docs\05-execution-logs\evidence"), `
+        (Join-Path -Path $seedFixtureRoot -ChildPath "docs\05-execution-logs\audits-reviews") | Out-Null
+
+    $seedProjectStatePath = Join-Path -Path $seedFixtureRoot -ChildPath "docs\04-agent-system\state\project-state.yaml"
+    $seedQueuePath = Join-Path -Path $seedFixtureRoot -ChildPath "docs\04-agent-system\state\task-queue.yaml"
+    $seedMatrixPath = Join-Path -Path $seedFixtureRoot -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml"
+    @"
+schemaVersion: 1
+
+currentTask:
+  id: closed-activation
+"@ | Set-Content -LiteralPath $seedProjectStatePath -Encoding UTF8
+    @"
+schemaVersion: 1
+tasks:
+  - id: closed-activation
+    status: done
+"@ | Set-Content -LiteralPath $seedQueuePath -Encoding UTF8
+    @"
+moduleRunVersion: 2
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $seedMatrixPath -Encoding UTF8
+    & git -C $seedFixtureRoot add docs | Out-Null
+    & git -C $seedFixtureRoot -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "seed pre-commit baseline" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit seed pre-commit baseline."
+    }
+
+    Add-Content -LiteralPath $seedQueuePath -Value @"
+  - id: authorization-and-access-smoke
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    status: pending
+"@ -Encoding UTF8
+    $seedEvidencePath = Join-Path -Path $seedFixtureRoot -ChildPath "docs\05-execution-logs\evidence\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md"
+    Set-Content -LiteralPath $seedEvidencePath -Value "autoDriveLocalImplementationApproval`nCost Calibration Gate remains blocked" -Encoding UTF8
+    $seedAuditPath = Join-Path -Path $seedFixtureRoot -ChildPath "docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md"
+    Set-Content -LiteralPath $seedAuditPath -Value "autoDriveLocalImplementationApproval`nCost Calibration Gate remains blocked" -Encoding UTF8
+    & git -C $seedFixtureRoot add `
+        "docs/04-agent-system/state/task-queue.yaml" `
+        "docs/05-execution-logs/evidence/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" `
+        "docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" | Out-Null
+
+    Push-Location $seedFixtureRoot
+    try {
+        $seedScopeOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $seedProjectStatePath `
+                -QueuePath $seedQueuePath `
+                -MatrixPath $seedMatrixPath
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $seedScopeOutput -Pattern "preCommitScopeMode: seed_transaction"
+    Assert-Contains -Output $seedScopeOutput -Pattern "OK_SCOPE docs/04-agent-system/state/task-queue.yaml"
+} finally {
+    if (Test-Path -LiteralPath $seedFixtureRoot) {
+        Remove-Item -LiteralPath $seedFixtureRoot -Recurse -Force
+    }
+}
+
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-commit-hardening-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
 

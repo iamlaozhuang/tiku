@@ -25,6 +25,7 @@ taskAutodrivePolicy:
         - reconcile_post_closeout_state
         - confirm_post_closeout_checkpoint
         - seed_implementation_tasks
+        - closeout_recoverable_auto_seed_transaction
     blockedAgentActions:
       requiredValues:
         - merge
@@ -111,6 +112,16 @@ autoSeedBridge:
       - validation command minimums
       - redactionRequired
       - Cost Calibration Gate remains blocked
+  recoveryLayer:
+    scriptPath: scripts/agent-system/Test-ModuleRunV2SeedTransactionRecoveryReadiness.ps1
+    closeoutScriptPath: scripts/agent-system/Invoke-ModuleRunV2RecoverableSeedTransactionCloseout.ps1
+    decisionOutput: seedRecoveryDecision
+    decisions:
+      - recoverable_seed_transaction
+      - manual_required
+      - stop_for_hard_block
+    recoveryAction: closeout_recoverable_auto_seed_transaction
+    writePolicy: execute_requires_autoDriveLocalImplementationApproval_commit_fast_forward_merge_push_cleanup
   runnerBridge:
     noExecutableTaskWithoutApproval: seed_proposal_available
     noExecutableTaskWithApproval: seed_transaction_applied

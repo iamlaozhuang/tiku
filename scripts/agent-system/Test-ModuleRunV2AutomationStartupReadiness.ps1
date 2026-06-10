@@ -201,6 +201,52 @@ function Test-GitDirty {
     return $status.Count -gt 0
 }
 
+function Get-OutputValue {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Output,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    foreach ($line in $Output) {
+        if ($line -match "^$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
+function Invoke-SeedTransactionRecoveryReadiness {
+    param([Parameter(Mandatory = $true)][string]$WorktreePath)
+
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2SeedTransactionRecoveryReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("seedRecoveryDecision: stop_for_hard_block", "reason: seed transaction recovery readiness script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -SeedWorktreePath $WorktreePath `
+                -MatrixPath $MatrixPath 2>&1
+        )
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Test-LocalToolingReady {
     if (-not (Test-Path -LiteralPath "package.json")) {
         Write-Output "localToolingReadiness: not_applicable"
@@ -450,6 +496,19 @@ function Test-AutomationWorktreeHygiene {
 
         if (Test-GitDirty -Path $worktreeFullPath) {
             if ($null -eq $runRegistry) {
+                $seedRecoveryResult = Invoke-SeedTransactionRecoveryReadiness -WorktreePath $worktreeFullPath
+                $seedRecoveryResult.Output | ForEach-Object { Write-Output $_ }
+                $seedRecoveryDecision = Get-OutputValue -Output $seedRecoveryResult.Output -Key "seedRecoveryDecision"
+                if ($seedRecoveryResult.ExitCode -eq 0 -and $seedRecoveryDecision -eq "recoverable_seed_transaction") {
+                    $script:startupOverrideDecision = "adopt_recoverable_run"
+                    $script:startupOverrideReason = "dirty automation worktree has a recoverable auto-seed transaction"
+                    $script:startupOverrideExitCode = 0
+                    Write-Output "RECOVERABLE_SEED_TRANSACTION_WORKTREE $worktreeFullPath"
+                    Write-Output "seedTransactionRecovery: ready"
+                    Write-Output "seedTransactionWorktreePath: $worktreeFullPath"
+                    return
+                }
+
                 $script:startupOverrideDecision = "stop_for_manual_decision"
                 $script:startupOverrideReason = "dirty automation worktree has no run registry handoff"
                 $script:startupOverrideExitCode = 1

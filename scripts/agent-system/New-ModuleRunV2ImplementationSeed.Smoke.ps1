@@ -147,6 +147,11 @@ try {
         throw "Seed evidence did not record concrete seeded task values."
     }
 
+    $seedAuditContent = Get-Content -LiteralPath (Join-Path -Path $fixtureRoot -ChildPath "seed-audit.md") -Raw
+    if ($seedAuditContent -match [char]7 -or $seedAuditContent -notmatch "autoDriveLocalImplementationApproval") {
+        throw "Seed audit did not preserve a clean autoDriveLocalImplementationApproval anchor."
+    }
+
     $selfReviewOutput = @(
         & $selfReviewPath `
             -ExpectedModule "authorization-and-access" `

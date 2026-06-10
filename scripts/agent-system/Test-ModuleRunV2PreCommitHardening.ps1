@@ -46,6 +46,8 @@ function Add-Finding {
 function Get-TaskBlock {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Lines,
 
         [Parameter(Mandatory = $true)]
@@ -78,6 +80,8 @@ function Get-TaskBlock {
 function Get-ListValues {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Block,
 
         [Parameter(Mandatory = $true)]
@@ -109,6 +113,8 @@ function Get-ListValues {
 function Get-CurrentTaskId {
     param(
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Lines
     )
 
@@ -183,6 +189,7 @@ function Expand-FileInputs {
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$Files
     )
 
@@ -203,6 +210,7 @@ function Get-ChangedFiles {
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyCollection()]
+        [AllowEmptyString()]
         [string[]]$ExplicitFiles
     )
 
@@ -219,6 +227,58 @@ function Get-ChangedFiles {
     $workingTreeFiles = @(& git diff --name-only --diff-filter=ACMR)
     $untrackedFiles = @(& git ls-files --others --exclude-standard)
     return @($workingTreeFiles + $untrackedFiles | Sort-Object -Unique)
+}
+
+function Test-SeedTransactionFileSet {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Files
+    )
+
+    if ($Files.Count -ne 3) {
+        return $false
+    }
+
+    $normalizedFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $hasQueue = $normalizedFiles -contains "docs/04-agent-system/state/task-queue.yaml"
+    $evidenceFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
+    $auditFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
+
+    return $hasQueue -and $evidenceFiles.Count -eq 1 -and $auditFiles.Count -eq 1
+}
+
+function Test-SeedTransactionAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files
+    )
+
+    $normalizedFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $evidenceFile = [string]($normalizedFiles | Where-Object { $_ -like "docs/05-execution-logs/evidence/*-module-run-v2-auto-seed-*.md" } | Select-Object -First 1)
+    $auditFile = [string]($normalizedFiles | Where-Object { $_ -like "docs/05-execution-logs/audits-reviews/*-module-run-v2-auto-seed-*.md" } | Select-Object -First 1)
+
+    foreach ($seedLogFile in @($evidenceFile, $auditFile)) {
+        if ([string]::IsNullOrWhiteSpace($seedLogFile)) {
+            Add-Finding "HARD_BLOCK_SEED_TRANSACTION_MISSING_LOG_FILE"
+            continue
+        }
+
+        $fullPath = Resolve-ScanPath -RepositoryRoot $RepositoryRoot -Path $seedLogFile
+        if (-not (Test-Path -LiteralPath $fullPath)) {
+            Add-Finding "HARD_BLOCK_SEED_TRANSACTION_LOG_FILE_MISSING $seedLogFile"
+            continue
+        }
+
+        $content = Get-Content -LiteralPath $fullPath -Raw
+        if ($content -notmatch "autoDriveLocalImplementationApproval") {
+            Add-Finding "HARD_BLOCK_SEED_TRANSACTION_MISSING_APPROVAL_ANCHOR $seedLogFile"
+        }
+        if ($content -notmatch "Cost Calibration Gate remains blocked") {
+            Add-Finding "HARD_BLOCK_SEED_TRANSACTION_MISSING_COST_GATE_ANCHOR $seedLogFile"
+        }
+    }
 }
 
 function Test-TextFile {
@@ -372,21 +432,48 @@ $repositoryRoot = ((& git rev-parse --show-toplevel) -join "").Trim()
 $projectStateLines = @(Get-Content -Path $ProjectStatePath)
 $queueLines = @(Get-Content -Path $QueuePath)
 $matrixContent = Get-Content -Path $MatrixPath -Raw
+$filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
+$isSeedTransactionScope = Test-SeedTransactionFileSet -Files $filesToScan
 
-if ([string]::IsNullOrWhiteSpace($TaskId)) {
+if (-not $isSeedTransactionScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
-$taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
-if ($taskBlock.Count -eq 0) {
-    throw "Task not found in queue: $TaskId"
+if ($isSeedTransactionScope) {
+    $TaskId = "module-run-v2-auto-seed-transaction"
+    $allowedFiles = @(
+        "docs/04-agent-system/state/task-queue.yaml",
+        "docs/05-execution-logs/evidence/*-module-run-v2-auto-seed-*.md",
+        "docs/05-execution-logs/audits-reviews/*-module-run-v2-auto-seed-*.md"
+    )
+    $blockedFiles = @(
+        ".env.local",
+        ".env.example",
+        "package.json",
+        "pnpm-lock.yaml",
+        "package-lock.yaml",
+        "package-lock.json",
+        "src/**",
+        "tests/**",
+        "e2e/**",
+        "src/db/schema/**",
+        "drizzle/**",
+        "materials/**",
+        "paper_assets/**",
+        "docs/01-requirements/stories/**"
+    )
+} else {
+    $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
+    if ($taskBlock.Count -eq 0) {
+        throw "Task not found in queue: $TaskId"
+    }
+
+    $allowedFiles = @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
+    $blockedFiles = @(Get-ListValues -Block $taskBlock -Key "blockedFiles")
 }
 
-$allowedFiles = @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
-$blockedFiles = @(Get-ListValues -Block $taskBlock -Key "blockedFiles")
-$filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
-
 Write-Output "taskId: $TaskId"
+Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } else { "task" })"
 Write-Output "filesToScan: $($filesToScan.Count)"
 
 Write-Section -Title "Module Run v2 Anchors"
@@ -408,6 +495,10 @@ if ($SkipScopeScan) {
 } elseif ($filesToScan.Count -eq 0) {
     Write-Output "scopeScan: no changed files"
 } else {
+    if ($isSeedTransactionScope) {
+        Test-SeedTransactionAnchors -RepositoryRoot $repositoryRoot -Files $filesToScan
+    }
+
     foreach ($changedFile in $filesToScan) {
         $allowedPattern = Get-MatchingPattern -Path $changedFile -Patterns $allowedFiles
         $blockedPattern = Get-MatchingPattern -Path $changedFile -Patterns $blockedFiles

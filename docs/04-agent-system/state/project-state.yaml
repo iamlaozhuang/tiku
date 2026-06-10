@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-autodrive-activation
-updatedAt: "2026-06-09T12:35:00-07:00"
+  currentPhase: module-run-v2-autodrive-seed-recovery-hardening
+updatedAt: "2026-06-09T20:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -90,16 +90,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 4d8ef2b14354ab011a6f5573b83a977a8cba545f
-  lastKnownOriginMasterSha: 4d8ef2b14354ab011a6f5573b83a977a8cba545f
+  lastKnownMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
+  lastKnownOriginMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
 currentTask:
-  id: module-run-v2-autodrive-activation
+  id: module-run-v2-autodrive-seed-recovery-hardening
   status: done
-  sourceStory: user-goal-2026-06-09-unattended-autodrive-activation
-  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-activation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
-  branch: codex/module-run-v2-autodrive-activation
+  sourceStory: user-goal-2026-06-09-autodrive-seed-transaction-recovery
+  planPath: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+  branch: codex/autodrive-seed-recovery-hardening
   commitShaSemantics: task_closeout_checkpoint_or_pending_local_commit
   commitSha: pending-local-commit
   prUrl: null
