@@ -529,6 +529,7 @@ $cleanupCandidates = New-Object System.Collections.Generic.List[object]
 $cleanupActions = New-Object System.Collections.Generic.List[object]
 $cleanupDeferred = New-Object System.Collections.Generic.List[object]
 $parkingActions = New-Object System.Collections.Generic.List[object]
+$runRegistryRecords = New-Object System.Collections.Generic.List[object]
 $taskQueueLinesForRegistry = @()
 if (-not [string]::IsNullOrWhiteSpace($QueuePath) -and (Test-Path -LiteralPath $QueuePath)) {
     $taskQueueLinesForRegistry = @(Get-Content -LiteralPath $QueuePath)
@@ -624,6 +625,14 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
         Write-Detail -Message "runRegistryCleanupPolicy: $cleanupPolicy"
         Write-Detail -Message "runRegistryWorktreePath: $registryWorktreePath"
         Write-Detail -Message "runRegistryHeartbeatAtUtc: $registryHeartbeatAtUtc"
+        $runRegistryRecords.Add([pscustomobject]@{
+                Path                = $registryFile.FullName
+                RunId               = $runId
+                Status              = $runStatus
+                CleanupPolicy       = $cleanupPolicy
+                WorktreePath        = $registryWorktreePath
+                RedactedHandoffPath = $redactedHandoffPath
+            })
 
         if ($runStatus -eq "cleanup_ready" -and $cleanupPolicy -eq "cleanup_ready") {
             Add-RunRegistryCleanupCandidate -RunId $runId -Path $registryFile.FullName
@@ -723,6 +732,7 @@ if (-not (Test-Path -LiteralPath $AutomationWorktreeRoot)) {
     }
 
     $registeredWorktreePaths = @($worktrees | ForEach-Object { [string]$_.Path })
+    $registeredWorktreeFullPaths = @($registeredWorktreePaths | ForEach-Object { ConvertTo-FullPath -Path $_ })
     $orphanWorktreeDirectories = @(Get-OrphanAutomationWorktreeDirectories -Root $AutomationWorktreeRoot -RegisteredWorktreePaths $registeredWorktreePaths -CurrentWorktreePath $currentWorktree)
     foreach ($orphanWorktreeDirectory in $orphanWorktreeDirectories) {
         if ($orphanWorktreeDirectory.HasGitMetadata) {
@@ -733,6 +743,44 @@ if (-not (Test-Path -LiteralPath $AutomationWorktreeRoot)) {
         Add-CleanupCandidate -Kind "orphan_worktree_directory" -Path $orphanWorktreeDirectory.Path
         if ($Cleanup) {
             Remove-SafeDirectory -Path $orphanWorktreeDirectory.Path -AllowedRoot $AutomationWorktreeRoot -Kind "orphan_worktree_directory"
+        }
+    }
+
+    foreach ($runRegistryRecord in $runRegistryRecords) {
+        if ($runRegistryRecord.Status -ne "active" -or $runRegistryRecord.CleanupPolicy -ne "none") {
+            continue
+        }
+
+        $registryWorktreePath = [string]$runRegistryRecord.WorktreePath
+        if ([string]::IsNullOrWhiteSpace($registryWorktreePath) -or -not (Test-PathInsideRoot -Path $registryWorktreePath -Root $AutomationWorktreeRoot)) {
+            continue
+        }
+
+        $registryWorktreeFullPath = ConvertTo-FullPath -Path $registryWorktreePath
+        if ($registeredWorktreeFullPaths -contains $registryWorktreeFullPath) {
+            continue
+        }
+
+        if ((Test-Path -LiteralPath $registryWorktreeFullPath) -and (Test-DirectoryHasGitMetadata -Path $registryWorktreeFullPath)) {
+            Add-HardBlock -Decision "stop_manual_cleanup_required" -Message "active run registry points at unregistered Git worktree metadata"
+            continue
+        }
+
+        Add-CleanupCandidate -Kind "orphan_active_run_registry" -Path $runRegistryRecord.Path
+        Add-RunRegistryCleanupCandidate -RunId $runRegistryRecord.RunId -Path $runRegistryRecord.Path
+
+        if ($Cleanup) {
+            Remove-SafeFile -Path $runRegistryRecord.Path -AllowedRoot $RunRegistryRoot -Kind "orphan_active_run_registry"
+            if (-not (Test-Path -LiteralPath $runRegistryRecord.Path)) {
+                Add-RunRegistryCleanupAction -RunId $runRegistryRecord.RunId -Path $runRegistryRecord.Path
+            }
+        }
+
+        if (Test-Path -LiteralPath $registryWorktreeFullPath) {
+            Add-CleanupCandidate -Kind "orphan_worktree_directory" -Path $registryWorktreeFullPath
+            if ($Cleanup) {
+                Remove-SafeDirectory -Path $registryWorktreeFullPath -AllowedRoot $AutomationWorktreeRoot -Kind "orphan_worktree_directory"
+            }
         }
     }
 }

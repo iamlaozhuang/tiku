@@ -50,6 +50,8 @@ Related mechanism drift: active mechanism state still wrote or declared the hist
 - Align serial unattended readiness with startup readiness for explicit `accepted_ancestor_checkpoint` repository SHA
   semantics, requiring real Git ancestry before continuing.
 - Repair the post-commit advisory blank-line parser defect surfaced by the follow-up mechanism commit.
+- Repair stopped-automation hygiene so orphan active run registries left after stale worktree removal are cleaned before
+  the next autopilot startup.
 - Keep edits limited to mechanism scripts/state and execution logs.
 
 ## Validation Plan

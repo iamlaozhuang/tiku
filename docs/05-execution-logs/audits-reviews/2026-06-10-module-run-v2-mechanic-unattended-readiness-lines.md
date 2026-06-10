@@ -24,6 +24,8 @@ APPROVE: mechanism-scoped repair is ready for local commit, fast-forward merge, 
   semantics, while still rejecting invalid or non-ancestor repository drift.
 - Post-commit advisory helpers now tolerate blank YAML separator lines and no longer emit the prior `Lines` binding
   advisory error.
+- Stopped-automation hygiene now cleans orphan active run registries when their worktree owner is no longer registered
+  and no Git metadata remains at the path.
 - The next primary autopilot startup can proceed to `batch-101` task claim.
 - No business implementation, dependency, package, lockfile, env/secret, provider, schema, migration, Docker DB, deploy,
   PR, force-push, or Cost Calibration Gate action was performed.

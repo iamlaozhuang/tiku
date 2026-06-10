@@ -134,6 +134,27 @@ Follow-up repair:
   `Module Run v2 post-commit readiness smoke passed`.
 - Re-ran the real post-commit advisory: pass, `post-commit advisory completed`.
 
+## Orphan Active Registry Cleanup Repair
+
+The final startup proof after smoke validation found a stale cleanup lifecycle gap:
+
+- Stopped-automation hygiene identified a stale clean worktree and removed the Git worktree registration, but a fresh
+  `active` run registry with `cleanupPolicy: none` remained after the worktree became an unregistered empty directory.
+- Startup could continue, but the mechanic closeout contract requires leaving no stale run registry for the next
+  autopilot.
+
+Follow-up repair:
+
+- `Test-ModuleRunV2StoppedAutomationHygiene.ps1` now treats an `active`/`cleanupPolicy: none` registry as a safe cleanup
+  candidate when its worktree path is inside the automation root, is not a registered Git worktree, and either is missing
+  or has no Git metadata.
+- Cleanup removes the orphan active registry and, when present, the paired non-Git orphan worktree directory.
+- Added smoke coverage for a fresh active orphan registry with an unregistered worktree path.
+- Re-ran `Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1`: pass,
+  `Module Run v2 stopped automation hygiene smoke passed`.
+- Ran real hygiene cleanup: removed the stale active run registry; current `runRegistryJsonCount=0`.
+- Re-ran startup readiness: `startupDecision: prepare_next_task`.
+
 ## Next Autopilot Takeover
 
 Current durable state is ready for the next primary autopilot startup:

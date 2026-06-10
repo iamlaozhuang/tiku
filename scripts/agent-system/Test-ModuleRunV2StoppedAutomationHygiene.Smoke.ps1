@@ -281,6 +281,43 @@ try {
         throw "Expected expired active missing-worktree run registry file to be removed."
     }
 
+    $freshOrphanWorktreeDir = Join-Path -Path $worktreeRoot -ChildPath "fresh-orphan-active-slot\tiku"
+    New-Item -ItemType Directory -Path $freshOrphanWorktreeDir -Force | Out-Null
+    $freshOrphanRunPath = Join-Path -Path $runRegistryRoot -ChildPath "fresh-orphan-active.json"
+    @"
+{
+  "runId": "fresh-orphan-active-run",
+  "automationId": "tiku-module-run-v2-autopilot-2",
+  "threadRole": "scheduled",
+  "taskId": "module-run-v2-fresh-orphan-active-registry",
+  "branch": "(detached HEAD)",
+  "worktreePath": "$($freshOrphanWorktreeDir.Replace("\", "\\"))",
+  "status": "active",
+  "heartbeatAtUtc": "2026-06-08T19:59:00Z",
+  "phase": "readiness",
+  "changedFiles": [],
+  "lastSafeCheckpoint": "unregistered worktree",
+  "nextRecommendedAction": "janitor cleanup",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $freshOrphanRunPath -Encoding UTF8
+
+    $freshOrphanAvailableOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -ActiveRunHeartbeatMinutes 30)
+    Assert-Contains -Output $freshOrphanAvailableOutput -Pattern "orphan_active_run_registry"
+    Assert-Contains -Output $freshOrphanAvailableOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_available"
+
+    $freshOrphanCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -ActiveRunHeartbeatMinutes 30 -Cleanup)
+    Assert-Contains -Output $freshOrphanCleanupOutput -Pattern "runRegistryCleanupAction:"
+    Assert-Contains -Output $freshOrphanCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    if (Test-Path -LiteralPath $freshOrphanRunPath) {
+        throw "Expected fresh orphan active run registry file to be removed."
+    }
+    if (Test-Path -LiteralPath $freshOrphanWorktreeDir) {
+        throw "Expected fresh orphan active worktree directory to be removed."
+    }
+
     $expiredTerminalRunPath = Join-Path -Path $runRegistryRoot -ChildPath "expired-active-terminal.json"
     @"
 {
