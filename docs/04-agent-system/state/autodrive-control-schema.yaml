@@ -232,6 +232,16 @@ registryLifecycle:
     - expired_active_missing_worktree
     - expired_active_terminal_registry
     - cleanup_ready_registry
+  cleanupDecisions:
+    - clean
+    - cleanup_available
+    - cleanup_completed
+    - cleanup_deferred
+    - stop_existing_run_active
+    - stop_invalid_lease
+    - stop_dirty_worktree
+    - stop_manual_cleanup_required
+  cleanupDeferredRule: cleanup_deferred is an advisory successful hygiene pass for safe cleanup candidates that could not be removed because of OS locks or transient filesystem access; it must not block guarded task dispatch when no active owner, dirty worktree, malformed lease, or unsafe path is present.
   redactionRequired: true
 parallelBatch:
   requiredForParallelWorkers: true

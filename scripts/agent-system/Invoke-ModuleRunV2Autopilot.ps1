@@ -347,7 +347,7 @@ if ($RunStartupReadiness) {
         $cleanupOutput = @(Invoke-StoppedAutomationCleanup)
         $cleanupOutput | ForEach-Object { Write-Output $_ }
         $cleanupDecision = Get-DecisionValue -Output $cleanupOutput -Key "stoppedAutomationHygieneDecision"
-        if ($LASTEXITCODE -ne 0 -or $cleanupDecision -ne "cleanup_completed") {
+        if ($LASTEXITCODE -ne 0 -or $cleanupDecision -notin @("cleanup_completed", "cleanup_deferred")) {
             Write-AutopilotResult -Decision "stop_for_hard_block" -Reason "stale automation artifact cleanup failed" -ExitCode 1
         }
 

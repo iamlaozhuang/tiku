@@ -130,7 +130,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.Smoke.ps1
     decisionOutput: stoppedAutomationHygieneDecision
-    role: classifies stopped automation residue into active-owner stops, dirty/manual stops, or bounded cleanup candidates including cleanup-ready registry files, expired missing-worktree registry files, expired terminal-task registry files, stale clean worktrees, and non-Git orphan worktree directories inside the automation worktree root
+    role: classifies stopped automation residue into active-owner stops, dirty/manual stops, bounded cleanup candidates, or deferred safe cleanup when local OS locks prevent immediate deletion; candidates include cleanup-ready registry files, expired missing-worktree registry files, expired terminal-task registry files, stale clean worktrees, and non-Git orphan worktree directories inside the automation worktree root
   - id: module-run-v2-branch-hygiene
     path: scripts/agent-system/Test-ModuleRunV2BranchHygiene.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2BranchHygiene.Smoke.ps1

@@ -802,6 +802,11 @@ This gate is read-only by default. It inventories:
 
 It returns `stoppedAutomationHygieneDecision: clean` when no residual artifact needs action, and
 `stoppedAutomationHygieneDecision: cleanup_available` when all detected residual artifacts are safe cleanup candidates.
+When `-Cleanup` attempts those safe candidates but Windows or another local filesystem owner keeps an otherwise safe
+directory locked, it returns `stoppedAutomationHygieneDecision: cleanup_deferred` and records
+`stoppedAutomationHygieneDeferredCleanupCount`. `cleanup_deferred` is not a hard stop by itself; the runner must rerun
+startup readiness and may continue guarded dispatch when no active owner, dirty worktree, invalid lease, unsafe cleanup
+path, or other hard block remains.
 It returns hard-block decisions for active leases, invalid leases, dirty worktrees, or cleanup paths outside the approved
 roots.
 

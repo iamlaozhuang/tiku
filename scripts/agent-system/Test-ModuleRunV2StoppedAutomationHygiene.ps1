@@ -141,6 +141,18 @@ function Add-CleanupAction {
     Write-Detail -Message "cleanupAction: $Kind $Path"
 }
 
+function Add-CleanupDeferred {
+    param(
+        [Parameter(Mandatory = $true)][string]$Kind,
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Reason
+    )
+
+    $script:cleanupDeferred.Add([pscustomobject]@{ Kind = $Kind; Path = $Path; Reason = $Reason })
+    Write-Detail -Message "cleanupDeferred: $Kind $Path"
+    Write-Detail -Message "cleanupDeferredReason: $Reason"
+}
+
 function Add-RunRegistryCleanupAction {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -284,8 +296,12 @@ function Remove-SafeFile {
     }
 
     if (Test-Path -LiteralPath $Path) {
-        Remove-Item -LiteralPath $Path -Force
-        Add-CleanupAction -Kind $Kind -Path $Path
+        try {
+            Remove-Item -LiteralPath $Path -Force
+            Add-CleanupAction -Kind $Kind -Path $Path
+        } catch {
+            Add-CleanupDeferred -Kind $Kind -Path $Path -Reason $_.Exception.Message
+        }
     }
 }
 
@@ -302,8 +318,12 @@ function Remove-SafeDirectory {
     }
 
     if (Test-Path -LiteralPath $Path) {
-        Remove-SafeDirectoryTree -Path $Path
-        Add-CleanupAction -Kind $Kind -Path $Path
+        try {
+            Remove-SafeDirectoryTree -Path $Path
+            Add-CleanupAction -Kind $Kind -Path $Path
+        } catch {
+            Add-CleanupDeferred -Kind $Kind -Path $Path -Reason $_.Exception.Message
+        }
     }
 }
 
@@ -441,10 +461,12 @@ function Write-HygieneResult {
     Write-Output "stoppedAutomationHygieneHardBlockCount: $($script:hardBlocks.Count)"
     Write-Output "stoppedAutomationHygieneCleanupCandidateCount: $($script:cleanupCandidates.Count)"
     Write-Output "stoppedAutomationHygieneCleanupActionCount: $($script:cleanupActions.Count)"
+    Write-Output "stoppedAutomationHygieneDeferredCleanupCount: $($script:cleanupDeferred.Count)"
     Write-Output "stoppedAutomationHygieneParkingActionCount: $($script:parkingActions.Count)"
     Write-Output "stoppedAutomationHygieneSummaryOnly: $($SummaryOnly.ToString().ToLowerInvariant())"
     Write-ObjectSummary -Prefix "stoppedAutomationHygieneCleanupCandidate" -Items $script:cleanupCandidates.ToArray()
     Write-ObjectSummary -Prefix "stoppedAutomationHygieneCleanupAction" -Items $script:cleanupActions.ToArray()
+    Write-ObjectSummary -Prefix "stoppedAutomationHygieneDeferredCleanup" -Items $script:cleanupDeferred.ToArray()
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
 
@@ -456,6 +478,11 @@ function Write-HygieneResult {
 
     if (($Cleanup -and $script:cleanupActions.Count -gt 0) -or ($ParkCurrentWorktree -and $script:parkingActions.Count -gt 0)) {
         Write-Output "stoppedAutomationHygieneDecision: cleanup_completed"
+        exit 0
+    }
+
+    if ($Cleanup -and $script:cleanupDeferred.Count -gt 0) {
+        Write-Output "stoppedAutomationHygieneDecision: cleanup_deferred"
         exit 0
     }
 
@@ -500,6 +527,7 @@ if (-not [string]::IsNullOrWhiteSpace($NowUtc)) {
 $hardBlocks = New-Object System.Collections.Generic.List[object]
 $cleanupCandidates = New-Object System.Collections.Generic.List[object]
 $cleanupActions = New-Object System.Collections.Generic.List[object]
+$cleanupDeferred = New-Object System.Collections.Generic.List[object]
 $parkingActions = New-Object System.Collections.Generic.List[object]
 $taskQueueLinesForRegistry = @()
 if (-not [string]::IsNullOrWhiteSpace($QueuePath) -and (Test-Path -LiteralPath $QueuePath)) {

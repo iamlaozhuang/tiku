@@ -544,6 +544,7 @@ automationHandoffPolicy:
     clean: no residual automation artifacts need action
     cleanup_available: residual artifacts are present and safe cleanup candidates
     cleanup_completed: explicit cleanup removed safe residual artifacts
+    cleanup_deferred: explicit cleanup attempted safe residual artifacts but OS locks or transient filesystem access require later retry; guarded dispatch may continue when no active owner or dirty/ambiguous state remains
     stop_existing_run_active: non-expired lease means another run owns the lane
     stop_invalid_lease: lease file is malformed and requires manual inspection
     stop_dirty_worktree: expired lease or automation worktree has uncommitted changes

@@ -13,7 +13,7 @@ function Assert-Contains {
 
     $matched = $Output | Where-Object { $_ -match $Pattern }
     if ($matched.Count -eq 0) {
-        throw "Expected output pattern not found: $Pattern"
+        throw "Expected output pattern not found: $Pattern`nActual output:`n$($Output -join "`n")"
     }
 }
 
@@ -40,6 +40,21 @@ function Invoke-ExpectFailure {
     }
 
     Assert-Contains -Output $output -Pattern $ExpectedPattern
+}
+
+function Assert-ExitCodeZero {
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$ExitCode,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string[]]$Output
+    )
+
+    if ($ExitCode -ne 0) {
+        throw "Expected command to exit 0, got ${ExitCode}.`nActual output:`n$($Output -join "`n")"
+    }
 }
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2StoppedAutomationHygiene.ps1"
@@ -324,6 +339,31 @@ try {
     if (Test-Path -LiteralPath $orphanWorktreeDir) {
         throw "Expected orphan automation worktree directory to be removed."
     }
+
+    $lockedOrphanRoot = Join-Path -Path $worktreeRoot -ChildPath "locked-orphan-slot"
+    $lockedOrphanDir = Join-Path -Path $lockedOrphanRoot -ChildPath "tiku"
+    New-Item -ItemType Directory -Path $lockedOrphanDir -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path -Path $lockedOrphanDir -ChildPath "package.json") -Value "{ `"private`": true }" -Encoding UTF8
+    $lockedDirectoryProcess = Start-Process `
+        -FilePath "powershell.exe" `
+        -ArgumentList @("-NoProfile", "-Command", "Start-Sleep -Seconds 20") `
+        -WorkingDirectory $lockedOrphanDir `
+        -WindowStyle Hidden `
+        -PassThru
+    Start-Sleep -Milliseconds 500
+    try {
+        $lockedCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -NowUtc $now -Cleanup 2>&1)
+        $lockedCleanupExitCode = $LASTEXITCODE
+    } finally {
+        if (-not $lockedDirectoryProcess.HasExited) {
+            Stop-Process -Id $lockedDirectoryProcess.Id -Force
+            $lockedDirectoryProcess.WaitForExit()
+        }
+    }
+    Assert-ExitCodeZero -ExitCode $lockedCleanupExitCode -Output $lockedCleanupOutput
+    Assert-Contains -Output $lockedCleanupOutput -Pattern "cleanupDeferred: orphan_worktree_directory"
+    Assert-Contains -Output $lockedCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_deferred"
+    Assert-Contains -Output $lockedCleanupOutput -Pattern "stoppedAutomationHygieneDeferredCleanupCount: 1"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

@@ -511,6 +511,13 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/cleanup-current.md
 "@ | Set-Content -LiteralPath $cleanupQueuePath -Encoding UTF8
 
+    $lockedCleanupProcess = Start-Process `
+        -FilePath "powershell.exe" `
+        -ArgumentList @("-NoProfile", "-Command", "Start-Sleep -Seconds 20") `
+        -WorkingDirectory $staleWorktreePath `
+        -WindowStyle Hidden `
+        -PassThru
+    Start-Sleep -Milliseconds 500
     Push-Location -LiteralPath $cleanupRepo
     try {
         $cleanupOutput = @(
@@ -527,9 +534,13 @@ tasks:
         )
     } finally {
         Pop-Location
+        if (-not $lockedCleanupProcess.HasExited) {
+            Stop-Process -Id $lockedCleanupProcess.Id -Force
+            $lockedCleanupProcess.WaitForExit()
+        }
     }
     Assert-Contains -Output $cleanupOutput -Pattern "startupDecision: cleanup_stale_artifacts"
-    Assert-Contains -Output $cleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    Assert-Contains -Output $cleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_deferred"
     Assert-Contains -Output $cleanupOutput -Pattern "runnerDecision: continue_current_task"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {

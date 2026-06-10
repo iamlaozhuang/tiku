@@ -425,8 +425,12 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
         $cleanupResult = Invoke-StoppedAutomationCleanup
         $cleanupResult.Output | ForEach-Object { Write-Output $_ }
         $cleanupDecision = Get-DecisionValue -Output $cleanupResult.Output -Key "stoppedAutomationHygieneDecision"
-        if ($cleanupResult.ExitCode -ne 0 -or $cleanupDecision -ne "cleanup_completed") {
+        if ($cleanupResult.ExitCode -ne 0) {
             Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_cleanup_failure" -Reason "stale automation artifact cleanup failed" -StepCount $stepIndex -ExitCode 1
+        }
+
+        if ($cleanupDecision -notin @("cleanup_completed", "cleanup_deferred")) {
+            Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_cleanup_failure" -Reason "stale automation artifact cleanup returned unexpected decision: $cleanupDecision" -StepCount $stepIndex -ExitCode 1
         }
 
         continue
