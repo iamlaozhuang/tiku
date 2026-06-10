@@ -130,7 +130,7 @@ scriptControls:
     path: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
     smokePath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1
     decisionOutput: runRegistryFinalizer
-    role: terminal writer for run registry state before thread exit; records real changed files, phase, blocker kind, evidence/audit paths, closeout transaction state, safeToAdopt, and cleanup policy
+    role: terminal writer for run registry state before thread exit; records real changed files, phase, blocker kind, stop taxonomy, evidence/audit paths, closeout transaction state, safeToAdopt, and cleanup policy
   - id: module-run-v2-post-closeout-state-reconcile
     path: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
@@ -161,11 +161,16 @@ scriptControls:
     smokePath: scripts/agent-system/Test-ModuleRunV2AutomationLeaseReadiness.Smoke.ps1
     decisionOutput: automationLeaseDecision
     role: hard-blocks scheduled automation when a non-expired run lease or expired dirty worktree exists
+  - id: module-run-v2-automation-registration-readiness
+    path: scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+    decisionOutput: automationRegistrationDecision
+    role: hard-blocks local scheduler drift when project-state codexAutomationId/status does not match local automation TOML, when more than one scheduled active automation is present, or when the primary prompt lacks identity, mechanic boundary, or standing closeout anchors
   - id: module-run-v2-automation-startup-readiness
     path: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
     decisionOutput: startupDecision
-    role: single scheduler startup gate for lease, state, queue, worktree hygiene, validation surface owner recovery, local tooling readiness, branch hygiene advisories, run registry state, and blocked gate anchors
+    role: single scheduler startup gate for automation registration, D:\tiku posture, lease, state, queue, worktree hygiene, validation surface owner recovery, local tooling readiness, branch hygiene advisories, run registry state, stop taxonomy, and blocked gate anchors
   - id: module-run-v2-parallel-readiness
     path: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1
@@ -185,7 +190,7 @@ scriptControls:
     path: scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
     smokePath: scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1
     decisionOutput: seedTransactionDecision
-    role: guarded queue append transaction for pending low-risk local implementation tasks after explicit autoDriveLocalImplementationApproval; materializes standingUnattendedLocalCloseoutApproval into task-scoped closeoutPolicy only when the durable approval statement is present
+    role: guarded queue append transaction for pending low-risk local implementation tasks after explicit autoDriveLocalImplementationApproval; creates task evidence/audit templates with required anchors and materializes standingUnattendedLocalCloseoutApproval into task-scoped closeoutPolicy only when the durable approval statement is present
   - id: module-run-v2-implementation-seed-self-review
     path: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
@@ -210,7 +215,7 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
     decisionOutput: agentAction
-    role: dry-run bridge from runner decisions to explicit Codex agent-layer actions
+    role: dry-run bridge from runner decisions to explicit Codex agent-layer actions, including run_approved_closeout for closeout-ready tasks with structured closeoutPolicy
   - id: module-run-v2-serial-autodrive-executor
     path: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1

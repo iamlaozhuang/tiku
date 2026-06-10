@@ -22,6 +22,7 @@ taskAutodrivePolicy:
         - adopt_recoverable_run
         - open_recovery_plan
         - run_closeout_recovery
+        - run_approved_closeout
         - request_owner_recovery
         - reconcile_post_closeout_state
         - confirm_post_closeout_checkpoint
@@ -64,6 +65,38 @@ schemaReadiness:
   idleCandidateValue: no-executable-task-seed-or-approve-next-task
   executionRule: terminal task diagnostics are zero-exit idle results and must not be treated as executable autodrive work.
 startupDiagnostics:
+  stopTaxonomyValues:
+    - approval_missing
+    - active_owner
+    - hygiene_deferred
+    - remote_divergence
+    - validation_failed
+    - no_task
+    - registration_mismatch
+    - closeout_pending
+    - hard_block
+  automationRegistration:
+    scriptPath: scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+    decisionOutput: automationRegistrationDecision
+    decisions:
+      - ready
+      - not_configured
+      - stop_for_hard_block
+    executionRule: project-state codexAutomationId/status must match the active local automation TOML; only tiku-module-run-v2-autopilot-2 may be scheduled ACTIVE, while mechanic-2 remains on-demand only.
+  primaryRepositoryPosture:
+    defaultPath: D:\tiku
+    passValues:
+      - pass_clean_detached_aligned
+      - pass_clean_protected_branch_aligned
+    warningValues:
+      - warning_clean_detached_stale
+      - warning_clean_protected_branch_stale
+    hardBlockValues:
+      - dirty
+      - unmerged_codex_branch
+      - unexpected_branch
+    executionRule: the primary long-lived local repository must stay clean detached or clean master/main; dirty state hard-stops startup and clean merged codex branches route to hygiene.
   startupDecisions:
     runnable:
       - continue_current_task
@@ -385,6 +418,7 @@ runRegistryFinalizer:
     - changedFiles
     - phase
     - blockerKind
+    - stopTaxonomy
     - evidencePath
     - auditReviewPath
     - closeoutTransactionState

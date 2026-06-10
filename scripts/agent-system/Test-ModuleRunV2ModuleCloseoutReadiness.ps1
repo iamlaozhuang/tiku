@@ -397,6 +397,12 @@ if (-not [string]::IsNullOrWhiteSpace($evidenceContent)) {
 
     if ($moduleRunVersion -eq "2") {
         Write-Section -Title "Module Run v2 Strict Evidence"
+        if ($evidenceContent -match "(?mi)^\s*(?:-\s*)?GREEN\s*:\s*pending\b") {
+            Add-Finding "HARD_BLOCK_PENDING_GREEN_EVIDENCE"
+        }
+        if ($evidenceContent -match "(?mi)^\s*(?:-\s*)?Commit\s*:\s*pending\b") {
+            Add-Finding "HARD_BLOCK_PENDING_COMMIT_EVIDENCE"
+        }
         Test-ModuleRunV2Evidence -Content $evidenceContent
     }
 }

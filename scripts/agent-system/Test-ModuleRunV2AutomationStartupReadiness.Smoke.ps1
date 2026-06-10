@@ -150,6 +150,7 @@ terminologyAnchors:
             -SkipWorktreeHygieneCheck
     )
     Assert-Contains -Output $continueOutput -Pattern "startupDecision: continue_current_task"
+    Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy:"
     Assert-Contains -Output $continueOutput -Pattern "localToolingReadiness:"
 
     Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludePendingTask -IncludeStaleStateWarnings
@@ -318,16 +319,21 @@ Cost Calibration Gate remains blocked
         throw "Failed to create seed recovery dirty worktree."
     }
     $seedTransactionScript = Join-Path -Path $PSScriptRoot -ChildPath "New-ModuleRunV2ImplementationSeed.ps1"
-    & $seedTransactionScript `
-        -Apply `
-        -ProjectStatePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\project-state.yaml") `
-        -QueuePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\task-queue.yaml") `
-        -MatrixPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml") `
-        -ApprovalStatement "autoDriveLocalImplementationApproval: startup smoke approval" `
-        -SeedEvidencePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\05-execution-logs\evidence\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md") `
-        -SeedAuditReviewPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md") | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to create seed recovery startup transaction."
+    Push-Location -LiteralPath $seedDirtyPath
+    try {
+        & $seedTransactionScript `
+            -Apply `
+            -ProjectStatePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\project-state.yaml") `
+            -QueuePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\task-queue.yaml") `
+            -MatrixPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml") `
+            -ApprovalStatement "autoDriveLocalImplementationApproval: startup smoke approval" `
+            -SeedEvidencePath (Join-Path -Path $seedDirtyPath -ChildPath "docs\05-execution-logs\evidence\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md") `
+            -SeedAuditReviewPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\05-execution-logs\audits-reviews\2026-06-09-module-run-v2-auto-seed-authorization-and-access.md") | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to create seed recovery startup transaction."
+        }
+    } finally {
+        Pop-Location
     }
     & git -C $seedDirtyPath add docs | Out-Null
     Push-Location $seedRepo

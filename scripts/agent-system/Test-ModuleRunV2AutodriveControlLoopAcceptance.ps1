@@ -44,8 +44,10 @@ function Write-AcceptanceResult {
     Write-Output "threadBridgeBoundary: bridge_only_no_thread_tool"
     Write-Output "parallelBoundary: manifest_only_serial_integration"
     Write-Output "serialBoundary: validation_filter_before_execution"
+    Write-Output "registrationBoundary: primary_active_autopilot_only"
     Write-Output "autoSeedBoundary: proposal_transaction_self_review"
     Write-Output "closeoutBoundary: structured_closeout_policy_only"
+    Write-Output "stopTaxonomyBoundary: terminal_decisions_emit_stopTaxonomy"
     Write-Output "reconcileBoundary: accepted_ancestor_state_reconcile_only"
     Write-Output "branchHygieneBoundary: merged_cleanup_unmerged_manual_review"
     Write-Output "diagnosticBoundary: no_write_readiness_available"
@@ -72,6 +74,7 @@ try {
     }
 
     $requiredScripts = @(
+        @{ Id = "automation_registration_readiness"; Path = "Test-ModuleRunV2AutomationRegistrationReadiness.ps1" },
         @{ Id = "startup_readiness"; Path = "Test-ModuleRunV2AutomationStartupReadiness.ps1" },
         @{ Id = "validation_surface_readiness"; Path = "Test-ModuleRunV2ValidationSurfaceReadiness.ps1" },
         @{ Id = "recovery_self_repair"; Path = "Invoke-ModuleRunV2RecoverySelfRepair.ps1" },
@@ -85,7 +88,8 @@ try {
         @{ Id = "branch_hygiene"; Path = "Test-ModuleRunV2BranchHygiene.ps1" },
         @{ Id = "implementation_seed_proposal"; Path = "Get-ModuleRunV2ImplementationSeedProposal.ps1" },
         @{ Id = "implementation_seed_transaction"; Path = "New-ModuleRunV2ImplementationSeed.ps1" },
-        @{ Id = "implementation_seed_self_review"; Path = "Test-ModuleRunV2ImplementationSeedSelfReview.ps1" }
+        @{ Id = "implementation_seed_self_review"; Path = "Test-ModuleRunV2ImplementationSeedSelfReview.ps1" },
+        @{ Id = "run_registry_finalizer"; Path = "Set-ModuleRunV2RunRegistryFinalizer.ps1" }
     )
 
     foreach ($requiredScript in $requiredScripts) {

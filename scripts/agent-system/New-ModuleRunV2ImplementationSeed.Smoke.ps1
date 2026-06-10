@@ -101,6 +101,7 @@ foreach ($requiredScript in @($scriptPath, $selfReviewPath)) {
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-seed-transaction-" + [guid]::NewGuid().ToString("N"))
 try {
     $fixture = Write-FixtureFiles -Root $fixtureRoot
+    Push-Location -LiteralPath $fixtureRoot
     $planOnlyOutput = @(
         & $scriptPath `
             -ProjectStatePath $fixture.ProjectStatePath `
@@ -136,6 +137,7 @@ try {
     Assert-Contains -Output $applyOutput -Pattern "seededTaskCount: 2"
     Assert-Contains -Output $applyOutput -Pattern "seedEvidencePath:"
     Assert-Contains -Output $applyOutput -Pattern "seedAuditReviewPath:"
+    Assert-Contains -Output $applyOutput -Pattern "seededTaskEvidenceTemplate: docs\\05-execution-logs\\evidence\\batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md"
     Assert-Contains -Output $applyOutput -Pattern "standingUnattendedLocalCloseoutApproval: not_recorded"
 
     $queueAfterApply = Get-Content -LiteralPath $fixture.QueuePath -Raw
@@ -155,6 +157,16 @@ try {
     $seedEvidenceContent = Get-Content -LiteralPath (Join-Path -Path $fixtureRoot -ChildPath "seed-evidence.md") -Raw
     if ($seedEvidenceContent -notmatch "authorization-and-access" -or $seedEvidenceContent -notmatch "batch-101-authorization-and-access") {
         throw "Seed evidence did not record concrete seeded task values."
+    }
+    $seededTaskEvidenceTemplate = Join-Path -Path $fixtureRoot -ChildPath "docs\05-execution-logs\evidence\batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md"
+    if (-not (Test-Path -LiteralPath $seededTaskEvidenceTemplate)) {
+        throw "Seeded task evidence template was not written: $seededTaskEvidenceTemplate"
+    }
+    $seededTaskEvidenceTemplateContent = Get-Content -LiteralPath $seededTaskEvidenceTemplate -Raw
+    foreach ($requiredAnchor in @("RED: pending", "GREEN: pending", "Commit: pending", "localFullLoopGate", "threadRolloverGate", "nextModuleRunCandidate", "Cost Calibration Gate remains blocked")) {
+        if ($seededTaskEvidenceTemplateContent -notmatch [regex]::Escape($requiredAnchor)) {
+            throw "Seeded task evidence template missing anchor: $requiredAnchor"
+        }
     }
 
     $seedAuditContent = Get-Content -LiteralPath (Join-Path -Path $fixtureRoot -ChildPath "seed-audit.md") -Raw
@@ -198,6 +210,7 @@ try {
     )
     Assert-Contains -Output $standingSelfReviewOutput -Pattern "seedSelfReviewDecision: passed"
 } finally {
+    Pop-Location
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
     }

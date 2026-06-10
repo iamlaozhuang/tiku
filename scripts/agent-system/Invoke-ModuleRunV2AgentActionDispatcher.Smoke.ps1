@@ -280,7 +280,7 @@ runnerNextAction: run_closeout_recovery_autopilot
     if ($LASTEXITCODE -ne 0) {
         throw "Closeout-recovery dispatcher fixture failed.`n$($closeoutRecoveryOutput -join "`n")"
     }
-    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "agentAction: run_closeout_recovery"
+    Assert-Contains -Output $closeoutRecoveryOutput -Pattern "agentAction: run_approved_closeout"
     Assert-Contains -Output $closeoutRecoveryOutput -Pattern "agentActionTask: current-task"
 
     $activeOwnerRunner = Write-RunnerOutput -Root $smokeRoot -Name "active-owner" -Content @"

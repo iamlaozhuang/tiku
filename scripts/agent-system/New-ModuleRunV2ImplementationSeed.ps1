@@ -362,6 +362,78 @@ Passed for guarded queue seeding.
     }
 }
 
+function Write-SeededTaskExecutionLogTemplates {
+    param(
+        [Parameter(Mandatory = $true)][string]$ModuleId,
+        [Parameter(Mandatory = $true)][string]$SourcePlanningTask,
+        [Parameter(Mandatory = $true)][string[]]$CandidateTaskIds,
+        [Parameter(Mandatory = $true)][string[]]$TargetClosureItems,
+        [Parameter(Mandatory = $true)][string]$LocalFullLoopGate
+    )
+
+    for ($index = 0; $index -lt $CandidateTaskIds.Count; $index++) {
+        $candidateTaskId = $CandidateTaskIds[$index]
+        $targetClosure = if ($index -lt $TargetClosureItems.Count) { $TargetClosureItems[$index] } else { "unspecified" }
+        $evidencePath = "docs\05-execution-logs\evidence\$candidateTaskId.md"
+        $auditReviewPath = "docs\05-execution-logs\audits-reviews\$candidateTaskId.md"
+
+        $evidenceDirectory = Split-Path -Path $evidencePath -Parent
+        $auditDirectory = Split-Path -Path $auditReviewPath -Parent
+        New-Item -ItemType Directory -Force -Path $evidenceDirectory | Out-Null
+        New-Item -ItemType Directory -Force -Path $auditDirectory | Out-Null
+
+        $templateLocalFullLoopGate = if ([string]::IsNullOrWhiteSpace($LocalFullLoopGate)) { "L2" } else { $LocalFullLoopGate }
+        $evidenceContent = @"
+# Module Run v2 Seeded Task Evidence: $candidateTaskId
+
+result: pending
+
+## Summary
+
+- module: $ModuleId
+- sourcePlanningTask: $SourcePlanningTask
+- targetClosureItem: $targetClosure
+- moduleRunVersion: 2
+
+## Required Anchors
+
+- Batch range: pending
+- RED: pending
+- GREEN: pending
+- Commit: pending
+- localFullLoopGate: $templateLocalFullLoopGate pending
+- threadRolloverGate: pending
+- nextModuleRunCandidate: pending
+- blocked remainder: high-risk gates remain separately blocked.
+- Cost Calibration Gate remains blocked.
+
+## Validation
+
+Pending implementation and local validation.
+"@
+
+        $auditContent = @"
+# Module Run v2 Seeded Task Audit Review: $candidateTaskId
+
+## Decision
+
+Pending implementation and closeout review.
+
+## Checks
+
+- RED/GREEN evidence must replace pending placeholders before closeout.
+- Commit evidence must replace pending placeholder before closeout.
+- localFullLoopGate, threadRolloverGate, and nextModuleRunCandidate decisions are required.
+- Cost Calibration Gate remains blocked.
+"@
+
+        Set-Content -LiteralPath $evidencePath -Value $evidenceContent -Encoding UTF8
+        Set-Content -LiteralPath $auditReviewPath -Value $auditContent -Encoding UTF8
+        Write-Output "seededTaskEvidenceTemplate: $evidencePath"
+        Write-Output "seededTaskAuditTemplate: $auditReviewPath"
+    }
+}
+
 try {
     Write-Section -Title "Module Run v2 Implementation Seed Transaction"
     Write-Output "seedTransactionMode: $(if ($Apply) { "apply" } else { "plan_only" })"
@@ -450,6 +522,12 @@ try {
         -CandidateTaskIds $candidateTaskIds `
         -TargetClosureItems $targetClosureItems `
         -ApprovalText $ApprovalStatement
+    Write-SeededTaskExecutionLogTemplates `
+        -ModuleId $moduleId `
+        -SourcePlanningTask $sourcePlanningTask `
+        -CandidateTaskIds $candidateTaskIds `
+        -TargetClosureItems $targetClosureItems `
+        -LocalFullLoopGate $localFullLoopGate
 
     Write-Section -Title "Applied"
     foreach ($candidateTaskId in $candidateTaskIds) {

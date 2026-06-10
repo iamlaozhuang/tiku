@@ -83,6 +83,66 @@ function Get-CurrentTaskId {
     return ""
 }
 
+function Get-TaskBlocks {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $blocks = New-Object System.Collections.Generic.List[object]
+    $currentId = ""
+    $currentLines = New-Object System.Collections.Generic.List[string]
+
+    foreach ($line in $Lines) {
+        if ($line -match "^\s+- id:\s+(.+?)\s*$") {
+            if (-not [string]::IsNullOrWhiteSpace($currentId)) {
+                $blocks.Add([pscustomobject]@{ Id = $currentId; Lines = $currentLines.ToArray() })
+            }
+            $currentId = $Matches[1].Trim()
+            $currentLines = New-Object System.Collections.Generic.List[string]
+            $currentLines.Add($line)
+            continue
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($currentId)) {
+            $currentLines.Add($line)
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($currentId)) {
+        $blocks.Add([pscustomobject]@{ Id = $currentId; Lines = $currentLines.ToArray() })
+    }
+
+    return $blocks.ToArray()
+}
+
+function Get-TaskBlock {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][string]$Id
+    )
+
+    foreach ($block in $Blocks) {
+        if ($block.Id -eq $Id) {
+            return $block.Lines
+        }
+    }
+
+    return @()
+}
+
+function Test-StructuredCloseoutPolicy {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block)
+
+    if ($Block.Count -eq 0) {
+        return $false
+    }
+
+    $blockText = $Block -join "`n"
+    return $blockText -match "(?m)^\s+closeoutPolicy:\s*$" `
+        -and $blockText -match "(?m)^\s+localCommit:\s*approved\s*$" `
+        -and $blockText -match "(?m)^\s+fastForwardMerge:\s*$" `
+        -and $blockText -match "(?m)^\s+push:\s*$" `
+        -and $blockText -match "(?m)^\s+cleanup:\s*$"
+}
+
 function Invoke-ExternalCommand {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
 
@@ -295,6 +355,12 @@ try {
         "closeout_recovery" {
             $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
             $targetTask = if ([string]::IsNullOrWhiteSpace($TaskId)) { Get-CurrentTaskId -Lines $projectStateLines } else { $TaskId }
+            $queueLines = @(Get-Content -LiteralPath $QueuePath)
+            $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
+            $targetTaskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $targetTask)
+            if (Test-StructuredCloseoutPolicy -Block $targetTaskBlock) {
+                Write-AgentActionResult -Decision "ready" -Action "run_approved_closeout" -Reason "runner selected a closeout-ready task with structured approved closeout policy" -ExitCode 0 -TargetTaskId $targetTask
+            }
             Write-AgentActionResult -Decision "ready" -Action "run_closeout_recovery" -Reason "runner selected bounded closeout recovery before next-task selection" -ExitCode 0 -TargetTaskId $targetTask
         }
         "prepare_parallel_workers" {

@@ -24,6 +24,15 @@ param(
     [string]$HandoffRoot = "",
 
     [Parameter(Mandatory = $false)]
+    [string]$AutomationRegistryRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$OnDemandAutomationRoot = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$PrimaryAutomationRepositoryPath = "D:\tiku",
+
+    [Parameter(Mandatory = $false)]
     [int]$ActiveRunHeartbeatMinutes = 120,
 
     [Parameter(Mandatory = $false)]
@@ -31,6 +40,12 @@ param(
 
     [Parameter(Mandatory = $false)]
     [switch]$SkipWorktreeHygieneCheck,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$SkipAutomationRegistrationCheck,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$SkipPrimaryRepositoryPostureCheck,
 
     [Parameter(Mandatory = $false)]
     [switch]$AllowProtectedBranch
@@ -63,14 +78,46 @@ function Write-StartupResult {
     param(
         [Parameter(Mandatory = $true)][string]$Decision,
         [Parameter(Mandatory = $true)][string]$Reason,
-        [Parameter(Mandatory = $true)][int]$ExitCode
+        [Parameter(Mandatory = $true)][int]$ExitCode,
+        [Parameter(Mandatory = $false)][string]$StopTaxonomy = ""
     )
+
+    if ([string]::IsNullOrWhiteSpace($StopTaxonomy)) {
+        $StopTaxonomy = Get-StartupStopTaxonomy -Decision $Decision -Reason $Reason
+    }
 
     Write-Section -Title "Result"
     Write-Output "startupDecision: $Decision"
+    Write-Output "stopTaxonomy: $StopTaxonomy"
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
+}
+
+function Get-StartupStopTaxonomy {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Reason
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($script:startupStopTaxonomyOverride)) {
+        return $script:startupStopTaxonomyOverride
+    }
+    if ($Reason -match "registration") { return "registration_mismatch" }
+    if ($Reason -match "lease|owner|heartbeat|active run") { return "active_owner" }
+    if ($Reason -match "cleanup|hygiene|stale") { return "hygiene_deferred" }
+    if ($Reason -match "remote") { return "remote_divergence" }
+    if ($Reason -match "validation|dirty primary automation repository") { return "validation_failed" }
+
+    switch ($Decision) {
+        "no_executable_task" { return "no_task" }
+        "exit_active_owner_present" { return "active_owner" }
+        "stop_existing_run_active" { return "active_owner" }
+        "cleanup_stale_artifacts" { return "hygiene_deferred" }
+        "closeout_recovery" { return "closeout_pending" }
+        "manual_required_owner_recovery" { return "active_owner" }
+        default { return "hard_block" }
+    }
 }
 
 function Get-TaskBlocks {
@@ -281,6 +328,114 @@ function Invoke-ValidationSurfaceReadiness {
         Pop-Location
         $ErrorActionPreference = $previousErrorActionPreference
     }
+}
+
+function Invoke-AutomationRegistrationReadiness {
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2AutomationRegistrationReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("automationRegistrationDecision: stop_for_hard_block", "stopTaxonomy: registration_mismatch", "reason: automation registration readiness script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $registrationArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $scriptPath,
+        "-ProjectStatePath",
+        $ProjectStatePath
+    )
+    if (-not [string]::IsNullOrWhiteSpace($AutomationRegistryRoot)) {
+        $registrationArgs += @("-AutomationRoot", $AutomationRegistryRoot)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($OnDemandAutomationRoot)) {
+        $registrationArgs += @("-OnDemandAutomationRoot", $OnDemandAutomationRoot)
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = @(& powershell.exe @registrationArgs 2>&1)
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
+function Test-PrimaryAutomationRepositoryPosture {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    Write-Section -Title "Primary Automation Repository Posture"
+    Write-Output "primaryAutomationRepositoryPath: $Path"
+
+    if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path)) {
+        Write-Output "primaryAutomationRepositoryPosture: not_present"
+        return
+    }
+
+    $insideWorktree = ((& git -C $Path rev-parse --is-inside-work-tree 2>$null) -join "").Trim()
+    if ($LASTEXITCODE -ne 0 -or $insideWorktree -ne "true") {
+        Add-Finding "HARD_BLOCK_PRIMARY_AUTOMATION_REPOSITORY_NOT_GIT $Path"
+        return
+    }
+
+    $status = @(& git -C $Path status --porcelain=v1 -uall 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_PRIMARY_AUTOMATION_REPOSITORY_STATUS_FAILED $Path"
+        return
+    }
+    if ($status.Count -gt 0) {
+        Add-Finding "HARD_BLOCK_PRIMARY_AUTOMATION_REPOSITORY_DIRTY $Path"
+        $script:startupStopTaxonomyOverride = "active_owner"
+        return
+    }
+
+    $branch = ((& git -C $Path branch --show-current 2>$null) -join "").Trim()
+    $headSha = ((& git -C $Path rev-parse HEAD 2>$null) -join "").Trim()
+    $originMasterSha = ((& git -C $Path rev-parse origin/master 2>$null) -join "").Trim()
+    if ([string]::IsNullOrWhiteSpace($branch)) {
+        $branch = "(detached HEAD)"
+    }
+
+    Write-Output "primaryAutomationRepositoryBranch: $branch"
+    Write-Output "primaryAutomationRepositoryHead: $headSha"
+    Write-Output "primaryAutomationRepositoryOriginMaster: $originMasterSha"
+
+    if ($branch -eq "(detached HEAD)") {
+        if (-not [string]::IsNullOrWhiteSpace($originMasterSha) -and $headSha -ne $originMasterSha) {
+            Write-Output "primaryAutomationRepositoryPosture: warning_clean_detached_stale"
+        } else {
+            Write-Output "primaryAutomationRepositoryPosture: pass_clean_detached_aligned"
+        }
+        return
+    }
+
+    if ($branch -eq "master" -or $branch -eq "main") {
+        if (-not [string]::IsNullOrWhiteSpace($originMasterSha) -and $headSha -ne $originMasterSha) {
+            Write-Output "primaryAutomationRepositoryPosture: warning_clean_protected_branch_stale"
+        } else {
+            Write-Output "primaryAutomationRepositoryPosture: pass_clean_protected_branch_aligned"
+        }
+        return
+    }
+
+    if ($branch -like "codex/*") {
+        & git -C $Path merge-base --is-ancestor HEAD origin/master 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            Add-RecoverableFinding "RECOVERABLE_PRIMARY_AUTOMATION_REPOSITORY_MERGED_CODEX_BRANCH $Path branch=$branch"
+        } else {
+            Add-Finding "HARD_BLOCK_PRIMARY_AUTOMATION_REPOSITORY_UNMERGED_CODEX_BRANCH $Path branch=$branch"
+        }
+        return
+    }
+
+    Add-Finding "HARD_BLOCK_PRIMARY_AUTOMATION_REPOSITORY_UNEXPECTED_BRANCH $Path branch=$branch"
 }
 
 function Test-LocalToolingReady {
@@ -678,6 +833,7 @@ $recoverableFindings = New-Object System.Collections.Generic.List[string]
 $startupOverrideDecision = ""
 $startupOverrideReason = ""
 $startupOverrideExitCode = 1
+$startupStopTaxonomyOverride = ""
 
 try {
     Write-Section -Title "Module Run v2 Automation Startup Readiness"
@@ -713,6 +869,21 @@ try {
     Write-Output "automationWorktreeRoot: $AutomationWorktreeRoot"
     Write-Output "runRegistryRoot: $RunRegistryRoot"
     Write-Output "handoffRoot: $HandoffRoot"
+
+    if (-not $SkipAutomationRegistrationCheck) {
+        Write-Section -Title "Automation Registration"
+        $registrationResult = Invoke-AutomationRegistrationReadiness
+        $registrationResult.Output | ForEach-Object { Write-Output $_ }
+        $registrationDecision = Get-OutputValue -Output $registrationResult.Output -Key "automationRegistrationDecision"
+        $registrationTaxonomy = Get-OutputValue -Output $registrationResult.Output -Key "stopTaxonomy"
+        if ($registrationResult.ExitCode -ne 0 -or $registrationDecision -eq "stop_for_hard_block") {
+            Write-StartupResult -Decision "stop_for_hard_block" -Reason "automation registration readiness failed" -ExitCode 1 -StopTaxonomy $(if ([string]::IsNullOrWhiteSpace($registrationTaxonomy)) { "registration_mismatch" } else { $registrationTaxonomy })
+        }
+    }
+
+    if (-not $SkipPrimaryRepositoryPostureCheck) {
+        Test-PrimaryAutomationRepositoryPosture -Path $PrimaryAutomationRepositoryPath
+    }
 
     $currentBranch = ((& git branch --show-current) -join "").Trim()
     if ([string]::IsNullOrWhiteSpace($currentBranch)) {

@@ -93,6 +93,19 @@ function New-SeedTaskBlock {
       - local_validation
       - evidence_redaction
       - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId module-run-v2-autodrive-activation -CandidateTaskId $TaskId
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId $TaskId
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId module-run-v2-autodrive-activation -CandidateTaskId $TaskId
       - npm.cmd run lint
@@ -105,6 +118,29 @@ function New-SeedTaskBlock {
     status: pending
     retryCount: 0
 "@
+}
+
+function Write-SeededTaskTemplate {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoPath,
+        [Parameter(Mandatory = $true)][string]$TaskId
+    )
+
+    $evidencePath = Join-Path -Path $RepoPath -ChildPath "docs\05-execution-logs\evidence\$TaskId.md"
+    $auditPath = Join-Path -Path $RepoPath -ChildPath "docs\05-execution-logs\audits-reviews\$TaskId.md"
+    @"
+result: pending
+Batch range: pending
+RED: pending
+GREEN: pending
+Commit: pending
+localFullLoopGate: L2 pending
+threadRolloverGate: pending
+nextModuleRunCandidate: pending
+blocked remainder: high-risk work remains separately gated
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
+    "Cost Calibration Gate remains blocked" | Set-Content -LiteralPath $auditPath -Encoding UTF8
 }
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2SeedTransactionRecoveryReadiness.ps1"
@@ -162,6 +198,8 @@ tasks:
     $seedTaskBlockB = New-SeedTaskBlock -TaskId "authorization-and-access-org-auth" -TargetClosure "organization authorization lifecycle"
     Add-Content -LiteralPath $queuePath -Value $seedTaskBlockA -Encoding UTF8
     Add-Content -LiteralPath $queuePath -Value $seedTaskBlockB -Encoding UTF8
+    Write-SeededTaskTemplate -RepoPath $repoPath -TaskId "authorization-and-access-personal-auth"
+    Write-SeededTaskTemplate -RepoPath $repoPath -TaskId "authorization-and-access-org-auth"
 
     $evidencePath = Join-Path -Path $evidenceDir -ChildPath "2026-06-09-module-run-v2-auto-seed-authorization-and-access.md"
     @"
@@ -182,7 +220,11 @@ tasks:
     & git -C $repoPath add `
         "docs/04-agent-system/state/task-queue.yaml" `
         "docs/05-execution-logs/evidence/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" `
-        "docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" | Out-Null
+        "docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" `
+        "docs/05-execution-logs/evidence/authorization-and-access-personal-auth.md" `
+        "docs/05-execution-logs/audits-reviews/authorization-and-access-personal-auth.md" `
+        "docs/05-execution-logs/evidence/authorization-and-access-org-auth.md" `
+        "docs/05-execution-logs/audits-reviews/authorization-and-access-org-auth.md" | Out-Null
 
     $readyOutput = @(& $scriptPath -SeedWorktreePath $repoPath -MatrixPath $matrixPath)
     Assert-Contains -Output $readyOutput -Pattern "seedRecoveryDecision: recoverable_seed_transaction"

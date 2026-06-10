@@ -390,6 +390,8 @@ function Write-RunnerResult {
         [string]$NextTask = ""
     )
 
+    $stopTaxonomy = Get-RunnerStopTaxonomy -Decision $Decision -NextAction $NextAction -Reason $Reason
+
     Write-Section -Title "Module Run v2 Autopilot Runner"
     Write-Output "runnerDecision: $Decision"
     Write-Output "runnerNextAction: $NextAction"
@@ -397,6 +399,7 @@ function Write-RunnerResult {
         Write-Output "runnerNextTask: $NextTask"
     }
     Write-Output "runnerStepCount: $StepCount"
+    Write-Output "stopTaxonomy: $stopTaxonomy"
     Write-Output "reason: $Reason"
     Write-Output "local Docker database: task_approval_required"
     Write-Output "project resource read: task_approval_required"
@@ -404,6 +407,31 @@ function Write-RunnerResult {
     Write-Output "provider call: blocked_without_task_approval"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
+}
+
+function Get-RunnerStopTaxonomy {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][string]$NextAction,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Reason
+    )
+
+    if ($Reason -match "registration") { return "registration_mismatch" }
+    if ($Reason -match "owner|lease|heartbeat|active run") { return "active_owner" }
+    if ($Reason -match "cleanup|hygiene|stale automation artifact") { return "hygiene_deferred" }
+    if ($Reason -match "remote") { return "remote_divergence" }
+    if ($Reason -match "validation|self-review|autopilot failure|seed transaction did not complete") { return "validation_failed" }
+    if ($NextAction -match "closeout") { return "closeout_pending" }
+
+    switch ($Decision) {
+        "no_executable_task" { return "no_task" }
+        "exit_active_owner_present" { return "active_owner" }
+        "cleanup_available" { return "hygiene_deferred" }
+        "stop_for_manual_decision" { return "approval_missing" }
+        "manual_required_owner_recovery" { return "active_owner" }
+        "closeout_recovery" { return "closeout_pending" }
+        default { return "hard_block" }
+    }
 }
 
 for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {

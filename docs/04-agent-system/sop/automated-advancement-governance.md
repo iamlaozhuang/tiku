@@ -562,6 +562,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 The startup gate coordinates:
 
+- automation registration readiness: `project-state.yaml` `codexAutomationId`/`codexAutomationStatus` must match the local
+  primary automation TOML, only `tiku-module-run-v2-autopilot-2` may be scheduled active, historical autopilot state is
+  archive-only, and `mechanic-2` is on-demand emergency reference only;
+- `D:\tiku` posture: clean detached or clean `master`/`main` is acceptable, clean stale detached is warning-only, clean
+  merged `codex/*` routes to hygiene, and dirty `D:\tiku` is a hard stop;
 - local automation lease readiness;
 - protected branch and repository state;
 - current task and pending task status from `task-queue.yaml`;
@@ -570,6 +575,7 @@ The startup gate coordinates:
 - local JS tooling readiness detail for lint/typecheck/Prettier availability;
 - local `codex/*` branch hygiene advisory counts;
 - external run registry and redacted handoff envelope state under `%USERPROFILE%\.codex\tiku`;
+- `stopTaxonomy` classification for terminal runner/startup/finalizer decisions;
 - blocked gate anchors.
 
 Automation may continue only when the startup gate returns one of these zero-exit decisions:
@@ -595,6 +601,21 @@ only decides whether the automation wakeup is allowed to proceed to the existing
 proposal-only planning step. Branch hygiene output from startup is advisory; cleanup still belongs to
 `Test-ModuleRunV2BranchHygiene.ps1 -Cleanup` and requires an approved cleanup path.
 
+Every startup and runner terminal decision should emit one `stopTaxonomy` value:
+
+- `approval_missing`;
+- `active_owner`;
+- `hygiene_deferred`;
+- `remote_divergence`;
+- `validation_failed`;
+- `no_task`;
+- `registration_mismatch`;
+- `closeout_pending`;
+- `hard_block`.
+
+This taxonomy is not an approval. It is a compact reason code so the next wakeup and the human operator can see why an
+automation stopped without rereading full logs.
+
 `Test-ModuleRunV2UnattendedReadiness.ps1` writes a `runRegistryHeartbeat` to
 `%USERPROFILE%\.codex\tiku\automation-runs` for the current worktree. The registry entry is a redacted local control
 record with `runId`, `automationId`, `threadRole`, `taskId`, `branch`, `worktreePath`, `status`, `heartbeatAtUtc`,
@@ -614,7 +635,7 @@ should prefer `-NoWrite`.
 
 Before an automation thread exits on a terminal or owner-recovery state, it must run
 `Set-ModuleRunV2RunRegistryFinalizer.ps1` for its current worktree. The finalizer writes the true `changedFiles`,
-`phase`, `blockerKind`, `evidencePath`, `auditReviewPath`, `closeoutTransactionState`, `safeToAdopt`, and
+`phase`, `blockerKind`, `stopTaxonomy`, `evidencePath`, `auditReviewPath`, `closeoutTransactionState`, `safeToAdopt`, and
 `cleanupPolicy` fields. A thread that stops after focused gates pass but advisory baseline fails must finalize as
 `status: stopped`, `safeToAdopt: false`, and `cleanupPolicy: none` unless a redacted handoff explicitly permits
 adoption. A closed and clean run may finalize as `status: cleanup_ready` only after evidence proves merge/push/parking
@@ -695,8 +716,18 @@ evidence, or stale state that is not an accepted closeout recovery point, it mus
 
 The only dirty-worktree exception is `approvedCloseoutContinuation`: the completed task itself must record explicit
 approval for commit, merge, push, cleanup, and worktree parking. In that shape, unattended readiness may return
-`closeout_recovery`, and autopilot may invoke `Invoke-ModuleRunV2ApprovedCloseout.ps1` to complete the local Git
-closeout before startup selects the next pending task.
+`closeout_recovery`. The dispatcher should return `agentAction: run_approved_closeout` only when a structured
+`closeoutPolicy` is present, and execution must still go through `Invoke-ModuleRunV2ApprovedCloseout.ps1` to complete the
+local Git closeout before startup selects the next pending task.
+
+The primary autopilot may absorb only limited mechanism self-healing: stale clean worktree cleanup, superseded registry
+cleanup, recoverable seed transaction closeout, automation registration mismatch reporting, and evidence/template gap
+reporting. It must not absorb business code repair, dirty owner takeover, or high-risk capability execution.
+
+Auto-seeded implementation tasks must be born with evidence and audit templates. The evidence template must include
+`RED`, `GREEN`, `Commit`, `localFullLoopGate`, `threadRolloverGate`, `nextModuleRunCandidate`, and `Cost Calibration Gate
+remains blocked` anchors. Placeholder values such as `GREEN: pending` and `Commit: pending` are intentional scaffolding,
+not completion proof; module closeout readiness must reject them.
 
 An accepted closeout recovery point may have `project-state.yaml` repository SHA values that are ancestors of the current
 `master` and `origin/master`, because the final closeout, validation repair, merge, and push commits can only be known

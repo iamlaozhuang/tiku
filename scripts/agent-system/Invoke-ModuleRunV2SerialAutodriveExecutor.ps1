@@ -309,9 +309,26 @@ function Write-SerialExecutorResult {
     if (-not [string]::IsNullOrWhiteSpace($TargetTaskId)) {
         Write-Output "serialExecutorTask: $TargetTaskId"
     }
+    Write-Output "stopTaxonomy: $(Get-SerialStopTaxonomy -Decision $Decision -Action $Action -Reason $Reason)"
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
+}
+
+function Get-SerialStopTaxonomy {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][string]$Action,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Reason
+    )
+
+    if ($Reason -match "validation|blocked command") { return "validation_failed" }
+    if ($Reason -match "manual|approval") { return "approval_missing" }
+    if ($Reason -match "active owner") { return "active_owner" }
+    if ($Action -match "hygiene|cleanup") { return "hygiene_deferred" }
+    if ($Action -match "closeout") { return "closeout_pending" }
+    if ($Decision -eq "idle") { return "no_task" }
+    return "hard_block"
 }
 
 function Assert-SchemaReady {
@@ -582,6 +599,7 @@ function Invoke-RunRegistryFinalizer {
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
         [Parameter(Mandatory = $true)][string]$Phase,
         [Parameter(Mandatory = $true)][string]$BlockerKind,
+        [Parameter(Mandatory = $false)][string]$StopTaxonomy = "hard_block",
         [Parameter(Mandatory = $true)][string]$CloseoutTransactionState,
         [Parameter(Mandatory = $true)][string]$NextRecommendedAction
     )
@@ -608,6 +626,8 @@ function Invoke-RunRegistryFinalizer {
         $Phase,
         "-BlockerKind",
         $BlockerKind,
+        "-StopTaxonomy",
+        $StopTaxonomy,
         "-EvidencePath",
         $evidencePath,
         "-AuditReviewPath",
@@ -779,7 +799,7 @@ try {
                 if (-not $safety.IsSafe) {
                     Write-Output "blocked command: $validationCommand"
                     Write-Output "blockedPattern: $($safety.Pattern)"
-                    Invoke-RunRegistryFinalizer -TargetTaskId $targetTask -TaskBlock $taskBlock -Phase "validation_safety" -BlockerKind "blocked_validation_command" -CloseoutTransactionState "unknown" -NextRecommendedAction "manual_required_owner_recovery"
+                    Invoke-RunRegistryFinalizer -TargetTaskId $targetTask -TaskBlock $taskBlock -Phase "validation_safety" -BlockerKind "blocked_validation_command" -StopTaxonomy "validation_failed" -CloseoutTransactionState "unknown" -NextRecommendedAction "manual_required_owner_recovery"
                     Write-SerialExecutorResult -Decision "blocked_command" -Action "run_validation" -Reason "validation command is outside the local safe command allowlist" -ExitCode 1 -TargetTaskId $targetTask
                 }
 
@@ -796,7 +816,7 @@ try {
                 $validationResult = Invoke-ValidationCommand -Command $validationCommand
                 $validationResult.Output | ForEach-Object { Write-Output "validationOutput: $_" }
                 if ($validationResult.ExitCode -ne 0) {
-                    Invoke-RunRegistryFinalizer -TargetTaskId $targetTask -TaskBlock $taskBlock -Phase "validation_failed" -BlockerKind "validation_command_failed" -CloseoutTransactionState "closeout_pending_evidence" -NextRecommendedAction "manual_required_owner_recovery"
+                    Invoke-RunRegistryFinalizer -TargetTaskId $targetTask -TaskBlock $taskBlock -Phase "validation_failed" -BlockerKind "validation_command_failed" -StopTaxonomy "validation_failed" -CloseoutTransactionState "closeout_pending_evidence" -NextRecommendedAction "manual_required_owner_recovery"
                     Write-SerialExecutorResult -Decision "validation_failed" -Action "run_validation" -Reason "validation command failed: $validationCommand" -ExitCode 1 -TargetTaskId $targetTask
                 }
             }
@@ -808,6 +828,9 @@ try {
         }
         "run_closeout_recovery" {
             Write-SerialExecutorResult -Decision "handoff_to_closeout_recovery" -Action "run_closeout_recovery" -Reason "closeout recovery remains bounded by unattended readiness, approved closeout, and post-closeout state reconcile gates" -ExitCode 0 -TargetTaskId (Get-ResolvedTargetTaskId -CandidateTaskId $agentActionTask)
+        }
+        "run_approved_closeout" {
+            Write-SerialExecutorResult -Decision "handoff_to_approved_closeout" -Action "run_approved_closeout" -Reason "approved closeout remains bounded by Invoke-ModuleRunV2ApprovedCloseout.ps1 and closeout readiness gates" -ExitCode 0 -TargetTaskId (Get-ResolvedTargetTaskId -CandidateTaskId $agentActionTask)
         }
         "adopt_recoverable_run" {
             Write-SerialExecutorResult -Decision "handoff_to_recovery" -Action "adopt_recoverable_run" -Reason "recovery adoption is handled by the startup and handoff gates" -ExitCode 0

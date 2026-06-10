@@ -144,6 +144,28 @@ tasks:
 "@ | Set-Content -LiteralPath $Path -Encoding UTF8
 }
 
+function Write-SeededTaskTemplates {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $evidencePath = Join-Path -Path $Root -ChildPath "docs\05-execution-logs\evidence\batch-101-authorization-and-access-authorization-read-model.md"
+    $auditPath = Join-Path -Path $Root -ChildPath "docs\05-execution-logs\audits-reviews\batch-101-authorization-and-access-authorization-read-model.md"
+    New-Item -ItemType Directory -Force -Path (Split-Path -Path $evidencePath -Parent) | Out-Null
+    New-Item -ItemType Directory -Force -Path (Split-Path -Path $auditPath -Parent) | Out-Null
+    @"
+result: pending
+Batch range: pending
+RED: pending
+GREEN: pending
+Commit: pending
+localFullLoopGate: L4 pending
+threadRolloverGate: pending
+nextModuleRunCandidate: pending
+blocked remainder: high-risk work remains separately gated
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
+    "Cost Calibration Gate remains blocked" | Set-Content -LiteralPath $auditPath -Encoding UTF8
+}
+
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ImplementationSeedSelfReview.ps1"
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing seed self-review script: $scriptPath"
@@ -152,10 +174,12 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-seed-self-review-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
 try {
+    Push-Location -LiteralPath $fixtureRoot
     $matrixPath = Join-Path -Path $fixtureRoot -ChildPath "matrix.yaml"
     $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
     Write-Matrix -Path $matrixPath
     Write-Queue -Path $queuePath
+    Write-SeededTaskTemplates -Root $fixtureRoot
 
     $passOutput = @(
         & $scriptPath `
@@ -166,6 +190,7 @@ try {
     Assert-Contains -Output $passOutput -Pattern "seedSelfReviewDecision: passed"
 
     Write-Queue -Path $queuePath -UnsafeAllowedFile
+    Write-SeededTaskTemplates -Root $fixtureRoot
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_ALLOWED_HIGH_RISK_FILE" -Command {
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
@@ -174,6 +199,7 @@ try {
     }
 
     Write-Queue -Path $queuePath -ApprovedCloseout
+    Write-SeededTaskTemplates -Root $fixtureRoot
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_CLOSEOUT_WITHOUT_STANDING_APPROVAL" -Command {
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
@@ -182,6 +208,7 @@ try {
     }
 
     Write-Queue -Path $queuePath -ApprovedCloseout -StandingApproval
+    Write-SeededTaskTemplates -Root $fixtureRoot
     $standingPassOutput = @(
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
@@ -190,6 +217,7 @@ try {
     )
     Assert-Contains -Output $standingPassOutput -Pattern "seedSelfReviewDecision: passed"
 } finally {
+    Pop-Location
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
     }

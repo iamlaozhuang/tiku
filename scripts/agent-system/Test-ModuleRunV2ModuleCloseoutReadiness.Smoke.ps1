@@ -136,6 +136,41 @@ tasks:
     if (($lifecycleOutput -join "`n") -match "HARD_BLOCK_VALIDATION_NOT_RECORDED pre-edit-validation") {
         throw "Expected closeout readiness to ignore pre_edit validation lifecycle commands."
     }
+
+    @"
+result: pass
+Batch range: pending fixture
+RED: recorded
+GREEN: pending
+Commit: pending
+localFullLoopGate: L2 pending
+threadRolloverGate: pending
+nextModuleRunCandidate: pending
+blocked remainder: high-risk gates remain blocked
+Cost Calibration Gate remains blocked
+closeout-validation
+"@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: lifecycle-task
+    title: Lifecycle Task
+    moduleRunVersion: 2
+    validationCommandLifecycle:
+      - phase: closeout
+        command: closeout-validation
+    evidencePath: $($evidencePath.Replace("\", "\\"))
+    auditReviewPath: $($auditPath.Replace("\", "\\"))
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PENDING_GREEN_EVIDENCE" -Command {
+        & $scriptPath `
+            -TaskId "lifecycle-task" `
+            -ProjectStatePath $statePath `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    }
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

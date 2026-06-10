@@ -21,6 +21,9 @@ param(
     [string]$BlockerKind = "none",
 
     [Parameter(Mandatory = $false)]
+    [string]$StopTaxonomy = "hard_block",
+
+    [Parameter(Mandatory = $false)]
     [string]$EvidencePath = "",
 
     [Parameter(Mandatory = $false)]
@@ -163,6 +166,7 @@ $registry = [ordered]@{
     heartbeatAtUtc = ([DateTimeOffset]::UtcNow.ToString("o"))
     phase = $Phase
     blockerKind = $BlockerKind
+    stopTaxonomy = $StopTaxonomy
     changedFiles = @($changedFiles)
     evidencePath = (ConvertTo-NormalizedPath -Path $EvidencePath)
     auditReviewPath = (ConvertTo-NormalizedPath -Path $AuditReviewPath)
@@ -188,6 +192,7 @@ Write-Output "runRegistryPath: $registryPath"
 Write-Output "runRegistryStatus: $Status"
 Write-Output "runRegistryPhase: $Phase"
 Write-Output "blockerKind: $BlockerKind"
+Write-Output "stopTaxonomy: $StopTaxonomy"
 Write-Output "changedFilesCount: $($changedFiles.Count)"
 foreach ($changedFile in $changedFiles) {
     Write-Output "changedFile: $changedFile"

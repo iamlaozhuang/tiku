@@ -309,9 +309,25 @@ try {
         }
         if ([string]::IsNullOrWhiteSpace($evidencePath)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_EVIDENCE $seedTaskId"
+        } elseif (-not (Test-Path -LiteralPath $evidencePath)) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_EVIDENCE_TEMPLATE $seedTaskId $evidencePath"
+        } else {
+            $seedEvidenceContent = Get-Content -LiteralPath $evidencePath -Raw
+            foreach ($requiredAnchor in @("RED:", "GREEN:", "Commit:", "localFullLoopGate", "threadRolloverGate", "nextModuleRunCandidate", "Cost Calibration Gate remains blocked")) {
+                if ($seedEvidenceContent -notmatch [regex]::Escape($requiredAnchor)) {
+                    Add-Finding "HARD_BLOCK_SEEDED_TASK_EVIDENCE_TEMPLATE_MISSING_ANCHOR $seedTaskId $requiredAnchor"
+                }
+            }
         }
         if ([string]::IsNullOrWhiteSpace($auditReviewPath)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_AUDIT $seedTaskId"
+        } elseif (-not (Test-Path -LiteralPath $auditReviewPath)) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_AUDIT_TEMPLATE $seedTaskId $auditReviewPath"
+        } else {
+            $seedAuditContent = Get-Content -LiteralPath $auditReviewPath -Raw
+            if ($seedAuditContent -notmatch "Cost Calibration Gate remains blocked") {
+                Add-Finding "HARD_BLOCK_SEEDED_TASK_AUDIT_TEMPLATE_MISSING_COST_GATE $seedTaskId"
+            }
         }
         if ($blockText -notmatch "autoDriveLocalImplementationApproval") {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_AUTODRIVE_APPROVAL $seedTaskId"

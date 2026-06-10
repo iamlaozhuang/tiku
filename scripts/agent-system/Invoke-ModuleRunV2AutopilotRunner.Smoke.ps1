@@ -190,6 +190,7 @@ tasks:
     }
     Assert-Contains -Output $continueOutput -Pattern "runnerDecision: continue_current_task"
     Assert-Contains -Output $continueOutput -Pattern "runnerNextAction: agent_continue_current_task"
+    Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy:"
     Assert-Contains -Output $continueOutput -Pattern "autopilotDecision: continue_current_thread"
 
     $pendingRepo = Join-Path -Path $fixtureRoot -ChildPath "pending-repo"

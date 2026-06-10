@@ -100,6 +100,7 @@ try {
             -Status "stopped" `
             -Phase "validation_failed" `
             -BlockerKind "advisory_baseline_out_of_scope" `
+            -StopTaxonomy "validation_failed" `
             -EvidencePath "docs/05-execution-logs/evidence/batch-102.md" `
             -AuditReviewPath "docs/05-execution-logs/audits-reviews/batch-102.md" `
             -CloseoutTransactionState "closeout_pending_commit_evidence" `
@@ -109,6 +110,7 @@ try {
 
     Assert-Contains -Output $dirtyOutput -Pattern "runRegistryFinalizer: wrote"
     Assert-Contains -Output $dirtyOutput -Pattern "changedFile: owner-recovery\.txt"
+    Assert-Contains -Output $dirtyOutput -Pattern "stopTaxonomy: validation_failed"
     Assert-Contains -Output $dirtyOutput -Pattern "closeoutTransactionState: closeout_pending_commit_evidence"
     Assert-Contains -Output $dirtyOutput -Pattern "safeToAdopt: false"
 
@@ -125,6 +127,7 @@ try {
     Assert-Equal -Actual ([string]$dirtyRegistry.status) -Expected "stopped" -Label "dirty registry status"
     Assert-Equal -Actual ([string]$dirtyRegistry.phase) -Expected "validation_failed" -Label "dirty registry phase"
     Assert-Equal -Actual ([string]$dirtyRegistry.blockerKind) -Expected "advisory_baseline_out_of_scope" -Label "dirty registry blocker kind"
+    Assert-Equal -Actual ([string]$dirtyRegistry.stopTaxonomy) -Expected "validation_failed" -Label "dirty registry stop taxonomy"
     Assert-Equal -Actual ([string]$dirtyRegistry.closeoutTransactionState) -Expected "closeout_pending_commit_evidence" -Label "dirty registry closeout state"
     Assert-Equal -Actual ([bool]$dirtyRegistry.safeToAdopt) -Expected $false -Label "dirty registry safeToAdopt"
     Assert-Contains -Output @($dirtyRegistry.changedFiles) -Pattern "owner-recovery\.txt"

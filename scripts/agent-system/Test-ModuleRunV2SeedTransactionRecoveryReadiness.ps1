@@ -128,16 +128,23 @@ function Get-TaskScalarValue {
 function Test-SeedTransactionFileSet {
     param([Parameter(Mandatory = $true)][string[]]$Files)
 
-    if ($Files.Count -ne 3) {
+    if ($Files.Count -lt 3) {
         return $false
     }
 
     $normalizedFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
     $hasQueue = $normalizedFiles -contains "docs/04-agent-system/state/task-queue.yaml"
-    $evidenceFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
-    $auditFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
+    $seedEvidenceFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
+    $seedAuditFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
+    $allowedGeneratedFiles = @($normalizedFiles | Where-Object {
+            $_ -match "^docs/05-execution-logs/evidence/[a-z0-9-]+\.md$" -or
+            $_ -match "^docs/05-execution-logs/audits-reviews/[a-z0-9-]+\.md$"
+        })
 
-    return $hasQueue -and $evidenceFiles.Count -eq 1 -and $auditFiles.Count -eq 1
+    return $hasQueue -and
+        $seedEvidenceFiles.Count -eq 1 -and
+        $seedAuditFiles.Count -eq 1 -and
+        ($allowedGeneratedFiles.Count + 1) -eq $normalizedFiles.Count
 }
 
 try {
@@ -246,12 +253,17 @@ try {
 
     if ($findings.Count -eq 0) {
         $selfReviewScript = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ImplementationSeedSelfReview.ps1"
-        $selfReviewOutput = @(
-            & $selfReviewScript `
-                -ExpectedModule $seedModule `
-                -QueuePath $queuePath `
-                -MatrixPath $MatrixPath 2>&1
-        )
+        Push-Location -LiteralPath $seedRoot
+        try {
+            $selfReviewOutput = @(
+                & $selfReviewScript `
+                    -ExpectedModule $seedModule `
+                    -QueuePath $queuePath `
+                    -MatrixPath $MatrixPath 2>&1
+            )
+        } finally {
+            Pop-Location
+        }
         $selfReviewOutput | ForEach-Object { Write-Output $_ }
         $selfReviewDecision = ""
         foreach ($line in $selfReviewOutput) {
