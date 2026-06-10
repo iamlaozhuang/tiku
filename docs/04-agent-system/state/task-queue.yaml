@@ -8140,16 +8140,16 @@ tasks:
     humanApproval: >-
       User requested continuing governance landing by splitting DB-related authorization into two governed approvals: standing local schema/migration approval, and task-scoped destructive local Docker DB approval. No real DB, migration execution, schema change, env/secret, provider, deploy, dependency, PR, force push, or Cost Calibration Gate action is approved by this mechanism task.
     closeoutPolicy:
-      localCommit: not_approved
+      localCommit: approved
       fastForwardMerge:
-        approved: not_approved
+        approved: true
         targetBranch: master
       push:
-        approved: not_approved
+        approved: true
         target: origin/master
       cleanup:
-        deleteShortBranch: not_approved
-        parkWorktree: not_approved
+        deleteShortBranch: true
+        parkWorktree: true
     autodrivePolicy:
       mode: guarded_serial
       allowedAgentActions:
@@ -8247,5 +8247,5 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-db-capability-governance-approval.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-db-capability-governance-approval.md
-    status: in_progress
+    status: ready_for_closeout
     retryCount: 0

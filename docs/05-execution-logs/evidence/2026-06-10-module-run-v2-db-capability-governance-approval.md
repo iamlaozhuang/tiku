@@ -14,6 +14,10 @@ The user requested continuing governance landing by splitting DB-related authori
 This task does not execute real DB operations, migrations, schema edits, destructive DB operations, env/secret access,
 provider calls, dependency changes, deploys, PRs, force pushes, or Cost Calibration Gate actions.
 
+`dbCapabilityGovernanceCloseoutApproval`: User authorized closeout for `codex/db-capability-governance-approval`: the
+two committed scoped commits may be checked by readiness, fast-forward merged to `master`, pushed to `origin/master`,
+the short branch cleaned up, and the worktree parked.
+
 ## Behavior
 
 - `schemaMigration: approved_migration_plan` can pass `Test-ModuleRunV2LocalCapabilityGate.ps1 -Capability schemaMigration -Intent use_capability`.
@@ -47,6 +51,25 @@ Passed:
 ## Closeout State
 
 Commit: a8c94052
+
+## Batch 106: DB Capability Governance
+
+RED: DB-related capability approval had not fully landed in executable durable gates. `schemaMigration:
+approved_migration_plan` was still routed to manual_required, and destructive local Docker DB work had no distinct
+task-scoped capability value.
+
+GREEN: `schemaMigration: approved_migration_plan` now passes local capability readiness, and
+`destructiveLocalDockerDatabase` exists as a separate task-scoped local-dev-only capability with unsafe values blocked by
+schema readiness.
+
+localFullLoopGate: Mechanism validation reached local governance L4 for capability classification only. No real DB,
+schema, migration, or destructive operation was executed.
+
+threadRolloverGate: Not required for this mechanism-only closeout; no Codex thread creation or continuation was
+performed.
+
+nextModuleRunCandidate: After this governance closeout, the next guarded runner cycle may use durable DB capability
+gates when a scoped task records approved capability values, or exit idle when no executable task exists.
 
 Local validation passed. Repository merge/push/cleanup closeout is pending explicit approval for this governance task.
 

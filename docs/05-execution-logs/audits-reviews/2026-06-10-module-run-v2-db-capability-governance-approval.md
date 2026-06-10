@@ -3,6 +3,7 @@
 ## Decision
 
 Passed for local mechanism validation.
+APPROVE repository-script closeout after readiness passes.
 
 ## Scope Review
 
