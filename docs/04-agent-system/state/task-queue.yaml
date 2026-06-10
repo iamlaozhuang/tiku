@@ -7272,3 +7272,416 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
     status: done
     retryCount: 0
+
+  - id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    title: Module Run v2 authorization-and-access implementation seed
+    phase: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-69-advanced-authorization-context-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    seededByTask: phase-69-advanced-authorization-context-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: authorization read-model and display contracts
+    localExperienceClosureGate: planned
+    localFullLoopGate: L4
+    blockedRemainder: high-risk work remains separately gated
+    closeoutPolicy:
+      localCommit: not_approved
+      fastForwardMerge:
+        approved: not_approved
+        targetBranch: master
+      push:
+        approved: not_approved
+        target: origin/master
+      cleanup:
+        deleteShortBranch: not_approved
+        parkWorktree: not_approved
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+    status: pending
+    retryCount: 0
+  - id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    title: Module Run v2 authorization-and-access implementation seed
+    phase: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-69-advanced-authorization-context-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    seededByTask: phase-69-advanced-authorization-context-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: personal_auth and org_auth local summaries
+    localExperienceClosureGate: planned
+    localFullLoopGate: L4
+    blockedRemainder: high-risk work remains separately gated
+    closeoutPolicy:
+      localCommit: not_approved
+      fastForwardMerge:
+        approved: not_approved
+        targetBranch: master
+      push:
+        approved: not_approved
+        target: origin/master
+      cleanup:
+        deleteShortBranch: not_approved
+        parkWorktree: not_approved
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    evidencePath: docs/05-execution-logs/evidence/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+    status: pending
+    retryCount: 0
+  - id: batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    title: Module Run v2 authorization-and-access implementation seed
+    phase: batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-69-advanced-authorization-context-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    seededByTask: phase-69-advanced-authorization-context-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: paper and mock_exam access context without changing real permission behavior
+    localExperienceClosureGate: planned
+    localFullLoopGate: L4
+    blockedRemainder: high-risk work remains separately gated
+    closeoutPolicy:
+      localCommit: not_approved
+      fastForwardMerge:
+        approved: not_approved
+        targetBranch: master
+      push:
+        approved: not_approved
+        target: origin/master
+      cleanup:
+        deleteShortBranch: not_approved
+        parkWorktree: not_approved
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    evidencePath: docs/05-execution-logs/evidence/batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+    status: pending
+    retryCount: 0
+  - id: batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    title: Module Run v2 authorization-and-access implementation seed
+    phase: batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-69-advanced-authorization-context-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+    seededByTask: phase-69-advanced-authorization-context-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: redeem_code, audit_log, and ai_call_log redacted references
+    localExperienceClosureGate: planned
+    localFullLoopGate: L4
+    blockedRemainder: high-risk work remains separately gated
+    closeoutPolicy:
+      localCommit: not_approved
+      fastForwardMerge:
+        approved: not_approved
+        targetBranch: master
+      push:
+        approved: not_approved
+        target: origin/master
+      cleanup:
+        deleteShortBranch: not_approved
+        parkWorktree: not_approved
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    evidencePath: docs/05-execution-logs/evidence/batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+    status: pending
+    retryCount: 0
