@@ -211,7 +211,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-db-capability-governance-approval.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-db-capability-governance-approval.md
   branch: codex/db-capability-governance-approval
-  commitSha: pending-local-commit
+  commitSha: a8c94052
   prUrl: null
   retryCount: 0
   lastFailurePath: null
