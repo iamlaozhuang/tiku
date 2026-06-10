@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
-updatedAt: "2026-06-09T23:43:32-07:00"
+updatedAt: "2026-06-10T02:17:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -94,14 +94,14 @@ repository:
   lastKnownOriginMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
 currentTask:
   id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
-  status: in_progress
+  status: done
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: docs/05-execution-logs/task-plans/2026-06-10-batch-101-authorization-read-model-display-contracts.md
   evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
   branch: codex/module-run-v2-autopilot-2026-06-10
   commitShaSemantics: task_closeout_checkpoint_or_pending_local_commit
-  commitSha: pending-local-commit
+  commitSha: 6bd71249948329e2828abbf986b396fb2ab67375
   prUrl: null
   retryCount: 0
   lastFailurePath: null

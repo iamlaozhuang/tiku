@@ -7374,7 +7374,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-101-authorization-and-access-authorization-read-model-and-display-contrac
     evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
-    status: in_progress
+    status: done
     retryCount: 0
   - id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
     title: Module Run v2 authorization-and-access implementation seed
