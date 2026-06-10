@@ -116,12 +116,15 @@ function New-SeedTaskBlock {
         [Parameter(Mandatory = $true)][string]$SourcePlanningTask,
         [Parameter(Mandatory = $true)][string]$TargetClosure,
         [Parameter(Mandatory = $true)][string]$LocalFullLoopGate,
-        [Parameter(Mandatory = $true)][string]$ApprovalText
+        [Parameter(Mandatory = $true)][string]$ApprovalText,
+        [Parameter(Mandatory = $false)][bool]$StandingCloseoutApproved = $false
     )
 
     $safeApprovalText = ConvertTo-YamlScalarText -Text $ApprovalText
     $safeTargetClosure = ConvertTo-YamlScalarText -Text $TargetClosure
     $safeLocalFullLoopGate = if ([string]::IsNullOrWhiteSpace($LocalFullLoopGate)) { "L2" } else { $LocalFullLoopGate }
+    $localCommitApproval = if ($StandingCloseoutApproved) { "approved" } else { "not_approved" }
+    $closeoutBooleanApproval = if ($StandingCloseoutApproved) { "true" } else { "not_approved" }
 
     return @"
   - id: $TaskId
@@ -143,16 +146,16 @@ function New-SeedTaskBlock {
     localFullLoopGate: $safeLocalFullLoopGate
     blockedRemainder: high-risk work remains separately gated
     closeoutPolicy:
-      localCommit: not_approved
+      localCommit: $localCommitApproval
       fastForwardMerge:
-        approved: not_approved
+        approved: $closeoutBooleanApproval
         targetBranch: master
       push:
-        approved: not_approved
+        approved: $closeoutBooleanApproval
         target: origin/master
       cleanup:
-        deleteShortBranch: not_approved
-        parkWorktree: not_approved
+        deleteShortBranch: $closeoutBooleanApproval
+        parkWorktree: $closeoutBooleanApproval
     autodrivePolicy:
       mode: guarded_serial
       allowedAgentActions:
@@ -295,6 +298,9 @@ function Write-SeedExecutionLogs {
     }
 
     $safeApprovalText = ConvertTo-YamlScalarText -Text $ApprovalText
+    $standingCloseoutApproved = $ApprovalText -match "standingUnattendedLocalCloseoutApproval" `
+        -and $ApprovalText -match "low-risk local implementation tasks only" `
+        -and $ApprovalText -match "High-risk capability gates remain blocked"
     $candidateText = ($candidateLines.ToArray()) -join "`n"
     $evidenceContent = @"
 # Module Run v2 Auto-Seed Evidence: $ModuleId
@@ -307,6 +313,7 @@ The auto-seed transaction appended guarded pending implementation tasks for ``$M
 
 - sourcePlanningTask: ``$SourcePlanningTask``
 - approvalAnchor: ``autoDriveLocalImplementationApproval``
+- standingCloseoutApproval: ``$(if ($standingCloseoutApproved) { "recorded" } else { "not_recorded" })``
 - approvalStatement: $safeApprovalText
 
 ## Seeded Tasks
@@ -324,6 +331,8 @@ $candidateText
 ## Closeout Requirement
 
 This seed transaction must be committed and integrated before any seeded implementation task is claimed.
+Seeded implementation task closeout is approved only when ``standingCloseoutApproval`` is ``recorded`` and all readiness,
+validation, pre-push, scope, lease, registry, hygiene, and remote-divergence gates pass.
 "@
 
     $auditContent = @"
@@ -336,6 +345,7 @@ Passed for guarded queue seeding.
 ## Checks
 
 - ``autoDriveLocalImplementationApproval`` is recorded.
+- ``standingUnattendedLocalCloseoutApproval`` is recorded only when task closeoutPolicy is generated as approved.
 - Seeded tasks are pending implementation tasks.
 - High-risk capabilities remain blocked or task-specific.
 - Cost Calibration Gate remains blocked.
@@ -402,6 +412,14 @@ try {
         Write-Output "MANUAL_DECISION_MISSING_AUTODRIVE_SEED_APPROVAL"
         Write-SeedTransactionResult -Decision "manual_required" -Reason "apply mode requires explicit autoDriveLocalImplementationApproval" -ExitCode 1
     }
+    $standingCloseoutApproved = $ApprovalStatement -match "standingUnattendedLocalCloseoutApproval" `
+        -and $ApprovalStatement -match "low-risk local implementation tasks only" `
+        -and $ApprovalStatement -match "local commit" `
+        -and $ApprovalStatement -match "fast-forward merge to master" `
+        -and $ApprovalStatement -match "push origin/master" `
+        -and $ApprovalStatement -match "merged short-branch cleanup" `
+        -and $ApprovalStatement -match "worktree parking" `
+        -and $ApprovalStatement -match "High-risk capability gates remain blocked"
 
     $queueContent = Get-Content -LiteralPath $QueuePath -Raw
     foreach ($candidateTaskId in $candidateTaskIds) {
@@ -419,7 +437,8 @@ try {
                     -SourcePlanningTask $sourcePlanningTask `
                     -TargetClosure $targetClosureItems[$index] `
                     -LocalFullLoopGate $localFullLoopGate `
-                    -ApprovalText $ApprovalStatement))
+                    -ApprovalText $ApprovalStatement `
+                    -StandingCloseoutApproved $standingCloseoutApproved))
     }
 
     $appendText = "`n" + (($taskBlocks.ToArray()) -join "`n")
@@ -437,6 +456,7 @@ try {
     }
     Write-Output "seededTaskCount: $($candidateTaskIds.Count)"
     Write-Output "autoDriveLocalImplementationApproval: recorded"
+    Write-Output "standingUnattendedLocalCloseoutApproval: $(if ($standingCloseoutApproved) { "recorded" } else { "not_recorded" })"
     if (-not [string]::IsNullOrWhiteSpace($executionLogs.EvidencePath)) {
         Write-Output "seedEvidencePath: $($executionLogs.EvidencePath)"
     }

@@ -316,6 +316,23 @@ try {
         if ($blockText -notmatch "autoDriveLocalImplementationApproval") {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_AUTODRIVE_APPROVAL $seedTaskId"
         }
+        $hasStandingCloseoutApproval = $blockText -match "standingUnattendedLocalCloseoutApproval" `
+            -and $blockText -match "low-risk local implementation tasks only" `
+            -and $blockText -match "High-risk capability gates remain blocked"
+        $hasApprovedCloseoutPolicy = $blockText -match "(?im)^\s+localCommit:\s*approved\s*$" `
+            -and $blockText -match "(?im)^\s+fastForwardMerge:\s*$" `
+            -and $blockText -match "(?im)^\s+approved:\s*true\s*$" `
+            -and $blockText -match "(?im)^\s+targetBranch:\s*master\s*$" `
+            -and $blockText -match "(?im)^\s+push:\s*$" `
+            -and $blockText -match "(?im)^\s+target:\s*origin/master\s*$" `
+            -and $blockText -match "(?im)^\s+deleteShortBranch:\s*true\s*$" `
+            -and $blockText -match "(?im)^\s+parkWorktree:\s*true\s*$"
+        if ($hasApprovedCloseoutPolicy -and -not $hasStandingCloseoutApproval) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_CLOSEOUT_WITHOUT_STANDING_APPROVAL $seedTaskId"
+        }
+        if ($hasStandingCloseoutApproval -and -not $hasApprovedCloseoutPolicy) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_STANDING_CLOSEOUT_POLICY $seedTaskId"
+        }
         if ($blockText -notmatch "localExperienceClosureGate") {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_LOCAL_EXPERIENCE_GATE $seedTaskId"
         }

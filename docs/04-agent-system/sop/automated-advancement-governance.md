@@ -753,6 +753,49 @@ Approved closeout may start from either a dirty task-scoped closeout worktree or
 has committed task work ahead of the base branch. A clean branch with no commits ahead of the base is not an executable
 closeout candidate.
 
+## Standing Unattended Local Closeout Approval
+
+`project-state.yaml` may record a durable `automation.unattendedControl.standingUnattendedLocalCloseoutApproval`. This
+approval is intentionally narrower than general automation approval. It applies only to low-risk Module Run v2 local
+implementation tasks that were produced by the governed auto-seed transaction and that also carry
+`autoDriveLocalImplementationApproval`.
+
+The seed transaction may materialize this standing approval into each eligible seeded task as:
+
+```yaml
+closeoutPolicy:
+  localCommit: approved
+  fastForwardMerge:
+    approved: true
+    targetBranch: master
+  push:
+    approved: true
+    target: origin/master
+  cleanup:
+    deleteShortBranch: true
+    parkWorktree: true
+```
+
+This is the only allowed durable conversion from standing approval to executable commit/merge/push/cleanup authority.
+The conversion must happen while the seed task is created, so later closeout scripts consume ordinary task-scoped
+`closeoutPolicy` instead of chat memory.
+
+The approval is executable only when all of these remain true:
+
+- the task is `taskKind: implementation` and `seededImplementationTask: true`;
+- high-risk capability values remain blocked or task-specific;
+- `allowedFiles` and `blockedFiles` exclude out-of-scope and high-risk surfaces;
+- validation evidence, audit review, module-closeout readiness, pre-push readiness, active-owner, lease, run registry,
+  hygiene, and remote-divergence gates all pass;
+- the closeout path uses repository scripts for local commit, fast-forward merge to `master`, push to `origin/master`,
+  merged short-branch cleanup, and worktree parking.
+
+The standing approval is not approval for mechanism repairs, non-seeded tasks, PR creation or update, force push,
+dependency/package/lockfile changes, schema or migration work, env/secret work, provider calls or provider
+configuration, destructive database work, e2e, external-service actions, deploy, payment, authorization model changes, or
+Cost Calibration Gate execution. Those still require fresh task-specific approval and must pass the local capability
+gate before any action.
+
 ## Blocked Gate Enforcement
 
 The following remain blocked unless a task records fresh explicit approval:

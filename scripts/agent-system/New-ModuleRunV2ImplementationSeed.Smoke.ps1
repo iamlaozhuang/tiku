@@ -136,10 +136,14 @@ try {
     Assert-Contains -Output $applyOutput -Pattern "seededTaskCount: 2"
     Assert-Contains -Output $applyOutput -Pattern "seedEvidencePath:"
     Assert-Contains -Output $applyOutput -Pattern "seedAuditReviewPath:"
+    Assert-Contains -Output $applyOutput -Pattern "standingUnattendedLocalCloseoutApproval: not_recorded"
 
     $queueAfterApply = Get-Content -LiteralPath $fixture.QueuePath -Raw
     if ($queueAfterApply -notmatch "seededImplementationTask:\s*true" -or $queueAfterApply -notmatch "status:\s*pending") {
         throw "Applied seed transaction did not write pending seeded tasks."
+    }
+    if ($queueAfterApply -notmatch "localCommit:\s*not_approved" -or $queueAfterApply -match "parkWorktree:\s*true") {
+        throw "Seed transaction without standing closeout approval unexpectedly approved closeout."
     }
     if ($queueAfterApply -notmatch "validationCommandLifecycle:" -or $queueAfterApply -notmatch "phase:\s*advisory_baseline") {
         throw "Applied seed transaction did not write lifecycle-aware advisory baseline validation."
@@ -165,6 +169,34 @@ try {
             -MatrixPath $fixture.MatrixPath
     )
     Assert-Contains -Output $selfReviewOutput -Pattern "seedSelfReviewDecision: passed"
+
+    $standingRoot = Join-Path -Path $fixtureRoot -ChildPath "standing-closeout"
+    $standingFixture = Write-FixtureFiles -Root $standingRoot
+    $standingApproval = "standingUnattendedLocalCloseoutApproval: User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation, local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking, when repository readiness, validation surface, module closeout readiness, pre-push readiness, allowedFiles/blockedFiles, active-owner, lease, registry, hygiene, and remote-divergence gates all pass. High-risk capability gates remain blocked unless separately approved. autoDriveLocalImplementationApproval: smoke-approved low-risk local implementation seed"
+    $standingApplyOutput = @(
+        & $scriptPath `
+            -Apply `
+            -ProjectStatePath $standingFixture.ProjectStatePath `
+            -QueuePath $standingFixture.QueuePath `
+            -MatrixPath $standingFixture.MatrixPath `
+            -ApprovalStatement $standingApproval `
+            -SeedEvidencePath (Join-Path -Path $standingRoot -ChildPath "seed-evidence.md") `
+            -SeedAuditReviewPath (Join-Path -Path $standingRoot -ChildPath "seed-audit.md")
+    )
+    Assert-Contains -Output $standingApplyOutput -Pattern "seedTransactionDecision: seeded"
+    Assert-Contains -Output $standingApplyOutput -Pattern "standingUnattendedLocalCloseoutApproval: recorded"
+    $standingQueueAfterApply = Get-Content -LiteralPath $standingFixture.QueuePath -Raw
+    if ($standingQueueAfterApply -notmatch "localCommit:\s*approved" -or $standingQueueAfterApply -notmatch "parkWorktree:\s*true") {
+        throw "Standing closeout approval did not generate approved closeoutPolicy."
+    }
+
+    $standingSelfReviewOutput = @(
+        & $selfReviewPath `
+            -ExpectedModule "authorization-and-access" `
+            -QueuePath $standingFixture.QueuePath `
+            -MatrixPath $standingFixture.MatrixPath
+    )
+    Assert-Contains -Output $standingSelfReviewOutput -Pattern "seedSelfReviewDecision: passed"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

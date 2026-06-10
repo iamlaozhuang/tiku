@@ -59,13 +59,23 @@ Cost Calibration Gate remains blocked
 function Write-Queue {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $false)][switch]$UnsafeAllowedFile
+        [Parameter(Mandatory = $false)][switch]$UnsafeAllowedFile,
+        [Parameter(Mandatory = $false)][switch]$ApprovedCloseout,
+        [Parameter(Mandatory = $false)][switch]$StandingApproval
     )
 
     $allowedFile = "src/server/services/**"
     if ($UnsafeAllowedFile) {
         $allowedFile = "package.json"
     }
+    $approvalText = "autoDriveLocalImplementationApproval smoke approval"
+    $autoDriveApprovalText = "smoke approval"
+    if ($StandingApproval) {
+        $approvalText = "standingUnattendedLocalCloseoutApproval: User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked unless separately approved. autoDriveLocalImplementationApproval smoke approval"
+        $autoDriveApprovalText = $approvalText
+    }
+    $localCommitApproval = if ($ApprovedCloseout) { "approved" } else { "not_approved" }
+    $closeoutApprovalValue = if ($ApprovedCloseout) { "true" } else { "not_approved" }
 
     @"
 schemaVersion: 1
@@ -73,14 +83,25 @@ tasks:
   - id: batch-101-authorization-and-access-authorization-read-model
     status: pending
     taskKind: implementation
-    humanApproval: autoDriveLocalImplementationApproval smoke approval
-    autoDriveLocalImplementationApproval: smoke approval
+    humanApproval: $approvalText
+    autoDriveLocalImplementationApproval: $autoDriveApprovalText
     seededImplementationTask: true
     seededExecutionModule: authorization-and-access
     targetClosureItem: authorization read-model and display contracts
     localExperienceClosureGate: planned
     localFullLoopGate: L4
     blockedRemainder: high-risk work remains separately gated
+    closeoutPolicy:
+      localCommit: $localCommitApproval
+      fastForwardMerge:
+        approved: $closeoutApprovalValue
+        targetBranch: master
+      push:
+        approved: $closeoutApprovalValue
+        target: origin/master
+      cleanup:
+        deleteShortBranch: $closeoutApprovalValue
+        parkWorktree: $closeoutApprovalValue
     allowedFiles:
       - $allowedFile
       - docs/05-execution-logs/evidence/**
@@ -151,6 +172,23 @@ try {
             -QueuePath $queuePath `
             -MatrixPath $matrixPath
     }
+
+    Write-Queue -Path $queuePath -ApprovedCloseout
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_CLOSEOUT_WITHOUT_STANDING_APPROVAL" -Command {
+        & $scriptPath `
+            -ExpectedModule "authorization-and-access" `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    }
+
+    Write-Queue -Path $queuePath -ApprovedCloseout -StandingApproval
+    $standingPassOutput = @(
+        & $scriptPath `
+            -ExpectedModule "authorization-and-access" `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    )
+    Assert-Contains -Output $standingPassOutput -Pattern "seedSelfReviewDecision: passed"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

@@ -8009,3 +8009,123 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-registry-finalizer-validation-lifecycle-hardening.md
     status: done
     retryCount: 0
+
+  - id: module-run-v2-standing-unattended-local-closeout-approval
+    title: Module Run v2 Standing Unattended Local Closeout Approval
+    phase: module-run-v2-standing-unattended-local-closeout-approval
+    sourceStory: user-approved-2026-06-10-standing-unattended-local-closeout-approval
+    dependencies:
+      - batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      standingUnattendedLocalCloseoutApproval: User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation, local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking, when repository readiness, validation surface, module closeout readiness, pre-push readiness, allowedFiles/blockedFiles, active-owner, lease, registry, hygiene, and remote-divergence gates all pass. High-risk capability gates remain blocked unless separately approved.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - continue_task
+        - run_validation
+        - write_evidence
+        - local_commit
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: mechanism_repair
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
+      - docs/05-execution-logs/evidence/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - closeout_recovery
+      - seed_transaction
+      - evidence_integrity
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
+    status: ready_for_closeout
+    retryCount: 0

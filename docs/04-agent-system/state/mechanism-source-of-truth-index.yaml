@@ -9,7 +9,7 @@ mode:
 canonicalStateFiles:
   - id: project-state
     path: docs/04-agent-system/state/project-state.yaml
-    role: current phase, automation pointers, current task, handoff
+    role: current phase, automation pointers, current task, handoff, standing unattended local closeout approval
   - id: task-queue
     path: docs/04-agent-system/state/task-queue.yaml
     role: active queue and recent recovery window
@@ -24,7 +24,7 @@ canonicalStateFiles:
     role: navigation index for mechanism facts
   - id: autodrive-control-schema
     path: docs/04-agent-system/state/autodrive-control-schema.yaml
-    role: durable schema for Module Run v2 autodrive policy, local capabilities, validation surface, closeout, registry lifecycle, parallel batch, and evidence minimums
+    role: durable schema for Module Run v2 autodrive policy, local capabilities, validation surface, standing local closeout approval, closeout, registry lifecycle, parallel batch, and evidence minimums
   - id: advanced-edition-code-stage-seeding-plan
     path: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
     role: planned Phase 65 code-stage queue seeding boundary
@@ -185,12 +185,12 @@ scriptControls:
     path: scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
     smokePath: scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1
     decisionOutput: seedTransactionDecision
-    role: guarded queue append transaction for pending low-risk local implementation tasks after explicit autoDriveLocalImplementationApproval
+    role: guarded queue append transaction for pending low-risk local implementation tasks after explicit autoDriveLocalImplementationApproval; materializes standingUnattendedLocalCloseoutApproval into task-scoped closeoutPolicy only when the durable approval statement is present
   - id: module-run-v2-implementation-seed-self-review
     path: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
     decisionOutput: seedSelfReviewDecision
-    role: hard-block self-review for seeded task coverage, metadata, safe file scope, validation commands, and redaction anchors
+    role: hard-block self-review for seeded task coverage, metadata, safe file scope, validation commands, standing closeout approval consistency, and redaction anchors
   - id: module-run-v2-seed-transaction-recovery-readiness
     path: scripts/agent-system/Test-ModuleRunV2SeedTransactionRecoveryReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2SeedTransactionRecoveryReadiness.Smoke.ps1

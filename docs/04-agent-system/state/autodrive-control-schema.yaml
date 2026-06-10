@@ -204,6 +204,55 @@ closeoutPolicy:
     requiredFields:
       - deleteShortBranch
       - parkWorktree
+standingUnattendedLocalCloseoutApproval:
+  statePath: docs/04-agent-system/state/project-state.yaml
+  durableKey: automation.unattendedControl.standingUnattendedLocalCloseoutApproval
+  purpose: Narrow standing approval for low-risk Module Run v2 local implementation task closeout after all guardian gates pass.
+  requiredStatus: approved
+  eligibleTaskFields:
+    taskKind: implementation
+    seededImplementationTask: true
+    requiredApprovalAnchors:
+      - autoDriveLocalImplementationApproval
+      - standingUnattendedLocalCloseoutApproval
+  generatedCloseoutPolicy:
+    localCommit: approved
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: true
+  requiredGates:
+    - repository_readiness
+    - validation_surface
+    - module_closeout_readiness
+    - pre_push_readiness
+    - allowedFiles_blockedFiles
+    - active_owner
+    - lease
+    - registry
+    - hygiene
+    - remote_divergence
+  blockedWithoutFreshTaskApproval:
+    - env_secret
+    - provider_call
+    - provider_configuration
+    - dependency_package_lockfile_change
+    - schema_migration
+    - destructive_database_operation
+    - e2e
+    - external_service
+    - deploy
+    - payment
+    - authorization_model_change
+    - pr
+    - force_push
+    - cost_calibration_gate
+  executionRule: The standing approval may be materialized only into auto-seeded low-risk implementation task closeoutPolicy during the seed transaction. It is not a general approval for mechanism repairs, manual tasks, PRs, force pushes, high-risk capabilities, or protected-branch editing outside approved closeout scripts.
 postCloseoutState:
   repositoryShaSemantics:
     allowedValues:
@@ -328,4 +377,5 @@ forbiddenClaims:
   - This schema does not approve local Docker database operations without task approval.
   - This schema does not approve env or secret writes.
   - This schema does not approve provider calls.
-  - This schema does not approve dependency, schema, migration, deploy, push, PR, or Cost Calibration Gate execution.
+  - This schema does not approve dependency, schema, migration, deploy, PR, force push, or Cost Calibration Gate execution.
+  - This schema approves push only through task-scoped closeoutPolicy materialized from standingUnattendedLocalCloseoutApproval or fresh task-specific approval, after all readiness and pre-push gates pass.
