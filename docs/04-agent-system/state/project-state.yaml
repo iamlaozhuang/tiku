@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-validation-closeout-recovery-hardening
-updatedAt: "2026-06-10T02:07:00-07:00"
+  currentPhase: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+updatedAt: "2026-06-09T23:43:32-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -93,15 +93,15 @@ repository:
   lastKnownMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
   lastKnownOriginMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
 currentTask:
-  id: module-run-v2-validation-closeout-recovery-hardening
-  status: done
-  sourceStory: user-approved-2026-06-10-validation-closeout-recovery-hardening
-  planPath: docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
-  branch: codex/module-run-v2-validation-closeout-recovery
+  id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+  status: in_progress
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-10-batch-101-authorization-read-model-display-contracts.md
+  evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+  branch: codex/module-run-v2-autopilot-2026-06-10
   commitShaSemantics: task_closeout_checkpoint_or_pending_local_commit
-  commitSha: 3fc91623d98c0ba25b2fadd2607374959677c48a
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

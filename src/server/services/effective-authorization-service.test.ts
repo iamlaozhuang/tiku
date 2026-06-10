@@ -10,12 +10,29 @@ import type {
   EffectivePersonalAuthRow,
 } from "../repositories/effective-authorization-repository";
 
+type EffectivePersonalAuthRowFixture = EffectivePersonalAuthRow & {
+  effective_edition?: "standard" | "advanced";
+};
+
+type EffectiveOrgAuthRowFixture = EffectiveOrgAuthRow & {
+  effective_edition?: "standard" | "advanced";
+};
+
 const now = new Date("2026-05-18T04:00:00.000Z");
 const startsAt = new Date("2026-05-01T04:00:00.000Z");
 const futureStartsAt = new Date("2026-05-19T04:00:00.000Z");
 const expiredAt = new Date("2026-05-17T04:00:00.000Z");
 const personalExpiresAt = new Date("2026-06-18T04:00:00.000Z");
 const orgExpiresAt = new Date("2026-07-18T04:00:00.000Z");
+
+const disabledCapabilities = {
+  canGenerateAiQuestion: false,
+  canGenerateAiPaper: false,
+  canCreateOrganizationTraining: false,
+  canAnswerOrganizationTraining: false,
+  canViewOrganizationTrainingSummary: false,
+  canManageAuthorizationQuota: false,
+};
 
 const clock: EffectiveAuthorizationClock = {
   now() {
@@ -24,8 +41,8 @@ const clock: EffectiveAuthorizationClock = {
 };
 
 function createPersonalAuth(
-  overrides: Partial<EffectivePersonalAuthRow> = {},
-): EffectivePersonalAuthRow {
+  overrides: Partial<EffectivePersonalAuthRowFixture> = {},
+): EffectivePersonalAuthRowFixture {
   return {
     id: 301,
     public_id: "personal_auth_public_123",
@@ -39,8 +56,8 @@ function createPersonalAuth(
 }
 
 function createOrgAuth(
-  overrides: Partial<EffectiveOrgAuthRow> = {},
-): EffectiveOrgAuthRow {
+  overrides: Partial<EffectiveOrgAuthRowFixture> = {},
+): EffectiveOrgAuthRowFixture {
   return {
     id: 401,
     public_id: "org_auth_public_456",
@@ -118,6 +135,36 @@ describe("effective authorization service", () => {
             status: "active",
           },
         ],
+        authorizationContexts: [
+          {
+            profession: "monopoly",
+            level: 3,
+            effectiveEdition: "standard",
+            authorizationSource: "personal_auth",
+            authorizationPublicId: "personal_auth_public_123",
+            ownerType: "personal",
+            ownerPublicId: "user_public_123",
+            organizationPublicId: null,
+            quotaOwnerType: "personal",
+            quotaOwnerPublicId: "user_public_123",
+            capabilities: disabledCapabilities,
+            blockedReason: null,
+          },
+          {
+            profession: "monopoly",
+            level: 3,
+            effectiveEdition: "standard",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_public_456",
+            ownerType: "organization",
+            ownerPublicId: "org_city_123",
+            organizationPublicId: "org_city_123",
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: "org_city_123",
+            capabilities: disabledCapabilities,
+            blockedReason: null,
+          },
+        ],
       },
     });
   });
@@ -187,6 +234,88 @@ describe("effective authorization service", () => {
             profession: "marketing",
             level: 2,
             authorizationTypes: ["org_auth"],
+          },
+        ],
+      },
+    });
+  });
+
+  it("enables personal advanced AI display capabilities when local production enablement is configured", async () => {
+    const authorizationService = createEffectiveAuthorizationService(
+      createRepository({
+        async listPersonalAuthsByUserPublicId() {
+          return [
+            createPersonalAuth({
+              effective_edition: "advanced",
+            }),
+          ];
+        },
+        async listOrgAuthsByUserPublicId() {
+          return [];
+        },
+      }),
+      clock,
+      {
+        isProductionEnablementConfigured: true,
+      },
+    );
+
+    await expect(
+      authorizationService.listEffectiveAuthorizations({
+        userPublicId: "user_public_advanced",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        authorizationContexts: [
+          {
+            effectiveEdition: "advanced",
+            authorizationSource: "personal_auth",
+            ownerType: "personal",
+            ownerPublicId: "user_public_advanced",
+            quotaOwnerType: "personal",
+            quotaOwnerPublicId: "user_public_advanced",
+            capabilities: {
+              ...disabledCapabilities,
+              canGenerateAiQuestion: true,
+              canGenerateAiPaper: true,
+            },
+            blockedReason: null,
+          },
+        ],
+      },
+    });
+  });
+
+  it("keeps advanced capabilities blocked when production enablement is missing", async () => {
+    const authorizationService = createEffectiveAuthorizationService(
+      createRepository({
+        async listPersonalAuthsByUserPublicId() {
+          return [
+            createPersonalAuth({
+              effective_edition: "advanced",
+            }),
+          ];
+        },
+        async listOrgAuthsByUserPublicId() {
+          return [];
+        },
+      }),
+      clock,
+    );
+
+    await expect(
+      authorizationService.listEffectiveAuthorizations({
+        userPublicId: "user_public_advanced",
+      }),
+    ).resolves.toMatchObject({
+      code: 0,
+      data: {
+        authorizationContexts: [
+          {
+            effectiveEdition: "advanced",
+            capabilities: disabledCapabilities,
+            blockedReason: "production_enablement_blocked",
           },
         ],
       },

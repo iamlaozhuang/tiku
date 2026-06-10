@@ -34,6 +34,14 @@ Future implementation should be split into separately approved code-stage tasks:
    - Cover personal advanced, personal standard, employee `org_auth`, organization admin, platform operations admin, and redaction cases.
    - Prove plaintext `redeem_code`, prompt text, provider payload, secret, token, employee sensitive detail, full `paper` content, and numeric ids are absent.
 
+## Module Run v2 Auto-Seed Gate Anchors
+
+- `implementationAutoSeedGate`: source planning supports guarded local implementation auto-seeding only for queued low-risk implementation tasks.
+- `localExperienceClosureGate`: seeded implementation work must stay local-first and must record the highest local validation level reached.
+- `seededImplementationTask`: future implementation tasks are proposed as separately queued candidate implementation tasks, not as unbounded direct product implementation.
+- `focused test plan`: each seeded implementation task must include focused tests for the changed contract, mapper, service, or route surface before broad gates.
+- `localFullLoopGate`: candidate implementation tasks should target local API or Server Action contract validation where safe, with environment/provider/deploy remainder blocked.
+
 ## Blocked Work
 
 Direct product implementation remains unapproved. `authorization` permission model changes beyond planning remain unapproved. Schema, migration, dependency, provider, env/secret, staging/prod/cloud/deploy, payment, external-service, and Cost Calibration Gate execution remain blocked.

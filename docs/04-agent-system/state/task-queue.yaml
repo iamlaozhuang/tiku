@@ -7281,7 +7281,7 @@ tasks:
       - phase-69-advanced-authorization-context-implementation-planning
     taskPlanPolicy: required_before_edit
     humanApproval: >-
-      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
+      autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked. Owner recovery closeout approval: user approved recovering D:\tiku as the canonical batch-101 owner with local commit, fast-forward merge to master, push origin/master, and safe cleanup of the merged owner branch only; 9716 remains read-only/manual unless repository hygiene classifies a safe cleanup.
     autoDriveLocalImplementationApproval: >-
       autoDriveLocalImplementationApproval: user-approved Module Run v2 unattended autodrive activation for low-risk local implementation auto-seeding only; high-risk capability gates remain blocked
     seededByTask: phase-69-advanced-authorization-context-implementation-planning
@@ -7292,15 +7292,15 @@ tasks:
     localFullLoopGate: L4
     blockedRemainder: high-risk work remains separately gated
     closeoutPolicy:
-      localCommit: not_approved
+      localCommit: approved
       fastForwardMerge:
-        approved: not_approved
+        approved: approved
         targetBranch: master
       push:
-        approved: not_approved
+        approved: approved
         target: origin/master
       cleanup:
-        deleteShortBranch: not_approved
+        deleteShortBranch: approved_after_merge
         parkWorktree: not_approved
     autodrivePolicy:
       mode: guarded_serial
@@ -7369,12 +7369,12 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-101-authorization-and-access-authorization-read-model-and-display-contrac
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused # focused test anchor
+      - npm.cmd run test:unit -- src/server/mappers/effective-authorization-mapper.test.ts src/server/services/effective-authorization-service.test.ts src/server/services/effective-authorization-route.test.ts
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-101-authorization-and-access-authorization-read-model-and-display-contrac
     evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
-    status: pending
+    status: in_progress
     retryCount: 0
   - id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
     title: Module Run v2 authorization-and-access implementation seed
