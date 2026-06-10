@@ -170,11 +170,14 @@ Current durable state is ready for the next primary autopilot startup:
 - next task: `batch-101-authorization-and-access-authorization-read-model-and-display-contrac`
 - dispatcher result: `agentActionDecision: ready`, `agentAction: claim_task`
 - serial executor dry run: `ready_to_claim`
+- pushed `origin/master`: `89c369f8308d2a2e401a718b796874576cc9d455`
+- post-push stopped-automation hygiene: `stoppedAutomationHygieneDecision: clean`
+- post-push startup readiness: `startupDecision: prepare_next_task`
+- post-push Git status: `master...origin/master` with no staged, unstaged, or untracked repository files
 
 Residual local state:
 
-- `C:\Users\jzzhu\.codex\worktrees\827f\tiku` remains a clean detached older autopilot worktree and is not touched by
-  this mechanic.
-- `C:\Users\jzzhu\.codex\worktrees\34e4\tiku` is an empty non-Git directory left after a smoke worktree cleanup hit a
-  Windows file lock. It contains no files, is not registered by `git worktree list`, and both stopped-automation hygiene
-  and startup readiness report clean/non-blocking status.
+- `git worktree list` contains only `D:\tiku` at `89c369f8308d2a2e401a718b796874576cc9d455`.
+- Empty non-Git directories remain under `C:\Users\jzzhu\.codex\worktrees\{0d5b,15eb,2660,34e4,827f}\tiku` because
+  Windows held directory handles during cleanup. Each path has `count=0`, is not registered by `git worktree list`, and
+  both stopped-automation hygiene and startup readiness report clean/non-blocking status.

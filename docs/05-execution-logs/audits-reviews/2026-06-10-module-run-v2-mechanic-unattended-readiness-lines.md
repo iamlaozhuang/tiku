@@ -26,7 +26,8 @@ APPROVE: mechanism-scoped repair is ready for local commit, fast-forward merge, 
   advisory error.
 - Stopped-automation hygiene now cleans orphan active run registries when their worktree owner is no longer registered
   and no Git metadata remains at the path.
-- The next primary autopilot startup can proceed to `batch-101` task claim.
+- Post-push stopped-automation hygiene is clean, startup readiness returns `prepare_next_task`, and the next primary
+  autopilot can proceed to `batch-101` task claim.
 - No business implementation, dependency, package, lockfile, env/secret, provider, schema, migration, Docker DB, deploy,
   PR, force-push, or Cost Calibration Gate action was performed.
 
