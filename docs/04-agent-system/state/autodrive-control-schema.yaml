@@ -22,6 +22,7 @@ taskAutodrivePolicy:
         - adopt_recoverable_run
         - open_recovery_plan
         - run_closeout_recovery
+        - request_owner_recovery
         - reconcile_post_closeout_state
         - confirm_post_closeout_checkpoint
         - seed_implementation_tasks
@@ -63,6 +64,21 @@ schemaReadiness:
   idleCandidateValue: no-executable-task-seed-or-approve-next-task
   executionRule: terminal task diagnostics are zero-exit idle results and must not be treated as executable autodrive work.
 startupDiagnostics:
+  startupDecisions:
+    runnable:
+      - continue_current_task
+      - prepare_next_task
+      - closeout_recovery
+      - adopt_recoverable_run
+      - open_recovery_plan
+      - cleanup_stale_artifacts
+    guardianStops:
+      - exit_active_owner_present
+      - stop_existing_run_active
+      - manual_required_owner_recovery
+      - stop_for_manual_decision
+      - stop_for_hard_block
+      - no_executable_task
   localToolingReadinessValues:
     - not_applicable
     - missing_node_modules
@@ -213,7 +229,34 @@ validationLifecycle:
     - pre_edit
     - post_edit
     - closeout
-  executionRule: serial validation and closeout readiness use post_edit and closeout commands when this field is present; pre_edit commands are entry-gate evidence only.
+    - advisory_baseline
+  executionRule: serial validation and closeout readiness use post_edit and closeout commands when this field is present; pre_edit commands are entry-gate evidence only; advisory_baseline commands can document unrelated baseline health but do not block closeout unless a task explicitly makes them hard gates.
+validationSurface:
+  scriptPath: scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.ps1
+  smokePath: scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
+  decisionOutput: validationSurfaceDecision
+  decisions:
+    - focused_validation_satisfied
+    - validation_surface_mismatch
+    - validation_surface_incomplete
+    - validation_evidence_missing
+    - stop_for_hard_block
+  broadGateValues:
+    - not_applicable
+    - unrelated_baseline_failure
+    - advisory_unrelated_baseline_failure
+    - failed_hard_gate
+    - unknown
+  closeoutTransactionStates:
+    - closeout_pending_evidence
+    - closeout_pending_commit_evidence
+    - closeout_pending_audit
+    - closeout_pending_audit_approval
+    - closeout_ready
+  ownerRecoveryDecisions:
+    - no_owner_recovery_needed
+    - manual_required_owner_recovery
+  executionRule: stale dirty active run registries with safeToAdopt=false must not be auto-adopted or cleaned; startup may use this read-only classifier to produce manual_required_owner_recovery instead of a generic hard block.
 registryLifecycle:
   statusField: runStatus
   allowedStatuses:
@@ -241,6 +284,7 @@ registryLifecycle:
     - stop_invalid_lease
     - stop_dirty_worktree
     - stop_manual_cleanup_required
+    - manual_required_owner_recovery
   cleanupDeferredRule: cleanup_deferred is an advisory successful hygiene pass for safe cleanup candidates that could not be removed because of OS locks or transient filesystem access; it must not block guarded task dispatch when no active owner, dirty worktree, malformed lease, or unsafe path is present.
   redactionRequired: true
 parallelBatch:

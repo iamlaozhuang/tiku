@@ -448,6 +448,10 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
         Write-RunnerResult -Decision "stop_for_manual_decision" -NextAction "request_manual_decision" -Reason "startup readiness requires manual decision" -StepCount $stepIndex -ExitCode 1
     }
 
+    if ($startupDecision -eq "manual_required_owner_recovery") {
+        Write-RunnerResult -Decision "manual_required_owner_recovery" -NextAction "request_owner_recovery" -Reason "startup readiness found a stale dirty owner that requires explicit recovery" -StepCount $stepIndex -ExitCode 1
+    }
+
     if ($startupDecision -eq "no_executable_task") {
         Write-Section -Title "Runner Step $stepIndex Seed Proposal"
         $seedProposalResult = Invoke-SeedProposal

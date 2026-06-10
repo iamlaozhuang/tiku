@@ -247,6 +247,42 @@ function Invoke-SeedTransactionRecoveryReadiness {
     }
 }
 
+function Invoke-ValidationSurfaceReadiness {
+    param(
+        [Parameter(Mandatory = $true)][string]$TargetTaskId,
+        [Parameter(Mandatory = $true)][string]$WorktreePath
+    )
+
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ValidationSurfaceReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("validationSurfaceDecision: stop_for_hard_block", "reason: validation surface readiness script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    Push-Location -LiteralPath $WorktreePath
+    try {
+        $output = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -TaskId $TargetTaskId `
+                -QueuePath $QueuePath 2>&1
+        )
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        Pop-Location
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Test-LocalToolingReady {
     if (-not (Test-Path -LiteralPath "package.json")) {
         Write-Output "localToolingReadiness: not_applicable"
@@ -527,6 +563,23 @@ function Test-AutomationWorktreeHygiene {
                 Write-Output "ACTIVE_OWNER_PRESENT $worktreeFullPath"
                 Write-Output "heartbeatAtUtc: $([string]$runRegistry.heartbeatAtUtc)"
                 return
+            }
+
+            if ($runStatus -eq "active" -and -not $safeToAdopt) {
+                $validationSurfaceResult = Invoke-ValidationSurfaceReadiness -TargetTaskId ([string]$runRegistry.taskId) -WorktreePath $worktreeFullPath
+                $validationSurfaceResult.Output | ForEach-Object { Write-Output $_ }
+                $ownerRecoveryDecision = Get-OutputValue -Output $validationSurfaceResult.Output -Key "ownerRecoveryDecision"
+                $validationSurfaceDecision = Get-OutputValue -Output $validationSurfaceResult.Output -Key "validationSurfaceDecision"
+                $closeoutTransactionState = Get-OutputValue -Output $validationSurfaceResult.Output -Key "closeoutTransactionState"
+                if ($validationSurfaceResult.ExitCode -eq 0 -and $ownerRecoveryDecision -eq "manual_required_owner_recovery") {
+                    $script:startupOverrideDecision = "manual_required_owner_recovery"
+                    $script:startupOverrideReason = "expired dirty active run requires owner recovery; validation=$validationSurfaceDecision; closeout=$closeoutTransactionState"
+                    $script:startupOverrideExitCode = 1
+                    Write-Output "MANUAL_REQUIRED_OWNER_RECOVERY $worktreeFullPath"
+                    Write-Output "validationSurfaceDecision: $validationSurfaceDecision"
+                    Write-Output "closeoutTransactionState: $closeoutTransactionState"
+                    return
+                }
             }
 
             if ($safeToAdopt -and $hasReadyHandoff -and $runStatus -in @("recoverable", "stopped", "abandoned")) {

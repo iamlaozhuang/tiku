@@ -166,6 +166,10 @@ try {
         Write-RecoveryResult -Decision "exit_active_owner_present" -RepairAction "none" -Reason "another active owner or lease owns the automation lane" -ExitCode 0 -StartupDecision $startupDecision
     }
 
+    if ($startupDecision -eq "manual_required_owner_recovery") {
+        Write-RecoveryResult -Decision "manual_required" -RepairAction "open_owner_recovery_plan" -Reason "startup found a stale dirty active owner protected by safeToAdopt=false" -ExitCode 1 -StartupDecision $startupDecision
+    }
+
     if ($hasPostCloseoutStateReconciliation -and $startupDecision -eq "closeout_recovery") {
         if ($Execute) {
             $reconcileOutput = @(Invoke-PostCloseoutStateReconcile)

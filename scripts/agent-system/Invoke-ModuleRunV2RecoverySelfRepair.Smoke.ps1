@@ -62,6 +62,21 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $activeOwnerResult.Output -Pattern "recoverySelfRepairDecision: exit_active_owner_present"
     Assert-Contains -Output $activeOwnerResult.Output -Pattern "repairAction: none"
 
+    $ownerRecoveryStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-owner-recovery.txt"
+    @"
+startupDecision: manual_required_owner_recovery
+validationSurfaceDecision: validation_surface_mismatch
+closeoutTransactionState: closeout_pending_commit_evidence
+reason: expired dirty active run requires owner recovery
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $ownerRecoveryStartupPath -Encoding UTF8
+    $ownerRecoveryResult = Invoke-Recovery -StartupOutputPath $ownerRecoveryStartupPath
+    if ($ownerRecoveryResult.ExitCode -eq 0) {
+        throw "Expected owner recovery decision to require manual action"
+    }
+    Assert-Contains -Output $ownerRecoveryResult.Output -Pattern "recoverySelfRepairDecision: manual_required"
+    Assert-Contains -Output $ownerRecoveryResult.Output -Pattern "repairAction: open_owner_recovery_plan"
+
     $continueStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-continue.txt"
     @"
 startupDecision: continue_current_task

@@ -49,6 +49,7 @@ function Write-AcceptanceResult {
     Write-Output "reconcileBoundary: accepted_ancestor_state_reconcile_only"
     Write-Output "branchHygieneBoundary: merged_cleanup_unmerged_manual_review"
     Write-Output "diagnosticBoundary: no_write_readiness_available"
+    Write-Output "ownerRecoveryBoundary: safeToAdopt_false_routes_to_manual_required_owner_recovery"
     Write-Output "nextModuleRunCandidate: $NextModuleRunCandidate"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
@@ -72,6 +73,7 @@ try {
 
     $requiredScripts = @(
         @{ Id = "startup_readiness"; Path = "Test-ModuleRunV2AutomationStartupReadiness.ps1" },
+        @{ Id = "validation_surface_readiness"; Path = "Test-ModuleRunV2ValidationSurfaceReadiness.ps1" },
         @{ Id = "recovery_self_repair"; Path = "Invoke-ModuleRunV2RecoverySelfRepair.ps1" },
         @{ Id = "agent_action_dispatcher"; Path = "Invoke-ModuleRunV2AgentActionDispatcher.ps1" },
         @{ Id = "serial_executor"; Path = "Invoke-ModuleRunV2SerialAutodriveExecutor.ps1" },
@@ -112,6 +114,19 @@ Cost Calibration Gate remains blocked
         }
         Assert-Contains -Output $recoveryResult.Output -Pattern "recoverySelfRepairDecision: self_repair_ready"
         Assert-Contains -Output $recoveryResult.Output -Pattern "repairAction: run_stopped_automation_hygiene_cleanup"
+
+        $manualOwnerRecoveryPath = Join-Path -Path $fixtureRoot -ChildPath "startup-manual-owner-recovery.txt"
+        @"
+startupDecision: manual_required_owner_recovery
+reason: stale dirty active owner protected by safeToAdopt false
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $manualOwnerRecoveryPath -Encoding UTF8
+        $manualOwnerRecoveryResult = Invoke-Script -Path $recoveryScriptPath -Arguments @("-StartupOutputPath", $manualOwnerRecoveryPath)
+        if ($manualOwnerRecoveryResult.ExitCode -eq 0) {
+            throw "Manual owner-recovery probe should stop with a manual-required decision"
+        }
+        Assert-Contains -Output $manualOwnerRecoveryResult.Output -Pattern "recoverySelfRepairDecision: manual_required"
+        Assert-Contains -Output $manualOwnerRecoveryResult.Output -Pattern "repairAction: open_owner_recovery_plan"
 
         $postCloseoutStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-post-closeout.txt"
         @"

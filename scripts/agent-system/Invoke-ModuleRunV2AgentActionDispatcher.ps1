@@ -250,7 +250,7 @@ try {
     Write-Output "runnerDecision: $runnerDecision"
     Write-Output "runnerNextAction: $runnerNextAction"
 
-    if ($runnerExitCode -ne 0 -and $runnerDecision -notin @("stop_for_hard_block", "stop_for_manual_decision", "stop_for_human_handoff", "iteration_limit_reached")) {
+    if ($runnerExitCode -ne 0 -and $runnerDecision -notin @("stop_for_hard_block", "stop_for_manual_decision", "stop_for_human_handoff", "manual_required_owner_recovery", "iteration_limit_reached")) {
         Write-AgentActionResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "runner failed without a recognized stop decision" -ExitCode 1
     }
 
@@ -303,6 +303,9 @@ try {
         }
         "stop_for_manual_decision" {
             Write-AgentActionResult -Decision "manual_required" -Action "request_manual_decision" -Reason "runner requires a manual decision" -ExitCode 1
+        }
+        "manual_required_owner_recovery" {
+            Write-AgentActionResult -Decision "manual_required" -Action "request_manual_decision" -Reason "runner requires explicit owner recovery before the automation lane can continue" -ExitCode 1
         }
         "stop_for_human_handoff" {
             Write-AgentActionResult -Decision "manual_required" -Action "request_human_handoff" -Reason "runner requires human handoff" -ExitCode 1

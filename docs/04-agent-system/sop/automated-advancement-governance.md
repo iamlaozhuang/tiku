@@ -160,6 +160,8 @@ The runner may automatically continue only through these already-gated actions:
 - leave the repository alone when `exit_active_owner_present` or an active lease owns the lane;
 - run stopped-automation hygiene cleanup when startup returns `cleanup_stale_artifacts`;
 - rerun startup after successful cleanup;
+- route `manual_required_owner_recovery` to a human owner-recovery decision when a stale dirty active run is protected by
+  `safeToAdopt: false`;
 - route `closeout_recovery` to the bounded closeout recovery path only when there is an actionable closeout recovery
   transaction;
 - treat `no_executable_task` as a quiet idle state when the current task is already closed and no pending task exists;
@@ -192,7 +194,9 @@ The gate consumes `startupDecision` and emits `recoverySelfRepairDecision` plus 
   `repairAction: confirm_post_closeout_checkpoint`.
 - `continue_without_repair`: startup can proceed without a repair step.
 - `exit_active_owner_present`: another active owner or lease owns the lane; scheduled automation exits quietly.
-- `manual_required`: recovery requires a human decision.
+- `manual_required`: recovery requires a human decision, including stale dirty active-owner worktrees protected by
+  `safeToAdopt: false`; the repair action is `open_owner_recovery_plan`, and the mechanism must not adopt, clean,
+  commit, or overwrite the owner worktree.
 - `stop_for_hard_block`: the state is unsafe or blocked.
 
 The gate is decision-only by default. `cleanup_stale_artifacts` is not a reason to stop indefinitely; it is routed to the
@@ -242,9 +246,9 @@ It emits `autodriveAcceptanceDecision`:
   guardian-first.
 - `stop_for_hard_block`: a required layer, safety boundary, or probe is missing or unsafe.
 
-The gate checks these layers without executing business implementation: startup readiness, recovery self-repair, agent
-action dispatch, serial executor, parallel coordinator, local capability gate, Codex thread bridge, approved closeout,
-post-closeout state reconciliation, and branch hygiene. It also verifies that recoverable cleanup routes through
+The gate checks these layers without executing business implementation: startup readiness, validation surface readiness,
+recovery self-repair, agent action dispatch, serial executor, parallel coordinator, local capability gate, Codex thread
+bridge, approved closeout, post-closeout state reconciliation, and branch hygiene. It also verifies that recoverable cleanup routes through
 `repairAction`, provider calls remain blocked without task-specific approval, thread launch remains a bridge output
 rather than a script-level thread-tool call, and local diagnostics can run without taking run-registry ownership.
 
@@ -570,6 +574,7 @@ Automation must stop when the startup gate returns:
 - `startupDecision: stop_existing_run_active`;
 - `startupDecision: stop_for_hard_block`;
 - `startupDecision: stop_for_manual_decision`;
+- `startupDecision: manual_required_owner_recovery`;
 - `startupDecision: no_executable_task`.
 
 The startup gate does not create threads, write handoffs, delete worktrees, delete branches, or modify source files. It
@@ -599,6 +604,9 @@ recoverable only when it is under the configured automation worktree root and `g
 automation worktrees are routed by the registry:
 
 - fresh `status: active` heartbeat -> `exit_active_owner_present`;
+- stale `status: active`, dirty worktree, and `safeToAdopt: false` -> run the read-only validation-surface classifier and
+  return `manual_required_owner_recovery` when evidence shows validation-surface mismatch, unrelated baseline failure, or
+  pending closeout transaction state;
 - `status: recoverable|stopped|abandoned`, `safeToAdopt: true`, and existing redacted handoff ->
   `adopt_recoverable_run`;
 - `status: recoverable|stopped|abandoned` without an adoptable handoff -> `open_recovery_plan`;

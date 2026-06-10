@@ -293,6 +293,14 @@ runnerNextAction: leave_active_owner_alone
     }
     Assert-Contains -Output $activeOwnerOutput -Pattern "agentAction: idle_active_owner_present"
 
+    $ownerRecoveryRunner = Write-RunnerOutput -Root $smokeRoot -Name "owner-recovery" -Content @"
+runnerDecision: manual_required_owner_recovery
+runnerNextAction: request_owner_recovery
+"@
+    Invoke-ExpectFailure -ExpectedPattern "agentAction: request_manual_decision" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dispatcherScriptPath -RunnerOutputPath $ownerRecoveryRunner -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath
+    } | Out-Null
+
     $recoverableSeedRunner = Write-RunnerOutput -Root $smokeRoot -Name "recoverable-seed" -Content @"
 runnerDecision: adopt_recoverable_run
 runnerNextAction: agent_adopt_recoverable_run

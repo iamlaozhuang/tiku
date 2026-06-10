@@ -24,7 +24,7 @@ canonicalStateFiles:
     role: navigation index for mechanism facts
   - id: autodrive-control-schema
     path: docs/04-agent-system/state/autodrive-control-schema.yaml
-    role: durable schema for Module Run v2 autodrive policy, local capabilities, closeout, registry lifecycle, parallel batch, and evidence minimums
+    role: durable schema for Module Run v2 autodrive policy, local capabilities, validation surface, closeout, registry lifecycle, parallel batch, and evidence minimums
   - id: advanced-edition-code-stage-seeding-plan
     path: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
     role: planned Phase 65 code-stage queue seeding boundary
@@ -120,7 +120,12 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
     decisionOutput: recoverySelfRepairDecision
-    role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, recovery plan, post-closeout checkpoint confirmation, quiet idle, or quiet active-owner exit
+    role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, owner recovery planning, recovery plan, post-closeout checkpoint confirmation, quiet idle, or quiet active-owner exit
+  - id: module-run-v2-validation-surface-readiness
+    path: scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
+    decisionOutput: validationSurfaceDecision
+    role: read-only classifier for focused validation satisfaction, unrelated baseline failures, closeout transaction state, and safeToAdopt=false owner recovery boundaries
   - id: module-run-v2-post-closeout-state-reconcile
     path: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
@@ -140,7 +145,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
     decisionOutput: autodriveAcceptanceDecision
-    role: local acceptance gate for the guardian-first autodrive control loop, including startup, recovery, dispatcher, serial, parallel, capability, thread bridge, and approved closeout boundaries
+    role: local acceptance gate for the guardian-first autodrive control loop, including startup, recovery, validation surface, dispatcher, serial, parallel, capability, thread bridge, and approved closeout boundaries
   - id: module-run-v2-autopilot-orchestrator
     path: scripts/agent-system/Invoke-ModuleRunV2Autopilot.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2Autopilot.Smoke.ps1
@@ -155,7 +160,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
     decisionOutput: startupDecision
-    role: single scheduler startup gate for lease, state, queue, worktree hygiene, local tooling readiness, branch hygiene advisories, run registry state, and blocked gate anchors
+    role: single scheduler startup gate for lease, state, queue, worktree hygiene, validation surface owner recovery, local tooling readiness, branch hygiene advisories, run registry state, and blocked gate anchors
   - id: module-run-v2-parallel-readiness
     path: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ParallelReadiness.Smoke.ps1

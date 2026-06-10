@@ -381,6 +381,13 @@ agentActionTask: current-task
     }
     Assert-Contains -Output $idleResult.Output -Pattern "serialExecutorDecision: idle"
 
+    $manualResult = Invoke-SerialExecutor -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath -Action "request_manual_decision"
+    if ($manualResult.ExitCode -eq 0) {
+        throw "Manual-decision fixture unexpectedly passed.`n$($manualResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $manualResult.Output -Pattern "serialExecutorDecision: manual_required"
+    Assert-Contains -Output $manualResult.Output -Pattern "serialExecutorAction: request_manual_decision"
+
     Write-Output "Module Run v2 serial autodrive executor smoke passed"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {

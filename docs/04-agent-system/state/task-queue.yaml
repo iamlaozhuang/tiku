@@ -7748,3 +7748,76 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-deferred-cleanup-continuation.md
     status: done
     retryCount: 0
+
+  - id: module-run-v2-validation-closeout-recovery-hardening
+    title: Module Run v2 Validation Closeout Recovery Hardening
+    phase: module-run-v2-validation-closeout-recovery-hardening
+    sourceStory: user-approved-2026-06-10-validation-closeout-recovery-hardening
+    dependencies:
+      - module-run-v2-deferred-cleanup-continuation
+    taskPlanPolicy: required_before_edit
+    humanApproval: User approved executing the mechanism-only serial T0-T8 repair plan so validation-surface mismatch, unrelated broad baseline failures, pending closeout transactions, and stale dirty active owners are classified deterministically without weakening safeToAdopt=false ownership protection.
+    taskKind: mechanism_repair
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
+      - scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - startup_readiness
+      - validation_surface
+      - closeout_recovery
+      - registry_lifecycle
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
+    status: done
+    retryCount: 0

@@ -410,6 +410,73 @@ Cost Calibration Gate remains blocked
                 -SkipLeaseCheck
         }
 
+        @"
+schemaVersion: 1
+tasks:
+  - id: module-run-v2-autopilot-maturity-hardening
+    status: in_progress
+    taskKind: implementation
+    moduleRunVersion: 2
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+        New-Item -ItemType Directory -Path (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\evidence"), (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\audits-reviews") -Force | Out-Null
+        @"
+result: pass
+Batch 101:
+RED: focused validation failed before implementation.
+GREEN: focused unit tests passed, 2 files / 5 tests.
+npm.cmd run lint: pass
+npm.cmd run typecheck: pass
+git diff --check: pass
+npm.cmd run test -- --run focused: failed
+Broad validation failed because unrelated existing failures were fresh-validation-runner timeouts and phase-8 mistake_book DATABASE_URL requirement.
+localFullLoopGate: L4
+blocked remainder: high-risk work remains separately gated.
+threadRolloverGate: continue current thread.
+nextModuleRunCandidate: batch-102.
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\evidence\2026-06-08-module-run-v2-autopilot-maturity-hardening.md") -Encoding UTF8
+        @"
+Review status: PENDING
+"@ | Set-Content -LiteralPath (Join-Path -Path $dirtyOwnerPath -ChildPath "docs\05-execution-logs\audits-reviews\2026-06-08-module-run-v2-autopilot-maturity-hardening.md") -Encoding UTF8
+        @"
+{
+  "runId": "expired-active-run",
+  "automationId": "tiku-module-run-v2-autopilot-2",
+  "threadRole": "interactive",
+  "taskId": "module-run-v2-autopilot-maturity-hardening",
+  "branch": "codex/dirty-owner-smoke",
+  "worktreePath": "$($dirtyOwnerPath.Replace("\", "\\"))",
+  "status": "active",
+  "heartbeatAtUtc": "2026-06-09T00:00:00Z",
+  "phase": "readiness",
+  "changedFiles": ["handoff.txt"],
+  "lastSafeCheckpoint": "unattended readiness started",
+  "nextRecommendedAction": "continue current task after gates pass",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $activeRunPath -Encoding UTF8
+
+        Invoke-ExpectFailure -ExpectedPattern "startupDecision: manual_required_owner_recovery" -Command {
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -AutomationWorktreeRoot $dirtyWorktreeRoot `
+                -RunRegistryRoot $runRegistryRoot `
+                -AllowProtectedBranch `
+                -SkipLeaseCheck `
+                -ActiveRunHeartbeatMinutes 30
+        }
+
         $adoptHandoffPath = Join-Path -Path $handoffRoot -ChildPath "adoptable.md"
         Set-Content -LiteralPath $adoptHandoffPath -Value "task:`nstatus: stopped`nadoption allowed: yes" -Encoding UTF8
         @"

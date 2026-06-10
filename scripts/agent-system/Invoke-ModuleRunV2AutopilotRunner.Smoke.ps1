@@ -250,6 +250,101 @@ tasks:
     Assert-Contains -Output $pendingOutput -Pattern "runnerDecision: prepare_next_task"
     Assert-Contains -Output $pendingOutput -Pattern "runnerNextTask: runner-next"
 
+    $ownerRecoveryRepo = Join-Path -Path $fixtureRoot -ChildPath "owner-recovery-repo"
+    $ownerRecoveryWorktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "owner-recovery-worktrees"
+    $ownerRecoveryRunRoot = Join-Path -Path $fixtureRoot -ChildPath "owner-recovery-runs"
+    New-Item -ItemType Directory -Path $ownerRecoveryWorktreeRoot, $ownerRecoveryRunRoot -Force | Out-Null
+    $ownerRecoverySha = Initialize-SmokeRepo -Path $ownerRecoveryRepo
+    $ownerRecoveryDirtyPath = Join-Path -Path $ownerRecoveryWorktreeRoot -ChildPath "dirty-owner"
+    & git -C $ownerRecoveryRepo worktree add -b codex/runner-owner-recovery-smoke $ownerRecoveryDirtyPath $ownerRecoverySha | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create runner owner-recovery dirty worktree fixture."
+    }
+    Set-Content -LiteralPath (Join-Path -Path $ownerRecoveryDirtyPath -ChildPath "owner-recovery.txt") -Value "dirty owner recovery" -Encoding UTF8
+    New-Item -ItemType Directory -Path (Join-Path -Path $ownerRecoveryDirtyPath -ChildPath "docs/05-execution-logs/evidence"), (Join-Path -Path $ownerRecoveryDirtyPath -ChildPath "docs/05-execution-logs/audits-reviews") -Force | Out-Null
+    @"
+result: pass
+Batch 101:
+RED: focused validator failed before implementation.
+GREEN: focused unit tests passed, 2 files / 5 tests.
+npm.cmd run lint: pass
+npm.cmd run typecheck: pass
+git diff --check: pass
+npm.cmd run test -- --run focused: failed
+Broad validation failed because unrelated existing failures were fresh-validation-runner timeouts and phase-8 mistake_book DATABASE_URL requirement.
+localFullLoopGate: L4
+blocked remainder: high-risk work remains separately gated.
+threadRolloverGate: continue current thread.
+nextModuleRunCandidate: batch-102.
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath (Join-Path -Path $ownerRecoveryDirtyPath -ChildPath "docs/05-execution-logs/evidence/runner-owner-recovery.md") -Encoding UTF8
+    Set-Content -LiteralPath (Join-Path -Path $ownerRecoveryDirtyPath -ChildPath "docs/05-execution-logs/audits-reviews/runner-owner-recovery.md") -Value "Review status: PENDING" -Encoding UTF8
+    $ownerRecoveryProjectStatePath = Join-Path -Path $ownerRecoveryRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $ownerRecoveryQueuePath = Join-Path -Path $ownerRecoveryRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $ownerRecoveryMatrixPath = Join-Path -Path $ownerRecoveryRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    Write-SmokeMatrix -Path $ownerRecoveryMatrixPath
+    Write-SmokeProjectState -Path $ownerRecoveryProjectStatePath -TaskId "runner-owner-recovery" -Sha $ownerRecoverySha
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-owner-recovery
+    status: in_progress
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-owner-recovery.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-owner-recovery.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-owner-recovery.md
+"@ | Set-Content -LiteralPath $ownerRecoveryQueuePath -Encoding UTF8
+    @"
+{
+  "runId": "runner-owner-recovery",
+  "automationId": "tiku-module-run-v2-autopilot-2",
+  "threadRole": "interactive",
+  "taskId": "runner-owner-recovery",
+  "branch": "codex/runner-owner-recovery-smoke",
+  "worktreePath": "$($ownerRecoveryDirtyPath.Replace("\", "\\"))",
+  "status": "active",
+  "heartbeatAtUtc": "2026-06-09T00:00:00Z",
+  "phase": "readiness",
+  "changedFiles": ["owner-recovery.txt"],
+  "lastSafeCheckpoint": "unattended readiness started",
+  "nextRecommendedAction": "continue current task after gates pass",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath (Join-Path -Path $ownerRecoveryRunRoot -ChildPath "runner-owner-recovery.json") -Encoding UTF8
+
+    Push-Location -LiteralPath $ownerRecoveryRepo
+    try {
+        $ownerRecoveryOutput = @(
+            & $runnerPath `
+                -TaskId "runner-owner-recovery" `
+                -ProjectStatePath $ownerRecoveryProjectStatePath `
+                -QueuePath $ownerRecoveryQueuePath `
+                -MatrixPath $ownerRecoveryMatrixPath `
+                -AutomationWorktreeRoot $ownerRecoveryWorktreeRoot `
+                -RunRegistryRoot $ownerRecoveryRunRoot `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "owner-recovery-handoffs") `
+                -MaxSteps 2
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $ownerRecoveryOutput -Pattern "startupDecision: manual_required_owner_recovery"
+    Assert-Contains -Output $ownerRecoveryOutput -Pattern "runnerDecision: manual_required_owner_recovery"
+    Assert-Contains -Output $ownerRecoveryOutput -Pattern "runnerNextAction: request_owner_recovery"
+
     $seedProposalRepo = Join-Path -Path $fixtureRoot -ChildPath "seed-proposal-repo"
     $seedProposalSha = Initialize-SmokeRepo -Path $seedProposalRepo
     $seedProposalProjectStatePath = Join-Path -Path $seedProposalRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
