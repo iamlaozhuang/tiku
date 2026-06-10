@@ -68,7 +68,7 @@ automation:
     autoSeedSelfReviewScriptPath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
     leasePath: "%USERPROFILE%\\.codex\\tiku\\automation-run-lease.json"
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
-    codexAutomationId: tiku-module-run-v2-autopilot
+    codexAutomationId: tiku-module-run-v2-autopilot-2
     codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
     codexAutomationExecutionEnvironment: worktree

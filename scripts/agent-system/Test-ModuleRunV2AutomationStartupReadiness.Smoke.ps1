@@ -382,7 +382,7 @@ Cost Calibration Gate remains blocked
         @"
 {
   "runId": "active-run",
-  "automationId": "tiku-module-run-v2-autopilot",
+  "automationId": "tiku-module-run-v2-autopilot-2",
   "threadRole": "interactive",
   "taskId": "module-run-v2-automation-handoff-contract-hardening",
   "branch": "codex/dirty-owner-smoke",
@@ -415,7 +415,7 @@ Cost Calibration Gate remains blocked
         @"
 {
   "runId": "adoptable-run",
-  "automationId": "tiku-module-run-v2-autopilot",
+  "automationId": "tiku-module-run-v2-autopilot-2",
   "threadRole": "recovery",
   "taskId": "module-run-v2-automation-handoff-contract-hardening",
   "branch": "codex/dirty-owner-smoke",

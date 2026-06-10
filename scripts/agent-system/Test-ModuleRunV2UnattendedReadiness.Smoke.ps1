@@ -51,7 +51,9 @@ $currentBranch = ((& git branch --show-current) -join "").Trim()
 $isProtectedBranch = $currentBranch -eq "master" -or $currentBranch -eq "main"
 
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-unattended-readiness-" + [guid]::NewGuid().ToString("N"))
+$previousUserProfile = $env:USERPROFILE
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
+$env:USERPROFILE = $fixtureRoot
 
 try {
     $taskId = "module-run-v2-unattended-readiness-smoke"
@@ -74,7 +76,9 @@ currentTask:
 
     @"
 schemaVersion: 1
+
 tasks:
+
   - id: $taskId
     status: in_progress
     taskKind: implementation
@@ -92,6 +96,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
+
   - id: $blockedTaskId
     status: in_progress
     taskKind: implementation
@@ -136,7 +141,11 @@ tasks:
             throw "Expected unattended readiness to write a run registry heartbeat."
         }
         $registryText = Get-Content -LiteralPath $registryFiles[0].FullName -Raw
-        if ($registryText -notmatch '"status":\s*"active"' -or $registryText -notmatch '"taskId":\s*"module-run-v2-unattended-readiness-smoke"') {
+        if (
+            $registryText -notmatch '"automationId":\s*"tiku-module-run-v2-autopilot-2"' -or
+            $registryText -notmatch '"status":\s*"active"' -or
+            $registryText -notmatch '"taskId":\s*"module-run-v2-unattended-readiness-smoke"'
+        ) {
             throw "Expected run registry heartbeat to record active task state."
         }
 
@@ -158,6 +167,53 @@ tasks:
         if ($registryCountAfterNoWrite -ne $registryCountBeforeNoWrite) {
             throw "Expected -NoWrite unattended readiness to avoid writing a run registry heartbeat."
         }
+
+        $pendingTaskId = "module-run-v2-unattended-readiness-pending-claim"
+        $pendingProjectStatePath = Join-Path -Path $fixtureRoot -ChildPath "pending-project-state.yaml"
+        $pendingQueuePath = Join-Path -Path $fixtureRoot -ChildPath "pending-task-queue.yaml"
+        @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $masterSha
+  lastKnownOriginMasterSha: $originMasterSha
+currentTask:
+  id: $pendingTaskId
+"@ | Set-Content -LiteralPath $pendingProjectStatePath -Encoding UTF8
+
+        @"
+schemaVersion: 1
+
+tasks:
+
+  - id: $pendingTaskId
+    status: pending
+    taskKind: implementation
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - package.json
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/module-run-v2-unattended-readiness-pending-claim.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/module-run-v2-unattended-readiness-pending-claim.md
+"@ | Set-Content -LiteralPath $pendingQueuePath -Encoding UTF8
+
+        $pendingClaimOutput = @(
+            & $scriptPath `
+                -TaskId $pendingTaskId `
+                -ProjectStatePath $pendingProjectStatePath `
+                -QueuePath $pendingQueuePath `
+                -ChangedFiles "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1" `
+                -RunRegistryRoot $runRegistryRoot `
+                -SkipRemoteAheadCheck `
+                -NoWrite
+        )
+        Assert-Contains -Output $pendingClaimOutput -Pattern "OK_EVIDENCE_PATH_DECLARED"
+        Assert-Contains -Output $pendingClaimOutput -Pattern "OK_AUDIT_PATH_DECLARED"
+        Assert-Contains -Output $pendingClaimOutput -Pattern "unattendedStopDecision: continue"
     }
 
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_PROTECTED_BRANCH master" -Command {
@@ -548,6 +604,7 @@ tasks:
     Assert-Contains -Output $structuredPolicyOutput -Pattern "OK_APPROVED_CLOSEOUT_DIRTY_WORKTREE"
     Assert-Contains -Output $structuredPolicyOutput -Pattern "approvedCloseoutContinuation: enabled"
 } finally {
+    $env:USERPROFILE = $previousUserProfile
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
     }

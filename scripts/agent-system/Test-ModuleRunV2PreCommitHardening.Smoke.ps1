@@ -126,13 +126,27 @@ Cost Calibration Gate remains blocked
     } finally {
         Pop-Location
     }
-    Assert-Contains -Output $seedScopeOutput -Pattern "preCommitScopeMode: seed_transaction"
-    Assert-Contains -Output $seedScopeOutput -Pattern "OK_SCOPE docs/04-agent-system/state/task-queue.yaml"
+Assert-Contains -Output $seedScopeOutput -Pattern "preCommitScopeMode: seed_transaction"
+Assert-Contains -Output $seedScopeOutput -Pattern "OK_SCOPE docs/04-agent-system/state/task-queue.yaml"
 } finally {
     if (Test-Path -LiteralPath $seedFixtureRoot) {
         Remove-Item -LiteralPath $seedFixtureRoot -Recurse -Force
     }
 }
+
+$mechanicScopeOutput = @(
+    & $scriptPath -ChangedFiles @(
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-mechanic-unattended-readiness-lines.md",
+        "docs/05-execution-logs/evidence/2026-06-10-module-run-v2-mechanic-unattended-readiness-lines.md",
+        "docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-mechanic-unattended-readiness-lines.md",
+        "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1",
+        "scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1"
+    )
+)
+Assert-Contains -Output $mechanicScopeOutput -Pattern "preCommitScopeMode: mechanic_repair"
+Assert-Contains -Output $mechanicScopeOutput -Pattern "OK_SCOPE scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1"
+Assert-Contains -Output $mechanicScopeOutput -Pattern "OK_SCOPE docs/05-execution-logs/evidence/2026-06-10-module-run-v2-mechanic-unattended-readiness-lines.md"
 
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-commit-hardening-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null

@@ -15,6 +15,7 @@ param(
     [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
 
     [Parameter(Mandatory = $false)]
+    [AllowEmptyString()]
     [string[]]$ChangedFiles = @(),
 
     [Parameter(Mandatory = $false)]
@@ -63,7 +64,7 @@ function Add-Finding {
 
 function Get-TaskBlock {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Lines,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines,
         [Parameter(Mandatory = $true)][string]$Id
     )
 
@@ -92,7 +93,7 @@ function Get-TaskBlock {
 
 function Get-ScalarValue {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Block,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
         [Parameter(Mandatory = $true)][string]$Key
     )
 
@@ -107,7 +108,7 @@ function Get-ScalarValue {
 
 function Get-ListValues {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Block,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
         [Parameter(Mandatory = $true)][string]$Key
     )
 
@@ -161,7 +162,7 @@ function Test-CloseoutAuthorizationText {
 }
 
 function Test-StructuredCloseoutPolicy {
-    param([Parameter(Mandatory = $true)][string[]]$TaskBlock)
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock)
 
     $taskText = ($TaskBlock -join "`n")
     if ($taskText -notmatch "(?im)^\s+closeoutPolicy:\s*$") {
@@ -181,7 +182,7 @@ function Test-StructuredCloseoutPolicy {
 
 function Test-ApprovedCloseoutContinuation {
     param(
-        [Parameter(Mandatory = $true)][string[]]$TaskBlock,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
         [Parameter(Mandatory = $false)][AllowEmptyString()][string]$Statement = ""
     )
 
@@ -198,7 +199,7 @@ function Test-ApprovedCloseoutContinuation {
 }
 
 function Get-CurrentTaskId {
-    param([Parameter(Mandatory = $true)][string[]]$Lines)
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
 
     $insideCurrentTask = $false
     foreach ($line in $Lines) {
@@ -221,7 +222,7 @@ function Get-CurrentTaskId {
 
 function Get-ProjectScalar {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Lines,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines,
         [Parameter(Mandatory = $true)][string]$Key
     )
 
@@ -260,10 +261,14 @@ function Test-PathPattern {
 function Get-MatchingPattern {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][string[]]$Patterns
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Patterns
     )
 
     foreach ($pattern in $Patterns) {
+        if ([string]::IsNullOrWhiteSpace($pattern)) {
+            continue
+        }
+
         if (Test-PathPattern -Path $Path -Pattern $pattern) {
             return $pattern
         }
@@ -273,7 +278,7 @@ function Get-MatchingPattern {
 }
 
 function Expand-FileInputs {
-    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$Files)
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
 
     $expandedFiles = New-Object System.Collections.Generic.List[string]
     foreach ($fileInput in $Files) {
@@ -289,7 +294,7 @@ function Expand-FileInputs {
 }
 
 function Get-ChangedFilesForScan {
-    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$ExplicitFiles)
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ExplicitFiles)
 
     $expandedExplicitFiles = @(Expand-FileInputs -Files $ExplicitFiles)
     if ($expandedExplicitFiles.Count -gt 0) {
@@ -388,7 +393,7 @@ function Write-RunRegistryHeartbeat {
     $registryPath = Join-Path -Path $Root -ChildPath "$worktreeHash.json"
     $runRegistry = [ordered]@{
         runId = $worktreeHash
-        automationId = "tiku-module-run-v2-autopilot"
+        automationId = "tiku-module-run-v2-autopilot-2"
         threadRole = "interactive"
         taskId = $TaskId
         branch = $Branch
@@ -563,8 +568,22 @@ try {
         Add-Finding "HARD_BLOCK_UNATTENDED_TASK_STATUS $TaskId status=$taskStatus"
     }
 
-    Test-RequiredPath -Path $evidencePath -MissingCode "HARD_BLOCK_MISSING_EVIDENCE" -OkCode "OK_EVIDENCE_PATH"
-    Test-RequiredPath -Path $auditReviewPath -MissingCode "HARD_BLOCK_MISSING_AUDIT" -OkCode "OK_AUDIT_PATH"
+    if ($taskStatus -eq "pending") {
+        if ([string]::IsNullOrWhiteSpace($evidencePath)) {
+            Add-Finding "HARD_BLOCK_MISSING_EVIDENCE_PATH"
+        } else {
+            Write-Output "OK_EVIDENCE_PATH_DECLARED $evidencePath"
+        }
+
+        if ([string]::IsNullOrWhiteSpace($auditReviewPath)) {
+            Add-Finding "HARD_BLOCK_MISSING_AUDIT_PATH"
+        } else {
+            Write-Output "OK_AUDIT_PATH_DECLARED $auditReviewPath"
+        }
+    } else {
+        Test-RequiredPath -Path $evidencePath -MissingCode "HARD_BLOCK_MISSING_EVIDENCE" -OkCode "OK_EVIDENCE_PATH"
+        Test-RequiredPath -Path $auditReviewPath -MissingCode "HARD_BLOCK_MISSING_AUDIT" -OkCode "OK_AUDIT_PATH"
+    }
 
     if ($validationCommands.Count -eq 0) {
         Add-Finding "HARD_BLOCK_MISSING_VALIDATION_COMMANDS"

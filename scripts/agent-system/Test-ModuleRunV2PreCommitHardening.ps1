@@ -281,6 +281,79 @@ function Test-SeedTransactionAnchors {
     }
 }
 
+function Test-MechanicRepairFileSet {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Files
+    )
+
+    if ($Files.Count -eq 0) {
+        return $false
+    }
+
+    $normalizedFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $mechanicLogFiles = @(
+        $normalizedFiles | Where-Object {
+            $_ -match "^docs/05-execution-logs/(task-plans|evidence|audits-reviews)/\d{4}-\d{2}-\d{2}-module-run-v2-mechanic-[a-z0-9-]+\.md$"
+        }
+    )
+    if ($mechanicLogFiles.Count -eq 0) {
+        return $false
+    }
+
+    foreach ($file in $normalizedFiles) {
+        $isAllowedMechanicFile = $file -like "scripts/agent-system/*.ps1" `
+            -or $file -eq "docs/04-agent-system/state/project-state.yaml" `
+            -or $file -eq "docs/04-agent-system/state/autodrive-control-schema.yaml" `
+            -or $file -eq "docs/04-agent-system/state/mechanism-source-of-truth-index.yaml" `
+            -or $file -like "docs/04-agent-system/sop/*.md" `
+            -or $file -match "^docs/05-execution-logs/(task-plans|evidence|audits-reviews)/\d{4}-\d{2}-\d{2}-module-run-v2-mechanic-[a-z0-9-]+\.md$"
+
+        if (-not $isAllowedMechanicFile) {
+            return $false
+        }
+    }
+
+    return $true
+}
+
+function Test-MechanicRepairAnchors {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files
+    )
+
+    $normalizedFiles = @($Files | ForEach-Object { ConvertTo-NormalizedPath -Path $_ })
+    $evidenceFile = [string]($normalizedFiles | Where-Object { $_ -like "docs/05-execution-logs/evidence/*-module-run-v2-mechanic-*.md" } | Select-Object -First 1)
+    $auditFile = [string]($normalizedFiles | Where-Object { $_ -like "docs/05-execution-logs/audits-reviews/*-module-run-v2-mechanic-*.md" } | Select-Object -First 1)
+
+    foreach ($mechanicLogFile in @($evidenceFile, $auditFile)) {
+        if ([string]::IsNullOrWhiteSpace($mechanicLogFile)) {
+            Add-Finding "HARD_BLOCK_MECHANIC_REPAIR_MISSING_LOG_FILE"
+            continue
+        }
+
+        $fullPath = Resolve-ScanPath -RepositoryRoot $RepositoryRoot -Path $mechanicLogFile
+        if (-not (Test-Path -LiteralPath $fullPath)) {
+            Add-Finding "HARD_BLOCK_MECHANIC_REPAIR_LOG_FILE_MISSING $mechanicLogFile"
+            continue
+        }
+
+        $content = Get-Content -LiteralPath $fullPath -Raw
+        if ($content -notmatch "tiku-module-run-v2-autopilot-2") {
+            Add-Finding "HARD_BLOCK_MECHANIC_REPAIR_MISSING_AUTOPILOT_ID $mechanicLogFile"
+        }
+        if ($content -notmatch "tiku-module-run-v2-mechanic-2") {
+            Add-Finding "HARD_BLOCK_MECHANIC_REPAIR_MISSING_MECHANIC_ID $mechanicLogFile"
+        }
+        if ($content -notmatch "Cost Calibration Gate remains blocked") {
+            Add-Finding "HARD_BLOCK_MECHANIC_REPAIR_MISSING_COST_GATE_ANCHOR $mechanicLogFile"
+        }
+    }
+}
+
 function Test-TextFile {
     param(
         [Parameter(Mandatory = $true)]
@@ -434,8 +507,9 @@ $queueLines = @(Get-Content -Path $QueuePath)
 $matrixContent = Get-Content -Path $MatrixPath -Raw
 $filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
 $isSeedTransactionScope = Test-SeedTransactionFileSet -Files $filesToScan
+$isMechanicRepairScope = (-not $isSeedTransactionScope) -and (Test-MechanicRepairFileSet -Files $filesToScan)
 
-if (-not $isSeedTransactionScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
+if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
@@ -445,6 +519,34 @@ if ($isSeedTransactionScope) {
         "docs/04-agent-system/state/task-queue.yaml",
         "docs/05-execution-logs/evidence/*-module-run-v2-auto-seed-*.md",
         "docs/05-execution-logs/audits-reviews/*-module-run-v2-auto-seed-*.md"
+    )
+    $blockedFiles = @(
+        ".env.local",
+        ".env.example",
+        "package.json",
+        "pnpm-lock.yaml",
+        "package-lock.yaml",
+        "package-lock.json",
+        "src/**",
+        "tests/**",
+        "e2e/**",
+        "src/db/schema/**",
+        "drizzle/**",
+        "materials/**",
+        "paper_assets/**",
+        "docs/01-requirements/stories/**"
+    )
+} elseif ($isMechanicRepairScope) {
+    $TaskId = "module-run-v2-mechanic-repair"
+    $allowedFiles = @(
+        "scripts/agent-system/*.ps1",
+        "docs/04-agent-system/state/project-state.yaml",
+        "docs/04-agent-system/state/autodrive-control-schema.yaml",
+        "docs/04-agent-system/state/mechanism-source-of-truth-index.yaml",
+        "docs/04-agent-system/sop/*.md",
+        "docs/05-execution-logs/task-plans/*-module-run-v2-mechanic-*.md",
+        "docs/05-execution-logs/evidence/*-module-run-v2-mechanic-*.md",
+        "docs/05-execution-logs/audits-reviews/*-module-run-v2-mechanic-*.md"
     )
     $blockedFiles = @(
         ".env.local",
@@ -473,7 +575,7 @@ if ($isSeedTransactionScope) {
 }
 
 Write-Output "taskId: $TaskId"
-Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } else { "task" })"
+Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } else { "task" })"
 Write-Output "filesToScan: $($filesToScan.Count)"
 
 Write-Section -Title "Module Run v2 Anchors"
@@ -497,6 +599,8 @@ if ($SkipScopeScan) {
 } else {
     if ($isSeedTransactionScope) {
         Test-SeedTransactionAnchors -RepositoryRoot $repositoryRoot -Files $filesToScan
+    } elseif ($isMechanicRepairScope) {
+        Test-MechanicRepairAnchors -RepositoryRoot $repositoryRoot -Files $filesToScan
     }
 
     foreach ($changedFile in $filesToScan) {
