@@ -8513,5 +8513,5 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-closeout-reconcile-and-posture-cleanup
     evidencePath: docs/05-execution-logs/evidence/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
-    status: in_progress
+    status: ready_for_closeout
     retryCount: 0

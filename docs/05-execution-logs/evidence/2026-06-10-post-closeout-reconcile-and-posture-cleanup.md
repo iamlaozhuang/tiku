@@ -32,11 +32,11 @@ GREEN: recorded.
 - `npm.cmd run lint` passed.
 - `npm.cmd run typecheck` passed.
 - `git diff --check` passed.
-- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-closeout-reconcile-and-posture-cleanup` initially failed until exact validation and commit evidence anchors were recorded.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-closeout-reconcile-and-posture-cleanup` initially failed until exact validation and commit evidence anchors were recorded, then passed.
 
 ## Commit
 
-Commit: local implementation commit to be recorded before approved closeout; approved closeout script will write the final accepted ancestor checkpoint.
+Commit: `5933075171968cca84fc46ea2de4e9d9fb23326e`; approved closeout script will write the final accepted ancestor checkpoint.
 
 ## localFullLoopGate
 
