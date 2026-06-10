@@ -244,6 +244,7 @@ try {
         Add-Content -LiteralPath "docs/05-execution-logs/evidence/clean-ahead-smoke.md" -Value "clean ahead branch work committed"
         & git add "docs/05-execution-logs/evidence/clean-ahead-smoke.md"
         & git commit -m "docs(smoke): commit clean ahead work" | Out-Null
+        $cleanAheadWorkSha = ((& git rev-parse HEAD) -join "").Trim()
 
         $cleanStatus = @(& git status --porcelain)
         if ($cleanStatus.Count -ne 0) {
@@ -264,6 +265,16 @@ try {
         Assert-Contains -Output $cleanAheadOutput -Pattern "mergeTarget: master"
         Assert-Contains -Output $cleanAheadOutput -Pattern "pushTarget: origin/master"
         Assert-Contains -Output $cleanAheadOutput -Pattern "branchCleanup: deleted codex/module-run-v2-clean-ahead-closeout-smoke"
+
+        $cleanAheadProjectStateAfter = Get-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Raw
+        if ($cleanAheadProjectStateAfter -notmatch "commitSha:\s*$([regex]::Escape($cleanAheadWorkSha))") {
+            throw "Expected approved closeout to write currentTask.commitSha to the pre-closeout branch HEAD $cleanAheadWorkSha."
+        }
+
+        & git merge-base --is-ancestor $cleanAheadWorkSha master
+        if ($LASTEXITCODE -ne 0) {
+            throw "Expected clean ahead work SHA to be accepted as a master ancestor after approved closeout."
+        }
     } finally {
         Pop-Location
     }

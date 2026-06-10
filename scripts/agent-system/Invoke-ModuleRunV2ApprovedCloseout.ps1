@@ -344,7 +344,8 @@ function Update-QueueStatus {
 function Update-ProjectStateCloseout {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][string]$TargetTaskId
+        [Parameter(Mandatory = $true)][string]$TargetTaskId,
+        [Parameter(Mandatory = $true)][string]$CommitSha
     )
 
     $lines = @(Get-Content -LiteralPath $Path)
@@ -372,6 +373,11 @@ function Update-ProjectStateCloseout {
 
         if ($insideCurrentTask -and $currentTaskId -eq $TargetTaskId -and $lines[$index] -match "^\s+status:\s*.+$") {
             $lines[$index] = "  status: closed"
+            continue
+        }
+
+        if ($insideCurrentTask -and $currentTaskId -eq $TargetTaskId -and $lines[$index] -match "^\s+commitSha:\s*.+$") {
+            $lines[$index] = "  commitSha: $CommitSha"
         }
     }
 
@@ -461,8 +467,9 @@ if ($LASTEXITCODE -ne 0) {
     throw "Pre-push readiness failed."
 }
 
+$preCloseoutCommitSha = ((& git rev-parse HEAD) -join "").Trim()
 Update-QueueStatus -Path $QueuePath -TargetTaskId $TaskId -Status "closed"
-Update-ProjectStateCloseout -Path $ProjectStatePath -TargetTaskId $TaskId
+Update-ProjectStateCloseout -Path $ProjectStatePath -TargetTaskId $TaskId -CommitSha $preCloseoutCommitSha
 
 $postStateChangedFiles = @(Get-ChangedFiles)
 foreach ($changedFile in $postStateChangedFiles) {

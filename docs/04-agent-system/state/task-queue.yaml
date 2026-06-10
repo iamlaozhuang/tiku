@@ -8387,3 +8387,131 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-autopilot-loop-hardening.md
     status: closed
     retryCount: 0
+
+  - id: post-closeout-reconcile-and-posture-cleanup
+    title: Post-closeout reconcile and posture cleanup
+    phase: post-closeout-reconcile-and-posture-cleanup
+    sourceStory: user-approved-2026-06-10-post-closeout-reconcile-and-posture-cleanup
+    dependencies:
+      - module-run-v2-autopilot-loop-hardening
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User requested a serial governed task combination to repair the post-closeout reconcile hard stop, park D:\tiku to
+      clean detached origin/master, re-run stopped automation hygiene for the a4e6 orphan cleanup status, and close out
+      through the existing local commit, fast-forward merge, push, short-branch cleanup, and worktree parking mechanism.
+      High-risk capability gates remain blocked.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - continue_task
+        - run_validation
+        - write_evidence
+        - local_commit
+        - run_approved_closeout
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: mechanism_repair
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - docs/05-execution-logs/task-plans/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+      - docs/05-execution-logs/evidence/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+      - docs/05-execution-logs/audits-reviews/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+      - docs/05-execution-logs/evidence/2026-06-10-module-run-v2-autopilot-loop-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - post_closeout_reconcile
+      - hygiene
+      - local_posture
+      - evidence_integrity
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1 -TaskId post-closeout-reconcile-and-posture-cleanup
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 -AllowProtectedBranch -SkipLeaseCheck -SkipWorktreeHygieneCheck
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1 -SummaryOnly
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-closeout-reconcile-and-posture-cleanup
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1 -TaskId post-closeout-reconcile-and-posture-cleanup
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 -AllowProtectedBranch -SkipLeaseCheck -SkipWorktreeHygieneCheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2BranchHygiene.ps1 -SummaryOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId post-closeout-reconcile-and-posture-cleanup
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+    status: in_progress
+    retryCount: 0

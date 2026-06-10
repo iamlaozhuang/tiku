@@ -57,7 +57,7 @@ Broad gates:
 
 ## Commit
 
-Commit: `ada10f2c2519990ae9164416775084a14daebcf5`.
+Commit: implementation commit `496edb47717854407d19fd7d15fd3b9e35e87db4`; closeout checkpoint `270827981598d409cc48c68d58c23aae559c0d59`.
 
 ## localFullLoopGate
 

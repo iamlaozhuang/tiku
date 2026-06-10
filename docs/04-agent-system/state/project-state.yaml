@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-autopilot-loop-hardening
-updatedAt: "2026-06-10T11:07:04-07:00"
+  currentPhase: post-closeout-reconcile-and-posture-cleanup
+updatedAt: "2026-06-10T11:18:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -202,17 +202,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
-  lastKnownOriginMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
+  lastKnownMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
+  lastKnownOriginMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
 currentTask:
-  id: module-run-v2-autopilot-loop-hardening
-  status: closed
-  sourceStory: user-approved-2026-06-10-autopilot-loop-hardening
-  planPath: docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-autopilot-loop-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-autopilot-loop-hardening.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-autopilot-loop-hardening.md
-  branch: codex/module-run-v2-autopilot-loop-hardening
-  commitSha: ada10f2c2519990ae9164416775084a14daebcf5
+  id: post-closeout-reconcile-and-posture-cleanup
+  status: in_progress
+  sourceStory: user-approved-2026-06-10-post-closeout-reconcile-and-posture-cleanup
+  planPath: docs/05-execution-logs/task-plans/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+  branch: codex/post-closeout-reconcile-and-posture-cleanup
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
