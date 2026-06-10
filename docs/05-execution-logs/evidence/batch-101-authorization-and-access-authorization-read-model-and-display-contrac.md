@@ -69,6 +69,19 @@ Fresh owner-recovery validation after closeout approval:
 - `git diff --check` pass.
 - First `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 ...` run blocked only on missing batch commit evidence before the local task commit.
 - Final `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 ...` run passed after commit evidence was recorded.
+- After rebase onto the mechanism-hardened `origin/master`, the task queue records `validationCommandLifecycle` so the
+  auto-seed readiness command remains a `pre_edit` gate and closeout validation uses only `post_edit` plus `closeout`
+  commands.
+
+## Post-Rebase Validation
+
+After rebasing onto `origin/master`, post-edit and closeout validation passed:
+
+- `npm.cmd run lint` pass.
+- `npm.cmd run typecheck` pass.
+- `npm.cmd run test:unit -- src/server/mappers/effective-authorization-mapper.test.ts src/server/services/effective-authorization-service.test.ts src/server/services/effective-authorization-route.test.ts` pass: 3 files, 7 tests.
+- `git diff --check` pass.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 ...` pass with `validationLifecycleMode: phase_filtered`.
 
 ## Local Validation Level
 
