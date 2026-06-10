@@ -184,6 +184,7 @@ function New-SeedTaskBlock {
         - active_owner_present
     capabilities:
       localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
       projectResourceRead: task_approval_required
       providerKey: env_destination_confirmation_required
       providerCall: blocked_without_task_approval

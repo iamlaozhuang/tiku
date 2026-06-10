@@ -49,6 +49,7 @@ tasks:
   - id: default-task
     capabilities:
       localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
       projectResourceRead: task_approval_required
       providerKey: env_destination_confirmation_required
       providerCall: blocked_without_task_approval
@@ -57,6 +58,7 @@ tasks:
   - id: approved-task
     capabilities:
       localDockerDatabase: approved_local_dev_only
+      destructiveLocalDockerDatabase: approved_destructive_local_dev_only
       projectResourceRead: approved_read_only_redacted
       providerKey: approved_confirmed_local_destination
       providerCall: approved_redacted_local_validation
@@ -65,6 +67,7 @@ tasks:
   - id: unsafe-task
     capabilities:
       localDockerDatabase: unsafe
+      destructiveLocalDockerDatabase: blocked_without_task_approval
       projectResourceRead: task_approval_required
       providerKey: env_destination_confirmation_required
       providerCall: blocked_without_task_approval
@@ -147,6 +150,47 @@ tasks:
         throw "Expected approved provider call capability to pass readiness"
     }
     Assert-Contains -Output $providerCallReadyResult.Output -Pattern "provider_call_redacted_local_validation_ready_no_execution"
+
+    $schemaMigrationReadyResult = Invoke-Gate -ScriptArguments @(
+        "-TaskId", "approved-task",
+        "-QueuePath", $queuePath,
+        "-ProjectStatePath", $projectStatePath,
+        "-Capability", "schemaMigration",
+        "-Intent", "use_capability"
+    )
+    if ($schemaMigrationReadyResult.ExitCode -ne 0) {
+        throw "Expected approved schema migration capability to pass readiness"
+    }
+    Assert-Contains -Output $schemaMigrationReadyResult.Output -Pattern "localCapabilityDecision: capability_ready"
+    Assert-Contains -Output $schemaMigrationReadyResult.Output -Pattern "adapterAction: schema_migration_plan_ready_no_execution"
+    Assert-Contains -Output $schemaMigrationReadyResult.Output -Pattern "blockedAdapterAction: destructive_data_operation"
+
+    $destructiveDbManualResult = Invoke-Gate -ScriptArguments @(
+        "-TaskId", "default-task",
+        "-QueuePath", $queuePath,
+        "-ProjectStatePath", $projectStatePath,
+        "-Capability", "destructiveLocalDockerDatabase",
+        "-Intent", "use_capability"
+    )
+    if ($destructiveDbManualResult.ExitCode -eq 0) {
+        throw "Expected missing destructive DB approval to fail"
+    }
+    Assert-Contains -Output $destructiveDbManualResult.Output -Pattern "localCapabilityDecision: manual_required"
+    Assert-Contains -Output $destructiveDbManualResult.Output -Pattern "destructive_local_db_task_approval_required"
+
+    $destructiveDbReadyResult = Invoke-Gate -ScriptArguments @(
+        "-TaskId", "approved-task",
+        "-QueuePath", $queuePath,
+        "-ProjectStatePath", $projectStatePath,
+        "-Capability", "destructiveLocalDockerDatabase",
+        "-Intent", "use_capability"
+    )
+    if ($destructiveDbReadyResult.ExitCode -ne 0) {
+        throw "Expected approved destructive local Docker DB capability to pass readiness"
+    }
+    Assert-Contains -Output $destructiveDbReadyResult.Output -Pattern "localCapabilityDecision: capability_ready"
+    Assert-Contains -Output $destructiveDbReadyResult.Output -Pattern "adapterAction: destructive_local_dev_db_adapter_ready_no_execution"
+    Assert-Contains -Output $destructiveDbReadyResult.Output -Pattern "blockedAdapterAction: staging_prod_connection"
 
     $costResult = Invoke-Gate -ScriptArguments @(
         "-TaskId", "approved-task",

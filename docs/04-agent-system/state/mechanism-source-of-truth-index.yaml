@@ -9,7 +9,7 @@ mode:
 canonicalStateFiles:
   - id: project-state
     path: docs/04-agent-system/state/project-state.yaml
-    role: current phase, automation pointers, current task, handoff, standing unattended local closeout approval
+    role: current phase, automation pointers, current task, handoff, standing unattended local closeout approval, DB capability approvals
   - id: task-queue
     path: docs/04-agent-system/state/task-queue.yaml
     role: active queue and recent recovery window
@@ -24,7 +24,7 @@ canonicalStateFiles:
     role: navigation index for mechanism facts
   - id: autodrive-control-schema
     path: docs/04-agent-system/state/autodrive-control-schema.yaml
-    role: durable schema for Module Run v2 autodrive policy, local capabilities, validation surface, standing local closeout approval, closeout, registry lifecycle, parallel batch, and evidence minimums
+    role: durable schema for Module Run v2 autodrive policy, local capabilities, schema/migration approval, destructive local Docker DB task approval, standing local closeout approval, closeout, registry lifecycle, parallel batch, and evidence minimums
   - id: advanced-edition-code-stage-seeding-plan
     path: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
     role: planned Phase 65 code-stage queue seeding boundary
@@ -115,7 +115,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
     decisionOutput: localCapabilityDecision
-    role: classifies local Docker DB, project resource read, provider key destination, provider call, schema migration, and Cost Calibration Gate capability readiness without executing those capabilities
+    role: classifies local Docker DB, destructive local Docker DB, project resource read, provider key destination, provider call, schema migration, and Cost Calibration Gate capability readiness without executing those capabilities
   - id: module-run-v2-recovery-self-repair
     path: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1

@@ -156,6 +156,19 @@ capabilities:
         - schema_migration
         - destructive_data_operation
         - staging_prod_connection
+    destructiveLocalDockerDatabase:
+      default: blocked_without_task_approval
+      approvedValue: approved_destructive_local_dev_only
+      requiredTaskEvidence:
+        - operation_kind
+        - local_docker_dev_target_alias
+        - backup_snapshot_or_disposable_db_rationale
+        - rollback_or_recovery_statement
+        - redacted_evidence_plan
+      blockedActions:
+        - staging_prod_connection
+        - database_url_evidence
+        - unscoped_destructive_operation
     projectResourceRead:
       default: task_approval_required
       approvedValue: approved_read_only_redacted
@@ -253,6 +266,64 @@ standingUnattendedLocalCloseoutApproval:
     - force_push
     - cost_calibration_gate
   executionRule: The standing approval may be materialized only into auto-seeded low-risk implementation task closeoutPolicy during the seed transaction. It is not a general approval for mechanism repairs, manual tasks, PRs, force pushes, high-risk capabilities, or protected-branch editing outside approved closeout scripts.
+standingLocalSchemaMigrationApproval:
+  statePath: docs/04-agent-system/state/project-state.yaml
+  durableKey: automation.unattendedControl.standingLocalSchemaMigrationApproval
+  requiredStatus: approved
+  approvedTaskCapabilityValue: approved_migration_plan
+  allowedLocalActions:
+    - edit_src_db_schema
+    - edit_drizzle_migration_files
+    - generate_migration
+    - run_local_dev_migrate
+    - run_schema_validation
+  requiredGates:
+    - Test-ModuleRunV2LocalCapabilityGate schemaMigration use_capability
+    - scoped allowedFiles and blockedFiles
+    - migration plan
+    - rollback_or_recovery_statement
+    - redacted evidence
+  blockedWithoutFreshTaskApproval:
+    - destructive_database_operation
+    - drizzle_kit_push
+    - staging_prod_connection
+    - env_secret
+    - provider_call
+    - dependency_package_lockfile_change
+    - deploy
+    - payment
+    - external_service
+    - cost_calibration_gate
+  executionRule: Standing schema/migration approval may be consumed only by a scoped task that explicitly records schemaMigration approved_migration_plan and passes the local capability gate. It does not approve destructive DB work, drizzle-kit push, env/secret access, staging/prod/cloud connections, dependency changes, or deployment.
+taskScopedDestructiveLocalDockerDbApproval:
+  statePath: docs/04-agent-system/state/project-state.yaml
+  durableKey: automation.unattendedControl.taskScopedDestructiveLocalDockerDbApproval
+  requiredStatus: task_specific_enabled
+  approvedTaskCapabilityValue: approved_destructive_local_dev_only
+  allowedOperationKinds:
+    - drop
+    - truncate
+    - reset
+    - delete_test_data
+    - repair_migration_table
+  requiredGates:
+    - Test-ModuleRunV2LocalCapabilityGate destructiveLocalDockerDatabase use_capability
+    - Test-ModuleRunV2LocalCapabilityGate localDockerDatabase use_capability
+    - explicit task-specific approval
+    - local Docker dev target confirmation
+    - backup_snapshot_or_disposable_db_rationale
+    - rollback_or_recovery_statement
+    - redacted evidence
+  blockedWithoutFreshTaskApproval:
+    - staging_prod_connection
+    - env_secret
+    - provider_call
+    - dependency_package_lockfile_change
+    - deploy
+    - payment
+    - external_service
+    - cost_calibration_gate
+  executionRule: This enables a governed task-specific destructive local Docker DB approval path only. It is not a global standing destructive DB approval and never approves staging/prod/cloud database operations or evidence containing database URLs or row data.
 postCloseoutState:
   repositoryShaSemantics:
     allowedValues:
@@ -377,5 +448,7 @@ forbiddenClaims:
   - This schema does not approve local Docker database operations without task approval.
   - This schema does not approve env or secret writes.
   - This schema does not approve provider calls.
-  - This schema does not approve dependency, schema, migration, deploy, PR, force push, or Cost Calibration Gate execution.
+  - This schema approves schema/migration only through standingLocalSchemaMigrationApproval plus task-scoped approved_migration_plan and capability gates.
+  - This schema approves destructive local Docker DB only through taskScopedDestructiveLocalDockerDbApproval plus task-scoped approved_destructive_local_dev_only and capability gates.
+  - This schema does not approve dependency, deploy, PR, force push, staging/prod/cloud DB, env/secret, provider, or Cost Calibration Gate execution.
   - This schema approves push only through task-scoped closeoutPolicy materialized from standingUnattendedLocalCloseoutApproval or fresh task-specific approval, after all readiness and pre-push gates pass.

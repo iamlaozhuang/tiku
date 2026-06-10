@@ -129,6 +129,7 @@ try {
         - active_owner_present
     capabilities:
       localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
       projectResourceRead: task_approval_required
       providerKey: env_destination_confirmation_required
       providerCall: blocked_without_task_approval
@@ -165,6 +166,22 @@ try {
     }
     Assert-Contains -Output $fullOutput -Pattern "autodriveSchemaDecision: can_autodrive"
     Assert-Contains -Output $fullOutput -Pattern "validationLifecycleCommandCount: 2"
+
+    $approvedDbCapabilityTaskBlock = $fullTaskBlock `
+        -replace "destructiveLocalDockerDatabase: blocked_without_task_approval", "destructiveLocalDockerDatabase: approved_destructive_local_dev_only" `
+        -replace "schemaMigration: blocked_without_task_approval", "schemaMigration: approved_migration_plan"
+    $approvedDbCapabilityFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $approvedDbCapabilityTaskBlock
+    $approvedDbCapabilityOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $approvedDbCapabilityFiles.StatePath -QueuePath $approvedDbCapabilityFiles.QueuePath -SchemaPath $approvedDbCapabilityFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Approved DB capability schema fixture failed unexpectedly.`n$($approvedDbCapabilityOutput -join "`n")"
+    }
+    Assert-Contains -Output $approvedDbCapabilityOutput -Pattern "autodriveSchemaDecision: can_autodrive"
+
+    $unsafeDestructiveDbTaskBlock = $fullTaskBlock -replace "destructiveLocalDockerDatabase: blocked_without_task_approval", "destructiveLocalDockerDatabase: unsafe"
+    $unsafeDestructiveDbFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $unsafeDestructiveDbTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_CAPABILITY_DESTRUCTIVE_LOCAL_DOCKER_DATABASE" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $unsafeDestructiveDbFiles.StatePath -QueuePath $unsafeDestructiveDbFiles.QueuePath -SchemaPath $unsafeDestructiveDbFiles.SchemaPath
+    } | Out-Null
 
     $closedTaskBlock = $fullTaskBlock -replace "status: in_progress", "status: closed"
     $closedFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $closedTaskBlock

@@ -8129,3 +8129,123 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
     status: closed
     retryCount: 0
+
+  - id: module-run-v2-db-capability-governance-approval
+    title: Module Run v2 DB Capability Governance Approval
+    phase: module-run-v2-db-capability-governance-approval
+    sourceStory: user-approved-2026-06-10-db-capability-governance-approval
+    dependencies:
+      - module-run-v2-standing-unattended-local-closeout-approval
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User requested continuing governance landing by splitting DB-related authorization into two governed approvals: standing local schema/migration approval, and task-scoped destructive local Docker DB approval. No real DB, migration execution, schema change, env/secret, provider, deploy, dependency, PR, force push, or Cost Calibration Gate action is approved by this mechanism task.
+    closeoutPolicy:
+      localCommit: not_approved
+      fastForwardMerge:
+        approved: not_approved
+        targetBranch: master
+      push:
+        approved: not_approved
+        target: origin/master
+      cleanup:
+        deleteShortBranch: not_approved
+        parkWorktree: not_approved
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - continue_task
+        - run_validation
+        - write_evidence
+        - local_commit
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: mechanism_repair
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
+      - scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-db-capability-governance-approval.md
+      - docs/05-execution-logs/evidence/2026-06-10-module-run-v2-db-capability-governance-approval.md
+      - docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-db-capability-governance-approval.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - local_capability_gate
+      - schema_migration_governance
+      - destructive_db_governance
+      - evidence_integrity
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-db-capability-governance-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-db-capability-governance-approval.md
+    status: in_progress
+    retryCount: 0

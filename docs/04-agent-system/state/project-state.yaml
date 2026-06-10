@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-standing-unattended-local-closeout-approval
-updatedAt: "2026-06-10T09:38:17-07:00"
+  currentPhase: module-run-v2-db-capability-governance-approval
+updatedAt: "2026-06-10T09:55:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -114,6 +114,71 @@ automation:
         - cost_calibration_gate
       statement: >-
         User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation, local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking, when repository readiness, validation surface, module closeout readiness, pre-push readiness, allowedFiles/blockedFiles, active-owner, lease, registry, hygiene, and remote-divergence gates all pass. High-risk capability gates remain blocked unless separately approved.
+    standingLocalSchemaMigrationApproval:
+      status: approved
+      approvedAt: "2026-06-10T09:55:00-07:00"
+      scope: local dev schema/migration/drizzle/src/db/schema work when required by a scoped Module Run v2 task
+      allowedActions:
+        - edit_src_db_schema
+        - edit_drizzle_migration_files
+        - generate_migration
+        - run_local_dev_migrate
+        - run_schema_validation
+        - write_redacted_evidence
+      requiredGates:
+        - Test-ModuleRunV2LocalCapabilityGate schemaMigration use_capability
+        - task allowedFiles includes src/db/schema/** or drizzle/**
+        - blockedFiles excludes env/secret/staging/prod/cloud/provider/deploy/payment
+        - migration plan
+        - rollback or recovery statement
+        - redacted evidence
+      blockedWithoutFreshTaskApproval:
+        - destructive_database_operation
+        - drizzle_kit_push
+        - staging_prod_connection
+        - env_secret
+        - provider_call
+        - dependency_package_lockfile_change
+        - deploy
+        - payment
+        - external_service
+        - cost_calibration_gate
+      statement: >-
+        User approves governed local schema/migration/drizzle/src/db/schema work for scoped Module Run v2 tasks when the task records approved_migration_plan, allowedFiles/blockedFiles permit the exact surfaces, local capability gate passes, rollback/recovery and redacted evidence are recorded, and staging/prod/cloud/env/provider/deploy/payment/dependency/Cost Calibration Gate remain blocked.
+    taskScopedDestructiveLocalDockerDbApproval:
+      status: task_specific_enabled
+      enabledAt: "2026-06-10T09:55:00-07:00"
+      scope: destructive operations against local Docker dev databases only, never staging/prod/cloud
+      allowedOnlyWhenTaskRecords:
+        - destructiveLocalDockerDatabase: approved_destructive_local_dev_only
+        - destructive operation kind
+        - target local Docker service or database alias without secret URL
+        - backup/snapshot or disposable-db rationale
+        - rollback/recovery statement
+        - redacted evidence plan
+      allowedOperationKinds:
+        - drop
+        - truncate
+        - reset
+        - delete_test_data
+        - repair_migration_table
+      requiredGates:
+        - Test-ModuleRunV2LocalCapabilityGate destructiveLocalDockerDatabase use_capability
+        - Test-ModuleRunV2LocalCapabilityGate localDockerDatabase use_capability
+        - explicit task-specific approval
+        - local Docker dev target confirmation
+        - no database URL or row data in evidence
+      blockedWithoutFreshTaskApproval:
+        - staging_prod_connection
+        - env_secret
+        - provider_call
+        - dependency_package_lockfile_change
+        - deploy
+        - payment
+        - external_service
+        - cost_calibration_gate
+      statement: >-
+        User enables a governed task-scoped destructive local Docker DB approval path. Destructive DB work is executable only for an explicitly scoped task against local Docker dev resources after capability gates pass and redacted evidence records the operation kind, target alias, backup/disposable rationale, and rollback/recovery boundary. It is not a global standing destructive DB approval.
     codexAutomationId: tiku-module-run-v2-autopilot-2
     codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
@@ -139,14 +204,14 @@ repository:
   lastKnownMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
   lastKnownOriginMasterSha: 7750de032c4e418670175f9bd91a90927c7f6a7a
 currentTask:
-  id: module-run-v2-standing-unattended-local-closeout-approval
-  status: closed
-  sourceStory: user-approved-2026-06-10-standing-unattended-local-closeout-approval
-  planPath: docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
-  branch: codex/standing-unattended-closeout-policy
-  commitSha: c1784b25
+  id: module-run-v2-db-capability-governance-approval
+  status: in_progress
+  sourceStory: user-approved-2026-06-10-db-capability-governance-approval
+  planPath: docs/05-execution-logs/task-plans/2026-06-10-module-run-v2-db-capability-governance-approval.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-db-capability-governance-approval.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-db-capability-governance-approval.md
+  branch: codex/db-capability-governance-approval
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

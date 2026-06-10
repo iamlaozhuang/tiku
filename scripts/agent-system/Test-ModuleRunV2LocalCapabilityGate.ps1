@@ -3,7 +3,7 @@ param(
     [string]$TaskId = "",
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet("localDockerDatabase", "projectResourceRead", "providerKey", "providerCall", "schemaMigration", "costCalibrationGate")]
+    [ValidateSet("localDockerDatabase", "destructiveLocalDockerDatabase", "projectResourceRead", "providerKey", "providerCall", "schemaMigration", "costCalibrationGate")]
     [string]$Capability,
 
     [Parameter(Mandatory = $false)]
@@ -118,6 +118,14 @@ function Get-CapabilityPolicy {
             BlockedActions = @("schema_migration", "destructive_data_operation", "staging_prod_connection")
             EvidenceRule = "local dev only; no schema, migration, destructive data, staging, or prod connection"
         }
+        destructiveLocalDockerDatabase = @{
+            DefaultState = "blocked_without_task_approval"
+            ApprovedState = "approved_destructive_local_dev_only"
+            ReadyAction = "destructive_local_dev_db_adapter_ready_no_execution"
+            ApprovalAction = "destructive_local_db_task_approval_required"
+            BlockedActions = @("staging_prod_connection", "database_url_evidence", "unscoped_destructive_operation")
+            EvidenceRule = "task-specific destructive local Docker dev DB approval, operation kind, target alias, backup/disposable rationale, rollback/recovery, and redacted evidence are required"
+        }
         projectResourceRead = @{
             DefaultState = "task_approval_required"
             ApprovedState = "approved_read_only_redacted"
@@ -145,10 +153,10 @@ function Get-CapabilityPolicy {
         schemaMigration = @{
             DefaultState = "blocked_without_task_approval"
             ApprovedState = "approved_migration_plan"
-            ReadyAction = "schema_migration_requires_separate_gate"
+            ReadyAction = "schema_migration_plan_ready_no_execution"
             ApprovalAction = "schema_migration_gate_required"
-            BlockedActions = @("schema_migration", "drizzle_push", "destructive_data_operation")
-            EvidenceRule = "separate migration plan, backup, rollback, and DB operation approval required"
+            BlockedActions = @("drizzle_push", "destructive_data_operation", "staging_prod_connection")
+            EvidenceRule = "migration plan, rollback/recovery boundary, scoped schema/drizzle files, local DB operation approval when needed, and redacted evidence are required"
         }
         costCalibrationGate = @{
             DefaultState = "blocked"
@@ -226,10 +234,6 @@ try {
 
     if ($Capability -eq "costCalibrationGate") {
         Write-CapabilityResult -Decision "stop_for_hard_block" -AdapterAction "none" -Reason "Cost Calibration Gate remains blocked by default" -ExitCode 1 -CapabilityState $capabilityState -Policy $policy
-    }
-
-    if ($Capability -eq "schemaMigration") {
-        Write-CapabilityResult -Decision "manual_required" -AdapterAction $policy.ApprovalAction -Reason "schema and migration work require a separate migration gate" -ExitCode 1 -CapabilityState $capabilityState -Policy $policy
     }
 
     if ($Intent -eq "declare_adapter") {

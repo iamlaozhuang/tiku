@@ -378,6 +378,7 @@ To make local development close more loops without weakening safety, future task
 | Capability                       | Default runner state                    | Required approval before use                                                                 |
 | -------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Local Docker database            | `task_approval_required`                | task-specific local DB validation approval, with schema/migration/destructive work separated |
+| Destructive local Docker DB      | `blocked_without_task_approval`         | task-specific local dev target, operation kind, backup/disposable rationale, rollback        |
 | Project `material`/`paper` input | `task_approval_required`                | read-only resource use approval and evidence redaction rules                                 |
 | DeepSeek API key destination     | `env_destination_confirmation_required` | confirmed local env-file destination and secret handling approval                            |
 | Real provider call               | `blocked_without_task_approval`         | provider validation approval, quota/cost statement, and redacted evidence                    |
@@ -407,10 +408,22 @@ The gate emits `localCapabilityDecision` and `adapterAction`:
 - `stop_for_hard_block`: the capability state is unsafe, unknown, or refers to a blocked gate.
 
 `localDockerDatabase` readiness does not approve schema/migration, destructive data operations, or staging/prod
-connections. `projectResourceRead` readiness does not approve recording full `paper` content, raw answer text, or
-cleartext `redeem_code`. `providerKey` readiness does not approve env/secret writes or secret output. `providerCall`
-readiness does not approve real provider calls unless the task separately records local validation approval, quota/cost
-limits, and evidence redaction rules. Cost Calibration Gate remains blocked.
+connections. `schemaMigration` readiness requires `approved_migration_plan`; it may consume
+`standingLocalSchemaMigrationApproval` only when the task explicitly scopes `src/db/schema/**` or `drizzle/**`, records a
+migration plan, rollback/recovery boundary, and redacted evidence, and keeps destructive DB, `drizzle-kit push`,
+staging/prod/cloud, env/secret, provider, dependency, deploy, payment, external-service, and Cost Calibration Gate
+blocked unless separately approved.
+
+`destructiveLocalDockerDatabase` readiness is task-scoped only. It requires
+`approved_destructive_local_dev_only`, a local Docker dev target alias, operation kind, backup/snapshot or disposable DB
+rationale, rollback/recovery statement, and redacted evidence. It must never connect to staging/prod/cloud resources,
+record database URLs, expose row data, or broaden to provider/env/deploy/payment/external-service work. This policy is
+not a global standing destructive DB approval.
+
+`projectResourceRead` readiness does not approve recording full `paper` content, raw answer text, or cleartext
+`redeem_code`. `providerKey` readiness does not approve env/secret writes or secret output. `providerCall` readiness
+does not approve real provider calls unless the task separately records local validation approval, quota/cost limits, and
+evidence redaction rules. Cost Calibration Gate remains blocked.
 
 ## Parallel Coordinator Control Point
 

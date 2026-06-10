@@ -421,6 +421,11 @@ try {
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+localDockerDatabase:\s*(task_approval_required|approved_local_dev_only)\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_LOCAL_DOCKER_DATABASE"
     }
+    if (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+destructiveLocalDockerDatabase:\s*") {
+        if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+destructiveLocalDockerDatabase:\s*(blocked_without_task_approval|approved_destructive_local_dev_only)\s*$")) {
+            Add-Finding "HARD_BLOCK_CAPABILITY_DESTRUCTIVE_LOCAL_DOCKER_DATABASE"
+        }
+    }
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+projectResourceRead:\s*(task_approval_required|approved_read_only_redacted)\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_PROJECT_RESOURCE_READ"
     }
