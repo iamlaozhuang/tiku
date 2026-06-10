@@ -146,7 +146,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
   branch: codex/standing-unattended-closeout-policy
-  commitSha: pending-local-commit
+  commitSha: c1784b25
   prUrl: null
   retryCount: 0
   lastFailurePath: null

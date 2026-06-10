@@ -60,7 +60,7 @@ performed.
 nextModuleRunCandidate: After this governance closeout, the next guarded runner cycle may use durable state to either
 seed the next low-risk Module Run v2 implementation tasks or exit idle when no executable task exists.
 
-Commit: pending-local-task-commit
+Commit: c1784b25
 
 ## Behavior Confirmed
 
