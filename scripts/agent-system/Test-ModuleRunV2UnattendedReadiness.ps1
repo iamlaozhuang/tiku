@@ -376,6 +376,16 @@ function Get-StablePathHash {
     }
 }
 
+function ConvertTo-NormalizedPath {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
+
+    return $Path.Replace("\", "/")
+}
+
 function Write-RunRegistryHeartbeat {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
@@ -395,7 +405,8 @@ function Write-RunRegistryHeartbeat {
         New-Item -ItemType Directory -Path $Root -Force | Out-Null
     }
 
-    $worktreeHash = Get-StablePathHash -Value $WorktreePath
+    $normalizedWorktreePath = ConvertTo-NormalizedPath -Path $WorktreePath
+    $worktreeHash = Get-StablePathHash -Value $normalizedWorktreePath
     $registryPath = Join-Path -Path $Root -ChildPath "$worktreeHash.json"
     $runRegistry = [ordered]@{
         runId = $worktreeHash
@@ -403,7 +414,7 @@ function Write-RunRegistryHeartbeat {
         threadRole = "interactive"
         taskId = $TaskId
         branch = $Branch
-        worktreePath = $WorktreePath
+        worktreePath = $normalizedWorktreePath
         status = "active"
         heartbeatAtUtc = ([DateTimeOffset]::UtcNow.ToString("o"))
         phase = "readiness"

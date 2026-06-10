@@ -354,6 +354,65 @@ try {
         throw "Expired active terminal registry cleanup must not remove the existing clean worktree."
     }
 
+    $supersededActiveRunPath = Join-Path -Path $runRegistryRoot -ChildPath "superseded-active.json"
+    $supersedingStoppedRunPath = Join-Path -Path $runRegistryRoot -ChildPath "superseding-stopped.json"
+    @"
+{
+  "runId": "superseded-active-run",
+  "automationId": "tiku-module-run-v2-autopilot-2",
+  "threadRole": "scheduled",
+  "taskId": "closed-terminal-task",
+  "branch": "codex/superseded-active",
+  "worktreePath": "$($activeWorktree.Replace("\", "/"))",
+  "status": "active",
+  "heartbeatAtUtc": "2026-06-08T19:59:00Z",
+  "phase": "readiness",
+  "changedFiles": [],
+  "lastSafeCheckpoint": "readiness started",
+  "nextRecommendedAction": "continue current task after gates pass",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $supersededActiveRunPath -Encoding UTF8
+    @"
+{
+  "runId": "superseding-stopped-run",
+  "automationId": "tiku-module-run-v2-autopilot-2",
+  "threadRole": "scheduled",
+  "taskId": "closed-terminal-task",
+  "branch": "codex/superseded-active",
+  "worktreePath": "$($activeWorktree.Replace("\", "\\"))",
+  "status": "stopped",
+  "heartbeatAtUtc": "2026-06-08T20:00:00Z",
+  "phase": "validation_failure",
+  "changedFiles": [
+    "docs/05-execution-logs/evidence/closed-terminal-task.md"
+  ],
+  "lastSafeCheckpoint": "terminal state finalized",
+  "nextRecommendedAction": "manual_required_owner_recovery",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null,
+  "finalizedAtUtc": "2026-06-08T20:00:00Z"
+}
+"@ | Set-Content -LiteralPath $supersedingStoppedRunPath -Encoding UTF8
+
+    $supersededAvailableOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -QueuePath $queuePath -NowUtc $now -ActiveRunHeartbeatMinutes 30)
+    Assert-Contains -Output $supersededAvailableOutput -Pattern "superseded_active_run_registry"
+    Assert-Contains -Output $supersededAvailableOutput -Pattern "runRegistryCleanupCandidate:"
+    Assert-Contains -Output $supersededAvailableOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_available"
+
+    $supersededCleanupOutput = @(& $scriptPath -LeasePath $missingLeasePath -LeaseCleanupRoot $leaseRoot -AutomationWorktreeRoot $worktreeRoot -TempRoot $tempRoot -RunRegistryRoot $runRegistryRoot -HandoffRoot $handoffRoot -QueuePath $queuePath -NowUtc $now -ActiveRunHeartbeatMinutes 30 -Cleanup)
+    Assert-Contains -Output $supersededCleanupOutput -Pattern "runRegistryCleanupAction:"
+    Assert-Contains -Output $supersededCleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_completed"
+    if (Test-Path -LiteralPath $supersededActiveRunPath) {
+        throw "Expected superseded active run registry file to be removed."
+    }
+    if (-not (Test-Path -LiteralPath $supersedingStoppedRunPath)) {
+        throw "Superseded active cleanup must not remove the newer terminal registry."
+    }
+
     $orphanWorktreeDir = Join-Path -Path $worktreeRoot -ChildPath "orphan-slot\tiku"
     New-Item -ItemType Directory -Path (Join-Path -Path $orphanWorktreeDir -ChildPath "src") | Out-Null
     Set-Content -LiteralPath (Join-Path -Path $orphanWorktreeDir -ChildPath "package.json") -Value "{ `"private`": true }" -Encoding UTF8

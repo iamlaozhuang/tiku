@@ -59,6 +59,16 @@ function ConvertTo-FullPath {
     return [System.IO.Path]::GetFullPath($Path)
 }
 
+function ConvertTo-NormalizedRegistryPath {
+    param([Parameter(Mandatory = $false)][AllowEmptyString()][string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
+
+    return ([System.IO.Path]::GetFullPath($Path)).Replace("\", "/").TrimEnd("/")
+}
+
 function Test-PathInsideRoot {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -129,6 +139,69 @@ function Test-RunRegistryHeartbeatExpired {
     } catch {
         return $false
     }
+}
+
+function Get-RunRegistryTimestamp {
+    param(
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$FinalizedAtUtc,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$HeartbeatAtUtc
+    )
+
+    $timestampText = if (-not [string]::IsNullOrWhiteSpace($FinalizedAtUtc)) { $FinalizedAtUtc } else { $HeartbeatAtUtc }
+    if ([string]::IsNullOrWhiteSpace($timestampText)) {
+        return [DateTimeOffset]::MinValue
+    }
+
+    try {
+        return [DateTimeOffset]::Parse($timestampText).ToUniversalTime()
+    } catch {
+        return [DateTimeOffset]::MinValue
+    }
+}
+
+function Test-RunRegistrySupersededByTerminal {
+    param(
+        [Parameter(Mandatory = $true)][object]$ActiveRecord,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Records
+    )
+
+    if ($ActiveRecord.Status -ne "active") {
+        return $false
+    }
+
+    $activeTaskId = [string]$ActiveRecord.TaskId
+    $activeWorktreePath = ConvertTo-NormalizedRegistryPath -Path ([string]$ActiveRecord.WorktreePath)
+    $activeTimestamp = Get-RunRegistryTimestamp -HeartbeatAtUtc ([string]$ActiveRecord.HeartbeatAtUtc)
+    if ([string]::IsNullOrWhiteSpace($activeTaskId) -or [string]::IsNullOrWhiteSpace($activeWorktreePath)) {
+        return $false
+    }
+
+    foreach ($record in $Records) {
+        if ([string]$record.Path -eq [string]$ActiveRecord.Path) {
+            continue
+        }
+
+        if ([string]$record.TaskId -ne $activeTaskId) {
+            continue
+        }
+
+        $recordStatus = [string]$record.Status
+        if ($recordStatus -notin @("stopped", "recoverable", "abandoned", "cleanup_ready")) {
+            continue
+        }
+
+        $recordWorktreePath = ConvertTo-NormalizedRegistryPath -Path ([string]$record.WorktreePath)
+        if ($recordWorktreePath -ne $activeWorktreePath) {
+            continue
+        }
+
+        $recordTimestamp = Get-RunRegistryTimestamp -FinalizedAtUtc ([string]$record.FinalizedAtUtc) -HeartbeatAtUtc ([string]$record.HeartbeatAtUtc)
+        if ($recordTimestamp -ge $activeTimestamp) {
+            return $true
+        }
+    }
+
+    return $false
 }
 
 function Add-CleanupAction {
@@ -618,6 +691,7 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
         $registryWorktreePath = [string]$registryJson.worktreePath
         $registryHeartbeatAtUtc = [string]$registryJson.heartbeatAtUtc
         $registryTaskId = [string]$registryJson.taskId
+        $registryFinalizedAtUtc = [string]$registryJson.finalizedAtUtc
         Write-Detail -Message "runRegistry: $($registryFile.FullName)"
         Write-Detail -Message "runRegistryRunId: $runId"
         Write-Detail -Message "runRegistryStatus: $runStatus"
@@ -632,6 +706,9 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
                 CleanupPolicy       = $cleanupPolicy
                 WorktreePath        = $registryWorktreePath
                 RedactedHandoffPath = $redactedHandoffPath
+                TaskId              = $registryTaskId
+                HeartbeatAtUtc      = $registryHeartbeatAtUtc
+                FinalizedAtUtc      = $registryFinalizedAtUtc
             })
 
         if ($runStatus -eq "cleanup_ready" -and $cleanupPolicy -eq "cleanup_ready") {
@@ -679,6 +756,22 @@ if (-not (Test-Path -LiteralPath $RunRegistryRoot)) {
                         Add-RunRegistryCleanupAction -RunId $runId -Path $registryFile.FullName
                     }
                 }
+            }
+        }
+    }
+
+    foreach ($runRegistryRecord in @($runRegistryRecords.ToArray())) {
+        if (-not (Test-RunRegistrySupersededByTerminal -ActiveRecord $runRegistryRecord -Records $runRegistryRecords.ToArray())) {
+            continue
+        }
+
+        Add-CleanupCandidate -Kind "superseded_active_run_registry" -Path $runRegistryRecord.Path
+        Add-RunRegistryCleanupCandidate -RunId $runRegistryRecord.RunId -Path $runRegistryRecord.Path
+
+        if ($Cleanup) {
+            Remove-SafeFile -Path $runRegistryRecord.Path -AllowedRoot $RunRegistryRoot -Kind "superseded_active_run_registry"
+            if (-not (Test-Path -LiteralPath $runRegistryRecord.Path)) {
+                Add-RunRegistryCleanupAction -RunId $runRegistryRecord.RunId -Path $runRegistryRecord.Path
             }
         }
     }

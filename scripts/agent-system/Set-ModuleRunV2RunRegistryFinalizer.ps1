@@ -148,7 +148,8 @@ if ([string]::IsNullOrWhiteSpace($TaskId)) {
 
 $fullWorktreePath = (Resolve-Path -LiteralPath $WorktreePath).Path
 $changedFiles = @(Get-GitChangedFiles -Path $fullWorktreePath)
-$runId = Get-StablePathHash -Value $fullWorktreePath
+$normalizedWorktreePath = ConvertTo-NormalizedPath -Path $fullWorktreePath
+$runId = Get-StablePathHash -Value $normalizedWorktreePath
 $registryPath = Join-Path -Path $RunRegistryRoot -ChildPath "$runId.json"
 
 $registry = [ordered]@{
@@ -157,7 +158,7 @@ $registry = [ordered]@{
     threadRole = "interactive"
     taskId = $TaskId
     branch = $Branch
-    worktreePath = (ConvertTo-NormalizedPath -Path $fullWorktreePath)
+    worktreePath = $normalizedWorktreePath
     status = $Status
     heartbeatAtUtc = ([DateTimeOffset]::UtcNow.ToString("o"))
     phase = $Phase

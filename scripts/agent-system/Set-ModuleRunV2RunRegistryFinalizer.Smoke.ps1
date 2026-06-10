@@ -29,6 +29,19 @@ function Assert-Equal {
     }
 }
 
+function Get-StablePathHash {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($Value.ToLowerInvariant())
+        $hashBytes = $sha256.ComputeHash($bytes)
+        return ([System.BitConverter]::ToString($hashBytes)).Replace("-", "").ToLowerInvariant()
+    } finally {
+        $sha256.Dispose()
+    }
+}
+
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Set-ModuleRunV2RunRegistryFinalizer.ps1"
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing run registry finalizer script: $scriptPath"
@@ -53,6 +66,28 @@ try {
     }
 
     Set-Content -LiteralPath (Join-Path -Path $repoPath -ChildPath "owner-recovery.txt") -Value "dirty owner" -Encoding UTF8
+
+    $normalizedRepoPath = $repoPath.Replace("\", "/")
+    $expectedRegistryPath = Join-Path -Path $runRegistryRoot -ChildPath "$(Get-StablePathHash -Value $normalizedRepoPath).json"
+    @"
+{
+  "runId": "$(Get-StablePathHash -Value $normalizedRepoPath)",
+  "automationId": "tiku-module-run-v2-autopilot-2",
+  "threadRole": "interactive",
+  "taskId": "batch-102",
+  "branch": "(detached HEAD)",
+  "worktreePath": "$normalizedRepoPath",
+  "status": "active",
+  "heartbeatAtUtc": "2026-06-08T19:59:00Z",
+  "phase": "readiness",
+  "changedFiles": [],
+  "lastSafeCheckpoint": "unattended readiness started",
+  "nextRecommendedAction": "continue current task after gates pass",
+  "safeToAdopt": false,
+  "cleanupPolicy": "none",
+  "redactedHandoffPath": null
+}
+"@ | Set-Content -LiteralPath $expectedRegistryPath -Encoding UTF8
 
     $dirtyOutput = @(
         & powershell.exe `
@@ -81,6 +116,10 @@ try {
     if (-not (Test-Path -LiteralPath $registryPath)) {
         throw "Finalizer did not write registry path: $registryPath"
     }
+
+    Assert-Equal -Actual $registryPath -Expected $expectedRegistryPath -Label "normalized registry path"
+    $registryFileCount = @(Get-ChildItem -LiteralPath $runRegistryRoot -Filter "*.json" -File).Count
+    Assert-Equal -Actual $registryFileCount -Expected 1 -Label "registry file count after finalizer"
 
     $dirtyRegistry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual ([string]$dirtyRegistry.status) -Expected "stopped" -Label "dirty registry status"
