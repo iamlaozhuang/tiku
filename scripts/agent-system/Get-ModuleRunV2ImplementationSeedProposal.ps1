@@ -284,6 +284,66 @@ function Test-ModuleClosureMarker {
     return $false
 }
 
+function Test-TerminalTaskStatus {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Status)
+
+    return $Status -in @("done", "closed", "pushed", "merged")
+}
+
+function Test-TargetClosureCompleted {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
+        [Parameter(Mandatory = $true)][string]$ModuleId,
+        [Parameter(Mandatory = $true)][string]$TargetClosure
+    )
+
+    foreach ($block in $TaskBlocks) {
+        $status = Get-TaskScalarValue -Block $block.Lines -Key "status"
+        if (-not (Test-TerminalTaskStatus -Status $status)) {
+            continue
+        }
+
+        $blockText = $block.Lines -join "`n"
+        $hasSeededModule = $blockText -match "(?m)^\s+seededExecutionModule:\s*$([regex]::Escape($ModuleId))\s*$"
+        $hasTargetClosure = $blockText -match "(?m)^\s+targetClosureItem:\s*$([regex]::Escape($TargetClosure))\s*$"
+        if ($hasSeededModule -and $hasTargetClosure) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-ModuleTargetClosureCompleted {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
+        [Parameter(Mandatory = $true)]$ExecutionModule
+    )
+
+    $targetClosureItems = @($ExecutionModule.TargetClosure)
+    if ($targetClosureItems.Count -eq 0) {
+        return $false
+    }
+
+    foreach ($targetClosure in $targetClosureItems) {
+        if (-not (Test-TargetClosureCompleted -TaskBlocks $TaskBlocks -ModuleId $ExecutionModule.Module -TargetClosure $targetClosure)) {
+            return $false
+        }
+    }
+
+    return $true
+}
+
+function Test-ModuleCompleted {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
+        [Parameter(Mandatory = $true)]$ExecutionModule
+    )
+
+    return (Test-ModuleClosureMarker -TaskBlocks $TaskBlocks -ModuleId $ExecutionModule.Module) -or
+        (Test-ModuleTargetClosureCompleted -TaskBlocks $TaskBlocks -ExecutionModule $ExecutionModule)
+}
+
 function Get-FirstEligibleBatchNumber {
     param([Parameter(Mandatory = $true)][string]$MatrixContent)
 
@@ -292,6 +352,25 @@ function Get-FirstEligibleBatchNumber {
     }
 
     return 101
+}
+
+function Get-NextCandidateBatchNumber {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
+        [Parameter(Mandatory = $true)][int]$MinimumBatchNumber
+    )
+
+    $highestBatchNumber = $MinimumBatchNumber - 1
+    foreach ($block in $TaskBlocks) {
+        if ($block.Id -match "^batch-(\d+)-") {
+            $batchNumber = [int]$Matches[1]
+            if ($batchNumber -gt $highestBatchNumber) {
+                $highestBatchNumber = $batchNumber
+            }
+        }
+    }
+
+    return [Math]::Max($MinimumBatchNumber, $highestBatchNumber + 1)
 }
 
 function ConvertTo-TaskSlug {
@@ -368,13 +447,22 @@ try {
 
     $selectedModule = $null
     foreach ($executionModule in $executionModules) {
-        if (Test-ModuleClosureMarker -TaskBlocks $taskBlocks -ModuleId $executionModule.Module) {
+        if (Test-ModuleCompleted -TaskBlocks $taskBlocks -ExecutionModule $executionModule) {
+            Write-Output "seedModuleAlreadyComplete: $($executionModule.Module)"
             continue
         }
 
         $dependencyBlocked = $false
         foreach ($dependency in $executionModule.DependsOn) {
-            if (-not (Test-ModuleClosureMarker -TaskBlocks $taskBlocks -ModuleId $dependency)) {
+            $dependencyModule = @($executionModules | Where-Object { $_.Module -eq $dependency } | Select-Object -First 1)
+            $dependencyComplete = $false
+            if ($dependencyModule.Count -gt 0) {
+                $dependencyComplete = Test-ModuleCompleted -TaskBlocks $taskBlocks -ExecutionModule $dependencyModule[0]
+            } else {
+                $dependencyComplete = Test-ModuleClosureMarker -TaskBlocks $taskBlocks -ModuleId $dependency
+            }
+
+            if (-not $dependencyComplete) {
                 $dependencyBlocked = $true
                 Write-Output "seedDependencyBlocked: $($executionModule.Module) waitsFor=$dependency"
                 break
@@ -391,10 +479,12 @@ try {
         Write-SeedProposalResult -Decision "no_seed_candidate" -Reason "no execution module has satisfied dependencies" -ExitCode 0
     }
 
-    $targetClosureItems = @($selectedModule.TargetClosure)
+    $targetClosureItems = @($selectedModule.TargetClosure | Where-Object {
+            -not (Test-TargetClosureCompleted -TaskBlocks $taskBlocks -ModuleId $selectedModule.Module -TargetClosure $_)
+        })
     if ($targetClosureItems.Count -eq 0) {
         Write-Output "HARD_BLOCK_SELECTED_MODULE_HAS_NO_TARGET_CLOSURE $($selectedModule.Module)"
-        Write-SeedProposalResult -Decision "stop_for_hard_block" -Reason "selected module has no target closure items" -ExitCode 1
+        Write-SeedProposalResult -Decision "stop_for_hard_block" -Reason "selected module has no remaining target closure items" -ExitCode 1
     }
 
     $sourcePlanningTask = ""
@@ -405,7 +495,7 @@ try {
         $sourcePlanningTask = $TaskId
     }
 
-    $batchNumber = Get-FirstEligibleBatchNumber -MatrixContent $matrixContent
+    $batchNumber = Get-NextCandidateBatchNumber -TaskBlocks $taskBlocks -MinimumBatchNumber (Get-FirstEligibleBatchNumber -MatrixContent $matrixContent)
     $candidateCount = [Math]::Min($MaxBatchCount, $targetClosureItems.Count)
 
     Write-Section -Title "Seed Candidate"

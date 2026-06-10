@@ -169,6 +169,13 @@ try {
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "mechanic-2" -Code "HARD_BLOCK_MISSING_PROMPT_MECHANIC_BOUNDARY"
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "on-demand" -Code "HARD_BLOCK_MISSING_PROMPT_ON_DEMAND_BOUNDARY"
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "standingUnattendedLocalCloseoutApproval" -Code "HARD_BLOCK_MISSING_PROMPT_STANDING_CLOSEOUT"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "low-risk local implementation tasks only" -Code "HARD_BLOCK_MISSING_PROMPT_LOW_RISK_LOCAL_IMPLEMENTATION_SCOPE"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "local commit" -Code "HARD_BLOCK_MISSING_PROMPT_LOCAL_COMMIT_CLOSEOUT"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "fast-forward merge to master" -Code "HARD_BLOCK_MISSING_PROMPT_FAST_FORWARD_MERGE_CLOSEOUT"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "push origin/master" -Code "HARD_BLOCK_MISSING_PROMPT_PUSH_CLOSEOUT"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "merged short-branch cleanup" -Code "HARD_BLOCK_MISSING_PROMPT_BRANCH_CLEANUP_CLOSEOUT"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "worktree parking" -Code "HARD_BLOCK_MISSING_PROMPT_WORKTREE_PARKING_CLOSEOUT"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "High-risk capability gates remain blocked" -Code "HARD_BLOCK_MISSING_PROMPT_HIGH_RISK_BLOCKED"
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "Embedded mechanic policy" -Code "HARD_BLOCK_MISSING_PROMPT_EMBEDDED_MECHANIC_POLICY"
         }
     }

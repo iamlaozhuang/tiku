@@ -694,6 +694,11 @@ Automation may:
 - mark provider, env/secret, staging/prod, deploy, payment, external-service, and Cost Calibration Gate work as blocked
   remainder.
 
+The seed proposal must treat terminal queue tasks (`done`, `closed`, `pushed`, or `merged`) that match a Module Run v2
+`seededExecutionModule` and `targetClosureItem` as already completed target closure items. It must not propose a
+duplicate task for an already terminal closure item, and when every target closure item for a module is terminal it must
+advance to the next dependency-satisfied execution module or return `no_seed_candidate`.
+
 Automation must not:
 
 - modify schema, migration, dependency, env/secret, provider configuration, deploy configuration, payment, or

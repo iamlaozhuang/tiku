@@ -102,6 +102,27 @@ try {
     Assert-Contains -Output $proposalOutput -Pattern "Cost Calibration Gate remains blocked"
 
     Add-Content -LiteralPath $fixture.QueuePath -Value @"
+  - id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: authorization read-model and display contracts
+    status: done
+  - id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: personal_auth and org_auth local summaries
+    status: closed
+"@ -Encoding UTF8
+
+    $terminalAuthorizationOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $fixture.ProjectStatePath `
+            -QueuePath $fixture.QueuePath `
+            -MatrixPath $fixture.MatrixPath
+    )
+    Assert-Contains -Output $terminalAuthorizationOutput -Pattern "seedModuleAlreadyComplete: authorization-and-access"
+    Assert-Contains -Output $terminalAuthorizationOutput -Pattern "seedModule: ai-task-and-provider"
+    Assert-Contains -Output $terminalAuthorizationOutput -Pattern "seedCandidateTask: batch-103-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract"
+
+    Add-Content -LiteralPath $fixture.QueuePath -Value @"
   - id: pending-task
     status: pending
     taskKind: implementation

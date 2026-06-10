@@ -49,7 +49,8 @@ function Write-FixtureState {
         [Parameter(Mandatory = $true)][string]$CurrentTaskStatus,
         [Parameter(Mandatory = $true)][string]$RemoteAutomationApproval,
         [Parameter(Mandatory = $false)][switch]$IncludePendingTask,
-        [Parameter(Mandatory = $false)][switch]$IncludeStaleStateWarnings
+        [Parameter(Mandatory = $false)][switch]$IncludeStaleStateWarnings,
+        [Parameter(Mandatory = $false)][switch]$IncludeCloseoutPolicy
     )
 
     $actualMasterSha = ((& git rev-parse master) -join "").Trim()
@@ -95,6 +96,22 @@ currentTask:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
 "@
     }
+    $closeoutPolicyBlock = ""
+    if ($IncludeCloseoutPolicy) {
+        $closeoutPolicyBlock = @"
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+"@
+    }
 
     @"
 schemaVersion: 1
@@ -102,6 +119,7 @@ tasks:
   - id: module-run-v2-autopilot-maturity-hardening
     status: $CurrentTaskStatus
     taskKind: implementation
+$closeoutPolicyBlock
     allowedFiles:
       - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
     blockedFiles:
@@ -152,6 +170,20 @@ terminologyAnchors:
     Assert-Contains -Output $continueOutput -Pattern "startupDecision: continue_current_task"
     Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy:"
     Assert-Contains -Output $continueOutput -Pattern "localToolingReadiness:"
+
+    Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "ready_for_closeout" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludeCloseoutPolicy
+    $readyForCloseoutOutput = @(
+        & $scriptPath `
+            -ProjectStatePath $projectStatePath `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath `
+            -AllowProtectedBranch `
+            -SkipLeaseCheck `
+            -SkipWorktreeHygieneCheck
+    )
+    Assert-Contains -Output $readyForCloseoutOutput -Pattern "startupCloseoutPolicy: structured"
+    Assert-Contains -Output $readyForCloseoutOutput -Pattern "startupDecision: closeout_recovery"
+    Assert-Contains -Output $readyForCloseoutOutput -Pattern "stopTaxonomy: closeout_pending"
 
     Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludePendingTask -IncludeStaleStateWarnings
     $pendingOutput = @(

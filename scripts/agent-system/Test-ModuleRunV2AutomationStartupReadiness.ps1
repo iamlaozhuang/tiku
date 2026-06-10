@@ -180,6 +180,25 @@ function Get-ScalarValue {
     return ""
 }
 
+function Test-StructuredCloseoutPolicy {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock)
+
+    $taskText = ($TaskBlock -join "`n")
+    if ($taskText -notmatch "(?im)^\s+closeoutPolicy:\s*$") {
+        return $false
+    }
+
+    $hasLocalCommit = $taskText -match "(?im)^\s+localCommit:\s*approved\s*$"
+    $hasMergeTarget = $taskText -match "(?im)^\s+fastForwardMerge:\s*$" -and $taskText -match "(?im)^\s+targetBranch:\s*master\s*$"
+    $hasPushTarget = $taskText -match "(?im)^\s+push:\s*$" -and $taskText -match "(?im)^\s+target:\s*origin/master\s*$"
+    $hasCleanup = $taskText -match "(?im)^\s+cleanup:\s*$" `
+        -and $taskText -match "(?im)^\s+deleteShortBranch:\s*true\s*$" `
+        -and $taskText -match "(?im)^\s+parkWorktree:\s*true\s*$"
+    $approvedCount = ([regex]::Matches($taskText, "(?im)^\s+approved:\s*true\s*$")).Count
+
+    return $hasLocalCommit -and $hasMergeTarget -and $hasPushTarget -and $hasCleanup -and $approvedCount -ge 2
+}
+
 function Get-CurrentTaskId {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
 
@@ -987,6 +1006,15 @@ try {
 
     if ($taskStatus -eq "in_progress") {
         Write-StartupResult -Decision "continue_current_task" -Reason "current task is in progress and startup gates passed" -ExitCode 0
+    }
+
+    if ($taskStatus -eq "ready_for_closeout") {
+        if (Test-StructuredCloseoutPolicy -TaskBlock $taskBlock) {
+            Write-Output "startupCloseoutPolicy: structured"
+            Write-StartupResult -Decision "closeout_recovery" -Reason "current task is ready for approved closeout" -ExitCode 0
+        }
+
+        Write-StartupResult -Decision "stop_for_manual_decision" -Reason "current task is ready_for_closeout but lacks structured closeoutPolicy" -ExitCode 1 -StopTaxonomy "approval_missing"
     }
 
     if ($pendingTaskIds.Count -gt 0) {

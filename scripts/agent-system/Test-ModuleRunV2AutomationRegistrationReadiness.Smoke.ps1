@@ -56,12 +56,16 @@ function Write-AutomationToml {
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][string]$AutomationId,
         [Parameter(Mandatory = $true)][string]$Status,
-        [Parameter(Mandatory = $false)][switch]$MissingStandingCloseoutAnchor
+        [Parameter(Mandatory = $false)][switch]$MissingStandingCloseoutAnchor,
+        [Parameter(Mandatory = $false)][switch]$MissingLowRiskScopeAnchor
     )
 
-    $prompt = "Current automation identity map tiku-module-run-v2-autopilot-2 tiku-module-run-v2-autopilot mechanic-2 on-demand Embedded mechanic policy standingUnattendedLocalCloseoutApproval"
+    $prompt = "Current automation identity map tiku-module-run-v2-autopilot-2 tiku-module-run-v2-autopilot mechanic-2 on-demand Embedded mechanic policy standingUnattendedLocalCloseoutApproval low-risk local implementation tasks only local commit fast-forward merge to master push origin/master merged short-branch cleanup worktree parking High-risk capability gates remain blocked"
     if ($MissingStandingCloseoutAnchor) {
         $prompt = $prompt.Replace(" standingUnattendedLocalCloseoutApproval", "")
+    }
+    if ($MissingLowRiskScopeAnchor) {
+        $prompt = $prompt.Replace(" low-risk local implementation tasks only", "")
     }
 
     @"
@@ -101,6 +105,9 @@ try {
 
     Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot-2" -Status "ACTIVE" -MissingStandingCloseoutAnchor
     Invoke-ExpectFailure -Command { & $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot } -ExpectedPattern "HARD_BLOCK_MISSING_PROMPT_STANDING_CLOSEOUT" | Out-Null
+
+    Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot-2" -Status "ACTIVE" -MissingLowRiskScopeAnchor
+    Invoke-ExpectFailure -Command { & $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot } -ExpectedPattern "HARD_BLOCK_MISSING_PROMPT_LOW_RISK_LOCAL_IMPLEMENTATION_SCOPE" | Out-Null
 
     Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot-2" -Status "ACTIVE"
     $mechanicRoot = Join-Path -Path $automationRoot -ChildPath "tiku-module-run-v2-mechanic-2"
