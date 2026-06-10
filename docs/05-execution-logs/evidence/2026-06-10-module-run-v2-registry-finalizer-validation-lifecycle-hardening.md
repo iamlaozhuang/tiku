@@ -65,7 +65,16 @@ Commit: b6bbff22.
 
 ## Next Autopilot Handoff
 
-Pending post-merge next-autopilot takeover proof.
+Next-autopilot takeover proof before merge/push:
+
+- `startupDecision: cleanup_stale_artifacts`
+- `runnerDecision: cleanup_available`
+- `runnerNextAction: run_stopped_automation_hygiene_cleanup`
+- `agentAction: run_hygiene_cleanup`
+- `runRegistryCount: 0`
+- `automationLeaseDecision: no_active_lease`
+
+The next expected action is cleanup of pre-existing clean stale automation worktrees through the hygiene gate. This is a governed cleanup path, not a stale active owner, dirty owner, registry mismatch, lease mismatch, or handoff mismatch.
 
 localFullLoopGate: mechanism L4 local control-loop validation.
 
