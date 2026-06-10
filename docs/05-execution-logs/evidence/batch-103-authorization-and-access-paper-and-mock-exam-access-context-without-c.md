@@ -65,7 +65,7 @@ Root cause: Batch 103 used legacy `validationCommands`, so the broad `npm.cmd ru
 
 Repair applied: added `validationCommandLifecycle` to the Batch 103 queue entry. `post_edit` now contains the scoped implementation gates; `npm.cmd run test -- --run focused` is retained as `advisory_baseline`; closeout readiness remains a separate closeout phase.
 
-Commit: `13488e0c`.
+Commit: `32a04e08`.
 
 ## Closeout Status
 
@@ -101,12 +101,19 @@ After the 2026-06-10 closeout authorization, Batch 103 was moved to `ready_for_c
 
 Local task commit:
 
-- Commit: `13488e0c`
+- Commit: `32a04e08`
 - Message: `feat(authorization): add paper mock access context summary`
 - Pre-commit hardening: pass.
 - lint-staged: pass.
 - `npm.cmd run lint`: pass.
 - `npm.cmd run typecheck`: pass.
+
+Closeout recovery note:
+
+- Initial approved closeout produced a local closeout commit, then stopped before merge because the branch was based on `76476665` while `master` was at `c11909e4`, so fast-forward merge was impossible.
+- The local short-lived branch was rebased onto `master` to restore the fast-forward-only closeout path.
+- Rebased implementation commit: `32a04e08`.
+- Rebased closeout commit before this evidence update: `872c0d30`.
 
 ## Redaction Check
 
