@@ -409,6 +409,91 @@ function Invoke-SeedSelfReview {
     return Invoke-ExternalCommand -Arguments $seedSelfReviewArgs
 }
 
+function Test-StandingAutoSeedApprovalAvailable {
+    if (-not (Test-Path -LiteralPath $ProjectStatePath)) {
+        return $false
+    }
+
+    $projectStateContent = Get-Content -LiteralPath $ProjectStatePath -Raw
+    return (
+        $projectStateContent -match "standingUnattendedLocalCloseoutApproval:\s*(?s:.*?)status:\s*approved" `
+            -and $projectStateContent -match "autoDriveLocalImplementationApproval" `
+            -and $projectStateContent -match "low-risk Module Run v2 local implementation tasks only" `
+            -and $projectStateContent -match "High-risk capability gates remain blocked"
+    )
+}
+
+function Get-RunnerSeverity {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][string]$NextAction,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$StopTaxonomy,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$SeverityOverride
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($SeverityOverride)) {
+        return $SeverityOverride
+    }
+
+    switch ($Decision) {
+        "no_executable_task" { return "idle" }
+        "exit_active_owner_present" { return "idle" }
+        "cleanup_available" { return "auto_recoverable" }
+        "seed_proposal_available" { return "approval_required" }
+        "seed_transaction_applied" { return "auto_recoverable" }
+        "stop_for_manual_decision" { return "approval_required" }
+        "manual_required_owner_recovery" { return "approval_required" }
+        "stop_for_human_handoff" { return "approval_required" }
+        "prepare_next_task" { return "auto_recoverable" }
+        "continue_current_task" { return "auto_recoverable" }
+        "closeout_recovery" { return "auto_recoverable" }
+        "adopt_recoverable_run" { return "auto_recoverable" }
+        "open_recovery_plan" { return "auto_recoverable" }
+        "prepare_parallel_workers" { return "auto_recoverable" }
+        "launch_new_thread" { return "auto_recoverable" }
+        "prepare_handoff" { return "auto_recoverable" }
+        "prepare_handoff_then_continue" { return "auto_recoverable" }
+        default {
+            if ($StopTaxonomy -eq "hard_block" -or $Decision -eq "stop_for_hard_block" -or $Decision -eq "iteration_limit_reached") {
+                return "hard_block"
+            }
+            return "advisory"
+        }
+    }
+}
+
+function Get-RunnerHumanRequired {
+    param([Parameter(Mandatory = $true)][string]$Severity)
+
+    return ($Severity -in @("approval_required", "hard_block")).ToString().ToLowerInvariant()
+}
+
+function Get-RunnerSafeToProceed {
+    param([Parameter(Mandatory = $true)][string]$Severity)
+
+    return ($Severity -in @("advisory", "auto_recoverable")).ToString().ToLowerInvariant()
+}
+
+function Get-DefaultNextCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][string]$NextAction
+    )
+
+    switch ($NextAction) {
+        "run_stopped_automation_hygiene_cleanup" { return ".\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -Cleanup" }
+        "request_auto_seed_approval" { return ".\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps 1 -AllowAutoSeed -AutoSeedApprovalStatement <autoDriveLocalImplementationApproval statement>" }
+        "idle_no_pending_task" { return "none" }
+        "leave_active_owner_alone" { return "none" }
+        default {
+            if ($Decision -eq "stop_for_hard_block") {
+                return "inspect runner reason and resolve the hard block before rerun"
+            }
+            return $NextAction
+        }
+    }
+}
+
 function Write-RunnerResult {
     param(
         [Parameter(Mandatory = $true)]
@@ -427,10 +512,46 @@ function Write-RunnerResult {
         [int]$ExitCode,
 
         [Parameter(Mandatory = $false)]
-        [string]$NextTask = ""
+        [string]$NextTask = "",
+
+        [Parameter(Mandatory = $false)]
+        [string]$SeverityOverride = "",
+
+        [Parameter(Mandatory = $false)]
+        [string]$NextCommandOverride = "",
+
+        [Parameter(Mandatory = $false)]
+        [string]$RiskIfAutoContinued = "",
+
+        [Parameter(Mandatory = $false)]
+        [string]$StateWritten = "none",
+
+        [Parameter(Mandatory = $false)]
+        [string]$NoWriteReason = "runner terminal envelope is stdout-only",
+
+        [Parameter(Mandatory = $false)]
+        [string]$ResumePointer = ""
     )
 
     $stopTaxonomy = Get-RunnerStopTaxonomy -Decision $Decision -NextAction $NextAction -Reason $Reason
+    $runnerSeverity = Get-RunnerSeverity -Decision $Decision -NextAction $NextAction -StopTaxonomy $stopTaxonomy -SeverityOverride $SeverityOverride
+    $requiresHuman = Get-RunnerHumanRequired -Severity $runnerSeverity
+    $safeToProceed = Get-RunnerSafeToProceed -Severity $runnerSeverity
+    $nextCommand = if ([string]::IsNullOrWhiteSpace($NextCommandOverride)) {
+        Get-DefaultNextCommand -Decision $Decision -NextAction $NextAction
+    } else {
+        $NextCommandOverride
+    }
+    $risk = if ([string]::IsNullOrWhiteSpace($RiskIfAutoContinued)) {
+        if ($runnerSeverity -eq "hard_block") { "unsafe or impossible to continue until the hard block is resolved" } else { "none" }
+    } else {
+        $RiskIfAutoContinued
+    }
+    $resume = if ([string]::IsNullOrWhiteSpace($ResumePointer)) {
+        "projectState=$ProjectStatePath; queue=$QueuePath"
+    } else {
+        $ResumePointer
+    }
 
     Write-Section -Title "Module Run v2 Autopilot Runner"
     Write-Output "runnerDecision: $Decision"
@@ -440,7 +561,17 @@ function Write-RunnerResult {
     }
     Write-Output "runnerStepCount: $StepCount"
     Write-Output "stopTaxonomy: $stopTaxonomy"
+    Write-Output "runnerSeverity: $runnerSeverity"
+    Write-Output "requiresHuman: $requiresHuman"
+    Write-Output "safeToProceed: $safeToProceed"
+    Write-Output "nextCommand: $nextCommand"
+    Write-Output "stateWritten: $StateWritten"
+    Write-Output "noWriteReason: $NoWriteReason"
+    Write-Output "resumePointer: $resume"
     Write-Output "reason: $Reason"
+    Write-Output "Why stopped: $Reason"
+    Write-Output "Risk if auto-continued: $risk"
+    Write-Output "Next action: $nextCommand"
     Write-Output "local Docker database: task_approval_required"
     Write-Output "project resource read: task_approval_required"
     Write-Output "DeepSeek provider key: env_destination_confirmation_required"
@@ -467,6 +598,7 @@ function Get-RunnerStopTaxonomy {
         "no_executable_task" { return "no_task" }
         "exit_active_owner_present" { return "active_owner" }
         "cleanup_available" { return "hygiene_deferred" }
+        "seed_proposal_available" { return "approval_missing" }
         "stop_for_manual_decision" { return "approval_missing" }
         "manual_required_owner_recovery" { return "active_owner" }
         "closeout_recovery" { return "closeout_pending" }
@@ -542,7 +674,19 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
         if ($seedProposalDecision -eq "proposal_available") {
             $seedModule = Get-FirstValue -Output $seedProposalResult.Output -Key "seedModule"
             if ($PlanOnly -or -not $AllowAutoSeed) {
-                Write-RunnerResult -Decision "seed_proposal_available" -NextAction "request_auto_seed_approval" -Reason "no executable task exists and a guarded seed proposal is available" -StepCount $stepIndex -ExitCode 0 -NextTask $seedModule
+                $standingAutoSeedAvailable = Test-StandingAutoSeedApprovalAvailable
+                $seedProposalSeverity = if ($standingAutoSeedAvailable -and $PlanOnly) { "auto_recoverable" } else { "approval_required" }
+                $seedProposalNextCommand = if ($standingAutoSeedAvailable) {
+                    ".\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps $MaxSteps -AllowAutoSeed -AutoSeedApprovalStatement <standingUnattendedLocalCloseoutApproval statement>"
+                } else {
+                    ".\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps $MaxSteps -AllowAutoSeed -AutoSeedApprovalStatement <autoDriveLocalImplementationApproval statement>"
+                }
+                $seedProposalRisk = if ($standingAutoSeedAvailable) {
+                    "none for PlanOnly; applying the seed writes task-queue and seed evidence only after guarded approval checks pass"
+                } else {
+                    "queue mutation requires explicit autoDriveLocalImplementationApproval"
+                }
+                Write-RunnerResult -Decision "seed_proposal_available" -NextAction "request_auto_seed_approval" -Reason "no executable task exists and a guarded seed proposal is available" -StepCount $stepIndex -ExitCode 0 -NextTask $seedModule -SeverityOverride $seedProposalSeverity -NextCommandOverride $seedProposalNextCommand -RiskIfAutoContinued $seedProposalRisk -NoWriteReason "PlanOnly or missing AllowAutoSeed prevents queue mutation" -ResumePointer "seedModule=$seedModule; projectState=$ProjectStatePath; queue=$QueuePath"
             }
 
             if ([string]::IsNullOrWhiteSpace($AutoSeedApprovalStatement) -or $AutoSeedApprovalStatement -notmatch "autoDriveLocalImplementationApproval") {

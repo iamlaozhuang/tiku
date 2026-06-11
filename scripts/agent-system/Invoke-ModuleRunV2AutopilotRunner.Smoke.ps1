@@ -17,6 +17,23 @@ function Assert-Contains {
     }
 }
 
+function Assert-NotContains {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Output,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    $matched = $Output | Where-Object { $_ -match $Pattern }
+    if ($matched.Count -gt 0) {
+        throw "Unexpected output pattern found: $Pattern`nMatched output:`n$($matched -join "`n")"
+    }
+}
+
 function Initialize-SmokeRepo {
     param(
         [Parameter(Mandatory = $true)]
@@ -398,6 +415,17 @@ tasks:
     Assert-Contains -Output $seedProposalOutput -Pattern "runnerDecision: seed_proposal_available"
     Assert-Contains -Output $seedProposalOutput -Pattern "runnerNextAction: request_auto_seed_approval"
     Assert-Contains -Output $seedProposalOutput -Pattern "seedProposalDecision: proposal_available"
+    Assert-Contains -Output $seedProposalOutput -Pattern "stopTaxonomy: approval_missing"
+    Assert-Contains -Output $seedProposalOutput -Pattern "runnerSeverity: approval_required"
+    Assert-Contains -Output $seedProposalOutput -Pattern "requiresHuman: true"
+    Assert-Contains -Output $seedProposalOutput -Pattern "safeToProceed: false"
+    Assert-Contains -Output $seedProposalOutput -Pattern "nextCommand: .*AutoSeedApprovalStatement"
+    Assert-Contains -Output $seedProposalOutput -Pattern "stateWritten: none"
+    Assert-Contains -Output $seedProposalOutput -Pattern "noWriteReason: PlanOnly or missing AllowAutoSeed prevents queue mutation"
+    Assert-Contains -Output $seedProposalOutput -Pattern "Why stopped: no executable task exists and a guarded seed proposal is available"
+    Assert-Contains -Output $seedProposalOutput -Pattern "Risk if auto-continued: queue mutation requires explicit autoDriveLocalImplementationApproval"
+    Assert-Contains -Output $seedProposalOutput -Pattern "Next action: .*AutoSeedApprovalStatement"
+    Assert-NotContains -Output $seedProposalOutput -Pattern "stopTaxonomy: hard_block"
 
     $seedApplyRepo = Join-Path -Path $fixtureRoot -ChildPath "seed-apply-repo"
     $seedApplySha = Initialize-SmokeRepo -Path $seedApplyRepo
