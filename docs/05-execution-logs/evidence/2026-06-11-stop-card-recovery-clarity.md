@@ -188,3 +188,95 @@ npm run typecheck
 Exit code: `0`
 
 Final result: stop card and recovery clarity passed targeted smoke and repository quality gates.
+
+## Post-Merge Master Verification
+
+Fast-forward merge to `master` succeeded:
+
+```text
+Updating ab6a9a56..03158285
+Fast-forward
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+```
+
+Exit code: `0`
+
+Output:
+
+```text
+Module Run v2 autopilot runner smoke passed
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+```
+
+Exit code: `0`
+
+Output:
+
+```text
+Module Run v2 agent action dispatcher smoke passed
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2StopEconomics.Smoke.ps1
+```
+
+Exit code: `0`
+
+Output:
+
+```text
+Module Run v2 stop economics smoke passed
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+```
+
+Exit code: `0`
+
+Key output:
+
+```text
+repository: branch=master; head=03158285; dirty=false
+projectStatusDecision: planned_pause_for_tuning
+projectStatusAction: keep_automation_paused_for_tuning
+Cost Calibration Gate remains blocked
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -MaxSteps 1 -AllowProtectedBranch
+```
+
+Exit code: `0`
+
+Key output:
+
+```text
+repository: branch=master; head=03158285; dirty=false
+currentTask: stop-card-recovery-clarity(closed)
+runnerDecision: planned_pause_for_tuning
+runnerNextAction: keep_automation_paused_for_tuning
+stopCardDecision: idle
+canAutoRecover: false
+blockerClass: planned_pause
+statePolicy: no_write_accounted
+Cost Calibration Gate remains blocked
+```
+
+Post-merge `git diff --check`, `npm run lint`, and `npm run typecheck` exit code: `0`.
