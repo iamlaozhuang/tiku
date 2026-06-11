@@ -10973,9 +10973,11 @@ tasks:
       - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract
     evidencePath: docs/05-execution-logs/evidence/batch-110-personal-learning-ai-local-transport-contract.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-110-personal-learning-ai-local-transport-contract.md
-    status: pending
+    status: closed
     retryCount: 0
 
   - id: batch-111-personal-learning-ai-request-context-local-contract
