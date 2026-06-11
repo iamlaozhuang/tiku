@@ -11,6 +11,8 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
 ## Current Mode
 
 - Current automation mode: `local_auto_candidate`.
+- Current local automation registration may be intentionally `PAUSED` while
+  `project-state.yaml` records `plannedPauseStatus: active`.
 - Default rhythm: queue-first, local-first, evidence-first, guardian-first.
 - Default execution shape: one focused task, one focused local commit, then an explicit closeout decision.
 - Module Run v2 may group Batches, but every Batch still needs focused evidence and a reviewable boundary.
@@ -57,6 +59,7 @@ Legacy `done`, `merged`, and `pushed` may remain in historical or archived entri
 
 Select the next task only when:
 
+- planned pause is not active;
 - status is `pending`;
 - dependencies are terminal and have evidence;
 - `taskKind`, `allowedFiles`, `blockedFiles`, `riskTypes`, and validation commands are concrete;
@@ -64,6 +67,10 @@ Select the next task only when:
 - the task does not require dependency, schema, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, PR, force push, or Cost Calibration Gate work without fresh approval.
 
 If no task qualifies, report `no-executable-task-seed-or-approve-next-task` instead of speculating.
+
+When `plannedPauseStatus: active` and `plannedPauseKeepsAutomationPaused: true` are recorded in `project-state.yaml`,
+diagnostics should report `planned_pause_for_tuning`. This is an intentional human-controlled stop state, not approval
+to resume automation, claim tasks, seed tasks, merge, push, deploy, call providers, or execute Cost Calibration Gate.
 
 ## Completion Standard
 

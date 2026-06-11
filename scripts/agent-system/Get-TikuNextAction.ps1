@@ -351,6 +351,10 @@ $currentTaskId = Get-ProjectScalar -Lines $projectStateLines -Section "currentTa
 if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
     $currentTaskId = $TaskId
 }
+$plannedPauseStatus = Get-ProjectScalar -Lines $projectStateLines -Section "automation" -Key "plannedPauseStatus"
+$plannedPauseReason = Get-ProjectScalar -Lines $projectStateLines -Section "automation" -Key "plannedPauseReason"
+$plannedPauseKeepsAutomationPaused = Get-ProjectScalar -Lines $projectStateLines -Section "automation" -Key "plannedPauseKeepsAutomationPaused"
+$plannedPauseActive = $plannedPauseStatus -eq "active" -and $plannedPauseKeepsAutomationPaused -eq "true"
 
 $currentTaskBlock = @()
 if (-not [string]::IsNullOrWhiteSpace($currentTaskId)) {
@@ -384,7 +388,13 @@ $stopReason = "none"
 
 $activeCurrentStatuses = @("claimed", "planned", "implemented", "validated", "reviewed", "ready_for_closeout", "in_progress")
 
-if ($findings.Count -gt 0) {
+if ($plannedPauseActive) {
+    $decision = "planned_pause_for_tuning"
+    $recommendedAction = "keep_automation_paused_for_tuning"
+    $stopReason = "planned_pause_for_tuning"
+    $nextTaskId = ""
+    $validationCommands = @()
+} elseif ($findings.Count -gt 0) {
     $decision = "hard_block_missing_inputs"
     $recommendedAction = "repair_missing_mechanism_inputs"
     $stopReason = Join-OrNone -Values @($findings)
@@ -416,6 +426,10 @@ $historyNotBlockingCurrentRun = $decision -notin @("hard_block_missing_inputs", 
 
 Write-Output "repository: branch=$branchName; head=$headSha; dirty=$($isDirty.ToString().ToLowerInvariant())"
 Write-Output "currentTask: $currentTaskId($currentTaskStatus)"
+Write-Output "plannedPauseStatus: $(if ([string]::IsNullOrWhiteSpace($plannedPauseStatus)) { 'none' } else { $plannedPauseStatus })"
+if (-not [string]::IsNullOrWhiteSpace($plannedPauseReason)) {
+    Write-Output "plannedPauseReason: $plannedPauseReason"
+}
 Write-Output "queueDecision: $decision"
 Write-Output "nextActionDecision: $decision"
 Write-Output "nextExecutableTask: $(if ([string]::IsNullOrWhiteSpace($nextTaskId)) { 'none' } else { $nextTaskId })"

@@ -898,6 +898,9 @@ try {
         if ($registrationResult.ExitCode -ne 0 -or $registrationDecision -eq "stop_for_hard_block") {
             Write-StartupResult -Decision "stop_for_hard_block" -Reason "automation registration readiness failed" -ExitCode 1 -StopTaxonomy $(if ([string]::IsNullOrWhiteSpace($registrationTaxonomy)) { "registration_mismatch" } else { $registrationTaxonomy })
         }
+        if ($registrationDecision -eq "planned_pause_for_tuning") {
+            Write-StartupResult -Decision "planned_pause_for_tuning" -Reason "local automation is intentionally paused for mechanism tuning" -ExitCode 0 -StopTaxonomy "planned_pause"
+        }
     }
 
     if (-not $SkipPrimaryRepositoryPostureCheck) {

@@ -37,6 +37,30 @@ An agent may start automated advancement only after it verifies:
 
 If any precondition fails, stop before editing and record the blocker in evidence or the startup report.
 
+## Planned Pause For Mechanism Tuning
+
+The user may intentionally pause the local Codex automation registration while mechanism tuning is underway. This state
+is durable only when `project-state.yaml` records:
+
+```yaml
+plannedPauseStatus: active
+plannedPauseKeepsAutomationPaused: true
+```
+
+When those fields are present and the primary local automation TOML is `PAUSED`, registration readiness may emit:
+
+```text
+automationRegistrationDecision: planned_pause_for_tuning
+```
+
+Startup and runner diagnostics must treat this as a successful stop state, not as runnable work. The correct next action
+is to keep automation paused while the approved tuning tasks run manually and serially. This state does not approve task
+claiming, queue seeding, merge, push, deployment, provider calls, env/secret work, dependency changes, schema or
+migration work, PR creation, force push, or Cost Calibration Gate execution.
+
+If the planned pause fields are absent, incomplete, or inconsistent with the local TOML, ACTIVE/PAUSED drift remains a
+hard-blocking registration mismatch.
+
 ## Automatic Task Claiming
 
 Automatic claiming may only select a task when all conditions are true:

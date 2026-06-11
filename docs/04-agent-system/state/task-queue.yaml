@@ -8861,3 +8861,76 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-runner-consumes-next-action.md
     status: closed
     retryCount: 0
+
+  - id: mechanism-planned-pause-and-tuning-mode
+    title: Mechanism planned pause and tuning mode
+    phase: mechanism-tuning-serial
+    sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
+    dependencies:
+      - mechanism-runner-consumes-next-action
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved serial mechanism tuning while keeping the local Codex automation registration paused. Each tuning
+      task may create a short-lived codex branch, update scoped mechanism scripts/docs/state/evidence, run validation,
+      commit, fast-forward merge to master, push origin/master, and clean the merged branch. This task must not resume
+      automation, claim business tasks, seed implementation tasks, modify product code, dependencies, lockfiles, schema,
+      migrations, env/secret, provider, staging/prod/cloud/deploy, payment, external service, PR, force push, or Cost
+      Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: mechanism_repair
+    allowedFiles:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+      - docs/05-execution-logs/evidence/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - planned_pause
+      - diagnostic_read_only
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps 1 -PlanOnly -SkipPrimaryRepositoryPostureCheck
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Get-TikuNextAction.ps1 scripts\agent-system\Get-TikuNextAction.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.ps1 scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 docs\04-agent-system\operating-manual.md docs\04-agent-system\sop\automated-advancement-governance.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-mechanism-planned-pause-and-tuning-mode.md docs\05-execution-logs\evidence\2026-06-11-mechanism-planned-pause-and-tuning-mode.md docs\05-execution-logs\audits-reviews\2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+    status: closed
+    retryCount: 0

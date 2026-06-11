@@ -450,6 +450,7 @@ function Get-RunnerSeverity {
 
     switch ($Decision) {
         "no_executable_task" { return "idle" }
+        "planned_pause_for_tuning" { return "idle" }
         "exit_active_owner_present" { return "idle" }
         "cleanup_available" { return "auto_recoverable" }
         "seed_proposal_available" { return "approval_required" }
@@ -609,6 +610,7 @@ function Get-RunnerStopTaxonomy {
 
     switch ($Decision) {
         "no_executable_task" { return "no_task" }
+        "planned_pause_for_tuning" { return "planned_pause" }
         "exit_active_owner_present" { return "active_owner" }
         "cleanup_available" { return "hygiene_deferred" }
         "seed_proposal_available" { return "approval_missing" }
@@ -660,6 +662,10 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
 
     if ($startupDecision -eq "exit_active_owner_present" -or $startupDecision -eq "stop_existing_run_active") {
         Write-RunnerResult -Decision "exit_active_owner_present" -NextAction "leave_active_owner_alone" -Reason "another healthy run owns the lane" -StepCount $stepIndex -ExitCode 0
+    }
+
+    if ($startupDecision -eq "planned_pause_for_tuning") {
+        Write-RunnerResult -Decision "planned_pause_for_tuning" -NextAction "keep_automation_paused_for_tuning" -Reason "local automation is intentionally paused for mechanism tuning" -StepCount $stepIndex -ExitCode 0
     }
 
     if ($startupDecision -eq "stop_for_hard_block") {

@@ -39,8 +39,18 @@ function Write-ProjectState {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][string]$AutomationId,
-        [Parameter(Mandatory = $true)][string]$Status
+        [Parameter(Mandatory = $true)][string]$Status,
+        [Parameter(Mandatory = $false)][switch]$PlannedPause
     )
+
+    $plannedPauseBlock = ""
+    if ($PlannedPause) {
+        $plannedPauseBlock = @"
+    plannedPauseStatus: active
+    plannedPauseReason: user_requested_mechanism_tuning
+    plannedPauseKeepsAutomationPaused: true
+"@
+    }
 
     @"
 schemaVersion: 1
@@ -48,6 +58,7 @@ automation:
   unattendedControl:
     codexAutomationId: $AutomationId
     codexAutomationStatus: $Status
+$plannedPauseBlock
 "@ | Set-Content -LiteralPath $Path -Encoding UTF8
 }
 
@@ -105,6 +116,14 @@ try {
     Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot" -Status "PAUSED"
     $pausedOutput = Invoke-ExpectFailure -Command { & $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot } -ExpectedPattern "HARD_BLOCK_AUTOMATION_STATUS_MISMATCH"
     Assert-Contains -Output $pausedOutput -Pattern "stopTaxonomy: registration_mismatch"
+
+    Write-ProjectState -Path $projectStatePath -AutomationId "tiku-module-run-v2-autopilot" -Status "ACTIVE" -PlannedPause
+    $plannedPauseOutput = @(& $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot)
+    Assert-Contains -Output $plannedPauseOutput -Pattern "plannedPauseForTuning: true"
+    Assert-Contains -Output $plannedPauseOutput -Pattern "automationRegistrationDecision: planned_pause_for_tuning"
+    Assert-Contains -Output $plannedPauseOutput -Pattern "stopTaxonomy: planned_pause"
+
+    Write-ProjectState -Path $projectStatePath -AutomationId "tiku-module-run-v2-autopilot" -Status "ACTIVE"
 
     Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot" -Status "ACTIVE" -MissingStandingCloseoutAnchor
     Invoke-ExpectFailure -Command { & $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot } -ExpectedPattern "HARD_BLOCK_MISSING_PROMPT_STANDING_CLOSEOUT" | Out-Null

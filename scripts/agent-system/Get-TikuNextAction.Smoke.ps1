@@ -194,6 +194,41 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $verboseOutput -Pattern '^evidenceFindingsVerbose: evidenceMissingFirst=task-legacy-done$'
     Assert-Contains -Output $verboseOutput -Pattern '^driftFindingsVerbose: queueMatrixDriftFirst=batch-999-missing-from-queue,missing-planning-task$'
 
+    $plannedPauseProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-planned-pause.yaml"
+    @"
+schemaVersion: 1
+automation:
+  unattendedControl:
+    plannedPauseStatus: active
+    plannedPauseReason: user_requested_mechanism_tuning
+    plannedPauseKeepsAutomationPaused: true
+repository:
+  lastKnownMasterSha: $sha
+  lastKnownOriginMasterSha: $sha
+currentTask:
+  id: completed-a
+  status: closed
+  commitSha: $sha
+"@ | Set-Content -LiteralPath $plannedPauseProjectStatePath -Encoding UTF8
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $plannedPauseOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $plannedPauseProjectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $plannedPauseOutput -Pattern '^plannedPauseStatus: active$'
+    Assert-Contains -Output $plannedPauseOutput -Pattern '^nextActionDecision: planned_pause_for_tuning$'
+    Assert-Contains -Output $plannedPauseOutput -Pattern '^nextExecutableTask: none$'
+    Assert-Contains -Output $plannedPauseOutput -Pattern '^recommendedAction: keep_automation_paused_for_tuning$'
+    Assert-Contains -Output $plannedPauseOutput -Pattern '^stopReason: planned_pause_for_tuning$'
+
     $afterProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $afterQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash
     $afterMatrixHash = (Get-FileHash -LiteralPath $matrixPath -Algorithm SHA256).Hash

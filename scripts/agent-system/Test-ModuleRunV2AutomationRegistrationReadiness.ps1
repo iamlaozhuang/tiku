@@ -88,6 +88,7 @@ function Test-PromptAnchor {
 }
 
 $findings = New-Object System.Collections.Generic.List[string]
+$registrationPlannedPauseForTuning = $false
 
 try {
     Write-Section -Title "Module Run v2 Automation Registration Readiness"
@@ -111,6 +112,9 @@ try {
     $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
     $projectAutomationId = Get-ProjectScalar -Lines $projectStateLines -Key "codexAutomationId"
     $projectAutomationStatus = Get-ProjectScalar -Lines $projectStateLines -Key "codexAutomationStatus"
+    $plannedPauseStatus = Get-ProjectScalar -Lines $projectStateLines -Key "plannedPauseStatus"
+    $plannedPauseReason = Get-ProjectScalar -Lines $projectStateLines -Key "plannedPauseReason"
+    $plannedPauseKeepsAutomationPaused = Get-ProjectScalar -Lines $projectStateLines -Key "plannedPauseKeepsAutomationPaused"
     if ([string]::IsNullOrWhiteSpace($ExpectedAutomationId)) {
         $ExpectedAutomationId = $projectAutomationId
     }
@@ -118,6 +122,10 @@ try {
     Write-Output "projectCodexAutomationId: $projectAutomationId"
     Write-Output "projectCodexAutomationStatus: $projectAutomationStatus"
     Write-Output "expectedAutomationId: $ExpectedAutomationId"
+    Write-Output "plannedPauseStatus: $(if ([string]::IsNullOrWhiteSpace($plannedPauseStatus)) { 'none' } else { $plannedPauseStatus })"
+    if (-not [string]::IsNullOrWhiteSpace($plannedPauseReason)) {
+        Write-Output "plannedPauseReason: $plannedPauseReason"
+    }
 
     if ([string]::IsNullOrWhiteSpace($projectAutomationId) -or [string]::IsNullOrWhiteSpace($projectAutomationStatus)) {
         Write-RegistrationResult -Decision "not_configured" -StopTaxonomy "no_task" -Reason "project-state has no codex automation registration" -ExitCode 0
@@ -168,11 +176,21 @@ try {
             if ($tomlId -ne $ExpectedAutomationId) {
                 Add-Finding "HARD_BLOCK_TOML_AUTOMATION_ID_MISMATCH expected=$ExpectedAutomationId actual=$tomlId"
             }
-            if ($tomlStatus -ne $projectAutomationStatus) {
+            $isPlannedPauseForTuning = $projectAutomationStatus -eq "ACTIVE" `
+                -and $tomlStatus -eq "PAUSED" `
+                -and $plannedPauseStatus -eq "active" `
+                -and $plannedPauseKeepsAutomationPaused -eq "true"
+
+            if ($tomlStatus -ne $projectAutomationStatus -and -not $isPlannedPauseForTuning) {
                 Add-Finding "HARD_BLOCK_AUTOMATION_STATUS_MISMATCH project=$projectAutomationStatus toml=$tomlStatus"
             }
-            if ($projectAutomationStatus -eq "ACTIVE" -and $tomlStatus -ne "ACTIVE") {
+            if ($projectAutomationStatus -eq "ACTIVE" -and $tomlStatus -ne "ACTIVE" -and -not $isPlannedPauseForTuning) {
                 Add-Finding "HARD_BLOCK_PRIMARY_AUTOMATION_NOT_ACTIVE status=$tomlStatus"
+            }
+            if ($isPlannedPauseForTuning) {
+                $registrationPlannedPauseForTuning = $true
+                Write-Output "plannedPauseForTuning: true"
+                Write-Output "plannedPauseLocalAutomationStatus: $tomlStatus"
             }
 
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "Current automation identity map" -Code "HARD_BLOCK_MISSING_PROMPT_IDENTITY_MAP"
@@ -206,6 +224,10 @@ try {
 
     if ($findings.Count -gt 0) {
         Write-RegistrationResult -Decision "stop_for_hard_block" -StopTaxonomy "registration_mismatch" -Reason "automation registration failed with $($findings.Count) finding(s)" -ExitCode 1
+    }
+
+    if ($registrationPlannedPauseForTuning) {
+        Write-RegistrationResult -Decision "planned_pause_for_tuning" -StopTaxonomy "planned_pause" -Reason "local automation is intentionally paused for mechanism tuning" -ExitCode 0
     }
 
     Write-RegistrationResult -Decision "ready" -StopTaxonomy "no_task" -Reason "automation registration is consistent" -ExitCode 0
