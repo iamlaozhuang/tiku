@@ -10078,6 +10078,7 @@ tasks:
     dependencies:
       - phase-70-advanced-ai-task-domain-implementation-planning
     taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-108-ai-task-provider-sandbox-proposal.md
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module ai-task-and-provider low-risk local implementation tasks only. standingUnattendedLocalCloseoutApproval permits low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking when all gates pass. High-risk capability gates remain blocked.
     autoDriveLocalImplementationApproval: >-
@@ -10197,5 +10198,5 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
     evidencePath: docs/05-execution-logs/evidence/batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-    status: pending
+    status: in_progress
     retryCount: 0
