@@ -232,6 +232,10 @@ The first runtime task after planning must inventory `createUnavailable...` surf
 - If no remote is configured, do not invent a repository URL.
 - When a remote exists, use draft PRs by default and do not enable auto-merge.
 - Push, PR creation, deployment, and production environment changes require explicit user approval.
+- For `master` push, explicit approval may be fresh task-specific approval or a complete task `closeoutPolicy`
+  materialized from `standingUnattendedLocalCloseoutApproval` for an eligible low-risk Module Run v2 auto-seeded
+  implementation task. This exception does not apply to PR creation/update, force push, deployment, production
+  environment changes, or any high-risk capability.
 - Local commit, local merge, remote push, PR creation, and cleanup are separate decisions. Approval for one does not automatically approve the next.
 - Before pushing `master`, fetch the remote and verify the branch is not behind `origin/master`.
 - Evidence must record every approved remote action and its result.
@@ -244,7 +248,7 @@ After a task branch is locally merged:
 2. Run task-relevant validation plus readiness and quality gates.
 3. Write closeout evidence with commit, merge, push, and cleanup status only when those facts are not already durable or
    a gate explicitly requires a file artifact.
-4. Push only when explicitly approved.
+4. Push only when explicitly approved by fresh approval or an eligible task `closeoutPolicy`.
 5. Remove the task worktree and delete the merged branch only after target-branch validation and evidence are complete.
 
 If Windows leaves a worktree directory behind because of `node_modules` or other generated residue, resolve the absolute path and confirm it is under `.worktrees/` before deleting anything.

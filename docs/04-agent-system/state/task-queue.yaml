@@ -9616,3 +9616,70 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-full-autodrive-dry-run.md
     status: closed
     retryCount: 0
+
+  - id: standing-push-approval-rule-alignment
+    title: Standing push approval rule alignment
+    phase: mechanism-tuning-serial
+    sourceStory: user-approved-2026-06-11-standing-push-rule-tuning
+    dependencies:
+      - full-autodrive-dry-run
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved implementing the recommended rule tuning after the primary automation prompt was adjusted for
+      bounded standing push approval. Scope is mechanism documentation/state/evidence alignment only, including task
+      registration required by the pre-commit scope gate. This task must not activate automation, run the runner, claim
+      implementation tasks, modify product code, dependencies, lockfiles, schema, migrations, env/secret, provider,
+      staging/prod/cloud/deploy, payment, external service, PR, force push, authorization model, unapproved e2e, or Cost
+      Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    taskKind: mechanism_governance
+    allowedFiles:
+      - AGENTS.md
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/automation-loop.md
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-standing-push-approval-rule-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-11-standing-push-approval-rule-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-standing-push-approval-rule-alignment.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - docs/01-requirements/stories/**
+    riskTypes:
+      - automation_policy
+      - push_policy
+      - task_queue
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standing-push-approval-rule-alignment
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown AGENTS.md docs\04-agent-system\operating-manual.md docs\04-agent-system\sop\automation-loop.md docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-standing-push-approval-rule-alignment.md docs\05-execution-logs\evidence\2026-06-11-standing-push-approval-rule-alignment.md docs\05-execution-logs\audits-reviews\2026-06-11-standing-push-approval-rule-alignment.md
+      - Select-String -Path AGENTS.md,docs\04-agent-system\operating-manual.md,docs\04-agent-system\sop\automation-loop.md,docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml,docs\04-agent-system\state\project-state.yaml,docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\2026-06-11-standing-push-approval-rule-alignment.md -Pattern 'standingUnattendedLocalCloseoutApproval','closeoutPolicy','push origin/master','fresh explicit approval','Cost Calibration Gate'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-standing-push-approval-rule-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-standing-push-approval-rule-alignment.md
+    status: closed
+    retryCount: 0

@@ -686,6 +686,13 @@ futureBatchPolicy:
     threadRolloverDecisionRequired: true
     nextModuleRunCandidateProposalRequiredAtCloseout: true
     pushRequiresExplicitApproval: true
+    pushExplicitApprovalIncludesMaterializedStandingCloseoutPolicy: true
+    pushApprovalPolicy: >-
+      A push to origin/master requires either fresh task-specific approval or a complete task closeoutPolicy
+      materialized from automation.unattendedControl.standingUnattendedLocalCloseoutApproval for an eligible low-risk
+      Module Run v2 auto-seeded implementation task. PR creation/update, force push, deploy, env/secret, real provider,
+      payment, external-service, dependency/package/lockfile, destructive DB, authorization model, and Cost Calibration
+      Gate work still require fresh explicit approval.
     unattendedPreStepDecisionRequired: true
     autopilotDecisionRequiredBeforeThreadLaunch: true
 terminologyAnchors:

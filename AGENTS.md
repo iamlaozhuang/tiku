@@ -170,7 +170,7 @@
 4. **证据先于结论**：任务完成前必须运行任务声明的验证命令，并把输出写入 `docs/05-execution-logs/evidence/`。如果 `test` script 缺失，只能声明“lint/typecheck 通过，测试门禁缺失”，禁止声称完整测试通过。
 5. **任务提交屏障**：一个任务默认对应一个可审查提交。任务完成、验证与 evidence 写入后，必须先评估是否适合提交；若继续领取下一任务前仍有未提交改动，必须说明原因并确认这些改动只属于当前任务。严禁把已完成任务的代码、依赖、格式化噪声混入后续任务提交。
 6. **依赖提交隔离**：任何允许的 `package.json` / lockfile 变更必须独立于业务实现提交，提交信息和 evidence 中都必须包含 `human approval` 证据；未经任务队列和人工审批允许，不得把依赖变更顺手带入功能提交。
-7. **Push 决策门禁**：本地合并或提交不等于允许 push。推送 `master`、创建/更新 PR、`--force-with-lease`、部署等远端动作必须有明确用户批准，并在 evidence 或交付说明中记录推送目标、分支和结果。
+7. **Push 决策门禁**：本地合并或提交不等于允许 push。推送 `master` 必须有明确用户批准；该批准可以是当次 fresh approval，也可以是 `project-state.yaml` 中 `standingUnattendedLocalCloseoutApproval` 已物化到任务级 `closeoutPolicy` 的低风险 Module Run v2 closeout 授权。创建/更新 PR、`--force-with-lease`、部署等远端动作仍必须 fresh approval。所有远端动作必须在 evidence 或交付说明中记录推送目标、分支和结果。
 8. **合入后清理隔离资源**：短生命周期分支合入 `master` 后，必须先在 `master` 运行必要门禁并写 evidence，再删除对应 worktree 和已合入分支；残留 `node_modules` 等本地产物只允许在确认路径位于 `.worktrees/` 内后删除。
 9. **跨会话恢复要求**：会话中断或上下文不足时，从 `project-state.yaml`、`task-queue.yaml`、最新 evidence 和 task plan 恢复，不得凭记忆继续实现。
 10. **PR 基线健康要求**：Stacked PR 必须声明临时 base；前置分支合入 `master` 后，必须将后续 PR 重新对准 `master`，并验证 compare 只包含当前任务文件。若需要重建短生命周期分支，只允许使用 `--force-with-lease`，禁止无保护 force push。

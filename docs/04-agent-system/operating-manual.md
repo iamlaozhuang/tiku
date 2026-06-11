@@ -143,6 +143,10 @@ Local commit and remote push are separate decisions.
 
 - Docs-only or mechanism-only tasks may be prepared for push only when task-scoped approval and closeout gates allow it.
 - Source-code tasks should default to local commit and local review; remote push requires explicit task-scoped push approval.
+- For low-risk Module Run v2 auto-seeded implementation tasks, a complete task `closeoutPolicy` materialized from
+  `automation.unattendedControl.standingUnattendedLocalCloseoutApproval` counts as explicit task-scoped push approval
+  only for local commit, fast-forward merge to `master`, push to `origin/master`, merged branch cleanup, and worktree
+  parking after all required gates pass.
 - Dependency, schema, migration, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, PR, force push, and Cost Calibration Gate actions always require fresh explicit approval.
 
 ## Product Closure Contribution
