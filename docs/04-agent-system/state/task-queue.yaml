@@ -9269,3 +9269,71 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-runner-pending-seed-decision-gate.md
     status: closed
     retryCount: 0
+
+  - id: controlled-auto-seed-policy
+    title: Controlled auto-seed policy
+    phase: mechanism-tuning-controlled-auto-seed
+    sourceStory: user-approved-2026-06-11-controlled-auto-seed-mece-tuning
+    dependencies:
+      - runner-pending-seed-decision-gate
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User requested implementation of the controlled auto-seed and MECE tuning plan. This task may add a controlled
+      auto-seed policy status and runner behavior for low-risk local implementation seed transactions, update the current
+      ai-task-and-provider seed decision to policy-approved, validate locally, commit, fast-forward merge to master, push
+      origin/master, and clean the merged short branch. It must not change local Codex automation registration, resume
+      automation, modify product code, dependencies, lockfiles, schema, migrations, env/secret, provider,
+      staging/prod/cloud/deploy, payment, external service, PR, force push, or Cost Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: mechanism_repair
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-controlled-auto-seed-policy.md
+      - docs/05-execution-logs/evidence/2026-06-11-controlled-auto-seed-policy.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-controlled-auto-seed-policy.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - seed_approval
+      - task_queue
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -MaxSteps 1 -AllowProtectedBranch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1 docs\04-agent-system\operating-manual.md docs\04-agent-system\state\autodrive-control-schema.yaml docs\04-agent-system\state\ai-task-and-provider-auto-seed-approval-decision.yaml docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-controlled-auto-seed-policy.md docs\05-execution-logs\evidence\2026-06-11-controlled-auto-seed-policy.md docs\05-execution-logs\audits-reviews\2026-06-11-controlled-auto-seed-policy.md
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-controlled-auto-seed-policy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-controlled-auto-seed-policy.md
+    status: closed
+    retryCount: 0

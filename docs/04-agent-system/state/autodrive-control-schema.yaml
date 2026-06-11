@@ -125,7 +125,17 @@ startupDiagnostics:
   executionRule: startup diagnostics are advisory unless startupDecision itself returns a hard block or cleanup transaction.
 autoSeedBridge:
   purpose: Bridge no_executable_task into a guarded proposal or approved queue seed transaction.
-  defaultMode: proposal_only
+  defaultMode: proposal_only_or_controlled_auto_seed
+  controlledPolicyLayer:
+    decisionPathField: automation.autoSeedApprovalDecisionPath
+    approvedStatus: approved_by_controlled_auto_seed_policy
+    pendingStatus: pending_human_decision
+    policyId: controlled_auto_seed
+    defaultMaxTasksPerSeed: 4
+    executionRule: >-
+      pending_human_decision blocks all seed transaction execution. approved_by_controlled_auto_seed_policy may apply only
+      for the matching seed module, only outside PlanOnly, only when seedCandidateTaskCount is within maxTasksPerSeed, and
+      only after the normal seed transaction plus self-review gates pass.
   proposalLayer:
     scriptPath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
     decisionOutput: seedProposalDecision

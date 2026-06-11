@@ -90,6 +90,11 @@ claim `ai-task-and-provider` work unless a later task records fresh explicit
 seed module, the runner must stop with `runnerDecision: stop_for_manual_decision` before `Invoke-SeedTransaction`, even
 when the command line includes `-AllowAutoSeed` and an `autoDriveLocalImplementationApproval` statement.
 
+If that record instead says `status: approved_by_controlled_auto_seed_policy`, the runner may auto-apply the seed only
+for the matching module, only when it is not `-PlanOnly`, and only when `seedCandidateTaskCount` is less than or equal to
+the policy `maxTasksPerSeed`. This policy does not approve local automation resume, task claim outside the seeded queue,
+provider/env/schema/deploy/dependency changes, payment/external-service work, PR/force push, or Cost Calibration Gate.
+
 ## Completion Standard
 
 Every task closeout must record:

@@ -244,6 +244,45 @@ function Test-AutoSeedDecisionMatchesModule {
     return $Decision.SeedModule -eq $SeedModule
 }
 
+function Get-ControlledAutoSeedMaxTasks {
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$Decision
+    )
+
+    if (-not $Decision.Exists) {
+        return 4
+    }
+
+    $maxTasksValue = Get-YamlScalarValue -Path $Decision.Path -Key "maxTasksPerSeed"
+    if ([string]::IsNullOrWhiteSpace($maxTasksValue)) {
+        return 4
+    }
+
+    $parsedMaxTasks = 0
+    if ([int]::TryParse($maxTasksValue, [ref]$parsedMaxTasks) -and $parsedMaxTasks -gt 0) {
+        return $parsedMaxTasks
+    }
+
+    return 4
+}
+
+function Test-ControlledAutoSeedPolicyApprovesModule {
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$Decision,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$SeedModule
+    )
+
+    return $Decision.Configured `
+        -and $Decision.Exists `
+        -and $Decision.Status -eq "approved_by_controlled_auto_seed_policy" `
+        -and (Test-AutoSeedDecisionMatchesModule -Decision $Decision -SeedModule $SeedModule)
+}
+
 function Invoke-ExternalCommand {
     param(
         [Parameter(Mandatory = $true)]
@@ -823,25 +862,66 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
                     -ResumePointer "decisionPath=$($autoSeedApprovalDecision.Path); seedModule=$seedModule; projectState=$ProjectStatePath; queue=$QueuePath"
             }
 
+            $controlledAutoSeedPolicyApproved = Test-ControlledAutoSeedPolicyApprovesModule -Decision $autoSeedApprovalDecision -SeedModule $seedModule
+            if ($controlledAutoSeedPolicyApproved) {
+                $seedCandidateTaskCount = Get-FirstValue -Output $seedProposalResult.Output -Key "seedCandidateTaskCount"
+                $maxTasksPerSeed = Get-ControlledAutoSeedMaxTasks -Decision $autoSeedApprovalDecision
+                $parsedSeedCandidateTaskCount = 0
+                if (-not [int]::TryParse($seedCandidateTaskCount, [ref]$parsedSeedCandidateTaskCount)) {
+                    Write-RunnerResult `
+                        -Decision "stop_for_hard_block" `
+                        -NextAction "report_seed_proposal_failure" `
+                        -Reason "controlled auto-seed policy could not read seedCandidateTaskCount" `
+                        -StepCount $stepIndex `
+                        -ExitCode 1 `
+                        -NextTask $seedModule `
+                        -RiskIfAutoContinued "seed task limit could not be enforced" `
+                        -NoWriteReason "controlled auto-seed policy task-count guard failed" `
+                        -ResumePointer "decisionPath=$($autoSeedApprovalDecision.Path); seedModule=$seedModule; projectState=$ProjectStatePath; queue=$QueuePath"
+                }
+                if ($parsedSeedCandidateTaskCount -gt $maxTasksPerSeed) {
+                    Write-RunnerResult `
+                        -Decision "stop_for_manual_decision" `
+                        -NextAction "request_auto_seed_approval" `
+                        -Reason "controlled auto-seed policy allows at most $maxTasksPerSeed task(s), proposal has $parsedSeedCandidateTaskCount" `
+                        -StepCount $stepIndex `
+                        -ExitCode 1 `
+                        -NextTask $seedModule `
+                        -NextCommandOverride "record explicit autoDriveLocalImplementationApproval or reduce seed batch size before rerunning" `
+                        -RiskIfAutoContinued "seed transaction would exceed controlled auto-seed task limit" `
+                        -NoWriteReason "controlled auto-seed maxTasksPerSeed blocks seed transaction execution" `
+                        -ResumePointer "decisionPath=$($autoSeedApprovalDecision.Path); seedModule=$seedModule; projectState=$ProjectStatePath; queue=$QueuePath"
+                }
+                Write-Output "controlledAutoSeedPolicyApproval: recorded"
+                Write-Output "controlledAutoSeedPolicy: controlled_auto_seed"
+                Write-Output "controlledAutoSeedMaxTasksPerSeed: $maxTasksPerSeed"
+            }
+
             $standingAutoSeedApprovalStatement = Get-StandingAutoSeedApprovalStatement
             $standingAutoSeedAvailable = -not [string]::IsNullOrWhiteSpace($standingAutoSeedApprovalStatement)
             $effectiveAutoSeedApprovalStatement = if (-not [string]::IsNullOrWhiteSpace($AutoSeedApprovalStatement)) {
                 $AutoSeedApprovalStatement
             } elseif ($standingAutoSeedAvailable) {
                 $standingAutoSeedApprovalStatement
+            } elseif ($controlledAutoSeedPolicyApproved) {
+                "autoDriveLocalImplementationApproval: controlled_auto_seed policy approved for module $seedModule"
             } else {
                 ""
             }
-            $effectiveAllowAutoSeed = $AllowAutoSeed -or ($standingAutoSeedAvailable -and -not $PlanOnly)
+            $effectiveAllowAutoSeed = $AllowAutoSeed -or ($standingAutoSeedAvailable -and -not $PlanOnly) -or ($controlledAutoSeedPolicyApproved -and -not $PlanOnly)
 
             if ($PlanOnly -or -not $effectiveAllowAutoSeed) {
-                $seedProposalSeverity = if ($standingAutoSeedAvailable -and $PlanOnly) { "auto_recoverable" } else { "approval_required" }
-                $seedProposalNextCommand = if ($standingAutoSeedAvailable) {
+                $seedProposalSeverity = if (($standingAutoSeedAvailable -or $controlledAutoSeedPolicyApproved) -and $PlanOnly) { "auto_recoverable" } else { "approval_required" }
+                $seedProposalNextCommand = if ($controlledAutoSeedPolicyApproved) {
+                    ".\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps $MaxSteps"
+                } elseif ($standingAutoSeedAvailable) {
                     ".\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps $MaxSteps -AllowAutoSeed -AutoSeedApprovalStatement <standingUnattendedLocalCloseoutApproval statement>"
                 } else {
                     ".\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps $MaxSteps -AllowAutoSeed -AutoSeedApprovalStatement <autoDriveLocalImplementationApproval statement>"
                 }
-                $seedProposalRisk = if ($standingAutoSeedAvailable) {
+                $seedProposalRisk = if ($controlledAutoSeedPolicyApproved) {
+                    "none for PlanOnly; controlled auto-seed policy allows apply only when the runner is not PlanOnly and guarded checks pass"
+                } elseif ($standingAutoSeedAvailable) {
                     "none for PlanOnly; applying the seed writes task-queue and seed evidence only after guarded approval checks pass"
                 } else {
                     "queue mutation requires explicit autoDriveLocalImplementationApproval"

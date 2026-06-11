@@ -1,9 +1,9 @@
 schemaVersion: 1
 decisionId: ai-task-and-provider-auto-seed-approval-decision
 createdAt: "2026-06-11T00:00:00-07:00"
-status: pending_human_decision
-defaultAction: keep_automation_paused_for_tuning
-sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
+status: approved_by_controlled_auto_seed_policy
+defaultAction: allow_controlled_auto_seed_when_runner_not_plan_only
+sourceStory: user-approved-2026-06-11-controlled-auto-seed-mece-tuning
 sourceDiagnostics:
   seedProposalScriptPath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
   nextActionScriptPath: scripts/agent-system/Get-TikuNextAction.ps1
@@ -19,8 +19,30 @@ proposal:
   seedModule: ai-task-and-provider
   seedSourcePlanningTask: phase-70-advanced-ai-task-domain-implementation-planning
   seedLocalFullLoopMinimum: L2
-  seedRequiredApproval: autoDriveLocalImplementationApproval for module ai-task-and-provider
+  seedRequiredApproval: controlled_auto_seed for module ai-task-and-provider
   seedCandidateTaskCount: 4
+controlledAutoSeedPolicy:
+  id: controlled_auto_seed
+  approvedAt: "2026-06-11T00:00:00-07:00"
+  maxTasksPerSeed: 4
+  allowedScope: low-risk local implementation seed transactions only
+  allowedActions:
+    - seed_transaction_execution
+    - queued_implementation_task_creation
+  requiredChecks:
+    - module matches proposal.seedModule
+    - seedCandidateTaskCount is less than or equal to maxTasksPerSeed
+    - seeded task self-review passes
+    - provider/env/schema/deploy/dependency changes remain blocked
+    - Cost Calibration Gate remains blocked
+  blockedRiskTypes:
+    - dependency_change
+    - env_secret
+    - provider_call
+    - schema_migration
+    - deploy
+    - payment_or_external_service
+    - cost_calibration_gate
 candidateTasks:
   - taskId: batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
     targetClosure: provider-agnostic AI task lifecycle contracts
@@ -39,21 +61,19 @@ candidateTasks:
     validationProfile: L2-local-implementation
     nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
 humanDecisionOptions:
-  - id: keep_paused
-    effect: leave proposal visible, keep automation paused, and wait for a later explicit decision
-  - id: approve_auto_seed
-    effect: allow a future scoped task to apply the guarded seed transaction for this module
-    requiredFreshApprovalText: autoDriveLocalImplementationApproval for module ai-task-and-provider
+  - id: keep_controlled_policy
+    effect: allow only controlled low-risk auto-seed while planned pause remains active until local automation is manually changed
+  - id: revoke_auto_seed
+    effect: set status back to pending_human_decision before automation is activated
   - id: create_manual_task
-    effect: create a manually reviewed task instead of applying the seed transaction
-nonApprovalStatement: >-
-  This record does not approve auto seed execution. It records the currently available proposal and the human decision
-  options while planned pause remains active.
+    effect: create a manually reviewed task instead of relying on auto seed
+approvalStatement: >-
+  This record approves controlled_auto_seed for module ai-task-and-provider only. It does not approve local automation
+  resume, task claim, provider/env/schema/deploy/dependency changes, payment/external-service work, PR/force push, or
+  Cost Calibration Gate execution.
 blockedActions:
   - automation_resume
   - task_claim
-  - seed_transaction_execution
-  - queued_implementation_task_creation
   - provider_call
   - env_secret_change
   - dependency_or_lockfile_change

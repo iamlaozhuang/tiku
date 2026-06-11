@@ -574,6 +574,79 @@ tasks:
         throw "Pending seed decision gate unexpectedly changed task queue."
     }
 
+    $controlledPolicySeedRepo = Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-seed-repo"
+    $controlledPolicySeedSha = Initialize-SmokeRepo -Path $controlledPolicySeedRepo
+    $controlledPolicySeedProjectStatePath = Join-Path -Path $controlledPolicySeedRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $controlledPolicySeedQueuePath = Join-Path -Path $controlledPolicySeedRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $controlledPolicySeedMatrixPath = Join-Path -Path $controlledPolicySeedRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    $controlledPolicyDecisionPath = Join-Path -Path $controlledPolicySeedRepo -ChildPath "docs/04-agent-system/state/auto-seed-approval-decision.yaml"
+    Write-SmokeSeedMatrix -Path $controlledPolicySeedMatrixPath
+    Write-SmokeProjectState `
+        -Path $controlledPolicySeedProjectStatePath `
+        -TaskId "runner-closed" `
+        -Sha $controlledPolicySeedSha `
+        -AutoSeedApprovalDecisionPath "docs/04-agent-system/state/auto-seed-approval-decision.yaml"
+    @"
+schemaVersion: 1
+status: approved_by_controlled_auto_seed_policy
+defaultAction: allow_controlled_auto_seed
+policy:
+  id: controlled_auto_seed
+  maxTasksPerSeed: 4
+proposal:
+  seedModule: authorization-and-access
+  seedRequiredApproval: controlled_auto_seed
+"@ | Set-Content -LiteralPath $controlledPolicyDecisionPath -Encoding UTF8
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-closed
+    status: closed
+    taskKind: implementation
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-closed.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-closed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-closed.md
+"@ | Set-Content -LiteralPath $controlledPolicySeedQueuePath -Encoding UTF8
+
+    Push-Location -LiteralPath $controlledPolicySeedRepo
+    try {
+        $controlledPolicyOutput = @(
+            & $runnerPath `
+                -TaskId "runner-closed" `
+                -ProjectStatePath $controlledPolicySeedProjectStatePath `
+                -QueuePath $controlledPolicySeedQueuePath `
+                -MatrixPath $controlledPolicySeedMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-handoffs") `
+                -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
+                -MaxSteps 2
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "seedProposalDecision: proposal_available"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "seedTransactionDecision: seeded"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "autoDriveLocalImplementationApproval: recorded"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "controlledAutoSeedPolicyApproval: recorded"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "runnerDecision: seed_transaction_applied"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "runnerNextAction: closeout_auto_seed_transaction"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "runnerSeverity: auto_recoverable"
+
+    $controlledPolicyQueueAfter = Get-Content -LiteralPath $controlledPolicySeedQueuePath -Raw
+    if ($controlledPolicyQueueAfter -notmatch "seededImplementationTask:\s*true" -or $controlledPolicyQueueAfter -notmatch "authorization-and-access") {
+        throw "Controlled auto-seed policy did not write seeded implementation tasks."
+    }
+
     $standingPlanOnlyRepo = Join-Path -Path $fixtureRoot -ChildPath "standing-planonly-repo"
     $standingPlanOnlySha = Initialize-SmokeRepo -Path $standingPlanOnlyRepo
     $standingPlanOnlyProjectStatePath = Join-Path -Path $standingPlanOnlyRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
