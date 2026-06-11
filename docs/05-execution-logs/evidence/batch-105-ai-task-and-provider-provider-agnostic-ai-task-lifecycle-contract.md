@@ -84,3 +84,14 @@ Result:
 - `npm.cmd run test -- --run focused` was not executed because the repository `test` script chains into e2e. The task-level focused validation used `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts`, keeping within the explicit no-e2e boundary.
 - After `batch-105` status moved to `done`, the implementation auto-seed readiness and seed self-review executable-candidate scripts reject reruns because the candidate is no longer pending. Their pre-edit and seed-time runs passed before implementation began; final closeout is governed by `Test-ModuleRunV2ModuleCloseoutReadiness.ps1`, which passed.
 - No provider call, provider configuration, schema, migration, dependency, lockfile, env/secret, staging, prod, deploy, payment, external-service, PR, force push, or Cost Calibration Gate action was performed.
+
+## Post-Merge Master Validation
+
+After fast-forward merge to `master`, these commands passed on `D:\tiku` before push:
+
+- `npm.cmd run lint`
+- `npm.cmd run typecheck`
+- `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts` (`1` test file, `4` tests)
+- `git diff --check`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract`
