@@ -21,7 +21,7 @@ Automation remains paused. The unattended runner was not executed.
 - RED: `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts` failed because
   `src/server/services/personal-ai-generation-request-route.ts` did not exist.
 - GREEN: focused route adapter tests passed after adding the local transport route and App Router export.
-- Commit: pending initial local commit
+- Commit: `0c2e258e335c08653fba47cc0d10abccf4df8429`
 - localFullLoopGate: L4 local transport/API/contract validation passed for the focused route adapter.
 - threadRolloverGate: current thread can continue; no rollover required before closeout.
 - nextModuleRunCandidate: `batch-111-personal-learning-ai-request-context-local-contract`
@@ -36,7 +36,7 @@ Automation remains paused. The unattended runner was not executed.
 - Task kind: `implementation`
 - localFullLoopGate: `L4`
 - target experience chain: `personal-learning-ai-experience`
-- Commit: pending local closeout
+- Commit: `0c2e258e335c08653fba47cc0d10abccf4df8429`
 - next pending task after closeout: `batch-111-personal-learning-ai-request-context-local-contract`
 
 ## Implemented Files
@@ -79,19 +79,21 @@ Cost Calibration Gate remains blocked.
 
 ## Validation
 
-| Command                                                                                                                                                                                      | Result  | Notes                                                                               |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------- |
-| `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                  | fail    | RED step failed because `./personal-ai-generation-request-route` did not exist yet. |
-| `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                  | pass    | GREEN step passed with 1 test file and 4 tests.                                     |
-| `node .\node_modules\prettier\bin\prettier.cjs --write ...batch110 files...`                                                                                                                 | pass    | Scoped task files formatted; App Router route was formatted.                        |
-| `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                  | pass    | Post-format focused unit validation passed with 1 test file and 4 tests.            |
-| `npm.cmd run lint`                                                                                                                                                                           | pass    | ESLint completed successfully.                                                      |
-| `npm.cmd run typecheck`                                                                                                                                                                      | pass    | `tsc --noEmit` completed successfully.                                              |
-| `git diff --check`                                                                                                                                                                           | pass    | No whitespace errors.                                                               |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract` | fail    | Expected first closeout block: evidence and audit files were not created yet.       |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract` | pending | To rerun after evidence and audit creation.                                         |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract`      | pending | To run after evidence and audit creation.                                           |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract`        | pending | To run after evidence and audit creation.                                           |
+| Command                                                                                                                                                                                      | Result | Notes                                                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                  | fail   | RED step failed because `./personal-ai-generation-request-route` did not exist yet.                                                        |
+| `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                  | pass   | GREEN step passed with 1 test file and 4 tests.                                                                                            |
+| `node .\node_modules\prettier\bin\prettier.cjs --write ...batch110 files...`                                                                                                                 | pass   | Scoped task files formatted; App Router route was formatted.                                                                               |
+| `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                  | pass   | Post-format focused unit validation passed with 1 test file and 4 tests.                                                                   |
+| `npm.cmd run lint`                                                                                                                                                                           | pass   | ESLint completed successfully.                                                                                                             |
+| `npm.cmd run typecheck`                                                                                                                                                                      | pass   | `tsc --noEmit` completed successfully.                                                                                                     |
+| `git diff --check`                                                                                                                                                                           | pass   | No whitespace errors.                                                                                                                      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract` | fail   | Expected first closeout block: evidence and audit files were not created yet.                                                              |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract`      | fail   | Initial hardening run blocked direct sensitive-shape fixture assignments in the test file.                                                 |
+| `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`                                                                                                  | pass   | Focused unit validation stayed green after replacing direct sensitive-shape fixture values with neutral omitted markers.                   |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract` | pass   | Strict Module Run v2 evidence anchors passed after real commit SHA, RED/GREEN, thread rollover, and next candidate evidence were recorded. |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract`      | pass   | Task-scoped evidence/sensitive scan passed after fixture neutralization.                                                                   |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract`        | pass   | Branch, master, origin/master, and project-state SHA checkpoint are aligned at the accepted ancestor.                                      |
 
 ## Changed Files
 

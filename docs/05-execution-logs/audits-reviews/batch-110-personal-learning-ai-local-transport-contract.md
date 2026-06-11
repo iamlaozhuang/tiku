@@ -48,7 +48,11 @@ credentials, database URLs, Authorization headers, cleartext `redeem_code`, full
 - `git diff --check` passed.
 - Initial module closeout readiness failed only because evidence and audit files were missing before this review was
   created.
-- Final closeout, pre-commit, and pre-push checks are rerun after evidence/audit creation.
+- Initial pre-commit hardening blocked direct sensitive-shape fixture assignments in the focused test; the test fixture
+  was changed to neutral omitted markers and focused unit validation stayed green.
+- Final module closeout readiness passed.
+- Final pre-commit hardening passed.
+- Final pre-push readiness passed.
 
 ## Findings
 
