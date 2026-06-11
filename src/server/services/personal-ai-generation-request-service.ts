@@ -4,7 +4,10 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type { PersonalAiGenerationRequestDto } from "../contracts/personal-ai-generation-request-contract";
-import type { PersonalAiGenerationRequestInput } from "../models/personal-ai-generation-request";
+import {
+  resolvePersonalAiGenerationRequestContextSelection,
+  type PersonalAiGenerationRequestInput,
+} from "../models/personal-ai-generation-request";
 import { normalizePersonalAiGenerationRequestInput } from "../validators/personal-ai-generation-request";
 
 const INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_CODE = 400011;
@@ -12,6 +15,9 @@ const INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_CODE = 400011;
 function mapPersonalAiGenerationRequestToDto(
   input: PersonalAiGenerationRequestInput,
 ): PersonalAiGenerationRequestDto {
+  const selectedContext =
+    resolvePersonalAiGenerationRequestContextSelection(input);
+
   return {
     userPublicId: input.userPublicId,
     authorizationPublicId: input.authorizationPublicId,
@@ -22,6 +28,7 @@ function mapPersonalAiGenerationRequestToDto(
       answerRecordPublicId: input.answerRecordPublicId,
       paperPublicId: input.paperPublicId,
       mockExamPublicId: input.mockExamPublicId,
+      selectedContext,
     },
     redeemCodeReference: {
       publicId: input.redeemCodePublicId,

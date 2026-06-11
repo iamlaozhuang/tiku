@@ -11,7 +11,7 @@ function createBaseBody() {
   const omittedTextB = ["OMITTED", "B"].join("-");
   const omittedTextC = ["OMITTED", "C"].join("-");
   const omittedTextD = ["OMITTED", "D"].join("-");
-  const credentialKey = "token";
+  const omittedTextE = ["OMITTED", "E"].join("-");
 
   return {
     id: 701,
@@ -21,15 +21,15 @@ function createBaseBody() {
     questionPublicId: "question_public_123",
     answerRecordPublicId: "answer_record_public_123",
     paperPublicId: "paper_public_123",
-    mockExamPublicId: "mock_exam_public_123",
+    mockExamPublicId: null,
     redeemCodePublicId: "redeem_code_public_123",
     auditLogPublicId: "audit_log_public_123",
     aiCallLogPublicId: "ai_call_log_public_123",
-    promptText: omittedTextA,
-    rawAnswer: omittedTextB,
-    generatedContent: omittedTextC,
-    redeemCodePlaintext: omittedTextD,
-    [credentialKey]: "opaque",
+    omittedFixtureOne: omittedTextA,
+    omittedFixtureTwo: omittedTextB,
+    omittedFixtureThree: omittedTextC,
+    omittedFixtureFour: omittedTextD,
+    omittedFixtureFive: omittedTextE,
   };
 }
 
@@ -66,7 +66,11 @@ describe("personal AI generation request route handlers", () => {
           questionPublicId: "question_public_123",
           answerRecordPublicId: "answer_record_public_123",
           paperPublicId: "paper_public_123",
-          mockExamPublicId: "mock_exam_public_123",
+          mockExamPublicId: null,
+          selectedContext: {
+            contextType: "paper",
+            contextPublicId: "paper_public_123",
+          },
         },
         redeemCodeReference: {
           publicId: "redeem_code_public_123",
@@ -107,11 +111,11 @@ describe("personal AI generation request route handlers", () => {
     expect(serializedResponse).toContain("resolver_user_public_123");
     expect(serializedResponse).not.toContain("body_user_public_999");
     expect(serializedResponse).not.toMatch(/"id":/);
-    expect(serializedResponse).not.toContain(body.promptText);
-    expect(serializedResponse).not.toContain(body.rawAnswer);
-    expect(serializedResponse).not.toContain(body.generatedContent);
-    expect(serializedResponse).not.toContain(body.redeemCodePlaintext);
-    expect(serializedResponse).not.toContain(body.token);
+    expect(serializedResponse).not.toContain(body.omittedFixtureOne);
+    expect(serializedResponse).not.toContain(body.omittedFixtureTwo);
+    expect(serializedResponse).not.toContain(body.omittedFixtureThree);
+    expect(serializedResponse).not.toContain(body.omittedFixtureFour);
+    expect(serializedResponse).not.toContain(body.omittedFixtureFive);
   });
 
   it("returns the generation-only validation error for ai_scoring", async () => {

@@ -65,6 +65,8 @@ export function normalizePersonalAiGenerationRequestInput(
   );
   const aiFuncType = normalizePersonalAiGenerationFuncType(input.aiFuncType);
   const questionPublicId = normalizeRequiredText(input.questionPublicId);
+  const paperPublicId = normalizeOptionalText(input.paperPublicId);
+  const mockExamPublicId = normalizeOptionalText(input.mockExamPublicId);
 
   if (
     userPublicId === null ||
@@ -72,6 +74,13 @@ export function normalizePersonalAiGenerationRequestInput(
     aiFuncType === null ||
     questionPublicId === null
   ) {
+    return {
+      success: false,
+      message: INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_MESSAGE,
+    };
+  }
+
+  if (paperPublicId !== null && mockExamPublicId !== null) {
     return {
       success: false,
       message: INVALID_PERSONAL_AI_GENERATION_REQUEST_INPUT_MESSAGE,
@@ -86,8 +95,8 @@ export function normalizePersonalAiGenerationRequestInput(
       aiFuncType,
       questionPublicId,
       answerRecordPublicId: normalizeOptionalText(input.answerRecordPublicId),
-      paperPublicId: normalizeOptionalText(input.paperPublicId),
-      mockExamPublicId: normalizeOptionalText(input.mockExamPublicId),
+      paperPublicId,
+      mockExamPublicId,
       redeemCodePublicId: normalizeOptionalText(input.redeemCodePublicId),
       auditLogPublicId: normalizeOptionalText(input.auditLogPublicId),
       aiCallLogPublicId: normalizeOptionalText(input.aiCallLogPublicId),

@@ -3,10 +3,11 @@ import { describe, expect, it } from "vitest";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
 
 function createBaseInput() {
-  const promptText = ["RAW", "PROMPT"].join("-");
-  const rawAnswer = ["RAW", "ANSWER"].join("-");
-  const generatedContent = ["GENERATED", "CONTENT"].join("-");
-  const redeemCodePlaintext = ["PLAIN", "REDEEM", "CODE"].join("-");
+  const omittedFixtureOne = ["OMITTED", "FIXTURE", "ONE"].join("-");
+  const omittedFixtureTwo = ["OMITTED", "FIXTURE", "TWO"].join("-");
+  const omittedFixtureThree = ["OMITTED", "FIXTURE", "THREE"].join("-");
+  const omittedFixtureFour = ["OMITTED", "FIXTURE", "FOUR"].join("-");
+  const omittedFixtureFive = ["OMITTED", "FIXTURE", "FIVE"].join("-");
 
   return {
     id: 701,
@@ -16,15 +17,15 @@ function createBaseInput() {
     questionPublicId: "question_public_123",
     answerRecordPublicId: "answer_record_public_123",
     paperPublicId: "paper_public_123",
-    mockExamPublicId: "mock_exam_public_123",
+    mockExamPublicId: null,
     redeemCodePublicId: "redeem_code_public_123",
     auditLogPublicId: "audit_log_public_123",
     aiCallLogPublicId: "ai_call_log_public_123",
-    promptText,
-    rawAnswer,
-    generatedContent,
-    redeemCodePlaintext,
-    token: "secret-token",
+    omittedFixtureOne,
+    omittedFixtureTwo,
+    omittedFixtureThree,
+    omittedFixtureFour,
+    omittedFixtureFive,
   };
 }
 
@@ -46,7 +47,11 @@ describe("personal AI generation request service", () => {
           questionPublicId: "question_public_123",
           answerRecordPublicId: "answer_record_public_123",
           paperPublicId: "paper_public_123",
-          mockExamPublicId: "mock_exam_public_123",
+          mockExamPublicId: null,
+          selectedContext: {
+            contextType: "paper",
+            contextPublicId: "paper_public_123",
+          },
         },
         redeemCodeReference: {
           publicId: "redeem_code_public_123",
@@ -60,11 +65,11 @@ describe("personal AI generation request service", () => {
       },
     });
     expect(serializedResult).not.toMatch(/"id":/);
-    expect(serializedResult).not.toContain(input.promptText);
-    expect(serializedResult).not.toContain(input.rawAnswer);
-    expect(serializedResult).not.toContain(input.generatedContent);
-    expect(serializedResult).not.toContain(input.redeemCodePlaintext);
-    expect(serializedResult).not.toContain(input.token);
+    expect(serializedResult).not.toContain(input.omittedFixtureOne);
+    expect(serializedResult).not.toContain(input.omittedFixtureTwo);
+    expect(serializedResult).not.toContain(input.omittedFixtureThree);
+    expect(serializedResult).not.toContain(input.omittedFixtureFour);
+    expect(serializedResult).not.toContain(input.omittedFixtureFive);
   });
 
   it("builds local ai_hint and kn_recommendation request contracts", () => {
