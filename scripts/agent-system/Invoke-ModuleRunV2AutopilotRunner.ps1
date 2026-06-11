@@ -363,6 +363,11 @@ function Invoke-SeedProposal {
 }
 
 function Invoke-SeedTransaction {
+    param(
+        [Parameter(Mandatory = $false)]
+        [string]$ApprovalStatement = $AutoSeedApprovalStatement
+    )
+
     $seedTransactionArgs = @(
         "-NoProfile",
         "-ExecutionPolicy",
@@ -373,7 +378,7 @@ function Invoke-SeedTransaction {
         "-MaxBatchCount",
         "$AutoSeedMaxBatchCount",
         "-ApprovalStatement",
-        $AutoSeedApprovalStatement,
+        $ApprovalStatement,
         "-ProjectStatePath",
         $ProjectStatePath,
         "-QueuePath",
@@ -421,6 +426,14 @@ function Test-StandingAutoSeedApprovalAvailable {
             -and $projectStateContent -match "low-risk Module Run v2 local implementation tasks only" `
             -and $projectStateContent -match "High-risk capability gates remain blocked"
     )
+}
+
+function Get-StandingAutoSeedApprovalStatement {
+    if (-not (Test-StandingAutoSeedApprovalAvailable)) {
+        return ""
+    }
+
+    return "standingUnattendedLocalCloseoutApproval: User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation, local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking, when repository readiness, validation surface, module closeout readiness, pre-push readiness, allowedFiles/blockedFiles, active-owner, lease, registry, hygiene, and remote-divergence gates all pass. High-risk capability gates remain blocked unless separately approved. autoDriveLocalImplementationApproval: state-approved low-risk local implementation seed"
 }
 
 function Get-RunnerSeverity {
@@ -673,8 +686,18 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
 
         if ($seedProposalDecision -eq "proposal_available") {
             $seedModule = Get-FirstValue -Output $seedProposalResult.Output -Key "seedModule"
-            if ($PlanOnly -or -not $AllowAutoSeed) {
-                $standingAutoSeedAvailable = Test-StandingAutoSeedApprovalAvailable
+            $standingAutoSeedApprovalStatement = Get-StandingAutoSeedApprovalStatement
+            $standingAutoSeedAvailable = -not [string]::IsNullOrWhiteSpace($standingAutoSeedApprovalStatement)
+            $effectiveAutoSeedApprovalStatement = if (-not [string]::IsNullOrWhiteSpace($AutoSeedApprovalStatement)) {
+                $AutoSeedApprovalStatement
+            } elseif ($standingAutoSeedAvailable) {
+                $standingAutoSeedApprovalStatement
+            } else {
+                ""
+            }
+            $effectiveAllowAutoSeed = $AllowAutoSeed -or ($standingAutoSeedAvailable -and -not $PlanOnly)
+
+            if ($PlanOnly -or -not $effectiveAllowAutoSeed) {
                 $seedProposalSeverity = if ($standingAutoSeedAvailable -and $PlanOnly) { "auto_recoverable" } else { "approval_required" }
                 $seedProposalNextCommand = if ($standingAutoSeedAvailable) {
                     ".\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps $MaxSteps -AllowAutoSeed -AutoSeedApprovalStatement <standingUnattendedLocalCloseoutApproval statement>"
@@ -689,12 +712,12 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
                 Write-RunnerResult -Decision "seed_proposal_available" -NextAction "request_auto_seed_approval" -Reason "no executable task exists and a guarded seed proposal is available" -StepCount $stepIndex -ExitCode 0 -NextTask $seedModule -SeverityOverride $seedProposalSeverity -NextCommandOverride $seedProposalNextCommand -RiskIfAutoContinued $seedProposalRisk -NoWriteReason "PlanOnly or missing AllowAutoSeed prevents queue mutation" -ResumePointer "seedModule=$seedModule; projectState=$ProjectStatePath; queue=$QueuePath"
             }
 
-            if ([string]::IsNullOrWhiteSpace($AutoSeedApprovalStatement) -or $AutoSeedApprovalStatement -notmatch "autoDriveLocalImplementationApproval") {
+            if ([string]::IsNullOrWhiteSpace($effectiveAutoSeedApprovalStatement) -or $effectiveAutoSeedApprovalStatement -notmatch "autoDriveLocalImplementationApproval") {
                 Write-RunnerResult -Decision "stop_for_manual_decision" -NextAction "request_auto_seed_approval" -Reason "auto-seed apply requires explicit autoDriveLocalImplementationApproval" -StepCount $stepIndex -ExitCode 1 -NextTask $seedModule
             }
 
             Write-Section -Title "Runner Step $stepIndex Seed Transaction"
-            $seedTransactionResult = Invoke-SeedTransaction
+            $seedTransactionResult = Invoke-SeedTransaction -ApprovalStatement $effectiveAutoSeedApprovalStatement
             $seedTransactionResult.Output | ForEach-Object { Write-Output $_ }
             $seedTransactionDecision = Get-DecisionValue -Output $seedTransactionResult.Output -Key "seedTransactionDecision"
             if ($seedTransactionDecision -ne "seeded") {

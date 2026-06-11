@@ -137,14 +137,42 @@ function Write-SmokeProjectState {
         [string]$TaskId,
 
         [Parameter(Mandatory = $true)]
-        [string]$Sha
+        [string]$Sha,
+
+        [Parameter(Mandatory = $false)]
+        [switch]$StandingAutoSeedApproval
     )
+
+    $standingApprovalBlock = ""
+    if ($StandingAutoSeedApproval) {
+        $standingApprovalBlock = @"
+    standingUnattendedLocalCloseoutApproval:
+      status: approved
+      approvedAt: "2026-06-10T09:18:00-07:00"
+      scope: low-risk Module Run v2 local implementation tasks only
+      appliesTo:
+        - auto-seeded implementation tasks with autoDriveLocalImplementationApproval
+      allowedActions:
+        - task_claim
+        - task_plan_evidence_audit_creation
+        - scoped_local_implementation
+        - local_validation
+        - local_commit
+        - fast_forward_merge_to_master
+        - push_origin_master
+        - merged_short_branch_cleanup
+        - worktree_parking
+      statement: >-
+        User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked unless separately approved. autoDriveLocalImplementationApproval smoke approval.
+"@
+    }
 
     @"
 schemaVersion: 1
 automation:
   unattendedControl:
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
+$standingApprovalBlock
 repository:
   lastKnownMasterSha: $Sha
   lastKnownOriginMasterSha: $Sha
@@ -426,6 +454,118 @@ tasks:
     Assert-Contains -Output $seedProposalOutput -Pattern "Risk if auto-continued: queue mutation requires explicit autoDriveLocalImplementationApproval"
     Assert-Contains -Output $seedProposalOutput -Pattern "Next action: .*AutoSeedApprovalStatement"
     Assert-NotContains -Output $seedProposalOutput -Pattern "stopTaxonomy: hard_block"
+
+    $standingPlanOnlyRepo = Join-Path -Path $fixtureRoot -ChildPath "standing-planonly-repo"
+    $standingPlanOnlySha = Initialize-SmokeRepo -Path $standingPlanOnlyRepo
+    $standingPlanOnlyProjectStatePath = Join-Path -Path $standingPlanOnlyRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $standingPlanOnlyQueuePath = Join-Path -Path $standingPlanOnlyRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $standingPlanOnlyMatrixPath = Join-Path -Path $standingPlanOnlyRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    Write-SmokeSeedMatrix -Path $standingPlanOnlyMatrixPath
+    Write-SmokeProjectState -Path $standingPlanOnlyProjectStatePath -TaskId "runner-closed" -Sha $standingPlanOnlySha -StandingAutoSeedApproval
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-closed
+    status: closed
+    taskKind: implementation
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-closed.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-closed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-closed.md
+"@ | Set-Content -LiteralPath $standingPlanOnlyQueuePath -Encoding UTF8
+
+    $standingPlanOnlyQueueBefore = Get-Content -LiteralPath $standingPlanOnlyQueuePath -Raw
+    Push-Location -LiteralPath $standingPlanOnlyRepo
+    try {
+        $standingPlanOnlyOutput = @(
+            & $runnerPath `
+                -TaskId "runner-closed" `
+                -ProjectStatePath $standingPlanOnlyProjectStatePath `
+                -QueuePath $standingPlanOnlyQueuePath `
+                -MatrixPath $standingPlanOnlyMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "standing-planonly-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "standing-planonly-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "standing-planonly-handoffs") `
+                -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
+                -PlanOnly `
+                -MaxSteps 2
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $standingPlanOnlyOutput -Pattern "runnerDecision: seed_proposal_available"
+    Assert-Contains -Output $standingPlanOnlyOutput -Pattern "runnerSeverity: auto_recoverable"
+    Assert-Contains -Output $standingPlanOnlyOutput -Pattern "safeToProceed: true"
+    Assert-Contains -Output $standingPlanOnlyOutput -Pattern "noWriteReason: PlanOnly or missing AllowAutoSeed prevents queue mutation"
+    Assert-Contains -Output $standingPlanOnlyOutput -Pattern "nextCommand: .*standingUnattendedLocalCloseoutApproval"
+
+    $standingPlanOnlyQueueAfter = Get-Content -LiteralPath $standingPlanOnlyQueuePath -Raw
+    if ($standingPlanOnlyQueueBefore -ne $standingPlanOnlyQueueAfter) {
+        throw "Standing PlanOnly seed proposal unexpectedly changed task queue."
+    }
+
+    $standingSeedRepo = Join-Path -Path $fixtureRoot -ChildPath "standing-seed-repo"
+    $standingSeedSha = Initialize-SmokeRepo -Path $standingSeedRepo
+    $standingSeedProjectStatePath = Join-Path -Path $standingSeedRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $standingSeedQueuePath = Join-Path -Path $standingSeedRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $standingSeedMatrixPath = Join-Path -Path $standingSeedRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    Write-SmokeSeedMatrix -Path $standingSeedMatrixPath
+    Write-SmokeProjectState -Path $standingSeedProjectStatePath -TaskId "runner-closed" -Sha $standingSeedSha -StandingAutoSeedApproval
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-closed
+    status: closed
+    taskKind: implementation
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-closed.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-closed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-closed.md
+"@ | Set-Content -LiteralPath $standingSeedQueuePath -Encoding UTF8
+
+    Push-Location -LiteralPath $standingSeedRepo
+    try {
+        $standingSeedOutput = @(
+            & $runnerPath `
+                -TaskId "runner-closed" `
+                -ProjectStatePath $standingSeedProjectStatePath `
+                -QueuePath $standingSeedQueuePath `
+                -MatrixPath $standingSeedMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "standing-seed-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "standing-seed-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "standing-seed-handoffs") `
+                -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
+                -MaxSteps 2
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $standingSeedOutput -Pattern "seedProposalDecision: proposal_available"
+    Assert-Contains -Output $standingSeedOutput -Pattern "seedTransactionDecision: seeded"
+    Assert-Contains -Output $standingSeedOutput -Pattern "standingUnattendedLocalCloseoutApproval: recorded"
+    Assert-Contains -Output $standingSeedOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $standingSeedOutput -Pattern "runnerDecision: seed_transaction_applied"
+    Assert-Contains -Output $standingSeedOutput -Pattern "runnerNextAction: closeout_auto_seed_transaction"
+    Assert-Contains -Output $standingSeedOutput -Pattern "runnerSeverity: auto_recoverable"
+
+    $standingSeedQueueAfterApply = Get-Content -LiteralPath $standingSeedQueuePath -Raw
+    if ($standingSeedQueueAfterApply -notmatch "seededImplementationTask:\s*true" -or $standingSeedQueueAfterApply -notmatch "localCommit:\s*approved") {
+        throw "Standing auto-seed did not write approved seeded implementation tasks."
+    }
 
     $seedApplyRepo = Join-Path -Path $fixtureRoot -ChildPath "seed-apply-repo"
     $seedApplySha = Initialize-SmokeRepo -Path $seedApplyRepo
