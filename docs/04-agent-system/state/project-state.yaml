@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: mechanism-serial-governance
-updatedAt: "2026-06-11T10:30:00-07:00"
+updatedAt: "2026-06-11T10:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -238,15 +238,16 @@ automation:
     codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
     codexAutomationExecutionEnvironment: worktree
-    plannedPauseStatus: active
-    plannedPauseReason: user_requested_mechanism_tuning
+    plannedPauseStatus: closed
+    plannedPauseReason: phase85_activation_readiness_sync_complete
     plannedPauseSince: "2026-06-11T00:00:00-07:00"
-    plannedPauseKeepsAutomationPaused: true
+    plannedPauseKeepsAutomationPaused: false
     plannedPauseStatement: >-
-      User intentionally paused the local Codex automation registration to inspect and tune the mechanism. Registration
-      readiness may classify project ACTIVE plus local PAUSED as planned_pause_for_tuning only while this flag is active;
-      it must not resume automation, claim tasks, seed tasks, merge, push, deploy, call providers, or execute Cost
-      Calibration Gate.
+      Phase85 closed the planned pause after restoring the primary automation prompt anchors and recording activation
+      preflight evidence. Local automation remains PAUSED until the user performs a separate activation action; while
+      PAUSED and plannedPauseStatus is closed, registration readiness is expected to hard-block on status mismatch until
+      tiku-module-run-v2-autopilot is explicitly activated. Do not activate tiku-module-run-v2-autopilot-2 or
+      tiku-module-run-v2-mechanic-2.
     defaultStopOn:
       - hard block
       - blocked gate
@@ -266,16 +267,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 212d8e17a42d31e6d5d1b236edf34a815642343a
-  lastKnownOriginMasterSha: 212d8e17a42d31e6d5d1b236edf34a815642343a
+  lastKnownMasterSha: d49ce29a9531d6d127b704c19e112ce097e72bae
+  lastKnownOriginMasterSha: d49ce29a9531d6d127b704c19e112ce097e72bae
 currentTask:
-  id: phase-84-module-run-v2-validation-command-normalization-required-path
+  id: phase-85-automation-activation-readiness-sync
   status: closed
   sourceStory: mechanism-serial-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-84-module-run-v2-validation-command-normalization-required-path.md
-  evidencePath: docs/05-execution-logs/evidence/phase-84-module-run-v2-validation-command-normalization-required-path.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/phase-84-module-run-v2-validation-command-normalization-required-path.md
-  branch: codex/phase-84-validation-normalization-required
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-85-automation-activation-readiness-sync.md
+  evidencePath: docs/05-execution-logs/evidence/phase-85-automation-activation-readiness-sync.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/phase-85-automation-activation-readiness-sync.md
+  branch: codex/phase-85-automation-activation-readiness-sync
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -313,10 +314,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 84 mechanism hardening is complete: validation_command_normalization_required is now a read-only repair
-    proposal path in readiness, dispatcher, and serial executor. Keep local automation intentionally paused unless the
-    user explicitly resumes it; do not run unattended runner, resume automation, call providers, change env/secrets,
-    alter dependencies or schema, deploy, execute e2e, or execute Cost Calibration Gate. Before continuing implementation
-    work, reread task-queue.yaml; the expected next candidate is batch-111-personal-learning-ai-request-context-local-contract
-    if it remains pending, dependency-complete, and can_autodrive.
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-84-module-run-v2-validation-command-normalization-required-path.md
+    Phase 85 automation activation readiness sync prepared the local activation decision surface. The primary automation
+    prompt now has the required registration anchors, and planned pause is closed in durable state. Local automation is
+    still PAUSED until the user explicitly activates tiku-module-run-v2-autopilot; do not activate
+    tiku-module-run-v2-autopilot-2 or tiku-module-run-v2-mechanic-2. The expected next queued task after activation is
+    batch-111-personal-learning-ai-request-context-local-contract if it remains pending, dependency-complete, and
+    can_autodrive. Keep provider, env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR,
+    force-push, and Cost Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-85-automation-activation-readiness-sync.md

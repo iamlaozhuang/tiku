@@ -1,5 +1,128 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: phase-85-automation-activation-readiness-sync
+    title: Automation activation readiness sync
+    phase: phase-85-automation-activation-readiness-sync
+    sourceStory: mechanism-serial-governance
+    dependencies:
+      - phase-84-module-run-v2-validation-command-normalization-required-path
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-85-automation-activation-readiness-sync.md
+    humanApproval: >-
+      User explicitly approved implementing the phase85 main automation activation readiness sync. This task may update
+      the existing tiku-module-run-v2-autopilot prompt while preserving PAUSED status, close the planned pause in durable
+      state after evidence is written, and prepare a controlled activation decision. It must not activate automation,
+      run the unattended runner, execute e2e, call providers, read or write env/secrets, change schema/migration,
+      change dependencies, deploy, touch payment or external-service surfaces, create or update PRs, force-push, change
+      product code, or execute Cost Calibration Gate.
+    validationProfile: automation-activation-readiness-sync
+    localFullLoopGate: mechanism
+    activationBoundary:
+      activationDuringTask: blocked
+      activationAfterCloseout: user_decision_required
+      primaryAutomationId: tiku-module-run-v2-autopilot
+      blockedAutomationIds:
+        - tiku-module-run-v2-autopilot-2
+        - tiku-module-run-v2-mechanic-2
+    blockedRemainder:
+      - automation activation remains a post-closeout user decision
+      - unattended runner remains blocked during this task
+      - e2e execution remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - e2e
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: blocked_without_task_approval
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: approved_read_only_redacted
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: mechanism_hardening
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - mechanism_hardening
+      - automation_policy
+      - activation_readiness
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationLeaseReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2StoppedAutomationHygiene.ps1 -SummaryOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId batch-111-personal-learning-ai-request-context-local-contract
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2UnattendedReadiness.ps1 -TaskId batch-111-personal-learning-ai-request-context-local-contract -NoWrite -AllowProtectedBranch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.ps1 -SkipAutomationRegistrationCheck -AllowProtectedBranch
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-85-automation-activation-readiness-sync
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-85-automation-activation-readiness-sync
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-85-automation-activation-readiness-sync
+    evidencePath: docs/05-execution-logs/evidence/phase-85-automation-activation-readiness-sync.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-85-automation-activation-readiness-sync.md
+    status: closed
+    retryCount: 0
+
   - id: phase-84-module-run-v2-validation-command-normalization-required-path
     title: Module Run v2 validation command normalization required path
     phase: phase-84-module-run-v2-validation-command-normalization-required-path
