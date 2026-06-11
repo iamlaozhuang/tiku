@@ -164,6 +164,7 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $output -Pattern '^queueDecision: executable_task_found$'
     Assert-Contains -Output $output -Pattern '^nextActionDecision: executable_task_found$'
     Assert-Contains -Output $output -Pattern '^nextExecutableTask: task-a$'
+    Assert-Contains -Output $output -Pattern '^seedProposalDecision: not_checked$'
     Assert-Contains -Output $output -Pattern '^blockedGates:'
     Assert-Contains -Output $output -Pattern '^validationNeeded: 2 command\(s\) for task-a$'
     Assert-Contains -Output $output -Pattern '^statusFindings: .*legacy_status_missing=1; legacy_done=1; .*notBlockingCurrentRun=true$'
@@ -228,6 +229,75 @@ currentTask:
     Assert-Contains -Output $plannedPauseOutput -Pattern '^nextExecutableTask: none$'
     Assert-Contains -Output $plannedPauseOutput -Pattern '^recommendedAction: keep_automation_paused_for_tuning$'
     Assert-Contains -Output $plannedPauseOutput -Pattern '^stopReason: planned_pause_for_tuning$'
+
+    $seedQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-seed.yaml"
+    $seedMatrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix-seed.yaml"
+    @"
+schemaVersion: 1
+tasks:
+  - id: seed-closed
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/seed-closed.md
+"@ | Set-Content -LiteralPath $seedQueuePath -Encoding UTF8
+
+    @"
+schemaVersion: 2
+moduleRunVersion: 2
+mode:
+  firstEligibleImplementationBatchNumber: 101
+sourcePlanningModules:
+  - module: authorization-context
+    sourcePlanningTask: phase-69-advanced-authorization-context-implementation-planning
+    v2ExecutionModule: authorization-and-access
+executionModules:
+  - module: authorization-and-access
+    sourceModules:
+      - authorization-context
+    localFullLoopMinimum: L4
+    targetLocalClosure:
+      - authorization read-model and display contracts
+      - personal_auth and org_auth local summaries
+implementationAutoSeedGate:
+  enabled: true
+localExperienceClosureGate:
+  enabled: true
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $seedMatrixPath -Encoding UTF8
+
+    $seedProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-seed.yaml"
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $sha
+  lastKnownOriginMasterSha: $sha
+currentTask:
+  id: seed-closed
+  status: closed
+  commitSha: $sha
+"@ | Set-Content -LiteralPath $seedProjectStatePath -Encoding UTF8
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $seedOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $seedProjectStatePath `
+                -QueuePath $seedQueuePath `
+                -MatrixPath $seedMatrixPath
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $seedOutput -Pattern '^nextActionDecision: seed_proposal_available$'
+    Assert-Contains -Output $seedOutput -Pattern '^nextExecutableTask: none$'
+    Assert-Contains -Output $seedOutput -Pattern '^seedProposalDecision: proposal_available$'
+    Assert-Contains -Output $seedOutput -Pattern '^seedModule: authorization-and-access$'
+    Assert-Contains -Output $seedOutput -Pattern '^recommendedHumanDecision: approve_auto_seed_or_keep_paused_or_create_manual_task$'
+    Assert-Contains -Output $seedOutput -Pattern '^recommendedAction: request_auto_seed_approval:authorization-and-access$'
 
     $afterProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $afterQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash

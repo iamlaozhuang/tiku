@@ -163,6 +163,57 @@ function Get-GitValue {
     return (($output -join "`n").Trim())
 }
 
+function Get-OutputValue {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Output,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    foreach ($line in $Output) {
+        if ($line -match "^$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return ""
+}
+
+function Invoke-SeedProposalDiagnostic {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectStatePath,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][string]$MatrixPath
+    )
+
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Get-ModuleRunV2ImplementationSeedProposal.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("seedProposalDecision: unavailable", "seedProposalReason: seed proposal script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -ProjectStatePath $ProjectStatePath `
+                -QueuePath $QueuePath `
+                -MatrixPath $MatrixPath 2>&1
+        )
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Test-DependencyTerminal {
     param(
         [Parameter(Mandatory = $true)][object[]]$Blocks,
@@ -377,6 +428,30 @@ if (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
     $validationCommands = @(Get-ListValues -Block $nextTask.Block -Key "validationCommands")
 }
 
+$seedProposalDecision = "not_checked"
+$seedModule = "none"
+$seedRequiredApproval = "none"
+$recommendedHumanDecision = "none"
+$currentTaskTerminal = $currentTaskStatus -in @("done", "closed", "pushed", "merged")
+if ($findings.Count -eq 0 -and [string]::IsNullOrWhiteSpace($nextTaskId) -and $currentTaskTerminal) {
+    $seedProposalResult = Invoke-SeedProposalDiagnostic -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath
+    $seedProposalDecision = Get-OutputValue -Output $seedProposalResult.Output -Key "seedProposalDecision"
+    if ([string]::IsNullOrWhiteSpace($seedProposalDecision)) {
+        $seedProposalDecision = if ($seedProposalResult.ExitCode -eq 0) { "unknown" } else { "unavailable" }
+    }
+    $seedModule = Get-OutputValue -Output $seedProposalResult.Output -Key "seedModule"
+    if ([string]::IsNullOrWhiteSpace($seedModule)) {
+        $seedModule = "none"
+    }
+    $seedRequiredApproval = Get-OutputValue -Output $seedProposalResult.Output -Key "seedRequiredApproval"
+    if ([string]::IsNullOrWhiteSpace($seedRequiredApproval)) {
+        $seedRequiredApproval = "none"
+    }
+    if ($seedProposalDecision -eq "proposal_available") {
+        $recommendedHumanDecision = "approve_auto_seed_or_keep_paused_or_create_manual_task"
+    }
+}
+
 $branchName = Get-GitValue -Arguments @("rev-parse", "--abbrev-ref", "HEAD")
 $headSha = Get-GitValue -Arguments @("rev-parse", "--short", "HEAD")
 $statusOutput = @(git status --porcelain=v1 -uall 2>$null)
@@ -406,6 +481,10 @@ if ($plannedPauseActive) {
     $decision = if ($isDirty) { "executable_task_found_with_dirty_worktree" } else { "executable_task_found" }
     $recommendedAction = if ($isDirty) { "close_current_changes_before_next_task:$nextTaskId" } else { "claim_or_plan_next_task:$nextTaskId" }
     $stopReason = if ($isDirty) { "dirty_worktree_advisory" } else { "none" }
+} elseif ($seedProposalDecision -eq "proposal_available") {
+    $decision = "seed_proposal_available"
+    $recommendedAction = "request_auto_seed_approval:$seedModule"
+    $stopReason = "auto_seed_approval_required"
 } elseif ($blockedReasons.Count -gt 0) {
     $decision = "pending_task_blocked"
     $recommendedAction = "resolve_dependency_or_status_block"
@@ -433,6 +512,10 @@ if (-not [string]::IsNullOrWhiteSpace($plannedPauseReason)) {
 Write-Output "queueDecision: $decision"
 Write-Output "nextActionDecision: $decision"
 Write-Output "nextExecutableTask: $(if ([string]::IsNullOrWhiteSpace($nextTaskId)) { 'none' } else { $nextTaskId })"
+Write-Output "seedProposalDecision: $seedProposalDecision"
+Write-Output "seedModule: $seedModule"
+Write-Output "seedRequiredApproval: $seedRequiredApproval"
+Write-Output "recommendedHumanDecision: $recommendedHumanDecision"
 Write-Output "blockedGates: $(Join-OrNone -Values @($blockedGates))"
 Write-Output "validationNeeded: $(if ($validationCommands.Count -eq 0) { 'none' } else { "$($validationCommands.Count) command(s) for $nextTaskId" })"
 Write-Output "statusFindings: legacy_status_missing=$($queueDiagnostics.MissingStatusIds.Count); legacy_done=$($queueDiagnostics.LegacyDoneIds.Count); unsupportedStatus=$($queueDiagnostics.UnsupportedStatusIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"

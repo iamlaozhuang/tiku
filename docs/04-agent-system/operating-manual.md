@@ -157,4 +157,9 @@ The lower-level next-action diagnostic is:
 .\scripts\agent-system\Get-TikuNextAction.ps1
 ```
 
-The command is read-only. It should summarize repository state, current task, queue decision, next executable task, blocked gates, validation needed, recommended action, and stop reason.
+The command is read-only. It should summarize repository state, current task, queue decision, next executable task,
+blocked gates, validation needed, recommended action, and stop reason.
+
+When no pending task is executable and the current task is terminal, the next-action diagnostic should also summarize
+the guarded Module Run v2 seed proposal as `seedProposalDecision`, `seedModule`, `seedRequiredApproval`, and
+`recommendedHumanDecision`. This is proposal-only. It does not write queue entries or approve implementation.

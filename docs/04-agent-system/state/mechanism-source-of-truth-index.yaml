@@ -139,7 +139,7 @@ scriptControls:
     path: scripts/agent-system/Get-TikuNextAction.ps1
     smokePath: scripts/agent-system/Get-TikuNextAction.Smoke.ps1
     decisionOutput: nextActionDecision
-    role: read-only next-action diagnostic for the active Tiku mechanism; reports repository posture, current task, queue decision, next executable task, validation need, blocked gates, recommended action, and stop reason without claiming tasks or mutating durable state
+    role: read-only next-action diagnostic for the active Tiku mechanism; reports repository posture, current task, queue decision, next executable task, validation need, blocked gates, recommended action, stop reason, planned pause, and proposal-only seed bridge summary without claiming tasks, mutating durable state, applying seed transactions, or executing Cost Calibration Gate
   - id: module-run-v2-unattended-readiness
     path: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1
