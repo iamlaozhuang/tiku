@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: mechanism-serial-governance
-updatedAt: "2026-06-11T08:30:00-07:00"
+updatedAt: "2026-06-11T08:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -249,16 +249,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 97699af3baaf93d4e7803ac64a8ad9cd2a82ecc3
-  lastKnownOriginMasterSha: 97699af3baaf93d4e7803ac64a8ad9cd2a82ecc3
+  lastKnownMasterSha: 2d043e9acf627bc15ddb90005f8d2fb80ceca9d8
+  lastKnownOriginMasterSha: 2d043e9acf627bc15ddb90005f8d2fb80ceca9d8
 currentTask:
-  id: phase-81-local-e2e-approval-smoke-verification
+  id: phase-82-personal-learning-ai-module-run-proposal
   status: closed
-  sourceStory: local-e2e-validation-approval-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-81-local-e2e-approval-smoke-verification.md
-  evidencePath: docs/05-execution-logs/evidence/phase-81-local-e2e-approval-smoke-verification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/phase-81-local-e2e-approval-smoke-verification.md
-  branch: codex/phase-81-local-e2e-smoke
+  sourceStory: personal-learning-ai-experience
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-82-personal-learning-ai-module-run-proposal.md
+  evidencePath: docs/05-execution-logs/evidence/phase-82-personal-learning-ai-module-run-proposal.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/phase-82-personal-learning-ai-module-run-proposal.md
+  branch: codex/phase-82-personal-learning-ai-module-run-proposal
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -296,7 +296,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Local E2E approval mechanism tuning is complete after phase 81 closeout. Keep local automation intentionally paused
-    unless the user explicitly resumes it; do not run unattended runner, resume automation, call providers, change
-    env/secrets, alter dependencies or schema, deploy, or execute Cost Calibration Gate.
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-81-local-e2e-approval-smoke-verification.md
+    Phase 82 seeded the next personal-learning-ai-experience queue chain. Continue manually with
+    batch-109-personal-learning-ai-local-transport-contract-planning first, then only one pending dependency-satisfied
+    task at a time. Keep local automation intentionally paused unless the user explicitly resumes it; do not run
+    unattended runner, resume automation, call providers, change env/secrets, alter dependencies or schema, deploy, or
+    execute Cost Calibration Gate.
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-82-personal-learning-ai-module-run-proposal.md

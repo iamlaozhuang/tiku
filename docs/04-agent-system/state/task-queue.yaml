@@ -10595,3 +10595,856 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/phase-81-local-e2e-approval-smoke-verification.md
     status: closed
     retryCount: 0
+
+  - id: phase-82-personal-learning-ai-module-run-proposal
+    title: Personal learning AI Module Run proposal and queue seed
+    phase: phase-82-personal-learning-ai-module-run-proposal
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - phase-81-local-e2e-approval-smoke-verification
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-82-personal-learning-ai-module-run-proposal.md
+    humanApproval: >-
+      Fresh user approval on 2026-06-11 authorizes this docs-only queue seed proposal for the
+      personal-learning-ai-experience chain and the low-risk queued Module Run v2 tasks it creates. Automation remains
+      paused; unattended runner, PR, force push, dependency/package/lockfile, env/secret, schema/migration, provider,
+      staging/prod/cloud/deploy, payment, external-service, destructive DB, e2e outside explicit local-only existing-spec
+      task approval, and Cost Calibration Gate remain blocked.
+    validationProfile: L0-docs-queue-seed
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    targetLocalFullLoopGate: L5
+    blockedRemainder:
+      - L4 transport/API/contract work remains pending in batch-109 and batch-110
+      - L5 UI/browser and local e2e planning remain pending in batch-113 and batch-114
+      - provider/env/secret/staging/prod/cloud/deploy/payment/external-service readiness remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: docs_only
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_governance
+      - queue_seed
+      - local_experience_closure
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\evidence\phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\audits-reviews\phase-82-personal-learning-ai-module-run-proposal.md
+      - phase: post_edit
+        command: node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\evidence\phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\audits-reviews\phase-82-personal-learning-ai-module-run-proposal.md
+      - phase: post_edit
+        command: Select-String -Path docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\phase-82-personal-learning-ai-module-run-proposal.md,docs\05-execution-logs\audits-reviews\phase-82-personal-learning-ai-module-run-proposal.md -Pattern 'personal-learning-ai-experience','localExperienceAcceptanceBridgeApproved','local_api_or_server_action_contract','local_ui_browser','approved_local_only_existing_specs','Cost Calibration Gate remains blocked'
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId phase-82-personal-learning-ai-module-run-proposal
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-82-personal-learning-ai-module-run-proposal
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-82-personal-learning-ai-module-run-proposal
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\evidence\phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\audits-reviews\phase-82-personal-learning-ai-module-run-proposal.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\evidence\phase-82-personal-learning-ai-module-run-proposal.md docs\05-execution-logs\audits-reviews\phase-82-personal-learning-ai-module-run-proposal.md
+      - Select-String -Path docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\phase-82-personal-learning-ai-module-run-proposal.md,docs\05-execution-logs\audits-reviews\phase-82-personal-learning-ai-module-run-proposal.md -Pattern 'personal-learning-ai-experience','localExperienceAcceptanceBridgeApproved','local_api_or_server_action_contract','local_ui_browser','approved_local_only_existing_specs','Cost Calibration Gate remains blocked'
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId phase-82-personal-learning-ai-module-run-proposal
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-82-personal-learning-ai-module-run-proposal
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-82-personal-learning-ai-module-run-proposal
+    evidencePath: docs/05-execution-logs/evidence/phase-82-personal-learning-ai-module-run-proposal.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-82-personal-learning-ai-module-run-proposal.md
+    status: closed
+    retryCount: 0
+
+  - id: batch-109-personal-learning-ai-local-transport-contract-planning
+    title: Personal learning AI local transport contract planning
+    phase: batch-109-personal-learning-ai-local-transport-contract-planning
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - phase-82-personal-learning-ai-module-run-proposal
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-109-personal-learning-ai-local-transport-contract-planning.md
+    humanApproval: >-
+      Seeded by phase82 with user approval for low-risk personal-learning-ai-experience Module Run v2 tasks. This task is
+      docs-only planning for the L4 local_api_or_server_action_contract bridge and must not implement product code.
+    localExperienceAcceptanceBridgeApproved: >-
+      localExperienceAcceptanceBridgeApproved: phase82 authorizes planning the personal-learning-ai-experience L4 bridge;
+      implementation touching API, Server Action, repository, mapper, UI/browser, or e2e surfaces remains limited to
+      explicitly queued follow-up tasks with matching allowedFiles and blockedFiles.
+    validationProfile: L4-local-transport-contract-planning
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L4
+    targetLocalFullLoopGate: L4
+    blockedRemainder:
+      - L4 implementation remains batch-110
+      - L5 UI/browser planning remains batch-113
+      - local e2e remains blocked until a task explicitly declares approved localE2EValidation
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: docs_only
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_governance
+      - local_transport_contract_planning
+      - local_experience_closure
+      - evidence_redaction
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-batch-109-personal-learning-ai-local-transport-contract-planning.md docs\05-execution-logs\evidence\batch-109-personal-learning-ai-local-transport-contract-planning.md docs\05-execution-logs\audits-reviews\batch-109-personal-learning-ai-local-transport-contract-planning.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-11-batch-109-personal-learning-ai-local-transport-contract-planning.md,docs\05-execution-logs\evidence\batch-109-personal-learning-ai-local-transport-contract-planning.md,docs\05-execution-logs\audits-reviews\batch-109-personal-learning-ai-local-transport-contract-planning.md -Pattern 'personal-learning-ai-experience','local_api_or_server_action_contract','localExperienceAcceptanceBridgeApproved','authorization','paper','mock_exam','ai_call_log','Cost Calibration Gate remains blocked'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/batch-109-personal-learning-ai-local-transport-contract-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-109-personal-learning-ai-local-transport-contract-planning.md
+    status: pending
+    retryCount: 0
+
+  - id: batch-110-personal-learning-ai-local-transport-contract
+    title: Personal learning AI local transport contract
+    phase: batch-110-personal-learning-ai-local-transport-contract
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-109-personal-learning-ai-local-transport-contract-planning
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-110-personal-learning-ai-local-transport-contract.md
+    humanApproval: >-
+      Seeded by phase82 with user approval for low-risk personal-learning-ai-experience Module Run v2 tasks. This task may
+      implement a local-only L4 transport/API/contract bridge when batch-109 confirms the exact contract and no blocked
+      high-risk surface is required.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved phase82 seed for low-risk personal-learning-ai local
+      implementation tasks only. standingUnattendedLocalCloseoutApproval permits local commit, fast-forward merge to
+      master, push origin/master, merged short-branch cleanup, and worktree parking when all gates pass. High-risk
+      capability gates remain blocked.
+    localExperienceAcceptanceBridgeApproved: >-
+      localExperienceAcceptanceBridgeApproved: phase82 authorizes this scoped personal-learning-ai L4 transport/API
+      contract task only within the allowed files and only without provider/env/schema/deploy/dependency/e2e work.
+    seededByTask: phase-82-personal-learning-ai-module-run-proposal
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: personal-learning-ai local transport/API contract for redacted request and result reference
+    behaviorBoundary: personal-learning-ai::local transport/API contract
+    requirementRefs:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+      - docs/05-execution-logs/task-plans/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+    useCases:
+      - student can locally target a redacted personal AI request/result-reference contract without provider execution
+    acceptanceScenarios:
+      - L4 local_api_or_server_action_contract validates standard response shape, public identifiers, and redacted fields
+        without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - real provider calls, provider configuration, raw generated AI content, schema/migration, dependency, env/secret,
+        e2e, staging/prod/cloud/deploy, payment, external-service, and Cost Calibration Gate execution
+    validationProfile: L4-local-transport-contract
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L4
+    blockedRemainder:
+      - L5 UI/browser remains batch-113
+      - local e2e remains batch-114 planning only until explicitly approved
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - src/server/mappers/**
+      - src/app/api/v1/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_implementation
+      - local_transport_contract
+      - api_contract
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor, replace with scoped unit test in task plan
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract
+    evidencePath: docs/05-execution-logs/evidence/batch-110-personal-learning-ai-local-transport-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-110-personal-learning-ai-local-transport-contract.md
+    status: pending
+    retryCount: 0
+
+  - id: batch-111-personal-learning-ai-request-context-local-contract
+    title: Personal learning AI request context local contract
+    phase: batch-111-personal-learning-ai-request-context-local-contract
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-110-personal-learning-ai-local-transport-contract
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-111-personal-learning-ai-request-context-local-contract.md
+    humanApproval: >-
+      Seeded by phase82 for low-risk personal-learning-ai local contract implementation after the L4 transport boundary
+      is established. No provider/env/schema/deploy/dependency/e2e work is approved.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved phase82 seed for low-risk personal-learning-ai local
+      implementation tasks only. High-risk capability gates remain blocked.
+    seededByTask: phase-82-personal-learning-ai-module-run-proposal
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: personal generation request flow and paper/mock_exam context selection
+    behaviorBoundary: personal-learning-ai::request flow and paper/mock_exam context selection
+    requirementRefs:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    useCases:
+      - validate personal generation request flow and `paper` or `mock_exam` context selection with redacted local
+        contracts
+    acceptanceScenarios:
+      - request context contract passes focused unit validation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - real provider calls, provider configuration, raw prompt, raw generated AI content, schema/migration, dependency,
+        env/secret, e2e, staging/prod/cloud/deploy, payment, external-service, and Cost Calibration Gate execution
+    validationProfile: L2-local-contract
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L2
+    blockedRemainder:
+      - L5 UI/browser remains batch-113
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_implementation
+      - local_contract
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor, replace with scoped unit test in task plan
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-111-personal-learning-ai-request-context-local-contract
+    evidencePath: docs/05-execution-logs/evidence/batch-111-personal-learning-ai-request-context-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-111-personal-learning-ai-request-context-local-contract.md
+    status: pending
+    retryCount: 0
+
+  - id: batch-112-personal-learning-ai-redacted-result-reference-local-contract
+    title: Personal learning AI redacted result reference local contract
+    phase: batch-112-personal-learning-ai-redacted-result-reference-local-contract
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-111-personal-learning-ai-request-context-local-contract
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
+    humanApproval: >-
+      Seeded by phase82 for low-risk personal-learning-ai redacted result reference implementation. No raw generated AI
+      content, provider/env/schema/deploy/dependency/e2e work is approved.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved phase82 seed for low-risk personal-learning-ai local
+      implementation tasks only. High-risk capability gates remain blocked.
+    seededByTask: phase-82-personal-learning-ai-module-run-proposal
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: redacted ai_call_log reference without storing raw generated AI content
+    behaviorBoundary: personal-learning-ai::redacted result reference and ai_call_log summary
+    requirementRefs:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+      - docs/superpowers/specs/2026-06-06-advanced-edition-ops-config-contract.md
+    useCases:
+      - validate redacted result reference and `ai_call_log` summary contract for personal AI learning tasks
+    acceptanceScenarios:
+      - redacted result reference contract passes focused unit validation without raw generated AI content or provider
+        payload exposure
+    nonGoals:
+      - real provider calls, provider configuration, raw prompt, raw generated AI content, provider payload,
+        schema/migration, dependency, env/secret, e2e, staging/prod/cloud/deploy, payment, external-service, and Cost
+        Calibration Gate execution
+    validationProfile: L2-local-contract
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L2
+    blockedRemainder:
+      - L5 UI/browser remains batch-113
+      - local e2e remains planning-only in batch-114
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - tests/unit/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_implementation
+      - local_contract
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor, replace with scoped unit test in task plan
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-112-personal-learning-ai-redacted-result-reference-local-contract
+    evidencePath: docs/05-execution-logs/evidence/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
+    status: pending
+    retryCount: 0
+
+  - id: batch-113-personal-learning-ai-local-ui-browser-planning
+    title: Personal learning AI local UI browser planning
+    phase: batch-113-personal-learning-ai-local-ui-browser-planning
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-112-personal-learning-ai-redacted-result-reference-local-contract
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-113-personal-learning-ai-local-ui-browser-planning.md
+    humanApproval: >-
+      Seeded by phase82 for docs-only L5 UI/browser planning after L4 and redacted local contracts. This task must not
+      edit UI code or run browser/e2e verification.
+    localExperienceAcceptanceBridgeApproved: >-
+      localExperienceAcceptanceBridgeApproved: phase82 authorizes planning the personal-learning-ai-experience L5
+      UI/browser bridge only; implementation touching `src/app/(student)/**` or browser verification remains limited to
+      future explicitly queued tasks.
+    validationProfile: L5-local-ui-browser-planning
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    targetLocalFullLoopGate: L5
+    blockedRemainder:
+      - UI implementation remains blocked until a future task names exact student surfaces
+      - browser verification remains blocked until a future task names exact command and redacted evidence
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: docs_only
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_governance
+      - local_ui_browser_planning
+      - local_experience_closure
+      - evidence_redaction
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-batch-113-personal-learning-ai-local-ui-browser-planning.md docs\05-execution-logs\evidence\batch-113-personal-learning-ai-local-ui-browser-planning.md docs\05-execution-logs\audits-reviews\batch-113-personal-learning-ai-local-ui-browser-planning.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-11-batch-113-personal-learning-ai-local-ui-browser-planning.md,docs\05-execution-logs\evidence\batch-113-personal-learning-ai-local-ui-browser-planning.md,docs\05-execution-logs\audits-reviews\batch-113-personal-learning-ai-local-ui-browser-planning.md -Pattern 'personal-learning-ai-experience','local_ui_browser','localExperienceAcceptanceBridgeApproved','authorization','paper','mock_exam','ai_call_log','Cost Calibration Gate remains blocked'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/batch-113-personal-learning-ai-local-ui-browser-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-113-personal-learning-ai-local-ui-browser-planning.md
+    status: pending
+    retryCount: 0
+
+  - id: batch-114-personal-learning-ai-local-e2e-smoke-planning
+    title: Personal learning AI local E2E smoke planning
+    phase: batch-114-personal-learning-ai-local-e2e-smoke-planning
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-113-personal-learning-ai-local-ui-browser-planning
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+    humanApproval: >-
+      Seeded by phase82 for docs-only local E2E smoke planning. This task must not run Playwright and must only identify
+      whether a future existing local spec can satisfy the localE2EValidation approval boundary.
+    localExperienceAcceptanceBridgeApproved: >-
+      localExperienceAcceptanceBridgeApproved: phase82 authorizes planning the personal-learning-ai-experience local e2e
+      bridge only; Playwright execution requires a future task with capabilities.localE2EValidation:
+      approved_local_only_existing_specs and explicit whitelisted commands.
+    validationProfile: L5-local-e2e-planning
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    targetLocalFullLoopGate: L5
+    blockedRemainder:
+      - Playwright execution remains blocked until a future task explicitly declares approved localE2EValidation
+      - full e2e suite, headed/debug/UI e2e, and non-existing specs remain blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: docs_only
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_governance
+      - local_e2e_validation_planning
+      - local_experience_closure
+      - evidence_redaction
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-batch-114-personal-learning-ai-local-e2e-smoke-planning.md docs\05-execution-logs\evidence\batch-114-personal-learning-ai-local-e2e-smoke-planning.md docs\05-execution-logs\audits-reviews\batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+      - Select-String -Path docs\05-execution-logs\task-plans\2026-06-11-batch-114-personal-learning-ai-local-e2e-smoke-planning.md,docs\05-execution-logs\evidence\batch-114-personal-learning-ai-local-e2e-smoke-planning.md,docs\05-execution-logs\audits-reviews\batch-114-personal-learning-ai-local-e2e-smoke-planning.md -Pattern 'personal-learning-ai-experience','approved_local_only_existing_specs','localE2EValidation','authorization','paper','mock_exam','ai_call_log','Cost Calibration Gate remains blocked'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+    status: pending
+    retryCount: 0
