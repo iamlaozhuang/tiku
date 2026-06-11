@@ -129,7 +129,8 @@ Then run broader gates as relevant:
 - Prettier check for changed docs and formatted files;
 - `lint` and `typecheck` for source-affecting tasks;
 - unit tests for changed services, validators, mappers, repositories, or utilities;
-- e2e or browser verification for changed user flows;
+- e2e or browser verification for changed user flows, only when the task explicitly declares the matching local browser
+  or `localE2EValidation: approved_local_only_existing_specs` capability or carries fresh approval;
 - build when routes, Next.js pages, shared contracts, or runtime wiring change;
 - naming convention checks when API, route, service, contract, or mapper surfaces change.
 
@@ -191,6 +192,10 @@ Evidence must not contain:
 - employee subjective answer text;
 - full `paper` content;
 - raw generated AI content that should not be visible to ordinary operations views.
+
+For local e2e validation, evidence must be reduced to command, pass/fail status, spec name, and test count. It must not
+embed screenshots, traces, HTML reports, page text, credentials, local storage/session contents, raw DB rows, or browser
+debug output.
 
 ## Commit Gate
 

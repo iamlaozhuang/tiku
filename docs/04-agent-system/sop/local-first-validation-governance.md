@@ -116,6 +116,39 @@ payment, or external-service settings.
 Cost Calibration Gate remains blocked. A redacted, user-approved local provider sandbox call is not provider cost
 calibration and is not approval for staging/prod provider readiness.
 
+## Local E2E Validation Approval
+
+Module Run v2 may run local Playwright e2e validation only when a queued task explicitly declares:
+
+```yaml
+capabilities:
+  localE2EValidation: approved_local_only_existing_specs
+validationProfile: L5-local-e2e
+localFullLoopGate: L5
+```
+
+The standing approval is intentionally local-only and spec-targeted. It allows only:
+
+- `npm.cmd run test:e2e -- --list`
+- `npm.cmd run test:e2e -- e2e/<existing-spec>.spec.ts`
+
+The target spec must already exist under `e2e/**`, and execution must stay on `localhost` or `127.0.0.1` through the
+existing Playwright configuration. Evidence may record only the command, pass/fail status, spec name, and test count.
+Screenshots, traces, HTML reports, page text, raw prompts, provider payloads, DB rows, credentials, tokens, database
+URLs, Authorization headers, cleartext `redeem_code`, and full `paper` or `material` content must not be recorded or
+committed.
+
+The approval does not make e2e a default gate for ordinary tasks. These remain blocked without fresh task-specific
+approval:
+
+- full-suite default `npm.cmd run test:e2e`;
+- `npm.cmd run test:e2e:ui`, headed mode, debug mode, or inspector-driven e2e;
+- non-existing specs, paths outside `e2e/**`, or generated e2e artifacts;
+- env/secret, provider, dependency, schema/migration, destructive DB, staging/prod/cloud/deploy, payment, or
+  external-service work.
+
+Cost Calibration Gate remains blocked.
+
 ## Mock, Fixture, And Local Labels
 
 Evidence must label incomplete or non-real behavior precisely:

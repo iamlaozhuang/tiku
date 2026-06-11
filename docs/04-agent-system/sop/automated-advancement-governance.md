@@ -890,6 +890,37 @@ configuration, destructive database work, e2e, external-service actions, deploy,
 Cost Calibration Gate execution. Those still require fresh task-specific approval and must pass the local capability
 gate before any action.
 
+## Standing Local E2E Validation Approval
+
+`project-state.yaml` may record a durable
+`automation.unattendedControl.standingLocalE2EValidationApproval`. This approval is not a general automation approval
+and does not remove e2e from the standing unattended local closeout blocked list.
+
+It can be consumed only by a queued task that explicitly records:
+
+```yaml
+capabilities:
+  localE2EValidation: approved_local_only_existing_specs
+validationProfile: L5-local-e2e
+localFullLoopGate: L5
+```
+
+The executable command surface is limited to local-only existing Playwright specs:
+
+```powershell
+npm.cmd run test:e2e -- --list
+npm.cmd run test:e2e -- e2e/<existing-spec>.spec.ts
+```
+
+The task must keep `blockedFiles` coverage for env/secret files, dependency and lock files, schema/migration surfaces,
+provider configuration, generated e2e artifacts, and out-of-scope source files. Evidence must be redacted to command,
+pass/fail status, spec name, and test count only.
+
+This approval does not approve full-suite default e2e, `test:e2e:ui`, headed/debug browser mode, non-existing specs,
+paths outside `e2e/**`, env/secret access, provider calls, staging/prod/cloud/deploy work, dependency changes,
+schema/migration work, destructive DB work, payment, external-service actions, PR creation, force push, or Cost
+Calibration Gate execution.
+
 ## Blocked Gate Enforcement
 
 The following remain blocked unless a task records fresh explicit approval:

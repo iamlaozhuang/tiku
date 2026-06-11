@@ -239,6 +239,21 @@ capabilities:
     schemaMigration:
       default: blocked_without_task_approval
       approvedValue: approved_migration_plan
+    localE2EValidation:
+      default: blocked_without_task_approval
+      approvedValue: approved_local_only_existing_specs
+      allowedCommands:
+        - npm.cmd run test:e2e -- --list
+        - npm.cmd run test:e2e -- e2e/<existing-spec>.spec.ts
+      blockedActions:
+        - full_e2e_suite_by_default
+        - e2e_ui_or_debug_mode
+        - headed_browser_mode
+        - non_existing_or_non_e2e_spec
+        - env_secret_access
+        - staging_prod_connection
+        - provider_call
+        - committed_e2e_artifacts
     costCalibrationGate:
       default: blocked
       approvedValue: not_supported_by_default
@@ -358,6 +373,41 @@ standingLocalSchemaMigrationApproval:
     - external_service
     - cost_calibration_gate
   executionRule: Standing schema/migration approval may be consumed only by a scoped task that explicitly records schemaMigration approved_migration_plan and passes the local capability gate. It does not approve destructive DB work, drizzle-kit push, env/secret access, staging/prod/cloud connections, dependency changes, or deployment.
+standingLocalE2EValidationApproval:
+  statePath: docs/04-agent-system/state/project-state.yaml
+  durableKey: automation.unattendedControl.standingLocalE2EValidationApproval
+  requiredStatus: approved
+  approvedTaskCapabilityValue: approved_local_only_existing_specs
+  allowedLocalActions:
+    - run_e2e_list
+    - run_targeted_existing_e2e_spec
+    - write_redacted_e2e_evidence
+  allowedCommands:
+    - npm.cmd run test:e2e -- --list
+    - npm.cmd run test:e2e -- e2e/<existing-spec>.spec.ts
+  requiredGates:
+    - task validationCommands or validationCommandLifecycle explicitly names the local e2e command
+    - capabilities.localE2EValidation: approved_local_only_existing_specs
+    - existing spec under e2e/**
+    - localhost or 127.0.0.1 only
+    - scoped allowedFiles and blockedFiles
+    - redacted evidence summary only
+  blockedWithoutFreshTaskApproval:
+    - full_e2e_suite
+    - e2e_ui_or_debug_mode
+    - headed_browser_mode
+    - non_existing_or_non_e2e_spec
+    - env_secret
+    - provider_call
+    - provider_configuration
+    - dependency_package_lockfile_change
+    - schema_migration
+    - destructive_database_operation
+    - staging_prod_cloud_deploy
+    - external_service
+    - payment
+    - cost_calibration_gate
+  executionRule: Standing local E2E validation approval may be consumed only by a scoped task that explicitly records localE2EValidation approved_local_only_existing_specs and uses the local-only command whitelist. It does not remove e2e from the default high-risk blocked gates and does not approve full-suite default runs, headed/debug/UI mode, env/secret access, provider calls, staging/prod/cloud/deploy work, dependency changes, schema/migration work, generated artifact commits, payment, external-service actions, or Cost Calibration Gate execution.
 taskScopedDestructiveLocalDockerDbApproval:
   statePath: docs/04-agent-system/state/project-state.yaml
   durableKey: automation.unattendedControl.taskScopedDestructiveLocalDockerDbApproval
@@ -524,6 +574,7 @@ forbiddenClaims:
   - This schema does not approve env or secret writes.
   - This schema does not approve provider calls.
   - This schema approves schema/migration only through standingLocalSchemaMigrationApproval plus task-scoped approved_migration_plan and capability gates.
+  - This schema approves local e2e validation only through standingLocalE2EValidationApproval plus task-scoped approved_local_only_existing_specs and local-only command gates.
   - This schema approves destructive local Docker DB only through taskScopedDestructiveLocalDockerDbApproval plus task-scoped approved_destructive_local_dev_only and capability gates.
   - This schema does not approve dependency, deploy, PR, force push, staging/prod/cloud DB, env/secret, provider, or Cost Calibration Gate execution.
   - This schema approves push only through task-scoped closeoutPolicy materialized from standingUnattendedLocalCloseoutApproval or fresh task-specific approval, after all readiness and pre-push gates pass.
