@@ -246,6 +246,165 @@ function Test-RequiredListValues {
     }
 }
 
+function Test-ListContainsPathPattern {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Values,
+        [Parameter(Mandatory = $true)][string]$ExpectedPattern
+    )
+
+    $normalizedExpectedPattern = $ExpectedPattern.Replace("\", "/").TrimStart(".", "/")
+    foreach ($value in $Values) {
+        $normalizedValue = $value.Replace("\", "/").TrimStart(".", "/")
+        if ($normalizedValue -eq $normalizedExpectedPattern) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-ProjectStateHasStandingLocalE2EApproval {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $content = $Lines -join "`n"
+    return $content -match "(?s)standingLocalE2EValidationApproval:\s*.*?status:\s*approved"
+}
+
+function Get-AllValidationCommandTexts {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$ValidationLifecycleCommands
+    )
+
+    $commands = New-Object System.Collections.Generic.List[string]
+    foreach ($validationCommand in $ValidationCommands) {
+        if (-not [string]::IsNullOrWhiteSpace($validationCommand)) {
+            $commands.Add($validationCommand.Trim())
+        }
+    }
+    foreach ($validationLifecycleCommand in $ValidationLifecycleCommands) {
+        if ($null -ne $validationLifecycleCommand -and -not [string]::IsNullOrWhiteSpace($validationLifecycleCommand.Command)) {
+            $commands.Add($validationLifecycleCommand.Command.Trim())
+        }
+    }
+
+    return @($commands.ToArray() | Sort-Object -Unique)
+}
+
+function Test-LocalE2ECommandAllowed {
+    param([Parameter(Mandatory = $true)][string]$Command)
+
+    $trimmedCommand = $Command.Trim()
+    if ($trimmedCommand -match "npm\.cmd\s+run\s+test:e2e:ui\b" -or
+        $trimmedCommand -match "(^|\s)--(ui|headed|debug)\b" -or
+        $trimmedCommand -match "\bplaywright\s+test\b") {
+        return [pscustomobject]@{
+            Allowed = $false
+            Reason = "blocked mode"
+            SpecPath = ""
+        }
+    }
+
+    if ($trimmedCommand -match "^npm\.cmd\s+run\s+test:e2e\s+--\s+--list\s*$") {
+        return [pscustomobject]@{
+            Allowed = $true
+            Reason = "list"
+            SpecPath = ""
+        }
+    }
+
+    $targetedSpecMatch = [regex]::Match($trimmedCommand, "^npm\.cmd\s+run\s+test:e2e\s+--\s+(e2e/[A-Za-z0-9._/-]+\.spec\.ts)\s*$")
+    if (-not $targetedSpecMatch.Success) {
+        return [pscustomobject]@{
+            Allowed = $false
+            Reason = "not whitelisted"
+            SpecPath = ""
+        }
+    }
+
+    $specPath = $targetedSpecMatch.Groups[1].Value
+    if ($specPath -match "\.\." -or -not (Test-Path -LiteralPath $specPath -PathType Leaf)) {
+        return [pscustomobject]@{
+            Allowed = $false
+            Reason = "missing or unsafe spec"
+            SpecPath = $specPath
+        }
+    }
+
+    return [pscustomobject]@{
+        Allowed = $true
+        Reason = "targeted existing spec"
+        SpecPath = $specPath
+    }
+}
+
+function Test-LocalE2EValidationGate {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ProjectStateLines,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$ValidationLifecycleCommands,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedFiles
+    )
+
+    $allCommands = @(Get-AllValidationCommandTexts -ValidationCommands $ValidationCommands -ValidationLifecycleCommands $ValidationLifecycleCommands)
+    $localE2ECommands = @(
+        $allCommands | Where-Object {
+            $_ -match "npm\.cmd\s+run\s+test:e2e\b" -or
+            $_ -match "npm\.cmd\s+run\s+test:e2e:ui\b" -or
+            $_ -match "^npm\.cmd\s+run\s+test(\s|$)" -or
+            $_ -match "\bplaywright\s+test\b"
+        }
+    )
+
+    if ($localE2ECommands.Count -eq 0) {
+        if (Test-TaskBlockContains -Block $TaskBlock -Pattern "(?m)^\s+localE2EValidation:\s*") {
+            if (-not (Test-TaskBlockContains -Block $TaskBlock -Pattern "(?m)^\s+localE2EValidation:\s*(blocked_without_task_approval|approved_local_only_existing_specs)\s*$")) {
+                Add-Finding "HARD_BLOCK_LOCAL_E2E_CAPABILITY"
+            }
+        }
+        return
+    }
+
+    if (-not (Test-ProjectStateHasStandingLocalE2EApproval -Lines $ProjectStateLines)) {
+        Add-Finding "HARD_BLOCK_LOCAL_E2E_STANDING_APPROVAL"
+    }
+
+    if (-not (Test-TaskBlockContains -Block $TaskBlock -Pattern "(?m)^\s+localE2EValidation:\s*approved_local_only_existing_specs\s*$")) {
+        Add-Finding "HARD_BLOCK_LOCAL_E2E_CAPABILITY"
+    }
+
+    foreach ($localE2ECommand in $localE2ECommands) {
+        $commandDecision = Test-LocalE2ECommandAllowed -Command $localE2ECommand
+        if (-not $commandDecision.Allowed) {
+            if ($commandDecision.Reason -eq "missing or unsafe spec") {
+                Add-Finding "HARD_BLOCK_LOCAL_E2E_SPEC $($commandDecision.SpecPath)"
+            } else {
+                Add-Finding "HARD_BLOCK_LOCAL_E2E_COMMAND $localE2ECommand"
+            }
+        } else {
+            Write-Output "OK_LOCAL_E2E_COMMAND $localE2ECommand"
+        }
+    }
+
+    foreach ($requiredBlockedFile in @(
+            ".env.local",
+            ".env.example",
+            "package.json",
+            "pnpm-lock.yaml",
+            "package-lock.yaml",
+            "package-lock.json",
+            "src/db/schema/**",
+            "drizzle/**",
+            "playwright-report/**",
+            "test-results/**"
+        )) {
+        if (-not (Test-ListContainsPathPattern -Values $BlockedFiles -ExpectedPattern $requiredBlockedFile)) {
+            Add-Finding "HARD_BLOCK_LOCAL_E2E_BLOCKED_FILES $requiredBlockedFile"
+        }
+    }
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 
 try {
@@ -438,6 +597,7 @@ try {
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+schemaMigration:\s*(blocked_without_task_approval|approved_migration_plan)\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_SCHEMA_MIGRATION"
     }
+    Test-LocalE2EValidationGate -ProjectStateLines $projectStateLines -TaskBlock $taskBlock -ValidationCommands $validationCommands -ValidationLifecycleCommands $validationLifecycleCommands -BlockedFiles $blockedFiles
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+costCalibrationGate:\s*blocked\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_COST_CALIBRATION_GATE"
     }

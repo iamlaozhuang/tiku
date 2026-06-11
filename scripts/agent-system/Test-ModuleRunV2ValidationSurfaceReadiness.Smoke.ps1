@@ -75,6 +75,32 @@ tasks:
 "@ | Set-Content -LiteralPath $Path -Encoding UTF8
 }
 
+function Write-E2ESmokeQueue {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$TaskId
+    )
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: $TaskId
+    status: ready_for_closeout
+    taskKind: local_verification
+    moduleRunVersion: 2
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- e2e/home.spec.ts
+      - phase: closeout
+        command: git diff --check
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/home.spec.ts
+      - git diff --check
+    evidencePath: evidence.md
+    auditReviewPath: audit.md
+"@ | Set-Content -LiteralPath $Path -Encoding UTF8
+}
+
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ValidationSurfaceReadiness.ps1"
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing validation surface readiness script: $scriptPath"
@@ -160,6 +186,69 @@ APPROVE: No blocking findings.
     Assert-Contains -Output $structuredOutput -Pattern "validationSurfaceBroadGate: advisory_unrelated_baseline_failure"
     Assert-Contains -Output $structuredOutput -Pattern "closeoutTransactionState: closeout_ready"
     Assert-Contains -Output $structuredOutput -Pattern "ownerRecoveryDecision: no_owner_recovery_needed"
+
+    $e2eQueuePath = Join-Path -Path $smokeRoot -ChildPath "e2e-queue.yaml"
+    $e2eEvidencePath = Join-Path -Path $smokeRoot -ChildPath "e2e-evidence.md"
+    $e2eAuditPath = Join-Path -Path $smokeRoot -ChildPath "e2e-audit.md"
+    Write-E2ESmokeQueue -Path $e2eQueuePath -TaskId "phase-81"
+    @"
+result: pass
+Batch 81:
+RED: local e2e evidence was not recognized by validation surface readiness.
+GREEN: local e2e passed, spec e2e/home.spec.ts, tests 3.
+npm.cmd run test:e2e -- e2e/home.spec.ts: pass
+git diff --check: pass
+Commit: `1234567890abcdef1234567890abcdef12345678`
+localFullLoopGate: L5
+blocked remainder: full e2e suite remains blocked.
+threadRolloverGate: continue current thread.
+nextModuleRunCandidate: none.
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $e2eEvidencePath -Encoding UTF8
+    @"
+APPROVE: No blocking findings.
+"@ | Set-Content -LiteralPath $e2eAuditPath -Encoding UTF8
+
+    $e2eOutput = @(
+        & powershell.exe `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File $scriptPath `
+            -TaskId "phase-81" `
+            -QueuePath $e2eQueuePath `
+            -EvidencePath $e2eEvidencePath `
+            -AuditReviewPath $e2eAuditPath
+    )
+    Assert-Contains -Output $e2eOutput -Pattern "validationSurfaceDecision: focused_validation_satisfied"
+    Assert-Contains -Output $e2eOutput -Pattern "closeoutTransactionState: closeout_ready"
+
+    $failedE2EEvidencePath = Join-Path -Path $smokeRoot -ChildPath "e2e-failed-evidence.md"
+    @"
+result: fail
+Batch 81:
+RED: local e2e failed.
+GREEN: not reached.
+npm.cmd run test:e2e -- e2e/home.spec.ts: failed
+git diff --check: pass
+Commit: `1234567890abcdef1234567890abcdef12345678`
+localFullLoopGate: L5
+blocked remainder: local e2e smoke failed.
+threadRolloverGate: continue current thread.
+nextModuleRunCandidate: none.
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $failedE2EEvidencePath -Encoding UTF8
+
+    $failedE2EOutput = @(
+        & powershell.exe `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File $scriptPath `
+            -TaskId "phase-81" `
+            -QueuePath $e2eQueuePath `
+            -EvidencePath $failedE2EEvidencePath `
+            -AuditReviewPath $e2eAuditPath
+    )
+    Assert-Contains -Output $failedE2EOutput -Pattern "validationSurfaceDecision: validation_surface_incomplete"
 } finally {
     if (Test-Path -LiteralPath $smokeRoot) {
         Remove-Item -LiteralPath $smokeRoot -Recurse -Force

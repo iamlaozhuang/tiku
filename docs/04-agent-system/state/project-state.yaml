@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: mechanism-serial-governance
-updatedAt: "2026-06-11T07:14:01-07:00"
+updatedAt: "2026-06-11T08:02:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -249,16 +249,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 73bd6845d9c07f04a5a520639c7ea33b62497490
-  lastKnownOriginMasterSha: 73bd6845d9c07f04a5a520639c7ea33b62497490
+  lastKnownMasterSha: 66f241c88996ea43b6bb8872747f89980d9ea8fd
+  lastKnownOriginMasterSha: 66f241c88996ea43b6bb8872747f89980d9ea8fd
 currentTask:
-  id: phase-79-local-e2e-validation-approval-governance
+  id: phase-80-module-run-v2-local-e2e-capability-gates
   status: closed
   sourceStory: local-e2e-validation-approval-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-79-local-e2e-validation-approval-governance.md
-  evidencePath: docs/05-execution-logs/evidence/phase-79-local-e2e-validation-approval-governance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/phase-79-local-e2e-validation-approval-governance.md
-  branch: codex/phase-79-local-e2e-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-80-module-run-v2-local-e2e-capability-gates.md
+  evidencePath: docs/05-execution-logs/evidence/phase-80-module-run-v2-local-e2e-capability-gates.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/phase-80-module-run-v2-local-e2e-capability-gates.md
+  branch: codex/phase-80-local-e2e-gates
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -296,7 +296,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Continue serially with phase-80-module-run-v2-local-e2e-capability-gates after phase 79 closeout. Keep local
-    automation intentionally paused; do not run unattended runner, resume automation, call providers, change
-    env/secrets, alter dependencies or schema, deploy, or execute Cost Calibration Gate.
-  lastSummaryPath: docs/05-execution-logs/evidence/phase-79-local-e2e-validation-approval-governance.md
+    Continue serially with phase-81-local-e2e-approval-smoke-verification after phase 80 closeout. Keep local automation
+    intentionally paused; do not run unattended runner, resume automation, call providers, change env/secrets, alter
+    dependencies or schema, deploy, or execute Cost Calibration Gate.
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-80-module-run-v2-local-e2e-capability-gates.md

@@ -49,17 +49,30 @@ function New-SmokeRoot {
 function Write-SmokeFiles {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
-        [Parameter(Mandatory = $true)][string]$TaskBlock
+        [Parameter(Mandatory = $true)][string]$TaskBlock,
+        [Parameter(Mandatory = $false)][switch]$WithoutStandingLocalE2EApproval
     )
 
     $statePath = Join-Path -Path $Root -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $Root -ChildPath "task-queue.yaml"
     $schemaPath = Join-Path -Path $Root -ChildPath "autodrive-control-schema.yaml"
 
+    $standingLocalE2EApprovalBlock = if ($WithoutStandingLocalE2EApproval) {
+        ""
+    } else {
+        @"
+automation:
+  unattendedControl:
+    standingLocalE2EValidationApproval:
+      status: approved
+"@
+    }
+
     @"
 schemaVersion: 1
 currentTask:
   id: smoke-task
+$standingLocalE2EApprovalBlock
 "@ | Set-Content -LiteralPath $statePath -Encoding UTF8
 
     @"
@@ -134,6 +147,7 @@ try {
       providerKey: env_destination_confirmation_required
       providerCall: blocked_without_task_approval
       schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
       runStatus: active
@@ -144,7 +158,15 @@ try {
       - docs/example.md
     blockedFiles:
       - .env.local
+      - .env.example
       - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
     riskTypes:
       - automation_policy
     validationCommands:
@@ -176,6 +198,51 @@ try {
         throw "Approved DB capability schema fixture failed unexpectedly.`n$($approvedDbCapabilityOutput -join "`n")"
     }
     Assert-Contains -Output $approvedDbCapabilityOutput -Pattern "autodriveSchemaDecision: can_autodrive"
+
+    $e2eCommandTaskBlock = $fullTaskBlock `
+        -replace "validationCommands:\r?\n\s{6}- git diff --check", "validationCommands:`n      - npm.cmd run test:e2e -- e2e/home.spec.ts`n      - git diff --check" `
+        -replace "validationCommandLifecycle:\r?\n\s{6}- phase: pre_edit", "validationCommandLifecycle:`n      - phase: post_edit`n        command: npm.cmd run test:e2e -- e2e/home.spec.ts`n      - phase: pre_edit"
+    $e2eWithoutCapabilityFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $e2eCommandTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_LOCAL_E2E_CAPABILITY" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $e2eWithoutCapabilityFiles.StatePath -QueuePath $e2eWithoutCapabilityFiles.QueuePath -SchemaPath $e2eWithoutCapabilityFiles.SchemaPath
+    } | Out-Null
+
+    $approvedE2ETaskBlock = $e2eCommandTaskBlock -replace "localE2EValidation: blocked_without_task_approval", "localE2EValidation: approved_local_only_existing_specs"
+    $approvedE2EFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $approvedE2ETaskBlock
+    $approvedE2EOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $approvedE2EFiles.StatePath -QueuePath $approvedE2EFiles.QueuePath -SchemaPath $approvedE2EFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Approved local E2E schema fixture failed unexpectedly.`n$($approvedE2EOutput -join "`n")"
+    }
+    Assert-Contains -Output $approvedE2EOutput -Pattern "autodriveSchemaDecision: can_autodrive"
+
+    $missingStandingE2EFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $approvedE2ETaskBlock -WithoutStandingLocalE2EApproval
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_LOCAL_E2E_STANDING_APPROVAL" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $missingStandingE2EFiles.StatePath -QueuePath $missingStandingE2EFiles.QueuePath -SchemaPath $missingStandingE2EFiles.SchemaPath
+    } | Out-Null
+
+    $implicitTestTaskBlock = $approvedE2ETaskBlock -replace "npm.cmd run test:e2e -- e2e/home.spec.ts", "npm.cmd run test"
+    $implicitTestFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $implicitTestTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_LOCAL_E2E_COMMAND" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $implicitTestFiles.StatePath -QueuePath $implicitTestFiles.QueuePath -SchemaPath $implicitTestFiles.SchemaPath
+    } | Out-Null
+
+    $uiModeTaskBlock = $approvedE2ETaskBlock -replace "npm.cmd run test:e2e -- e2e/home.spec.ts", "npm.cmd run test:e2e:ui -- e2e/home.spec.ts"
+    $uiModeFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $uiModeTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_LOCAL_E2E_COMMAND" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $uiModeFiles.StatePath -QueuePath $uiModeFiles.QueuePath -SchemaPath $uiModeFiles.SchemaPath
+    } | Out-Null
+
+    $headedModeTaskBlock = $approvedE2ETaskBlock -replace "npm.cmd run test:e2e -- e2e/home.spec.ts", "npm.cmd run test:e2e -- e2e/home.spec.ts --headed"
+    $headedModeFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $headedModeTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_LOCAL_E2E_COMMAND" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $headedModeFiles.StatePath -QueuePath $headedModeFiles.QueuePath -SchemaPath $headedModeFiles.SchemaPath
+    } | Out-Null
+
+    $missingSpecTaskBlock = $approvedE2ETaskBlock -replace "e2e/home.spec.ts", "e2e/module-run-v2-missing-smoke.spec.ts"
+    $missingSpecFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $missingSpecTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_LOCAL_E2E_SPEC" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $missingSpecFiles.StatePath -QueuePath $missingSpecFiles.QueuePath -SchemaPath $missingSpecFiles.SchemaPath
+    } | Out-Null
 
     $unsafeDestructiveDbTaskBlock = $fullTaskBlock -replace "destructiveLocalDockerDatabase: blocked_without_task_approval", "destructiveLocalDockerDatabase: unsafe"
     $unsafeDestructiveDbFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $unsafeDestructiveDbTaskBlock

@@ -183,6 +183,15 @@ function Test-CommandEvidenceRecorded {
         return $EvidenceContent -match "(?im)git diff --check.*pass|diff check.*pass"
     }
 
+    if ($Command -match "npm\.cmd run test:e2e") {
+        $escapedCommand = [regex]::Escape($Command)
+        if ($EvidenceContent -match "(?im)$escapedCommand.*fail|local e2e.*fail|result:\s*fail") {
+            return $false
+        }
+
+        return $EvidenceContent -match "(?im)$escapedCommand.*pass|local e2e.*passed|spec\s+e2e/[A-Za-z0-9._/-]+\.spec\.ts,\s*tests\s+\d+"
+    }
+
     if ($Command -match "test:unit|--run focused") {
         return $EvidenceContent -match "(?im)$([regex]::Escape($Command)).*pass|focused.*tests?.*passed|unit tests?.*passed|GREEN:.*passed"
     }
@@ -339,7 +348,7 @@ try {
 
     $ownerRecoveryDecision = "no_owner_recovery_needed"
     $nextAction = if ($closeoutState -eq "closeout_ready") { "closeout_recovery" } else { "continue_current_task" }
-    if ($decision -eq "validation_surface_mismatch" -or $closeoutState -ne "closeout_ready") {
+    if ($decision -ne "focused_validation_satisfied" -or $closeoutState -ne "closeout_ready") {
         $ownerRecoveryDecision = "manual_required_owner_recovery"
         $nextAction = "manual_required_owner_recovery"
     }
