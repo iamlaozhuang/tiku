@@ -15,6 +15,8 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
   `project-state.yaml` records `plannedPauseStatus: active`.
 - Default rhythm: queue-first, local-first, evidence-first, guardian-first.
 - Default execution shape: one focused task, one focused local commit, then an explicit closeout decision.
+- Post-merge evidence-only commits are not required by default; use final handoff or `project-state.yaml` for final SHAs
+  unless durable post-merge evidence is needed for recovery or a gate explicitly requires it.
 - Module Run v2 may group Batches, but every Batch still needs focused evidence and a reviewable boundary.
 
 ## Recovery Read Order
@@ -115,6 +117,12 @@ Every task closeout must record:
 - validation result;
 - blocked remainder;
 - next task or stop reason.
+
+Post-merge evidence-only commits are required only when validation or closeout facts were not already recorded, a failed
+merge/push/cleanup needs durable recovery facts, `project-state.yaml` or handoff SHA state must be repaired on disk, the
+task policy explicitly requires persistent post-merge evidence, or a downstream gate requires file-based evidence. In the
+ordinary successful case, record final SHAs and cleanup results in the final handoff or `project-state.yaml` instead of
+creating another evidence-only commit.
 
 Docs-only work may claim governance completion only. It must not claim runtime behavior for `authorization`, `paper`, `mock_exam`, `redeem_code`, `audit_log`, or `ai_call_log` without task-specific runtime evidence.
 

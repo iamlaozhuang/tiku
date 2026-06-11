@@ -58,6 +58,8 @@ Assert-Contains -Output $passOutput -Pattern "Module Run v2 Pre-Push Readiness"
 Assert-Contains -Output $passOutput -Pattern "prePushMode: hard_block"
 Assert-Contains -Output $passOutput -Pattern "OK_EVIDENCE_PATH"
 Assert-Contains -Output $passOutput -Pattern "OK_AUDIT_PATH"
+Assert-Contains -Output $passOutput -Pattern "postMergeEvidenceOnlyCommitPolicy: not_required_by_default"
+Assert-Contains -Output $passOutput -Pattern "finalHandoffShaPolicy: final_handoff_or_project_state"
 Assert-Contains -Output $passOutput -Pattern "Cost Calibration Gate remains blocked"
 
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_EVIDENCE" -Command {
@@ -104,6 +106,7 @@ tasks:
 $ancestorOutput = @(& $scriptPath -TaskId $fixtureTaskId -ProjectStatePath $fixtureProjectStatePath -QueuePath $fixtureQueuePath -SkipRemoteAheadCheck)
 Assert-Contains -Output $ancestorOutput -Pattern "OK_PRE_PUSH_STATE_SHA_ANCESTOR master"
 Assert-Contains -Output $ancestorOutput -Pattern "OK_PRE_PUSH_STATE_SHA_ANCESTOR origin/master"
+Assert-Contains -Output $ancestorOutput -Pattern "postMergeEvidenceOnlyCommitPolicy: not_required_by_default"
 Assert-Contains -Output $ancestorOutput -Pattern "pre-push readiness passed"
 
 @"

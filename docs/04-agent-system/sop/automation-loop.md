@@ -242,13 +242,22 @@ After a task branch is locally merged:
 
 1. Switch to the merge target branch.
 2. Run task-relevant validation plus readiness and quality gates.
-3. Write closeout evidence with commit, merge, push, and cleanup status.
+3. Write closeout evidence with commit, merge, push, and cleanup status only when those facts are not already durable or
+   a gate explicitly requires a file artifact.
 4. Push only when explicitly approved.
 5. Remove the task worktree and delete the merged branch only after target-branch validation and evidence are complete.
 
 If Windows leaves a worktree directory behind because of `node_modules` or other generated residue, resolve the absolute path and confirm it is under `.worktrees/` before deleting anything.
 
-Closeout evidence must name the implementation commit. It does not need to contain the SHA of the closeout evidence commit itself, because that SHA is created after the file is written. Record the closeout evidence commit in the final handoff or `project-state.yaml` when useful instead of creating repeated evidence-only commits.
+Closeout evidence must name the implementation commit. It does not need to contain the SHA of the closeout evidence
+commit itself, because that SHA is created after the file is written. Record the closeout evidence commit in the final
+handoff or `project-state.yaml` when useful instead of creating repeated evidence-only commits.
+
+The default post-merge policy is `postMergeEvidenceOnlyCommitPolicy: not_required_by_default`. Use a persistent
+post-merge evidence-only commit only when validation output or closeout facts were missing before merge, queue or
+`project-state.yaml` SHA/handoff state must be repaired on disk, merge/push/cleanup failed and needs durable recovery
+facts, task policy explicitly requires persistent evidence, or a downstream gate requires a file-based artifact. For
+ordinary successful closeout, final handoff plus pre-push readiness is sufficient.
 
 ## Project State Closeout Reconciliation
 

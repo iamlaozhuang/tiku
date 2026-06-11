@@ -271,6 +271,15 @@ closeoutPolicy:
     requiredFields:
       - deleteShortBranch
       - parkWorktree
+  noisePolicy:
+    postMergeEvidenceOnlyCommitPolicy: not_required_by_default
+    finalHandoffShaPolicy: final_handoff_or_project_state
+    persistentPostMergeEvidenceRequiredWhen:
+      - missing_pre_merge_validation
+      - state_sha_or_handoff_repair_required
+      - failed_merge_push_or_cleanup
+      - task_policy_requires_persistent_evidence
+      - downstream_gate_requires_file_evidence
 standingUnattendedLocalCloseoutApproval:
   statePath: docs/04-agent-system/state/project-state.yaml
   durableKey: automation.unattendedControl.standingUnattendedLocalCloseoutApproval

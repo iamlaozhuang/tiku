@@ -322,6 +322,12 @@ Write-Section -Title "Evidence And Audit"
 Test-RequiredPath -Path $EvidencePath -MissingCode "HARD_BLOCK_MISSING_EVIDENCE" -OkCode "OK_EVIDENCE_PATH"
 Test-RequiredPath -Path $AuditReviewPath -MissingCode "HARD_BLOCK_MISSING_AUDIT" -OkCode "OK_AUDIT_PATH"
 
+Write-Section -Title "Closeout Noise Policy"
+Write-Output "postMergeEvidenceOnlyCommitPolicy: not_required_by_default"
+Write-Output "persistentPostMergeEvidenceRequiredWhen: missing_pre_merge_validation_or_state_sha_handoff_repair_or_failed_closeout_or_task_policy_requires"
+Write-Output "finalHandoffShaPolicy: final_handoff_or_project_state"
+Write-Output "stateShaPolicy: accepted_ancestor_checkpoint"
+
 Write-Section -Title "Result"
 if ($findings.Count -gt 0) {
     throw "Module Run v2 pre-push readiness failed with $($findings.Count) finding(s): $($findings -join '; ')"

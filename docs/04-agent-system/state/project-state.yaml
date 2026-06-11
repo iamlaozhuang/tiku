@@ -214,16 +214,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ab6a9a562dcdbfc5c9fc0076c50c79629db6406a
-  lastKnownOriginMasterSha: ab6a9a562dcdbfc5c9fc0076c50c79629db6406a
+  lastKnownMasterSha: 0d54b17a27c9f4bf2044ae1244d51a61490be195
+  lastKnownOriginMasterSha: 0d54b17a27c9f4bf2044ae1244d51a61490be195
 currentTask:
-  id: stop-card-recovery-clarity
+  id: closeout-noise-reduction
   status: closed
   sourceStory: user-approved-2026-06-11-controlled-auto-seed-mece-tuning
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-stop-card-recovery-clarity.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-stop-card-recovery-clarity.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-stop-card-recovery-clarity.md
-  branch: codex/stop-card-recovery-clarity
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-closeout-noise-reduction.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-closeout-noise-reduction.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-closeout-noise-reduction.md
+  branch: codex/closeout-noise-reduction
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0

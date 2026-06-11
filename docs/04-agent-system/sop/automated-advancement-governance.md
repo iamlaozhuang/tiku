@@ -793,7 +793,10 @@ Each task must finish with:
 - search validation for required blocked gate statements and project terms;
 - Git inventory showing the changed files are task-scoped.
 
-One task should normally produce one local commit. Dependency approval, dependency installation, implementation, and closeout evidence must be separate commits unless a task-specific approval says otherwise.
+One task should normally produce one local commit. Dependency approval, dependency installation, implementation, and
+required closeout evidence must be separate commits unless a task-specific approval says otherwise. A post-merge
+evidence-only commit is not required by default after successful validation, merge, push, and cleanup; record final SHAs
+through final handoff or `project-state.yaml` unless durable post-merge evidence is required for recovery or a gate.
 
 ## Merge, Push, And Cleanup Boundary
 
@@ -807,6 +810,11 @@ Automation must not infer approval for one action from approval for another. Evi
 - push target when approved;
 - cleanup result when approved;
 - residual branch or worktree if cleanup is deferred.
+
+If these facts were already recorded before push and pre-push readiness accepts the task checkpoint as an ancestor of
+current Git reality, do not create an extra post-merge evidence-only commit merely to record the new evidence commit SHA.
+Create persistent post-merge evidence only for missing validation/closeout facts, failed merge/push/cleanup recovery,
+queue or `project-state.yaml` SHA/handoff repair, explicit task policy, or downstream gate requirements.
 
 Pushing `master`, creating or updating PRs, force-with-lease operations, deploy actions, and cloud changes require explicit human approval.
 

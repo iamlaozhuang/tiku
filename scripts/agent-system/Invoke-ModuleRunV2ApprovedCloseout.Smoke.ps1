@@ -147,6 +147,8 @@ try {
         Assert-Contains -Output $output -Pattern "automationWorktreeParking: detached origin/master"
         Assert-Contains -Output $output -Pattern "branchCleanup: deleted codex/module-run-v2-closeout-smoke"
         Assert-Contains -Output $output -Pattern "postCloseoutStateCheckpoint: accepted_ancestor_checkpoint"
+        Assert-Contains -Output $output -Pattern "postMergeEvidenceOnlyCommitPolicy: not_required_by_default"
+        Assert-Contains -Output $output -Pattern "finalHandoffShaPolicy: final_handoff_or_project_state"
 
         $queueAfter = Get-Content -Raw "docs/04-agent-system/state/task-queue.yaml"
         if ($queueAfter -notmatch "status:\s*closed") {
@@ -265,6 +267,7 @@ try {
         Assert-Contains -Output $cleanAheadOutput -Pattern "mergeTarget: master"
         Assert-Contains -Output $cleanAheadOutput -Pattern "pushTarget: origin/master"
         Assert-Contains -Output $cleanAheadOutput -Pattern "branchCleanup: deleted codex/module-run-v2-clean-ahead-closeout-smoke"
+        Assert-Contains -Output $cleanAheadOutput -Pattern "postMergeEvidenceOnlyCommitPolicy: not_required_by_default"
 
         $cleanAheadProjectStateAfter = Get-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Raw
         if ($cleanAheadProjectStateAfter -notmatch "commitSha:\s*$([regex]::Escape($cleanAheadWorkSha))") {
