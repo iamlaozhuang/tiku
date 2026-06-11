@@ -47,8 +47,8 @@ Create or update only as needed:
 - [x] Verify RED with the focused unit test command.
 - [x] GREEN: implement minimal deterministic model/contract/service or validator exports.
 - [x] Verify GREEN with the focused unit test command.
-- [ ] Run `npm.cmd run lint`, `npm.cmd run typecheck`, focused unit tests, `git diff --check`, and module closeout readiness.
-- [ ] Write evidence and audit review with redacted validation output.
+- [x] Run `npm.cmd run lint`, `npm.cmd run typecheck`, focused unit tests, `git diff --check`, and module closeout readiness.
+- [x] Write evidence and audit review with redacted validation output.
 
 ## Risk Defense
 
