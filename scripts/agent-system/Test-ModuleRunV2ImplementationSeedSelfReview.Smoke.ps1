@@ -32,6 +32,7 @@ function Invoke-ExpectFailure {
     }
 
     Assert-Contains -Output $output -Pattern $ExpectedPattern
+    return $output
 }
 
 function Write-Matrix {
@@ -295,6 +296,10 @@ try {
             -MatrixPath $matrixPath
     )
     Assert-Contains -Output $passOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $passOutput -Pattern "meceReviewDecision: passed"
+    Assert-Contains -Output $passOutput -Pattern "meceCoverageStatus: complete"
+    Assert-Contains -Output $passOutput -Pattern "meceGapCount: 0"
+    Assert-Contains -Output $passOutput -Pattern "meceOverlapCount: 0"
 
     Write-Queue -Path $queuePath -UnsafeAllowedFile
     Write-SeededTaskTemplates -Root $fixtureRoot
@@ -316,39 +321,49 @@ try {
 
     Write-Queue -Path $queuePath -OmitRequirementRefs
     Write-SeededTaskTemplates -Root $fixtureRoot
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_REQUIREMENT_REFS" -Command {
+    $missingRequirementRefsOutput = Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_REQUIREMENT_REFS" -Command {
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath
     }
+    Assert-Contains -Output $missingRequirementRefsOutput -Pattern "meceReviewDecision: failed"
+    Assert-Contains -Output $missingRequirementRefsOutput -Pattern "meceCoverageStatus: metadata_gap"
 
     Write-Queue -Path $queuePath -OmitAcceptanceScenarios
     Write-SeededTaskTemplates -Root $fixtureRoot
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_ACCEPTANCE_SCENARIOS" -Command {
+    $missingAcceptanceScenariosOutput = Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_ACCEPTANCE_SCENARIOS" -Command {
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath
     }
+    Assert-Contains -Output $missingAcceptanceScenariosOutput -Pattern "meceReviewDecision: failed"
+    Assert-Contains -Output $missingAcceptanceScenariosOutput -Pattern "meceCoverageStatus: metadata_gap"
 
     Write-Queue -Path $queuePath -OmitBlockedRemainder
     Write-SeededTaskTemplates -Root $fixtureRoot
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_BLOCKED_REMAINDER" -Command {
+    $missingBlockedRemainderOutput = Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_BLOCKED_REMAINDER" -Command {
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath
     }
+    Assert-Contains -Output $missingBlockedRemainderOutput -Pattern "meceReviewDecision: failed"
+    Assert-Contains -Output $missingBlockedRemainderOutput -Pattern "meceCoverageStatus: gap"
+    Assert-Contains -Output $missingBlockedRemainderOutput -Pattern "meceGapCount: 1"
 
     Write-Queue -Path $queuePath -DuplicateTargetClosure
     Write-SeededTaskTemplates -Root $fixtureRoot
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEED_DUPLICATE_TARGET_CLOSURE" -Command {
+    $duplicateTargetClosureOutput = Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEED_DUPLICATE_TARGET_CLOSURE" -Command {
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
             -QueuePath $queuePath `
             -MatrixPath $matrixPath
     }
+    Assert-Contains -Output $duplicateTargetClosureOutput -Pattern "meceReviewDecision: failed"
+    Assert-Contains -Output $duplicateTargetClosureOutput -Pattern "meceCoverageStatus: overlap"
+    Assert-Contains -Output $duplicateTargetClosureOutput -Pattern "meceOverlapCount: 1"
 
     Write-Queue -Path $queuePath -ApprovedCloseout -StandingApproval
     Write-SeededTaskTemplates -Root $fixtureRoot
@@ -359,6 +374,10 @@ try {
             -MatrixPath $matrixPath
     )
     Assert-Contains -Output $standingPassOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $standingPassOutput -Pattern "meceReviewDecision: passed"
+    Assert-Contains -Output $standingPassOutput -Pattern "meceCoverageStatus: complete"
+    Assert-Contains -Output $standingPassOutput -Pattern "meceGapCount: 0"
+    Assert-Contains -Output $standingPassOutput -Pattern "meceOverlapCount: 0"
 } finally {
     Pop-Location
     if (Test-Path -LiteralPath $fixtureRoot) {

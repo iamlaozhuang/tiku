@@ -638,6 +638,8 @@ tasks:
     Assert-Contains -Output $controlledPolicyOutput -Pattern "autoDriveLocalImplementationApproval: recorded"
     Assert-Contains -Output $controlledPolicyOutput -Pattern "controlledAutoSeedPolicyApproval: recorded"
     Assert-Contains -Output $controlledPolicyOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "meceReviewDecision: passed"
+    Assert-Contains -Output $controlledPolicyOutput -Pattern "meceCoverageStatus: complete"
     Assert-Contains -Output $controlledPolicyOutput -Pattern "runnerDecision: seed_transaction_applied"
     Assert-Contains -Output $controlledPolicyOutput -Pattern "runnerNextAction: closeout_auto_seed_transaction"
     Assert-Contains -Output $controlledPolicyOutput -Pattern "runnerSeverity: auto_recoverable"
@@ -750,6 +752,8 @@ tasks:
     Assert-Contains -Output $standingSeedOutput -Pattern "seedTransactionDecision: seeded"
     Assert-Contains -Output $standingSeedOutput -Pattern "standingUnattendedLocalCloseoutApproval: recorded"
     Assert-Contains -Output $standingSeedOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $standingSeedOutput -Pattern "meceReviewDecision: passed"
+    Assert-Contains -Output $standingSeedOutput -Pattern "meceCoverageStatus: complete"
     Assert-Contains -Output $standingSeedOutput -Pattern "runnerDecision: seed_transaction_applied"
     Assert-Contains -Output $standingSeedOutput -Pattern "runnerNextAction: closeout_auto_seed_transaction"
     Assert-Contains -Output $standingSeedOutput -Pattern "runnerSeverity: auto_recoverable"
@@ -806,6 +810,8 @@ tasks:
     }
     Assert-Contains -Output $seedApplyOutput -Pattern "seedTransactionDecision: seeded"
     Assert-Contains -Output $seedApplyOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $seedApplyOutput -Pattern "meceReviewDecision: passed"
+    Assert-Contains -Output $seedApplyOutput -Pattern "meceCoverageStatus: complete"
     Assert-Contains -Output $seedApplyOutput -Pattern "runnerDecision: seed_transaction_applied"
     Assert-Contains -Output $seedApplyOutput -Pattern "runnerNextAction: closeout_auto_seed_transaction"
 

@@ -159,6 +159,11 @@ autoSeedBridge:
   selfReviewLayer:
     scriptPath: scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
     decisionOutput: seedSelfReviewDecision
+    meceOutputs:
+      - meceReviewDecision
+      - meceCoverageStatus
+      - meceGapCount
+      - meceOverlapCount
     decisions:
       - passed
       - stop_for_hard_block

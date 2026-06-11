@@ -30,6 +30,32 @@ function Add-Finding {
     Write-Output $Message
 }
 
+function Add-MeceMetadataGap {
+    $script:meceMetadataGapCount++
+}
+
+function Add-MeceCoverageGap {
+    $script:meceGapCount++
+}
+
+function Add-MeceOverlap {
+    $script:meceOverlapCount++
+}
+
+function Get-MeceCoverageStatus {
+    if ($script:meceOverlapCount -gt 0) {
+        return "overlap"
+    }
+    if ($script:meceGapCount -gt 0) {
+        return "gap"
+    }
+    if ($script:meceMetadataGapCount -gt 0) {
+        return "metadata_gap"
+    }
+
+    return "complete"
+}
+
 function Write-SeedSelfReviewResult {
     param(
         [Parameter(Mandatory = $true)][string]$Decision,
@@ -37,7 +63,14 @@ function Write-SeedSelfReviewResult {
         [Parameter(Mandatory = $true)][int]$ExitCode
     )
 
+    $meceReviewDecision = if ($Decision -eq "passed") { "passed" } else { "failed" }
+    $meceCoverageStatus = Get-MeceCoverageStatus
+
     Write-Section -Title "Result"
+    Write-Output "meceReviewDecision: $meceReviewDecision"
+    Write-Output "meceCoverageStatus: $meceCoverageStatus"
+    Write-Output "meceGapCount: $script:meceGapCount"
+    Write-Output "meceOverlapCount: $script:meceOverlapCount"
     Write-Output "seedSelfReviewDecision: $Decision"
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
@@ -236,6 +269,9 @@ function Test-PathPattern {
 }
 
 $findings = New-Object System.Collections.Generic.List[string]
+$meceGapCount = 0
+$meceOverlapCount = 0
+$meceMetadataGapCount = 0
 
 try {
     Write-Section -Title "Module Run v2 Implementation Seed Self Review"
@@ -335,33 +371,42 @@ try {
         }
         if ([string]::IsNullOrWhiteSpace($targetClosure)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_TARGET_CLOSURE $seedTaskId"
+            Add-MeceCoverageGap
         }
         if ([string]::IsNullOrWhiteSpace($behaviorBoundary)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_BEHAVIOR_BOUNDARY $seedTaskId"
+            Add-MeceMetadataGap
         }
         if ($requirementRefs.Count -eq 0) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_REQUIREMENT_REFS $seedTaskId"
+            Add-MeceMetadataGap
         } elseif (-not [string]::IsNullOrWhiteSpace($sourcePlanningTask) -and $requirementRefs -notcontains $sourcePlanningTask) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_REQUIREMENT_TRACE_MISMATCH $seedTaskId source=$sourcePlanningTask"
+            Add-MeceMetadataGap
         }
         if ($useCases.Count -eq 0) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_USE_CASES $seedTaskId"
+            Add-MeceMetadataGap
         }
         if ($acceptanceScenarios.Count -eq 0) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_ACCEPTANCE_SCENARIOS $seedTaskId"
+            Add-MeceMetadataGap
         }
         if ($nonGoals.Count -eq 0) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_NON_GOALS $seedTaskId"
+            Add-MeceMetadataGap
         } else {
             $nonGoalText = $nonGoals -join " "
             foreach ($requiredNonGoalPattern in @("provider", "env|secret", "schema|migration", "deploy", "dependency|package|lockfile", "Cost Calibration Gate")) {
                 if ($nonGoalText -notmatch $requiredNonGoalPattern) {
                     Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_HIGH_RISK_NON_GOAL $seedTaskId $requiredNonGoalPattern"
+                    Add-MeceMetadataGap
                 }
             }
         }
         if ([string]::IsNullOrWhiteSpace($validationProfile)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_VALIDATION_PROFILE $seedTaskId"
+            Add-MeceMetadataGap
         }
         if ([string]::IsNullOrWhiteSpace($evidencePath)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_EVIDENCE $seedTaskId"
@@ -473,6 +518,7 @@ try {
             }
             if ($moduleTargets[$moduleId].Contains($targetClosure)) {
                 Add-Finding "HARD_BLOCK_SEED_DUPLICATE_TARGET_CLOSURE $moduleId $targetClosure"
+                Add-MeceOverlap
             }
             $moduleTargets[$moduleId].Add($targetClosure)
         }
@@ -500,6 +546,7 @@ try {
         foreach ($expectedTarget in $expectedTargets) {
             if ($actualTargets -notcontains $expectedTarget -and $blockedRemainderTargets -notcontains $expectedTarget) {
                 Add-Finding "HARD_BLOCK_SEED_COVERAGE_MISSING_TARGET $moduleId $expectedTarget"
+                Add-MeceCoverageGap
             }
         }
     }

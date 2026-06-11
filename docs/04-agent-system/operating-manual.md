@@ -95,6 +95,10 @@ for the matching module, only when it is not `-PlanOnly`, and only when `seedCan
 the policy `maxTasksPerSeed`. This policy does not approve local automation resume, task claim outside the seeded queue,
 provider/env/schema/deploy/dependency changes, payment/external-service work, PR/force push, or Cost Calibration Gate.
 
+Every auto-seed transaction must pass seed self-review with explicit MECE outputs: `meceReviewDecision`,
+`meceCoverageStatus`, `meceGapCount`, and `meceOverlapCount`. Duplicate target closures, uncovered target closures
+without blocked remainder, or missing seed metadata must hard-block before the runner can claim seeded work.
+
 ## Completion Standard
 
 Every task closeout must record:
