@@ -12,7 +12,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml"
+    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [switch]$VerboseHistory
 )
 
 $ErrorActionPreference = "Stop"
@@ -409,6 +412,7 @@ $blockedGates = @(
     "push_pr_force_push:blocked_without_fresh_approval"
     "Cost Calibration Gate remains blocked"
 ) | ForEach-Object { $_ }
+$historyNotBlockingCurrentRun = $decision -notin @("hard_block_missing_inputs", "pending_task_blocked")
 
 Write-Output "repository: branch=$branchName; head=$headSha; dirty=$($isDirty.ToString().ToLowerInvariant())"
 Write-Output "currentTask: $currentTaskId($currentTaskStatus)"
@@ -417,9 +421,14 @@ Write-Output "nextActionDecision: $decision"
 Write-Output "nextExecutableTask: $(if ([string]::IsNullOrWhiteSpace($nextTaskId)) { 'none' } else { $nextTaskId })"
 Write-Output "blockedGates: $(Join-OrNone -Values @($blockedGates))"
 Write-Output "validationNeeded: $(if ($validationCommands.Count -eq 0) { 'none' } else { "$($validationCommands.Count) command(s) for $nextTaskId" })"
-Write-Output "statusFindings: legacy_status_missing=$($queueDiagnostics.MissingStatusIds.Count); legacy_done=$($queueDiagnostics.LegacyDoneIds.Count); unsupportedStatus=$($queueDiagnostics.UnsupportedStatusIds.Count); legacy_status_missing_first=$(Join-FirstItems -Values $queueDiagnostics.MissingStatusIds); legacy_done_first=$(Join-FirstItems -Values $queueDiagnostics.LegacyDoneIds)"
-Write-Output "evidenceFindings: evidenceMissing=$($queueDiagnostics.EvidenceMissingIds.Count); evidenceMissingFirst=$(Join-FirstItems -Values $queueDiagnostics.EvidenceMissingIds)"
-Write-Output "driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:$($matrixDiagnostics.MissingBatches.Count),sourcePlanningTaskMissingInQueue:$($matrixDiagnostics.MissingPlanningTasks.Count); queueMatrixDriftFirst=$(Join-FirstItems -Values @($matrixDiagnostics.MissingBatches + $matrixDiagnostics.MissingPlanningTasks))"
+Write-Output "statusFindings: legacy_status_missing=$($queueDiagnostics.MissingStatusIds.Count); legacy_done=$($queueDiagnostics.LegacyDoneIds.Count); unsupportedStatus=$($queueDiagnostics.UnsupportedStatusIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
+Write-Output "evidenceFindings: evidenceMissing=$($queueDiagnostics.EvidenceMissingIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
+Write-Output "driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:$($matrixDiagnostics.MissingBatches.Count),sourcePlanningTaskMissingInQueue:$($matrixDiagnostics.MissingPlanningTasks.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
+if ($VerboseHistory) {
+    Write-Output "statusFindingsVerbose: legacy_status_missing_first=$(Join-FirstItems -Values $queueDiagnostics.MissingStatusIds); legacy_done_first=$(Join-FirstItems -Values $queueDiagnostics.LegacyDoneIds); unsupportedStatusFirst=$(Join-FirstItems -Values $queueDiagnostics.UnsupportedStatusIds)"
+    Write-Output "evidenceFindingsVerbose: evidenceMissingFirst=$(Join-FirstItems -Values $queueDiagnostics.EvidenceMissingIds)"
+    Write-Output "driftFindingsVerbose: queueMatrixDriftFirst=$(Join-FirstItems -Values @($matrixDiagnostics.MissingBatches + $matrixDiagnostics.MissingPlanningTasks))"
+}
 Write-Output "recommendedAction: $recommendedAction"
 Write-Output "stopReason: $stopReason"
 Write-Output "diagnosticOnly: true"

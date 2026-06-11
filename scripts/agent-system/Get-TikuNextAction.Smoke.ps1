@@ -17,6 +17,23 @@ function Assert-Contains {
     }
 }
 
+function Assert-NotContains {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Output,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    $matched = $Output | Where-Object { $_ -match $Pattern }
+    if ($matched.Count -gt 0) {
+        throw "Unexpected output pattern found: $Pattern`nActual output:`n$($Output -join "`n")"
+    }
+}
+
 function Initialize-SmokeRepo {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -149,13 +166,33 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $output -Pattern '^nextExecutableTask: task-a$'
     Assert-Contains -Output $output -Pattern '^blockedGates:'
     Assert-Contains -Output $output -Pattern '^validationNeeded: 2 command\(s\) for task-a$'
-    Assert-Contains -Output $output -Pattern '^statusFindings: .*legacy_status_missing=1; legacy_done=1;'
-    Assert-Contains -Output $output -Pattern '^evidenceFindings: evidenceMissing=1;'
-    Assert-Contains -Output $output -Pattern '^driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:1,sourcePlanningTaskMissingInQueue:1;'
+    Assert-Contains -Output $output -Pattern '^statusFindings: .*legacy_status_missing=1; legacy_done=1; .*notBlockingCurrentRun=true$'
+    Assert-Contains -Output $output -Pattern '^evidenceFindings: evidenceMissing=1; notBlockingCurrentRun=true$'
+    Assert-Contains -Output $output -Pattern '^driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:1,sourcePlanningTaskMissingInQueue:1; notBlockingCurrentRun=true$'
+    Assert-NotContains -Output $output -Pattern 'legacy_done_first='
+    Assert-NotContains -Output $output -Pattern 'evidenceMissingFirst='
+    Assert-NotContains -Output $output -Pattern 'queueMatrixDriftFirst='
     Assert-Contains -Output $output -Pattern '^recommendedAction: claim_or_plan_next_task:task-a$'
     Assert-Contains -Output $output -Pattern '^stopReason: none$'
     Assert-Contains -Output $output -Pattern '^diagnosticOnly: true$'
     Assert-Contains -Output $output -Pattern 'Cost Calibration Gate remains blocked'
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $verboseOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -VerboseHistory
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $verboseOutput -Pattern '^statusFindingsVerbose: .*legacy_status_missing_first=task-missing-status; legacy_done_first=task-legacy-done;'
+    Assert-Contains -Output $verboseOutput -Pattern '^evidenceFindingsVerbose: evidenceMissingFirst=task-legacy-done$'
+    Assert-Contains -Output $verboseOutput -Pattern '^driftFindingsVerbose: queueMatrixDriftFirst=batch-999-missing-from-queue,missing-planning-task$'
 
     $afterProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $afterQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash
