@@ -39,19 +39,19 @@
 
 ### 主要问题
 
-1. **stop taxonomy 与行动语义混在一起**  
+1. **stop taxonomy 与行动语义混在一起**
    `seed_proposal_available` 是“有下一步但需要审批/可套用审批”的状态，不应被默认归为 `hard_block`。`hard_block` 应只用于 unsafe 或 impossible。
 
-2. **默认自动驾驶策略偏保守**  
+2. **默认自动驾驶策略偏保守**
    runner 支持 `-AllowAutoSeed` 和 `-AutoSeedApprovalStatement`，项目状态也有 standing approval，但当前默认唤醒没有消费这类 standing approval，导致“有机制但停在请求批准”。
 
-3. **状态源多，但字段职责没有足够薄**  
+3. **状态源多，但字段职责没有足够薄**
    SOP、schema、matrix、project-state、task queue、script output 都在描述类似边界。它们不是错误，但需要明确“谁拥有事实，谁只是索引或派生摘要”。
 
-4. **历史噪声仍进入当前决策视野**  
+4. **历史噪声仍进入当前决策视野**
    `legacy_done=94`、`evidenceMissing=6` 作为诊断信息有用，但在自动推进摘要中反复出现，会消耗注意力和 token，并增加误判为 blocker 的风险。
 
-5. **MECE 没有成为 auto-seed 的一等门禁**  
+5. **MECE 没有成为 auto-seed 的一等门禁**
    现在 seed self-review 会检查 target closure coverage、metadata、安全文件范围和 validation，但还没有强制要求 `requirement -> capability -> user flow -> acceptance scenario -> task` 的不重不漏矩阵。
 
 ## P0 修复建议
