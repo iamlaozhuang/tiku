@@ -1,0 +1,76 @@
+schemaVersion: 1
+decisionId: ai-task-and-provider-auto-seed-approval-decision
+createdAt: "2026-06-11T00:00:00-07:00"
+status: pending_human_decision
+defaultAction: keep_automation_paused_for_tuning
+sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
+sourceDiagnostics:
+  seedProposalScriptPath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+  nextActionScriptPath: scripts/agent-system/Get-TikuNextAction.ps1
+  projectStatusScriptPath: scripts/agent-system/Get-TikuProjectStatus.ps1
+  observedBranch: codex/ai-task-provider-seed-approval-decision
+  observedHead: 0a309182
+plannedPause:
+  status: active
+  reason: user_requested_mechanism_tuning
+  keepsAutomationPaused: true
+proposal:
+  seedProposalDecision: proposal_available
+  seedModule: ai-task-and-provider
+  seedSourcePlanningTask: phase-70-advanced-ai-task-domain-implementation-planning
+  seedLocalFullLoopMinimum: L2
+  seedRequiredApproval: autoDriveLocalImplementationApproval for module ai-task-and-provider
+  seedCandidateTaskCount: 4
+candidateTasks:
+  - taskId: batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    targetClosure: provider-agnostic AI task lifecycle contracts
+    validationProfile: L2-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+  - taskId: batch-106-ai-task-and-provider-local-task-request-policy-and-result-referen
+    targetClosure: local task request policy and result reference contracts
+    validationProfile: L2-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+  - taskId: batch-107-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    targetClosure: redacted audit_log and ai_call_log evidence references
+    validationProfile: L2-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+  - taskId: batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    targetClosure: local_provider_sandbox proposal and evidence rules
+    validationProfile: L2-local-implementation
+    nonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+humanDecisionOptions:
+  - id: keep_paused
+    effect: leave proposal visible, keep automation paused, and wait for a later explicit decision
+  - id: approve_auto_seed
+    effect: allow a future scoped task to apply the guarded seed transaction for this module
+    requiredFreshApprovalText: autoDriveLocalImplementationApproval for module ai-task-and-provider
+  - id: create_manual_task
+    effect: create a manually reviewed task instead of applying the seed transaction
+nonApprovalStatement: >-
+  This record does not approve auto seed execution. It records the currently available proposal and the human decision
+  options while planned pause remains active.
+blockedActions:
+  - automation_resume
+  - task_claim
+  - seed_transaction_execution
+  - queued_implementation_task_creation
+  - provider_call
+  - env_secret_change
+  - dependency_or_lockfile_change
+  - schema_or_migration_change
+  - staging_prod_cloud_deploy
+  - payment_or_external_service
+  - pr_or_force_push
+  - cost_calibration_gate
+validationCommands:
+  - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+  - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+  - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+terminologyAnchors:
+  - authorization
+  - paper
+  - mock_exam
+  - redeem_code
+  - audit_log
+  - ai_call_log
+costCalibrationGate: blocked

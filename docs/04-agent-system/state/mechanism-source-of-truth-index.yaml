@@ -34,6 +34,9 @@ canonicalStateFiles:
   - id: advanced-edition-domain-module-run-matrix
     path: docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
     role: source-of-truth matrix for domain-level Module Run boundaries, batch grouping, validation, evidence, and stop conditions
+  - id: ai-task-and-provider-auto-seed-approval-decision
+    path: docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml
+    role: current human decision entry for the ai-task-and-provider seed proposal; pending_human_decision means diagnostics may show proposal availability but agents must keep automation paused and must not apply seed transactions
 factOwnership:
   - fact: task execution state, dependencies, allowed files, blocked files, validation commands, evidence path, audit review path
     sourcePath: docs/04-agent-system/state/task-queue.yaml
@@ -53,6 +56,13 @@ factOwnership:
       - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
       - scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
     rule: seed scripts must derive from the matrix and must not introduce untracked module closure commitments.
+  - fact: current human decision status for applying the ai-task-and-provider seed proposal
+    sourcePath: docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml
+    derivedSummaries:
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+    rule: proposal_available is not approval; pending_human_decision keeps automation paused and blocks seed transaction execution until fresh explicit approval is recorded.
   - fact: transient owner, active run, recoverable run, cleanup-ready run, no-write terminal envelope
     sourcePath: local run registry, lease, and redacted handoff files under the configured Codex automation roots
     derivedSummaries:

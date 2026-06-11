@@ -75,6 +75,16 @@ When `plannedPauseStatus: active` and `plannedPauseKeepsAutomationPaused: true` 
 diagnostics should report `planned_pause_for_tuning`. This is an intentional human-controlled stop state, not approval
 to resume automation, claim tasks, seed tasks, merge, push, deploy, call providers, or execute Cost Calibration Gate.
 
+## Auto Seed Approval Decision Rule
+
+Seed proposal diagnostics are not seed execution approval. The current `ai-task-and-provider` proposal decision is
+recorded in `docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml`.
+
+While that record says `status: pending_human_decision`, the default action is `keep_automation_paused_for_tuning`.
+Agents must not run `New-ModuleRunV2ImplementationSeed.ps1`, append seeded implementation tasks, resume automation, or
+claim `ai-task-and-provider` work unless a later task records fresh explicit
+`autoDriveLocalImplementationApproval for module ai-task-and-provider`.
+
 ## Completion Standard
 
 Every task closeout must record:

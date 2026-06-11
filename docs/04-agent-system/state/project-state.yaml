@@ -206,6 +206,7 @@ automation:
   executionLogIndexPath: docs/05-execution-logs/execution-log-index.yaml
   mechanismSourceOfTruthIndexPath: docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
   advancedEditionCodeStageSeedingPlanPath: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+  autoSeedApprovalDecisionPath: docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml
 taskSource:
   requirementsPath: docs/01-requirements/stories
   queueStrategy: story_to_verifiable_units
@@ -216,13 +217,13 @@ repository:
   lastKnownMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
   lastKnownOriginMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
 currentTask:
-  id: mechanism-active-queue-slimming-plan
+  id: ai-task-and-provider-auto-seed-approval-decision
   status: closed
   sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-mechanism-active-queue-slimming-plan.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-active-queue-slimming-plan.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-active-queue-slimming-plan.md
-  branch: codex/mechanism-active-queue-slimming
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+  branch: codex/ai-task-provider-seed-approval-decision
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -260,7 +261,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Continue the approved mechanism tuning chain while local automation remains intentionally paused. Next task:
-    ai-task-and-provider-auto-seed-approval-decision. Keep high-risk capability gates blocked until task-specific
-    approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-mechanism-active-queue-slimming-plan.md
+    Await explicit human decision for the ai-task-and-provider seed proposal. Keep local automation intentionally paused;
+    do not apply seed transactions, claim tasks, resume automation, call providers, change env/secrets, or execute Cost
+    Calibration Gate without fresh task-specific approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md

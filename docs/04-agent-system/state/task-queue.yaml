@@ -9131,3 +9131,72 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-active-queue-slimming-plan.md
     status: closed
     retryCount: 0
+
+  - id: ai-task-and-provider-auto-seed-approval-decision
+    title: AI task and provider auto seed approval decision
+    phase: mechanism-tuning-serial
+    sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
+    dependencies:
+      - mechanism-active-queue-slimming-plan
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved serial mechanism tuning while keeping the local Codex automation registration paused. Each tuning
+      task may create a short-lived codex branch, update scoped mechanism docs/state/evidence, run validation, commit,
+      fast-forward merge to master, push origin/master, and clean the merged branch. This task records the current
+      ai-task-and-provider seed proposal as pending human decision only; it must not resume automation, claim business
+      tasks, apply seed transactions, create queued implementation tasks, modify product code, dependencies, lockfiles,
+      schema, migrations, env/secret, provider, staging/prod/cloud/deploy, payment, external service, PR, force push, or
+      Cost Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+      - docs/05-execution-logs/evidence/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - seed_approval
+      - diagnostic_read_only
+      - task_queue
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\ai-task-and-provider-auto-seed-approval-decision.yaml docs\04-agent-system\operating-manual.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md docs\05-execution-logs\evidence\2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md docs\05-execution-logs\audits-reviews\2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+      - Select-String -Path docs\04-agent-system\state\ai-task-and-provider-auto-seed-approval-decision.yaml,docs\04-agent-system\operating-manual.md,docs\05-execution-logs\evidence\2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md -Pattern 'pending_human_decision','ai-task-and-provider','autoDriveLocalImplementationApproval','seedProposalDecision','keep_automation_paused_for_tuning','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log','Cost Calibration Gate remains blocked'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+    status: closed
+    retryCount: 0
