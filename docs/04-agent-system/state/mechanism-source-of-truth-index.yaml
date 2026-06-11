@@ -230,6 +230,11 @@ scriptControls:
     smokePath: scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
     decisionOutput: runnerDecision
     role: bounded local control loop over startup readiness, hygiene cleanup, auto-seed bridge, autopilot, parallel, closeout, handoff, and stop decisions
+  - id: module-run-v2-stop-economics
+    path: scripts/agent-system/Get-ModuleRunV2StopEconomics.ps1
+    smokePath: scripts/agent-system/Get-ModuleRunV2StopEconomics.Smoke.ps1
+    decisionOutput: stopEconomicsDecision
+    role: read-only summarizer for stop economics metrics derived from run registry and terminal envelopes, including false stop candidates, hard blocks, approval reuse candidates, handoff completeness, and mean runner steps when recorded
   - id: module-run-v2-implementation-seed-proposal
     path: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
     smokePath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.Smoke.ps1
