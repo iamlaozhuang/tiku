@@ -877,10 +877,16 @@ Blocked gates may be documented, clarified, or kept synchronized as docs-only ta
 Every task must keep these surfaces aligned:
 
 - `task-queue.yaml`: execution state, dependencies, allowed files, blocked files, risk types, validation commands, evidence path;
-- `project-state.yaml`: current phase, current task, repository SHA recovery point, handoff, latest evidence path;
+- `project-state.yaml`: current phase, current task, repository SHA recovery point, handoff, latest evidence path, standing unattended local closeout approval;
+- domain matrix: Module Run v2 source planning modules, execution modules, dependency graph, targetLocalClosure, and localFullLoopMinimum;
+- local run registry, lease, and redacted handoff files: transient owner, recoverable run, cleanup-ready run, and no-write terminal envelope;
 - task plan: intended scope and risk defenses;
 - evidence: observed commands, changed files, approval boundary, blocked-work statement, redaction status;
 - audit review: independent verdict, findings, residual risks, and gate review.
+
+Script output is a derived summary. It may be quoted or summarized in evidence, but it must not be copied into another
+state file as a second source of truth for task status, current task, standing approval, module closure, transient owner,
+or validation facts.
 
 If Git reality and `project-state.yaml` disagree, the next docs-only task should reconcile the drift before claiming unrelated work.
 

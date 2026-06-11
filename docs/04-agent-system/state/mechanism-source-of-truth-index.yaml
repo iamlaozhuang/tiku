@@ -34,6 +34,47 @@ canonicalStateFiles:
   - id: advanced-edition-domain-module-run-matrix
     path: docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
     role: source-of-truth matrix for domain-level Module Run boundaries, batch grouping, validation, evidence, and stop conditions
+factOwnership:
+  - fact: task execution state, dependencies, allowed files, blocked files, validation commands, evidence path, audit review path
+    sourcePath: docs/04-agent-system/state/task-queue.yaml
+    derivedSummaries:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+    rule: script output is a derived summary and must not be copied into another durable file as a second task-state source.
+  - fact: current task pointer, automation mode, standing unattended local closeout approval, repository checkpoint, handoff pointer
+    sourcePath: docs/04-agent-system/state/project-state.yaml
+    derivedSummaries:
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
+    rule: runner and startup output may explain the state, but project-state remains the durable owner for the current pointer and standing approval.
+  - fact: Module Run v2 source planning modules, execution modules, dependency graph, targetLocalClosure, localFullLoopMinimum
+    sourcePath: docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+    derivedSummaries:
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
+    rule: seed scripts must derive from the matrix and must not introduce untracked module closure commitments.
+  - fact: transient owner, active run, recoverable run, cleanup-ready run, no-write terminal envelope
+    sourcePath: local run registry, lease, and redacted handoff files under the configured Codex automation roots
+    derivedSummaries:
+      - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
+      - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
+      - scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
+    rule: transient ownership is local operational state; committed docs may reference it as evidence but must not make it a durable queue fact.
+  - fact: validation command result, changed-file proof, approval boundary, redaction status
+    sourcePath: docs/05-execution-logs/evidence/
+    derivedSummaries:
+      - docs/05-execution-logs/execution-log-index.yaml
+    rule: evidence records observed facts; indexes and chat summaries are navigation aids only.
+  - fact: independent review verdict, findings, residual risk, gate review
+    sourcePath: docs/05-execution-logs/audits-reviews/
+    derivedSummaries:
+      - docs/05-execution-logs/execution-log-index.yaml
+    rule: audit review records review conclusions; it does not overwrite queue state or project-state pointers.
+  - fact: Codex automation registration identity and active or paused status
+    sourcePath: docs/04-agent-system/state/project-state.yaml plus local Codex automation registry
+    derivedSummaries:
+      - scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+    rule: registration diagnostics verify both sources and must not silently replace either one.
 archiveIndexes:
   - id: task-queue-archive-2026-05
     path: docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
