@@ -130,9 +130,21 @@ try {
     if (-not (Test-Path -LiteralPath $AutomationRoot)) {
         Add-Finding "HARD_BLOCK_MISSING_AUTOMATION_ROOT $AutomationRoot"
     } else {
-        $automationDirs = @(Get-ChildItem -LiteralPath $AutomationRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
-                Test-Path -LiteralPath (Join-Path -Path $_.FullName -ChildPath "automation.toml")
-            })
+        $automationDirs = New-Object System.Collections.Generic.List[object]
+        $allAutomationDirs = @(Get-ChildItem -LiteralPath $AutomationRoot -Directory -ErrorAction SilentlyContinue)
+        foreach ($automationDir in $allAutomationDirs) {
+            $automationTomlPath = Join-Path -Path $automationDir.FullName -ChildPath "automation.toml"
+            if (-not (Test-Path -LiteralPath $automationTomlPath)) {
+                continue
+            }
+
+            $automationToml = Get-Content -LiteralPath $automationTomlPath -Raw
+            $automationStatus = Get-TomlString -Content $automationToml -Key "status"
+            Write-Output "automationRegistration: $($automationDir.Name); status=$automationStatus"
+            if ($automationStatus -eq "ACTIVE") {
+                $automationDirs.Add($automationDir) | Out-Null
+            }
+        }
         Write-Output "activeAutomationRegistrationCount: $($automationDirs.Count)"
         foreach ($automationDir in $automationDirs) {
             Write-Output "activeAutomationRegistration: $($automationDir.Name)"
@@ -164,8 +176,8 @@ try {
             }
 
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "Current automation identity map" -Code "HARD_BLOCK_MISSING_PROMPT_IDENTITY_MAP"
-            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "tiku-module-run-v2-autopilot-2" -Code "HARD_BLOCK_MISSING_PROMPT_PRIMARY_IDENTITY"
-            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "tiku-module-run-v2-autopilot" -Code "HARD_BLOCK_MISSING_PROMPT_HISTORICAL_AUTOPILOT"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "tiku-module-run-v2-autopilot" -Code "HARD_BLOCK_MISSING_PROMPT_PRIMARY_IDENTITY"
+            Test-PromptAnchor -Prompt $tomlPrompt -Anchor "tiku-module-run-v2-autopilot-2" -Code "HARD_BLOCK_MISSING_PROMPT_HISTORICAL_AUTOPILOT"
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "mechanic-2" -Code "HARD_BLOCK_MISSING_PROMPT_MECHANIC_BOUNDARY"
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "on-demand" -Code "HARD_BLOCK_MISSING_PROMPT_ON_DEMAND_BOUNDARY"
             Test-PromptAnchor -Prompt $tomlPrompt -Anchor "standingUnattendedLocalCloseoutApproval" -Code "HARD_BLOCK_MISSING_PROMPT_STANDING_CLOSEOUT"

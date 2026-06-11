@@ -1,4 +1,4 @@
-schemaVersion: 1
+﻿schemaVersion: 1
 generatedByTask: module-run-v2-autodrive-phase-0-2
 purpose: Durable control schema for Module Run v2 unattended local autodrive. This file defines required approval and lifecycle fields. It does not approve product implementation or high-risk actions by itself.
 taskAutodrivePolicy:
@@ -83,7 +83,7 @@ startupDiagnostics:
       - ready
       - not_configured
       - stop_for_hard_block
-    executionRule: project-state codexAutomationId/status must match the active local automation TOML; only tiku-module-run-v2-autopilot-2 may be scheduled ACTIVE, while mechanic-2 remains on-demand only.
+    executionRule: project-state codexAutomationId/status must match the active local automation TOML; only tiku-module-run-v2-autopilot may be scheduled ACTIVE, while mechanic-2 remains on-demand only.
   primaryRepositoryPosture:
     defaultPath: D:\tiku
     passValues:

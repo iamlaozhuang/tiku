@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $false)]
     [string]$TaskId = "",
 
@@ -342,7 +342,7 @@ function Test-MechanicRepairAnchors {
         }
 
         $content = Get-Content -LiteralPath $fullPath -Raw
-        if ($content -notmatch "tiku-module-run-v2-autopilot-2") {
+        if ($content -notmatch "tiku-module-run-v2-autopilot") {
             Add-Finding "HARD_BLOCK_MECHANIC_REPAIR_MISSING_AUTOPILOT_ID $mechanicLogFile"
         }
         if ($content -notmatch "tiku-module-run-v2-mechanic-2") {

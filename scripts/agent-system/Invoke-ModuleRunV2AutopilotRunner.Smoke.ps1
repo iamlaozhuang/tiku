@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 function Assert-Contains {
     param(
@@ -314,7 +314,7 @@ tasks:
     @"
 {
   "runId": "runner-owner-recovery",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "interactive",
   "taskId": "runner-owner-recovery",
   "branch": "codex/runner-owner-recovery-smoke",

@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 function Assert-Contains {
     param(
@@ -69,6 +69,8 @@ schemaVersion: 1
 automation:
   unattendedControl:
     remoteAutomationApproval: $RemoteAutomationApproval
+    codexAutomationId: tiku-module-run-v2-autopilot
+    codexAutomationStatus: ACTIVE
 repository:
   shaSemantics: accepted_ancestor_checkpoint
   lastKnownMasterSha: $stateMasterSha
@@ -165,7 +167,8 @@ terminologyAnchors:
             -MatrixPath $matrixPath `
             -AllowProtectedBranch `
             -SkipLeaseCheck `
-            -SkipWorktreeHygieneCheck
+            -SkipWorktreeHygieneCheck `
+            -SkipPrimaryRepositoryPostureCheck
     )
     Assert-Contains -Output $continueOutput -Pattern "startupDecision: continue_current_task"
     Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy:"
@@ -179,7 +182,8 @@ terminologyAnchors:
             -MatrixPath $matrixPath `
             -AllowProtectedBranch `
             -SkipLeaseCheck `
-            -SkipWorktreeHygieneCheck
+            -SkipWorktreeHygieneCheck `
+            -SkipPrimaryRepositoryPostureCheck
     )
     Assert-Contains -Output $readyForCloseoutOutput -Pattern "startupCloseoutPolicy: structured"
     Assert-Contains -Output $readyForCloseoutOutput -Pattern "startupDecision: closeout_recovery"
@@ -193,7 +197,8 @@ terminologyAnchors:
             -MatrixPath $matrixPath `
             -AllowProtectedBranch `
             -SkipLeaseCheck `
-            -SkipWorktreeHygieneCheck
+            -SkipWorktreeHygieneCheck `
+            -SkipPrimaryRepositoryPostureCheck
     )
     Assert-Contains -Output $pendingOutput -Pattern "startupDecision: prepare_next_task"
     Assert-Contains -Output $pendingOutput -Pattern "startupStateWarning: lastKnownMasterSha is an accepted ancestor of master"
@@ -208,7 +213,8 @@ terminologyAnchors:
             -MatrixPath $matrixPath `
             -AllowProtectedBranch `
             -SkipLeaseCheck `
-            -SkipWorktreeHygieneCheck
+            -SkipWorktreeHygieneCheck `
+            -SkipPrimaryRepositoryPostureCheck
     )
     Assert-Contains -Output $closeoutOutput -Pattern "startupDecision: no_executable_task"
 
@@ -220,7 +226,8 @@ terminologyAnchors:
             -MatrixPath $matrixPath `
             -AllowProtectedBranch `
             -SkipLeaseCheck `
-            -SkipWorktreeHygieneCheck
+            -SkipWorktreeHygieneCheck `
+            -SkipPrimaryRepositoryPostureCheck
     }
 
     Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "in_progress" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning"
@@ -244,7 +251,8 @@ terminologyAnchors:
             -MatrixPath $matrixPath `
             -LeasePath $activeLeasePath `
             -AllowProtectedBranch `
-            -SkipWorktreeHygieneCheck
+            -SkipWorktreeHygieneCheck `
+            -SkipPrimaryRepositoryPostureCheck
     }
 
     $parkingRepo = Join-Path -Path $fixtureRoot -ChildPath "startup-repo"
@@ -286,6 +294,7 @@ terminologyAnchors:
                 -MatrixPath $matrixPath `
                 -AutomationWorktreeRoot $startupWorktreeRoot `
                 -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
                 -SkipLeaseCheck
         )
     } finally {
@@ -378,6 +387,7 @@ Cost Calibration Gate remains blocked
                 -MatrixPath (Join-Path -Path $seedDirtyPath -ChildPath "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml") `
                 -AutomationWorktreeRoot $seedWorktreeRoot `
                 -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
                 -SkipLeaseCheck
         )
     } finally {
@@ -420,7 +430,7 @@ Cost Calibration Gate remains blocked
         @"
 {
   "runId": "active-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "interactive",
   "taskId": "module-run-v2-automation-handoff-contract-hardening",
   "branch": "codex/dirty-owner-smoke",
@@ -446,6 +456,7 @@ Cost Calibration Gate remains blocked
                 -RunRegistryRoot $runRegistryRoot `
                 -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
                 -SkipLeaseCheck
         }
 
@@ -495,7 +506,7 @@ Review status: PENDING
         @"
 {
   "runId": "fresh-active-validation-lifecycle",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "interactive",
   "taskId": "module-run-v2-active-owner-validation-lifecycle",
   "branch": "codex/dirty-owner-smoke",
@@ -521,6 +532,7 @@ Review status: PENDING
                 -RunRegistryRoot $runRegistryRoot `
                 -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
                 -SkipLeaseCheck
         }
 
@@ -561,7 +573,7 @@ Review status: PENDING
         @"
 {
   "runId": "expired-active-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "interactive",
   "taskId": "module-run-v2-autopilot-maturity-hardening",
   "branch": "codex/dirty-owner-smoke",
@@ -587,6 +599,7 @@ Review status: PENDING
                 -RunRegistryRoot $runRegistryRoot `
                 -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
                 -SkipLeaseCheck `
                 -ActiveRunHeartbeatMinutes 30
         }
@@ -596,7 +609,7 @@ Review status: PENDING
         @"
 {
   "runId": "adoptable-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "recovery",
   "taskId": "module-run-v2-automation-handoff-contract-hardening",
   "branch": "codex/dirty-owner-smoke",
@@ -622,6 +635,7 @@ Review status: PENDING
                 -RunRegistryRoot $runRegistryRoot `
                 -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
                 -SkipLeaseCheck
         )
         Assert-Contains -Output $adoptOutput -Pattern "startupDecision: adopt_recoverable_run"
@@ -637,6 +651,7 @@ Review status: PENDING
                 -RunRegistryRoot $runRegistryRoot `
                 -HandoffRoot $handoffRoot `
                 -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
                 -SkipLeaseCheck
         }
     } finally {

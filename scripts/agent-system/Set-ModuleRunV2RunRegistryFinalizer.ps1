@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $false)]
     [string]$TaskId = "",
 
@@ -49,7 +49,7 @@ param(
     [string]$NextRecommendedAction = "manual_required_owner_recovery",
 
     [Parameter(Mandatory = $false)]
-    [string]$AutomationId = "tiku-module-run-v2-autopilot-2",
+    [string]$AutomationId = "tiku-module-run-v2-autopilot",
 
     [Parameter(Mandatory = $false)]
     [switch]$NoWrite

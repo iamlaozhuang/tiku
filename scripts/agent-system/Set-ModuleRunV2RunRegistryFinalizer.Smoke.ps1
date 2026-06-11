@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 function Assert-Contains {
     param(
@@ -72,7 +72,7 @@ try {
     @"
 {
   "runId": "$(Get-StablePathHash -Value $normalizedRepoPath)",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "interactive",
   "taskId": "batch-102",
   "branch": "(detached HEAD)",

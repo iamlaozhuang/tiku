@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 function Assert-Contains {
     param(
@@ -209,7 +209,7 @@ try {
     @"
 {
   "runId": "cleanup-ready-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "scheduled",
   "taskId": "module-run-v2-automation-handoff-contract-hardening",
   "branch": "codex/cleanup-ready",
@@ -252,7 +252,7 @@ try {
     @"
 {
   "runId": "expired-active-missing-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "scheduled",
   "taskId": "module-run-v2-expired-active-missing-worktree",
   "branch": "codex/expired-active-missing",
@@ -287,7 +287,7 @@ try {
     @"
 {
   "runId": "fresh-orphan-active-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "scheduled",
   "taskId": "module-run-v2-fresh-orphan-active-registry",
   "branch": "(detached HEAD)",
@@ -322,7 +322,7 @@ try {
     @"
 {
   "runId": "expired-active-terminal-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "scheduled",
   "taskId": "closed-terminal-task",
   "branch": "codex/expired-active-terminal",
@@ -359,7 +359,7 @@ try {
     @"
 {
   "runId": "superseded-active-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "scheduled",
   "taskId": "closed-terminal-task",
   "branch": "codex/superseded-active",
@@ -378,7 +378,7 @@ try {
     @"
 {
   "runId": "superseding-stopped-run",
-  "automationId": "tiku-module-run-v2-autopilot-2",
+  "automationId": "tiku-module-run-v2-autopilot",
   "threadRole": "scheduled",
   "taskId": "closed-terminal-task",
   "branch": "codex/superseded-active",

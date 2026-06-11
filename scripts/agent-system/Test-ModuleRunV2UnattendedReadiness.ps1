@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $false)]
     [string]$TaskId = "",
 
@@ -410,7 +410,7 @@ function Write-RunRegistryHeartbeat {
     $registryPath = Join-Path -Path $Root -ChildPath "$worktreeHash.json"
     $runRegistry = [ordered]@{
         runId = $worktreeHash
-        automationId = "tiku-module-run-v2-autopilot-2"
+        automationId = "tiku-module-run-v2-autopilot"
         threadRole = "interactive"
         taskId = $TaskId
         branch = $Branch

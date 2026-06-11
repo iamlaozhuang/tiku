@@ -1,4 +1,4 @@
-# Automated Advancement Governance SOP
+﻿# Automated Advancement Governance SOP
 
 ## Status
 
@@ -570,7 +570,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 The startup gate coordinates:
 
 - automation registration readiness: `project-state.yaml` `codexAutomationId`/`codexAutomationStatus` must match the local
-  primary automation TOML, only `tiku-module-run-v2-autopilot-2` may be scheduled active, historical autopilot state is
+  primary automation TOML, only `tiku-module-run-v2-autopilot` may be scheduled active, historical autopilot state is
   archive-only, and `mechanic-2` is on-demand emergency reference only;
 - `D:\tiku` posture: clean detached or clean `master`/`main` is acceptable, clean stale detached is warning-only, clean
   merged `codex/*` routes to hygiene, and dirty `D:\tiku` is a hard stop;

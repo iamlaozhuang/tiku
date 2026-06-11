@@ -180,7 +180,7 @@ automation:
         - cost_calibration_gate
       statement: >-
         User enables a governed task-scoped destructive local Docker DB approval path. Destructive DB work is executable only for an explicitly scoped task against local Docker dev resources after capability gates pass and redacted evidence records the operation kind, target alias, backup/disposable rationale, and rollback/recovery boundary. It is not a global standing destructive DB approval.
-    codexAutomationId: tiku-module-run-v2-autopilot-2
+    codexAutomationId: tiku-module-run-v2-autopilot
     codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
     codexAutomationExecutionEnvironment: worktree

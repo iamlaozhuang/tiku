@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 function Assert-Contains {
     param(
@@ -147,7 +147,7 @@ tasks:
         }
         $registryText = Get-Content -LiteralPath $registryFiles[0].FullName -Raw
         if (
-            $registryText -notmatch '"automationId":\s*"tiku-module-run-v2-autopilot-2"' -or
+            $registryText -notmatch '"automationId":\s*"tiku-module-run-v2-autopilot"' -or
             $registryText -notmatch '"status":\s*"active"' -or
             $registryText -notmatch '"taskId":\s*"module-run-v2-unattended-readiness-smoke"'
         ) {
