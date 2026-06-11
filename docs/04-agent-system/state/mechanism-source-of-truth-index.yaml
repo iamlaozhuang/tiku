@@ -89,6 +89,11 @@ sopGroups:
     - id: skill-dispatch-matrix
       path: docs/04-agent-system/sop/skill-dispatch-matrix.md
 scriptControls:
+  - id: tiku-next-action-diagnostic
+    path: scripts/agent-system/Get-TikuNextAction.ps1
+    smokePath: scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+    decisionOutput: nextActionDecision
+    role: read-only next-action diagnostic for the active Tiku mechanism; reports repository posture, current task, queue decision, next executable task, validation need, blocked gates, recommended action, and stop reason without claiming tasks or mutating durable state
   - id: module-run-v2-unattended-readiness
     path: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.Smoke.ps1

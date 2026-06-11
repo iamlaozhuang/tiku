@@ -1,0 +1,339 @@
+param(
+    [Parameter(Mandatory = $false)]
+    [string]$TaskId = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ProjectStatePath = "docs\04-agent-system\state\project-state.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$QueuePath = "docs\04-agent-system\state\task-queue.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml"
+)
+
+$ErrorActionPreference = "Stop"
+
+function Get-TaskBlocks {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $blocks = New-Object System.Collections.ArrayList
+    $current = $null
+
+    foreach ($line in $Lines) {
+        if ($line -match '^\s{2}- id:\s*(.+?)\s*$') {
+            if ($null -ne $current) {
+                [void]$blocks.Add($current)
+            }
+
+            $current = [pscustomobject]@{
+                Id = $Matches[1].Trim()
+                Lines = New-Object System.Collections.ArrayList
+            }
+        }
+
+        if ($null -ne $current) {
+            [void]$current.Lines.Add($line)
+        }
+    }
+
+    if ($null -ne $current) {
+        [void]$blocks.Add($current)
+    }
+
+    return $blocks
+}
+
+function Get-TaskBlock {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][string]$Id
+    )
+
+    foreach ($block in $Blocks) {
+        if ($block.Id -eq $Id) {
+            return $block.Lines
+        }
+    }
+
+    return @()
+}
+
+function Get-ScalarValue {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s+$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            return $Matches[1].Trim().Trim('"')
+        }
+    }
+
+    return ""
+}
+
+function Get-ListValues {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    $values = New-Object System.Collections.ArrayList
+    $inList = $false
+    $baseIndent = 0
+
+    foreach ($line in $Block) {
+        if (-not $inList -and $line -match "^(\s+)$([regex]::Escape($Key)):\s*$") {
+            $inList = $true
+            $baseIndent = $Matches[1].Length
+            continue
+        }
+
+        if ($inList) {
+            if ($line -match '^(\s*)\S') {
+                $indent = $Matches[1].Length
+                if ($indent -le $baseIndent) {
+                    break
+                }
+            }
+
+            if ($line -match '^\s*-\s+(.+?)\s*$') {
+                [void]$values.Add($Matches[1].Trim())
+            }
+        }
+    }
+
+    return $values
+}
+
+function Get-ProjectSection {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    $section = New-Object System.Collections.ArrayList
+    $inSection = $false
+
+    foreach ($line in $Lines) {
+        if (-not $inSection -and $line -match "^$([regex]::Escape($Key)):\s*$") {
+            $inSection = $true
+            continue
+        }
+
+        if ($inSection) {
+            if ($line -match '^\S.+:\s*' -and $line -notmatch "^\s") {
+                break
+            }
+
+            [void]$section.Add($line)
+        }
+    }
+
+    return $section
+}
+
+function Get-ProjectScalar {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines,
+        [Parameter(Mandatory = $true)][string]$Section,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    $sectionLines = @(Get-ProjectSection -Lines $Lines -Key $Section)
+    return Get-ScalarValue -Block $sectionLines -Key $Key
+}
+
+function Get-GitValue {
+    param([Parameter(Mandatory = $true)][string[]]$Arguments)
+
+    $output = @(& git @Arguments 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        return ""
+    }
+
+    return (($output -join "`n").Trim())
+}
+
+function Test-DependencyTerminal {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][string]$DependencyId,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.ArrayList]$BlockedReasons
+    )
+
+    $dependencyBlock = @(Get-TaskBlock -Blocks $Blocks -Id $DependencyId)
+    if ($dependencyBlock.Count -eq 0) {
+        [void]$BlockedReasons.Add("dependency_missing:$DependencyId")
+        return $false
+    }
+
+    $status = Get-ScalarValue -Block $dependencyBlock -Key "status"
+    if ($status -in @("done", "closed", "pushed", "merged")) {
+        return $true
+    }
+
+    if ([string]::IsNullOrWhiteSpace($status)) {
+        $status = "missing_status"
+    }
+    [void]$BlockedReasons.Add("dependency_not_terminal:${DependencyId}:$status")
+    return $false
+}
+
+function Get-NextExecutableTask {
+    param([Parameter(Mandatory = $true)][object[]]$Blocks)
+
+    $firstBlockedPending = ""
+    $firstBlockedReasons = @()
+
+    foreach ($block in $Blocks) {
+        $status = Get-ScalarValue -Block $block.Lines -Key "status"
+        if ($status -ne "pending") {
+            continue
+        }
+
+        $blockedReasons = New-Object System.Collections.ArrayList
+        $dependencies = @(Get-ListValues -Block $block.Lines -Key "dependencies")
+        foreach ($dependency in $dependencies) {
+            [void](Test-DependencyTerminal -Blocks $Blocks -DependencyId $dependency -BlockedReasons $blockedReasons)
+        }
+
+        if ($blockedReasons.Count -eq 0) {
+            return [pscustomobject]@{
+                Id = $block.Id
+                Block = $block.Lines
+                BlockedReasons = @()
+            }
+        }
+
+        if ([string]::IsNullOrWhiteSpace($firstBlockedPending)) {
+            $firstBlockedPending = $block.Id
+            $firstBlockedReasons = @($blockedReasons)
+        }
+    }
+
+    return [pscustomobject]@{
+        Id = ""
+        Block = @()
+        BlockedPendingTask = $firstBlockedPending
+        BlockedReasons = $firstBlockedReasons
+    }
+}
+
+function Join-OrNone {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Values)
+
+    $nonEmpty = @($Values | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($nonEmpty.Count -eq 0) {
+        return "none"
+    }
+
+    return ($nonEmpty -join "; ")
+}
+
+$findings = New-Object System.Collections.ArrayList
+
+if (-not (Test-Path -LiteralPath $ProjectStatePath)) {
+    [void]$findings.Add("missing_project_state")
+}
+if (-not (Test-Path -LiteralPath $QueuePath)) {
+    [void]$findings.Add("missing_task_queue")
+}
+if (-not (Test-Path -LiteralPath $MatrixPath)) {
+    [void]$findings.Add("missing_matrix")
+}
+
+$projectStateLines = @()
+$queueLines = @()
+if ($findings.Count -eq 0) {
+    $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
+    $queueLines = @(Get-Content -LiteralPath $QueuePath)
+}
+
+$taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
+$currentTaskId = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "id"
+if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+    $currentTaskId = $TaskId
+}
+
+$currentTaskBlock = @()
+if (-not [string]::IsNullOrWhiteSpace($currentTaskId)) {
+    $currentTaskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $currentTaskId)
+}
+
+$currentTaskStatus = ""
+if ($currentTaskBlock.Count -gt 0) {
+    $currentTaskStatus = Get-ScalarValue -Block $currentTaskBlock -Key "status"
+}
+if ([string]::IsNullOrWhiteSpace($currentTaskStatus)) {
+    $currentTaskStatus = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "status"
+}
+
+$nextTask = Get-NextExecutableTask -Blocks $taskBlocks
+$nextTaskId = $nextTask.Id
+$blockedReasons = @($nextTask.BlockedReasons)
+$validationCommands = @()
+if (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
+    $validationCommands = @(Get-ListValues -Block $nextTask.Block -Key "validationCommands")
+}
+
+$branchName = Get-GitValue -Arguments @("rev-parse", "--abbrev-ref", "HEAD")
+$headSha = Get-GitValue -Arguments @("rev-parse", "--short", "HEAD")
+$statusOutput = @(git status --porcelain=v1 -uall 2>$null)
+$isDirty = $LASTEXITCODE -eq 0 -and $statusOutput.Count -gt 0
+
+$decision = "no_pending_task"
+$recommendedAction = "idle_no_pending_task"
+$stopReason = "none"
+
+if ($findings.Count -gt 0) {
+    $decision = "hard_block_missing_inputs"
+    $recommendedAction = "repair_missing_mechanism_inputs"
+    $stopReason = Join-OrNone -Values @($findings)
+} elseif ($currentTaskStatus -in @("in_progress", "ready_for_closeout")) {
+    $decision = "current_task_active"
+    $recommendedAction = "finish_current_task_closeout:$currentTaskId"
+    $stopReason = "current_task_not_closed:${currentTaskId}:$currentTaskStatus"
+} elseif (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
+    $decision = if ($isDirty) { "executable_task_found_with_dirty_worktree" } else { "executable_task_found" }
+    $recommendedAction = if ($isDirty) { "close_current_changes_before_next_task:$nextTaskId" } else { "claim_or_plan_next_task:$nextTaskId" }
+    $stopReason = if ($isDirty) { "dirty_worktree_advisory" } else { "none" }
+} elseif ($blockedReasons.Count -gt 0) {
+    $decision = "pending_task_blocked"
+    $recommendedAction = "resolve_dependency_or_status_block"
+    $stopReason = Join-OrNone -Values $blockedReasons
+}
+
+$blockedGates = @(
+    $blockedReasons
+    "dependency_change:blocked_without_approval"
+    "env_secret:blocked_without_approval"
+    "provider_call:blocked_without_task_approval"
+    "schema_migration:blocked_without_task_approval"
+    "deploy:blocked_without_approval"
+    "push_pr_force_push:blocked_without_fresh_approval"
+    "Cost Calibration Gate remains blocked"
+) | ForEach-Object { $_ }
+
+Write-Output "repository: branch=$branchName; head=$headSha; dirty=$($isDirty.ToString().ToLowerInvariant())"
+Write-Output "currentTask: $currentTaskId($currentTaskStatus)"
+Write-Output "queueDecision: $decision"
+Write-Output "nextActionDecision: $decision"
+Write-Output "nextExecutableTask: $(if ([string]::IsNullOrWhiteSpace($nextTaskId)) { 'none' } else { $nextTaskId })"
+Write-Output "blockedGates: $(Join-OrNone -Values @($blockedGates))"
+Write-Output "validationNeeded: $(if ($validationCommands.Count -eq 0) { 'none' } else { "$($validationCommands.Count) command(s) for $nextTaskId" })"
+Write-Output "recommendedAction: $recommendedAction"
+Write-Output "stopReason: $stopReason"
+Write-Output "diagnosticOnly: true"
+Write-Output "Cost Calibration Gate remains blocked"
+
+if ($decision -eq "hard_block_missing_inputs") {
+    exit 1
+}
+
+exit 0

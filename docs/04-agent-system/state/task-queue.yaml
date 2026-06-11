@@ -8724,6 +8724,7 @@ tasks:
     allowedFiles:
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
       - docs/05-execution-logs/task-plans/2026-06-11-mechanism-next-action-readonly-diagnostic.md
@@ -8755,7 +8756,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-next-action-readonly-diagnostic.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-next-action-readonly-diagnostic.md
-    status: pending
+    status: closed
     retryCount: 0
 
   - id: mechanism-status-and-drift-diagnostics
@@ -8772,6 +8773,7 @@ tasks:
     allowedFiles:
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/05-execution-logs/task-plans/2026-06-11-mechanism-status-and-drift-diagnostics.md
       - docs/05-execution-logs/evidence/2026-06-11-mechanism-status-and-drift-diagnostics.md
@@ -8823,6 +8825,7 @@ tasks:
       - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
       - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
       - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
       - docs/04-agent-system/sop/automated-advancement-governance.md
       - docs/05-execution-logs/task-plans/2026-06-11-mechanism-runner-consumes-next-action.md
