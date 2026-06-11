@@ -10829,12 +10829,16 @@ tasks:
       - local_experience_closure
       - evidence_redaction
     validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-batch-109-personal-learning-ai-local-transport-contract-planning.md docs\05-execution-logs\evidence\batch-109-personal-learning-ai-local-transport-contract-planning.md docs\05-execution-logs\audits-reviews\batch-109-personal-learning-ai-local-transport-contract-planning.md
       - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-batch-109-personal-learning-ai-local-transport-contract-planning.md docs\05-execution-logs\evidence\batch-109-personal-learning-ai-local-transport-contract-planning.md docs\05-execution-logs\audits-reviews\batch-109-personal-learning-ai-local-transport-contract-planning.md
       - Select-String -Path docs\05-execution-logs\task-plans\2026-06-11-batch-109-personal-learning-ai-local-transport-contract-planning.md,docs\05-execution-logs\evidence\batch-109-personal-learning-ai-local-transport-contract-planning.md,docs\05-execution-logs\audits-reviews\batch-109-personal-learning-ai-local-transport-contract-planning.md -Pattern 'personal-learning-ai-experience','local_api_or_server_action_contract','localExperienceAcceptanceBridgeApproved','authorization','paper','mock_exam','ai_call_log','Cost Calibration Gate remains blocked'
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId batch-109-personal-learning-ai-local-transport-contract-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-109-personal-learning-ai-local-transport-contract-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-109-personal-learning-ai-local-transport-contract-planning
     evidencePath: docs/05-execution-logs/evidence/batch-109-personal-learning-ai-local-transport-contract-planning.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-109-personal-learning-ai-local-transport-contract-planning.md
-    status: pending
+    status: closed
     retryCount: 0
 
   - id: batch-110-personal-learning-ai-local-transport-contract
@@ -10966,7 +10970,7 @@ tasks:
     validationCommands:
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused # focused test anchor, replace with scoped unit test in task plan
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-110-personal-learning-ai-local-transport-contract
     evidencePath: docs/05-execution-logs/evidence/batch-110-personal-learning-ai-local-transport-contract.md
