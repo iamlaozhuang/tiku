@@ -176,3 +176,79 @@ Output:
 Final `git diff --check` exit code: `0`, no whitespace errors.
 
 Final result: validation passed for the scoped mechanism hardening task.
+
+## Post-Merge Master Verification
+
+Fast-forward merge to `master` succeeded:
+
+```text
+Updating a1cfbc22..0d393629
+Fast-forward
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+```
+
+Exit code: `0`
+
+Key output:
+
+```text
+repository: branch=master; head=0d39362; dirty=true
+nextActionDecision: planned_pause_for_tuning
+automationRegistrationDecision: planned_pause_for_tuning
+stoppedAutomationHygieneDecision: clean
+seedProposalDecision: proposal_available
+seedModule: ai-task-and-provider
+projectStatusDecision: planned_pause_for_tuning
+projectStatusAction: keep_automation_paused_for_tuning
+Cost Calibration Gate remains blocked
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -MaxSteps 1 -AllowProtectedBranch
+```
+
+Exit code: `0`
+
+Key output:
+
+```text
+currentTask: runner-pending-seed-decision-gate(closed)
+nextActionDecision: planned_pause_for_tuning
+seedProposalDecision: proposal_available
+seedModule: ai-task-and-provider
+automationRegistrationDecision: planned_pause_for_tuning
+startupDecision: planned_pause_for_tuning
+runnerDecision: planned_pause_for_tuning
+runnerNextAction: keep_automation_paused_for_tuning
+Cost Calibration Gate remains blocked
+```
+
+Post-merge command:
+
+```powershell
+node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1 docs\04-agent-system\operating-manual.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-11-runner-pending-seed-decision-gate.md docs\05-execution-logs\evidence\2026-06-11-runner-pending-seed-decision-gate.md docs\05-execution-logs\audits-reviews\2026-06-11-runner-pending-seed-decision-gate.md
+```
+
+Exit code: `0`
+
+Output:
+
+```text
+Checking formatting...
+All matched files use Prettier code style!
+```
+
+Post-merge `git diff --check` exit code: `0`, no whitespace errors.
+
+Post-merge repository inventory before evidence-only commit:
+
+```text
+## master...origin/master [ahead 1]
+```
