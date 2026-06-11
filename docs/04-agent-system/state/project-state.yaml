@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-111-personal-learning-ai-request-context-local-contract
-updatedAt: "2026-06-11T10:32:19-07:00"
+  currentPhase: batch-112-personal-learning-ai-redacted-result-reference-local-contract
+updatedAt: "2026-06-11T10:53:01-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -270,14 +270,14 @@ repository:
   lastKnownMasterSha: d49ce29a9531d6d127b704c19e112ce097e72bae
   lastKnownOriginMasterSha: d49ce29a9531d6d127b704c19e112ce097e72bae
 currentTask:
-  id: batch-111-personal-learning-ai-request-context-local-contract
+  id: batch-112-personal-learning-ai-redacted-result-reference-local-contract
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-111-personal-learning-ai-request-context-local-contract.md
-  evidencePath: docs/05-execution-logs/evidence/batch-111-personal-learning-ai-request-context-local-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-111-personal-learning-ai-request-context-local-contract.md
-  branch: codex/batch-111-personal-learning-ai-request-context-local-contract
-  commitSha: 4c6669f8c4104d9580c99bf4347043af25ab10f9
+  planPath: pending-task-plan
+  evidencePath: docs/05-execution-logs/evidence/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
+  branch: (detached HEAD)
+  commitSha: d9ec333bf054c8f66073a9f2c76946d693e25d92
   prUrl: null
   retryCount: 0
   lastFailurePath: null
