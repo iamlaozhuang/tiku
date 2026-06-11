@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-112-personal-learning-ai-redacted-result-reference-local-contract
-updatedAt: "2026-06-11T10:53:01-07:00"
+  currentPhase: batch-113-personal-learning-ai-local-ui-browser-planning
+updatedAt: "2026-06-11T16:34:47-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -270,14 +270,14 @@ repository:
   lastKnownMasterSha: d49ce29a9531d6d127b704c19e112ce097e72bae
   lastKnownOriginMasterSha: d49ce29a9531d6d127b704c19e112ce097e72bae
 currentTask:
-  id: batch-112-personal-learning-ai-redacted-result-reference-local-contract
+  id: batch-113-personal-learning-ai-local-ui-browser-planning
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: pending-task-plan
-  evidencePath: docs/05-execution-logs/evidence/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
-  branch: (detached HEAD)
-  commitSha: d9ec333bf054c8f66073a9f2c76946d693e25d92
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-113-personal-learning-ai-local-ui-browser-planning.md
+  evidencePath: docs/05-execution-logs/evidence/batch-113-personal-learning-ai-local-ui-browser-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-113-personal-learning-ai-local-ui-browser-planning.md
+  branch: codex/batch-113-personal-learning-ai-local-ui-browser-planning
+  commitSha: 2ead79e639b809929c3f3fb5dce7efc9475f4cdc
   prUrl: null
   retryCount: 0
   lastFailurePath: null
