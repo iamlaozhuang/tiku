@@ -56,6 +56,9 @@ try {
     $projectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $stateRoot -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix.yaml"
+    $completedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/completed-a.md"
+    New-Item -ItemType Directory -Path (Split-Path -Path $completedEvidencePath -Parent) -Force | Out-Null
+    Set-Content -LiteralPath $completedEvidencePath -Value "completed-a smoke evidence" -Encoding UTF8
 
     @"
 schemaVersion: 1
@@ -76,6 +79,15 @@ tasks:
     validationCommands:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/completed-a.md
+  - id: task-missing-status
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/task-missing-status.md
+  - id: task-legacy-done
+    status: done
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/task-legacy-done.md
   - id: task-a
     status: pending
     dependencies:
@@ -96,6 +108,13 @@ tasks:
     @"
 schemaVersion: 2
 moduleRunVersion: 2
+sourcePlanningModules:
+  - module: smoke-module
+    sourcePlanningTask: missing-planning-task
+    v2ExecutionModule: smoke-execution
+    currentProgress:
+      completedBatches:
+        - batch-999-missing-from-queue
 terminologyAnchors:
   - Cost Calibration Gate remains blocked
 Cost Calibration Gate remains blocked
@@ -130,6 +149,9 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $output -Pattern '^nextExecutableTask: task-a$'
     Assert-Contains -Output $output -Pattern '^blockedGates:'
     Assert-Contains -Output $output -Pattern '^validationNeeded: 2 command\(s\) for task-a$'
+    Assert-Contains -Output $output -Pattern '^statusFindings: .*legacy_status_missing=1; legacy_done=1;'
+    Assert-Contains -Output $output -Pattern '^evidenceFindings: evidenceMissing=1;'
+    Assert-Contains -Output $output -Pattern '^driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:1,sourcePlanningTaskMissingInQueue:1;'
     Assert-Contains -Output $output -Pattern '^recommendedAction: claim_or_plan_next_task:task-a$'
     Assert-Contains -Output $output -Pattern '^stopReason: none$'
     Assert-Contains -Output $output -Pattern '^diagnosticOnly: true$'

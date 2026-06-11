@@ -175,6 +175,12 @@ function Test-DependencyTerminal {
 
     $status = Get-ScalarValue -Block $dependencyBlock -Key "status"
     if ($status -in @("done", "closed", "pushed", "merged")) {
+        $evidencePath = Get-ScalarValue -Block $dependencyBlock -Key "evidencePath"
+        if ([string]::IsNullOrWhiteSpace($evidencePath) -or -not (Test-Path -LiteralPath $evidencePath)) {
+            [void]$BlockedReasons.Add("dependency_evidence_missing:$DependencyId")
+            return $false
+        }
+
         return $true
     }
 
@@ -236,6 +242,84 @@ function Join-OrNone {
     return ($nonEmpty -join "; ")
 }
 
+function Join-FirstItems {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Values)
+
+    $nonEmpty = @($Values | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($nonEmpty.Count -eq 0) {
+        return "none"
+    }
+
+    return (($nonEmpty | Select-Object -First 5) -join ",")
+}
+
+function Get-QueueDiagnostics {
+    param([Parameter(Mandatory = $true)][object[]]$Blocks)
+
+    $allowedStatuses = @("pending", "claimed", "planned", "implemented", "validated", "reviewed", "ready_for_closeout", "closed", "blocked")
+    $legacyTerminalStatuses = @("done", "merged", "pushed")
+    $missingStatusIds = New-Object System.Collections.ArrayList
+    $legacyDoneIds = New-Object System.Collections.ArrayList
+    $unsupportedStatusIds = New-Object System.Collections.ArrayList
+    $evidenceMissingIds = New-Object System.Collections.ArrayList
+
+    foreach ($block in $Blocks) {
+        $status = Get-ScalarValue -Block $block.Lines -Key "status"
+        $evidencePath = Get-ScalarValue -Block $block.Lines -Key "evidencePath"
+
+        if ([string]::IsNullOrWhiteSpace($status)) {
+            [void]$missingStatusIds.Add($block.Id)
+            continue
+        }
+
+        if ($status -in $legacyTerminalStatuses) {
+            [void]$legacyDoneIds.Add($block.Id)
+        } elseif ($status -notin $allowedStatuses -and $status -ne "in_progress") {
+            [void]$unsupportedStatusIds.Add("$($block.Id):$status")
+        }
+
+        if ($status -in @("done", "closed", "merged", "pushed") -and ([string]::IsNullOrWhiteSpace($evidencePath) -or -not (Test-Path -LiteralPath $evidencePath))) {
+            [void]$evidenceMissingIds.Add($block.Id)
+        }
+    }
+
+    return [pscustomobject]@{
+        MissingStatusIds = @($missingStatusIds)
+        LegacyDoneIds = @($legacyDoneIds)
+        UnsupportedStatusIds = @($unsupportedStatusIds)
+        EvidenceMissingIds = @($evidenceMissingIds)
+    }
+}
+
+function Get-MatrixDiagnostics {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$MatrixLines
+    )
+
+    $queueIds = @($Blocks | ForEach-Object { $_.Id })
+    $matrixBatchIds = New-Object System.Collections.ArrayList
+    $sourcePlanningTaskIds = New-Object System.Collections.ArrayList
+
+    foreach ($line in $MatrixLines) {
+        if ($line -match '^\s*-\s+(batch-\d+[a-z0-9-]*)\s*$') {
+            [void]$matrixBatchIds.Add($Matches[1])
+        }
+
+        if ($line -match '^\s+sourcePlanningTask:\s*([a-z0-9-]+)\s*$') {
+            [void]$sourcePlanningTaskIds.Add($Matches[1])
+        }
+    }
+
+    $missingBatches = @($matrixBatchIds | Where-Object { $_ -notin $queueIds } | Select-Object -Unique)
+    $missingPlanningTasks = @($sourcePlanningTaskIds | Where-Object { $_ -notin $queueIds } | Select-Object -Unique)
+
+    return [pscustomobject]@{
+        MissingBatches = $missingBatches
+        MissingPlanningTasks = $missingPlanningTasks
+    }
+}
+
 $findings = New-Object System.Collections.ArrayList
 
 if (-not (Test-Path -LiteralPath $ProjectStatePath)) {
@@ -250,12 +334,16 @@ if (-not (Test-Path -LiteralPath $MatrixPath)) {
 
 $projectStateLines = @()
 $queueLines = @()
+$matrixLines = @()
 if ($findings.Count -eq 0) {
     $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
+    $matrixLines = @(Get-Content -LiteralPath $MatrixPath)
 }
 
 $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
+$queueDiagnostics = Get-QueueDiagnostics -Blocks $taskBlocks
+$matrixDiagnostics = Get-MatrixDiagnostics -Blocks $taskBlocks -MatrixLines $matrixLines
 $currentTaskId = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "id"
 if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
     $currentTaskId = $TaskId
@@ -291,11 +379,13 @@ $decision = "no_pending_task"
 $recommendedAction = "idle_no_pending_task"
 $stopReason = "none"
 
+$activeCurrentStatuses = @("claimed", "planned", "implemented", "validated", "reviewed", "ready_for_closeout", "in_progress")
+
 if ($findings.Count -gt 0) {
     $decision = "hard_block_missing_inputs"
     $recommendedAction = "repair_missing_mechanism_inputs"
     $stopReason = Join-OrNone -Values @($findings)
-} elseif ($currentTaskStatus -in @("in_progress", "ready_for_closeout")) {
+} elseif ($currentTaskStatus -in $activeCurrentStatuses) {
     $decision = "current_task_active"
     $recommendedAction = "finish_current_task_closeout:$currentTaskId"
     $stopReason = "current_task_not_closed:${currentTaskId}:$currentTaskStatus"
@@ -327,6 +417,9 @@ Write-Output "nextActionDecision: $decision"
 Write-Output "nextExecutableTask: $(if ([string]::IsNullOrWhiteSpace($nextTaskId)) { 'none' } else { $nextTaskId })"
 Write-Output "blockedGates: $(Join-OrNone -Values @($blockedGates))"
 Write-Output "validationNeeded: $(if ($validationCommands.Count -eq 0) { 'none' } else { "$($validationCommands.Count) command(s) for $nextTaskId" })"
+Write-Output "statusFindings: legacy_status_missing=$($queueDiagnostics.MissingStatusIds.Count); legacy_done=$($queueDiagnostics.LegacyDoneIds.Count); unsupportedStatus=$($queueDiagnostics.UnsupportedStatusIds.Count); legacy_status_missing_first=$(Join-FirstItems -Values $queueDiagnostics.MissingStatusIds); legacy_done_first=$(Join-FirstItems -Values $queueDiagnostics.LegacyDoneIds)"
+Write-Output "evidenceFindings: evidenceMissing=$($queueDiagnostics.EvidenceMissingIds.Count); evidenceMissingFirst=$(Join-FirstItems -Values $queueDiagnostics.EvidenceMissingIds)"
+Write-Output "driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:$($matrixDiagnostics.MissingBatches.Count),sourcePlanningTaskMissingInQueue:$($matrixDiagnostics.MissingPlanningTasks.Count); queueMatrixDriftFirst=$(Join-FirstItems -Values @($matrixDiagnostics.MissingBatches + $matrixDiagnostics.MissingPlanningTasks))"
 Write-Output "recommendedAction: $recommendedAction"
 Write-Output "stopReason: $stopReason"
 Write-Output "diagnosticOnly: true"
