@@ -150,6 +150,11 @@ try {
     if ($queueAfterApply -notmatch "validationCommandLifecycle:" -or $queueAfterApply -notmatch "phase:\s*advisory_baseline") {
         throw "Applied seed transaction did not write lifecycle-aware advisory baseline validation."
     }
+    foreach ($requiredQueueAnchor in @("requirementRefs:", "useCases:", "acceptanceScenarios:", "nonGoals:", "validationProfile:", "behaviorBoundary:", "blockedRemainder:")) {
+        if ($queueAfterApply -notmatch [regex]::Escape($requiredQueueAnchor)) {
+            throw "Applied seed transaction did not write MECE anchor: $requiredQueueAnchor"
+        }
+    }
     if ($queueAfterApply -match "phase:\s*post_edit\s+command:\s*npm\.cmd run test -- --run focused") {
         throw "Applied seed transaction wrote broad baseline as a post_edit hard gate."
     }

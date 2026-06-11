@@ -109,6 +109,30 @@ function ConvertTo-YamlScalarText {
     return $singleLine
 }
 
+function New-YamlListBlock {
+    param(
+        [Parameter(Mandatory = $true)][string]$Key,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Values,
+        [Parameter(Mandatory = $false)][int]$Indent = 4
+    )
+
+    $baseIndent = " " * $Indent
+    $itemIndent = " " * ($Indent + 2)
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("${baseIndent}${Key}:")
+
+    $safeValues = @($Values | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    if ($safeValues.Count -eq 0) {
+        $safeValues = @("not provided")
+    }
+
+    foreach ($value in $safeValues) {
+        $lines.Add("$itemIndent- $(ConvertTo-YamlScalarText -Text $value)")
+    }
+
+    return ($lines.ToArray()) -join "`n"
+}
+
 function New-SeedTaskBlock {
     param(
         [Parameter(Mandatory = $true)][string]$TaskId,
@@ -117,14 +141,28 @@ function New-SeedTaskBlock {
         [Parameter(Mandatory = $true)][string]$TargetClosure,
         [Parameter(Mandatory = $true)][string]$LocalFullLoopGate,
         [Parameter(Mandatory = $true)][string]$ApprovalText,
+        [Parameter(Mandatory = $true)][string]$RequirementRef,
+        [Parameter(Mandatory = $true)][string]$UseCase,
+        [Parameter(Mandatory = $true)][string]$AcceptanceScenario,
+        [Parameter(Mandatory = $true)][string]$BehaviorBoundary,
+        [Parameter(Mandatory = $true)][string]$NonGoal,
+        [Parameter(Mandatory = $true)][string]$ValidationProfile,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedRemainderItems,
         [Parameter(Mandatory = $false)][bool]$StandingCloseoutApproved = $false
     )
 
     $safeApprovalText = ConvertTo-YamlScalarText -Text $ApprovalText
     $safeTargetClosure = ConvertTo-YamlScalarText -Text $TargetClosure
     $safeLocalFullLoopGate = if ([string]::IsNullOrWhiteSpace($LocalFullLoopGate)) { "L2" } else { $LocalFullLoopGate }
+    $safeBehaviorBoundary = ConvertTo-YamlScalarText -Text $BehaviorBoundary
+    $safeValidationProfile = ConvertTo-YamlScalarText -Text $ValidationProfile
     $localCommitApproval = if ($StandingCloseoutApproved) { "approved" } else { "not_approved" }
     $closeoutBooleanApproval = if ($StandingCloseoutApproved) { "true" } else { "not_approved" }
+    $requirementRefsBlock = New-YamlListBlock -Key "requirementRefs" -Values @($RequirementRef)
+    $useCasesBlock = New-YamlListBlock -Key "useCases" -Values @($UseCase)
+    $acceptanceScenariosBlock = New-YamlListBlock -Key "acceptanceScenarios" -Values @($AcceptanceScenario)
+    $nonGoalsBlock = New-YamlListBlock -Key "nonGoals" -Values @($NonGoal)
+    $blockedRemainderBlock = New-YamlListBlock -Key "blockedRemainder" -Values $BlockedRemainderItems
 
     return @"
   - id: $TaskId
@@ -142,9 +180,15 @@ function New-SeedTaskBlock {
     seededImplementationTask: true
     seededExecutionModule: $ModuleId
     targetClosureItem: $safeTargetClosure
+    behaviorBoundary: $safeBehaviorBoundary
+$requirementRefsBlock
+$useCasesBlock
+$acceptanceScenariosBlock
+$nonGoalsBlock
+    validationProfile: $safeValidationProfile
     localExperienceClosureGate: planned
     localFullLoopGate: $safeLocalFullLoopGate
-    blockedRemainder: high-risk work remains separately gated
+$blockedRemainderBlock
     closeoutPolicy:
       localCommit: $localCommitApproval
       fastForwardMerge:
@@ -463,10 +507,34 @@ try {
     $localFullLoopGate = Get-DecisionValue -Output $proposalOutput -Key "seedLocalFullLoopMinimum"
     $candidateTaskIds = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateTask")
     $targetClosureItems = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateTargetClosure")
+    $requirementRefs = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateRequirementRef")
+    $useCases = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateUseCase")
+    $acceptanceScenarios = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateAcceptanceScenario")
+    $behaviorBoundaries = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateBehaviorBoundary")
+    $nonGoals = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateNonGoal")
+    $validationProfiles = @(Get-AllValues -Output $proposalOutput -Key "seedCandidateValidationProfile")
+    $blockedRemainderItems = @(Get-AllValues -Output $proposalOutput -Key "seedBlockedRemainder" | Where-Object { $_ -ne "none" })
+    if ($blockedRemainderItems.Count -eq 0) {
+        $blockedRemainderItems = @("none")
+    }
 
     if ($candidateTaskIds.Count -eq 0 -or $candidateTaskIds.Count -ne $targetClosureItems.Count) {
         Write-Output "HARD_BLOCK_PROPOSAL_CANDIDATE_MISMATCH"
         Write-SeedTransactionResult -Decision "stop_for_hard_block" -Reason "proposal candidate task list is inconsistent" -ExitCode 1
+    }
+    $metadataLists = @(
+        [pscustomobject]@{ Name = "seedCandidateRequirementRef"; Values = $requirementRefs },
+        [pscustomobject]@{ Name = "seedCandidateUseCase"; Values = $useCases },
+        [pscustomobject]@{ Name = "seedCandidateAcceptanceScenario"; Values = $acceptanceScenarios },
+        [pscustomobject]@{ Name = "seedCandidateBehaviorBoundary"; Values = $behaviorBoundaries },
+        [pscustomobject]@{ Name = "seedCandidateNonGoal"; Values = $nonGoals },
+        [pscustomobject]@{ Name = "seedCandidateValidationProfile"; Values = $validationProfiles }
+    )
+    foreach ($metadataList in $metadataLists) {
+        if (@($metadataList.Values).Count -ne $candidateTaskIds.Count) {
+            Write-Output "HARD_BLOCK_PROPOSAL_MECE_METADATA_MISMATCH"
+            Write-SeedTransactionResult -Decision "stop_for_hard_block" -Reason "$($metadataList.Name) list is inconsistent" -ExitCode 1
+        }
     }
 
     Write-Section -Title "Transaction Candidate"
@@ -511,6 +579,13 @@ try {
                     -TargetClosure $targetClosureItems[$index] `
                     -LocalFullLoopGate $localFullLoopGate `
                     -ApprovalText $ApprovalStatement `
+                    -RequirementRef $requirementRefs[$index] `
+                    -UseCase $useCases[$index] `
+                    -AcceptanceScenario $acceptanceScenarios[$index] `
+                    -BehaviorBoundary $behaviorBoundaries[$index] `
+                    -NonGoal $nonGoals[$index] `
+                    -ValidationProfile $validationProfiles[$index] `
+                    -BlockedRemainderItems $blockedRemainderItems `
                     -StandingCloseoutApproved $standingCloseoutApproved))
     }
 

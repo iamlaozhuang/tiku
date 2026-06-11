@@ -154,6 +154,12 @@ autoSeedBridge:
       - stop_for_hard_block
     requiredChecks:
       - targetLocalClosure coverage
+      - unique targetClosureItem per seeded execution module
+      - requirementRefs trace back to source planning task
+      - useCases and acceptanceScenarios are non-empty
+      - explicit blockedRemainder for unseeded matrix target closure
+      - nonGoals preserve provider/env/schema/deploy/dependency/Cost Calibration Gate boundaries
+      - validationProfile is non-empty
       - required task metadata
       - autoDriveLocalImplementationApproval
       - safe allowedFiles and blockedFiles

@@ -509,8 +509,15 @@ try {
         $targetClosure = $targetClosureItems[$index]
         $slug = ConvertTo-TaskSlug -Text $targetClosure
         $candidateTaskId = "batch-$($batchNumber + $index)-$($selectedModule.Module)-$slug"
+        $validationProfile = if ([string]::IsNullOrWhiteSpace($selectedModule.LocalFullLoopMinimum)) { "L2-local-implementation" } else { "$($selectedModule.LocalFullLoopMinimum)-local-implementation" }
         Write-Output "seedCandidateTask: $candidateTaskId"
         Write-Output "seedCandidateTargetClosure: $targetClosure"
+        Write-Output "seedCandidateRequirementRef: $sourcePlanningTask"
+        Write-Output "seedCandidateUseCase: $($selectedModule.Module) local implementation validates $targetClosure"
+        Write-Output "seedCandidateAcceptanceScenario: $targetClosure passes $validationProfile without provider/env/schema/deploy/dependency changes"
+        Write-Output "seedCandidateBehaviorBoundary: $($selectedModule.Module)::$targetClosure"
+        Write-Output "seedCandidateNonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution"
+        Write-Output "seedCandidateValidationProfile: $validationProfile"
     }
 
     if ($candidateCount -lt $targetClosureItems.Count) {

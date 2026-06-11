@@ -46,6 +46,7 @@ executionModules:
     localFullLoopMinimum: L4
     targetLocalClosure:
       - authorization read-model and display contracts
+      - authorization cache invalidation policy
 implementationAutoSeedGate:
   enabled: true
 localExperienceClosureGate:
@@ -61,7 +62,11 @@ function Write-Queue {
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $false)][switch]$UnsafeAllowedFile,
         [Parameter(Mandatory = $false)][switch]$ApprovedCloseout,
-        [Parameter(Mandatory = $false)][switch]$StandingApproval
+        [Parameter(Mandatory = $false)][switch]$StandingApproval,
+        [Parameter(Mandatory = $false)][switch]$OmitRequirementRefs,
+        [Parameter(Mandatory = $false)][switch]$OmitAcceptanceScenarios,
+        [Parameter(Mandatory = $false)][switch]$OmitBlockedRemainder,
+        [Parameter(Mandatory = $false)][switch]$DuplicateTargetClosure
     )
 
     $allowedFile = "src/server/services/**"
@@ -76,8 +81,32 @@ function Write-Queue {
     }
     $localCommitApproval = if ($ApprovedCloseout) { "approved" } else { "not_approved" }
     $closeoutApprovalValue = if ($ApprovedCloseout) { "true" } else { "not_approved" }
+    $requirementRefsBlock = if ($OmitRequirementRefs) {
+        ""
+    } else {
+        @"
+    requirementRefs:
+      - phase-69-advanced-authorization-context-implementation-planning
+"@
+    }
+    $acceptanceScenariosBlock = if ($OmitAcceptanceScenarios) {
+        ""
+    } else {
+        @"
+    acceptanceScenarios:
+      - authorization read-model and display contracts passes L4-local-implementation without provider/env/schema/deploy/dependency changes
+"@
+    }
+    $blockedRemainderBlock = if ($OmitBlockedRemainder) {
+        ""
+    } else {
+        @"
+    blockedRemainder:
+      - authorization cache invalidation policy
+"@
+    }
 
-    @"
+    $queueContent = @"
 schemaVersion: 1
 tasks:
   - id: batch-101-authorization-and-access-authorization-read-model
@@ -85,12 +114,21 @@ tasks:
     taskKind: implementation
     humanApproval: $approvalText
     autoDriveLocalImplementationApproval: $autoDriveApprovalText
+    seededByTask: phase-69-advanced-authorization-context-implementation-planning
     seededImplementationTask: true
     seededExecutionModule: authorization-and-access
     targetClosureItem: authorization read-model and display contracts
+    behaviorBoundary: authorization-and-access::authorization read-model and display contracts
+$requirementRefsBlock
+    useCases:
+      - authorization-and-access local implementation validates authorization read-model and display contracts
+$acceptanceScenariosBlock
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L4-local-implementation
     localExperienceClosureGate: planned
     localFullLoopGate: L4
-    blockedRemainder: high-risk work remains separately gated
+$blockedRemainderBlock
     closeoutPolicy:
       localCommit: $localCommitApproval
       fastForwardMerge:
@@ -141,7 +179,76 @@ tasks:
       redactionRequired: true
     evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model.md
-"@ | Set-Content -LiteralPath $Path -Encoding UTF8
+"@
+
+    if ($DuplicateTargetClosure) {
+        $queueContent += @"
+
+  - id: batch-102-authorization-and-access-duplicate-read-model
+    status: pending
+    taskKind: implementation
+    humanApproval: $approvalText
+    autoDriveLocalImplementationApproval: $autoDriveApprovalText
+    seededByTask: phase-69-advanced-authorization-context-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: authorization read-model and display contracts
+    behaviorBoundary: authorization-and-access::authorization read-model and display contracts
+    requirementRefs:
+      - phase-69-advanced-authorization-context-implementation-planning
+    useCases:
+      - authorization-and-access local implementation validates authorization read-model and display contracts
+    acceptanceScenarios:
+      - authorization read-model and display contracts passes L4-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L4-local-implementation
+    localExperienceClosureGate: planned
+    localFullLoopGate: L4
+    blockedRemainder:
+      - authorization cache invalidation policy
+    allowedFiles:
+      - src/server/services/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-102-authorization-and-access-duplicate-read-model
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-102-authorization-and-access-duplicate-read-model
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-102-authorization-and-access-duplicate-read-model
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-102-authorization-and-access-duplicate-read-model
+    registryLifecycle:
+      redactionRequired: true
+    evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model.md
+"@
+    }
+
+    $queueContent | Set-Content -LiteralPath $Path -Encoding UTF8
 }
 
 function Write-SeededTaskTemplates {
@@ -201,6 +308,42 @@ try {
     Write-Queue -Path $queuePath -ApprovedCloseout
     Write-SeededTaskTemplates -Root $fixtureRoot
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_CLOSEOUT_WITHOUT_STANDING_APPROVAL" -Command {
+        & $scriptPath `
+            -ExpectedModule "authorization-and-access" `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    }
+
+    Write-Queue -Path $queuePath -OmitRequirementRefs
+    Write-SeededTaskTemplates -Root $fixtureRoot
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_REQUIREMENT_REFS" -Command {
+        & $scriptPath `
+            -ExpectedModule "authorization-and-access" `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    }
+
+    Write-Queue -Path $queuePath -OmitAcceptanceScenarios
+    Write-SeededTaskTemplates -Root $fixtureRoot
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_ACCEPTANCE_SCENARIOS" -Command {
+        & $scriptPath `
+            -ExpectedModule "authorization-and-access" `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    }
+
+    Write-Queue -Path $queuePath -OmitBlockedRemainder
+    Write-SeededTaskTemplates -Root $fixtureRoot
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEEDED_TASK_MISSING_BLOCKED_REMAINDER" -Command {
+        & $scriptPath `
+            -ExpectedModule "authorization-and-access" `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    }
+
+    Write-Queue -Path $queuePath -DuplicateTargetClosure
+    Write-SeededTaskTemplates -Root $fixtureRoot
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEED_DUPLICATE_TARGET_CLOSURE" -Command {
         & $scriptPath `
             -ExpectedModule "authorization-and-access" `
             -QueuePath $queuePath `

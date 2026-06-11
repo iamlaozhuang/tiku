@@ -99,6 +99,11 @@ try {
     Assert-Contains -Output $proposalOutput -Pattern "seedModule: authorization-and-access"
     Assert-Contains -Output $proposalOutput -Pattern "seedCandidateTaskCount: 2"
     Assert-Contains -Output $proposalOutput -Pattern "seedRequiredApproval: autoDriveLocalImplementationApproval"
+    Assert-Contains -Output $proposalOutput -Pattern "seedCandidateRequirementRef: phase-69-advanced-authorization-context-implementation-planning"
+    Assert-Contains -Output $proposalOutput -Pattern "seedCandidateUseCase: authorization-and-access local implementation validates authorization read-model and display contracts"
+    Assert-Contains -Output $proposalOutput -Pattern "seedCandidateAcceptanceScenario: authorization read-model and display contracts passes L4-local-implementation without provider/env/schema/deploy/dependency changes"
+    Assert-Contains -Output $proposalOutput -Pattern "seedCandidateNonGoal: provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution"
+    Assert-Contains -Output $proposalOutput -Pattern "seedCandidateValidationProfile: L4-local-implementation"
     Assert-Contains -Output $proposalOutput -Pattern "Cost Calibration Gate remains blocked"
 
     Add-Content -LiteralPath $fixture.QueuePath -Value @"

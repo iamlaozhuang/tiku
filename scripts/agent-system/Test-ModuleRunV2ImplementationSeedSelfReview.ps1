@@ -147,6 +147,25 @@ function Get-TaskListValues {
     return $values.ToArray()
 }
 
+function Get-TaskListOrScalarValues {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    $listValues = @(Get-TaskListValues -Block $Block -Key $Key)
+    if ($listValues.Count -gt 0) {
+        return $listValues
+    }
+
+    $scalarValue = Get-TaskScalarValue -Block $Block -Key $Key
+    if ([string]::IsNullOrWhiteSpace($scalarValue)) {
+        return @()
+    }
+
+    return @($scalarValue)
+}
+
 function Get-TargetClosureItems {
     param(
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines,
@@ -254,6 +273,7 @@ try {
     }
 
     $moduleTargets = @{}
+    $moduleBlockedRemainders = @{}
     $highRiskAllowedPatterns = @(
         ".env.local",
         ".env.example",
@@ -279,6 +299,14 @@ try {
         $taskKind = Get-TaskScalarValue -Block $taskBlock -Key "taskKind"
         $moduleId = Get-TaskScalarValue -Block $taskBlock -Key "seededExecutionModule"
         $targetClosure = Get-TaskScalarValue -Block $taskBlock -Key "targetClosureItem"
+        $sourcePlanningTask = Get-TaskScalarValue -Block $taskBlock -Key "seededByTask"
+        $behaviorBoundary = Get-TaskScalarValue -Block $taskBlock -Key "behaviorBoundary"
+        $validationProfile = Get-TaskScalarValue -Block $taskBlock -Key "validationProfile"
+        $requirementRefs = @(Get-TaskListOrScalarValues -Block $taskBlock -Key "requirementRefs")
+        $useCases = @(Get-TaskListOrScalarValues -Block $taskBlock -Key "useCases")
+        $acceptanceScenarios = @(Get-TaskListOrScalarValues -Block $taskBlock -Key "acceptanceScenarios")
+        $nonGoals = @(Get-TaskListOrScalarValues -Block $taskBlock -Key "nonGoals")
+        $blockedRemainders = @(Get-TaskListOrScalarValues -Block $taskBlock -Key "blockedRemainder")
         $evidencePath = Get-TaskScalarValue -Block $taskBlock -Key "evidencePath"
         $auditReviewPath = Get-TaskScalarValue -Block $taskBlock -Key "auditReviewPath"
         $allowedFiles = @(Get-TaskListValues -Block $taskBlock -Key "allowedFiles")
@@ -291,6 +319,7 @@ try {
         Write-Output "taskKind: $taskKind"
         Write-Output "seededExecutionModule: $moduleId"
         Write-Output "targetClosureItem: $targetClosure"
+        Write-Output "validationProfile: $validationProfile"
 
         if ($status -notin @("pending", "in_progress")) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_NOT_EXECUTABLE $seedTaskId status=$status"
@@ -306,6 +335,33 @@ try {
         }
         if ([string]::IsNullOrWhiteSpace($targetClosure)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_TARGET_CLOSURE $seedTaskId"
+        }
+        if ([string]::IsNullOrWhiteSpace($behaviorBoundary)) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_BEHAVIOR_BOUNDARY $seedTaskId"
+        }
+        if ($requirementRefs.Count -eq 0) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_REQUIREMENT_REFS $seedTaskId"
+        } elseif (-not [string]::IsNullOrWhiteSpace($sourcePlanningTask) -and $requirementRefs -notcontains $sourcePlanningTask) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_REQUIREMENT_TRACE_MISMATCH $seedTaskId source=$sourcePlanningTask"
+        }
+        if ($useCases.Count -eq 0) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_USE_CASES $seedTaskId"
+        }
+        if ($acceptanceScenarios.Count -eq 0) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_ACCEPTANCE_SCENARIOS $seedTaskId"
+        }
+        if ($nonGoals.Count -eq 0) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_NON_GOALS $seedTaskId"
+        } else {
+            $nonGoalText = $nonGoals -join " "
+            foreach ($requiredNonGoalPattern in @("provider", "env|secret", "schema|migration", "deploy", "dependency|package|lockfile", "Cost Calibration Gate")) {
+                if ($nonGoalText -notmatch $requiredNonGoalPattern) {
+                    Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_HIGH_RISK_NON_GOAL $seedTaskId $requiredNonGoalPattern"
+                }
+            }
+        }
+        if ([string]::IsNullOrWhiteSpace($validationProfile)) {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_VALIDATION_PROFILE $seedTaskId"
         }
         if ([string]::IsNullOrWhiteSpace($evidencePath)) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_EVIDENCE $seedTaskId"
@@ -355,7 +411,7 @@ try {
         if ($blockText -notmatch "localFullLoopGate") {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_LOCAL_FULL_LOOP_GATE $seedTaskId"
         }
-        if ($blockText -notmatch "blockedRemainder") {
+        if ($blockedRemainders.Count -eq 0) {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_BLOCKED_REMAINDER $seedTaskId"
         }
         if ($blockText -notmatch "redactionRequired:\s*true") {
@@ -415,19 +471,34 @@ try {
             if (-not $moduleTargets.ContainsKey($moduleId)) {
                 $moduleTargets[$moduleId] = New-Object System.Collections.Generic.List[string]
             }
+            if ($moduleTargets[$moduleId].Contains($targetClosure)) {
+                Add-Finding "HARD_BLOCK_SEED_DUPLICATE_TARGET_CLOSURE $moduleId $targetClosure"
+            }
             $moduleTargets[$moduleId].Add($targetClosure)
+        }
+        if (-not [string]::IsNullOrWhiteSpace($moduleId)) {
+            if (-not $moduleBlockedRemainders.ContainsKey($moduleId)) {
+                $moduleBlockedRemainders[$moduleId] = New-Object System.Collections.Generic.List[string]
+            }
+            foreach ($blockedRemainder in $blockedRemainders) {
+                if (-not [string]::IsNullOrWhiteSpace($blockedRemainder) -and $blockedRemainder -ne "none") {
+                    $moduleBlockedRemainders[$moduleId].Add($blockedRemainder)
+                }
+            }
         }
     }
 
     foreach ($moduleId in $moduleTargets.Keys) {
         $expectedTargets = @(Get-TargetClosureItems -Lines $matrixLines -ModuleId $moduleId)
         $actualTargets = @($moduleTargets[$moduleId].ToArray())
+        $blockedRemainderTargets = if ($moduleBlockedRemainders.ContainsKey($moduleId)) { @($moduleBlockedRemainders[$moduleId].ToArray()) } else { @() }
         Write-Section -Title "Coverage $moduleId"
         Write-Output "expectedTargetCount: $($expectedTargets.Count)"
         Write-Output "actualTargetCount: $($actualTargets.Count)"
+        Write-Output "blockedRemainderTargetCount: $($blockedRemainderTargets.Count)"
 
         foreach ($expectedTarget in $expectedTargets) {
-            if ($actualTargets -notcontains $expectedTarget) {
+            if ($actualTargets -notcontains $expectedTarget -and $blockedRemainderTargets -notcontains $expectedTarget) {
                 Add-Finding "HARD_BLOCK_SEED_COVERAGE_MISSING_TARGET $moduleId $expectedTarget"
             }
         }
