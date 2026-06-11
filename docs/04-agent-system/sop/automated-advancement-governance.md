@@ -149,11 +149,18 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\I
 
 The runner is the local automation state machine. It repeatedly consumes:
 
+- `nextActionDecision` from `Get-TikuNextAction.ps1` as a read-only preflight summary;
 - `startupDecision` from `Test-ModuleRunV2AutomationStartupReadiness.ps1`;
 - `stoppedAutomationHygieneDecision` from `Test-ModuleRunV2StoppedAutomationHygiene.ps1`;
 - `autopilotDecision` from `Invoke-ModuleRunV2Autopilot.ps1`.
 
 It emits `runnerDecision`, `runnerNextAction`, and `runnerStepCount`.
+
+`Get-TikuNextAction.ps1` is diagnostic-only. The runner must echo it before startup readiness so humans and scheduled
+automation can see the queue, status, evidence, drift, and blocked-gate summary that led into the step. The diagnostic
+does not claim tasks, repair state, clean worktrees, merge, push, deploy, call providers, or execute Cost Calibration
+Gate, and it does not override startup readiness, closeout readiness, local capability gates, schema gates, or blocked
+gate decisions.
 
 The runner may automatically continue only through these already-gated actions:
 

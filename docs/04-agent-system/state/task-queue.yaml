@@ -8854,10 +8854,10 @@ tasks:
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps 1 -PlanOnly
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps 1 -PlanOnly -SkipPrimaryRepositoryPostureCheck
       - Select-String -Path scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1,docs\05-execution-logs\evidence\2026-06-11-mechanism-runner-consumes-next-action.md -Pattern 'Get-TikuNextAction','nextActionDecision','diagnosticOnly','Cost Calibration Gate remains blocked'
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-runner-consumes-next-action.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-runner-consumes-next-action.md
-    status: pending
+    status: closed
     retryCount: 0

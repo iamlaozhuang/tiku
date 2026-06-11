@@ -31,6 +31,9 @@ param(
     [switch]$SkipUnattendedReadiness,
 
     [Parameter(Mandatory = $false)]
+    [switch]$SkipPrimaryRepositoryPostureCheck,
+
+    [Parameter(Mandatory = $false)]
     [switch]$AllowProtectedBranch,
 
     [Parameter(Mandatory = $false)]
@@ -163,6 +166,40 @@ function Invoke-ExternalCommand {
     }
 }
 
+function Invoke-NextActionDiagnostic {
+    $nextActionScriptPath = Join-Path -Path $agentSystemRoot -ChildPath "Get-TikuNextAction.ps1"
+    if (-not (Test-Path -LiteralPath $nextActionScriptPath)) {
+        return [pscustomobject]@{
+            Output = @(
+                "nextActionDecision: missing_diagnostic_script",
+                "diagnosticOnly: true",
+                "reason: missing Get-TikuNextAction.ps1"
+            )
+            ExitCode = 1
+        }
+    }
+
+    $nextActionArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $nextActionScriptPath,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath,
+        "-MatrixPath",
+        $MatrixPath
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        $nextActionArgs += @("-TaskId", $TaskId)
+    }
+
+    return Invoke-ExternalCommand -Arguments $nextActionArgs
+}
+
 function Invoke-StartupReadiness {
     $startupArgs = @(
         "-NoProfile",
@@ -195,6 +232,9 @@ function Invoke-StartupReadiness {
     }
     if ($AllowProtectedBranch) {
         $startupArgs += "-AllowProtectedBranch"
+    }
+    if ($SkipPrimaryRepositoryPostureCheck) {
+        $startupArgs += "-SkipPrimaryRepositoryPostureCheck"
     }
 
     return Invoke-ExternalCommand -Arguments $startupArgs
@@ -435,6 +475,15 @@ function Get-RunnerStopTaxonomy {
 }
 
 for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
+    Write-Section -Title "Runner Step $stepIndex Next Action Diagnostic"
+    $nextActionResult = Invoke-NextActionDiagnostic
+    $nextActionResult.Output | ForEach-Object { Write-Output $_ }
+    $nextActionDecision = Get-DecisionValue -Output $nextActionResult.Output -Key "nextActionDecision"
+
+    if ($nextActionResult.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($nextActionDecision)) {
+        Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_next_action_diagnostic_failure" -Reason "next-action diagnostic failed or omitted nextActionDecision" -StepCount $stepIndex -ExitCode 1
+    }
+
     Write-Section -Title "Runner Step $stepIndex Startup"
     $startupResult = Invoke-StartupReadiness
     $startupResult.Output | ForEach-Object { Write-Output $_ }

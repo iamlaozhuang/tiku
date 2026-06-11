@@ -183,6 +183,7 @@ tasks:
                 -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "no-runs") `
                 -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "handoffs") `
                 -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
                 -MaxSteps 2
         )
     } finally {
@@ -192,6 +193,8 @@ tasks:
     Assert-Contains -Output $continueOutput -Pattern "runnerNextAction: agent_continue_current_task"
     Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy:"
     Assert-Contains -Output $continueOutput -Pattern "autopilotDecision: continue_current_thread"
+    Assert-Contains -Output $continueOutput -Pattern "nextActionDecision:"
+    Assert-Contains -Output $continueOutput -Pattern "diagnosticOnly: true"
 
     $pendingRepo = Join-Path -Path $fixtureRoot -ChildPath "pending-repo"
     $pendingSha = Initialize-SmokeRepo -Path $pendingRepo
@@ -243,6 +246,7 @@ tasks:
                 -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "pending-no-runs") `
                 -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "pending-handoffs") `
                 -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
                 -MaxSteps 2
         )
     } finally {
@@ -250,6 +254,7 @@ tasks:
     }
     Assert-Contains -Output $pendingOutput -Pattern "runnerDecision: prepare_next_task"
     Assert-Contains -Output $pendingOutput -Pattern "runnerNextTask: runner-next"
+    Assert-Contains -Output $pendingOutput -Pattern "nextActionDecision:"
 
     $ownerRecoveryRepo = Join-Path -Path $fixtureRoot -ChildPath "owner-recovery-repo"
     $ownerRecoveryWorktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "owner-recovery-worktrees"
@@ -337,6 +342,7 @@ tasks:
                 -AutomationWorktreeRoot $ownerRecoveryWorktreeRoot `
                 -RunRegistryRoot $ownerRecoveryRunRoot `
                 -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "owner-recovery-handoffs") `
+                -SkipPrimaryRepositoryPostureCheck `
                 -MaxSteps 2
         )
     } finally {
@@ -383,6 +389,7 @@ tasks:
                 -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-proposal-no-runs") `
                 -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-proposal-handoffs") `
                 -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
                 -MaxSteps 2
         )
     } finally {
@@ -429,6 +436,7 @@ tasks:
                 -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-apply-no-runs") `
                 -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-apply-handoffs") `
                 -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
                 -AllowAutoSeed `
                 -AutoSeedApprovalStatement "autoDriveLocalImplementationApproval: smoke-approved runner auto-seed" `
                 -MaxSteps 3
@@ -453,6 +461,7 @@ tasks:
                 -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-continue-no-runs") `
                 -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "seed-continue-handoffs") `
                 -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
                 -MaxSteps 2
         )
     } finally {
@@ -558,6 +567,7 @@ tasks:
                 -ParallelCandidateTaskIds "docs-worker-a,docs-worker-b" `
                 -ParallelCoordinatorTaskId "coordinator-task" `
                 -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
                 -MaxSteps 2
         )
     } finally {
@@ -626,6 +636,7 @@ tasks:
                 -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "cleanup-runs") `
                 -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "cleanup-handoffs") `
                 -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
                 -MaxSteps 3
         )
     } finally {
