@@ -9549,3 +9549,70 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-closeout-noise-reduction.md
     status: closed
     retryCount: 0
+
+  - id: full-autodrive-dry-run
+    title: Full autodrive dry run
+    phase: mechanism-tuning-controlled-auto-seed
+    sourceStory: user-approved-2026-06-11-controlled-auto-seed-mece-tuning
+    dependencies:
+      - closeout-noise-reduction
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User requested implementation of the controlled auto-seed and MECE tuning plan. This task may add or run fixture
+      smoke coverage that simulates ACTIVE without changing the real local automation registration, validate locally,
+      commit, fast-forward merge to master, push origin/master, and clean the merged short branch. It must not change
+      local Codex automation registration, product code, dependencies, lockfiles, schema, migrations, env/secret,
+      provider, staging/prod/cloud/deploy, payment, external service, PR, force push, or Cost Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: mechanism_validation
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-full-autodrive-dry-run.md
+      - docs/05-execution-logs/evidence/2026-06-11-full-autodrive-dry-run.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-full-autodrive-dry-run.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - dry_run
+      - seed_mece
+      - stop_card
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2StopEconomics.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -MaxSteps 1 -AllowProtectedBranch
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-full-autodrive-dry-run.md docs\05-execution-logs\evidence\2026-06-11-full-autodrive-dry-run.md docs\05-execution-logs\audits-reviews\2026-06-11-full-autodrive-dry-run.md
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-full-autodrive-dry-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-full-autodrive-dry-run.md
+    status: closed
+    retryCount: 0

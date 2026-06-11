@@ -657,6 +657,135 @@ tasks:
         throw "Controlled auto-seed policy did not write seeded implementation tasks."
     }
 
+    $controlledPolicyContinueRepo = Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-continue-repo"
+    $controlledPolicyContinueSha = Initialize-SmokeRepo -Path $controlledPolicyContinueRepo
+    $controlledPolicyContinueProjectStatePath = Join-Path -Path $controlledPolicyContinueRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $controlledPolicyContinueQueuePath = Join-Path -Path $controlledPolicyContinueRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $controlledPolicyContinueMatrixPath = Join-Path -Path $controlledPolicyContinueRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    $controlledPolicyContinueDecisionPath = Join-Path -Path $controlledPolicyContinueRepo -ChildPath "docs/04-agent-system/state/auto-seed-approval-decision.yaml"
+    Write-SmokeSeedMatrix -Path $controlledPolicyContinueMatrixPath
+    Write-SmokeProjectState `
+        -Path $controlledPolicyContinueProjectStatePath `
+        -TaskId "runner-closed" `
+        -Sha $controlledPolicyContinueSha `
+        -AutoSeedApprovalDecisionPath "docs/04-agent-system/state/auto-seed-approval-decision.yaml"
+    @"
+schemaVersion: 1
+status: approved_by_controlled_auto_seed_policy
+policy:
+  id: controlled_auto_seed
+  maxTasksPerSeed: 4
+proposal:
+  seedModule: authorization-and-access
+  seedRequiredApproval: controlled_auto_seed
+"@ | Set-Content -LiteralPath $controlledPolicyContinueDecisionPath -Encoding UTF8
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-closed
+    status: closed
+    taskKind: implementation
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-closed.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-closed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-closed.md
+"@ | Set-Content -LiteralPath $controlledPolicyContinueQueuePath -Encoding UTF8
+
+    Push-Location -LiteralPath $controlledPolicyContinueRepo
+    try {
+        $controlledPolicyContinueOutput = @(
+            & $runnerPath `
+                -TaskId "runner-closed" `
+                -ProjectStatePath $controlledPolicyContinueProjectStatePath `
+                -QueuePath $controlledPolicyContinueQueuePath `
+                -MatrixPath $controlledPolicyContinueMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-continue-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-continue-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "controlled-policy-continue-handoffs") `
+                -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
+                -ContinueAfterAutoSeed `
+                -MaxSteps 3
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $controlledPolicyContinueOutput -Pattern "seedProposalDecision: proposal_available"
+    Assert-Contains -Output $controlledPolicyContinueOutput -Pattern "controlledAutoSeedPolicyApproval: recorded"
+    Assert-Contains -Output $controlledPolicyContinueOutput -Pattern "seedTransactionDecision: seeded"
+    Assert-Contains -Output $controlledPolicyContinueOutput -Pattern "meceReviewDecision: passed"
+    Assert-Contains -Output $controlledPolicyContinueOutput -Pattern "meceCoverageStatus: complete"
+    Assert-Contains -Output $controlledPolicyContinueOutput -Pattern "runnerDecision: prepare_next_task"
+    Assert-Contains -Output $controlledPolicyContinueOutput -Pattern "runnerNextAction: agent_claim_next_task"
+
+    $closeoutRecoveryRepo = Join-Path -Path $fixtureRoot -ChildPath "closeout-recovery-runner-repo"
+    $closeoutRecoverySha = Initialize-SmokeRepo -Path $closeoutRecoveryRepo
+    $closeoutRecoveryProjectStatePath = Join-Path -Path $closeoutRecoveryRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $closeoutRecoveryQueuePath = Join-Path -Path $closeoutRecoveryRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $closeoutRecoveryMatrixPath = Join-Path -Path $closeoutRecoveryRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    Write-SmokeMatrix -Path $closeoutRecoveryMatrixPath
+    Write-SmokeProjectState -Path $closeoutRecoveryProjectStatePath -TaskId "runner-ready-closeout" -Sha $closeoutRecoverySha
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-ready-closeout
+    status: ready_for_closeout
+    taskKind: implementation
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-ready-closeout.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-ready-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-ready-closeout.md
+"@ | Set-Content -LiteralPath $closeoutRecoveryQueuePath -Encoding UTF8
+
+    Push-Location -LiteralPath $closeoutRecoveryRepo
+    try {
+        $closeoutRecoveryRunnerOutput = @(
+            & $runnerPath `
+                -TaskId "runner-ready-closeout" `
+                -ProjectStatePath $closeoutRecoveryProjectStatePath `
+                -QueuePath $closeoutRecoveryQueuePath `
+                -MatrixPath $closeoutRecoveryMatrixPath `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "closeout-recovery-no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "closeout-recovery-no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "closeout-recovery-handoffs") `
+                -SkipUnattendedReadiness `
+                -SkipPrimaryRepositoryPostureCheck `
+                -PlanOnly `
+                -MaxSteps 2
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $closeoutRecoveryRunnerOutput -Pattern "startupDecision: closeout_recovery"
+    Assert-Contains -Output $closeoutRecoveryRunnerOutput -Pattern "runnerDecision: closeout_recovery"
+    Assert-Contains -Output $closeoutRecoveryRunnerOutput -Pattern "runnerNextAction: run_closeout_recovery_autopilot"
+    Assert-Contains -Output $closeoutRecoveryRunnerOutput -Pattern "stopCardDecision: auto_recoverable"
+    Assert-Contains -Output $closeoutRecoveryRunnerOutput -Pattern "blockerClass: closeout_pending"
+    Assert-Contains -Output $closeoutRecoveryRunnerOutput -Pattern "statePolicy: no_write_accounted"
+
     $standingPlanOnlyRepo = Join-Path -Path $fixtureRoot -ChildPath "standing-planonly-repo"
     $standingPlanOnlySha = Initialize-SmokeRepo -Path $standingPlanOnlyRepo
     $standingPlanOnlyProjectStatePath = Join-Path -Path $standingPlanOnlyRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
