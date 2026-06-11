@@ -63,6 +63,7 @@ automation:
     codexThreadBridgeReadinessScriptPath: scripts/agent-system/Test-ModuleRunV2CodexThreadBridgeReadiness.ps1
     localCapabilityGateScriptPath: scripts/agent-system/Test-ModuleRunV2LocalCapabilityGate.ps1
     recoverySelfRepairScriptPath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
+    projectStatusDiagnosticScriptPath: scripts/agent-system/Get-TikuProjectStatus.ps1
     autodriveControlLoopAcceptanceScriptPath: scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
     autoSeedProposalScriptPath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
     autoSeedTransactionScriptPath: scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
@@ -214,13 +215,13 @@ repository:
   lastKnownMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
   lastKnownOriginMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
 currentTask:
-  id: mechanism-planned-pause-and-tuning-mode
+  id: mechanism-project-status-unified-diagnostic
   status: closed
   sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
-  branch: codex/mechanism-planned-pause
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-mechanism-project-status-unified-diagnostic.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-project-status-unified-diagnostic.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-project-status-unified-diagnostic.md
+  branch: codex/mechanism-project-status-diagnostic
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -259,5 +260,5 @@ skills:
 handoff:
   nextRecommendedAction: >-
     Continue the approved mechanism tuning chain while local automation remains intentionally paused. Next task:
-    mechanism-project-status-unified-diagnostic. Keep high-risk capability gates blocked until task-specific approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+    mechanism-seed-proposal-next-action-bridge. Keep high-risk capability gates blocked until task-specific approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-mechanism-project-status-unified-diagnostic.md

@@ -130,6 +130,11 @@ sopGroups:
     - id: skill-dispatch-matrix
       path: docs/04-agent-system/sop/skill-dispatch-matrix.md
 scriptControls:
+  - id: tiku-project-status-diagnostic
+    path: scripts/agent-system/Get-TikuProjectStatus.ps1
+    smokePath: scripts/agent-system/Get-TikuProjectStatus.Smoke.ps1
+    decisionOutput: projectStatusDecision
+    role: read-only human-facing status aggregator for the active Tiku mechanism; summarizes Git posture, next-action diagnostic, automation registration, stopped automation hygiene, seed proposal, final action, and planned pause without claiming tasks, mutating queue state, cleaning artifacts, seeding tasks, merging, pushing, deploying, calling providers, or executing Cost Calibration Gate
   - id: tiku-next-action-diagnostic
     path: scripts/agent-system/Get-TikuNextAction.ps1
     smokePath: scripts/agent-system/Get-TikuNextAction.Smoke.ps1

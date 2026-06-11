@@ -142,7 +142,16 @@ Stop before editing or continuing when:
 
 ## Next Action Diagnostic
 
-The intended single diagnostic entry point is:
+The intended human-facing project status entry point is:
+
+```powershell
+.\scripts\agent-system\Get-TikuProjectStatus.ps1
+```
+
+The command is read-only. It summarizes Git state, next-action decision, automation registration, stopped automation
+hygiene, seed proposal, and the final `projectStatusDecision`.
+
+The lower-level next-action diagnostic is:
 
 ```powershell
 .\scripts\agent-system\Get-TikuNextAction.ps1
