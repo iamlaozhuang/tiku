@@ -92,3 +92,14 @@ Result:
   uses neutral omitted markers and still verifies that supplied internal text bodies do not appear in serialized output.
 - No provider call, provider configuration, schema, migration, dependency, lockfile, env/secret, staging, prod, deploy,
   payment, external-service, PR, force push, or Cost Calibration Gate action was performed.
+
+## Post-Merge Master Validation
+
+After fast-forward merge to `master`, these commands passed on `D:\tiku` before push:
+
+- `npm.cmd run lint`
+- `npm.cmd run typecheck`
+- `npm.cmd run test:unit -- src/server/services/ai-generation-task-request-service.test.ts` (`1` test file, `4` tests)
+- `git diff --check`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-106-ai-task-and-provider-local-task-request-policy-and-result-referen`
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-106-ai-task-and-provider-local-task-request-policy-and-result-referen`
