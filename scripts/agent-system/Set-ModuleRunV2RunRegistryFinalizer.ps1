@@ -24,6 +24,12 @@
     [string]$StopTaxonomy = "hard_block",
 
     [Parameter(Mandatory = $false)]
+    [string]$Severity = "hard_block",
+
+    [Parameter(Mandatory = $false)]
+    [string]$RequiresHuman = "true",
+
+    [Parameter(Mandatory = $false)]
     [string]$EvidencePath = "",
 
     [Parameter(Mandatory = $false)]
@@ -47,6 +53,23 @@
 
     [Parameter(Mandatory = $false)]
     [string]$NextRecommendedAction = "manual_required_owner_recovery",
+
+    [Parameter(Mandatory = $false)]
+    [string]$NextCommand = "manual_required_owner_recovery",
+
+    [Parameter(Mandatory = $false)]
+    [string]$RiskIfAutoContinued = "unsafe or impossible to continue until resolved",
+
+    [Parameter(Mandatory = $false)]
+    [string]$StateWritten = "run_registry",
+
+    [Parameter(Mandatory = $false)]
+    [AllowEmptyString()]
+    [string]$NoWriteReason = "",
+
+    [Parameter(Mandatory = $false)]
+    [AllowEmptyString()]
+    [string]$ResumePointer = "",
 
     [Parameter(Mandatory = $false)]
     [string]$AutomationId = "tiku-module-run-v2-autopilot",
@@ -126,6 +149,28 @@ function Get-GitChangedFiles {
     return @($files | Select-Object -Unique)
 }
 
+function ConvertTo-BooleanValue {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Value,
+        [Parameter(Mandatory = $true)][bool]$DefaultValue
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return $DefaultValue
+    }
+
+    $normalizedValue = $Value.Trim().ToLowerInvariant()
+    if ($normalizedValue -in @("true", "1", "yes")) {
+        return $true
+    }
+
+    if ($normalizedValue -in @("false", "0", "no")) {
+        return $false
+    }
+
+    throw "Invalid RequiresHuman value: $Value"
+}
+
 Write-Section -Title "Module Run v2 Run Registry Finalizer"
 Write-Output "runRegistryFinalizerMode: write_terminal_state"
 
@@ -154,6 +199,13 @@ $changedFiles = @(Get-GitChangedFiles -Path $fullWorktreePath)
 $normalizedWorktreePath = ConvertTo-NormalizedPath -Path $fullWorktreePath
 $runId = Get-StablePathHash -Value $normalizedWorktreePath
 $registryPath = Join-Path -Path $RunRegistryRoot -ChildPath "$runId.json"
+$effectiveRequiresHuman = ConvertTo-BooleanValue -Value $RequiresHuman -DefaultValue $true
+$effectiveStateWritten = if ($NoWrite) { "none" } elseif ([string]::IsNullOrWhiteSpace($StateWritten)) { "run_registry" } else { $StateWritten }
+$effectiveNoWriteReason = $NoWriteReason
+if ($NoWrite -and [string]::IsNullOrWhiteSpace($effectiveNoWriteReason)) {
+    $effectiveNoWriteReason = "NoWrite requested; run registry was not written."
+}
+$normalizedResumePointer = ConvertTo-NormalizedPath -Path $ResumePointer
 
 $registry = [ordered]@{
     runId = $runId
@@ -167,12 +219,19 @@ $registry = [ordered]@{
     phase = $Phase
     blockerKind = $BlockerKind
     stopTaxonomy = $StopTaxonomy
+    severity = $Severity
+    requiresHuman = $effectiveRequiresHuman
     changedFiles = @($changedFiles)
     evidencePath = (ConvertTo-NormalizedPath -Path $EvidencePath)
     auditReviewPath = (ConvertTo-NormalizedPath -Path $AuditReviewPath)
     closeoutTransactionState = $CloseoutTransactionState
     lastSafeCheckpoint = $LastSafeCheckpoint
     nextRecommendedAction = $NextRecommendedAction
+    nextCommand = $NextCommand
+    riskIfAutoContinued = $RiskIfAutoContinued
+    stateWritten = $effectiveStateWritten
+    noWriteReason = $effectiveNoWriteReason
+    resumePointer = $normalizedResumePointer
     safeToAdopt = $SafeToAdopt
     cleanupPolicy = $CleanupPolicy
     redactedHandoffPath = if ([string]::IsNullOrWhiteSpace($RedactedHandoffPath)) { $null } else { (ConvertTo-NormalizedPath -Path $RedactedHandoffPath) }
@@ -193,6 +252,8 @@ Write-Output "runRegistryStatus: $Status"
 Write-Output "runRegistryPhase: $Phase"
 Write-Output "blockerKind: $BlockerKind"
 Write-Output "stopTaxonomy: $StopTaxonomy"
+Write-Output "severity: $Severity"
+Write-Output "requiresHuman: $($effectiveRequiresHuman.ToString().ToLowerInvariant())"
 Write-Output "changedFilesCount: $($changedFiles.Count)"
 foreach ($changedFile in $changedFiles) {
     Write-Output "changedFile: $changedFile"
@@ -203,4 +264,9 @@ Write-Output "closeoutTransactionState: $CloseoutTransactionState"
 Write-Output "safeToAdopt: $($SafeToAdopt.ToString().ToLowerInvariant())"
 Write-Output "cleanupPolicy: $CleanupPolicy"
 Write-Output "nextRecommendedAction: $NextRecommendedAction"
+Write-Output "nextCommand: $NextCommand"
+Write-Output "riskIfAutoContinued: $RiskIfAutoContinued"
+Write-Output "stateWritten: $effectiveStateWritten"
+Write-Output "noWriteReason: $effectiveNoWriteReason"
+Write-Output "resumePointer: $normalizedResumePointer"
 Write-Output "Cost Calibration Gate remains blocked"

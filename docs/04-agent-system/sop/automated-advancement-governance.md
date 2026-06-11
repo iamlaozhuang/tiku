@@ -642,11 +642,15 @@ should prefer `-NoWrite`.
 
 Before an automation thread exits on a terminal or owner-recovery state, it must run
 `Set-ModuleRunV2RunRegistryFinalizer.ps1` for its current worktree. The finalizer writes the true `changedFiles`,
-`phase`, `blockerKind`, `stopTaxonomy`, `evidencePath`, `auditReviewPath`, `closeoutTransactionState`, `safeToAdopt`, and
-`cleanupPolicy` fields. A thread that stops after focused gates pass but advisory baseline fails must finalize as
+`phase`, `blockerKind`, `stopTaxonomy`, `severity`, `requiresHuman`, `evidencePath`, `auditReviewPath`,
+`closeoutTransactionState`, `nextCommand`, `riskIfAutoContinued`, `stateWritten`, `noWriteReason`, `resumePointer`,
+`safeToAdopt`, and `cleanupPolicy` fields. Idle, PlanOnly, and diagnostic no-op exits may choose `stateWritten: none`,
+but they must emit a human-readable no-write reason and a resume pointer. A thread that stops after focused gates pass
+but advisory baseline fails must finalize as
 `status: stopped`, `safeToAdopt: false`, and `cleanupPolicy: none` unless a redacted handoff explicitly permits
 adoption. A closed and clean run may finalize as `status: cleanup_ready` only after evidence proves merge/push/parking
-completed.
+completed. Every terminal envelope must give the operator the three-line conclusion: why it stopped, risk if it
+auto-continued, and the next command or next decision point.
 
 Clean stale automation worktrees are `recoverableAutomationWorktree` findings, not hard blocks. A stale worktree is
 recoverable only when it is under the configured automation worktree root and `git status --porcelain` is clean. Dirty

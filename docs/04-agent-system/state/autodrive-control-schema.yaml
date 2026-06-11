@@ -419,12 +419,19 @@ runRegistryFinalizer:
     - phase
     - blockerKind
     - stopTaxonomy
+    - severity
+    - requiresHuman
     - evidencePath
     - auditReviewPath
     - closeoutTransactionState
+    - nextCommand
+    - riskIfAutoContinued
+    - stateWritten
+    - noWriteReason
+    - resumePointer
     - safeToAdopt
     - cleanupPolicy
-  executionRule: before an automation thread exits on a stopped, recoverable, cleanup-ready, or closed state, write the terminal run registry through the finalizer so startup can classify owner recovery, closeout recovery, cleanup, or idle without stale active-owner ambiguity.
+  executionRule: before an automation thread exits on a stopped, recoverable, cleanup-ready, or closed state, it must either write the terminal run registry through the finalizer or emit an explicit no-write envelope with noWriteReason, so startup can classify owner recovery, closeout recovery, cleanup, or idle without stale active-owner ambiguity.
 registryLifecycle:
   statusField: runStatus
   allowedStatuses:
