@@ -318,6 +318,20 @@ agentActionTask: current-task
     Assert-Contains -Output $continueResult.Output -Pattern "serialExecutorDecision: ready_to_continue"
     Assert-Contains -Output $continueResult.Output -Pattern "serialExecutorAction: continue_task"
 
+    $normalizationDispatcherOutputPath = Write-DispatcherOutput -Root $smokeRoot -Name "normalization-required" -Content @"
+agentAction: propose_validation_command_normalization
+agentActionTask: current-task
+"@
+    $normalizationResult = Invoke-SerialExecutor -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath -DispatcherOutputPath $normalizationDispatcherOutputPath
+    if ($normalizationResult.ExitCode -ne 0) {
+        throw "Normalization-required fixture failed.`n$($normalizationResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $normalizationResult.Output -Pattern "serialExecutorDecision: validation_command_normalization_required"
+    Assert-Contains -Output $normalizationResult.Output -Pattern "serialExecutorAction: propose_validation_command_normalization"
+    if (($normalizationResult.Output -join "`n") -match "safe command:|running command:|validationOutput:") {
+        throw "Normalization-required fixture must not execute validation commands."
+    }
+
     $closeoutRecoveryResult = Invoke-SerialExecutor -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath -Action "run_closeout_recovery" -ActionTask "current-task"
     if ($closeoutRecoveryResult.ExitCode -ne 0) {
         throw "Closeout-recovery fixture failed.`n$($closeoutRecoveryResult.Output -join "`n")"

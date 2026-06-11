@@ -49,7 +49,8 @@ function New-SmokeRoot {
 function Write-SmokeFiles {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
-        [Parameter(Mandatory = $false)][switch]$MissingAutodrivePolicy
+        [Parameter(Mandatory = $false)][switch]$MissingAutodrivePolicy,
+        [Parameter(Mandatory = $false)][switch]$NormalizationRequiredTask
     )
 
     $statePath = Join-Path -Path $Root -ChildPath "project-state.yaml"
@@ -96,6 +97,28 @@ currentTask:
 "@
     }
 
+    $normalizationFields = if ($NormalizationRequiredTask) {
+        @"
+    validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit
+    normalizedValidationCommand: npm.cmd run test:unit -- src/server/services/example-normalized.test.ts
+"@
+    } else {
+        ""
+    }
+
+    $currentValidationCommands = if ($NormalizationRequiredTask) {
+        @"
+    validationCommands:
+      - npm.cmd run test -- --run focused # focused test anchor
+      - git diff --check
+"@
+    } else {
+        @"
+    validationCommands:
+      - git diff --check
+"@
+    }
+
     @"
 schemaVersion: 1
 tasks:
@@ -115,6 +138,7 @@ tasks:
       cleanup:
         deleteShortBranch: false
         parkWorktree: false
+$normalizationFields
 $autodrivePolicy
     capabilities:
       localDockerDatabase: task_approval_required
@@ -135,8 +159,7 @@ $autodrivePolicy
       - package.json
     riskTypes:
       - automation_policy
-    validationCommands:
-      - git diff --check
+$currentValidationCommands
     evidencePath: docs/current-evidence.md
     auditReviewPath: docs/current-audit.md
     status: in_progress
@@ -271,6 +294,15 @@ runnerNextTask: next-task
         throw "Proposal dispatcher fixture failed.`n$($proposalOutput -join "`n")"
     }
     Assert-Contains -Output $proposalOutput -Pattern "agentAction: propose_schema_repair"
+
+    $normalizationFiles = Write-SmokeFiles -Root $smokeRoot -NormalizationRequiredTask
+    $normalizationOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dispatcherScriptPath -TaskId current-task -RunnerOutputPath $continueRunner -ProjectStatePath $normalizationFiles.StatePath -QueuePath $normalizationFiles.QueuePath -SchemaPath $normalizationFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Normalization-required dispatcher fixture failed.`n$($normalizationOutput -join "`n")"
+    }
+    Assert-Contains -Output $normalizationOutput -Pattern "autodriveSchemaDecision: validation_command_normalization_required"
+    Assert-Contains -Output $normalizationOutput -Pattern "agentActionDecision: validation_command_normalization_required"
+    Assert-Contains -Output $normalizationOutput -Pattern "agentAction: propose_validation_command_normalization"
 
     $closeoutRecoveryRunner = Write-RunnerOutput -Root $smokeRoot -Name "closeout-recovery" -Content @"
 runnerDecision: closeout_recovery

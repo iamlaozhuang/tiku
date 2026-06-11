@@ -331,6 +331,10 @@ function Resolve-SchemaControlledAction {
         Write-AgentActionResult -Decision "proposal_only" -Action "propose_schema_repair" -Reason "target task is not yet executable by unattended autodrive" -ExitCode 0 -TargetTaskId $TargetTaskId
     }
 
+    if ($schemaDecision -eq "validation_command_normalization_required") {
+        Write-AgentActionResult -Decision "validation_command_normalization_required" -Action "propose_validation_command_normalization" -Reason "target task requires validation command normalization before guarded autodrive execution" -ExitCode 0 -TargetTaskId $TargetTaskId
+    }
+
     if ($schemaDecision -ne "can_autodrive") {
         Write-AgentActionResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "unknown autodrive schema decision: $schemaDecision" -ExitCode 1 -TargetTaskId $TargetTaskId
     }

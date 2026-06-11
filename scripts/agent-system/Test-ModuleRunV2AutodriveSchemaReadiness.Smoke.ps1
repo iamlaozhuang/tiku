@@ -216,11 +216,24 @@ try {
         powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $missingReplacementFiles.StatePath -QueuePath $missingReplacementFiles.QueuePath -SchemaPath $missingReplacementFiles.SchemaPath
     } | Out-Null
 
+    $unsafeReplacementTaskBlock = $missingReplacementTaskBlock -replace "validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit", "validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit`n    normalizedValidationCommand: npm.cmd run test -- --run focused"
+    $unsafeReplacementFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $unsafeReplacementTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_UNSAFE_REPLACEMENT" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $unsafeReplacementFiles.StatePath -QueuePath $unsafeReplacementFiles.QueuePath -SchemaPath $unsafeReplacementFiles.SchemaPath
+    } | Out-Null
+
     $unappliedReplacementTaskBlock = $missingReplacementTaskBlock -replace "validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit", "validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit`n    normalizedValidationCommand: npm.cmd run test:unit -- src/server/services/example-normalized.test.ts"
     $unappliedReplacementFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $unappliedReplacementTaskBlock
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_REQUIRED" -Command {
-        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $unappliedReplacementFiles.StatePath -QueuePath $unappliedReplacementFiles.QueuePath -SchemaPath $unappliedReplacementFiles.SchemaPath
-    } | Out-Null
+    $unappliedReplacementOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $unappliedReplacementFiles.StatePath -QueuePath $unappliedReplacementFiles.QueuePath -SchemaPath $unappliedReplacementFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Normalization-required fixture failed unexpectedly.`n$($unappliedReplacementOutput -join "`n")"
+    }
+    Assert-Contains -Output $unappliedReplacementOutput -Pattern "autodriveSchemaDecision: validation_command_normalization_required"
+    Assert-Contains -Output $unappliedReplacementOutput -Pattern "normalizationAction: replace_legacy_focused_placeholder_with_scoped_unit"
+    Assert-Contains -Output $unappliedReplacementOutput -Pattern "normalizedValidationCommand: npm\.cmd run test:unit -- src/server/services/example-normalized\.test\.ts"
+    if (($unappliedReplacementOutput -join "`n") -match "autodriveSchemaDecision: can_autodrive") {
+        throw "Normalization-required fixture must not be executable autodrive."
+    }
 
     $approvedDbCapabilityTaskBlock = $fullTaskBlock `
         -replace "destructiveLocalDockerDatabase: blocked_without_task_approval", "destructiveLocalDockerDatabase: approved_destructive_local_dev_only" `

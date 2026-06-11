@@ -55,6 +55,7 @@ schemaReadiness:
   decisions:
     - can_autodrive
     - proposal_only
+    - validation_command_normalization_required
     - not_executable_closed_task
     - stop_for_hard_block
   terminalTaskStatuses:
@@ -71,6 +72,7 @@ startupDiagnostics:
     - hygiene_deferred
     - remote_divergence
     - validation_failed
+    - repair_required
     - no_task
     - registration_mismatch
     - closeout_pending

@@ -35,11 +35,19 @@ function Write-AutodriveSchemaResult {
     param(
         [Parameter(Mandatory = $true)][string]$Decision,
         [Parameter(Mandatory = $true)][string]$Reason,
-        [Parameter(Mandatory = $true)][int]$ExitCode
+        [Parameter(Mandatory = $true)][int]$ExitCode,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$NormalizationAction = "",
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$NormalizedValidationCommand = ""
     )
 
     Write-Section -Title "Result"
     Write-Output "autodriveSchemaDecision: $Decision"
+    if (-not [string]::IsNullOrWhiteSpace($NormalizationAction)) {
+        Write-Output "normalizationAction: $NormalizationAction"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($NormalizedValidationCommand)) {
+        Write-Output "normalizedValidationCommand: $NormalizedValidationCommand"
+    }
     Write-Output "reason: $Reason"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
@@ -332,7 +340,9 @@ function Test-ValidationCommandNormalizationGate {
 
     $legacyPlaceholders = @($ValidationCommands | Where-Object { Test-BroadFocusedPlaceholderCommand -Command $_ })
     if ($legacyPlaceholders.Count -gt 0) {
-        Add-Finding "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_REQUIRED"
+        $script:normalizationRequired = $true
+        $script:normalizationAction = "replace_legacy_focused_placeholder_with_scoped_unit"
+        $script:normalizedValidationCommand = $replacementCommand
         return
     }
 
@@ -439,10 +449,14 @@ function Test-LocalE2EValidationGate {
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$ValidationLifecycleCommands,
-        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedFiles
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedFiles,
+        [Parameter(Mandatory = $false)][bool]$IgnoreFocusedPlaceholderForNormalization = $false
     )
 
     $allCommands = @(Get-RunnableValidationCommandTexts -ValidationCommands $ValidationCommands -ValidationLifecycleCommands $ValidationLifecycleCommands)
+    if ($IgnoreFocusedPlaceholderForNormalization) {
+        $allCommands = @($allCommands | Where-Object { -not (Test-BroadFocusedPlaceholderCommand -Command $_) })
+    }
     $localE2ECommands = @(
         $allCommands | Where-Object {
             $_ -match "npm\.cmd\s+run\s+test:e2e\b" -or
@@ -501,6 +515,9 @@ function Test-LocalE2EValidationGate {
 }
 
 $findings = New-Object System.Collections.Generic.List[string]
+$normalizationRequired = $false
+$normalizationAction = ""
+$normalizedValidationCommand = ""
 
 try {
     Write-Section -Title "Module Run v2 Autodrive Schema Readiness"
@@ -695,7 +712,7 @@ try {
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+schemaMigration:\s*(blocked_without_task_approval|approved_migration_plan)\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_SCHEMA_MIGRATION"
     }
-    Test-LocalE2EValidationGate -ProjectStateLines $projectStateLines -TaskBlock $taskBlock -ValidationCommands $validationCommands -ValidationLifecycleCommands $validationLifecycleCommands -BlockedFiles $blockedFiles
+    Test-LocalE2EValidationGate -ProjectStateLines $projectStateLines -TaskBlock $taskBlock -ValidationCommands $validationCommands -ValidationLifecycleCommands $validationLifecycleCommands -BlockedFiles $blockedFiles -IgnoreFocusedPlaceholderForNormalization:$script:normalizationRequired
     if (-not (Test-TaskBlockContains -Block $taskBlock -Pattern "(?m)^\s+costCalibrationGate:\s*blocked\s*$")) {
         Add-Finding "HARD_BLOCK_CAPABILITY_COST_CALIBRATION_GATE"
     }
@@ -709,6 +726,10 @@ try {
 
     if ($findings.Count -gt 0) {
         Write-AutodriveSchemaResult -Decision "stop_for_hard_block" -Reason "durable autodrive schema has unsafe values" -ExitCode 1
+    }
+
+    if ($script:normalizationRequired) {
+        Write-AutodriveSchemaResult -Decision "validation_command_normalization_required" -Reason "legacy focused validation placeholder must be replaced with the approved scoped unit command before autodrive execution" -ExitCode 0 -NormalizationAction $script:normalizationAction -NormalizedValidationCommand $script:normalizedValidationCommand
     }
 
     Write-AutodriveSchemaResult -Decision "can_autodrive" -Reason "durable autodrive schema is safe for guarded local action" -ExitCode 0

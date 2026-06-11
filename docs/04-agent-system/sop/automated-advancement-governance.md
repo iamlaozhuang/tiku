@@ -304,12 +304,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\T
 
 The schema gate emits `autodriveSchemaDecision`:
 
-| Decision                     | Meaning                                                                                         |
-| ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| `can_autodrive`              | The task has safe base metadata, explicit autodrive policy, capabilities, closeout, registry.   |
-| `proposal_only`              | The task is not yet executable by unattended autodrive; propose schema repair or use manual.    |
-| `not_executable_closed_task` | The named task is terminal and should be treated as idle diagnostic state, not executable work. |
-| `stop_for_hard_block`        | Base task metadata, risk gates, or capability values are unsafe.                                |
+| Decision                                    | Meaning                                                                                                                             |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `can_autodrive`                             | The task has safe base metadata, explicit autodrive policy, capabilities, closeout, registry.                                       |
+| `proposal_only`                             | The task is not yet executable by unattended autodrive; propose schema repair or use manual.                                        |
+| `validation_command_normalization_required` | The task has an approved scoped replacement, but a legacy focused placeholder still needs docs-only normalization before execution. |
+| `not_executable_closed_task`                | The named task is terminal and should be treated as idle diagnostic state, not executable work.                                     |
+| `stop_for_hard_block`                       | Base task metadata, risk gates, or capability values are unsafe.                                                                    |
 
 Missing advanced autodrive fields are proposal-only when the base task metadata is otherwise safe. Missing base task
 metadata, high-risk gates, unsafe capability values, and missing durable files remain hard blocks. Terminal task statuses
@@ -336,6 +337,7 @@ surface these actions:
 - `run_closeout_recovery`;
 - `prepare_parallel_workers`;
 - `propose_schema_repair`;
+- `propose_validation_command_normalization`;
 - `request_manual_decision`;
 - `request_human_handoff`;
 - `stop_for_hard_block`.
@@ -386,6 +388,8 @@ Supported decisions:
 - `task_claimed`: `-Execute` updated the pending task to `in_progress` and synchronized `project-state.yaml`.
 - `validation_ready`: validation commands passed the blocked-command safety filter, but were not executed.
 - `validation_passed`: `-RunValidation` executed all safe validation commands successfully.
+- `validation_command_normalization_required`: an approved scoped replacement exists, but the legacy focused placeholder
+  still requires a docs-only normalization proposal before any validation can run.
 - `handoff_to_closeout_recovery`: closeout recovery is recognized, but the executor delegates to unattended readiness,
   approved closeout, and post-closeout state reconciliation gates.
 - `blocked_command`: a validation command attempted an out-of-scope surface such as env/secret, provider, DB,

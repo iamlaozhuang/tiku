@@ -322,6 +322,7 @@ function Get-SerialStopTaxonomy {
         [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Reason
     )
 
+    if ($Decision -eq "validation_command_normalization_required") { return "repair_required" }
     if ($Reason -match "validation|blocked command") { return "validation_failed" }
     if ($Reason -match "manual|approval") { return "approval_missing" }
     if ($Reason -match "active owner") { return "active_owner" }
@@ -345,6 +346,10 @@ function Assert-SchemaReady {
 
     if ($schemaDecision -eq "proposal_only") {
         Write-SerialExecutorResult -Decision "proposal_only" -Action "propose_schema_repair" -Reason "target task is not executable by unattended autodrive yet" -ExitCode 0 -TargetTaskId $TargetTaskId
+    }
+
+    if ($schemaDecision -eq "validation_command_normalization_required") {
+        Write-SerialExecutorResult -Decision "validation_command_normalization_required" -Action "propose_validation_command_normalization" -Reason "target task requires validation command normalization before execution" -ExitCode 0 -TargetTaskId $TargetTaskId
     }
 
     if ($schemaDecision -ne "can_autodrive") {
@@ -730,6 +735,9 @@ try {
         }
         "propose_schema_repair" {
             Write-SerialExecutorResult -Decision "proposal_only" -Action "propose_schema_repair" -Reason "schema repair proposal required before execution" -ExitCode 0 -TargetTaskId (Get-ResolvedTargetTaskId -CandidateTaskId $agentActionTask)
+        }
+        "propose_validation_command_normalization" {
+            Write-SerialExecutorResult -Decision "validation_command_normalization_required" -Action "propose_validation_command_normalization" -Reason "validation command normalization proposal required before execution" -ExitCode 0 -TargetTaskId (Get-ResolvedTargetTaskId -CandidateTaskId $agentActionTask)
         }
         "continue_task" {
             $targetTask = Get-ResolvedTargetTaskId -CandidateTaskId $agentActionTask
