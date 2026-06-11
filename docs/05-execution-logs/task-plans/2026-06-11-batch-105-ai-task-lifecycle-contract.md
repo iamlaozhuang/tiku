@@ -41,12 +41,12 @@ Update:
 
 ## Steps
 
-- [ ] RED: add focused lifecycle model tests for allowed transitions, blocked transitions, retryable failure categories, and redaction-safe public identifiers.
-- [ ] Verify RED with `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts`.
-- [ ] GREEN: implement minimal lifecycle model and contract exports.
-- [ ] Verify GREEN with the focused test.
-- [ ] Run `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts`, `git diff --check`, and module closeout readiness.
-- [ ] Write evidence and audit review with redacted validation output.
+- [x] RED: add focused lifecycle model tests for allowed transitions, blocked transitions, retryable failure categories, and redaction-safe public identifiers.
+- [x] Verify RED with `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts`.
+- [x] GREEN: implement minimal lifecycle model and contract exports.
+- [x] Verify GREEN with the focused test.
+- [x] Run `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd run test:unit -- src/server/models/ai-generation-task.test.ts`, `git diff --check`, and module closeout readiness.
+- [x] Write evidence and audit review with redacted validation output.
 
 ## Risk Defense
 
