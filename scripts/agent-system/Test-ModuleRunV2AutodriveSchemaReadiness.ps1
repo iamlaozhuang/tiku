@@ -270,6 +270,77 @@ function Test-ProjectStateHasStandingLocalE2EApproval {
     return $content -match "(?s)standingLocalE2EValidationApproval:\s*.*?status:\s*approved"
 }
 
+function Test-BroadFocusedPlaceholderCommand {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Command)
+
+    return $Command.Trim() -match "^npm\.cmd\s+run\s+test\s+--\s+--run\s+focused\b"
+}
+
+function Test-ScopedUnitValidationCommand {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Command)
+
+    $normalizedCommand = $Command.Replace("\", "/").Trim()
+    if ($normalizedCommand -match "\.\.") {
+        return $false
+    }
+
+    return $normalizedCommand -match "^npm\.cmd\s+run\s+test:unit\s+--\s+(src|tests)/[A-Za-z0-9._/-]+\.test\.ts$"
+}
+
+function Test-ValidationCommandsContainExactCommand {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$ExpectedCommand
+    )
+
+    $normalizedExpectedCommand = $ExpectedCommand.Replace("\", "/").Trim()
+    foreach ($validationCommand in $ValidationCommands) {
+        $normalizedValidationCommand = $validationCommand.Replace("\", "/").Trim()
+        if ($normalizedValidationCommand -eq $normalizedExpectedCommand) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-ValidationCommandNormalizationGate {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands
+    )
+
+    $normalizationMode = Get-TaskScalarValue -Block $TaskBlock -Key "validationCommandNormalization"
+    if ([string]::IsNullOrWhiteSpace($normalizationMode)) {
+        return
+    }
+
+    if ($normalizationMode -ne "approved_docs_only_placeholder_to_scoped_unit") {
+        Add-Finding "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_MODE $normalizationMode"
+    }
+
+    $replacementCommand = Get-TaskScalarValue -Block $TaskBlock -Key "normalizedValidationCommand"
+    if ([string]::IsNullOrWhiteSpace($replacementCommand)) {
+        Add-Finding "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_MISSING_REPLACEMENT"
+        return
+    }
+
+    if (-not (Test-ScopedUnitValidationCommand -Command $replacementCommand)) {
+        Add-Finding "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_UNSAFE_REPLACEMENT $replacementCommand"
+        return
+    }
+
+    $legacyPlaceholders = @($ValidationCommands | Where-Object { Test-BroadFocusedPlaceholderCommand -Command $_ })
+    if ($legacyPlaceholders.Count -gt 0) {
+        Add-Finding "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_REQUIRED"
+        return
+    }
+
+    if (-not (Test-ValidationCommandsContainExactCommand -ValidationCommands $ValidationCommands -ExpectedCommand $replacementCommand)) {
+        Add-Finding "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_MISSING_REPLACEMENT_COMMAND $replacementCommand"
+    }
+}
+
 function Get-AllValidationCommandTexts {
     param(
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands,
@@ -284,6 +355,30 @@ function Get-AllValidationCommandTexts {
     }
     foreach ($validationLifecycleCommand in $ValidationLifecycleCommands) {
         if ($null -ne $validationLifecycleCommand -and -not [string]::IsNullOrWhiteSpace($validationLifecycleCommand.Command)) {
+            $commands.Add($validationLifecycleCommand.Command.Trim())
+        }
+    }
+
+    return @($commands.ToArray() | Sort-Object -Unique)
+}
+
+function Get-RunnableValidationCommandTexts {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ValidationCommands,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$ValidationLifecycleCommands
+    )
+
+    $commands = New-Object System.Collections.Generic.List[string]
+    foreach ($validationCommand in $ValidationCommands) {
+        if (-not [string]::IsNullOrWhiteSpace($validationCommand)) {
+            $commands.Add($validationCommand.Trim())
+        }
+    }
+    foreach ($validationLifecycleCommand in $ValidationLifecycleCommands) {
+        if ($null -eq $validationLifecycleCommand -or [string]::IsNullOrWhiteSpace($validationLifecycleCommand.Command)) {
+            continue
+        }
+        if ($validationLifecycleCommand.Phase -in @("post_edit", "closeout")) {
             $commands.Add($validationLifecycleCommand.Command.Trim())
         }
     }
@@ -347,7 +442,7 @@ function Test-LocalE2EValidationGate {
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedFiles
     )
 
-    $allCommands = @(Get-AllValidationCommandTexts -ValidationCommands $ValidationCommands -ValidationLifecycleCommands $ValidationLifecycleCommands)
+    $allCommands = @(Get-RunnableValidationCommandTexts -ValidationCommands $ValidationCommands -ValidationLifecycleCommands $ValidationLifecycleCommands)
     $localE2ECommands = @(
         $allCommands | Where-Object {
             $_ -match "npm\.cmd\s+run\s+test:e2e\b" -or
@@ -457,6 +552,7 @@ try {
     $riskTypes = @(Get-TaskListValues -Block $taskBlock -Key "riskTypes")
     $validationCommands = @(Get-TaskListValues -Block $taskBlock -Key "validationCommands")
     $validationLifecycleCommands = @(Get-TaskValidationLifecycleCommands -Block $taskBlock)
+    $validationCommandNormalization = Get-TaskScalarValue -Block $taskBlock -Key "validationCommandNormalization"
 
     Write-Section -Title "Task"
     Write-Output "status: $status"
@@ -466,6 +562,7 @@ try {
     Write-Output "riskTypeCount: $($riskTypes.Count)"
     Write-Output "validationCommandCount: $($validationCommands.Count)"
     Write-Output "validationLifecycleCommandCount: $($validationLifecycleCommands.Count)"
+    Write-Output "validationCommandNormalization: $validationCommandNormalization"
 
     if ($status -in @("done", "closed", "pushed", "merged")) {
         Write-Output "not_executable_closed_task: $TaskId status=$status"
@@ -497,7 +594,7 @@ try {
         Add-Finding "HARD_BLOCK_MISSING_VALIDATION_COMMANDS $TaskId"
     }
     if ($validationLifecycleCommands.Count -gt 0) {
-        $validLifecyclePhases = @("pre_edit", "post_edit", "closeout")
+        $validLifecyclePhases = @("pre_edit", "post_edit", "closeout", "advisory_baseline")
         $hasRunnableCompletionPhase = $false
         foreach ($validationLifecycleCommand in $validationLifecycleCommands) {
             if ($validationLifecycleCommand.Phase -notin $validLifecyclePhases) {
@@ -532,6 +629,7 @@ try {
             Add-Finding "HARD_BLOCK_RISK_GATE $riskType"
         }
     }
+    Test-ValidationCommandNormalizationGate -TaskBlock $taskBlock -ValidationCommands $validationCommands
 
     if ($findings.Count -gt 0) {
         Write-AutodriveSchemaResult -Decision "stop_for_hard_block" -Reason "base task metadata is unsafe for autodrive" -ExitCode 1

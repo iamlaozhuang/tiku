@@ -189,6 +189,39 @@ try {
     Assert-Contains -Output $fullOutput -Pattern "autodriveSchemaDecision: can_autodrive"
     Assert-Contains -Output $fullOutput -Pattern "validationLifecycleCommandCount: 2"
 
+    $advisoryBaselineTaskBlock = $fullTaskBlock -replace "      - phase: closeout`r?`n        command: git diff --check", "      - phase: advisory_baseline`n        command: npm.cmd run test -- --run focused # focused test anchor`n      - phase: closeout`n        command: git diff --check"
+    $advisoryBaselineFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $advisoryBaselineTaskBlock
+    $advisoryBaselineOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $advisoryBaselineFiles.StatePath -QueuePath $advisoryBaselineFiles.QueuePath -SchemaPath $advisoryBaselineFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Advisory baseline fixture failed unexpectedly.`n$($advisoryBaselineOutput -join "`n")"
+    }
+    Assert-Contains -Output $advisoryBaselineOutput -Pattern "autodriveSchemaDecision: can_autodrive"
+    Assert-Contains -Output $advisoryBaselineOutput -Pattern "validationLifecycleCommandCount: 3"
+
+    $normalizedCommandTaskBlock = $fullTaskBlock `
+        -replace "humanApproval: smoke approval", "humanApproval: smoke approval`n    validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit`n    normalizedValidationCommand: npm.cmd run test:unit -- src/server/services/example-normalized.test.ts" `
+        -replace "validationCommands:\r?\n\s{6}- git diff --check", "validationCommands:`n      - npm.cmd run test:unit -- src/server/services/example-normalized.test.ts`n      - git diff --check"
+    $normalizedCommandFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $normalizedCommandTaskBlock
+    $normalizedCommandOutput = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $normalizedCommandFiles.StatePath -QueuePath $normalizedCommandFiles.QueuePath -SchemaPath $normalizedCommandFiles.SchemaPath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Validation command normalization fixture failed unexpectedly.`n$($normalizedCommandOutput -join "`n")"
+    }
+    Assert-Contains -Output $normalizedCommandOutput -Pattern "autodriveSchemaDecision: can_autodrive"
+
+    $missingReplacementTaskBlock = $fullTaskBlock `
+        -replace "humanApproval: smoke approval", "humanApproval: smoke approval`n    validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit" `
+        -replace "validationCommands:\r?\n\s{6}- git diff --check", "validationCommands:`n      - npm.cmd run test -- --run focused # focused test anchor`n      - git diff --check"
+    $missingReplacementFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $missingReplacementTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_MISSING_REPLACEMENT" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $missingReplacementFiles.StatePath -QueuePath $missingReplacementFiles.QueuePath -SchemaPath $missingReplacementFiles.SchemaPath
+    } | Out-Null
+
+    $unappliedReplacementTaskBlock = $missingReplacementTaskBlock -replace "validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit", "validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit`n    normalizedValidationCommand: npm.cmd run test:unit -- src/server/services/example-normalized.test.ts"
+    $unappliedReplacementFiles = Write-SmokeFiles -Root $smokeRoot -TaskBlock $unappliedReplacementTaskBlock
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_VALIDATION_COMMAND_NORMALIZATION_REQUIRED" -Command {
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $schemaScriptPath -ProjectStatePath $unappliedReplacementFiles.StatePath -QueuePath $unappliedReplacementFiles.QueuePath -SchemaPath $unappliedReplacementFiles.SchemaPath
+    } | Out-Null
+
     $approvedDbCapabilityTaskBlock = $fullTaskBlock `
         -replace "destructiveLocalDockerDatabase: blocked_without_task_approval", "destructiveLocalDockerDatabase: approved_destructive_local_dev_only" `
         -replace "schemaMigration: blocked_without_task_approval", "schemaMigration: approved_migration_plan"

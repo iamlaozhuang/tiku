@@ -281,7 +281,6 @@ $blockedRemainderBlock
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId $SourcePlanningTask -CandidateTaskId $TaskId
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused # focused test anchor
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId $TaskId
     evidencePath: docs/05-execution-logs/evidence/$TaskId.md

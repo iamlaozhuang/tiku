@@ -1,5 +1,126 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: phase-83-module-run-v2-validation-command-normalization
+    title: Module Run v2 validation command normalization
+    phase: phase-83-module-run-v2-validation-command-normalization
+    sourceStory: mechanism-serial-governance
+    dependencies:
+      - batch-110-personal-learning-ai-local-transport-contract
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-83-module-run-v2-validation-command-normalization.md
+    humanApproval: >-
+      User explicitly approved implementing the Module Run v2 validation command normalization mechanism for legacy
+      focused placeholder commands. Automation must remain paused; no unattended runner, e2e, provider, env/secret,
+      schema/migration, dependency, deploy, payment, external-service, PR, force-push, or Cost Calibration Gate work is
+      approved.
+    validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit
+    validationProfile: mechanism-hardening
+    localFullLoopGate: mechanism
+    blockedRemainder:
+      - automation resume remains blocked
+      - e2e execution remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: approved_read_only_redacted
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: mechanism_hardening
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - mechanism_hardening
+      - validation_command_normalization
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationSeedSelfReview.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.ps1 -TaskId batch-111-personal-learning-ai-request-context-local-contract
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-83-module-run-v2-validation-command-normalization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-83-module-run-v2-validation-command-normalization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-83-module-run-v2-validation-command-normalization
+    evidencePath: docs/05-execution-logs/evidence/phase-83-module-run-v2-validation-command-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-83-module-run-v2-validation-command-normalization.md
+    status: closed
+    retryCount: 0
+
   - id: phase-1-api-contract-baseline
     title: API Contract Baseline
     phase: phase-1-foundation
@@ -10994,6 +11115,8 @@ tasks:
     autoDriveLocalImplementationApproval: >-
       autoDriveLocalImplementationApproval: user-approved phase82 seed for low-risk personal-learning-ai local
       implementation tasks only. High-risk capability gates remain blocked.
+    validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit
+    normalizedValidationCommand: npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-context-service.test.ts
     seededByTask: phase-82-personal-learning-ai-module-run-proposal
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
@@ -11098,7 +11221,7 @@ tasks:
     validationCommands:
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused # focused test anchor, replace with scoped unit test in task plan
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-context-service.test.ts
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-111-personal-learning-ai-request-context-local-contract
     evidencePath: docs/05-execution-logs/evidence/batch-111-personal-learning-ai-request-context-local-contract.md
@@ -11120,6 +11243,8 @@ tasks:
     autoDriveLocalImplementationApproval: >-
       autoDriveLocalImplementationApproval: user-approved phase82 seed for low-risk personal-learning-ai local
       implementation tasks only. High-risk capability gates remain blocked.
+    validationCommandNormalization: approved_docs_only_placeholder_to_scoped_unit
+    normalizedValidationCommand: npm.cmd run test:unit -- src/server/services/personal-ai-generation-result-reference-service.test.ts
     seededByTask: phase-82-personal-learning-ai-module-run-proposal
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
@@ -11227,7 +11352,7 @@ tasks:
     validationCommands:
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused # focused test anchor, replace with scoped unit test in task plan
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-result-reference-service.test.ts
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-112-personal-learning-ai-redacted-result-reference-local-contract
     evidencePath: docs/05-execution-logs/evidence/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md

@@ -173,7 +173,6 @@ $blockedRemainderBlock
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-101-authorization-and-access-authorization-read-model
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused # focused test anchor
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-101-authorization-and-access-authorization-read-model
     registryLifecycle:
@@ -239,7 +238,6 @@ $blockedRemainderBlock
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-102-authorization-and-access-duplicate-read-model
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused # focused test anchor
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-102-authorization-and-access-duplicate-read-model
     registryLifecycle:

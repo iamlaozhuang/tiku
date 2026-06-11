@@ -2,7 +2,7 @@
 project:
   name: tiku
   currentPhase: mechanism-serial-governance
-updatedAt: "2026-06-11T09:35:00-07:00"
+updatedAt: "2026-06-11T10:25:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -183,6 +183,23 @@ automation:
         - cost_calibration_gate
       statement: >-
         User approves local-only existing Playwright e2e validation for scoped queued tasks only. The approval may be consumed only when the task records capabilities.localE2EValidation: approved_local_only_existing_specs, uses the whitelisted npm.cmd run test:e2e commands, keeps evidence redacted, and preserves env/secret, provider, dependency, schema/migration, staging/prod/cloud/deploy, payment, external-service, destructive DB, full-suite default e2e, debug/headed e2e, and Cost Calibration Gate blocks.
+    standingValidationCommandNormalizationApproval:
+      status: approved
+      approvedAt: "2026-06-11T10:25:00-07:00"
+      scope: docs-only Module Run v2 placeholder validation command normalization
+      allowedActions:
+        - replace_legacy_focused_placeholder_with_scoped_unit_test_command
+        - write_task_plan_evidence_audit
+        - rerun_readiness_after_normalization
+      requiredGates:
+        - task declares validationCommandNormalization approved_docs_only_placeholder_to_scoped_unit
+        - replacement command is exactly npm.cmd run test:unit -- <path>.test.ts
+        - changed files stay in docs/state/task-plan/evidence/audit or approved mechanism scripts
+        - no e2e, provider, env/secret, schema/migration, dependency, deploy, payment, external-service, destructive DB, PR, force-push, or Cost Calibration Gate work
+      statement: >-
+        User approves a narrow docs-only normalization path for low-risk Module Run v2 tasks whose unsafe validation
+        surface is the legacy focused placeholder command. The placeholder may be replaced only by an explicit scoped
+        unit test command and only after evidence records the before/after command and preserves all high-risk blocks.
     taskScopedDestructiveLocalDockerDbApproval:
       status: task_specific_enabled
       enabledAt: "2026-06-10T09:55:00-07:00"
@@ -249,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fac14c451eb88b019c0ce4c7d87c6064dc2b2a8d
-  lastKnownOriginMasterSha: fac14c451eb88b019c0ce4c7d87c6064dc2b2a8d
+  lastKnownMasterSha: d5a889069d36bdecb2ae9e22f633f87628aa1313
+  lastKnownOriginMasterSha: d5a889069d36bdecb2ae9e22f633f87628aa1313
 currentTask:
-  id: batch-110-personal-learning-ai-local-transport-contract
+  id: phase-83-module-run-v2-validation-command-normalization
   status: closed
-  sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-110-personal-learning-ai-local-transport-contract.md
-  evidencePath: docs/05-execution-logs/evidence/batch-110-personal-learning-ai-local-transport-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-110-personal-learning-ai-local-transport-contract.md
-  branch: codex/batch-110-personal-ai-transport-contract
+  sourceStory: mechanism-serial-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-phase-83-module-run-v2-validation-command-normalization.md
+  evidencePath: docs/05-execution-logs/evidence/phase-83-module-run-v2-validation-command-normalization.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/phase-83-module-run-v2-validation-command-normalization.md
+  branch: codex/phase-83-validation-command-normalization
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -296,9 +313,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 110 implemented the personal-learning-ai-experience L4 transport/API/contract bridge. Continue manually with
-    batch-111-personal-learning-ai-request-context-local-contract, then only one pending dependency-satisfied task at a
-    time. Keep local automation intentionally paused unless the user explicitly resumes it; do not run unattended runner,
-    resume automation, call providers, change env/secrets, alter dependencies or schema, deploy, execute e2e, or execute
-    Cost Calibration Gate.
-  lastSummaryPath: docs/05-execution-logs/evidence/batch-110-personal-learning-ai-local-transport-contract.md
+    Phase 83 tuned validation command normalization and corrected the personal-learning-ai batch111/batch112 scoped unit
+    validation commands. Continue manually with batch-111-personal-learning-ai-request-context-local-contract, then only
+    one pending dependency-satisfied task at a time. Keep local automation intentionally paused unless the user explicitly
+    resumes it; do not run unattended runner, resume automation, call providers, change env/secrets, alter dependencies
+    or schema, deploy, execute e2e, or execute Cost Calibration Gate.
+  lastSummaryPath: docs/05-execution-logs/evidence/phase-83-module-run-v2-validation-command-normalization.md

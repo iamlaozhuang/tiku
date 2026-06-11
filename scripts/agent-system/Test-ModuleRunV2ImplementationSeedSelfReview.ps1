@@ -493,6 +493,9 @@ try {
         if ($blockText -match "phase:\s*post_edit\s+command:\s*npm\.cmd run test -- --run focused") {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_BROAD_BASELINE_AS_POST_EDIT $seedTaskId"
         }
+        if (($validationCommands -join "`n") -match "npm\.cmd\s+run\s+test\s+--\s+--run\s+focused") {
+            Add-Finding "HARD_BLOCK_SEEDED_TASK_BROAD_BASELINE_AS_LEGACY_VALIDATION_COMMAND $seedTaskId"
+        }
         if ($validationText -notmatch "npm\.cmd run lint") {
             Add-Finding "HARD_BLOCK_SEEDED_TASK_MISSING_LINT $seedTaskId"
         }
