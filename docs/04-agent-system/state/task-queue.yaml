@@ -9200,3 +9200,72 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
     status: closed
     retryCount: 0
+
+  - id: runner-pending-seed-decision-gate
+    title: Runner pending seed decision gate
+    phase: mechanism-tuning-serial
+    sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
+    dependencies:
+      - ai-task-and-provider-auto-seed-approval-decision
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved a small mechanism hardening task while keeping the local Codex automation registration unchanged.
+      The task must wire pending_human_decision into the runner hard gate so later manual activation of the primary
+      automation cannot bypass the durable auto-seed approval decision. The existing serial closeout approval covers
+      scoped local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after
+      validation. This task must not change local automation state, resume automation, claim business tasks, apply a real
+      seed transaction, create queued implementation tasks, modify product code, dependencies, lockfiles, schema,
+      migrations, env/secret, provider, staging/prod/cloud/deploy, payment, external service, PR, force push, or Cost
+      Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: mechanism_repair
+    allowedFiles:
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-runner-pending-seed-decision-gate.md
+      - docs/05-execution-logs/evidence/2026-06-11-runner-pending-seed-decision-gate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-runner-pending-seed-decision-gate.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - seed_approval
+      - task_queue
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -MaxSteps 1 -AllowProtectedBranch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1 docs\04-agent-system\operating-manual.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\05-execution-logs\task-plans\2026-06-11-runner-pending-seed-decision-gate.md docs\05-execution-logs\evidence\2026-06-11-runner-pending-seed-decision-gate.md docs\05-execution-logs\audits-reviews\2026-06-11-runner-pending-seed-decision-gate.md
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-runner-pending-seed-decision-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-runner-pending-seed-decision-gate.md
+    status: closed
+    retryCount: 0

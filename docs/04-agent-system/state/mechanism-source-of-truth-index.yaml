@@ -59,10 +59,11 @@ factOwnership:
   - fact: current human decision status for applying the ai-task-and-provider seed proposal
     sourcePath: docs/04-agent-system/state/ai-task-and-provider-auto-seed-approval-decision.yaml
     derivedSummaries:
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
       - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/Get-TikuProjectStatus.ps1
-    rule: proposal_available is not approval; pending_human_decision keeps automation paused and blocks seed transaction execution until fresh explicit approval is recorded.
+    rule: proposal_available is not approval; pending_human_decision keeps automation paused and the runner must block seed transaction execution until fresh explicit approval is recorded.
   - fact: transient owner, active run, recoverable run, cleanup-ready run, no-write terminal envelope
     sourcePath: local run registry, lease, and redacted handoff files under the configured Codex automation roots
     derivedSummaries:

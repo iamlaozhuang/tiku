@@ -34,6 +34,27 @@ function Assert-NotContains {
     }
 }
 
+function Invoke-SmokeRunnerInChild {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Arguments,
+
+        [Parameter(Mandatory = $false)]
+        [int[]]$AllowedExitCodes = @(0)
+    )
+
+    $output = @(& powershell.exe @Arguments 2>&1)
+    $exitCode = $LASTEXITCODE
+    if ($AllowedExitCodes -notcontains $exitCode) {
+        throw "Unexpected runner exit code: $exitCode`nActual output:`n$($output -join "`n")"
+    }
+
+    return [pscustomobject]@{
+        Output = $output
+        ExitCode = $exitCode
+    }
+}
+
 function Initialize-SmokeRepo {
     param(
         [Parameter(Mandatory = $true)]
@@ -140,7 +161,10 @@ function Write-SmokeProjectState {
         [string]$Sha,
 
         [Parameter(Mandatory = $false)]
-        [switch]$StandingAutoSeedApproval
+        [switch]$StandingAutoSeedApproval,
+
+        [Parameter(Mandatory = $false)]
+        [string]$AutoSeedApprovalDecisionPath = ""
     )
 
     $standingApprovalBlock = ""
@@ -167,9 +191,15 @@ function Write-SmokeProjectState {
 "@
     }
 
+    $autoSeedApprovalDecisionPathLine = ""
+    if (-not [string]::IsNullOrWhiteSpace($AutoSeedApprovalDecisionPath)) {
+        $autoSeedApprovalDecisionPathLine = "  autoSeedApprovalDecisionPath: $AutoSeedApprovalDecisionPath"
+    }
+
     @"
 schemaVersion: 1
 automation:
+$autoSeedApprovalDecisionPathLine
   unattendedControl:
     remoteAutomationApproval: lease_guarded_local_readiness_and_planning
 $standingApprovalBlock
@@ -454,6 +484,95 @@ tasks:
     Assert-Contains -Output $seedProposalOutput -Pattern "Risk if auto-continued: queue mutation requires explicit autoDriveLocalImplementationApproval"
     Assert-Contains -Output $seedProposalOutput -Pattern "Next action: .*AutoSeedApprovalStatement"
     Assert-NotContains -Output $seedProposalOutput -Pattern "stopTaxonomy: hard_block"
+
+    $pendingSeedDecisionRepo = Join-Path -Path $fixtureRoot -ChildPath "pending-seed-decision-repo"
+    $pendingSeedDecisionSha = Initialize-SmokeRepo -Path $pendingSeedDecisionRepo
+    $pendingSeedDecisionProjectStatePath = Join-Path -Path $pendingSeedDecisionRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
+    $pendingSeedDecisionQueuePath = Join-Path -Path $pendingSeedDecisionRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
+    $pendingSeedDecisionMatrixPath = Join-Path -Path $pendingSeedDecisionRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    $pendingSeedDecisionPath = Join-Path -Path $pendingSeedDecisionRepo -ChildPath "docs/04-agent-system/state/auto-seed-approval-decision.yaml"
+    Write-SmokeSeedMatrix -Path $pendingSeedDecisionMatrixPath
+    Write-SmokeProjectState `
+        -Path $pendingSeedDecisionProjectStatePath `
+        -TaskId "runner-closed" `
+        -Sha $pendingSeedDecisionSha `
+        -AutoSeedApprovalDecisionPath "docs/04-agent-system/state/auto-seed-approval-decision.yaml"
+    @"
+schemaVersion: 1
+status: pending_human_decision
+defaultAction: keep_automation_paused_for_tuning
+proposal:
+  seedModule: authorization-and-access
+  seedRequiredApproval: autoDriveLocalImplementationApproval for module authorization-and-access
+"@ | Set-Content -LiteralPath $pendingSeedDecisionPath -Encoding UTF8
+    @"
+schemaVersion: 1
+tasks:
+  - id: runner-closed
+    status: closed
+    taskKind: implementation
+    allowedFiles:
+      - docs/05-execution-logs/evidence/runner-closed.md
+    blockedFiles:
+      - .env.local
+    riskTypes:
+      - automation_policy
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/runner-closed.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/runner-closed.md
+"@ | Set-Content -LiteralPath $pendingSeedDecisionQueuePath -Encoding UTF8
+
+    $pendingSeedDecisionQueueBefore = Get-Content -LiteralPath $pendingSeedDecisionQueuePath -Raw
+    Push-Location -LiteralPath $pendingSeedDecisionRepo
+    try {
+        $pendingSeedDecisionResult = Invoke-SmokeRunnerInChild `
+            -Arguments @(
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                $runnerPath,
+                "-TaskId",
+                "runner-closed",
+                "-ProjectStatePath",
+                $pendingSeedDecisionProjectStatePath,
+                "-QueuePath",
+                $pendingSeedDecisionQueuePath,
+                "-MatrixPath",
+                $pendingSeedDecisionMatrixPath,
+                "-AutomationWorktreeRoot",
+                (Join-Path -Path $fixtureRoot -ChildPath "pending-seed-decision-no-worktrees"),
+                "-RunRegistryRoot",
+                (Join-Path -Path $fixtureRoot -ChildPath "pending-seed-decision-no-runs"),
+                "-HandoffRoot",
+                (Join-Path -Path $fixtureRoot -ChildPath "pending-seed-decision-handoffs"),
+                "-SkipUnattendedReadiness",
+                "-SkipPrimaryRepositoryPostureCheck",
+                "-AllowAutoSeed",
+                "-AutoSeedApprovalStatement",
+                "autoDriveLocalImplementationApproval: smoke-approved runner auto-seed",
+                "-MaxSteps",
+                "2"
+            ) `
+            -AllowedExitCodes @(1)
+    } finally {
+        Pop-Location
+    }
+    $pendingSeedDecisionOutput = $pendingSeedDecisionResult.Output
+    Assert-Contains -Output $pendingSeedDecisionOutput -Pattern "seedProposalDecision: proposal_available"
+    Assert-Contains -Output $pendingSeedDecisionOutput -Pattern "runnerDecision: stop_for_manual_decision"
+    Assert-Contains -Output $pendingSeedDecisionOutput -Pattern "runnerNextAction: request_auto_seed_approval"
+    Assert-Contains -Output $pendingSeedDecisionOutput -Pattern "runnerNextTask: authorization-and-access"
+    Assert-Contains -Output $pendingSeedDecisionOutput -Pattern "reason: auto-seed approval decision is pending_human_decision"
+    Assert-Contains -Output $pendingSeedDecisionOutput -Pattern "noWriteReason: pending_human_decision blocks seed transaction execution"
+    Assert-Contains -Output $pendingSeedDecisionOutput -Pattern "Risk if auto-continued: seed transaction would bypass the durable pending_human_decision approval gate"
+    Assert-NotContains -Output $pendingSeedDecisionOutput -Pattern "seedTransactionDecision: seeded"
+
+    $pendingSeedDecisionQueueAfter = Get-Content -LiteralPath $pendingSeedDecisionQueuePath -Raw
+    if ($pendingSeedDecisionQueueBefore -ne $pendingSeedDecisionQueueAfter) {
+        throw "Pending seed decision gate unexpectedly changed task queue."
+    }
 
     $standingPlanOnlyRepo = Join-Path -Path $fixtureRoot -ChildPath "standing-planonly-repo"
     $standingPlanOnlySha = Initialize-SmokeRepo -Path $standingPlanOnlyRepo

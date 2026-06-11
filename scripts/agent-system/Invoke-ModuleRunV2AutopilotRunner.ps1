@@ -147,6 +147,103 @@ function Get-FirstValue {
     return ""
 }
 
+function Get-YamlScalarValue {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Key
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return ""
+    }
+
+    foreach ($line in (Get-Content -LiteralPath $Path)) {
+        if ($line -match "^\s*$([regex]::Escape($Key)):\s*(.*?)\s*$") {
+            $value = $Matches[1].Trim()
+            if ($value -match "^(.*?)\s+#.*$") {
+                $value = $Matches[1].Trim()
+            }
+            if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+            return $value
+        }
+    }
+
+    return ""
+}
+
+function Resolve-RepositoryPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$PathValue
+    )
+
+    $trimmedPath = $PathValue.Trim()
+    if ([string]::IsNullOrWhiteSpace($trimmedPath)) {
+        return ""
+    }
+
+    if ([System.IO.Path]::IsPathRooted($trimmedPath)) {
+        return $trimmedPath
+    }
+
+    return (Join-Path -Path (Get-Location).Path -ChildPath $trimmedPath)
+}
+
+function Get-AutoSeedApprovalDecision {
+    $decisionPathValue = Get-YamlScalarValue -Path $ProjectStatePath -Key "autoSeedApprovalDecisionPath"
+    if ([string]::IsNullOrWhiteSpace($decisionPathValue)) {
+        return [pscustomobject]@{
+            Configured = $false
+            Exists = $false
+            Path = ""
+            Status = ""
+            SeedModule = ""
+        }
+    }
+
+    $resolvedDecisionPath = Resolve-RepositoryPath -PathValue $decisionPathValue
+    if (-not (Test-Path -LiteralPath $resolvedDecisionPath)) {
+        return [pscustomobject]@{
+            Configured = $true
+            Exists = $false
+            Path = $resolvedDecisionPath
+            Status = "missing"
+            SeedModule = ""
+        }
+    }
+
+    return [pscustomobject]@{
+        Configured = $true
+        Exists = $true
+        Path = $resolvedDecisionPath
+        Status = Get-YamlScalarValue -Path $resolvedDecisionPath -Key "status"
+        SeedModule = Get-YamlScalarValue -Path $resolvedDecisionPath -Key "seedModule"
+    }
+}
+
+function Test-AutoSeedDecisionMatchesModule {
+    param(
+        [Parameter(Mandatory = $true)]
+        [pscustomobject]$Decision,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$SeedModule
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Decision.SeedModule)) {
+        return $true
+    }
+
+    return $Decision.SeedModule -eq $SeedModule
+}
+
 function Invoke-ExternalCommand {
     param(
         [Parameter(Mandatory = $true)]
@@ -692,6 +789,40 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
 
         if ($seedProposalDecision -eq "proposal_available") {
             $seedModule = Get-FirstValue -Output $seedProposalResult.Output -Key "seedModule"
+            $autoSeedApprovalDecision = Get-AutoSeedApprovalDecision
+            if ($autoSeedApprovalDecision.Configured -and -not $autoSeedApprovalDecision.Exists) {
+                Write-RunnerResult `
+                    -Decision "stop_for_hard_block" `
+                    -NextAction "request_auto_seed_approval" `
+                    -Reason "auto-seed approval decision file is configured but missing" `
+                    -StepCount $stepIndex `
+                    -ExitCode 1 `
+                    -NextTask $seedModule `
+                    -NextCommandOverride "restore the configured auto-seed approval decision file or record a fresh human decision before rerunning auto-seed" `
+                    -RiskIfAutoContinued "seed transaction would run without the configured durable auto-seed approval decision file" `
+                    -NoWriteReason "configured auto-seed approval decision file is missing" `
+                    -ResumePointer "decisionPath=$($autoSeedApprovalDecision.Path); seedModule=$seedModule; projectState=$ProjectStatePath; queue=$QueuePath"
+            }
+
+            if (
+                $autoSeedApprovalDecision.Configured -and
+                $autoSeedApprovalDecision.Exists -and
+                $autoSeedApprovalDecision.Status -eq "pending_human_decision" -and
+                (Test-AutoSeedDecisionMatchesModule -Decision $autoSeedApprovalDecision -SeedModule $seedModule)
+            ) {
+                Write-RunnerResult `
+                    -Decision "stop_for_manual_decision" `
+                    -NextAction "request_auto_seed_approval" `
+                    -Reason "auto-seed approval decision is pending_human_decision for module $seedModule" `
+                    -StepCount $stepIndex `
+                    -ExitCode 1 `
+                    -NextTask $seedModule `
+                    -NextCommandOverride "record an approved auto-seed decision or keep automation paused; do not rerun with AllowAutoSeed while status=pending_human_decision" `
+                    -RiskIfAutoContinued "seed transaction would bypass the durable pending_human_decision approval gate" `
+                    -NoWriteReason "pending_human_decision blocks seed transaction execution" `
+                    -ResumePointer "decisionPath=$($autoSeedApprovalDecision.Path); seedModule=$seedModule; projectState=$ProjectStatePath; queue=$QueuePath"
+            }
+
             $standingAutoSeedApprovalStatement = Get-StandingAutoSeedApprovalStatement
             $standingAutoSeedAvailable = -not [string]::IsNullOrWhiteSpace($standingAutoSeedApprovalStatement)
             $effectiveAutoSeedApprovalStatement = if (-not [string]::IsNullOrWhiteSpace($AutoSeedApprovalStatement)) {

@@ -85,6 +85,11 @@ Agents must not run `New-ModuleRunV2ImplementationSeed.ps1`, append seeded imple
 claim `ai-task-and-provider` work unless a later task records fresh explicit
 `autoDriveLocalImplementationApproval for module ai-task-and-provider`.
 
+`Invoke-ModuleRunV2AutopilotRunner.ps1` must also enforce that decision as a hard execution gate. If
+`automation.autoSeedApprovalDecisionPath` points to a record whose `status` is `pending_human_decision` for the proposed
+seed module, the runner must stop with `runnerDecision: stop_for_manual_decision` before `Invoke-SeedTransaction`, even
+when the command line includes `-AllowAutoSeed` and an `autoDriveLocalImplementationApproval` statement.
+
 ## Completion Standard
 
 Every task closeout must record:
