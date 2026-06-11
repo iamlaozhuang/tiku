@@ -29,6 +29,7 @@ automation:
   codeStageTaskSeedingSopPath: docs/04-agent-system/sop/code-stage-task-seeding-governance.md
   requirementTaskCoverageGapAuditSopPath: docs/04-agent-system/sop/requirement-task-coverage-and-gap-audit-governance.md
   taskQueueArchivalIndexSopPath: docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
+  activeQueueSlimmingPlanPath: docs/04-agent-system/sop/active-queue-slimming-plan.md
   threadRolloverHandoffSopPath: docs/04-agent-system/sop/thread-rollover-and-handoff-governance.md
   gitBoundary: draft_pr
   approvalPolicy: high_risk_only
@@ -215,13 +216,13 @@ repository:
   lastKnownMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
   lastKnownOriginMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
 currentTask:
-  id: mechanism-seed-proposal-next-action-bridge
+  id: mechanism-active-queue-slimming-plan
   status: closed
   sourceStory: user-approved-2026-06-11-mechanism-tuning-serial
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-mechanism-seed-proposal-next-action-bridge.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-seed-proposal-next-action-bridge.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-seed-proposal-next-action-bridge.md
-  branch: codex/mechanism-seed-proposal-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-mechanism-active-queue-slimming-plan.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-active-queue-slimming-plan.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-active-queue-slimming-plan.md
+  branch: codex/mechanism-active-queue-slimming
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
@@ -260,5 +261,6 @@ skills:
 handoff:
   nextRecommendedAction: >-
     Continue the approved mechanism tuning chain while local automation remains intentionally paused. Next task:
-    mechanism-active-queue-slimming-plan. Keep high-risk capability gates blocked until task-specific approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-mechanism-seed-proposal-next-action-bridge.md
+    ai-task-and-provider-auto-seed-approval-decision. Keep high-risk capability gates blocked until task-specific
+    approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-mechanism-active-queue-slimming-plan.md

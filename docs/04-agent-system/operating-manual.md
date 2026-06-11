@@ -55,6 +55,9 @@ blocked
 
 Legacy `done`, `merged`, and `pushed` may remain in historical or archived entries when evidence exists. Empty status in active entries is a diagnostic finding and must not be selected for new execution until repaired or explicitly grandfathered.
 
+Active queue slimming rules live in `docs/04-agent-system/sop/active-queue-slimming-plan.md`. That plan is
+planning-only until a future archival task is explicitly approved.
+
 ## Task Selection Rule
 
 Select the next task only when:
