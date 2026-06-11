@@ -7,6 +7,9 @@ mode:
   modeSourcePath: docs/04-agent-system/state/project-state.yaml
   modeTransitionSopPath: docs/04-agent-system/sop/automation-readiness-scorecard-and-mode-transition-governance.md
 canonicalStateFiles:
+  - id: operating-manual
+    path: docs/04-agent-system/operating-manual.md
+    role: concise human and Codex entry point for current advancement rules, source-of-truth policy, status policy, mechanism budget, push boundary, product closure contribution, blocked gates, and stop rules
   - id: project-state
     path: docs/04-agent-system/state/project-state.yaml
     role: current phase, automation pointers, current task, handoff, standing unattended local closeout approval, DB capability approvals
@@ -253,6 +256,7 @@ recoveryReadOrder:
   - AGENTS.md
   - docs/03-standards/code-taste-ten-commandments.md
   - docs/02-architecture/adr/
+  - docs/04-agent-system/operating-manual.md
   - docs/04-agent-system/state/project-state.yaml
   - docs/04-agent-system/state/task-queue.yaml
   - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml

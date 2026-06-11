@@ -8657,3 +8657,204 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness.md
     status: closed
     retryCount: 0
+
+  - id: mechanism-operating-manual-baseline
+    title: Mechanism operating manual baseline
+    phase: mechanism-serial-governance
+    sourceStory: user-approved-2026-06-11-mechanism-serial-governance
+    dependencies:
+      - advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved applying four mechanism improvement recommendations as one serial task group. Each task must end
+      with review, evidence, validation, and local closeout before the next task starts. Remote push is not approved by
+      this task entry; dependency, package, lockfile, schema, migration, env/secret, provider, staging/prod/cloud/deploy,
+      payment, external-service, PR, force push, and Cost Calibration Gate actions remain blocked.
+    taskKind: docs_only
+    allowedFiles:
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-mechanism-operating-manual-baseline.md
+      - docs/05-execution-logs/evidence/2026-06-11-mechanism-operating-manual-baseline.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-operating-manual-baseline.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - task_queue
+      - source_of_truth
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs\04-agent-system\operating-manual.md docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\mechanism-source-of-truth-index.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-mechanism-operating-manual-baseline.md docs\05-execution-logs\evidence\2026-06-11-mechanism-operating-manual-baseline.md docs\05-execution-logs\audits-reviews\2026-06-11-mechanism-operating-manual-baseline.md
+      - Select-String -Path docs\04-agent-system\operating-manual.md,docs\04-agent-system\state\task-queue.yaml,docs\05-execution-logs\evidence\2026-06-11-mechanism-operating-manual-baseline.md -Pattern 'single source of truth','mechanism work budget','push boundary','productClosureContribution','Cost Calibration Gate remains blocked','authorization','paper','mock_exam','redeem_code','audit_log','ai_call_log'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-operating-manual-baseline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-operating-manual-baseline.md
+    status: closed
+    retryCount: 0
+
+  - id: mechanism-next-action-readonly-diagnostic
+    title: Mechanism next action read-only diagnostic
+    phase: mechanism-serial-governance
+    sourceStory: user-approved-2026-06-11-mechanism-serial-governance
+    dependencies:
+      - mechanism-operating-manual-baseline
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved the second serial governance task: implement a read-only next-action diagnostic entry point after
+      the operating manual task closes. The task may add diagnostic scripts and evidence only. It must not write state,
+      claim tasks, clean artifacts, create branches, merge, push, or execute high-risk capabilities.
+    taskKind: mechanism_repair
+    allowedFiles:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-mechanism-next-action-readonly-diagnostic.md
+      - docs/05-execution-logs/evidence/2026-06-11-mechanism-next-action-readonly-diagnostic.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-next-action-readonly-diagnostic.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - diagnostic_read_only
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - Select-String -Path scripts\agent-system\Get-TikuNextAction.ps1,docs\05-execution-logs\evidence\2026-06-11-mechanism-next-action-readonly-diagnostic.md -Pattern 'repository:','currentTask:','queueDecision:','nextExecutableTask:','blockedGates:','validationNeeded:','recommendedAction:','stopReason:','Cost Calibration Gate remains blocked'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-next-action-readonly-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-next-action-readonly-diagnostic.md
+    status: pending
+    retryCount: 0
+
+  - id: mechanism-status-and-drift-diagnostics
+    title: Mechanism status and drift diagnostics
+    phase: mechanism-serial-governance
+    sourceStory: user-approved-2026-06-11-mechanism-serial-governance
+    dependencies:
+      - mechanism-next-action-readonly-diagnostic
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved the third serial governance task: extend the read-only diagnostic to detect active queue status
+      anomalies and queue/matrix/evidence drift. The task must report only; it must not repair or mutate durable state.
+    taskKind: mechanism_repair
+    allowedFiles:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-mechanism-status-and-drift-diagnostics.md
+      - docs/05-execution-logs/evidence/2026-06-11-mechanism-status-and-drift-diagnostics.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-status-and-drift-diagnostics.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - state_drift
+      - diagnostic_read_only
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - Select-String -Path scripts\agent-system\Get-TikuNextAction.ps1,docs\05-execution-logs\evidence\2026-06-11-mechanism-status-and-drift-diagnostics.md -Pattern 'legacy_status_missing','legacy_done','queueMatrixDrift','evidenceMissing','diagnosticOnly','Cost Calibration Gate remains blocked'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-status-and-drift-diagnostics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-status-and-drift-diagnostics.md
+    status: pending
+    retryCount: 0
+
+  - id: mechanism-runner-consumes-next-action
+    title: Mechanism runner consumes next action diagnostic
+    phase: mechanism-serial-governance
+    sourceStory: user-approved-2026-06-11-mechanism-serial-governance
+    dependencies:
+      - mechanism-status-and-drift-diagnostics
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved the fourth serial governance task: make the autopilot runner consume the unified read-only
+      next-action diagnostic before normal guarded dispatch. The runner may use the diagnostic as a preflight summary
+      only; existing startup, schema, closeout, blocked-gate, and high-risk guards remain authoritative.
+    taskKind: mechanism_repair
+    allowedFiles:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/05-execution-logs/task-plans/2026-06-11-mechanism-runner-consumes-next-action.md
+      - docs/05-execution-logs/evidence/2026-06-11-mechanism-runner-consumes-next-action.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-runner-consumes-next-action.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - automation_policy
+      - runner_dispatch
+      - diagnostic_read_only
+      - evidence_integrity
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps 1 -PlanOnly
+      - Select-String -Path scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1,docs\05-execution-logs\evidence\2026-06-11-mechanism-runner-consumes-next-action.md -Pattern 'Get-TikuNextAction','nextActionDecision','diagnosticOnly','Cost Calibration Gate remains blocked'
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-runner-consumes-next-action.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-runner-consumes-next-action.md
+    status: pending
+    retryCount: 0

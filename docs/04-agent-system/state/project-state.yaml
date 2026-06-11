@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness
-updatedAt: "2026-06-10T12:08:31-07:00"
+  currentPhase: mechanism-serial-governance
+updatedAt: "2026-06-10T20:34:46-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -205,14 +205,14 @@ repository:
   lastKnownMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
   lastKnownOriginMasterSha: 270827981598d409cc48c68d58c23aae559c0d59
 currentTask:
-  id: advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness
+  id: mechanism-operating-manual-baseline
   status: closed
-  sourceStory: user-approved-2026-06-10-advanced-edition-consistency-review-autodrive-resume
-  planPath: docs/05-execution-logs/task-plans/2026-06-10-advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-10-advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness.md
-  branch: codex/advanced-edition-autodrive-resume-readiness
-  commitSha: cb2cff3635f4a2ca55753e7dbaafbb31872d071e
+  sourceStory: user-approved-2026-06-11-mechanism-serial-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-mechanism-operating-manual-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-operating-manual-baseline.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-operating-manual-baseline.md
+  branch: codex/mechanism-serial-governance
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -249,7 +249,6 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Module Run v2 unattended autodrive is active after the auto-seed bridge closeout. The Codex app automation must use the
-    runner with guarded auto-seed approval, keep guardian-first startup checks, and leave high-risk capability gates blocked
-    until task-specific approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md
+    Continue the approved mechanism serial governance chain with mechanism-next-action-readonly-diagnostic after the
+    operating manual baseline local commit closes. Keep high-risk capability gates blocked until task-specific approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-mechanism-operating-manual-baseline.md
