@@ -256,3 +256,153 @@ validationProfile:
 - 文档中继续使用项目既有术语：`authorization`、`paper`、`mock_exam`、`audit_log`、`ai_call_log`、`task-queue.yaml`、`project-state.yaml`。
 - 审计建议保持证据先于结论，并明确区分 `approval_required`、`auto_recoverable` 与 `hard_block`。
 - Cost Calibration Gate remains blocked.
+
+## 二次深入审计发现
+
+### 当前基线事实
+
+| 维度          | 当前事实                                                                                                          | 审计判断                                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Git 分支      | `codex/mechanism-serial-governance`                                                                               | 符合非 `master` / `main` 审计工作边界                         |
+| 当前提交      | `07913e7c docs(mechanism): audit autodrive advancement governance`                                                | 上一轮机制审计已提交                                          |
+| 工作区        | 二次审计开始前 `git status --short --branch` 为 clean                                                             | 本轮新增变更应只限 task plan、evidence、audit report          |
+| Automation    | `tiku-module-run-v2-autopilot` 为 `ACTIVE`；旧 `tiku-module-run-v2-autopilot-2` 为 `PAUSED`                       | UI visibility / automation registration repair 当前有效       |
+| Standing 审批 | `project-state.yaml` 存在 `standingUnattendedLocalCloseoutApproval.status: approved`                              | 审批事实存在，但 runner 默认参数缺失时不会自行读取并注入      |
+| Queue 状态    | `currentTask: mechanism-runner-consumes-next-action(closed)`；`queueDecision: no_pending_task`                    | 当前不是业务实现阻断，而是无 pending 后的 control loop 决策点 |
+| Runner 样本   | `seedProposalDecision: proposal_available`；`runnerDecision: seed_proposal_available`；`stopTaxonomy: hard_block` | 典型不必要断点：有可治理下一步，却被展示为硬阻断              |
+| Hygiene       | `stoppedAutomationHygieneDecision: clean`；cleanup candidate/action/deferred 都为 0                               | 当前停顿不是 stale automation hygiene 问题                    |
+| 高风险门禁    | `Cost Calibration Gate remains blocked`                                                                           | 高风险边界仍被正确阻断，本轮不建议放松                        |
+
+### 六项困扰逐项复核
+
+| 用户困扰               | 二次审计结论                                                                                                      | 证据                                                                                         | 严重度 | 建议修复方向                                                                                                     |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| 不必要断点             | 成立。`seed_proposal_available` 是 approval / auto-seed 桥接状态，不是真正 `hard_block`。                         | `Get-RunnerStopTaxonomy` 未映射 `seed_proposal_available`，默认落入 `hard_block`。           | P0     | 建立独立 severity：`approval_required`、`auto_recoverable`、`idle`、`hard_block`，不要用 taxonomy 承载所有语义。 |
+| 过度谨慎、效率低、噪声 | 部分成立。高风险 blocked gates 必须保留，但历史 `legacy_done=94`、`evidenceMissing=6` 默认展开会稀释当前信号。    | `Get-TikuNextAction.ps1` 每次输出 historical findings，即使 `stopReason: none`。             | P1     | 引入三层诊断：默认摘要、verbose 展开、hard-block 展开。                                                          |
+| 停下原因和建议不清晰   | 成立。runner 有 `reason` 和 `runnerNextAction`，但没有统一 `requiresHuman`、`nextCommand`、`riskIfContinued`。    | `Write-RunnerResult` 输出 decision/action/taxonomy/reason，但没有 terminal envelope。        | P0     | 每次停止输出三行结论和机器可消费 stop envelope。                                                                 |
+| 停下收尾收口不足       | 部分成立。finalizer 能写 durable terminal facts，但不是所有 terminal path 的强制不变式，也缺 no-write reason。    | finalizer 参数有 `StopTaxonomy`、`EvidencePath`、`NextRecommendedAction`，无 `nextCommand`。 | P0     | 所有终止路径强制 finalizer 或 `stateWritten: none` + `noWriteReason`。                                           |
+| 无任务自动拆解         | 成立。proposal 和 seed transaction 能力存在，但默认 runner 仍停在请求审批，PlanOnly 样本仍显示 `hard_block`。     | runner 支持 `-AllowAutoSeed` / `-AutoSeedApprovalStatement`，但脚本默认不从 state 注入审批。 | P0     | 让 runner 读取 standing approval，满足低风险条件时自动 seed transaction 并 self-review。                         |
+| MECE 拆解复核          | 成立。当前四个 target closure 方向上不重叠，但 seed self-review 不足以证明 requirement-to-acceptance 的不重不漏。 | self-review 更偏 metadata/scope/template/allowedFiles/validation lifecycle。                 | P1     | 把 `requirementRefs`、`userRoles`、`acceptanceScenarios`、`blockedRemainder`、`validationProfile` 纳入门禁。     |
+
+### 不必要断点分类矩阵
+
+| 场景                                                 | 当前表现                                      | 建议 severity                       | 是否需要人工 | 自动化下一步                                                                                |
+| ---------------------------------------------------- | --------------------------------------------- | ----------------------------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| 无 pending，且无 seed candidate                      | `no_executable_task` / `idle_no_pending_task` | `idle`                              | 否           | 停止，写明 no-op；不创建新线程，不重试                                                      |
+| 无 pending，有 seed proposal，无显式审批             | `seed_proposal_available` + `hard_block`      | `approval_required`                 | 是           | 输出可复制批准语句、风险边界、精确命令                                                      |
+| 无 pending，有 seed proposal，standing approval 满足 | 仍可能请求 `request_auto_seed_approval`       | `auto_recoverable`                  | 否           | 自动传入 approval statement，apply seed transaction，self-review，closeout seed transaction |
+| Stopped hygiene clean                                | `clean`                                       | `advisory`                          | 否           | 只记录摘要，不应阻断                                                                        |
+| cleanup candidate clean/stale 可清理                 | `cleanup_available` / `hygiene_deferred`      | `auto_recoverable`                  | 否           | 执行 bounded hygiene cleanup；失败才升级                                                    |
+| cleanup deferred 且原因安全                          | 可能被视为 stop                               | `advisory`                          | 否           | 输出 deferred reason，继续或 idle                                                           |
+| cleanup deferred 且涉及脏 worktree/未合并分支        | hygiene stop                                  | `approval_required` 或 `hard_block` | 视风险       | 保留路径和原因，禁止手删；需要人工确认或专门 recovery                                       |
+| healthy active owner / fresh lease                   | `exit_active_owner_present`                   | `idle`                              | 否           | 静默退出并说明 owner                                                                        |
+| stale dirty owner                                    | `manual_required_owner_recovery`              | `approval_required`                 | 是           | 输出 recovery script 和风险，不自动接管                                                     |
+| closeout recovery 可执行                             | `closeout_recovery`                           | `auto_recoverable`                  | 否           | 走 dispatcher + closeout recovery script                                                    |
+| closeout recovery 信息不足                           | 可能变成 generic block                        | `approval_required`                 | 是           | 写 finalizer/handoff，给出缺失字段                                                          |
+| dirty unknown worktree                               | `stop_for_hard_block`                         | `hard_block`                        | 是           | 停止，不自动修复                                                                            |
+| provider/env/schema/deploy/Cost Calibration Gate     | blocked gates                                 | `approval_required` 或 `hard_block` | 是           | 继续阻断；Cost Calibration Gate remains blocked                                             |
+
+### 状态噪声与漂移来源表
+
+| 信息类别                      | 唯一事实源                                                   | 派生摘要 / 展示源                      | 默认展示建议              | 展开条件                                                   |
+| ----------------------------- | ------------------------------------------------------------ | -------------------------------------- | ------------------------- | ---------------------------------------------------------- |
+| 当前 task 指针                | `docs/04-agent-system/state/project-state.yaml`              | `Get-TikuNextAction.ps1`               | 展示当前 task 一行        | 当前 task 非 closed 或状态异常                             |
+| task status / allowedFiles    | `docs/04-agent-system/state/task-queue.yaml`                 | readiness、dispatcher、evidence        | 只展示 next task          | claim/continue/closeout 相关                               |
+| 模块目标 closure              | `advanced-edition-domain-module-run-matrix.yaml`             | seed proposal                          | 展示模块和候选数          | auto-seed、MECE self-review                                |
+| Standing approval             | `project-state.yaml` + automation prompt                     | runner 参数                            | 展示 status 和 scope      | 需要消费审批或审批不匹配                                   |
+| Automation 注册状态           | `$HOME\.codex\automations\*/automation.toml` + project-state | startup readiness / registration check | 展示 active id            | active count 不为 1、id 漂移、UI 不可见                    |
+| 历史 `legacy_done`            | `task-queue.yaml`                                            | `Get-TikuNextAction.ps1`               | 默认只展示计数            | `-VerboseHistory` 或影响当前 closeout                      |
+| 历史 `evidenceMissing`        | `task-queue.yaml` + evidence files                           | `Get-TikuNextAction.ps1`               | 默认只展示计数            | 当前 task evidence 缺失或 release gate 需要                |
+| 高风险 blocked gates          | capability gate SOP / schema                                 | `Get-TikuNextAction.ps1`               | 默认按类别压缩            | 当前任务触及 dependency/env/provider/schema/deploy/push 等 |
+| transient owner / lease / run | run lease、run registry、handoff                             | startup readiness、finalizer           | 展示 owner 和 fresh/stale | owner 非健康、需要 recovery/adopt/cleanup                  |
+| validation 事实               | evidence file                                                | audit report / queue pointer           | 展示 pass/fail 摘要       | 任务完成、失败、closeout、回归风险                         |
+
+建议模型：
+
+| 层级            | 输出内容                                                                        | 目标                          |
+| --------------- | ------------------------------------------------------------------------------- | ----------------------------- |
+| 默认摘要        | 当前 task、queue decision、runner decision、severity、nextCommand、历史噪声计数 | 降低 token 和误判成本         |
+| verbose 展开    | historical ids、blocked gate 明细、seed candidate 明细、drift first items       | 人工审计或机制调试            |
+| hard-block 展开 | 全量 blocker、受影响文件、风险、恢复命令、state write 结果、handoff 指针        | 真正 unsafe / impossible 场景 |
+
+### 停下收口覆盖矩阵
+
+| Terminal path                              | 当前 durable 记录能力                       | 缺口                                                          | 建议不变式                                                                 |
+| ------------------------------------------ | ------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `seed_proposal_available`                  | runner 输出 decision/action/reason/taxonomy | 没有 `nextCommand`；没有说明 standing approval 是否可自动消费 | `approval_required` 或 `auto_recoverable`，输出批准语句或自动 seed 命令    |
+| `no_executable_task` 且无 candidate        | runner 输出 idle action                     | 没有 `stateWritten: none` / `noWriteReason`                   | idle 也输出 no-op terminal envelope                                        |
+| `cleanup_available` / `cleanup_deferred`   | startup / hygiene 输出 candidate/action     | deferred 原因没有统一 risk / nextCommand                      | bounded cleanup 成功自动恢复；deferred 必须写 risk 和恢复路径              |
+| `exit_active_owner_present`                | runner 输出 leave owner                     | 缺 owner id / freshness / resume pointer 的统一字段           | idle envelope 记录 owner 与“不接管”原因                                    |
+| `manual_required_owner_recovery`           | runner 输出 approval/recovery request       | finalizer/handoff 是否写入依路径而定                          | 必须 finalizer 或 handoff，附 recovery script 和需要人工确认的原因         |
+| `closeout_recovery`                        | runner 能输出 recovery action               | 不保证所有路径都有 finalizer，也缺三行人类结论                | dispatcher 前后都保留 `nextCommand`、`stateFilesTouched`、`resumePointer`  |
+| `stop_for_hard_block`                      | runner 输出 taxonomy/reason                 | `hard_block` 过载；可能包含 approval 或可恢复场景             | 只有 unsafe/impossible 才 hard block；其他拆到 approval/auto/idle/advisory |
+| `seed_transaction_applied`                 | runner 输出 closeout action                 | seed transaction closeout 与后续 claim 的边界需要更显式       | 必须先 closeout seed transaction；禁止同一脏 worktree 直接领取 seeded task |
+| validation failure                         | finalizer 支持 evidence/audit path          | 缺标准 `riskIfContinued` 和 `nextCommand`                     | failure envelope 指向 exact validation command 和 evidence                 |
+| iteration limit reached / unknown decision | generic reason                              | 没有分类为 runner defect / config defect / transient          | 写 hard-block finalizer，附脚本名、step、unknown decision、复现命令        |
+
+建议每次停止固定输出：
+
+```text
+Why stopped: <真实停止原因>
+Risk if auto-continued: <风险；没有则写 none>
+Next action: <精确命令、审批文本或 none>
+```
+
+同时，机器字段至少包含：
+
+```yaml
+severity:
+requiresHuman:
+safeToProceed:
+nextCommand:
+stateWritten:
+noWriteReason:
+resumePointer:
+```
+
+### 自动拆解与 MECE 审计
+
+| 审计项                        | 当前能力                                                                                                    | 缺口                                                                                             | 建议补强                                                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| 下一模块识别                  | seed proposal 能选中 `ai-task-and-provider`                                                                 | 无 pending 时 runner 默认仍可能停在 approval request                                             | standing approval 满足时自动进入 seed transaction                               |
+| 候选任务生成                  | 基于四个 `targetLocalClosure` 生成 batch-105 至 batch-108                                                   | 候选任务名称和 closure 有，但 requirement/use case/acceptance traceability 不完整                | seed candidate 升级为结构化对象                                                 |
+| Standing approval 消费        | runner 支持参数；ACTIVE automation prompt 已带 `-AllowAutoSeed` 和 approval statement                       | runner 脚本默认不读取 `project-state.yaml` 注入 standing approval；PlanOnly 仍报 `hard_block`    | runner 增加 state-driven approval resolver                                      |
+| Seed transaction 安全边界     | `New-ModuleRunV2ImplementationSeed.ps1` 写 allowed/blocked files、approval anchors、validation lifecycle    | 没有证明四个任务覆盖完整用户流程，也没有显式 blocked remainder                                   | seed 前做 MECE gate，失败则不写队列                                             |
+| Self-review                   | 检查 metadata、scope、template、approval anchors、allowed/blocked files、validation lifecycle               | 不检查 requirement source -> user role/use case -> acceptance scenario -> validation evidence 链 | 增加 requirement/task coverage SOP 的强制校验                                   |
+| `ai-task-and-provider` 不重叠 | 四个 target closure 分别覆盖 lifecycle contract、request/result reference、audit evidence、sandbox proposal | 方向上不重叠，但文件范围和业务行为边界仍需 seed 时结构化声明                                     | 每个 candidate 声明 `nonGoals` 和与其他 candidates 的边界                       |
+| `ai-task-and-provider` 不遗漏 | 四个 target closure 均有候选任务                                                                            | 未证明源规划任务、用户角色、失败路径、权限路径、空态和验收证据全部覆盖                           | 每个 target closure 必须有 candidate 或 `blockedRemainder`                      |
+| 可追溯                        | matrix 能追到 source module `ai-task-domain`                                                                | 不能直接追到 requirement/source planning task、acceptance scenario、validation evidence          | 增加 `requirementRefs`、`userRoles`、`acceptanceScenarios`、`validationProfile` |
+
+建议 seed candidate 结构：
+
+```yaml
+targetClosureItem:
+requirementRefs:
+userRoles:
+useCases:
+acceptanceScenarios:
+nonGoals:
+blockedRemainder:
+allowedFiles:
+blockedFiles:
+validationProfile:
+validationEvidencePlan:
+```
+
+### 更新后的修复 backlog
+
+| 优先级 | 任务                                       | 目标                                                                                   | 验收口径                                                                                              |
+| ------ | ------------------------------------------ | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| P0     | `mechanism-stop-envelope-normalization`    | 统一 runner/startup/seed/dispatcher 的 severity、requiresHuman、nextCommand            | `seed_proposal_available` 不再显示为 `hard_block`；真实 hard block 仍阻断                             |
+| P0     | `mechanism-standing-auto-seed-consumption` | runner 在 standing approval 满足时自动消费 `standingUnattendedLocalCloseoutApproval`   | 无 pending + proposal available 场景自动 seed transaction + self-review；不触发高风险门禁             |
+| P0     | `mechanism-terminal-finalizer-contract`    | 所有 terminal path finalizer 或 no-write reason 化                                     | idle、approval_required、auto_recoverable、hard_block 都有三行结论和 `stateWritten` / `noWriteReason` |
+| P1     | `mechanism-seed-mece-self-review`          | seed self-review 强制 MECE 与 requirement/acceptance traceability                      | 缺 requirement refs、acceptance scenarios、blocked remainder 或任务重叠时拒绝 seed                    |
+| P1     | `mechanism-diagnostic-noise-budget`        | 历史 `legacy_done`、`evidenceMissing`、长期 blocked gates 默认折叠                     | 默认输出只保留计数和 notBlockingCurrentRun；verbose 才展开 ids                                        |
+| P1     | `mechanism-state-source-ownership-map`     | 建立字段所有权表，减少 SOP/schema/state/script 重复记录                                | 每类事实只有一个写入源，其他文件只引用或派生                                                          |
+| P2     | `mechanism-stop-economics-metrics`         | 记录 false stop rate、mean unattended steps、approval reuse rate、handoff completeness | 后续机制修复有量化目标，而不是继续靠主观体感                                                          |
+
+### 本轮非修复声明
+
+本次二次审计没有实施上述 backlog，也没有修改 runner 行为、SOP/schema、`task-queue.yaml`、seed transaction、provider/env/schema/deploy/push 相关能力。报告结论只作为后续机制修复方案的输入。
+
+Cost Calibration Gate remains blocked.
