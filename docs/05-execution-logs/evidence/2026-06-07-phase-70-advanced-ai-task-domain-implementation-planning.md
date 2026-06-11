@@ -59,3 +59,21 @@ This evidence contains no secrets, env values, DB URLs, tokens, Authorization he
 ## Next Recommended Task
 
 After closeout, continue to Phase 71 advanced personal AI generation implementation planning.
+
+## Module Run v2 Auto-Seed Compatibility Anchors
+
+This section was added during `batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract` startup to
+make the historical planning evidence readable by the later Module Run v2 auto-seed gate. It does not change the
+original planning verdict.
+
+- implementationAutoSeedGate: the approved seed transaction derives executable local implementation tasks from this
+  planning task only after controlled approval.
+- localExperienceClosureGate: `ai-task-and-provider` contributes provider-agnostic lifecycle contracts toward the
+  personal-learning-ai and ops-governance experience chains without claiming UI, provider, staging, prod, or deploy
+  closure.
+- seededImplementationTask: `batch-105` through `batch-108` are the guarded implementation tasks seeded from this
+  planning task.
+- focusedTestPlan: use focused Vitest coverage for lifecycle model, request/result reference policy, redacted
+  `audit_log` / `ai_call_log` references, and local provider sandbox proposal rules.
+- localFullLoopGate: L2 local unit validation is the safe target for this execution module until a separately approved
+  bridge task expands repository, API, UI, browser, role-flow, provider, env, or deployment surfaces.

@@ -217,13 +217,13 @@ repository:
   lastKnownMasterSha: fc2866f4118875368953ca85913cd6950825e000
   lastKnownOriginMasterSha: fc2866f4118875368953ca85913cd6950825e000
 currentTask:
-  id: standing-push-approval-rule-alignment
-  status: closed
-  sourceStory: user-approved-2026-06-11-standing-push-rule-tuning
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-standing-push-approval-rule-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-standing-push-approval-rule-alignment.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-standing-push-approval-rule-alignment.md
-  branch: codex/standing-push-approval-rule-alignment
+  id: batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+  status: in_progress
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-105-ai-task-lifecycle-contract.md
+  evidencePath: docs/05-execution-logs/evidence/batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  branch: codex/batch-105-ai-task-lifecycle-contract
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
