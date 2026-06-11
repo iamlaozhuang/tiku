@@ -137,3 +137,72 @@ npm run typecheck
 Exit code: `0`
 
 Final result: controlled auto-seed policy behavior passed targeted and repository quality gates.
+
+## Post-Merge Master Verification
+
+Fast-forward merge to `master` succeeded:
+
+```text
+Updating 8522f0dc..2c6c0936
+Fast-forward
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
+```
+
+Exit code: `0`
+
+Output:
+
+```text
+Module Run v2 autopilot runner smoke passed
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+```
+
+Exit code: `0`
+
+Key output:
+
+```text
+repository: branch=master; head=2c6c0936; dirty=false
+nextActionDecision: planned_pause_for_tuning
+automationRegistrationDecision: planned_pause_for_tuning
+stoppedAutomationHygieneDecision: clean
+seedProposalDecision: proposal_available
+seedModule: ai-task-and-provider
+projectStatusDecision: planned_pause_for_tuning
+projectStatusAction: keep_automation_paused_for_tuning
+Cost Calibration Gate remains blocked
+```
+
+Post-merge command:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -PlanOnly -MaxSteps 1 -AllowProtectedBranch
+```
+
+Exit code: `0`
+
+Key output:
+
+```text
+currentTask: controlled-auto-seed-policy(closed)
+nextActionDecision: planned_pause_for_tuning
+seedProposalDecision: proposal_available
+seedModule: ai-task-and-provider
+automationRegistrationDecision: planned_pause_for_tuning
+startupDecision: planned_pause_for_tuning
+runnerDecision: planned_pause_for_tuning
+runnerNextAction: keep_automation_paused_for_tuning
+Cost Calibration Gate remains blocked
+```
+
+Post-merge `git diff --check` exit code: `0`, no whitespace errors.
