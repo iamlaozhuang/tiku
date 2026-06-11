@@ -98,6 +98,10 @@ function New-StopRecord {
         RequiresHuman = ConvertTo-BooleanValue -Value (Get-FieldValue -Record $Record -Name "requiresHuman") -DefaultValue $true
         SafeToProceed = ConvertTo-BooleanValue -Value (Get-FieldValue -Record $Record -Name "safeToProceed") -DefaultValue $false
         NextCommand = [string](Get-FieldValue -Record $Record -Name "nextCommand")
+        StopCardDecision = [string](Get-FieldValue -Record $Record -Name "stopCardDecision")
+        CanAutoRecover = ConvertTo-BooleanValue -Value (Get-FieldValue -Record $Record -Name "canAutoRecover") -DefaultValue $false
+        BlockerClass = [string](Get-FieldValue -Record $Record -Name "blockerClass")
+        StatePolicy = [string](Get-FieldValue -Record $Record -Name "statePolicy")
         StateWritten = [string](Get-FieldValue -Record $Record -Name "stateWritten")
         NoWriteReason = [string](Get-FieldValue -Record $Record -Name "noWriteReason")
         ResumePointer = [string](Get-FieldValue -Record $Record -Name "resumePointer")
@@ -161,6 +165,13 @@ $handoffCompleteRecords = @($records | Where-Object {
         )
         $hasRequiredPointer -and $hasWriteAccounting
     })
+$stopCardCompleteRecords = @($records | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_.StopCardDecision) -and
+        -not [string]::IsNullOrWhiteSpace($_.BlockerClass) -and
+        -not [string]::IsNullOrWhiteSpace($_.NextCommand) -and
+        -not [string]::IsNullOrWhiteSpace($_.StatePolicy)
+    })
+$autoRecoverStopCards = @($records | Where-Object { $_.CanAutoRecover -or $_.StopCardDecision -eq "auto_recoverable" })
 $runnerStepCounts = @($records | ForEach-Object { $_.RunnerStepCount } | Where-Object { $null -ne $_ })
 $meanRunnerSteps = "n/a"
 if ($runnerStepCounts.Count -gt 0) {
@@ -177,6 +188,8 @@ Write-Output "falseStopCandidateCount: $($falseStopCandidates.Count)"
 Write-Output "hardBlockCount: $($hardBlocks.Count)"
 Write-Output "approvalReuseCandidateCount: $($approvalReuseCandidates.Count)"
 Write-Output "handoffCompletenessCount: $($handoffCompleteRecords.Count)"
+Write-Output "stopCardCompletenessCount: $($stopCardCompleteRecords.Count)"
+Write-Output "autoRecoverStopCardCount: $($autoRecoverStopCards.Count)"
 Write-Output "meanRunnerSteps: $meanRunnerSteps"
 Write-Output "stopEconomicsDecision: summarized"
 Write-Output "Cost Calibration Gate remains blocked"

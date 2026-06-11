@@ -297,9 +297,13 @@ runnerNextAction: leave_active_owner_alone
 runnerDecision: manual_required_owner_recovery
 runnerNextAction: request_owner_recovery
 "@
-    Invoke-ExpectFailure -ExpectedPattern "agentAction: request_manual_decision" -Command {
+    $ownerRecoveryOutput = Invoke-ExpectFailure -ExpectedPattern "agentAction: request_manual_decision" -Command {
         powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dispatcherScriptPath -RunnerOutputPath $ownerRecoveryRunner -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath
-    } | Out-Null
+    }
+    Assert-Contains -Output $ownerRecoveryOutput -Pattern "stopCardDecision: manual_required"
+    Assert-Contains -Output $ownerRecoveryOutput -Pattern "canAutoRecover: false"
+    Assert-Contains -Output $ownerRecoveryOutput -Pattern "blockerClass: active_owner"
+    Assert-Contains -Output $ownerRecoveryOutput -Pattern "statePolicy: dispatcher_stdout_only"
 
     $recoverableSeedRunner = Write-RunnerOutput -Root $smokeRoot -Name "recoverable-seed" -Content @"
 runnerDecision: adopt_recoverable_run
@@ -318,9 +322,13 @@ seedTransactionWorktreePath: C:\Users\jzzhu\.codex\worktrees\ec30\tiku
 runnerDecision: stop_for_hard_block
 runnerNextAction: report_startup_hard_block
 "@
-    Invoke-ExpectFailure -ExpectedPattern "agentAction: stop_for_hard_block" -Command {
+    $hardBlockOutput = Invoke-ExpectFailure -ExpectedPattern "agentAction: stop_for_hard_block" -Command {
         powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dispatcherScriptPath -RunnerOutputPath $hardBlockRunner -ProjectStatePath $files.StatePath -QueuePath $files.QueuePath -SchemaPath $files.SchemaPath
-    } | Out-Null
+    }
+    Assert-Contains -Output $hardBlockOutput -Pattern "stopCardDecision: hard_block"
+    Assert-Contains -Output $hardBlockOutput -Pattern "canAutoRecover: false"
+    Assert-Contains -Output $hardBlockOutput -Pattern "blockerClass: hard_block"
+    Assert-Contains -Output $hardBlockOutput -Pattern "statePolicy: dispatcher_stdout_only"
 
     Write-Output "Module Run v2 agent action dispatcher smoke passed"
 } finally {

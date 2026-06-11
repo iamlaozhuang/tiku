@@ -32,6 +32,10 @@ try {
   "requiresHuman": true,
   "safeToProceed": false,
   "nextCommand": "repair automation registration",
+  "stopCardDecision": "hard_block",
+  "canAutoRecover": false,
+  "blockerClass": "registration_mismatch",
+  "statePolicy": "durable_state_written",
   "stateWritten": "run_registry",
   "noWriteReason": "",
   "resumePointer": "automationRegistrationDecision",
@@ -47,6 +51,10 @@ try {
   "requiresHuman": false,
   "safeToProceed": true,
   "nextCommand": "rerun with standingUnattendedLocalCloseoutApproval",
+  "stopCardDecision": "auto_recoverable",
+  "canAutoRecover": true,
+  "blockerClass": "approval_missing",
+  "statePolicy": "no_write_accounted",
   "stateWritten": "none",
   "noWriteReason": "PlanOnly does not write queue",
   "resumePointer": "seed_proposal_available",
@@ -62,6 +70,10 @@ try {
   "requiresHuman": true,
   "safeToProceed": false,
   "nextCommand": "provide AutoSeedApprovalStatement",
+  "stopCardDecision": "manual_required",
+  "canAutoRecover": false,
+  "blockerClass": "approval_missing",
+  "statePolicy": "no_write_accounted",
   "stateWritten": "none",
   "noWriteReason": "approval required before write",
   "resumePointer": "seed_proposal_available"
@@ -75,6 +87,11 @@ try {
   "stopTaxonomy": "advisory",
   "requiresHuman": false,
   "safeToProceed": true,
+  "nextCommand": "record advisory summary",
+  "stopCardDecision": "auto_recoverable",
+  "canAutoRecover": true,
+  "blockerClass": "advisory",
+  "statePolicy": "no_write_accounted",
   "stateWritten": "none",
   "noWriteReason": "advisory dry run"
 }
@@ -86,6 +103,10 @@ stopTaxonomy: approval_missing
 requiresHuman: false
 safeToProceed: true
 nextCommand: rerun non-PlanOnly runner
+stopCardDecision: auto_recoverable
+canAutoRecover: true
+blockerClass: approval_missing
+statePolicy: no_write_accounted
 stateWritten: none
 noWriteReason: terminal envelope fixture
 resumePointer: runnerDecision=seed_proposal_available
@@ -106,6 +127,8 @@ runnerStepCount: 2
     Assert-Contains -Output $output -Pattern "^hardBlockCount: 1$"
     Assert-Contains -Output $output -Pattern "^approvalReuseCandidateCount: 3$"
     Assert-Contains -Output $output -Pattern "^handoffCompletenessCount: 4$"
+    Assert-Contains -Output $output -Pattern "^stopCardCompletenessCount: 5$"
+    Assert-Contains -Output $output -Pattern "^autoRecoverStopCardCount: 3$"
     Assert-Contains -Output $output -Pattern "^meanRunnerSteps: 2$"
     Assert-Contains -Output $output -Pattern "^stopEconomicsDecision: summarized$"
     Assert-Contains -Output $output -Pattern "Cost Calibration Gate remains blocked"

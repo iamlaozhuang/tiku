@@ -213,6 +213,66 @@ function Invoke-AutodriveSchemaReadiness {
     return Invoke-ExternalCommand -Arguments $schemaArgs
 }
 
+function Get-AgentActionStopCardDecision {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][string]$Action
+    )
+
+    if ($Decision -eq "stop_for_hard_block" -or $Action -eq "stop_for_hard_block") {
+        return "hard_block"
+    }
+    if ($Decision -eq "manual_required") {
+        return "manual_required"
+    }
+    if ($Decision -eq "ready") {
+        return "auto_recoverable"
+    }
+    if ($Decision -eq "idle") {
+        return "idle"
+    }
+
+    return "advisory"
+}
+
+function Get-AgentActionBlockerClass {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][string]$Action,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Reason
+    )
+
+    if ($Decision -eq "stop_for_hard_block" -or $Action -eq "stop_for_hard_block") {
+        return "hard_block"
+    }
+    if ($Reason -match "owner|active") {
+        return "active_owner"
+    }
+    if ($Action -match "handoff") {
+        return "human_handoff"
+    }
+    if ($Decision -eq "manual_required") {
+        return "approval_missing"
+    }
+    if ($Action -match "closeout") {
+        return "closeout_pending"
+    }
+    if ($Action -match "cleanup|hygiene") {
+        return "hygiene_deferred"
+    }
+    if ($Action -match "idle_no_executable_task") {
+        return "no_task"
+    }
+
+    return $Action
+}
+
+function Get-AgentActionCanAutoRecover {
+    param([Parameter(Mandatory = $true)][string]$StopCardDecision)
+
+    return ($StopCardDecision -eq "auto_recoverable").ToString().ToLowerInvariant()
+}
+
 function Write-AgentActionResult {
     param(
         [Parameter(Mandatory = $true)][string]$Decision,
@@ -223,6 +283,10 @@ function Write-AgentActionResult {
         [Parameter(Mandatory = $false)][string]$SeedWorktreePath = ""
     )
 
+    $stopCardDecision = Get-AgentActionStopCardDecision -Decision $Decision -Action $Action
+    $canAutoRecover = Get-AgentActionCanAutoRecover -StopCardDecision $stopCardDecision
+    $blockerClass = Get-AgentActionBlockerClass -Decision $Decision -Action $Action -Reason $Reason
+
     Write-Section -Title "Module Run v2 Agent Action Dispatcher"
     Write-Output "agentActionDecision: $Decision"
     Write-Output "agentAction: $Action"
@@ -232,6 +296,11 @@ function Write-AgentActionResult {
     if (-not [string]::IsNullOrWhiteSpace($SeedWorktreePath)) {
         Write-Output "agentActionSeedWorktreePath: $SeedWorktreePath"
     }
+    Write-Output "stopCardDecision: $stopCardDecision"
+    Write-Output "canAutoRecover: $canAutoRecover"
+    Write-Output "blockerClass: $blockerClass"
+    Write-Output "nextCommand: $Action"
+    Write-Output "statePolicy: dispatcher_stdout_only"
     Write-Output "reason: $Reason"
     Write-Output "active owner: leave_alone"
     Write-Output "Cost Calibration Gate remains blocked"

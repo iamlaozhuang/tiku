@@ -214,16 +214,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b0bf3827af24594090f4161ae4af0611836f63cc
-  lastKnownOriginMasterSha: b0bf3827af24594090f4161ae4af0611836f63cc
+  lastKnownMasterSha: ab6a9a562dcdbfc5c9fc0076c50c79629db6406a
+  lastKnownOriginMasterSha: ab6a9a562dcdbfc5c9fc0076c50c79629db6406a
 currentTask:
-  id: mece-seed-self-review-gate
+  id: stop-card-recovery-clarity
   status: closed
   sourceStory: user-approved-2026-06-11-controlled-auto-seed-mece-tuning
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-mece-seed-self-review-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-mece-seed-self-review-gate.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mece-seed-self-review-gate.md
-  branch: codex/mece-seed-self-review-gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-stop-card-recovery-clarity.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-stop-card-recovery-clarity.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-stop-card-recovery-clarity.md
+  branch: codex/stop-card-recovery-clarity
   commitSha: pending-local-commit
   prUrl: null
   retryCount: 0

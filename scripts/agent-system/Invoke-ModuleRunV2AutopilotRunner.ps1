@@ -624,6 +624,50 @@ function Get-RunnerSafeToProceed {
     return ($Severity -in @("advisory", "auto_recoverable")).ToString().ToLowerInvariant()
 }
 
+function Get-RunnerStopCardDecision {
+    param(
+        [Parameter(Mandatory = $true)][string]$Severity,
+        [Parameter(Mandatory = $true)][string]$Decision
+    )
+
+    if ($Severity -eq "hard_block" -or $Decision -eq "stop_for_hard_block" -or $Decision -eq "iteration_limit_reached") {
+        return "hard_block"
+    }
+    if ($Severity -eq "approval_required") {
+        return "manual_required"
+    }
+    if ($Severity -eq "auto_recoverable") {
+        return "auto_recoverable"
+    }
+    if ($Severity -eq "idle") {
+        return "idle"
+    }
+
+    return "advisory"
+}
+
+function Get-RunnerCanAutoRecover {
+    param([Parameter(Mandatory = $true)][string]$Severity)
+
+    return ($Severity -eq "auto_recoverable").ToString().ToLowerInvariant()
+}
+
+function Get-RunnerStatePolicy {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$StateWritten,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$NoWriteReason
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($StateWritten) -and $StateWritten -ne "none") {
+        return "durable_state_written"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($NoWriteReason)) {
+        return "no_write_accounted"
+    }
+
+    return "state_unknown"
+}
+
 function Get-DefaultNextCommand {
     param(
         [Parameter(Mandatory = $true)][string]$Decision,
@@ -687,6 +731,10 @@ function Write-RunnerResult {
     $runnerSeverity = Get-RunnerSeverity -Decision $Decision -NextAction $NextAction -StopTaxonomy $stopTaxonomy -SeverityOverride $SeverityOverride
     $requiresHuman = Get-RunnerHumanRequired -Severity $runnerSeverity
     $safeToProceed = Get-RunnerSafeToProceed -Severity $runnerSeverity
+    $stopCardDecision = Get-RunnerStopCardDecision -Severity $runnerSeverity -Decision $Decision
+    $canAutoRecover = Get-RunnerCanAutoRecover -Severity $runnerSeverity
+    $blockerClass = if ([string]::IsNullOrWhiteSpace($stopTaxonomy)) { "unknown" } else { $stopTaxonomy }
+    $statePolicy = Get-RunnerStatePolicy -StateWritten $StateWritten -NoWriteReason $NoWriteReason
     $nextCommand = if ([string]::IsNullOrWhiteSpace($NextCommandOverride)) {
         Get-DefaultNextCommand -Decision $Decision -NextAction $NextAction
     } else {
@@ -714,7 +762,11 @@ function Write-RunnerResult {
     Write-Output "runnerSeverity: $runnerSeverity"
     Write-Output "requiresHuman: $requiresHuman"
     Write-Output "safeToProceed: $safeToProceed"
+    Write-Output "stopCardDecision: $stopCardDecision"
+    Write-Output "canAutoRecover: $canAutoRecover"
+    Write-Output "blockerClass: $blockerClass"
     Write-Output "nextCommand: $nextCommand"
+    Write-Output "statePolicy: $statePolicy"
     Write-Output "stateWritten: $StateWritten"
     Write-Output "noWriteReason: $NoWriteReason"
     Write-Output "resumePointer: $resume"

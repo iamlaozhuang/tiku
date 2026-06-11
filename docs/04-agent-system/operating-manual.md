@@ -99,6 +99,11 @@ Every auto-seed transaction must pass seed self-review with explicit MECE output
 `meceCoverageStatus`, `meceGapCount`, and `meceOverlapCount`. Duplicate target closures, uncovered target closures
 without blocked remainder, or missing seed metadata must hard-block before the runner can claim seeded work.
 
+Every runner or dispatcher terminal stop must emit a compact stop card in addition to legacy compatibility fields:
+`stopCardDecision`, `canAutoRecover`, `blockerClass`, `nextCommand`, and `statePolicy`. The stop card must fit on one
+screen and state why execution stopped, whether automated recovery is allowed, the single recommended next command, and
+whether durable state was written or intentionally skipped with accounting.
+
 ## Completion Standard
 
 Every task closeout must record:
