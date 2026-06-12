@@ -203,6 +203,71 @@ autoSeedBridge:
     seedApplyParameter: AllowAutoSeed
     approvalParameter: AutoSeedApprovalStatement
     maxBatchParameter: AutoSeedMaxBatchCount
+boundedQueueDrain:
+  purpose: Allow one automation wake to continue across multiple low-risk Module Run v2 batches without weakening quality gates.
+  defaultMode: disabled_without_task_drainPolicy
+  eligibilityGate:
+    scriptPath: scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+    decisionOutput: queueDrainEligibilityDecision
+    decisions:
+      - eligible
+      - not_eligible
+      - single_task_only
+      - stop_for_hard_block
+    requiredTaskPolicy:
+      drainPolicy:
+        drainEligible:
+          default: false
+        riskProfile:
+          allowedValues:
+            - docs_governance
+            - mechanism_low_risk
+            - low_risk_local_code
+            - single_task_only
+            - blocked_high_risk
+        validationCostClass:
+          allowedValues:
+            - light
+            - standard
+            - heavy
+          default: standard
+        requiredFreshApproval:
+          default: false
+        maxTasksPerWake:
+          default: 2
+          maximum: 10
+        maxChangedFiles:
+          default: 20
+        maxChangedLines:
+          default: 800
+        autoRepairAllowance:
+          allowedValues:
+            - none
+            - format_lint_evidence_once
+          default: none
+    executionRule: Missing drainPolicy defaults to not_eligible. drainEligible true is accepted only for docs_governance and mechanism_low_risk. low_risk_local_code returns single_task_only in this phase. High-risk riskTypes, requiredFreshApproval true, missing evidence/audit, missing validation surface, or missing structured closeoutPolicy hard-block drain.
+  supervisor:
+    scriptPath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
+    decisionOutput: queueDrainDecision
+    decisions:
+      - ready_for_agent_task
+      - closeout_executed_continue
+      - budget_exhausted
+      - approval_required
+      - hard_block
+      - idle
+    defaultBudgets:
+      maxTasksPerWake: 2
+      maxWallClockMinutes: 90
+      maxConsecutiveFailures: 1
+      maxConsecutiveRecoveries: 2
+      maxChangedFiles: 20
+      maxChangedLines: 800
+    manifestRoot: "%USERPROFILE%\\.codex\\tiku\\drain-runs"
+    writePolicy: repo_external_manifest_only
+    executionRule: The supervisor consumes existing runner and dispatcher outputs, checks drain eligibility before agent execution, and writes only repo-external drain manifests. It must not implement product work or bypass startup, schema, validation, closeout, pre-push, pre-commit, or blocked-gate checks. Approved closeout may run only through the existing approved closeout script when explicitly requested.
 capabilities:
   defaultState: denied
   fields:

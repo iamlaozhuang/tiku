@@ -46,6 +46,7 @@ function Write-AcceptanceResult {
     Write-Output "serialBoundary: validation_filter_before_execution"
     Write-Output "registrationBoundary: primary_active_autopilot_only"
     Write-Output "autoSeedBoundary: proposal_transaction_self_review"
+    Write-Output "queueDrainBoundary: explicit_drainPolicy_budgeted_low_risk_only"
     Write-Output "closeoutBoundary: structured_closeout_policy_only"
     Write-Output "stopTaxonomyBoundary: terminal_decisions_emit_stopTaxonomy"
     Write-Output "reconcileBoundary: accepted_ancestor_state_reconcile_only"
@@ -78,6 +79,8 @@ try {
         @{ Id = "startup_readiness"; Path = "Test-ModuleRunV2AutomationStartupReadiness.ps1" },
         @{ Id = "validation_surface_readiness"; Path = "Test-ModuleRunV2ValidationSurfaceReadiness.ps1" },
         @{ Id = "recovery_self_repair"; Path = "Invoke-ModuleRunV2RecoverySelfRepair.ps1" },
+        @{ Id = "queue_drain_eligibility"; Path = "Test-ModuleRunV2QueueDrainEligibility.ps1" },
+        @{ Id = "queue_drain_supervisor"; Path = "Invoke-ModuleRunV2QueueDrainSupervisor.ps1" },
         @{ Id = "agent_action_dispatcher"; Path = "Invoke-ModuleRunV2AgentActionDispatcher.ps1" },
         @{ Id = "serial_executor"; Path = "Invoke-ModuleRunV2SerialAutodriveExecutor.ps1" },
         @{ Id = "parallel_coordinator"; Path = "Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1" },

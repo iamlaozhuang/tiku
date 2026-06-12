@@ -15,6 +15,8 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
   `project-state.yaml` records `plannedPauseStatus: active`.
 - Default rhythm: queue-first, local-first, evidence-first, guardian-first.
 - Default execution shape: one focused task, one focused local commit, then an explicit closeout decision.
+- Bounded queue drain may continue across multiple low-risk governance/mechanism batches in one wake only when the
+  target task records an explicit `drainPolicy` and the supervisor budgets remain open.
 - Post-merge evidence-only commits are not required by default; use final handoff or `project-state.yaml` for final SHAs
   unless durable post-merge evidence is needed for recovery or a gate explicitly requires it.
 - Module Run v2 may group Batches, but every Batch still needs focused evidence and a reviewable boundary.
@@ -72,6 +74,23 @@ Select the next task only when:
 - the task does not require dependency, schema, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, PR, force push, or Cost Calibration Gate work without fresh approval.
 
 If no task qualifies, report `no-executable-task-seed-or-approve-next-task` instead of speculating.
+
+## Bounded Queue Drain Rule
+
+Use `Invoke-ModuleRunV2QueueDrainSupervisor.ps1` only as a supervisor over the existing runner, dispatcher, eligibility
+gate, and approved closeout flow. It may return:
+
+```text
+queueDrainDecision: ready_for_agent_task
+queueDrainNextAction: agent_execute_task
+```
+
+The agent layer may then execute only that task and must return to the supervisor after validation or closeout. The
+supervisor writes its run manifest outside the repository under `%USERPROFILE%\.codex\tiku\drain-runs`.
+
+Do not drain when `drainPolicy` is missing, `riskProfile` is `low_risk_local_code` or higher risk, fresh approval is
+required, validation fails, evidence/audit is missing, blocked files are touched, a repeated `blockerFingerprint` is
+seen, or the wake exceeds its task/time/diff budgets.
 
 When `plannedPauseStatus: active` and `plannedPauseKeepsAutomationPaused: true` are recorded in `project-state.yaml`,
 diagnostics should report `planned_pause_for_tuning`. This is an intentional human-controlled stop state, not approval

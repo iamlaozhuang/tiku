@@ -215,6 +215,51 @@ evidence.
 `exit_active_owner_present` and `no_executable_task` are normal no-op terminal decisions for scheduled automation. They
 should not be treated as failed development work.
 
+## Bounded Queue Drain Supervisor
+
+The primary automation may use a bounded queue drain supervisor when the goal is to continue across several low-risk
+Module Run v2 batches in one wake without weakening existing gates:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.ps1
+```
+
+The supervisor is an outer protocol layer. It does not write product code, broaden scope, bypass validation, or replace
+the existing runner, dispatcher, or approved closeout scripts. It consumes `runnerDecision` and `agentAction` outputs,
+checks `drainPolicy`, writes a redacted manifest under `%USERPROFILE%\.codex\tiku\drain-runs`, and returns the next
+agent-layer action.
+
+Task drain is disabled unless the task block explicitly records:
+
+```yaml
+drainPolicy:
+  drainEligible: true
+  riskProfile: mechanism_low_risk
+  validationCostClass: standard
+  requiredFreshApproval: false
+  maxTasksPerWake: 2
+  maxChangedFiles: 20
+  maxChangedLines: 800
+  autoRepairAllowance: format_lint_evidence_once
+```
+
+Only `docs_governance` and `mechanism_low_risk` are multi-task drain eligible in this phase. `low_risk_local_code` must
+return `single_task_only`; product code remains one task per wake by default. Missing `drainPolicy`, missing evidence or
+audit paths, missing validation surface, missing structured `closeoutPolicy`, `requiredFreshApproval: true`, high-risk
+`riskTypes`, or any blocked-files conflict stops drain before the next task is claimed.
+
+Queue drain budgets are hard ceilings, not targets:
+
+- default `MaxTasksPerWake`: `2`;
+- default `MaxWallClockMinutes`: `90`;
+- default `MaxConsecutiveFailures`: `1`;
+- default `MaxConsecutiveRecoveries`: `2`;
+- default diff ceiling: `20` files or `800` changed lines.
+
+Repeated `blockerFingerprint` values must stop drain instead of generating duplicate recovery plans. The manifest must
+not contain secrets, provider payloads, raw prompts, raw answers, raw model responses, database URLs, Authorization
+headers, full `paper` or `material` content, or plaintext `redeem_code`.
+
 ## Recovery Self-Repair Control
 
 Before a recovery pass treats a startup finding as a stop, the agent layer may run:
