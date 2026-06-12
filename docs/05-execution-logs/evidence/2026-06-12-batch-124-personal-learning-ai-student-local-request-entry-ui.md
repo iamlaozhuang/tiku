@@ -92,6 +92,29 @@ result: pass
 - Commit: `b06316c4f6a8be66b720f423769b2545ad3710cb` captured the initial batch-124 implementation commit before the
   final evidence amend; the immutable final branch SHA is reported in closeout.
 
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/batch-124-personal-learning-ai-student-local-request-entry-ui` into `master`.
+- Merged master SHA before this post-merge evidence note:
+  `b0e58e78e537d2f1e5f5693e7563d4019b898899`.
+- `npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts`: passed on `master`,
+  `Test Files 1 passed (1)`, `Tests 3 passed (3)`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `npm.cmd run test:unit`: passed on `master`, `Test Files 244 passed (244)`, `Tests 872 passed (872)`.
+- `npm.cmd run build`: passed on `master`, Next.js 16.2.6 compiled successfully and generated 55 static pages including
+  `/ai-generation`.
+- `git diff --check`: passed on `master`.
+- `npm.cmd run test:e2e -- --list`: passed on `master`, 27 tests listed in 10 files.
+- `npm.cmd run test:e2e`: first post-merge run failed once in the existing role-based Student Positive Flow login URL
+  wait; immediate rerun passed on `master`, 27 tests passed.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-124-personal-learning-ai-student-local-request-entry-ui`:
+  passed on `master` before this evidence-only closeout commit.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-124-personal-learning-ai-student-local-request-entry-ui`: passed
+  on `master` with accepted-ancestor state SHA checks before this evidence-only closeout commit.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, e2e edits, formal generated-content write paths, and Cost Calibration Gate remain blocked.
+
 ## Out Of Scope
 
 - No package.json or lockfile changes.
