@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-125-personal-learning-ai-redacted-reference-display-integration
-updatedAt: "2026-06-12T12:55:41-07:00"
+currentPhase: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+updatedAt: "2026-06-12T13:12:18-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fcef8efa4b6b6f39182d9295b136069c9cdc33c9
-  lastKnownOriginMasterSha: fcef8efa4b6b6f39182d9295b136069c9cdc33c9
+  lastKnownMasterSha: 6db97a120186bda8e6eabbcbdbfc8b30a9e98496
+  lastKnownOriginMasterSha: 6db97a120186bda8e6eabbcbdbfc8b30a9e98496
 currentTask:
-  id: batch-125-personal-learning-ai-redacted-reference-display-integration
+  id: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
-  branch: codex/batch-125-personal-learning-ai-redacted-reference-display-integration
-  commitSha: fcef8efa4b6b6f39182d9295b136069c9cdc33c9
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+  branch: codex/batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+  commitSha: 6db97a120186bda8e6eabbcbdbfc8b30a9e98496
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,7 +293,7 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_125_git_completion_readiness
+    readiness: pass_batch_126_git_completion_readiness
     lint: pass
     typecheck: pass
     unit: pass_244_files_873_tests
@@ -316,9 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-125 redacted result/reference display integration is closed after focused RED/GREEN, lint, typecheck, unit,
-    build, local e2e, and Browser checks. After merge and push, reclaim from master before starting
-    batch-126-personal-learning-ai-local-browser-flow-e2e-validation. Keep provider, env/secret, schema/migration,
-    dependency, deploy, payment, external-service, PR, force-push, product source edits for validation-only work,
-    formal generated-content write paths, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+    Batch-126 validation-only task is closed after lint, typecheck, unit, build, diff, e2e list, and full e2e passed.
+    After merge and push, reclaim from master and inspect the queue before starting any further work. Keep product source
+    edits, e2e spec edits, provider, env/secret, schema/migration, dependency, deploy, payment, external-service, PR,
+    force-push, headed/debug browser UI mode, formal generated-content write paths, and Cost Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
