@@ -1,15 +1,14 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+
+import playwrightConfig, {
+  shouldReuseExistingPlaywrightServer,
+} from "../../playwright.config";
 
 type PlaywrightWebServerConfig = {
   command?: string;
   reuseExistingServer?: boolean;
   url?: string;
 };
-
-async function loadPlaywrightConfig() {
-  vi.resetModules();
-  return (await import("../../playwright.config")).default;
-}
 
 function getWebServerConfig(config: {
   webServer?: PlaywrightWebServerConfig | PlaywrightWebServerConfig[];
@@ -20,30 +19,27 @@ function getWebServerConfig(config: {
   return config.webServer as PlaywrightWebServerConfig;
 }
 
-afterEach(() => {
-  vi.unstubAllEnvs();
-  vi.resetModules();
-});
-
 describe("playwright config baseline", () => {
-  it("starts a fresh local server by default", async () => {
-    vi.stubEnv("CI", "");
-    vi.stubEnv("TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER", "");
-
-    const webServer = getWebServerConfig(await loadPlaywrightConfig());
+  it("starts a fresh local server by default", () => {
+    const webServer = getWebServerConfig(playwrightConfig);
 
     expect(webServer).toMatchObject({
       command: "npm.cmd run dev -- --hostname 127.0.0.1",
       reuseExistingServer: false,
       url: "http://127.0.0.1:3000",
     });
+    expect(
+      shouldReuseExistingPlaywrightServer({
+        TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER: "",
+      }),
+    ).toBe(false);
   });
 
-  it("requires explicit local opt-in before reusing an existing server", async () => {
-    vi.stubEnv("TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER", "1");
-
-    const webServer = getWebServerConfig(await loadPlaywrightConfig());
-
-    expect(webServer.reuseExistingServer).toBe(true);
+  it("requires explicit local opt-in before reusing an existing server", () => {
+    expect(
+      shouldReuseExistingPlaywrightServer({
+        TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER: "1",
+      }),
+    ).toBe(true);
   });
 });

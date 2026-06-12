@@ -1,7 +1,15 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const reuseExistingServer =
-  process.env.TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
+export function shouldReuseExistingPlaywrightServer(
+  env: { TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER?: string } = {
+    TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER:
+      process.env.TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER,
+  },
+) {
+  return env.TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
+}
+
+const reuseExistingServer = shouldReuseExistingPlaywrightServer();
 
 export default defineConfig({
   testDir: "./e2e",

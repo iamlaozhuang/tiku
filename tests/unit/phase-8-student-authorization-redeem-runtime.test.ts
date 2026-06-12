@@ -185,7 +185,9 @@ describe("phase 8 student authorization redeem runtime", () => {
       }),
     );
 
-    await expect(readJson(response)).resolves.toEqual({
+    const responsePayload = await readJson(response);
+
+    expect(responsePayload).toEqual({
       code: 0,
       message: "ok",
       data: {
@@ -222,8 +224,55 @@ describe("phase 8 student authorization redeem runtime", () => {
             status: "active",
           },
         ],
+        authorizationContexts: [
+          {
+            authorizationPublicId: "personal_auth_public_123",
+            authorizationSource: "personal_auth",
+            blockedReason: null,
+            capabilities: {
+              canAnswerOrganizationTraining: false,
+              canCreateOrganizationTraining: false,
+              canGenerateAiPaper: false,
+              canGenerateAiQuestion: false,
+              canManageAuthorizationQuota: false,
+              canViewOrganizationTrainingSummary: false,
+            },
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "standard",
+            level: 3,
+            organizationPublicId: null,
+            ownerPublicId: "user_public_student_123",
+            ownerType: "personal",
+            profession: "monopoly",
+            quotaOwnerPublicId: "user_public_student_123",
+            quotaOwnerType: "personal",
+          },
+          {
+            authorizationPublicId: "org_auth_public_123",
+            authorizationSource: "org_auth",
+            blockedReason: null,
+            capabilities: {
+              canAnswerOrganizationTraining: false,
+              canCreateOrganizationTraining: false,
+              canGenerateAiPaper: false,
+              canGenerateAiQuestion: false,
+              canManageAuthorizationQuota: false,
+              canViewOrganizationTrainingSummary: false,
+            },
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "standard",
+            level: 3,
+            organizationPublicId: "org_public_123",
+            ownerPublicId: "org_public_123",
+            ownerType: "organization",
+            profession: "monopoly",
+            quotaOwnerPublicId: "org_public_123",
+            quotaOwnerType: "organization",
+          },
+        ],
       },
     });
+    expect(JSON.stringify(responsePayload)).not.toContain('"id":');
   });
 
   it("lists personal authorizations for the authenticated student", async () => {

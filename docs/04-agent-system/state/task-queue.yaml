@@ -4526,3 +4526,70 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-project-quality-gate-refresh.md
     status: closed
     retryCount: 0
+  - id: fix-unit-gate-student-authorization-context-contract
+    title: Fix student authorization runtime unit contract drift
+    phase: unit-gate-student-authorization-context-contract
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - docs-project-quality-gate-refresh
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly requested on 2026-06-12 to open a P1 small task to fix the student authorization runtime unit
+      contract drift, rerun npm.cmd run test:unit, and only after the unit gate is green open a separate L5 local e2e
+      validation task using fresh Playwright server behavior and existing specs. Scope is limited to the stale unit
+      expectation, task plan, evidence, audit review, and docs/state queue tracking. No dependency/package/lockfile,
+      schema/migration, env/secret, provider, deploy, payment, external-service, PR, force-push, or Cost Calibration
+      Gate work is approved.
+    validationProfile: P1-unit-gate
+    localFullLoopGate: L2
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: test_contract_fix
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - playwright.config.ts
+      - tests/unit/playwright-config-baseline.test.ts
+      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - unit_contract
+      - local_validation
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - npm.cmd run test:unit -- tests/unit/playwright-config-baseline.test.ts
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
+    status: closed
+    retryCount: 0
