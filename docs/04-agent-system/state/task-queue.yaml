@@ -3652,3 +3652,512 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
     status: closed
     retryCount: 0
+
+  - id: batch-119-personal-learning-ai-personal-generation-request-flow
+    title: Module Run v2 personal-learning-ai implementation seed
+    phase: batch-119-personal-learning-ai-personal-generation-request-flow
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    seededByTask: phase-71-advanced-personal-ai-generation-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: personal generation request flow
+    behaviorBoundary: personal-learning-ai::personal generation request flow
+    requirementRefs:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    useCases:
+      - personal-learning-ai local implementation validates personal generation request flow
+    acceptanceScenarios:
+      - personal generation request flow passes L5-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L5-local-implementation
+    localExperienceClosureGate: planned
+    localFullLoopGate: L5
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-119-personal-learning-ai-personal-generation-request-flow
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-119-personal-learning-ai-personal-generation-request-flow
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-119-personal-learning-ai-personal-generation-request-flow
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-119-personal-learning-ai-personal-generation-request-flow
+    evidencePath: docs/05-execution-logs/evidence/batch-119-personal-learning-ai-personal-generation-request-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-119-personal-learning-ai-personal-generation-request-flow.md
+    status: pending
+    retryCount: 0
+  - id: batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+    title: Module Run v2 personal-learning-ai implementation seed
+    phase: batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    seededByTask: phase-71-advanced-personal-ai-generation-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: paper and mock_exam context selection
+    behaviorBoundary: personal-learning-ai::paper and mock_exam context selection
+    requirementRefs:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    useCases:
+      - personal-learning-ai local implementation validates paper and mock_exam context selection
+    acceptanceScenarios:
+      - paper and mock_exam context selection passes L5-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L5-local-implementation
+    localExperienceClosureGate: planned
+    localFullLoopGate: L5
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+    evidencePath: docs/05-execution-logs/evidence/batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    status: pending
+    retryCount: 0
+  - id: batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+    title: Module Run v2 personal-learning-ai implementation seed
+    phase: batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    seededByTask: phase-71-advanced-personal-ai-generation-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local UI/browser experience for request and result reference where approved
+    behaviorBoundary: personal-learning-ai::local UI/browser experience for request and result reference where approved
+    requirementRefs:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    useCases:
+      - personal-learning-ai local implementation validates local UI/browser experience for request and result reference where approved
+    acceptanceScenarios:
+      - local UI/browser experience for request and result reference where approved passes L5-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L5-local-implementation
+    localExperienceClosureGate: planned
+    localFullLoopGate: L5
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+    evidencePath: docs/05-execution-logs/evidence/batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    status: pending
+    retryCount: 0
+  - id: batch-122-personal-learning-ai-redacted-ai-call-log-reference
+    title: Module Run v2 personal-learning-ai implementation seed
+    phase: batch-122-personal-learning-ai-redacted-ai-call-log-reference
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
+    seededByTask: phase-71-advanced-personal-ai-generation-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: redacted ai_call_log reference without storing raw generated AI content
+    behaviorBoundary: personal-learning-ai::redacted ai_call_log reference without raw content
+    requirementRefs:
+      - phase-71-advanced-personal-ai-generation-implementation-planning
+    useCases:
+      - personal-learning-ai local implementation validates redacted ai_call_log reference without storing raw generated AI content
+    acceptanceScenarios:
+      - redacted ai_call_log reference without storing raw generated AI content passes L5-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L5-local-implementation
+    localExperienceClosureGate: planned
+    localFullLoopGate: L5
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-122-personal-learning-ai-redacted-ai-call-log-reference
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-122-personal-learning-ai-redacted-ai-call-log-reference
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-122-personal-learning-ai-redacted-ai-call-log-reference
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-122-personal-learning-ai-redacted-ai-call-log-reference
+    evidencePath: docs/05-execution-logs/evidence/batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    status: pending
+    retryCount: 0
