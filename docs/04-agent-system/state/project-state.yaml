@@ -266,7 +266,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 03f1e5e21bb9478aff0cc92dfe4ed034123c13d6
+  lastKnownMasterSha: 231e9ef976c4c5ce57e5c4d9a204f02dad0cd976
   lastKnownOriginMasterSha: 03f1e5e21bb9478aff0cc92dfe4ed034123c13d6
 currentTask:
   id: batch-122-personal-learning-ai-redacted-ai-call-log-reference
@@ -276,7 +276,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
   branch: codex/batch-122-personal-learning-ai-redacted-ai-call-log-reference
-  commitSha: 10e7cc958dc2ff83b2f1bcdaf9f9bc8b6cd74044
+  commitSha: 231e9ef976c4c5ce57e5c4d9a204f02dad0cd976
   prUrl: null
   retryCount: 0
   lastFailurePath: null

@@ -74,6 +74,20 @@ provider runtime, persistence, schema/migration, formal generated content write 
 - e2e: not run because batch-122 did not touch UI/e2e files and does not declare `localE2EValidation`; allowed files
   prohibit UI/e2e implementation.
 
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/batch-122-personal-learning-ai-redacted-ai-call-log-reference` into `master`.
+- Merged master SHA before this post-merge evidence note:
+  `231e9ef976c4c5ce57e5c4d9a204f02dad0cd976`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `npm.cmd run test:unit`: first run exceeded the 120s tool timeout and produced no test conclusion; rerun with a longer
+  timeout passed on `master`, `Test Files 243 passed (243)`, `Tests 868 passed (868)`.
+- `npm.cmd run build`: passed on `master`, Next.js 16.2.6 compiled successfully and generated 54 static pages.
+- `git diff --check`: passed on `master`.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, and Cost Calibration Gate remain blocked.
+
 ## Commit
 
 - Commit: `10e7cc958dc2ff83b2f1bcdaf9f9bc8b6cd74044` recorded as the post-commit evidence anchor before final amend; the
