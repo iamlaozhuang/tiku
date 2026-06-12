@@ -4258,9 +4258,11 @@ tasks:
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-122-personal-learning-ai-redacted-ai-call-log-reference
-    evidencePath: docs/05-execution-logs/evidence/batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
-    status: pending
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    status: closed
+    result: pass
     retryCount: 0
   - id: fix-api-error-envelope-consistency
     title: Standardize API route error envelopes

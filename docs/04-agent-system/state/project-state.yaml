@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
-updatedAt: "2026-06-12T10:31:13-07:00"
+currentPhase: batch-122-personal-learning-ai-redacted-ai-call-log-reference
+updatedAt: "2026-06-12T10:57:34-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cde8eef18370f24e6fa1d2efd158c56925c9ad5c
-  lastKnownOriginMasterSha: cde8eef18370f24e6fa1d2efd158c56925c9ad5c
+  lastKnownMasterSha: 03f1e5e21bb9478aff0cc92dfe4ed034123c13d6
+  lastKnownOriginMasterSha: 03f1e5e21bb9478aff0cc92dfe4ed034123c13d6
 currentTask:
-  id: batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+  id: batch-122-personal-learning-ai-redacted-ai-call-log-reference
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  branch: codex/batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
-  commitSha: 31361ef650dab21e3e87e2136a7f760077f4efab
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+  branch: codex/batch-122-personal-learning-ai-redacted-ai-call-log-reference
+  commitSha: 10e7cc958dc2ff83b2f1bcdaf9f9bc8b6cd74044
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_121_pre_edit_readiness
+    readiness: pass_batch_122_pre_edit_readiness
     lint: pass
     typecheck: pass
-    unit: pass_242_files_865_tests
+    unit: pass_243_files_868_tests
     build: pass
-    e2e: not_run_batch_121_server_side_only
+    e2e: not_run_batch_122_server_side_only
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,7 +316,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Start batch-122 personal-learning-ai redacted ai_call_log reference from master after batch-121 is fast-forward
-    merged, pushed, and cleaned up. Keep provider, env/secret, schema/migration, dependency, deploy, payment,
-    external-service, PR, force-push, and Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    No pending personal-learning-ai seeded implementation tasks remain in the active queue after batch-122 closeout.
+    Keep provider, env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, and Cost
+    Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
