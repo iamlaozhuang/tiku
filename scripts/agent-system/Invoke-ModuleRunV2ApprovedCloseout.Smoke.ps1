@@ -12,6 +12,36 @@ function Assert-Contains {
     }
 }
 
+function Initialize-FakeNodeTooling {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    New-Item -ItemType Directory -Path (Join-Path -Path $Root -ChildPath "node_modules\.bin") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path -Path $Root -ChildPath "node_modules\typescript") -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path -Path $Root -ChildPath "node_modules\prettier\bin") -Force | Out-Null
+    "fake" | Set-Content -LiteralPath (Join-Path -Path $Root -ChildPath "node_modules\.bin\eslint.cmd") -Encoding ASCII
+    "fake" | Set-Content -LiteralPath (Join-Path -Path $Root -ChildPath "node_modules\.bin\tsc.cmd") -Encoding ASCII
+    "fake" | Set-Content -LiteralPath (Join-Path -Path $Root -ChildPath "node_modules\.bin\prettier.cmd") -Encoding ASCII
+    "{}" | Set-Content -LiteralPath (Join-Path -Path $Root -ChildPath "node_modules\typescript\package.json") -Encoding ASCII
+    "fake" | Set-Content -LiteralPath (Join-Path -Path $Root -ChildPath "node_modules\prettier\bin\prettier.cjs") -Encoding ASCII
+
+    $fakeBin = Join-Path -Path $Root -ChildPath "fake-bin"
+    New-Item -ItemType Directory -Path $fakeBin -Force | Out-Null
+    @"
+@echo off
+if "%1"=="run" if "%2"=="lint" (
+  echo lint ok
+  exit /b 0
+)
+if "%1"=="run" if "%2"=="typecheck" (
+  echo typecheck ok
+  exit /b 0
+)
+exit /b 9
+"@ | Set-Content -LiteralPath (Join-Path -Path $fakeBin -ChildPath "npm.cmd") -Encoding ASCII
+
+    return $fakeBin
+}
+
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Invoke-ModuleRunV2ApprovedCloseout.ps1"
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing approved closeout script: $scriptPath"
@@ -20,6 +50,8 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-approved-closeout-" + [guid]::NewGuid().ToString("N"))
 $originRoot = Join-Path -Path $fixtureRoot -ChildPath "origin.git"
 $repoRoot = Join-Path -Path $fixtureRoot -ChildPath "repo"
+$handoffRoot = Join-Path -Path $fixtureRoot -ChildPath "handoffs"
+$originalPath = $env:Path
 
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
 
@@ -37,6 +69,10 @@ try {
         New-Item -ItemType Directory -Path "docs/04-agent-system/state" -Force | Out-Null
         New-Item -ItemType Directory -Path "docs/05-execution-logs/evidence" -Force | Out-Null
         New-Item -ItemType Directory -Path "docs/05-execution-logs/audits-reviews" -Force | Out-Null
+        "node_modules/" | Set-Content -LiteralPath ".gitignore" -Encoding UTF8
+        '{"scripts":{"lint":"eslint","typecheck":"tsc --noEmit"}}' | Set-Content -LiteralPath "package.json" -Encoding UTF8
+        $fakeBin = Initialize-FakeNodeTooling -Root $repoRoot
+        $env:Path = "$fakeBin;$originalPath"
 
         @(
             "schemaVersion: 2",
@@ -278,10 +314,233 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Expected clean ahead work SHA to be accepted as a master ancestor after approved closeout."
         }
+
+        & git switch master | Out-Null
+
+        @(
+            'schemaVersion: 1',
+            'project:',
+            '  name: tiku',
+            '  currentPhase: module-run-v2-closeout-preflight-fail-smoke',
+            'updatedAt: "2026-06-09T09:00:00-07:00"',
+            'repository:',
+            "  lastKnownMasterSha: $cleanAheadBaseSha",
+            "  lastKnownOriginMasterSha: $cleanAheadBaseSha",
+            'currentTask:',
+            '  id: module-run-v2-closeout-preflight-fail-smoke',
+            '  status: ready_for_closeout',
+            '  sourceStory: smoke',
+            '  planPath: docs/05-execution-logs/task-plans/preflight-fail-smoke.md',
+            '  evidencePath: docs/05-execution-logs/evidence/preflight-fail-smoke.md',
+            '  auditReviewPath: docs/05-execution-logs/audits-reviews/preflight-fail-smoke.md',
+            '  branch: codex/module-run-v2-closeout-preflight-fail-smoke',
+            '  commitSha: pending-local-commit'
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Encoding UTF8
+
+        @(
+            'schemaVersion: 1',
+            'tasks:',
+            '  - id: module-run-v2-closeout-preflight-fail-smoke',
+            '    title: Approved Closeout Preflight Fail Smoke',
+            '    status: ready_for_closeout',
+            '    taskKind: implementation',
+            '    closeoutPolicy:',
+            '      localCommit: approved',
+            '      fastForwardMerge:',
+            '        approved: true',
+            '        targetBranch: master',
+            '      push:',
+            '        approved: true',
+            '        target: origin/master',
+            '      cleanup:',
+            '        deleteShortBranch: true',
+            '        parkWorktree: true',
+            '    allowedFiles:',
+            '      - docs/04-agent-system/state/project-state.yaml',
+            '      - docs/04-agent-system/state/task-queue.yaml',
+            '      - docs/05-execution-logs/evidence/preflight-fail-smoke.md',
+            '      - docs/05-execution-logs/evidence/preflight-note.txt',
+            '      - docs/05-execution-logs/audits-reviews/preflight-fail-smoke.md',
+            '    blockedFiles:',
+            '      - .env.local',
+            '      - src/**',
+            '    riskTypes:',
+            '      - automation_policy',
+            '    validationCommands:',
+            '      - git diff --check',
+            '    evidencePath: docs/05-execution-logs/evidence/preflight-fail-smoke.md',
+            '    auditReviewPath: docs/05-execution-logs/audits-reviews/preflight-fail-smoke.md'
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/task-queue.yaml" -Encoding UTF8
+        @(
+            '# Approved Closeout Preflight Fail Smoke Evidence',
+            'result: pass',
+            'RED: recorded',
+            'GREEN: recorded',
+            'Commit: `abcdef3`',
+            'localFullLoopGate: L2',
+            'blocked remainder: Cost Calibration Gate remains blocked',
+            'threadRolloverGate: continue_current_thread',
+            'nextModuleRunCandidate: no-executable-task-seed-or-approve-next-task',
+            'git diff --check',
+            'Cost Calibration Gate remains blocked'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/evidence/preflight-fail-smoke.md" -Encoding UTF8
+        @(
+            '# Approved Closeout Preflight Fail Smoke Audit',
+            'APPROVE'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/audits-reviews/preflight-fail-smoke.md" -Encoding UTF8
+        & git add .
+        & git commit -m "chore(smoke): seed preflight fail fixture" | Out-Null
+        & git push origin master | Out-Null
+        & git switch -c codex/module-run-v2-closeout-preflight-fail-smoke | Out-Null
+        "preflight note" | Set-Content -LiteralPath "docs/05-execution-logs/evidence/preflight-note.txt" -Encoding UTF8
+        Remove-Item -LiteralPath "node_modules" -Recurse -Force
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $preflightFailOutput = @(
+                powershell.exe -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
+                    -TaskId "module-run-v2-closeout-preflight-fail-smoke" `
+                    -ProjectStatePath "docs/04-agent-system/state/project-state.yaml" `
+                    -QueuePath "docs/04-agent-system/state/task-queue.yaml" `
+                    -MatrixPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" `
+                    -RecoveryPacketHandoffRoot $handoffRoot 2>&1
+            )
+            $preflightFailExitCode = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        if ($preflightFailExitCode -eq 0) {
+            throw "Expected closeout local tooling preflight failure to exit non-zero."
+        }
+        Assert-Contains -Output $preflightFailOutput -Pattern "closeoutLocalToolingDecision: stop_for_hard_block"
+        Assert-Contains -Output $preflightFailOutput -Pattern "recoveryPacketDecision: written"
+        $preflightQueueAfter = Get-Content -LiteralPath "docs/04-agent-system/state/task-queue.yaml" -Raw
+        if ($preflightQueueAfter -notmatch "status:\s*ready_for_closeout" -or $preflightQueueAfter -match "status:\s*closed") {
+            throw "Expected preflight failure to leave queue status ready_for_closeout."
+        }
+        $preflightProjectStateAfter = Get-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Raw
+        if ($preflightProjectStateAfter -notmatch "status:\s*ready_for_closeout" -or $preflightProjectStateAfter -match "status:\s*closed") {
+            throw "Expected preflight failure to leave project-state status ready_for_closeout."
+        }
+        & git reset --hard HEAD | Out-Null
+        & git clean -fd | Out-Null
+        & git switch master | Out-Null
+        $fakeBin = Initialize-FakeNodeTooling -Root $repoRoot
+        $env:Path = "$fakeBin;$originalPath"
+
+        @(
+            'schemaVersion: 1',
+            'project:',
+            '  name: tiku',
+            '  currentPhase: module-run-v2-closeout-commit-fail-smoke',
+            'updatedAt: "2026-06-09T09:15:00-07:00"',
+            'repository:',
+            "  lastKnownMasterSha: $cleanAheadBaseSha",
+            "  lastKnownOriginMasterSha: $cleanAheadBaseSha",
+            'currentTask:',
+            '  id: module-run-v2-closeout-commit-fail-smoke',
+            '  status: ready_for_closeout',
+            '  sourceStory: smoke',
+            '  planPath: docs/05-execution-logs/task-plans/commit-fail-smoke.md',
+            '  evidencePath: docs/05-execution-logs/evidence/commit-fail-smoke.md',
+            '  auditReviewPath: docs/05-execution-logs/audits-reviews/commit-fail-smoke.md',
+            '  branch: codex/module-run-v2-closeout-commit-fail-smoke',
+            '  commitSha: pending-local-commit'
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Encoding UTF8
+        @(
+            'schemaVersion: 1',
+            'tasks:',
+            '  - id: module-run-v2-closeout-commit-fail-smoke',
+            '    title: Approved Closeout Commit Fail Smoke',
+            '    status: ready_for_closeout',
+            '    taskKind: implementation',
+            '    closeoutPolicy:',
+            '      localCommit: approved',
+            '      fastForwardMerge:',
+            '        approved: true',
+            '        targetBranch: master',
+            '      push:',
+            '        approved: true',
+            '        target: origin/master',
+            '      cleanup:',
+            '        deleteShortBranch: true',
+            '        parkWorktree: true',
+            '    allowedFiles:',
+            '      - docs/04-agent-system/state/project-state.yaml',
+            '      - docs/04-agent-system/state/task-queue.yaml',
+            '      - docs/05-execution-logs/evidence/commit-fail-smoke.md',
+            '      - docs/05-execution-logs/evidence/commit-fail-note.txt',
+            '      - docs/05-execution-logs/audits-reviews/commit-fail-smoke.md',
+            '    blockedFiles:',
+            '      - .env.local',
+            '      - src/**',
+            '    riskTypes:',
+            '      - automation_policy',
+            '    validationCommands:',
+            '      - git diff --check',
+            '    evidencePath: docs/05-execution-logs/evidence/commit-fail-smoke.md',
+            '    auditReviewPath: docs/05-execution-logs/audits-reviews/commit-fail-smoke.md'
+        ) | Set-Content -LiteralPath "docs/04-agent-system/state/task-queue.yaml" -Encoding UTF8
+        @(
+            '# Approved Closeout Commit Fail Smoke Evidence',
+            'result: pass',
+            'RED: recorded',
+            'GREEN: recorded',
+            'Commit: `abcdef4`',
+            'localFullLoopGate: L2',
+            'blocked remainder: Cost Calibration Gate remains blocked',
+            'threadRolloverGate: continue_current_thread',
+            'nextModuleRunCandidate: no-executable-task-seed-or-approve-next-task',
+            'git diff --check',
+            'Cost Calibration Gate remains blocked'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/evidence/commit-fail-smoke.md" -Encoding UTF8
+        @(
+            '# Approved Closeout Commit Fail Smoke Audit',
+            'APPROVE'
+        ) | Set-Content -LiteralPath "docs/05-execution-logs/audits-reviews/commit-fail-smoke.md" -Encoding UTF8
+        & git add .
+        & git commit -m "chore(smoke): seed commit fail fixture" | Out-Null
+        & git push origin master | Out-Null
+        & git switch -c codex/module-run-v2-closeout-commit-fail-smoke | Out-Null
+        "commit fail note" | Set-Content -LiteralPath "docs/05-execution-logs/evidence/commit-fail-note.txt" -Encoding UTF8
+        @"
+#!/bin/sh
+echo forced pre-commit failure
+exit 23
+"@ | Set-Content -LiteralPath ".git/hooks/pre-commit" -Encoding ASCII
+        $previousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        try {
+            $commitFailOutput = @(
+                powershell.exe -NoProfile -ExecutionPolicy Bypass -File $scriptPath `
+                    -TaskId "module-run-v2-closeout-commit-fail-smoke" `
+                    -ProjectStatePath "docs/04-agent-system/state/project-state.yaml" `
+                    -QueuePath "docs/04-agent-system/state/task-queue.yaml" `
+                    -MatrixPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml" `
+                    -RecoveryPacketHandoffRoot $handoffRoot 2>&1
+            )
+            $commitFailExitCode = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        if ($commitFailExitCode -eq 0) {
+            throw "Expected commit failure to exit non-zero."
+        }
+        Assert-Contains -Output $commitFailOutput -Pattern "recoveryPacketDecision: written"
+        Assert-Contains -Output $commitFailOutput -Pattern "closeoutStateRestored: true"
+        $commitFailQueueAfter = Get-Content -LiteralPath "docs/04-agent-system/state/task-queue.yaml" -Raw
+        if ($commitFailQueueAfter -notmatch "status:\s*ready_for_closeout" -or $commitFailQueueAfter -match "status:\s*closed") {
+            throw "Expected commit failure to restore queue status ready_for_closeout."
+        }
+        $commitFailProjectStateAfter = Get-Content -LiteralPath "docs/04-agent-system/state/project-state.yaml" -Raw
+        if ($commitFailProjectStateAfter -notmatch "status:\s*ready_for_closeout" -or $commitFailProjectStateAfter -match "status:\s*closed") {
+            throw "Expected commit failure to restore project-state status ready_for_closeout."
+        }
     } finally {
         Pop-Location
     }
 } finally {
+    $env:Path = $originalPath
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
     }

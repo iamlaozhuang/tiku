@@ -67,6 +67,7 @@ schemaReadiness:
   executionRule: terminal task diagnostics are zero-exit idle results and must not be treated as executable autodrive work.
 startupDiagnostics:
   stopTaxonomyValues:
+    - runnable
     - approval_missing
     - active_owner
     - hygiene_deferred
@@ -124,7 +125,7 @@ startupDiagnostics:
     - manual_review_available
     - clean
     - advisory_unavailable
-  executionRule: startup diagnostics are advisory unless startupDecision itself returns a hard block or cleanup transaction.
+  executionRule: startup diagnostics are advisory unless startupDecision itself returns a hard block. Safe cleanup candidates emit startupHygieneAdvisory and must not preempt continue_current_task, closeout_recovery, prepare_next_task, or adopt_recoverable_run; cleanup_stale_artifacts is returned only when no executable task is available.
 autoSeedBridge:
   purpose: Bridge no_executable_task into a guarded proposal or approved queue seed transaction.
   defaultMode: proposal_only_or_controlled_auto_seed
@@ -272,6 +273,30 @@ capabilities:
       - manual_required
       - stop_for_hard_block
 closeoutPolicy:
+  approvedCloseoutScriptPath: scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+  localToolingPreflight:
+    scriptPath: scripts/agent-system/Test-ModuleRunV2CloseoutLocalToolingReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2CloseoutLocalToolingReadiness.Smoke.ps1
+    decisionOutput: closeoutLocalToolingDecision
+    decisions:
+      - ready
+      - not_applicable
+      - stop_for_hard_block
+    executionRule: approved closeout must run this preflight after module-closeout and pre-push readiness but before queue or project-state mutation; npm lint and typecheck may run, but lint-staged or other write-capable preflight commands must not run here.
+  recoveryPacket:
+    scriptPath: scripts/agent-system/New-ModuleRunV2RecoveryPacket.ps1
+    smokePath: scripts/agent-system/New-ModuleRunV2RecoveryPacket.Smoke.ps1
+    decisionOutput: recoveryPacketDecision
+    defaultRoot: "%USERPROFILE%\\.codex\\tiku\\handoffs"
+    decisions:
+      - written
+      - reused
+    redactionRule: recovery packets must not include secrets, provider payloads, raw prompts, raw answers, DB URLs, Authorization headers, or complete paper/material content.
+  closeoutExecutionStates:
+    - closeout_local_tooling_failed
+    - closeout_commit_failed_state_restored
+    - closeout_commit_created_pending_merge_push_cleanup
+    - closeout_closed_committed_merged_pushed_cleanup_complete
   localCommit:
     allowedValues:
       - approved

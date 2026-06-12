@@ -77,6 +77,24 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $ownerRecoveryResult.Output -Pattern "recoverySelfRepairDecision: manual_required"
     Assert-Contains -Output $ownerRecoveryResult.Output -Pattern "repairAction: open_owner_recovery_plan"
 
+    $existingPacketPath = Join-Path -Path $fixtureRoot -ChildPath "existing-recovery-packet.md"
+    Set-Content -LiteralPath $existingPacketPath -Value "existing recovery packet" -Encoding UTF8
+    $reusedPacketStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-existing-packet.txt"
+    @"
+startupDecision: open_recovery_plan
+blockerFingerprint: repeat-blocker-123
+recoveryPacketPath: $existingPacketPath
+reason: dirty automation worktree has registry but no adoptable redacted handoff
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $reusedPacketStartupPath -Encoding UTF8
+    $reusedPacketResult = Invoke-Recovery -StartupOutputPath $reusedPacketStartupPath
+    if ($reusedPacketResult.ExitCode -ne 0) {
+        throw "Expected existing recovery packet reuse decision to pass"
+    }
+    Assert-Contains -Output $reusedPacketResult.Output -Pattern "recoverySelfRepairDecision: self_repair_ready"
+    Assert-Contains -Output $reusedPacketResult.Output -Pattern "repairAction: reuse_existing_recovery_packet"
+    Assert-Contains -Output $reusedPacketResult.Output -Pattern "blockerFingerprint: repeat-blocker-123"
+
     $continueStartupPath = Join-Path -Path $fixtureRoot -ChildPath "startup-continue.txt"
     @"
 startupDecision: continue_current_task

@@ -70,6 +70,7 @@ factOwnership:
       - scripts/agent-system/Test-ModuleRunV2StoppedAutomationHygiene.ps1
       - scripts/agent-system/Test-ModuleRunV2UnattendedReadiness.ps1
       - scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
+      - scripts/agent-system/New-ModuleRunV2RecoveryPacket.ps1
     rule: transient ownership is local operational state; committed docs may reference it as evidence but must not make it a durable queue fact.
   - fact: validation command result, changed-file proof, approval boundary, redaction status
     sourcePath: docs/05-execution-logs/evidence/
@@ -187,12 +188,27 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2RecoverySelfRepair.Smoke.ps1
     decisionOutput: recoverySelfRepairDecision
-    role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, owner recovery planning, recovery plan, post-closeout checkpoint confirmation, quiet idle, or quiet active-owner exit
+    role: maps startup recovery findings to bounded repairAction hints such as stopped automation hygiene cleanup, recoverable-run adoption, owner recovery planning, recovery plan or existing recovery packet reuse, post-closeout checkpoint confirmation, quiet idle, or quiet active-owner exit
+  - id: module-run-v2-recovery-packet-generator
+    path: scripts/agent-system/New-ModuleRunV2RecoveryPacket.ps1
+    smokePath: scripts/agent-system/New-ModuleRunV2RecoveryPacket.Smoke.ps1
+    decisionOutput: recoveryPacketDecision
+    role: writes or reuses a redacted out-of-repository recovery packet for failed closeout or repeated blocker states, including task id, worktree, branch, changed files, failed command, closeout transaction state, safeToAdopt, next command, and forbidden actions
+  - id: module-run-v2-closeout-local-tooling-readiness
+    path: scripts/agent-system/Test-ModuleRunV2CloseoutLocalToolingReadiness.ps1
+    smokePath: scripts/agent-system/Test-ModuleRunV2CloseoutLocalToolingReadiness.Smoke.ps1
+    decisionOutput: closeoutLocalToolingDecision
+    role: approved-closeout preflight that verifies local JS tooling availability and runs lint/typecheck before any queue or project-state closeout mutation, without invoking write-capable lint-staged hooks
   - id: module-run-v2-validation-surface-readiness
     path: scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2ValidationSurfaceReadiness.Smoke.ps1
     decisionOutput: validationSurfaceDecision
     role: read-only classifier for focused validation satisfaction, unrelated baseline failures, closeout transaction state, and safeToAdopt=false owner recovery boundaries
+  - id: module-run-v2-approved-closeout
+    path: scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.ps1
+    smokePath: scripts/agent-system/Invoke-ModuleRunV2ApprovedCloseout.Smoke.ps1
+    decisionOutput: approvedCloseoutContinuation
+    role: executes structured closeoutPolicy commit, fast-forward merge, push, worktree parking, and branch cleanup after module closeout, pre-push readiness, local tooling preflight, state snapshots, and recovery-packet guarded failure handling
   - id: module-run-v2-run-registry-finalizer
     path: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
     smokePath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1

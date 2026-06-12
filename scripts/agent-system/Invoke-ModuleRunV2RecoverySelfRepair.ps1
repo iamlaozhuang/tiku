@@ -68,7 +68,9 @@ function Write-RecoveryResult {
         [Parameter(Mandatory = $true)][string]$RepairAction,
         [Parameter(Mandatory = $true)][string]$Reason,
         [Parameter(Mandatory = $true)][int]$ExitCode,
-        [Parameter(Mandatory = $true)][string]$StartupDecision
+        [Parameter(Mandatory = $true)][string]$StartupDecision,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$RecoveryPacketPath = "",
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$BlockerFingerprint = ""
     )
 
     Write-Output ""
@@ -81,6 +83,12 @@ function Write-RecoveryResult {
     Write-Output "repairAction: $RepairAction"
     Write-Output "executeRequested: $($Execute.ToString().ToLowerInvariant())"
     Write-Output "reason: $Reason"
+    if (-not [string]::IsNullOrWhiteSpace($RecoveryPacketPath)) {
+        Write-Output "recoveryPacketPath: $RecoveryPacketPath"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($BlockerFingerprint)) {
+        Write-Output "blockerFingerprint: $BlockerFingerprint"
+    }
     Write-Output "nextModuleRunCandidate: $NextModuleRunCandidate"
     Write-Output "Cost Calibration Gate remains blocked"
     exit $ExitCode
@@ -159,6 +167,21 @@ try {
     }
 
     if ($startupDecision -eq "open_recovery_plan") {
+        $recoveryPacketPath = Get-KeyValue -Lines $startupOutput -Key "recoveryPacketPath"
+        $blockerFingerprint = Get-KeyValue -Lines $startupOutput -Key "blockerFingerprint"
+        if (
+            -not [string]::IsNullOrWhiteSpace($recoveryPacketPath) -and
+            (Test-Path -LiteralPath $recoveryPacketPath)
+        ) {
+            Write-RecoveryResult `
+                -Decision "self_repair_ready" `
+                -RepairAction "reuse_existing_recovery_packet" `
+                -Reason "startup found an existing recovery packet for the same blocker fingerprint" `
+                -ExitCode 0 `
+                -StartupDecision $startupDecision `
+                -RecoveryPacketPath $recoveryPacketPath `
+                -BlockerFingerprint $blockerFingerprint
+        }
         Write-RecoveryResult -Decision "self_repair_ready" -RepairAction "open_recovery_plan" -Reason "startup found a recoverable run that needs a recovery plan before edits" -ExitCode 0 -StartupDecision $startupDecision
     }
 

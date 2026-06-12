@@ -266,7 +266,8 @@ tasks:
     }
     Assert-Contains -Output $continueOutput -Pattern "runnerDecision: continue_current_task"
     Assert-Contains -Output $continueOutput -Pattern "runnerNextAction: agent_continue_current_task"
-    Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy:"
+    Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy: runnable"
+    Assert-Contains -Output $continueOutput -Pattern "blockerClass: runnable"
     Assert-Contains -Output $continueOutput -Pattern "autopilotDecision: continue_current_thread"
     Assert-Contains -Output $continueOutput -Pattern "nextActionDecision:"
     Assert-Contains -Output $continueOutput -Pattern "diagnosticOnly: true"
@@ -1149,9 +1150,11 @@ tasks:
             $lockedCleanupProcess.WaitForExit()
         }
     }
-    Assert-Contains -Output $cleanupOutput -Pattern "startupDecision: cleanup_stale_artifacts"
-    Assert-Contains -Output $cleanupOutput -Pattern "stoppedAutomationHygieneDecision: cleanup_deferred"
+    Assert-Contains -Output $cleanupOutput -Pattern "startupHygieneAdvisory: cleanup_available"
+    Assert-Contains -Output $cleanupOutput -Pattern "startupDecision: continue_current_task"
+    Assert-Contains -Output $cleanupOutput -Pattern "stopTaxonomy: runnable"
     Assert-Contains -Output $cleanupOutput -Pattern "runnerDecision: continue_current_task"
+    Assert-Contains -Output $cleanupOutput -Pattern "blockerClass: runnable"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

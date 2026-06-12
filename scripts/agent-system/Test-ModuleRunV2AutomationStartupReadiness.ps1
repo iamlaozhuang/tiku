@@ -110,6 +110,9 @@ function Get-StartupStopTaxonomy {
     if ($Reason -match "validation|dirty primary automation repository") { return "validation_failed" }
 
     switch ($Decision) {
+        "continue_current_task" { return "runnable" }
+        "prepare_next_task" { return "runnable" }
+        "adopt_recoverable_run" { return "runnable" }
         "no_executable_task" { return "no_task" }
         "exit_active_owner_present" { return "active_owner" }
         "stop_existing_run_active" { return "active_owner" }
@@ -826,6 +829,14 @@ function Test-AutomationWorktreeHygiene {
                 $script:startupOverrideReason = "dirty automation worktree has registry but no adoptable redacted handoff"
                 $script:startupOverrideExitCode = 0
                 Write-Output "OPEN_RECOVERY_PLAN $worktreeFullPath"
+                $recoveryPacketPath = [string]$runRegistry.recoveryPacketPath
+                $blockerFingerprint = [string]$runRegistry.blockerFingerprint
+                if (-not [string]::IsNullOrWhiteSpace($recoveryPacketPath)) {
+                    Write-Output "recoveryPacketPath: $recoveryPacketPath"
+                }
+                if (-not [string]::IsNullOrWhiteSpace($blockerFingerprint)) {
+                    Write-Output "blockerFingerprint: $blockerFingerprint"
+                }
                 return
             }
 
@@ -953,7 +964,14 @@ try {
         Write-Output "runRegistryCount: $($runRegistryEntries.Count)"
         Test-AutomationWorktreeHygiene -Root $AutomationWorktreeRoot -CurrentWorktree $currentWorktree -RunRegistryEntries $runRegistryEntries -AllowedHandoffRoot $HandoffRoot -HeartbeatMinutes $ActiveRunHeartbeatMinutes
         if (-not [string]::IsNullOrWhiteSpace($startupOverrideDecision)) {
-            Write-StartupResult -Decision $startupOverrideDecision -Reason $startupOverrideReason -ExitCode $startupOverrideExitCode
+            if ($startupOverrideDecision -eq "cleanup_stale_artifacts") {
+                Add-RecoverableFinding "RECOVERABLE_AUTOMATION_WORKTREE_CLEANUP_READY $startupOverrideReason"
+                $startupOverrideDecision = ""
+                $startupOverrideReason = ""
+                $startupOverrideExitCode = 1
+            } else {
+                Write-StartupResult -Decision $startupOverrideDecision -Reason $startupOverrideReason -ExitCode $startupOverrideExitCode
+            }
         }
     }
 
@@ -991,11 +1009,6 @@ try {
         Write-StartupResult -Decision "stop_for_hard_block" -Reason "startup readiness failed with $($findings.Count) finding(s)" -ExitCode 1
     }
 
-    if ($recoverableFindings.Count -gt 0) {
-        Write-Output "recoverableAutomationWorktreeCount: $($recoverableFindings.Count)"
-        Write-StartupResult -Decision "cleanup_stale_artifacts" -Reason "clean stale automation worktree cleanup is available" -ExitCode 0
-    }
-
     $taskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $TaskId)
     $taskStatus = Get-ScalarValue -Block $taskBlock -Key "status"
     $pendingTaskIds = @(Get-PendingTaskIds -Blocks $taskBlocks)
@@ -1005,6 +1018,10 @@ try {
     Write-Output "pendingTaskCount: $($pendingTaskIds.Count)"
     foreach ($pendingTaskId in $pendingTaskIds) {
         Write-Output "pendingTask: $pendingTaskId"
+    }
+    if ($recoverableFindings.Count -gt 0) {
+        Write-Output "recoverableAutomationWorktreeCount: $($recoverableFindings.Count)"
+        Write-Output "startupHygieneAdvisory: cleanup_available"
     }
 
     if ($taskStatus -eq "in_progress") {
@@ -1022,6 +1039,10 @@ try {
 
     if ($pendingTaskIds.Count -gt 0) {
         Write-StartupResult -Decision "prepare_next_task" -Reason "pending task is available after startup gates passed" -ExitCode 0
+    }
+
+    if ($recoverableFindings.Count -gt 0) {
+        Write-StartupResult -Decision "cleanup_stale_artifacts" -Reason "clean stale automation worktree cleanup is available and no executable task is pending" -ExitCode 0
     }
 
     if ($taskStatus -in @("done", "closed")) {

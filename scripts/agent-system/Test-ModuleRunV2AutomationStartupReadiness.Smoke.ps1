@@ -143,8 +143,18 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
 
 $fixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-automation-startup-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $fixtureRoot | Out-Null
+$originalUserProfile = $env:USERPROFILE
 
 try {
+    $env:USERPROFILE = $fixtureRoot
+    $automationRoot = Join-Path -Path $fixtureRoot -ChildPath ".codex\automations\tiku-module-run-v2-autopilot"
+    New-Item -ItemType Directory -Path $automationRoot -Force | Out-Null
+    @"
+id = "tiku-module-run-v2-autopilot"
+status = "ACTIVE"
+prompt = "Current automation identity map tiku-module-run-v2-autopilot tiku-module-run-v2-autopilot-2 mechanic-2 on-demand standingUnattendedLocalCloseoutApproval low-risk local implementation tasks only local commit fast-forward merge to master push origin/master merged short-branch cleanup worktree parking High-risk capability gates remain blocked Embedded mechanic policy"
+"@ | Set-Content -LiteralPath (Join-Path -Path $automationRoot -ChildPath "automation.toml") -Encoding UTF8
+
     $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $fixtureRoot -ChildPath "matrix.yaml"
@@ -171,7 +181,7 @@ terminologyAnchors:
             -SkipPrimaryRepositoryPostureCheck
     )
     Assert-Contains -Output $continueOutput -Pattern "startupDecision: continue_current_task"
-    Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy:"
+    Assert-Contains -Output $continueOutput -Pattern "stopTaxonomy: runnable"
     Assert-Contains -Output $continueOutput -Pattern "localToolingReadiness:"
 
     Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "ready_for_closeout" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning" -IncludeCloseoutPolicy
@@ -201,6 +211,7 @@ terminologyAnchors:
             -SkipPrimaryRepositoryPostureCheck
     )
     Assert-Contains -Output $pendingOutput -Pattern "startupDecision: prepare_next_task"
+    Assert-Contains -Output $pendingOutput -Pattern "stopTaxonomy: runnable"
     Assert-Contains -Output $pendingOutput -Pattern "startupStateWarning: lastKnownMasterSha is an accepted ancestor of master"
     Assert-Contains -Output $pendingOutput -Pattern "startupStateWarning: currentTask.commitSha is a placeholder"
     Assert-Contains -Output $pendingOutput -Pattern "startupStateCheckpoint: accepted_ancestor_checkpoint"
@@ -302,7 +313,30 @@ terminologyAnchors:
     }
     Assert-Contains -Output $recoverableWorktreeOutput -Pattern "RECOVERABLE_AUTOMATION_WORKTREE_STALE_CLEAN"
     Assert-Contains -Output $recoverableWorktreeOutput -Pattern "recoverableAutomationWorktreeCount: 1"
-    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "startupDecision: cleanup_stale_artifacts"
+    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "startupHygieneAdvisory: cleanup_available"
+    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "startupDecision: prepare_next_task"
+    Assert-Contains -Output $recoverableWorktreeOutput -Pattern "stopTaxonomy: runnable"
+
+    Write-FixtureState -ProjectStatePath $projectStatePath -QueuePath $queuePath -CurrentTaskStatus "done" -RemoteAutomationApproval "lease_guarded_local_readiness_and_planning"
+    Push-Location $parkingRepo
+    try {
+        $recoverableNoTaskOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $queuePath `
+                -MatrixPath $matrixPath `
+                -AutomationWorktreeRoot $startupWorktreeRoot `
+                -AllowProtectedBranch `
+                -SkipPrimaryRepositoryPostureCheck `
+                -SkipLeaseCheck
+        )
+    } finally {
+        Pop-Location
+    }
+    Assert-Contains -Output $recoverableNoTaskOutput -Pattern "recoverableAutomationWorktreeCount: 1"
+    Assert-Contains -Output $recoverableNoTaskOutput -Pattern "startupHygieneAdvisory: cleanup_available"
+    Assert-Contains -Output $recoverableNoTaskOutput -Pattern "startupDecision: cleanup_stale_artifacts"
+    Assert-Contains -Output $recoverableNoTaskOutput -Pattern "stopTaxonomy: hygiene_deferred"
 
     $seedRepo = Join-Path -Path $fixtureRoot -ChildPath "seed-recovery-repo"
     $seedWorktreeRoot = Join-Path -Path $fixtureRoot -ChildPath "seed-recovery-worktrees"
@@ -658,6 +692,7 @@ Review status: PENDING
         Pop-Location
     }
 } finally {
+    $env:USERPROFILE = $originalUserProfile
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
     }

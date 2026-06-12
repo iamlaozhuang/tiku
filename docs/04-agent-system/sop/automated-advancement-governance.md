@@ -152,6 +152,12 @@ uses `create_thread` or `send_message_to_thread` only when the thread launch pol
 
 Dry-run launch decisions are advisory unless a durable handoff was explicitly produced by an approved closeout flow.
 
+Startup may emit `startupHygieneAdvisory: cleanup_available` when it sees safe cleanup candidates such as stale clean
+automation worktrees. This advisory must not preempt `continue_current_task`, `closeout_recovery`, `prepare_next_task`,
+or `adopt_recoverable_run`; those executable paths use `stopTaxonomy: runnable` or their specific closeout taxonomy and
+may proceed through their existing gates. Only when there is no executable current or pending task should startup return
+`startupDecision: cleanup_stale_artifacts`.
+
 When startup returns `startupDecision: cleanup_stale_artifacts`, automation must run the stopped-automation hygiene gate
 before unattended readiness, handoff generation, or next-task selection. The cleanup command is limited to:
 
@@ -222,7 +228,7 @@ The gate consumes `startupDecision` and emits `recoverySelfRepairDecision` plus 
 - `self_repair_ready`: a bounded repair action is available, such as
   `repairAction: run_stopped_automation_hygiene_cleanup`,
   `repairAction: adopt_recoverable_run_after_redacted_handoff_audit`, `repairAction: open_recovery_plan`, or
-  `repairAction: confirm_post_closeout_checkpoint`.
+  `repairAction: reuse_existing_recovery_packet`, or `repairAction: confirm_post_closeout_checkpoint`.
 - `continue_without_repair`: startup can proceed without a repair step.
 - `exit_active_owner_present`: another active owner or lease owns the lane; scheduled automation exits quietly.
 - `manual_required`: recovery requires a human decision, including stale dirty active-owner worktrees protected by
@@ -234,6 +240,12 @@ The gate is decision-only by default. `cleanup_stale_artifacts` is not a reason 
 stopped-automation hygiene gate. Accepted post-closeout ancestor checkpoints are confirmable without writing new current
 HEAD values back into committed state files. Dirty unknown worktrees, invalid leases, blocked gates,
 provider/env/schema/deploy needs, and unsafe cleanup paths remain hard stops.
+
+If startup reports `startupDecision: open_recovery_plan` with both `blockerFingerprint` and an existing
+`recoveryPacketPath`, recovery self-repair must reuse that packet rather than generate another recovery plan for the same
+blocker. Recovery packets live outside the repository by default under `%USERPROFILE%\.codex\tiku\handoffs\` and must
+contain only redacted operational facts: task id, branch/worktree, changed files, last passed gate, failed command,
+failure class, `closeoutTransactionState`, `safeToAdopt`, next command, and forbidden actions.
 
 When the only repair action is `confirm_post_closeout_checkpoint`, execution is allowed only through:
 
@@ -850,6 +862,17 @@ Cost Calibration Gate execution.
 Approved closeout may start from either a dirty task-scoped closeout worktree or a clean short-lived branch that already
 has committed task work ahead of the base branch. A clean branch with no commits ahead of the base is not an executable
 closeout candidate.
+
+Approved closeout must run local tooling preflight after module-closeout readiness and pre-push readiness but before any
+tracked queue or `project-state.yaml` mutation. The preflight checks local JS tooling availability and runs `npm.cmd run
+lint` plus `npm.cmd run typecheck` when `package.json` exists; it must not run `lint-staged` or other commands that can
+modify files. If this preflight fails, closeout writes a recovery packet and leaves durable task state unchanged.
+
+Before writing `closed` state, approved closeout must snapshot `task-queue.yaml` and `project-state.yaml`. If the local
+closeout commit fails after those files are updated, the script must restore both snapshots, unstage the partial state
+mutation, emit `closeoutStateRestored: true`, and write a recovery packet. If commit succeeds but merge, push, parking,
+or branch cleanup fails, the successful commit remains the recovery point and the recovery packet must record
+`closeout_commit_created_pending_merge_push_cleanup`; automation must not silently claim the next task.
 
 ## Standing Unattended Local Closeout Approval
 

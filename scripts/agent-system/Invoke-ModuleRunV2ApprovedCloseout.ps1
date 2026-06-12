@@ -19,7 +19,10 @@ param(
     [string]$BaseBranch = "master",
 
     [Parameter(Mandatory = $false)]
-    [string]$CloseoutAuthorizationStatement = ""
+    [string]$CloseoutAuthorizationStatement = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$RecoveryPacketHandoffRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -225,6 +228,68 @@ function Invoke-GitCommand {
     }
 }
 
+function Invoke-RecoveryPacket {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptRoot,
+        [Parameter(Mandatory = $true)][string]$TargetTaskId,
+        [Parameter(Mandatory = $true)][string]$WorktreePath,
+        [Parameter(Mandatory = $true)][string]$Branch,
+        [Parameter(Mandatory = $true)][string]$FailureClass,
+        [Parameter(Mandatory = $true)][string]$FailedCommand,
+        [Parameter(Mandatory = $true)][string]$LastPassedGate,
+        [Parameter(Mandatory = $true)][string]$CloseoutTransactionState,
+        [Parameter(Mandatory = $false)][string[]]$ChangedFiles = @(),
+        [Parameter(Mandatory = $false)][string]$NextCommand = "inspect recovery packet and rerun approved closeout"
+    )
+
+    $packetScriptPath = Join-Path -Path $ScriptRoot -ChildPath "New-ModuleRunV2RecoveryPacket.ps1"
+    if (-not (Test-Path -LiteralPath $packetScriptPath)) {
+        Write-Output "recoveryPacketDecision: unavailable"
+        Write-Output "recoveryPacketReason: missing New-ModuleRunV2RecoveryPacket.ps1"
+        return
+    }
+
+    $packetArguments = @{
+        TaskId                   = $TargetTaskId
+        WorktreePath             = $WorktreePath
+        Branch                   = $Branch
+        FailureClass             = $FailureClass
+        FailedCommand            = $FailedCommand
+        LastPassedGate           = $LastPassedGate
+        CloseoutTransactionState = $CloseoutTransactionState
+        ChangedFiles             = $ChangedFiles
+        SafeToAdopt              = $false
+        NextCommand              = $NextCommand
+    }
+    if (-not [string]::IsNullOrWhiteSpace($RecoveryPacketHandoffRoot)) {
+        $packetArguments["HandoffRoot"] = $RecoveryPacketHandoffRoot
+    }
+
+    & $packetScriptPath @packetArguments
+}
+
+function Invoke-CloseoutLocalToolingReadiness {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptRoot,
+        [Parameter(Mandatory = $true)][string]$RepositoryPath
+    )
+
+    $toolingScriptPath = Join-Path -Path $ScriptRoot -ChildPath "Test-ModuleRunV2CloseoutLocalToolingReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $toolingScriptPath)) {
+        throw "Missing closeout local tooling readiness script: $toolingScriptPath"
+    }
+
+    $toolingOutput = @(
+        powershell.exe -NoProfile -ExecutionPolicy Bypass -File $toolingScriptPath -RepositoryPath $RepositoryPath 2>&1
+    )
+    $toolingExitCode = $LASTEXITCODE
+    $toolingOutput | ForEach-Object { Write-Output $_ }
+
+    if ($toolingExitCode -ne 0) {
+        throw "Closeout local tooling readiness failed."
+    }
+}
+
 function Get-BranchWorktreePath {
     param([Parameter(Mandatory = $true)][string]$Branch)
 
@@ -426,6 +491,7 @@ $currentBranch = ((& git branch --show-current) -join "").Trim()
 if ([string]::IsNullOrWhiteSpace($currentBranch) -or $currentBranch -in @("master", "main")) {
     throw "Approved closeout requires a non-protected short-lived branch."
 }
+$currentWorktreeRoot = ((& git rev-parse --show-toplevel) -join "").Trim()
 
 $allowedFiles = @(Get-ListValues -Block $taskBlock -Key "allowedFiles")
 $blockedFiles = @(Get-ListValues -Block $taskBlock -Key "blockedFiles")
@@ -467,46 +533,105 @@ if ($LASTEXITCODE -ne 0) {
     throw "Pre-push readiness failed."
 }
 
-$preCloseoutCommitSha = ((& git rev-parse HEAD) -join "").Trim()
-Update-QueueStatus -Path $QueuePath -TargetTaskId $TaskId -Status "closed"
-Update-ProjectStateCloseout -Path $ProjectStatePath -TargetTaskId $TaskId -CommitSha $preCloseoutCommitSha
-
-$postStateChangedFiles = @(Get-ChangedFiles)
-foreach ($changedFile in $postStateChangedFiles) {
-    Invoke-GitCommand -Arguments @("add", "--all", "--", $changedFile)
+try {
+    Invoke-CloseoutLocalToolingReadiness -ScriptRoot $scriptRoot -RepositoryPath $currentWorktreeRoot
+} catch {
+    Invoke-RecoveryPacket `
+        -ScriptRoot $scriptRoot `
+        -TargetTaskId $TaskId `
+        -WorktreePath $currentWorktreeRoot `
+        -Branch $currentBranch `
+        -FailureClass "closeout_local_tooling_failed" `
+        -FailedCommand $_.Exception.Message `
+        -LastPassedGate "pre-push readiness" `
+        -CloseoutTransactionState "closeout_local_tooling_failed" `
+        -ChangedFiles $changedFiles `
+        -NextCommand "restore local JS tooling, then rerun Invoke-ModuleRunV2ApprovedCloseout.ps1"
+    throw
 }
 
-$commitMessage = "chore(task): close out $TaskId"
-Invoke-GitCommand -Arguments @("commit", "-m", $commitMessage)
+$preCloseoutCommitSha = ((& git rev-parse HEAD) -join "").Trim()
+$queueSnapshot = Get-Content -LiteralPath $QueuePath -Raw
+$projectStateSnapshot = Get-Content -LiteralPath $ProjectStatePath -Raw
+$closeoutStateWritten = $false
+$postStateChangedFiles = @()
+
+try {
+    Update-QueueStatus -Path $QueuePath -TargetTaskId $TaskId -Status "closed"
+    Update-ProjectStateCloseout -Path $ProjectStatePath -TargetTaskId $TaskId -CommitSha $preCloseoutCommitSha
+    $closeoutStateWritten = $true
+
+    $postStateChangedFiles = @(Get-ChangedFiles)
+    foreach ($changedFile in $postStateChangedFiles) {
+        Invoke-GitCommand -Arguments @("add", "--all", "--", $changedFile)
+    }
+
+    $commitMessage = "chore(task): close out $TaskId"
+    Invoke-GitCommand -Arguments @("commit", "-m", $commitMessage)
+} catch {
+    if ($closeoutStateWritten) {
+        Set-Content -LiteralPath $QueuePath -Value $queueSnapshot -Encoding UTF8
+        Set-Content -LiteralPath $ProjectStatePath -Value $projectStateSnapshot -Encoding UTF8
+        & git reset --mixed HEAD | Out-Null
+        Write-Output "closeoutStateRestored: true"
+    }
+
+    Invoke-RecoveryPacket `
+        -ScriptRoot $scriptRoot `
+        -TargetTaskId $TaskId `
+        -WorktreePath $currentWorktreeRoot `
+        -Branch $currentBranch `
+        -FailureClass "closeout_commit_failed" `
+        -FailedCommand $_.Exception.Message `
+        -LastPassedGate "closeout local tooling readiness" `
+        -CloseoutTransactionState "closeout_commit_failed_state_restored" `
+        -ChangedFiles $postStateChangedFiles `
+        -NextCommand "inspect restored state and rerun Invoke-ModuleRunV2ApprovedCloseout.ps1 after fixing commit blocker"
+    throw
+}
 
 $commitSha = ((& git rev-parse HEAD) -join "").Trim()
 Write-Output "commitSha: $commitSha"
 
-$currentWorktreeRoot = ((& git rev-parse --show-toplevel) -join "").Trim()
 $baseBranchWorktreePath = Get-BranchWorktreePath -Branch $BaseBranch
 
-if (
-    -not [string]::IsNullOrWhiteSpace($baseBranchWorktreePath) -and
-    (Resolve-Path -LiteralPath $baseBranchWorktreePath).Path -ne (Resolve-Path -LiteralPath $currentWorktreeRoot).Path
-) {
-    Assert-CleanWorktree -Path $baseBranchWorktreePath
-    Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "merge", "--ff-only", $currentBranch)
-    Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "push", "origin", $BaseBranch)
-    Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "fetch", "origin")
-    Invoke-GitCommand -Arguments @("fetch", "origin")
-} else {
-    Invoke-GitCommand -Arguments @("switch", $BaseBranch)
+try {
+    if (
+        -not [string]::IsNullOrWhiteSpace($baseBranchWorktreePath) -and
+        (Resolve-Path -LiteralPath $baseBranchWorktreePath).Path -ne (Resolve-Path -LiteralPath $currentWorktreeRoot).Path
+    ) {
+        Assert-CleanWorktree -Path $baseBranchWorktreePath
+        Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "merge", "--ff-only", $currentBranch)
+        Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "push", "origin", $BaseBranch)
+        Invoke-GitCommand -Arguments @("-C", $baseBranchWorktreePath, "fetch", "origin")
+        Invoke-GitCommand -Arguments @("fetch", "origin")
+    } else {
+        Invoke-GitCommand -Arguments @("switch", $BaseBranch)
 
-    Invoke-GitCommand -Arguments @("merge", "--ff-only", $currentBranch)
+        Invoke-GitCommand -Arguments @("merge", "--ff-only", $currentBranch)
 
-    Invoke-GitCommand -Arguments @("push", "origin", $BaseBranch)
+        Invoke-GitCommand -Arguments @("push", "origin", $BaseBranch)
 
-    Invoke-GitCommand -Arguments @("fetch", "origin")
+        Invoke-GitCommand -Arguments @("fetch", "origin")
+    }
+
+    Invoke-GitCommand -Arguments @("switch", "--detach", "origin/$BaseBranch")
+
+    Invoke-GitCommand -Arguments @("branch", "-D", $currentBranch)
+} catch {
+    Invoke-RecoveryPacket `
+        -ScriptRoot $scriptRoot `
+        -TargetTaskId $TaskId `
+        -WorktreePath $currentWorktreeRoot `
+        -Branch $currentBranch `
+        -FailureClass "closeout_git_operation_failed" `
+        -FailedCommand $_.Exception.Message `
+        -LastPassedGate "closeout commit" `
+        -CloseoutTransactionState "closeout_commit_created_pending_merge_push_cleanup" `
+        -ChangedFiles @() `
+        -NextCommand "inspect git state, then complete merge/push/cleanup or run post-closeout reconciliation"
+    throw
 }
-
-Invoke-GitCommand -Arguments @("switch", "--detach", "origin/$BaseBranch")
-
-Invoke-GitCommand -Arguments @("branch", "-D", $currentBranch)
 
 Write-Output "mergeTarget: $BaseBranch"
 Write-Output "pushTarget: origin/$BaseBranch"

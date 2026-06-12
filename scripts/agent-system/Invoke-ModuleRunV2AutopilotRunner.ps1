@@ -797,6 +797,9 @@ function Get-RunnerStopTaxonomy {
     if ($NextAction -match "closeout") { return "closeout_pending" }
 
     switch ($Decision) {
+        "prepare_next_task" { return "runnable" }
+        "continue_current_task" { return "runnable" }
+        "adopt_recoverable_run" { return "runnable" }
         "no_executable_task" { return "no_task" }
         "planned_pause_for_tuning" { return "planned_pause" }
         "exit_active_owner_present" { return "active_owner" }
