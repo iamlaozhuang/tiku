@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-activation-branch-posture-hardening
-updatedAt: "2026-06-11T22:33:33-07:00"
+  currentPhase: batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries
+updatedAt: "2026-06-11T22:53:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,14 +269,14 @@ repository:
   lastKnownMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
   lastKnownOriginMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
 currentTask:
-  id: module-run-v2-activation-branch-posture-hardening
+  id: batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries
   status: closed
-  sourceStory: user-request-2026-06-11-mechanism-hardening-plan
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
-  branch: codex/module-run-v2-branch-posture-registration-hardening
-  commitSha: 25382855b4e0e0c4a4ad92367e9ab681a3717b45
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  evidencePath: docs/05-execution-logs/evidence/batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  branch: codex/batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries
+  commitSha: 703e8ea638e391125dce743568f01b7a86959540
   prUrl: null
   retryCount: 0
   lastFailurePath: null

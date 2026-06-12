@@ -9,6 +9,7 @@ import type {
   AuthorizationSourceTypeSummaryInput,
   AuthorizationSourceTypeSummarySource,
 } from "../models/authorization-source-type-summary";
+import type { EffectiveAuthorizationEdition } from "../contracts/effective-authorization-contract";
 
 export type AuthorizationSourceTypeSummaryValidationResult =
   | {
@@ -71,6 +72,24 @@ function normalizeAuthorizationType(
   return null;
 }
 
+function normalizeEffectiveEdition(
+  value: unknown,
+): EffectiveAuthorizationEdition | null {
+  if (value === null || value === undefined) {
+    return "standard";
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+
+  return normalizedValue === "standard" || normalizedValue === "advanced"
+    ? normalizedValue
+    : null;
+}
+
 function isProfession(value: unknown): value is Profession {
   return (
     typeof value === "string" && professionValues.includes(value as Profession)
@@ -92,6 +111,7 @@ function normalizeAuthorizationSource(
 
   const authorizationType = normalizeAuthorizationType(value.authorizationType);
   const publicId = normalizeRequiredText(value.publicId);
+  const effectiveEdition = normalizeEffectiveEdition(value.effectiveEdition);
   const level = normalizePositiveInteger(value.level);
   const startsAt = normalizeDate(value.startsAt);
   const expiresAt = normalizeDate(value.expiresAt);
@@ -102,6 +122,7 @@ function normalizeAuthorizationSource(
   if (
     authorizationType === null ||
     publicId === null ||
+    effectiveEdition === null ||
     !isProfession(value.profession) ||
     level === null ||
     startsAt === null ||
@@ -122,6 +143,7 @@ function normalizeAuthorizationSource(
   return {
     authorizationType,
     publicId,
+    effectiveEdition,
     profession: value.profession,
     level,
     startsAt,

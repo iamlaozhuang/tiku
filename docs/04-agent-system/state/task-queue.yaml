@@ -3143,7 +3143,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries
     evidencePath: docs/05-execution-logs/evidence/batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: batch-117-authorization-and-access-paper-and-mock-exam-access-context-without-c
     title: Module Run v2 authorization-and-access implementation seed

@@ -1,6 +1,10 @@
 import type { AuthStatus, Profession } from "../models/auth";
 import type { AuthorizationContextSourceType } from "../models/authorization-context";
 import type {
+  EffectiveAuthorizationEdition,
+  EffectiveAuthorizationOwnerType,
+} from "./effective-authorization-contract";
+import type {
   AuthorizationSourceTypeSummaryRuntimeStatus,
   AuthorizationSourceTypeSummaryStatus,
 } from "../models/authorization-source-type-summary";
@@ -22,6 +26,11 @@ export type AuthorizationSourceTypeEffectiveWindowDto = {
 export type AuthorizationSourceTypeDto = {
   authorizationPublicId: string;
   authorizationSource: AuthorizationContextSourceType;
+  effectiveEdition: EffectiveAuthorizationEdition;
+  ownerType: EffectiveAuthorizationOwnerType;
+  ownerPublicId: string;
+  quotaOwnerType: EffectiveAuthorizationOwnerType;
+  quotaOwnerPublicId: string;
   profession: Profession;
   level: number;
   startsAt: string;

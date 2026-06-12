@@ -9,6 +9,7 @@ function createBaseInput() {
       {
         authorizationType: "personal_auth",
         publicId: "personal_auth_public_123",
+        effectiveEdition: "advanced",
         profession: "monopoly",
         level: 3,
         startsAt: "2026-06-01T00:00:00.000Z",
@@ -42,15 +43,34 @@ describe("authorization source type summary validator", () => {
           {
             authorizationType: "personal_auth",
             publicId: "personal_auth_public_123",
+            effectiveEdition: "advanced",
             organizationPublicId: null,
           },
           {
             authorizationType: "org_auth",
             publicId: "org_auth_public_456",
+            effectiveEdition: "standard",
             organizationPublicId: "organization_public_456",
           },
         ],
       },
+    });
+  });
+
+  it("rejects invalid effective edition values", () => {
+    expect(
+      normalizeAuthorizationSourceTypeSummaryInput({
+        ...createBaseInput(),
+        authorizationSources: [
+          {
+            ...createBaseInput().authorizationSources[0],
+            effectiveEdition: "enterprise",
+          },
+        ],
+      }),
+    ).toEqual({
+      success: false,
+      message: "Invalid authorization source type summary input.",
     });
   });
 

@@ -43,11 +43,24 @@ function countSources(
 }
 
 function mapSourceTypeToDto(
+  userPublicId: string,
   authorizationSource: AuthorizationSourceTypeSummarySource,
 ): AuthorizationSourceTypeDto {
+  const isPersonalAuth =
+    authorizationSource.authorizationType === "personal_auth";
+  const ownerPublicId = isPersonalAuth
+    ? userPublicId
+    : authorizationSource.organizationPublicId;
+  const ownerType = isPersonalAuth ? "personal" : "organization";
+
   return {
     authorizationPublicId: authorizationSource.publicId,
     authorizationSource: authorizationSource.authorizationType,
+    effectiveEdition: authorizationSource.effectiveEdition,
+    ownerType,
+    ownerPublicId: ownerPublicId ?? userPublicId,
+    quotaOwnerType: ownerType,
+    quotaOwnerPublicId: ownerPublicId ?? userPublicId,
     profession: authorizationSource.profession,
     level: authorizationSource.level,
     startsAt: authorizationSource.startsAt.toISOString(),
@@ -76,7 +89,9 @@ function mapAuthorizationSourceTypeSummaryToDto(
       earliestStartsAt: new Date(Math.min(...startsAtValues)).toISOString(),
       latestExpiresAt: new Date(Math.max(...expiresAtValues)).toISOString(),
     },
-    sourceTypes: input.authorizationSources.map(mapSourceTypeToDto),
+    sourceTypes: input.authorizationSources.map((authorizationSource) =>
+      mapSourceTypeToDto(input.userPublicId, authorizationSource),
+    ),
   };
 }
 
