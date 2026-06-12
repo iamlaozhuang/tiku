@@ -24,6 +24,10 @@ param(
     [string]$SchemaPath = "docs\04-agent-system\state\autodrive-control-schema.yaml",
 
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$TaskHistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml",
+
+    [Parameter(Mandatory = $false)]
     [string]$RunRegistryRoot = "",
 
     [Parameter(Mandatory = $false)]
@@ -359,9 +363,15 @@ function Assert-SchemaReady {
 
 function Get-QueueContext {
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
+    $historyLines = @()
+    if (Test-Path -LiteralPath $TaskHistoryIndexPath) {
+        $historyLines = @(Get-Content -LiteralPath $TaskHistoryIndexPath)
+    }
+
     return [pscustomobject]@{
         Lines = $queueLines
         Blocks = @(Get-TaskBlocks -Lines $queueLines)
+        HistoryBlocks = @(Get-TaskBlocks -Lines $historyLines)
     }
 }
 
@@ -392,7 +402,27 @@ function Assert-TaskDependenciesComplete {
     foreach ($dependency in $dependencies) {
         $dependencyBlock = @(Get-TaskBlock -Blocks $QueueContext.Blocks -Id $dependency)
         if ($dependencyBlock.Count -eq 0) {
-            $incompleteDependencies.Add("$dependency (missing)")
+            $historyBlock = @(Get-TaskBlock -Blocks $QueueContext.HistoryBlocks -Id $dependency)
+            if ($historyBlock.Count -eq 0) {
+                $incompleteDependencies.Add("$dependency (missing)")
+                continue
+            }
+
+            $historyStatus = Get-TaskScalarValue -Block $historyBlock -Key "status"
+            if ($terminalStatuses -notcontains $historyStatus) {
+                if ([string]::IsNullOrWhiteSpace($historyStatus)) {
+                    $historyStatus = "missing_status"
+                }
+                $incompleteDependencies.Add("$dependency (history:$historyStatus)")
+                continue
+            }
+
+            $historyEvidencePath = Get-TaskScalarValue -Block $historyBlock -Key "evidencePath"
+            if ([string]::IsNullOrWhiteSpace($historyEvidencePath) -or -not (Test-Path -LiteralPath $historyEvidencePath)) {
+                $incompleteDependencies.Add("$dependency (history evidence missing)")
+                continue
+            }
+
             continue
         }
 

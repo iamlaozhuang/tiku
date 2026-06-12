@@ -47,12 +47,15 @@ function Write-FixtureFiles {
         [Parameter(Mandatory = $true)][string]$Root,
         [Parameter(Mandatory = $false)][switch]$MissingGate,
         [Parameter(Mandatory = $false)][switch]$MissingApproval,
-        [Parameter(Mandatory = $false)][switch]$UnsafeAllowedFile
+        [Parameter(Mandatory = $false)][switch]$UnsafeAllowedFile,
+        [Parameter(Mandatory = $false)][switch]$ArchivedSourceTask,
+        [Parameter(Mandatory = $false)][string]$ArchivedSourceTaskStatus = "done"
     )
 
     $projectStatePath = Join-Path -Path $Root -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $Root -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $Root -ChildPath "matrix.yaml"
+    $taskHistoryIndexPath = Join-Path -Path $Root -ChildPath "task-history-index.yaml"
     $evidencePath = Join-Path -Path $Root -ChildPath "planning-evidence.md"
 
     $gateBlock = "implementationAutoSeedGate:`n  enabled: true"
@@ -86,9 +89,10 @@ currentTask:
         $allowedFile = "src/db/schema/ai-task.ts"
     }
 
-    @"
-schemaVersion: 1
-tasks:
+    $sourceTaskBlock = if ($ArchivedSourceTask) {
+        ""
+    } else {
+        @"
   - id: module-run-v2-ai-task-and-provider-planning
     status: done
     taskKind: implementation_planning
@@ -102,6 +106,13 @@ tasks:
       - git diff --check
     evidencePath: $($evidencePath.Replace("\", "/"))
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+"@
+    }
+
+    @"
+schemaVersion: 1
+tasks:
+$sourceTaskBlock
   - id: module-run-v2-ai-task-local-contract-implementation
     status: pending
     taskKind: implementation
@@ -124,8 +135,18 @@ tasks:
     riskTypes:
       - local_implementation
       - evidence_integrity
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-ai-task-local-contract-implementation
     validationCommands:
-      - npx vitest run src/server/services/ai-task-local-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
@@ -145,10 +166,26 @@ tasks:
 - Cost Calibration Gate remains blocked.
 "@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
 
+    @"
+schemaVersion: 1
+tasks:
+  - id: module-run-v2-ai-task-and-provider-planning
+    phase: module-run-v2-ai-task-and-provider-planning
+    status: $ArchivedSourceTaskStatus
+    taskKind: implementation_planning
+    evidencePath: $($evidencePath.Replace("\", "/"))
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-smoke.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-smoke
+"@ | Set-Content -LiteralPath $taskHistoryIndexPath -Encoding UTF8
+
     return [pscustomobject]@{
         ProjectStatePath = $projectStatePath
         QueuePath        = $queuePath
         MatrixPath       = $matrixPath
+        TaskHistoryIndexPath = $taskHistoryIndexPath
     }
 }
 
@@ -171,6 +208,29 @@ try {
             -MatrixPath $fixture.MatrixPath
     )
     Assert-Contains -Output $passOutput -Pattern "implementation auto-seed readiness passed"
+
+    $archivedSourceFixture = Write-FixtureFiles -Root $fixtureRoot -ArchivedSourceTask
+    $archivedSourceOutput = @(
+        & $scriptPath `
+            -TaskId module-run-v2-ai-task-and-provider-planning `
+            -CandidateTaskId module-run-v2-ai-task-local-contract-implementation `
+            -ProjectStatePath $archivedSourceFixture.ProjectStatePath `
+            -QueuePath $archivedSourceFixture.QueuePath `
+            -MatrixPath $archivedSourceFixture.MatrixPath `
+            -TaskHistoryIndexPath $archivedSourceFixture.TaskHistoryIndexPath
+    )
+    Assert-Contains -Output $archivedSourceOutput -Pattern "implementation auto-seed readiness passed"
+
+    $archivedSourcePendingFixture = Write-FixtureFiles -Root $fixtureRoot -ArchivedSourceTask -ArchivedSourceTaskStatus pending
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SOURCE_HISTORY_NOT_TERMINAL" -Command {
+        & $scriptPath `
+            -TaskId module-run-v2-ai-task-and-provider-planning `
+            -CandidateTaskId module-run-v2-ai-task-local-contract-implementation `
+            -ProjectStatePath $archivedSourcePendingFixture.ProjectStatePath `
+            -QueuePath $archivedSourcePendingFixture.QueuePath `
+            -MatrixPath $archivedSourcePendingFixture.MatrixPath `
+            -TaskHistoryIndexPath $archivedSourcePendingFixture.TaskHistoryIndexPath
+    }
 
     $missingGateFixture = Write-FixtureFiles -Root $fixtureRoot -MissingGate
     Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_IMPLEMENTATION_AUTO_SEED_GATE" -Command {

@@ -27,6 +27,7 @@ function Invoke-SerialExecutor {
         [Parameter(Mandatory = $false)][string]$Action = "",
         [Parameter(Mandatory = $false)][string]$ActionTask = "",
         [Parameter(Mandatory = $false)][string]$DispatcherOutputPath = "",
+        [Parameter(Mandatory = $false)][string]$TaskHistoryIndexPath = "",
         [Parameter(Mandatory = $false)][switch]$Execute,
         [Parameter(Mandatory = $false)][switch]$RunValidation
     )
@@ -57,6 +58,9 @@ function Invoke-SerialExecutor {
     }
     if (-not [string]::IsNullOrWhiteSpace($DispatcherOutputPath)) {
         $arguments += @("-DispatcherOutputPath", $DispatcherOutputPath)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TaskHistoryIndexPath)) {
+        $arguments += @("-TaskHistoryIndexPath", $TaskHistoryIndexPath)
     }
     if ($Execute) {
         $arguments += "-Execute"
@@ -104,6 +108,10 @@ function Write-SmokeFiles {
     $statePath = Join-Path -Path $caseRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $caseRoot -ChildPath "task-queue.yaml"
     $schemaPath = Join-Path -Path $caseRoot -ChildPath "autodrive-control-schema.yaml"
+    $taskHistoryIndexPath = Join-Path -Path $caseRoot -ChildPath "task-history-index.yaml"
+    $archivedEvidencePath = Join-Path -Path $caseRoot -ChildPath "docs/05-execution-logs/evidence/archived-task.md"
+    New-Item -ItemType Directory -Path (Split-Path -Path $archivedEvidencePath -Parent) -Force | Out-Null
+    Set-Content -LiteralPath $archivedEvidencePath -Value "archived task evidence" -Encoding UTF8
 
     @"
 schemaVersion: 1
@@ -281,10 +289,26 @@ registryLifecycle: {}
 closeoutPolicy: {}
 "@ | Set-Content -LiteralPath $schemaPath -Encoding UTF8
 
+    @"
+schemaVersion: 1
+tasks:
+  - id: archived-task
+    phase: archived-task
+    status: done
+    taskKind: implementation_planning
+    evidencePath: $($archivedEvidencePath.Replace("\", "/"))
+    auditReviewPath: docs/05-execution-logs/audits-reviews/archived-task.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-smoke.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-smoke
+"@ | Set-Content -LiteralPath $taskHistoryIndexPath -Encoding UTF8
+
     return [pscustomobject]@{
         StatePath = $statePath
         QueuePath = $queuePath
         SchemaPath = $schemaPath
+        TaskHistoryIndexPath = $taskHistoryIndexPath
     }
 }
 
@@ -345,6 +369,13 @@ agentActionTask: current-task
         throw "Claim-ready fixture failed.`n$($claimReadyResult.Output -join "`n")"
     }
     Assert-Contains -Output $claimReadyResult.Output -Pattern "serialExecutorDecision: ready_to_claim"
+
+    $claimArchivedReadyFiles = Write-SmokeFiles -Root $smokeRoot -CurrentStatus "closed" -NextDependencies "archived-task"
+    $claimArchivedReadyResult = Invoke-SerialExecutor -ProjectStatePath $claimArchivedReadyFiles.StatePath -QueuePath $claimArchivedReadyFiles.QueuePath -SchemaPath $claimArchivedReadyFiles.SchemaPath -TaskHistoryIndexPath $claimArchivedReadyFiles.TaskHistoryIndexPath -Action "claim_task" -ActionTask "next-task"
+    if ($claimArchivedReadyResult.ExitCode -ne 0) {
+        throw "Claim-ready archived dependency fixture failed.`n$($claimArchivedReadyResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $claimArchivedReadyResult.Output -Pattern "serialExecutorDecision: ready_to_claim"
 
     $claimExecuteFiles = Write-SmokeFiles -Root $smokeRoot -CurrentStatus "closed" -NextDependencies "current-task"
     $claimExecuteResult = Invoke-SerialExecutor -ProjectStatePath $claimExecuteFiles.StatePath -QueuePath $claimExecuteFiles.QueuePath -SchemaPath $claimExecuteFiles.SchemaPath -Action "claim_task" -ActionTask "next-task" -Execute

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: module-run-v2-auto-seed-authorization-and-access
-updatedAt: "2026-06-11T20:32:33-07:00"
+  currentPhase: module-run-v2-automation-startup-archive-dependency-repair
+updatedAt: "2026-06-11T21:02:56-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -235,7 +235,7 @@ automation:
       statement: >-
         User enables a governed task-scoped destructive local Docker DB approval path. Destructive DB work is executable only for an explicitly scoped task against local Docker dev resources after capability gates pass and redacted evidence records the operation kind, target alias, backup/disposable rationale, and rollback/recovery boundary. It is not a global standing destructive DB approval.
     codexAutomationId: tiku-module-run-v2-autopilot
-    codexAutomationStatus: ACTIVE
+    codexAutomationStatus: PAUSED
     codexAutomationSchedule: hourly
     codexAutomationExecutionEnvironment: worktree
     plannedPauseStatus: closed
@@ -244,10 +244,9 @@ automation:
     plannedPauseKeepsAutomationPaused: false
     plannedPauseStatement: >-
       Phase85 closed the planned pause after restoring the primary automation prompt anchors and recording activation
-      preflight evidence. Local automation remains PAUSED until the user performs a separate activation action; while
-      PAUSED and plannedPauseStatus is closed, registration readiness is expected to hard-block on status mismatch until
-      tiku-module-run-v2-autopilot is explicitly activated. Do not activate tiku-module-run-v2-autopilot-2 or
-      tiku-module-run-v2-mechanic-2.
+      preflight evidence. Local automation remains PAUSED by explicit user choice. Registration readiness is expected to
+      be consistent while the primary automation TOML is PAUSED; do not activate tiku-module-run-v2-autopilot,
+      tiku-module-run-v2-autopilot-2, or tiku-module-run-v2-mechanic-2 without separate user action.
     defaultStopOn:
       - hard block
       - blocked gate
@@ -270,13 +269,13 @@ repository:
   lastKnownMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
   lastKnownOriginMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
 currentTask:
-  id: module-run-v2-auto-seed-authorization-and-access
+  id: module-run-v2-automation-startup-archive-dependency-repair
   status: closed
-  sourceStory: user-request-2026-06-11-authorization-access-seed
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
-  branch: codex/authorization-access-seed
+  sourceStory: user-request-2026-06-11-automation-startup-archive-dependency-repair
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+  branch: codex/automation-archive-dependency-repair
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -314,10 +313,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Module Run v2 authorization-and-access auto-seed appended pending implementation tasks batch-115 through batch-118.
-    The next automatic implementation candidate is
-    batch-115-authorization-and-access-authorization-read-model-and-display-contrac. New seeded implementation tasks use
-    validationCommandLifecycle with pre_edit, post_edit, advisory_baseline, and closeout phases. Keep provider,
-    env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and Cost
-    Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
+    Module Run v2 automation startup archive dependency repair keeps the primary automation PAUSED and aligns durable
+    state with the app TOML. Startup, next-action, serial claim, and implementation auto-seed readiness can now treat
+    terminal dependencies found in task-history-index.yaml as complete when evidence exists. The next manual run target
+    remains batch-115-authorization-and-access-authorization-read-model-and-display-contrac. Keep provider, env/secret,
+    schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate
+    blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md

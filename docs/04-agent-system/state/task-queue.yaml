@@ -3231,3 +3231,164 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
     status: pending
     retryCount: 0
+
+  - id: module-run-v2-automation-startup-archive-dependency-repair
+    title: Module Run v2 automation startup archive dependency repair
+    phase: module-run-v2-automation-startup-archive-dependency-repair
+    sourceStory: user-request-2026-06-11-automation-startup-archive-dependency-repair
+    dependencies:
+      - module-run-v2-auto-seed-authorization-and-access
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+    humanApproval: >-
+      User approved implementing the automation startup archive dependency repair plan. Scope is mechanism scripts,
+      smoke fixtures, durable state/queue, task plan, evidence, and audit only. Primary automation remains PAUSED and
+      must not be activated by this task. No e2e, schema/migration, dependency/package/lockfile, provider, env/secret,
+      deploy, payment, external-service, PR, force-push, or Cost Calibration Gate work is approved.
+    validationProfile: mechanism-hardening
+    localFullLoopGate: mechanism
+    blockedRemainder:
+      - primary automation remains PAUSED by explicit user choice
+      - scheduled unattended execution remains inactive unless separately activated
+      - implementation work remains deferred to batch-115 through batch-118
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - e2e
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: approved_read_only_redacted
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: mechanism_hardening
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+      - docs/05-execution-logs/evidence/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - mechanism_hardening
+      - automation_policy
+      - archive_dependency_resolution
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-115-authorization-and-access-authorization-read-model-and-display-contrac
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps 3 -AllowAutoSeed -PlanOnly -AllowProtectedBranch
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 -AgentActionOverride claim_task -AgentActionTaskOverride batch-115-authorization-and-access-authorization-read-model-and-display-contrac -AllowProtectedBranch
+      - phase: post_edit
+        command: node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Get-TikuNextAction.ps1 scripts\agent-system\Get-TikuNextAction.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md docs\05-execution-logs\evidence\2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md docs\05-execution-logs\audits-reviews\2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-automation-startup-archive-dependency-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-automation-startup-archive-dependency-repair
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-automation-startup-archive-dependency-repair
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-115-authorization-and-access-authorization-read-model-and-display-contrac
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.ps1 -MaxSteps 3 -AllowAutoSeed -PlanOnly -AllowProtectedBranch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 -AgentActionOverride claim_task -AgentActionTaskOverride batch-115-authorization-and-access-authorization-read-model-and-display-contrac -AllowProtectedBranch
+      - node .\node_modules\prettier\bin\prettier.cjs --check --ignore-unknown scripts\agent-system\Get-TikuNextAction.ps1 scripts\agent-system\Get-TikuNextAction.Smoke.ps1 scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1 scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.Smoke.ps1 docs\04-agent-system\state\project-state.yaml docs\04-agent-system\state\task-queue.yaml docs\05-execution-logs\task-plans\2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md docs\05-execution-logs\evidence\2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md docs\05-execution-logs\audits-reviews\2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-automation-startup-archive-dependency-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-automation-startup-archive-dependency-repair
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-automation-startup-archive-dependency-repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+    status: closed
+    retryCount: 0

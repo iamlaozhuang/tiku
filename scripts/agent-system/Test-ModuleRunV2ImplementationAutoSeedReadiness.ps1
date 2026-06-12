@@ -18,6 +18,10 @@ param(
     [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
 
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$TaskHistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml",
+
+    [Parameter(Mandatory = $false)]
     [string]$EvidencePath = ""
 )
 
@@ -131,6 +135,34 @@ function Get-ListValues {
     return $values.ToArray()
 }
 
+function Get-ValidationLifecycleCommands {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block)
+
+    $commands = New-Object System.Collections.Generic.List[string]
+    $insideSection = $false
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s+validationCommandLifecycle:\s*$") {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if (-not $insideSection) {
+            continue
+        }
+
+        if ($line -match "^\s+command:\s*(.+)\s*$") {
+            $commands.Add($Matches[1].Trim())
+        }
+    }
+
+    return $commands.ToArray()
+}
+
 function Get-CurrentTaskId {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
 
@@ -221,14 +253,24 @@ $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
 $queueLines = @(Get-Content -LiteralPath $QueuePath)
 $matrixContent = Get-Content -LiteralPath $MatrixPath -Raw
 $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
+$taskHistoryBlocks = @()
+if (Test-Path -LiteralPath $TaskHistoryIndexPath) {
+    $taskHistoryBlocks = @(Get-TaskBlocks -Lines @(Get-Content -LiteralPath $TaskHistoryIndexPath))
+}
 
 if ([string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
+$sourceResolvedFromHistory = $false
 $taskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $TaskId)
 if ($taskBlock.Count -eq 0) {
-    throw "Task not found in queue: $TaskId"
+    $taskBlock = @(Get-TaskBlock -Blocks $taskHistoryBlocks -Id $TaskId)
+    if ($taskBlock.Count -eq 0) {
+        throw "Task not found in queue or task history index: $TaskId"
+    }
+
+    $sourceResolvedFromHistory = $true
 }
 
 if ([string]::IsNullOrWhiteSpace($EvidencePath)) {
@@ -254,6 +296,14 @@ Write-Output "taskKind: $sourceTaskKind"
 Write-Output "status: $sourceTaskStatus"
 if ($sourceTaskKind -notin @("implementation_planning", "local_verification_planning", "governance_alignment", "implementation")) {
     Add-Finding "HARD_BLOCK_SOURCE_TASK_KIND_NOT_ALLOWED $sourceTaskKind"
+}
+
+if ($sourceResolvedFromHistory -and $sourceTaskStatus -notin @("done", "closed", "pushed", "merged")) {
+    if ([string]::IsNullOrWhiteSpace($sourceTaskStatus)) {
+        $sourceTaskStatus = "missing_status"
+    }
+
+    Add-Finding "HARD_BLOCK_SOURCE_HISTORY_NOT_TERMINAL $sourceTaskStatus"
 }
 
 if (-not (Test-Path -LiteralPath $EvidencePath)) {
@@ -284,6 +334,7 @@ if (-not [string]::IsNullOrWhiteSpace($CandidateTaskId)) {
         $blockedFiles = @(Get-ListValues -Block $candidateBlock -Key "blockedFiles")
         $riskTypes = @(Get-ListValues -Block $candidateBlock -Key "riskTypes")
         $validationCommands = @(Get-ListValues -Block $candidateBlock -Key "validationCommands")
+        $validationLifecycleCommands = @(Get-ValidationLifecycleCommands -Block $candidateBlock)
 
         Write-Section -Title "Candidate Implementation Task"
         Write-Output "taskKind: $candidateKind"
@@ -371,7 +422,7 @@ if (-not [string]::IsNullOrWhiteSpace($CandidateTaskId)) {
             }
         }
 
-        $validationText = $validationCommands -join "`n"
+        $validationText = @($validationCommands + $validationLifecycleCommands) -join "`n"
         Test-ContentPattern -Content $validationText -Pattern "npm\.cmd run lint" -MissingCode "HARD_BLOCK_CANDIDATE_MISSING_LINT" -OkCode "OK_CANDIDATE_LINT"
         Test-ContentPattern -Content $validationText -Pattern "npm\.cmd run typecheck" -MissingCode "HARD_BLOCK_CANDIDATE_MISSING_TYPECHECK" -OkCode "OK_CANDIDATE_TYPECHECK"
         Test-ContentPattern -Content $validationText -Pattern "git diff --check" -MissingCode "HARD_BLOCK_CANDIDATE_MISSING_DIFF_CHECK" -OkCode "OK_CANDIDATE_DIFF_CHECK"

@@ -15,6 +15,10 @@ param(
     [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
 
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$TaskHistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml",
+
+    [Parameter(Mandatory = $false)]
     [switch]$VerboseHistory
 )
 
@@ -217,14 +221,35 @@ function Invoke-SeedProposalDiagnostic {
 function Test-DependencyTerminal {
     param(
         [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $false)][object[]]$HistoryBlocks = @(),
         [Parameter(Mandatory = $true)][string]$DependencyId,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.ArrayList]$BlockedReasons
     )
 
     $dependencyBlock = @(Get-TaskBlock -Blocks $Blocks -Id $DependencyId)
     if ($dependencyBlock.Count -eq 0) {
-        [void]$BlockedReasons.Add("dependency_missing:$DependencyId")
-        return $false
+        $historyBlock = @(Get-TaskBlock -Blocks $HistoryBlocks -Id $DependencyId)
+        if ($historyBlock.Count -eq 0) {
+            [void]$BlockedReasons.Add("dependency_missing:$DependencyId")
+            return $false
+        }
+
+        $historyStatus = Get-ScalarValue -Block $historyBlock -Key "status"
+        if ($historyStatus -notin @("done", "closed", "pushed", "merged")) {
+            if ([string]::IsNullOrWhiteSpace($historyStatus)) {
+                $historyStatus = "missing_status"
+            }
+            [void]$BlockedReasons.Add("dependency_history_not_terminal:${DependencyId}:$historyStatus")
+            return $false
+        }
+
+        $historyEvidencePath = Get-ScalarValue -Block $historyBlock -Key "evidencePath"
+        if ([string]::IsNullOrWhiteSpace($historyEvidencePath) -or -not (Test-Path -LiteralPath $historyEvidencePath)) {
+            [void]$BlockedReasons.Add("dependency_history_evidence_missing:$DependencyId")
+            return $false
+        }
+
+        return $true
     }
 
     $status = Get-ScalarValue -Block $dependencyBlock -Key "status"
@@ -246,7 +271,10 @@ function Test-DependencyTerminal {
 }
 
 function Get-NextExecutableTask {
-    param([Parameter(Mandatory = $true)][object[]]$Blocks)
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $false)][object[]]$HistoryBlocks = @()
+    )
 
     $firstBlockedPending = ""
     $firstBlockedReasons = @()
@@ -260,7 +288,7 @@ function Get-NextExecutableTask {
         $blockedReasons = New-Object System.Collections.ArrayList
         $dependencies = @(Get-ListValues -Block $block.Lines -Key "dependencies")
         foreach ($dependency in $dependencies) {
-            [void](Test-DependencyTerminal -Blocks $Blocks -DependencyId $dependency -BlockedReasons $blockedReasons)
+            [void](Test-DependencyTerminal -Blocks $Blocks -HistoryBlocks $HistoryBlocks -DependencyId $dependency -BlockedReasons $blockedReasons)
         }
 
         if ($blockedReasons.Count -eq 0) {
@@ -396,6 +424,10 @@ if ($findings.Count -eq 0) {
 }
 
 $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
+$taskHistoryBlocks = @()
+if (Test-Path -LiteralPath $TaskHistoryIndexPath) {
+    $taskHistoryBlocks = @(Get-TaskBlocks -Lines @(Get-Content -LiteralPath $TaskHistoryIndexPath))
+}
 $queueDiagnostics = Get-QueueDiagnostics -Blocks $taskBlocks
 $matrixDiagnostics = Get-MatrixDiagnostics -Blocks $taskBlocks -MatrixLines $matrixLines
 $currentTaskId = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "id"
@@ -420,7 +452,7 @@ if ([string]::IsNullOrWhiteSpace($currentTaskStatus)) {
     $currentTaskStatus = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "status"
 }
 
-$nextTask = Get-NextExecutableTask -Blocks $taskBlocks
+$nextTask = Get-NextExecutableTask -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks
 $nextTaskId = $nextTask.Id
 $blockedReasons = @($nextTask.BlockedReasons)
 $validationCommands = @()

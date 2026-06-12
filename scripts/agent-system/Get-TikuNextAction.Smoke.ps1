@@ -73,9 +73,12 @@ try {
     $projectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $stateRoot -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix.yaml"
+    $taskHistoryIndexPath = Join-Path -Path $stateRoot -ChildPath "task-history-index.yaml"
     $completedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/completed-a.md"
+    $archivedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/archived-a.md"
     New-Item -ItemType Directory -Path (Split-Path -Path $completedEvidencePath -Parent) -Force | Out-Null
     Set-Content -LiteralPath $completedEvidencePath -Value "completed-a smoke evidence" -Encoding UTF8
+    Set-Content -LiteralPath $archivedEvidencePath -Value "archived-a smoke evidence" -Encoding UTF8
 
     @"
 schemaVersion: 1
@@ -121,6 +124,21 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/task-b.md
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: archived-a
+    phase: archived-a
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/archived-a.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/archived-a.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-smoke.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-smoke
+"@ | Set-Content -LiteralPath $taskHistoryIndexPath -Encoding UTF8
 
     @"
 schemaVersion: 2
@@ -229,6 +247,48 @@ currentTask:
     Assert-Contains -Output $plannedPauseOutput -Pattern '^nextExecutableTask: none$'
     Assert-Contains -Output $plannedPauseOutput -Pattern '^recommendedAction: keep_automation_paused_for_tuning$'
     Assert-Contains -Output $plannedPauseOutput -Pattern '^stopReason: planned_pause_for_tuning$'
+
+    $historyQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-history.yaml"
+    @"
+schemaVersion: 1
+tasks:
+  - id: seed-closed
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/completed-a.md
+  - id: task-archived-dependency
+    status: pending
+    dependencies:
+      - archived-a
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/task-archived-dependency.md
+"@ | Set-Content -LiteralPath $historyQueuePath -Encoding UTF8
+
+    & git -C $repoPath add docs | Out-Null
+    & git -C $repoPath commit -m "chore(smoke): add archived dependency fixture" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit next-action archived dependency fixture."
+    }
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $historyOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $projectStatePath `
+                -QueuePath $historyQueuePath `
+                -MatrixPath $matrixPath `
+                -TaskHistoryIndexPath $taskHistoryIndexPath
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $historyOutput -Pattern '^queueDecision: executable_task_found$'
+    Assert-Contains -Output $historyOutput -Pattern '^nextExecutableTask: task-archived-dependency$'
+    Assert-Contains -Output $historyOutput -Pattern '^recommendedAction: claim_or_plan_next_task:task-archived-dependency$'
+    Assert-Contains -Output $historyOutput -Pattern '^stopReason: none$'
 
     $seedQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-seed.yaml"
     $seedMatrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix-seed.yaml"
