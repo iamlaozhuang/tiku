@@ -125,3 +125,35 @@ Resolution:
 - Updated `project-state.yaml` `currentTask` to the bounded queue drain task with `status: closed`.
 - Kept automation activation, product code, dependency, schema/migration, env/secret, provider, deploy/payment, PR,
   force-push, and Cost Calibration Gate outside scope.
+
+## Master Post-Merge Verification
+
+Timestamp: `2026-06-11T19:09:39.2179877-07:00`
+
+Merge result:
+
+- `git merge --ff-only codex/module-run-v2-bounded-queue-drain` succeeded on `master`.
+- Fast-forward range: `a2ae08e5..c995e775`.
+- No merge commit was created.
+
+Post-merge validation:
+
+| Command                                                                                                                             | Result            | Notes                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------- |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1`    | pass              | Queue drain eligibility gate passed on `master`.                                            |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1`   | pass              | Bounded drain supervisor smoke passed on `master`.                                          |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1` | pass              | Acceptance reports bounded drain boundary and keeps Cost Calibration Gate blocked.          |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1` | pass              | Schema readiness smoke passed on `master`.                                                  |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1`        | pass              | Runner compatibility retained; temporary fixture branch messages are expected smoke output. |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1`  | pass              | Dispatcher compatibility retained.                                                          |
+| `npm.cmd run lint`                                                                                                                  | pass              | ESLint completed.                                                                           |
+| `npm.cmd run typecheck`                                                                                                             | pass              | `tsc --noEmit` completed.                                                                   |
+| `npm.cmd run format:check`                                                                                                          | pass              | Prettier check completed.                                                                   |
+| `git diff --check`                                                                                                                  | pass              | No whitespace errors.                                                                       |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`                          | expected exit `1` | Repository clean and batch-114 executable; automation registration mismatch remains manual. |
+
+Expected residual boundary:
+
+- `Get-TikuProjectStatus.ps1` reports `projectStatusDecision: hard_block_registration` because local automation
+  registration remains mismatched with the project ACTIVE expectation.
+- `Cost Calibration Gate remains blocked`.
