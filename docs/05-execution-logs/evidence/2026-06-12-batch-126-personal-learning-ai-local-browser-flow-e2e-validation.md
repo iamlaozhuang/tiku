@@ -62,6 +62,21 @@ result: pass
 - Commit: `ec9852e412e120c0bd67f70737ae2fbaf8784131` captured the initial batch-126 validation commit before the final
   evidence amend; the immutable final branch SHA is reported in closeout.
 
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/batch-126-personal-learning-ai-local-browser-flow-e2e-validation` into `master`.
+- Merged master SHA before this post-merge evidence note:
+  `d5f0337b59a6fe0a3d1ccd52a2671b2eb2ffcb1a`.
+- Product source, unit test, and e2e spec edits remained absent; this task was docs/state/evidence-only.
+- `git diff --check`: passed on `master`.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-126-personal-learning-ai-local-browser-flow-e2e-validation`:
+  passed on `master` before this evidence-only closeout commit.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-126-personal-learning-ai-local-browser-flow-e2e-validation`:
+  passed on `master` with `localAhead: 1` before this evidence-only closeout commit.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, product source edits, e2e spec edits, headed/debug browser UI mode, formal generated-content
+  write paths, and Cost Calibration Gate remain blocked.
+
 ## Out Of Scope
 
 - No product source edits.
