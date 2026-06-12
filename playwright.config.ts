@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const reuseExistingServer =
+  process.env.TIKU_PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -11,7 +14,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npm.cmd run dev -- --hostname 127.0.0.1",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer,
     url: "http://127.0.0.1:3000",
   },
   projects: [
