@@ -68,8 +68,24 @@ result: pass
 
 ## Commit
 
-- Commit: `01788105fc4c43f0b3946a17444660a3bd3ce902` is the pre-seed baseline checkpoint. The final immutable seed
-  commit SHA is reported after commit because this evidence file participates in the commit object.
+- Commit: `07f9086572e43bfd957b1b9c28f665bc3107f13e` recorded the seed task branch commit.
+- The final immutable post-merge evidence commit SHA is reported in the final response because this evidence file
+  participates in that commit object.
+
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/seed-next-personal-learning-ai-product-tasks` into `master`.
+- Merged master SHA before this post-merge evidence note:
+  `07f9086572e43bfd957b1b9c28f665bc3107f13e`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `git diff --check`: passed on `master`.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks`: passed on
+  `master`.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks`: passed on `master` with
+  `localAhead: 1` before the evidence-only closeout commit.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, formal generated-content write paths, and Cost Calibration Gate remain blocked.
 
 ## Out Of Scope
 
