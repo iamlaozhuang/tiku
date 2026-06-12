@@ -4830,3 +4830,70 @@ tasks:
     status: closed
     result: first_run_fresh_server_full_e2e_pass
     retryCount: 0
+  - id: fix-project-state-sha-sync-after-batch-122
+    title: Sync project-state repository checkpoint after batch-122 closeout
+    phase: governance-detail-repair
+    sourceStory: user-request-2026-06-12-governance-detail-repair
+    dependencies:
+      - batch-122-personal-learning-ai-redacted-ai-call-log-reference
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly requested on 2026-06-12 to apply the recommended governance detail repair before further product
+      work. Scope is limited to docs/state checkpoint synchronization, task queue registration, task plan, evidence, and
+      audit review. Local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup are
+      approved after validation passes. No product code, dependency/package/lockfile, schema/migration, env/secret,
+      provider, deploy, payment, external-service, PR, force-push, or Cost Calibration Gate work is approved.
+    validationProfile: docs-state-governance-repair
+    localFullLoopGate: L2
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: docs_state_repair
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - governance_repair
+      - repository_checkpoint
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-project-state-sha-sync-after-batch-122
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-project-state-sha-sync-after-batch-122
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-project-state-sha-sync-after-batch-122
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+    status: closed
+    result: pass
+    retryCount: 0

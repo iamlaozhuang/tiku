@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-122-personal-learning-ai-redacted-ai-call-log-reference
-updatedAt: "2026-06-12T10:57:34-07:00"
+currentPhase: fix-project-state-sha-sync-after-batch-122
+updatedAt: "2026-06-12T11:21:50-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 231e9ef976c4c5ce57e5c4d9a204f02dad0cd976
-  lastKnownOriginMasterSha: 03f1e5e21bb9478aff0cc92dfe4ed034123c13d6
+  lastKnownMasterSha: b6f81531c5136f6785062a1b1d8c56ffa923aca6
+  lastKnownOriginMasterSha: b6f81531c5136f6785062a1b1d8c56ffa923aca6
 currentTask:
-  id: batch-122-personal-learning-ai-redacted-ai-call-log-reference
+  id: fix-project-state-sha-sync-after-batch-122
   status: closed
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
-  branch: codex/batch-122-personal-learning-ai-redacted-ai-call-log-reference
-  commitSha: 231e9ef976c4c5ce57e5c4d9a204f02dad0cd976
+  sourceStory: user-request-2026-06-12-governance-detail-repair
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+  branch: codex/fix-project-state-sha-sync-after-batch-122
+  commitSha: b6f81531c5136f6785062a1b1d8c56ffa923aca6
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_122_pre_edit_readiness
+    readiness: pass_project_state_sha_sync_after_batch_122
     lint: pass
     typecheck: pass
     unit: pass_243_files_868_tests
     build: pass
-    e2e: not_run_batch_122_server_side_only
+    e2e: not_run_docs_state_only
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,7 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    No pending personal-learning-ai seeded implementation tasks remain in the active queue after batch-122 closeout.
-    Keep provider, env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, and Cost
-    Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    Project-state repository checkpoints are synchronized to the accepted post-batch-122 master baseline. No pending
+    personal-learning-ai seeded implementation tasks remain in the active queue after batch-122 closeout. Before further
+    product work, choose a fresh scoped queued task or seed the next roadmap unit. Keep provider, env/secret,
+    schema/migration, dependency, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate blocked
+    unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
