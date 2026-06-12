@@ -12,6 +12,7 @@ import {
   type Profession,
   type Subject,
 } from "../models/paper";
+import type { EffectiveAuthorizationEdition } from "../contracts/effective-authorization-contract";
 
 export type AuthorizationPaperMockExamAccessContextValidationResult =
   | {
@@ -70,6 +71,32 @@ function normalizeAuthorizationType(
   value: unknown,
 ): AuthorizationContextSourceType | null {
   return value === "personal_auth" || value === "org_auth" ? value : null;
+}
+
+function normalizeEffectiveEdition(
+  value: unknown,
+): EffectiveAuthorizationEdition | null {
+  if (value === null || value === undefined) {
+    return "standard";
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+
+  return normalizedValue === "standard" || normalizedValue === "advanced"
+    ? normalizedValue
+    : null;
+}
+
+function normalizeOptionalText(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return normalizeRequiredText(value);
 }
 
 function normalizePaperContext(
@@ -159,7 +186,13 @@ export function normalizeAuthorizationPaperMockExamAccessContextInput(
   const authorizationPublicId = normalizeRequiredText(
     input.authorizationPublicId,
   );
-  const authorizationType = normalizeAuthorizationType(input.authorizationType);
+  const authorizationSource = normalizeAuthorizationType(
+    input.authorizationSource ?? input.authorizationType,
+  );
+  const effectiveEdition = normalizeEffectiveEdition(input.effectiveEdition);
+  const organizationPublicId = normalizeOptionalText(
+    input.organizationPublicId,
+  );
   const authorizationProfession = normalizeProfession(
     input.authorizationProfession,
   );
@@ -172,11 +205,24 @@ export function normalizeAuthorizationPaperMockExamAccessContextInput(
   if (
     userPublicId === null ||
     authorizationPublicId === null ||
-    authorizationType === null ||
+    authorizationSource === null ||
+    effectiveEdition === null ||
     authorizationProfession === null ||
     authorizationLevel === null ||
     paperContext === undefined ||
     mockExamContext === undefined
+  ) {
+    return {
+      success: false,
+      message:
+        INVALID_AUTHORIZATION_PAPER_MOCK_EXAM_ACCESS_CONTEXT_INPUT_MESSAGE,
+    };
+  }
+
+  if (
+    (authorizationSource === "personal_auth" &&
+      organizationPublicId !== null) ||
+    (authorizationSource === "org_auth" && organizationPublicId === null)
   ) {
     return {
       success: false,
@@ -190,7 +236,9 @@ export function normalizeAuthorizationPaperMockExamAccessContextInput(
     value: {
       userPublicId,
       authorizationPublicId,
-      authorizationType,
+      authorizationSource,
+      effectiveEdition,
+      organizationPublicId,
       authorizationProfession,
       authorizationLevel,
       paperContext,

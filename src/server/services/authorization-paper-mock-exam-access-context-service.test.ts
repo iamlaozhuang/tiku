@@ -11,7 +11,9 @@ function createBaseInput() {
     id: 1081,
     userPublicId: "user_public_123",
     authorizationPublicId: "personal_auth_public_123",
-    authorizationType: "personal_auth",
+    authorizationSource: "personal_auth",
+    effectiveEdition: "advanced",
+    organizationPublicId: null,
     authorizationProfession: "monopoly",
     authorizationLevel: 3,
     paperContext: {
@@ -52,10 +54,12 @@ describe("authorization paper mock_exam access context service", () => {
       data: {
         userPublicId: "user_public_123",
         authorization: {
-          publicId: "personal_auth_public_123",
-          authorizationType: "personal_auth",
+          authorizationPublicId: "personal_auth_public_123",
+          authorizationSource: "personal_auth",
+          effectiveEdition: "advanced",
           profession: "monopoly",
           level: 3,
+          organizationPublicId: null,
         },
         accessContextStatus: "context_summary_only",
         permissionBehaviorStatus: "unchanged",
@@ -88,14 +92,18 @@ describe("authorization paper mock_exam access context service", () => {
     expect(
       buildAuthorizationPaperMockExamAccessContextReadModel({
         ...createBaseInput(),
-        authorizationType: "org_auth",
+        authorizationSource: "org_auth",
         authorizationPublicId: "org_auth_public_123",
+        effectiveEdition: "standard",
+        organizationPublicId: "org_public_123",
         authorizationProfession: "marketing",
         authorizationLevel: 2,
       }).data,
     ).toMatchObject({
       authorization: {
-        authorizationType: "org_auth",
+        authorizationSource: "org_auth",
+        effectiveEdition: "standard",
+        organizationPublicId: "org_public_123",
       },
       permissionBehaviorStatus: "unchanged",
       paper: {
@@ -125,7 +133,20 @@ describe("authorization paper mock_exam access context service", () => {
     expect(
       buildAuthorizationPaperMockExamAccessContextReadModel({
         ...createBaseInput(),
-        authorizationType: "unsupported_authorization",
+        authorizationSource: "unsupported_authorization",
+      }),
+    ).toEqual({
+      code: 400042,
+      message: "Invalid authorization paper mock_exam access context input.",
+      data: null,
+    });
+  });
+
+  it("rejects invalid effective edition values", () => {
+    expect(
+      buildAuthorizationPaperMockExamAccessContextReadModel({
+        ...createBaseInput(),
+        effectiveEdition: "enterprise",
       }),
     ).toEqual({
       code: 400042,

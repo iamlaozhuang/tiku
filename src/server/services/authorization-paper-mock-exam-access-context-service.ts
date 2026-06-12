@@ -73,10 +73,12 @@ function mapAuthorizationPaperMockExamAccessContextToDto(
   return {
     userPublicId: input.userPublicId,
     authorization: {
-      publicId: input.authorizationPublicId,
-      authorizationType: input.authorizationType,
+      authorizationPublicId: input.authorizationPublicId,
+      authorizationSource: input.authorizationSource,
+      effectiveEdition: input.effectiveEdition,
       profession: input.authorizationProfession,
       level: input.authorizationLevel,
+      organizationPublicId: input.organizationPublicId,
     },
     accessContextStatus: "context_summary_only",
     permissionBehaviorStatus: "unchanged",

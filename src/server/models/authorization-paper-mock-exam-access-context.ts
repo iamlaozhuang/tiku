@@ -1,6 +1,7 @@
 import type { AuthorizationContextSourceType } from "./authorization-context";
 import type { Profession } from "./auth";
 import type { PaperType, Subject } from "./paper";
+import type { EffectiveAuthorizationEdition } from "../contracts/effective-authorization-contract";
 
 export type AuthorizationPaperMockExamAccessContextStatus =
   "context_summary_only";
@@ -27,7 +28,9 @@ export type AuthorizationMockExamAccessContextInput =
 export type AuthorizationPaperMockExamAccessContextInput = {
   userPublicId: string;
   authorizationPublicId: string;
-  authorizationType: AuthorizationContextSourceType;
+  authorizationSource: AuthorizationContextSourceType;
+  effectiveEdition: EffectiveAuthorizationEdition;
+  organizationPublicId: string | null;
   authorizationProfession: Profession;
   authorizationLevel: number;
   paperContext: AuthorizationPaperAccessContextInput | null;
