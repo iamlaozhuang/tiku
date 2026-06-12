@@ -109,11 +109,11 @@ const sampleModelConfigs: ModelConfigListDto["modelConfigs"] = [
   {
     publicId: "model-config-public-003",
     providerPublicId: "model-provider-public-001",
-    providerDisplayName: "閫氫箟鍗冮棶",
+    providerDisplayName: "通义千问",
     providerKey: "alibaba",
     modelName: "qwen-turbo-fallback",
     modelAlias: "qwen-turbo-fallback",
-    displayName: "閫氫箟鍗冮棶璁茶В澶囩敤妯″瀷",
+    displayName: "通义千问讲解备用模型",
     aiFuncType: "ai_explanation",
     apiKeyDisplay: "****5678",
     secretStatus: "configured",

@@ -102,6 +102,11 @@ describe("admin ai and audit log ops baseline", () => {
       aiFuncType: "ai_explanation",
       fallbackModelConfigPublicId: "model-config-public-003",
     });
+    expect(modelConfigList.data?.modelConfigs[2]).toMatchObject({
+      publicId: "model-config-public-003",
+      providerDisplayName: "通义千问",
+      displayName: "通义千问讲解备用模型",
+    });
     expect(modelConfigList.data?.modelConfigs[0]).not.toHaveProperty("id");
     expect(modelConfigList.data?.modelConfigs[0]).not.toHaveProperty("apiKey");
     expect(modelConfigList.data?.modelConfigs[0]).not.toHaveProperty(
