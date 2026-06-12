@@ -4161,3 +4161,368 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
     status: pending
     retryCount: 0
+  - id: fix-api-error-envelope-consistency
+    title: Standardize API route error envelopes
+    phase: health-audit-followup
+    sourceStory: health-audit-local-baseline
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly approved the health audit closeout and follow-up serial implementation plan on 2026-06-12,
+      including local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after
+      each task passes gates. Scope is limited to API route error-envelope consistency, task plan, evidence, and audit
+      review. No dependency/package/lockfile, schema/migration, env/secret, provider, deploy, payment,
+      external-service, PR, force-push, or Cost Calibration Gate work is approved.
+    validationProfile: L4-local-api-contract
+    localFullLoopGate: L4
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/services/**
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-api-error-envelope-consistency.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-api-error-envelope-consistency.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-api-error-envelope-consistency.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - api_contract
+      - local_validation
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/route-error-response.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-api-error-envelope-consistency.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-api-error-envelope-consistency.md
+    status: pending
+    retryCount: 0
+  - id: fix-client-server-type-boundary
+    title: Move contact_config fallback to client-safe boundary
+    phase: health-audit-followup
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - fix-api-error-envelope-consistency
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly approved the health audit closeout and follow-up serial implementation plan on 2026-06-12,
+      including local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after
+      each task passes gates. Scope is limited to client/server import boundary repair for contact_config fallback
+      data, task plan, evidence, and audit review. No dependency/package/lockfile, schema/migration, env/secret,
+      provider, deploy, payment, external-service, PR, force-push, or Cost Calibration Gate work is approved.
+    validationProfile: L2-ui-contract
+    localFullLoopGate: L2
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/lib/**
+      - src/server/contracts/contact-config-contract.ts
+      - src/server/services/contact-config-service.ts
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/features/admin/org-auth-redeem/AdminOrgAuthRedeemPage.tsx
+      - tests/unit/student-profile-redeem-ui.test.ts
+      - tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts
+      - tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-client-server-type-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-client-server-type-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-client-server-type-boundary.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - client_server_boundary
+      - local_validation
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-profile-redeem-ui.test.ts tests/unit/phase-8-admin-org-auth-redeem-ui.test.ts tests/unit/phase-11-contact-config-purchase-guidance-loop.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-client-server-type-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-client-server-type-boundary.md
+    status: pending
+    retryCount: 0
+  - id: fix-playwright-stale-server-risk
+    title: Prevent stale Playwright dev server reuse
+    phase: health-audit-followup
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - fix-client-server-type-boundary
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly approved the health audit closeout and follow-up serial implementation plan on 2026-06-12,
+      including local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after
+      each task passes gates. Scope is limited to Playwright local dev server reuse policy, task plan, evidence, and
+      audit review. No dependency/package/lockfile, schema/migration, env/secret, provider, deploy, payment,
+      external-service, PR, force-push, e2e execution, or Cost Calibration Gate work is approved.
+    validationProfile: L2-test-config
+    localFullLoopGate: L2
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - playwright.config.ts
+      - tests/unit/playwright-config-baseline.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-playwright-stale-server-risk.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-playwright-stale-server-risk.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-playwright-stale-server-risk.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - test_config
+      - local_validation
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/playwright-config-baseline.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-playwright-stale-server-risk.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-playwright-stale-server-risk.md
+    status: pending
+    retryCount: 0
+  - id: fix-admin-ai-audit-log-sample-encoding
+    title: Repair admin ai_call_log sample display text
+    phase: health-audit-followup
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - fix-playwright-stale-server-risk
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly approved the health audit closeout and follow-up serial implementation plan on 2026-06-12,
+      including local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after
+      each task passes gates. Scope is limited to admin AI audit sample display text, task plan, evidence, and audit
+      review. No dependency/package/lockfile, schema/migration, env/secret, provider, deploy, payment, external-service,
+      PR, force-push, or Cost Calibration Gate work is approved.
+    validationProfile: L2-unit
+    localFullLoopGate: L2
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/services/admin-ai-audit-log-ops-service.ts
+      - tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - encoding
+      - local_validation
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/admin-ai-audit-log-ops-baseline.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
+    status: pending
+    retryCount: 0
+  - id: docs-adr-runtime-dependency-alignment
+    title: Align ADR runtime dependency baseline
+    phase: health-audit-followup
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - fix-admin-ai-audit-log-sample-encoding
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly approved the health audit closeout and follow-up serial implementation plan on 2026-06-12,
+      including local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after
+      each task passes gates. Scope is docs-only ADR runtime/dependency alignment. No dependency/package/lockfile,
+      schema/migration, env/secret, provider, deploy, payment, external-service, PR, force-push, or Cost Calibration
+      Gate work is approved.
+    validationProfile: docs-only
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: docs_only
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/05-execution-logs/task-plans/2026-06-12-docs-adr-runtime-dependency-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-12-docs-adr-runtime-dependency-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-docs-adr-runtime-dependency-alignment.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - architecture_docs
+      - dependency_governance
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-docs-adr-runtime-dependency-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-adr-runtime-dependency-alignment.md
+    status: pending
+    retryCount: 0
+  - id: docs-project-quality-gate-refresh
+    title: Refresh project quality gate and final health follow-up review
+    phase: health-audit-followup
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - docs-adr-runtime-dependency-alignment
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly approved the health audit closeout and follow-up serial implementation plan on 2026-06-12,
+      including local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup after
+      each task passes gates. Scope is docs/state quality gate refresh, final self-review, and next-step recommendation.
+      No product repair, dependency/package/lockfile, schema/migration, env/secret, provider, deploy, payment,
+      external-service, PR, force-push, e2e execution, or Cost Calibration Gate work is approved.
+    validationProfile: final-local-quality-refresh
+    localFullLoopGate: L2
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: docs_state_closeout
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-docs-project-quality-gate-refresh.md
+      - docs/05-execution-logs/evidence/2026-06-12-docs-project-quality-gate-refresh.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-docs-project-quality-gate-refresh.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - quality_gate
+      - final_review
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-docs-project-quality-gate-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-project-quality-gate-refresh.md
+    status: pending
+    retryCount: 0
