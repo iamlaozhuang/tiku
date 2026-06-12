@@ -3739,6 +3739,7 @@ tasks:
       - phase-71-advanced-personal-ai-generation-implementation-planning
       - fix-phase-71-personal-ai-generation-auto-seed-anchors
     taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
     autoDriveLocalImplementationApproval: >-
@@ -3807,7 +3808,7 @@ tasks:
       schemaMigration: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -3855,9 +3856,9 @@ tasks:
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-119-personal-learning-ai-personal-generation-request-flow
-    evidencePath: docs/05-execution-logs/evidence/batch-119-personal-learning-ai-personal-generation-request-flow.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-119-personal-learning-ai-personal-generation-request-flow.md
-    status: pending
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
+    status: closed
     retryCount: 0
   - id: batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
     title: Module Run v2 personal-learning-ai implementation seed
