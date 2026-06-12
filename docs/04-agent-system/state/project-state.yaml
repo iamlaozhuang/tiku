@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
-updatedAt: "2026-06-12T13:12:18-07:00"
+currentPhase: fix-agent-state-hygiene-after-batch-126
+updatedAt: "2026-06-12T15:20:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6db97a120186bda8e6eabbcbdbfc8b30a9e98496
-  lastKnownOriginMasterSha: 6db97a120186bda8e6eabbcbdbfc8b30a9e98496
+  lastKnownMasterSha: 22c238b6e400d8b554b965c5178ceeda544302c5
+  lastKnownOriginMasterSha: 22c238b6e400d8b554b965c5178ceeda544302c5
 currentTask:
-  id: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+  id: fix-agent-state-hygiene-after-batch-126
   status: closed
-  sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
-  branch: codex/batch-126-personal-learning-ai-local-browser-flow-e2e-validation
-  commitSha: 6db97a120186bda8e6eabbcbdbfc8b30a9e98496
+  sourceStory: user-request-2026-06-12-agent-state-hygiene
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+  branch: codex/fix-agent-state-hygiene-after-batch-126
+  commitSha: 22c238b6e400d8b554b965c5178ceeda544302c5
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_126_git_completion_readiness
+    readiness: pass_fix_agent_state_hygiene_after_batch_126
     lint: pass
     typecheck: pass
     unit: pass_244_files_873_tests
     build: pass_55_static_pages
-    e2e: pass_27_tests
+    e2e: not_applicable_docs_state_only
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,8 +316,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-126 validation-only task is closed after lint, typecheck, unit, build, diff, e2e list, and full e2e passed.
-    After merge and push, reclaim from master and inspect the queue before starting any further work. Keep product source
-    edits, e2e spec edits, provider, env/secret, schema/migration, dependency, deploy, payment, external-service, PR,
-    force-push, headed/debug browser UI mode, formal generated-content write paths, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    Agent state hygiene after batch-126 is closed after synchronizing repository checkpoints to the real
+    master/origin master SHA and closing stale batch-121/batch-122 runStatus values that already had closed/pass
+    evidence. After merge and push, reclaim from master and seed the next small personal-learning-ai tasks only within
+    docs/state/evidence/audit/task-plan scope. Keep product source edits, e2e spec edits, provider, env/secret,
+    schema/migration, dependency, deploy, payment, external-service, PR, force-push, headed/debug browser UI mode,
+    formal generated-content write paths, and Cost Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-fix-agent-state-hygiene-after-batch-126.md

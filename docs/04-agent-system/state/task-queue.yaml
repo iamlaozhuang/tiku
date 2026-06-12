@@ -4080,7 +4080,7 @@ tasks:
       schemaMigration: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -4210,7 +4210,7 @@ tasks:
       schemaMigration: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -5497,6 +5497,87 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-126-personal-learning-ai-local-browser-flow-e2e-validation
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: fix-agent-state-hygiene-after-batch-126
+    title: Clean agent state hygiene after batch-126
+    phase: fix-agent-state-hygiene-after-batch-126
+    sourceStory: user-request-2026-06-12-agent-state-hygiene
+    dependencies:
+      - batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+    humanApproval: >-
+      User explicitly requested on 2026-06-12 to run a docs/state-only mechanism hygiene repair after batch-126 before
+      seeding the next personal-learning-ai work. Scope is limited to durable state checkpoint synchronization,
+      historical batch-121/batch-122 runStatus consistency cleanup, task plan, evidence, and audit review. Local commit,
+      fast-forward merge to master, push origin/master, and merged short-branch cleanup are approved after gates pass.
+      No product code, tests, e2e specs, dependency/package/lockfile, schema/migration, env/secret, provider, deploy,
+      payment, external-service, PR, force-push, formal generated-content write path, or Cost Calibration Gate work is
+      approved.
+    validationProfile: docs-state-governance-repair
+    localFullLoopGate: L2
+    blockedRemainder:
+      - product implementation remains blocked during this docs/state repair
+      - provider/env/secret/schema/migration/dependency/deploy/payment/external-service work remains blocked
+      - PR, force push, e2e, formal generated-content write paths, and Cost Calibration Gate remain blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: closed
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: docs_state_repair
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - governance_repair
+      - repository_checkpoint
+      - registry_hygiene
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-agent-state-hygiene-after-batch-126
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-agent-state-hygiene-after-batch-126
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-agent-state-hygiene-after-batch-126
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
     status: closed
     result: pass
     retryCount: 0
