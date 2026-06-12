@@ -17,29 +17,58 @@ function Assert-Contains {
     }
 }
 
-function Invoke-ExpectFailure {
+function Assert-NotContains {
     param(
         [Parameter(Mandatory = $true)]
-        [scriptblock]$Command,
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Output,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Pattern
+    )
+
+    $matched = $Output | Where-Object { $_ -match $Pattern }
+    if ($matched.Count -gt 0) {
+        throw "Unexpected output pattern found: $Pattern`nActual output:`n$($Output -join "`n")"
+    }
+}
+
+function Invoke-RecoveryReadiness {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptPath,
+        [Parameter(Mandatory = $true)][string]$SeedWorktreePath,
+        [Parameter(Mandatory = $true)][string]$MatrixPath
+    )
+
+    $output = @(
+        powershell.exe `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File $ScriptPath `
+            -SeedWorktreePath $SeedWorktreePath `
+            -MatrixPath $MatrixPath 2>&1
+    )
+
+    return [pscustomobject]@{
+        Output = $output
+        ExitCode = $LASTEXITCODE
+    }
+}
+
+function Invoke-ExpectFailure {
+    param(
+        [Parameter(Mandatory = $true)][pscustomobject]$Result,
 
         [Parameter(Mandatory = $true)]
         [string]$ExpectedPattern
     )
 
-    $output = @()
-    $failed = $false
-    try {
-        $output = @(& $Command 2>&1)
-    } catch {
-        $failed = $true
-        $output += $_.Exception.Message
-    }
-
-    if (-not $failed -and $LASTEXITCODE -eq 0) {
+    if ($Result.ExitCode -eq 0) {
         throw "Expected command to fail with pattern: $ExpectedPattern"
     }
 
-    Assert-Contains -Output $output -Pattern $ExpectedPattern
+    Assert-Contains -Output $Result.Output -Pattern $ExpectedPattern
 }
 
 function New-SeedTaskBlock {
@@ -60,6 +89,16 @@ function New-SeedTaskBlock {
     seededImplementationTask: true
     seededExecutionModule: authorization-and-access
     targetClosureItem: $TargetClosure
+    behaviorBoundary: smoke local implementation boundary for $TargetClosure
+    requirementRefs:
+      - smoke-requirement-$TaskId
+    useCases:
+      - smoke use case for $TargetClosure
+    acceptanceScenarios:
+      - smoke acceptance scenario for $TargetClosure
+    nonGoals:
+      - no dependency package lockfile env secret provider deploy schema migration or Cost Calibration Gate work
+    validationProfile: smoke-local-implementation
     localExperienceClosureGate: planned
     localFullLoopGate: L2
     blockedRemainder: high-risk work remains separately gated
@@ -110,7 +149,6 @@ function New-SeedTaskBlock {
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId module-run-v2-autodrive-activation -CandidateTaskId $TaskId
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - npm.cmd run test -- --run focused
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId $TaskId
     evidencePath: docs/05-execution-logs/evidence/$TaskId.md
@@ -160,9 +198,10 @@ try {
     }
 
     $stateDir = Join-Path -Path $repoPath -ChildPath "docs\04-agent-system\state"
+    $taskPlanDir = Join-Path -Path $repoPath -ChildPath "docs\05-execution-logs\task-plans"
     $evidenceDir = Join-Path -Path $repoPath -ChildPath "docs\05-execution-logs\evidence"
     $auditDir = Join-Path -Path $repoPath -ChildPath "docs\05-execution-logs\audits-reviews"
-    New-Item -ItemType Directory -Path $stateDir, $evidenceDir, $auditDir | Out-Null
+    New-Item -ItemType Directory -Path $stateDir, $taskPlanDir, $evidenceDir, $auditDir | Out-Null
 
     $matrixPath = Join-Path -Path $stateDir -ChildPath "advanced-edition-domain-module-run-matrix.yaml"
     @"
@@ -186,6 +225,12 @@ tasks:
   - id: module-run-v2-autodrive-activation
     status: done
     taskKind: automation_activation
+  - id: historical-ai-task-seed
+    status: closed
+    taskKind: implementation
+    seededImplementationTask: true
+    seededExecutionModule: ai-task-and-provider
+    targetClosureItem: historical closed task outside current seed transaction
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
     & git -C $repoPath add docs | Out-Null
@@ -194,12 +239,26 @@ tasks:
         throw "Failed to commit seed recovery baseline."
     }
 
+    $emptyResult = Invoke-RecoveryReadiness -ScriptPath $scriptPath -SeedWorktreePath $repoPath -MatrixPath $matrixPath
+    Invoke-ExpectFailure -Result $emptyResult -ExpectedPattern "HARD_BLOCK_SEED_RECOVERY_FILE_SET"
+    Assert-NotContains -Output $emptyResult.Output -Pattern "HARD_BLOCK_SEED_RECOVERY_EXCEPTION"
+
     $seedTaskBlockA = New-SeedTaskBlock -TaskId "authorization-and-access-personal-auth" -TargetClosure "personal authorization lifecycle"
     $seedTaskBlockB = New-SeedTaskBlock -TaskId "authorization-and-access-org-auth" -TargetClosure "organization authorization lifecycle"
     Add-Content -LiteralPath $queuePath -Value $seedTaskBlockA -Encoding UTF8
     Add-Content -LiteralPath $queuePath -Value $seedTaskBlockB -Encoding UTF8
     Write-SeededTaskTemplate -RepoPath $repoPath -TaskId "authorization-and-access-personal-auth"
     Write-SeededTaskTemplate -RepoPath $repoPath -TaskId "authorization-and-access-org-auth"
+    Write-SeededTaskTemplate -RepoPath $repoPath -TaskId "batch-119-authorization-and-access-personal-auth"
+    Write-SeededTaskTemplate -RepoPath $repoPath -TaskId "batch-120-authorization-and-access-org-auth"
+
+    $taskPlanPath = Join-Path -Path $taskPlanDir -ChildPath "2026-06-09-module-run-v2-auto-seed-authorization-and-access.md"
+    @"
+# Module Run v2 Auto-Seed Plan: authorization-and-access
+
+- autoDriveLocalImplementationApproval is recorded.
+- Cost Calibration Gate remains blocked.
+"@ | Set-Content -LiteralPath $taskPlanPath -Encoding UTF8
 
     $evidencePath = Join-Path -Path $evidenceDir -ChildPath "2026-06-09-module-run-v2-auto-seed-authorization-and-access.md"
     @"
@@ -219,23 +278,34 @@ tasks:
 
     & git -C $repoPath add `
         "docs/04-agent-system/state/task-queue.yaml" `
+        "docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" `
         "docs/05-execution-logs/evidence/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" `
         "docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md" `
         "docs/05-execution-logs/evidence/authorization-and-access-personal-auth.md" `
         "docs/05-execution-logs/audits-reviews/authorization-and-access-personal-auth.md" `
         "docs/05-execution-logs/evidence/authorization-and-access-org-auth.md" `
-        "docs/05-execution-logs/audits-reviews/authorization-and-access-org-auth.md" | Out-Null
+        "docs/05-execution-logs/audits-reviews/authorization-and-access-org-auth.md" `
+        "docs/05-execution-logs/evidence/batch-119-authorization-and-access-personal-auth.md" `
+        "docs/05-execution-logs/audits-reviews/batch-119-authorization-and-access-personal-auth.md" `
+        "docs/05-execution-logs/evidence/batch-120-authorization-and-access-org-auth.md" `
+        "docs/05-execution-logs/audits-reviews/batch-120-authorization-and-access-org-auth.md" | Out-Null
 
-    $readyOutput = @(& $scriptPath -SeedWorktreePath $repoPath -MatrixPath $matrixPath)
-    Assert-Contains -Output $readyOutput -Pattern "seedRecoveryDecision: recoverable_seed_transaction"
-    Assert-Contains -Output $readyOutput -Pattern "seedModule: authorization-and-access"
-    Assert-Contains -Output $readyOutput -Pattern "seedTaskCount: 2"
-    Assert-Contains -Output $readyOutput -Pattern "Cost Calibration Gate remains blocked"
+    $readyResult = Invoke-RecoveryReadiness -ScriptPath $scriptPath -SeedWorktreePath $repoPath -MatrixPath $matrixPath
+    if ($readyResult.ExitCode -ne 0) {
+        throw "Expected seed recovery readiness to pass. Output:`n$($readyResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $readyResult.Output -Pattern "seedRecoveryDecision: recoverable_seed_transaction"
+    Assert-Contains -Output $readyResult.Output -Pattern "seedModule: authorization-and-access"
+    Assert-Contains -Output $readyResult.Output -Pattern "seedTaskCount: 2"
+    Assert-Contains -Output $readyResult.Output -Pattern "seedTaskId: authorization-and-access-personal-auth"
+    Assert-Contains -Output $readyResult.Output -Pattern "seedTaskId: authorization-and-access-org-auth"
+    Assert-Contains -Output $readyResult.Output -Pattern "seedTransactionFile: docs/05-execution-logs/task-plans/2026-06-09-module-run-v2-auto-seed-authorization-and-access.md"
+    Assert-Contains -Output $readyResult.Output -Pattern "seedTransactionFile: docs/05-execution-logs/evidence/batch-119-authorization-and-access-personal-auth.md"
+    Assert-Contains -Output $readyResult.Output -Pattern "Cost Calibration Gate remains blocked"
 
     Set-Content -LiteralPath (Join-Path -Path $repoPath -ChildPath "unstaged.txt") -Value "not allowed" -Encoding UTF8
-    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_SEED_RECOVERY_UNTRACKED" -Command {
-        & $scriptPath -SeedWorktreePath $repoPath -MatrixPath $matrixPath
-    }
+    $untrackedResult = Invoke-RecoveryReadiness -ScriptPath $scriptPath -SeedWorktreePath $repoPath -MatrixPath $matrixPath
+    Invoke-ExpectFailure -Result $untrackedResult -ExpectedPattern "HARD_BLOCK_SEED_RECOVERY_UNTRACKED"
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

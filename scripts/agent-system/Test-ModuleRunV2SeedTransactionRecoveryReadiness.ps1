@@ -32,7 +32,9 @@ function Write-RecoveryResult {
         [Parameter(Mandatory = $false)][string]$Module = "",
         [Parameter(Mandatory = $false)][string]$EvidencePath = "",
         [Parameter(Mandatory = $false)][string]$AuditReviewPath = "",
-        [Parameter(Mandatory = $false)][int]$SeedTaskCount = 0
+        [Parameter(Mandatory = $false)][int]$SeedTaskCount = 0,
+        [Parameter(Mandatory = $false)][AllowEmptyCollection()][AllowEmptyString()][string[]]$SeedTaskIds = @(),
+        [Parameter(Mandatory = $false)][AllowEmptyCollection()][AllowEmptyString()][string[]]$SeedTransactionFiles = @()
     )
 
     Write-Section -Title "Result"
@@ -43,11 +45,21 @@ function Write-RecoveryResult {
     if ($SeedTaskCount -gt 0) {
         Write-Output "seedTaskCount: $SeedTaskCount"
     }
+    foreach ($seedTaskId in @($SeedTaskIds)) {
+        if (-not [string]::IsNullOrWhiteSpace($seedTaskId)) {
+            Write-Output "seedTaskId: $seedTaskId"
+        }
+    }
     if (-not [string]::IsNullOrWhiteSpace($EvidencePath)) {
         Write-Output "seedEvidencePath: $EvidencePath"
     }
     if (-not [string]::IsNullOrWhiteSpace($AuditReviewPath)) {
         Write-Output "seedAuditReviewPath: $AuditReviewPath"
+    }
+    foreach ($seedTransactionFile in @($SeedTransactionFiles)) {
+        if (-not [string]::IsNullOrWhiteSpace($seedTransactionFile)) {
+            Write-Output "seedTransactionFile: $seedTransactionFile"
+        }
     }
     Write-Output "seedRecoveryAction: closeout_recoverable_auto_seed_transaction"
     Write-Output "reason: $Reason"
@@ -110,6 +122,21 @@ function Get-TaskBlocks {
     return $blocks.ToArray()
 }
 
+function Get-TaskBlock {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][string]$Id
+    )
+
+    foreach ($block in $Blocks) {
+        if ($block.Id -eq $Id) {
+            return $block.Lines
+        }
+    }
+
+    return @()
+}
+
 function Get-TaskScalarValue {
     param(
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
@@ -125,8 +152,44 @@ function Get-TaskScalarValue {
     return ""
 }
 
+function Get-StagedQueueSeedTaskIds {
+    param(
+        [Parameter(Mandatory = $true)][string]$WorktreePath,
+        [Parameter(Mandatory = $true)][string]$QueueRelativePath
+    )
+
+    $queueDiffResult = Get-GitOutput -WorktreePath $WorktreePath -Arguments @(
+        "diff",
+        "--cached",
+        "--unified=0",
+        "--",
+        $QueueRelativePath
+    )
+    if ($queueDiffResult.ExitCode -ne 0) {
+        Add-Finding "HARD_BLOCK_SEED_RECOVERY_QUEUE_DIFF_UNREADABLE"
+        return @()
+    }
+
+    $addedQueueLines = New-Object System.Collections.Generic.List[string]
+    foreach ($line in $queueDiffResult.Output) {
+        if ($line.StartsWith("+") -and -not $line.StartsWith("+++")) {
+            $addedQueueLines.Add($line.Substring(1))
+        }
+    }
+
+    $seedTaskIds = New-Object System.Collections.Generic.List[string]
+    foreach ($block in @(Get-TaskBlocks -Lines $addedQueueLines.ToArray())) {
+        $blockText = $block.Lines -join "`n"
+        if ($blockText -match "(?m)^\s+seededImplementationTask:\s*true\s*$") {
+            $seedTaskIds.Add($block.Id)
+        }
+    }
+
+    return $seedTaskIds.ToArray()
+}
+
 function Test-SeedTransactionFileSet {
-    param([Parameter(Mandatory = $true)][string[]]$Files)
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Files)
 
     if ($Files.Count -lt 3) {
         return $false
@@ -136,15 +199,22 @@ function Test-SeedTransactionFileSet {
     $hasQueue = $normalizedFiles -contains "docs/04-agent-system/state/task-queue.yaml"
     $seedEvidenceFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/evidence/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
     $seedAuditFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/audits-reviews/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
+    $seedTaskPlanFiles = @($normalizedFiles | Where-Object { $_ -match "^docs/05-execution-logs/task-plans/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$" })
     $allowedGeneratedFiles = @($normalizedFiles | Where-Object {
             $_ -match "^docs/05-execution-logs/evidence/[a-z0-9-]+\.md$" -or
-            $_ -match "^docs/05-execution-logs/audits-reviews/[a-z0-9-]+\.md$"
+            $_ -match "^docs/05-execution-logs/audits-reviews/[a-z0-9-]+\.md$" -or
+            $_ -match "^docs/05-execution-logs/task-plans/\d{4}-\d{2}-\d{2}-module-run-v2-auto-seed-[a-z0-9-]+\.md$"
         })
+    $allowedFiles = @(
+        "docs/04-agent-system/state/task-queue.yaml"
+    ) + $allowedGeneratedFiles
+    $invalidFiles = @($normalizedFiles | Where-Object { $allowedFiles -notcontains $_ })
 
     return $hasQueue -and
         $seedEvidenceFiles.Count -eq 1 -and
         $seedAuditFiles.Count -eq 1 -and
-        ($allowedGeneratedFiles.Count + 1) -eq $normalizedFiles.Count
+        $seedTaskPlanFiles.Count -le 1 -and
+        $invalidFiles.Count -eq 0
 }
 
 try {
@@ -182,6 +252,12 @@ try {
     foreach ($stagedFile in $stagedFiles) {
         Write-Output "stagedFile: $(ConvertTo-NormalizedPath -Path $stagedFile)"
     }
+    foreach ($unstagedFile in $unstagedFiles) {
+        Write-Output "unstagedFile: $(ConvertTo-NormalizedPath -Path $unstagedFile)"
+    }
+    foreach ($untrackedFile in $untrackedFiles) {
+        Write-Output "untrackedFile: $(ConvertTo-NormalizedPath -Path $untrackedFile)"
+    }
 
     if ($unstagedFiles.Count -gt 0) {
         Add-Finding "HARD_BLOCK_SEED_RECOVERY_UNSTAGED"
@@ -208,19 +284,22 @@ try {
     }
 
     $seedModule = ""
-    $seedTaskCount = 0
+    $seedTaskIds = @(Get-StagedQueueSeedTaskIds -WorktreePath $seedRoot -QueueRelativePath $queueRelativePath)
+    $seedTaskCount = $seedTaskIds.Count
     if (Test-Path -LiteralPath $queuePath) {
         $queueLines = @(Get-Content -LiteralPath $queuePath)
         $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
         $seededModules = New-Object System.Collections.Generic.List[string]
-        foreach ($block in $taskBlocks) {
-            $blockText = $block.Lines -join "`n"
-            if ($blockText -match "(?m)^\s+seededImplementationTask:\s*true\s*$") {
-                $seedTaskCount += 1
-                $moduleId = Get-TaskScalarValue -Block $block.Lines -Key "seededExecutionModule"
-                if (-not [string]::IsNullOrWhiteSpace($moduleId) -and -not $seededModules.Contains($moduleId)) {
-                    $seededModules.Add($moduleId)
-                }
+        foreach ($seedTaskId in $seedTaskIds) {
+            $taskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $seedTaskId)
+            if ($taskBlock.Count -eq 0) {
+                Add-Finding "HARD_BLOCK_SEED_RECOVERY_TASK_NOT_FOUND $seedTaskId"
+                continue
+            }
+
+            $moduleId = Get-TaskScalarValue -Block $taskBlock -Key "seededExecutionModule"
+            if (-not [string]::IsNullOrWhiteSpace($moduleId) -and -not $seededModules.Contains($moduleId)) {
+                $seededModules.Add($moduleId)
             }
         }
         if ($seededModules.Count -eq 1) {
@@ -258,6 +337,7 @@ try {
             $selfReviewOutput = @(
                 & $selfReviewScript `
                     -ExpectedModule $seedModule `
+                    -SeedTaskIds $seedTaskIds `
                     -QueuePath $queuePath `
                     -MatrixPath $MatrixPath 2>&1
             )
@@ -287,7 +367,9 @@ try {
         -Module $seedModule `
         -EvidencePath (ConvertTo-NormalizedPath -Path $evidenceRelativePath) `
         -AuditReviewPath (ConvertTo-NormalizedPath -Path $auditRelativePath) `
-        -SeedTaskCount $seedTaskCount
+        -SeedTaskCount $seedTaskCount `
+        -SeedTaskIds $seedTaskIds `
+        -SeedTransactionFiles $normalizedFiles
 } catch {
     Write-Output "HARD_BLOCK_SEED_RECOVERY_EXCEPTION $($_.Exception.Message)"
     Write-RecoveryResult -Decision "stop_for_hard_block" -Reason "seed recovery readiness script exception" -ExitCode 1

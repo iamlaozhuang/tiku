@@ -69,6 +69,22 @@ function Get-OutputValue {
     return ""
 }
 
+function Get-OutputValues {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Output,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    $values = New-Object System.Collections.Generic.List[string]
+    foreach ($line in $Output) {
+        if ($line -match "^$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            $values.Add($Matches[1].Trim())
+        }
+    }
+
+    return $values.ToArray()
+}
+
 function Invoke-GitCommand {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
 
@@ -83,6 +99,31 @@ function Invoke-GitCommand {
     $output | ForEach-Object { Write-Output $_ }
     if ($LASTEXITCODE -ne 0) {
         throw "Git command failed: git $($Arguments -join ' ')"
+    }
+}
+
+function Invoke-CloseoutLocalToolingReadiness {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptRoot,
+        [Parameter(Mandatory = $true)][string]$RepositoryPath
+    )
+
+    $toolingScriptPath = Join-Path -Path $ScriptRoot -ChildPath "Test-ModuleRunV2CloseoutLocalToolingReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $toolingScriptPath)) {
+        throw "Missing closeout local tooling readiness script: $toolingScriptPath"
+    }
+
+    $toolingOutput = @(
+        powershell.exe `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File $toolingScriptPath `
+            -RepositoryPath $RepositoryPath 2>&1
+    )
+    $toolingExitCode = $LASTEXITCODE
+    $toolingOutput | ForEach-Object { Write-Output $_ }
+    if ($toolingExitCode -ne 0) {
+        throw "Closeout local tooling readiness failed."
     }
 }
 
@@ -223,6 +264,27 @@ function Copy-SeedLogFile {
     Copy-Item -LiteralPath $sourcePath -Destination $targetPath -Force
 }
 
+function Copy-SeedTransactionFiles {
+    param(
+        [Parameter(Mandatory = $true)][string]$SeedRoot,
+        [Parameter(Mandatory = $true)][string]$CurrentRoot,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$RelativePaths
+    )
+
+    $copiedFiles = New-Object System.Collections.Generic.List[string]
+    foreach ($relativePath in @($RelativePaths)) {
+        $normalizedPath = $relativePath.Replace("\", "/").TrimStart(".", "/")
+        if ([string]::IsNullOrWhiteSpace($normalizedPath) -or $normalizedPath -eq "docs/04-agent-system/state/task-queue.yaml") {
+            continue
+        }
+
+        Copy-SeedLogFile -SeedRoot $SeedRoot -CurrentRoot $CurrentRoot -RelativePath $normalizedPath
+        $copiedFiles.Add($normalizedPath)
+    }
+
+    return $copiedFiles.ToArray()
+}
+
 function Assert-CleanupPathAllowed {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -270,9 +332,21 @@ try {
     $seedModule = Get-OutputValue -Output $recoveryOutput -Key "seedModule"
     $seedEvidencePath = Get-OutputValue -Output $recoveryOutput -Key "seedEvidencePath"
     $seedAuditReviewPath = Get-OutputValue -Output $recoveryOutput -Key "seedAuditReviewPath"
+    $seedTaskIds = @(Get-OutputValues -Output $recoveryOutput -Key "seedTaskId")
+    $seedTransactionFiles = @(Get-OutputValues -Output $recoveryOutput -Key "seedTransactionFile")
+    if ($seedTransactionFiles.Count -eq 0) {
+        $seedTransactionFiles = @(
+            "docs/04-agent-system/state/task-queue.yaml",
+            $seedEvidencePath,
+            $seedAuditReviewPath
+        )
+    }
     $seedQueuePath = Join-Path -Path $seedRoot -ChildPath "docs\04-agent-system\state\task-queue.yaml"
     $currentQueuePath = Join-Path -Path $currentRoot -ChildPath "docs\04-agent-system\state\task-queue.yaml"
     $seedBlocks = @(Get-SeedTaskBlocks -Lines @(Get-Content -LiteralPath $seedQueuePath))
+    if ($seedTaskIds.Count -gt 0) {
+        $seedBlocks = @($seedBlocks | Where-Object { $seedTaskIds -contains $_.Id })
+    }
     if ($seedBlocks.Count -eq 0) {
         Write-CloseoutResult -Decision "stop_for_hard_block" -Reason "recoverable seed transaction has no seed task blocks" -ExitCode 1 -Module $seedModule
     }
@@ -301,22 +375,27 @@ try {
         Invoke-GitCommand -Arguments @("switch", "-c", $currentBranch)
     }
 
+    Invoke-CloseoutLocalToolingReadiness -ScriptRoot $PSScriptRoot -RepositoryPath $currentRoot
+
     $appendedCount = Append-SeedTaskBlocks -QueuePath $currentQueuePath -SeedBlocks $seedBlocks
     Write-Output "seedTaskBlocksAppended: $appendedCount"
     if ($appendedCount -eq 0) {
         Write-CloseoutResult -Decision "already_replayed" -Reason "current queue already contains the recoverable seed task blocks" -ExitCode 0 -Module $seedModule
     }
 
-    Copy-SeedLogFile -SeedRoot $seedRoot -CurrentRoot $currentRoot -RelativePath $seedEvidencePath
-    Copy-SeedLogFile -SeedRoot $seedRoot -CurrentRoot $currentRoot -RelativePath $seedAuditReviewPath
+    $copiedSeedTransactionFiles = @(Copy-SeedTransactionFiles -SeedRoot $seedRoot -CurrentRoot $currentRoot -RelativePaths $seedTransactionFiles)
+    foreach ($copiedSeedTransactionFile in $copiedSeedTransactionFiles) {
+        Write-Output "seedTransactionFileCopied: $copiedSeedTransactionFile"
+    }
 
     $selfReviewScript = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ImplementationSeedSelfReview.ps1"
-    & $selfReviewScript -ExpectedModule $seedModule -QueuePath $currentQueuePath -MatrixPath $currentMatrixPath
+    & $selfReviewScript -ExpectedModule $seedModule -SeedTaskIds $seedTaskIds -QueuePath $currentQueuePath -MatrixPath $currentMatrixPath
     if ($LASTEXITCODE -ne 0) {
         throw "Seed self-review failed after replay."
     }
 
-    Invoke-GitCommand -Arguments @("add", "--", "docs/04-agent-system/state/task-queue.yaml", $seedEvidencePath, $seedAuditReviewPath)
+    $stagedSeedFiles = @("docs/04-agent-system/state/task-queue.yaml") + $copiedSeedTransactionFiles
+    Invoke-GitCommand -Arguments (@("add", "--") + $stagedSeedFiles)
     Invoke-GitCommand -Arguments @("diff", "--cached", "--check")
 
     $baseBranchWorktreePath = Get-BranchWorktreePath -Branch $BaseBranch

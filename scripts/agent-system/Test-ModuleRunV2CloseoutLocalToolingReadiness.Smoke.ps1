@@ -82,6 +82,20 @@ try {
     Pop-Location
     Assert-Contains -Output $notApplicableOutput -Pattern "closeoutLocalToolingDecision: not_applicable"
 
+    $missingShimRoot = New-SmokeRoot
+    $roots.Add($missingShimRoot)
+    '{"scripts":{"lint":"eslint","typecheck":"tsc --noEmit"}}' | Set-Content -LiteralPath (Join-Path -Path $missingShimRoot -ChildPath "package.json") -Encoding UTF8
+    New-Item -ItemType Directory -Path (Join-Path -Path $missingShimRoot -ChildPath "node_modules") | Out-Null
+    Push-Location $missingShimRoot
+    $missingShimOutput = @(powershell.exe -NoProfile -ExecutionPolicy Bypass -File $scriptPath 2>&1)
+    $missingShimExitCode = $LASTEXITCODE
+    Pop-Location
+    if ($missingShimExitCode -eq 0) {
+        throw "Expected missing .bin shim case to exit non-zero. Output:`n$($missingShimOutput -join "`n")"
+    }
+    Assert-Contains -Output $missingShimOutput -Pattern "closeoutLocalToolingMissing: node_modules\\.bin"
+    Assert-Contains -Output $missingShimOutput -Pattern "reason: local binary shims are missing"
+
     $readyRoot = New-SmokeRoot
     $roots.Add($readyRoot)
     $readyFakeBin = Write-FakeNodeTooling -Root $readyRoot

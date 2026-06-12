@@ -68,6 +68,11 @@ try {
         Write-ToolingResult -Decision "stop_for_hard_block" -Reason "node_modules is missing" -ExitCode 1
     }
 
+    if (-not (Test-Path -LiteralPath "node_modules\.bin")) {
+        Write-Output "closeoutLocalToolingMissing: node_modules\.bin"
+        Write-ToolingResult -Decision "stop_for_hard_block" -Reason "local binary shims are missing" -ExitCode 1
+    }
+
     $requiredToolingPaths = @(
         "node_modules\.bin\eslint.cmd",
         "node_modules\.bin\tsc.cmd",
