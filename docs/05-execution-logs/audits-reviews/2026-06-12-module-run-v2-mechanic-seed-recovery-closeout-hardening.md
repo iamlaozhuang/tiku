@@ -27,6 +27,7 @@ No blocking findings in the implemented mechanism changes after local tooling wa
 - Smoke tests include a historical seeded task outside the current transaction.
 - The real `9550` personal-learning-ai seed transaction now validates as recoverable after staging.
 - The primary Codex app automation card was rendered through `automation_update view`.
+- After local fast-forward merge to `D:\tiku` `master`, the three mechanism smoke scripts, closeout local tooling readiness, lint/typecheck, and `git diff --check` passed without remote push.
 - No product, dependency, package, lockfile, schema, migration, env, secret, provider, deploy, PR, force-push, or Cost Calibration Gate work was included.
 
 ## Residual Risk

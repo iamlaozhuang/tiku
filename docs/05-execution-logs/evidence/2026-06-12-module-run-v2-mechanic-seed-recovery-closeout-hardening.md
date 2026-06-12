@@ -51,4 +51,16 @@ Mechanic repair anchors:
 
 The local tooling gap was repaired after fresh user approval. `npm.cmd run lint`, `npm.cmd run typecheck`, and closeout local tooling readiness now pass in this worktree.
 
+## Post-Merge Local Master Validation
+
+After local fast-forward merge to `D:\tiku` `master`, without pushing remote:
+
+| Command                                                                                                                                              | Result | Notes                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------ |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2SeedTransactionRecoveryReadiness.Smoke.ps1`          | pass   | Seed recovery readiness smoke passed.      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2CloseoutLocalToolingReadiness.Smoke.ps1`             | pass   | Tooling readiness smoke passed.            |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2RecoverableSeedTransactionCloseout.Smoke.ps1`      | pass   | Recoverable seed closeout smoke passed.    |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2CloseoutLocalToolingReadiness.ps1 -RepositoryPath .` | pass   | Ran `npm.cmd run lint` and `typecheck`.    |
+| `git diff --check`                                                                                                                                   | pass   | No whitespace errors after local closeout. |
+
 Cost Calibration Gate remains blocked.
