@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
-updatedAt: "2026-06-12T02:36:44-07:00"
+  currentPhase: health-audit-followup-quality-refresh
+updatedAt: "2026-06-12T08:03:57-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
-  lastKnownOriginMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
+  lastKnownMasterSha: 5a5ce59772bd7d1e67519c3a7b3afa07dfc1334c
+  lastKnownOriginMasterSha: 5a5ce59772bd7d1e67519c3a7b3afa07dfc1334c
 currentTask:
-  id: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+  id: docs-project-quality-gate-refresh
   status: closed
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
-  evidencePath: docs/05-execution-logs/evidence/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
-  branch: codex/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
-  commitSha: 71c36f9a4b8ed60a6e704cecb0b83cff77b09fe6
+  sourceStory: health-audit-local-baseline
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-docs-project-quality-gate-refresh.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-docs-project-quality-gate-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-project-quality-gate-refresh.md
+  branch: codex/docs-project-quality-gate-refresh
+  commitSha: pending_final_quality_refresh_commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -284,20 +284,23 @@ qualityGates:
   desired:
     - lint
     - typecheck
-    - test
-    - build_when_relevant
+    - unit
+    - build
   available:
     - lint
     - typecheck
+    - unit
+    - build
   lastRun:
-    date: "2026-06-01"
-    readiness: pass
+    date: "2026-06-12"
+    readiness: continue_with_p1_followups
     lint: pass
     typecheck: pass
-    test: pass
+    unit: fail
     build: pass
-    e2e: pass
+    e2e: not_run_deferred_until_unit_gate_fixed
     preCommitHook: pass
+    prePushHook: pass
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -313,7 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Implement the Module Run v2 activation and branch posture hardening task before resuming batch-116. The task must
-    keep provider, env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and
-    Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+    Create a P1 unit gate drift task for the student authorization runtime response contract, then rerun npm.cmd run
+    test:unit. If the full unit run reproduces the Playwright config baseline timeout again, include a narrow
+    Playwright config test stability fix in that unit-gate task. Defer L5 local e2e until unit gate is healthy. Keep
+    provider, env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, and Cost
+    Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-docs-project-quality-gate-refresh.md

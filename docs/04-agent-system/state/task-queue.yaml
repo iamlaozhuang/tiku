@@ -4217,7 +4217,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-api-error-envelope-consistency.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-api-error-envelope-consistency.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: fix-client-server-type-boundary
     title: Move contact_config fallback to client-safe boundary
@@ -4283,7 +4283,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-client-server-type-boundary.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-client-server-type-boundary.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: fix-playwright-stale-server-risk
     title: Prevent stale Playwright dev server reuse
@@ -4343,7 +4343,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-playwright-stale-server-risk.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-playwright-stale-server-risk.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: fix-admin-ai-audit-log-sample-encoding
     title: Repair admin ai_call_log sample display text
@@ -4403,7 +4403,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: docs-adr-runtime-dependency-alignment
     title: Align ADR runtime dependency baseline
@@ -4462,7 +4462,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-docs-adr-runtime-dependency-alignment.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-adr-runtime-dependency-alignment.md
-    status: pending
+    status: closed
     retryCount: 0
   - id: docs-project-quality-gate-refresh
     title: Refresh project quality gate and final health follow-up review
@@ -4524,5 +4524,5 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-docs-project-quality-gate-refresh.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-project-quality-gate-refresh.md
-    status: pending
+    status: closed
     retryCount: 0
