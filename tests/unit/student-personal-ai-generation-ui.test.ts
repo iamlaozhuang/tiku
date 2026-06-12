@@ -115,15 +115,18 @@ const localExperienceResponse = {
         taskType: "ai_question_generation",
         status: "pending",
         failureCategory: null,
-        resultPublicId: null,
-        contentVisibility: "summary_only",
-        evidenceStatus: "none",
-        citationCount: 0,
-        aiCallLogReference: {
-          publicId: null,
+        resultReference: {
+          resultPublicId: null,
+          contentVisibility: "summary_only",
+          evidenceStatus: "none",
+          citationCount: 0,
           redactionStatus: "redacted",
         },
-        redactionStatus: "redacted",
+        aiCallLogReference: {
+          aiCallLogPublicId: null,
+          contentVisibility: "summary_only",
+          redactionStatus: "redacted",
+        },
       },
     },
   },
@@ -272,5 +275,67 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("generated content");
+  });
+
+  it("renders redacted result and ai_call_log reference metadata without raw provider content", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const redactedReferenceResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          taskPublicId: "ai-generation-task-public-001",
+          resultPublicId: "ai-result-public-001",
+          contentVisibility: "summary_only",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+        },
+        requestFlow: {
+          ...localExperienceResponse.data.requestFlow,
+          resultReference: {
+            ...localExperienceResponse.data.requestFlow.resultReference,
+            status: "succeeded",
+            resultReference: {
+              resultPublicId: "ai-result-public-001",
+              contentVisibility: "summary_only",
+              evidenceStatus: "sufficient",
+              citationCount: 2,
+              redactionStatus: "redacted",
+            },
+            aiCallLogReference: {
+              aiCallLogPublicId: "ai-call-log-public-001",
+              contentVisibility: "summary_only",
+              redactionStatus: "redacted",
+            },
+          },
+        },
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => redactedReferenceResponse,
+      })),
+    );
+
+    render(createElement(StudentPersonalAiGenerationPage));
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(await screen.findByText("aiCallLogPublicId")).toBeInTheDocument();
+    expect(screen.getByText("ai-call-log-public-001")).toBeInTheDocument();
+    expect(screen.getByText("resultPublicId")).toBeInTheDocument();
+    expect(screen.getByText("ai-result-public-001")).toBeInTheDocument();
+    expect(screen.getByText("evidenceStatus")).toBeInTheDocument();
+    expect(screen.getByText("sufficient")).toBeInTheDocument();
+    expect(screen.getByText("citationCount")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("generated content");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 });

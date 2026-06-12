@@ -5233,7 +5233,7 @@ tasks:
         deleteShortBranch: true
         parkWorktree: false
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -5346,7 +5346,7 @@ tasks:
         deleteShortBranch: true
         parkWorktree: false
     registryLifecycle:
-      runStatus: pending
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -5394,7 +5394,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-125-personal-learning-ai-redacted-reference-display-integration
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
     title: Validate personal learning AI local browser flow with existing e2e suite

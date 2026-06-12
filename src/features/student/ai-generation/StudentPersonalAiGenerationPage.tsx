@@ -121,6 +121,10 @@ function createPersonalAiGenerationRequestBody(
   };
 }
 
+function formatNullableText(value: string | null | undefined): string {
+  return value ?? "null";
+}
+
 function StudentPersonalAiGenerationStateMessage({
   title,
   description,
@@ -166,6 +170,7 @@ function StudentPersonalAiGenerationContractSummary({
   experience: PersonalAiGenerationLocalBrowserExperienceDto;
 }) {
   const disabledReason = experience.requestState.action.disabledReason;
+  const resultReference = experience.requestFlow.resultReference;
 
   return (
     <section className="border-border bg-surface rounded-xl border p-4">
@@ -205,6 +210,34 @@ function StudentPersonalAiGenerationContractSummary({
         <ContractField
           label="contentVisibility"
           value={experience.resultState.contentVisibility}
+        />
+        <ContractField
+          label="taskPublicId"
+          value={resultReference.taskPublicId}
+        />
+        <ContractField
+          label="resultPublicId"
+          value={formatNullableText(
+            resultReference.resultReference.resultPublicId,
+          )}
+        />
+        <ContractField
+          label="aiCallLogPublicId"
+          value={formatNullableText(
+            resultReference.aiCallLogReference.aiCallLogPublicId,
+          )}
+        />
+        <ContractField
+          label="evidenceStatus"
+          value={resultReference.resultReference.evidenceStatus}
+        />
+        <ContractField
+          label="citationCount"
+          value={String(resultReference.resultReference.citationCount)}
+        />
+        <ContractField
+          label="referenceRedactionStatus"
+          value={resultReference.resultReference.redactionStatus}
         />
       </dl>
     </section>
