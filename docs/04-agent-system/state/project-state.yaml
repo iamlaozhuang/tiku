@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-114-personal-learning-ai-local-e2e-smoke-planning
-updatedAt: "2026-06-11T19:44:25-07:00"
+  currentPhase: active-queue-slimming-2026-06-11
+updatedAt: "2026-06-11T20:00:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -267,16 +267,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2b25cf8b8a21020550061cb07c112f6f0a66461a
-  lastKnownOriginMasterSha: 2b25cf8b8a21020550061cb07c112f6f0a66461a
+  lastKnownMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
+  lastKnownOriginMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
 currentTask:
-  id: batch-114-personal-learning-ai-local-e2e-smoke-planning
+  id: active-queue-slimming-2026-06-11
   status: closed
-  sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-114-personal-learning-ai-local-e2e-smoke-planning.md
-  evidencePath: docs/05-execution-logs/evidence/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
-  branch: codex/batch-114-personal-learning-ai-local-e2e-smoke-planning
+  sourceStory: user-request-2026-06-11-active-queue-slimming
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-active-queue-slimming.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-active-queue-slimming.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-active-queue-slimming.md
+  branch: codex/active-queue-slimming
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -314,11 +314,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch114 closed the docs-only local E2E smoke planning for personal-learning-ai-experience. Current existing
-    Playwright specs provide adjacent coverage but do not yet fully prove the student-facing personal AI request and
-    redacted result-reference path. Future e2e execution must wait for a separate queued task that declares
-    capabilities.localE2EValidation: approved_local_only_existing_specs and names an existing local spec command. Local
-    automation pause remains user-controlled. Keep provider, env/secret, schema/migration, dependency, deploy, payment,
-    external-service, PR, force-push, full e2e suite, headed/debug e2e, and Cost Calibration Gate blocked unless
-    separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+    Active queue slimming 2026-06-11 reduced task-queue.yaml to the current recovery pointer, evidence-gap debt entries,
+    and the recent local closeout window. Historical terminal entries moved to
+    docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml and are locatable through
+    docs/04-agent-system/state/task-history-index.yaml. Local automation pause remains user-controlled. Keep provider,
+    env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and Cost
+    Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-active-queue-slimming.md

@@ -1,8 +1,8 @@
 schemaVersion: 1
 generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
-  generatedByTask: phase-59-evidence-gap-reconciliation
-  generatedAt: "2026-06-07T09:28:31-07:00"
+  generatedByTask: active-queue-slimming-2026-06-11
+  generatedAt: "2026-06-11T20:00:52-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -4270,3 +4270,1303 @@ entries:
     evidenceReconciliation:
       reconciledByTask: phase-59-evidence-gap-reconciliation
       previousEvidencePath: docs/05-execution-logs/evidence/2026-06-06-advanced-edition-cost-calibration-gate.md
+  - id: phase-53-requirement-task-coverage-gap-governance
+    phase: phase-53-requirement-task-coverage-gap-governance
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-53-requirement-task-coverage-gap-governance.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-54-task-queue-archival-index-governance
+    phase: phase-54-task-queue-archival-index-governance
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-54-task-queue-archival-index-governance.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-55-thread-rollover-handoff-governance
+    phase: phase-55-thread-rollover-handoff-governance
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-55-thread-rollover-handoff-governance.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-56-advanced-edition-coverage-audit
+    phase: phase-56-advanced-edition-coverage-audit
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-56-advanced-edition-coverage-audit.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-57-docs-slimming-readonly-inventory
+    phase: phase-57-docs-slimming-readonly-inventory
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-57-docs-slimming-readonly-inventory.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-58-task-queue-archive-execution
+    phase: phase-58-task-queue-archive-execution
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-58-task-queue-archive-execution.md
+    auditReviewPath: null
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-59-evidence-gap-reconciliation
+    phase: phase-59-automation-readiness-prep
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-59-evidence-gap-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-59-evidence-gap-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-60-execution-log-archive-governance
+    phase: phase-60-execution-log-archive-governance
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-60-execution-log-archive-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-60-execution-log-archive-governance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-61-execution-log-archive-first-batch
+    phase: phase-61-execution-log-archive-first-batch
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-61-execution-log-archive-first-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-61-execution-log-archive-first-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-62-mechanism-source-index
+    phase: phase-62-mechanism-source-index
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-62-mechanism-source-index.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-62-mechanism-source-index.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-63-codex-app-readiness-follow-up
+    phase: phase-63-codex-app-readiness-follow-up
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-63-codex-app-readiness-follow-up.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-63-codex-app-readiness-follow-up.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-64-advanced-code-stage-seeding-plan
+    phase: phase-64-advanced-code-stage-seeding-plan
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-64-advanced-code-stage-seeding-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-65-advanced-code-stage-queue-seeding-execution
+    phase: phase-65-advanced-code-stage-queue-seeding-execution
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-65-advanced-code-stage-queue-seeding-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-65-advanced-code-stage-queue-seeding-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-66-local-implementation-readiness-gate
+    phase: phase-66-local-implementation-readiness-gate
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-66-local-implementation-readiness-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-66-local-implementation-readiness-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-67-automation-readiness-scorecard
+    phase: phase-67-automation-readiness-scorecard
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-67-automation-readiness-scorecard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-67-automation-readiness-scorecard.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-68-mode-transition-proposal-final-readiness-audit
+    phase: phase-68-mode-transition-proposal-final-readiness-audit
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-68-mode-transition-proposal-final-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: local-auto-candidate-mode-transition-confirmation
+    phase: local-auto-candidate-mode-transition-confirmation
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-local-auto-candidate-mode-transition-confirmation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-local-auto-candidate-mode-transition-confirmation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-69-advanced-authorization-context-implementation-planning
+    phase: phase-69-advanced-authorization-context-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-69-advanced-authorization-context-implementation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-70-advanced-ai-task-domain-implementation-planning
+    phase: phase-70-advanced-ai-task-domain-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-70-advanced-ai-task-domain-implementation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-71-advanced-personal-ai-generation-implementation-planning
+    phase: phase-71-advanced-personal-ai-generation-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-72-advanced-organization-training-implementation-planning
+    phase: phase-72-advanced-organization-training-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-72-advanced-organization-training-implementation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-73-advanced-organization-analytics-implementation-planning
+    phase: phase-73-advanced-organization-analytics-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-73-advanced-organization-analytics-implementation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-74-advanced-ops-auth-quota-implementation-planning
+    phase: phase-74-advanced-ops-auth-quota-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-74-advanced-ops-auth-quota-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-74-advanced-ops-auth-quota-implementation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-75-advanced-retention-log-governance-implementation-planning
+    phase: phase-75-advanced-retention-log-governance-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-75-advanced-retention-log-governance-implementation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-75-advanced-retention-log-governance-implementation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-76-advanced-code-stage-schema-dependency-blocker-review
+    phase: phase-76-advanced-code-stage-schema-dependency-blocker-review
+    status: done
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-76-advanced-code-stage-schema-dependency-blocker-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-76-advanced-code-stage-schema-dependency-blocker-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-77-advanced-code-stage-security-redaction-review-plan
+    phase: phase-77-advanced-code-stage-security-redaction-review-plan
+    status: done
+    taskKind: security_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-77-advanced-code-stage-security-redaction-review-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-77-advanced-code-stage-security-redaction-review-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-78-advanced-code-stage-local-validation-planning
+    phase: phase-78-advanced-code-stage-local-validation-planning
+    status: done
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-78-advanced-code-stage-local-validation-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-79-closeout-readiness-audit
+    phase: phase-79-closeout-readiness-audit
+    status: done
+    taskKind: closeout
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-79-closeout-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-79-closeout-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-80-post-closeout-state-reconciliation
+    phase: phase-80-post-closeout-state-reconciliation
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-80-post-closeout-state-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-81-next-docs-only-batch-planning
+    phase: phase-81-next-docs-only-batch-planning
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-81-next-docs-only-batch-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-81-next-docs-only-batch-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-82-active-queue-slimming-readiness-audit
+    phase: phase-82-active-queue-slimming-readiness-audit
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-82-active-queue-slimming-readiness-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-83-code-stage-approval-request-pack
+    phase: phase-83-code-stage-approval-request-pack
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-83-code-stage-approval-request-pack.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-83-code-stage-approval-request-pack.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-84-code-stage-narrow-scope-approval-decision-record
+    phase: phase-84-code-stage-narrow-scope-approval-decision-record
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-84-code-stage-narrow-scope-approval-decision-record.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-84-code-stage-narrow-scope-approval-decision-record.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-85-first-implementation-slice-approval-draft
+    phase: phase-85-first-implementation-slice-approval-draft
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-85-first-implementation-slice-approval-draft.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-85-first-implementation-slice-approval-draft.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-86-human-approval-checklist
+    phase: phase-86-human-approval-checklist
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-86-human-approval-checklist.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-86-human-approval-checklist.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-87-authorization-context-read-model-contract
+    phase: phase-87-authorization-context-read-model-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-87-authorization-context-read-model-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-87-authorization-context-read-model-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-88-ai-task-domain-local-contract
+    phase: phase-88-ai-task-domain-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-88-ai-task-domain-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-88-ai-task-domain-local-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-89-paper-mock-exam-scope-read-model
+    phase: phase-89-paper-mock-exam-scope-read-model
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-89-paper-mock-exam-scope-read-model.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-89-paper-mock-exam-scope-read-model.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-90-audit-ai-call-log-redacted-reference
+    phase: phase-90-audit-ai-call-log-redacted-reference
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-07-phase-90-audit-ai-call-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-07-phase-90-audit-ai-call-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-07"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-91-redeem-code-redacted-reference
+    phase: phase-91-redeem-code-redacted-reference
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-phase-91-redeem-code-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-phase-91-redeem-code-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-92-personal-ai-generation-request-contract
+    phase: phase-92-personal-ai-generation-request-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-phase-92-personal-ai-generation-request-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-phase-92-personal-ai-generation-request-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: phase-93-org-auth-training-scope-summary
+    phase: phase-93-org-auth-training-scope-summary
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-phase-93-org-auth-training-scope-summary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-phase-93-org-auth-training-scope-summary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-94-authorization-read-model-local-contract
+    phase: batch-94-authorization-read-model-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-read-model-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-read-model-local-contract-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-94-post-merge-state-reconciliation
+    phase: batch-94-post-merge-state-reconciliation
+    status: done
+    taskKind: docs_state_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-batch-94-post-merge-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-batch-94-post-merge-state-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-95-authorization-display-local-contract
+    phase: batch-95-authorization-display-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-display-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-display-local-contract-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: evidence-format-finalization-governance
+    phase: evidence-format-finalization-governance
+    status: done
+    taskKind: docs_state_governance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-evidence-format-finalization-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-evidence-format-finalization-governance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-96-authorization-access-reason-local-contract
+    phase: batch-96-authorization-access-reason-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-access-reason-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-access-reason-local-contract-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-97-authorization-reason-presentation-local-contract
+    phase: batch-97-authorization-reason-presentation-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-presentation-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-reason-presentation-local-contract-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-98-authorization-reason-view-section-local-contract
+    phase: batch-98-authorization-reason-view-section-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-view-section-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-reason-view-section-local-contract-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-99-authorization-reason-view-model-local-contract
+    phase: batch-99-authorization-reason-view-model-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-view-model-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-reason-view-model-local-contract-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-100-authorization-reason-view-model-selector-local-contract
+    phase: batch-100-authorization-reason-view-model-selector-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-authorization-reason-view-model-selector-local-contract-batch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-authorization-reason-view-model-selector-local-contract-batch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: advanced-edition-domain-module-run-matrix
+    phase: advanced-edition-domain-module-run-matrix
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-domain-module-run-matrix.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-advanced-edition-domain-module-run-matrix.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: advanced-edition-module-run-v2-mechanism-upgrade
+    phase: advanced-edition-module-run-v2-mechanism-upgrade
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-advanced-edition-module-run-v2-mechanism-upgrade.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-hook-automation-readiness
+    phase: module-run-v2-hook-automation-readiness
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-hook-automation-readiness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-pre-work-pre-edit-advisory
+    phase: module-run-v2-pre-work-pre-edit-advisory
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-work-pre-edit-advisory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-pre-commit-scan-hardening
+    phase: module-run-v2-pre-commit-scan-hardening
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-hook-automation-hardening-sequence
+    phase: module-run-v2-hook-automation-hardening-sequence
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-hook-automation-hardening-sequence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-authorization-and-access-pilot
+    phase: module-run-v2-authorization-and-access-pilot
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-authorization-and-access-pilot.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-mechanism-completion
+    phase: module-run-v2-mechanism-completion
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-completion.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-completion.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-mechanism-state-source-sync
+    phase: module-run-v2-mechanism-completion
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-mechanism-state-source-sync.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-start-gate-hardening
+    phase: module-run-v2-mechanism-completion
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-start-gate-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-start-gate-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-closeout-strictness-hardening
+    phase: module-run-v2-mechanism-completion
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-closeout-strictness-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-closeout-strictness-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-post-commit-advisory
+    phase: module-run-v2-mechanism-completion
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-commit-advisory.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-commit-advisory.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-automation-readiness-scorecard-refresh
+    phase: module-run-v2-mechanism-completion
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-automation-readiness-scorecard-refresh.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-evidence-redaction-scan-hardening
+    phase: module-run-v2-mechanism-completion
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-evidence-redaction-scan-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-unattended-automation-control
+    phase: module-run-v2-unattended-automation-control
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-unattended-automation-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-unattended-automation-control.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autopilot-orchestration-control
+    phase: module-run-v2-autopilot-orchestration-control
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-orchestration-control.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autopilot-hardening
+    phase: module-run-v2-autopilot-hardening
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-post-push-state-reconciliation
+    phase: module-run-v2-post-push-state-reconciliation
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-post-push-state-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autopilot-maturity-hardening
+    phase: module-run-v2-autopilot-maturity-hardening
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autopilot-maturity-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-ai-task-and-provider-planning
+    phase: module-run-v2-ai-task-and-provider-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-ai-task-and-provider-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-ai-task-lifecycle-local-contract
+    phase: module-run-v2-ai-task-lifecycle-local-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-ai-task-lifecycle-local-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-post-done-closeout-authorization-adoption
+    phase: module-run-v2-post-done-closeout-authorization-adoption
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-post-done-closeout-authorization-adoption.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-unattended-blocker-hardening
+    phase: module-run-v2-unattended-blocker-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-unattended-blocker-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-unattended-blocker-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-closeout-continuity-hardening
+    phase: module-run-v2-closeout-continuity-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-continuity-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-local-experience-closure-alignment
+    phase: module-run-v2-local-experience-closure-alignment
+    status: done
+    taskKind: governance_alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-closure-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-closure-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-local-experience-acceptance-planning
+    phase: module-run-v2-local-experience-acceptance-planning
+    status: closed
+    taskKind: local_verification_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-local-experience-acceptance-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-planning-to-implementation-autodrive
+    phase: module-run-v2-planning-to-implementation-autodrive
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-planning-to-implementation-autodrive.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-stopped-automation-hygiene
+    phase: module-run-v2-stopped-automation-hygiene
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-stopped-automation-hygiene.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-stopped-automation-hygiene.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-mechanism-html-doc
+    phase: module-run-v2-autodrive-mechanism-html-doc
+    status: done
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-autodrive-mechanism-html-doc.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-08"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-automation-handoff-contract-hardening
+    phase: module-run-v2-automation-handoff-contract-hardening
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-automation-handoff-contract-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-automation-handoff-contract-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-empty-scope-scan-repair
+    phase: module-run-v2-empty-scope-scan-repair
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-empty-scope-scan-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-stale-clean-worktree-autocleanup-routing
+    phase: module-run-v2-stale-clean-worktree-autocleanup-routing
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-stale-clean-worktree-autocleanup-routing.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-approved-closeout-clean-ahead-support
+    phase: module-run-v2-approved-closeout-clean-ahead-support
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-approved-closeout-clean-ahead-support.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-closeout-policy-hardening
+    phase: module-run-v2-closeout-policy-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-closeout-policy-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-closeout-policy-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-parallel-coordinator-readiness
+    phase: module-run-v2-parallel-coordinator-readiness
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-coordinator-readiness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-parallel-autopilot-integration
+    phase: module-run-v2-parallel-autopilot-integration
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-parallel-autopilot-integration.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autopilot-runner-control
+    phase: module-run-v2-autopilot-runner-control
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autopilot-runner-control.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autopilot-runner-control.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-phase-0-2
+    phase: module-run-v2-autodrive-phase-0-2
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-0-2.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-phase-3
+    phase: module-run-v2-autodrive-phase-3
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-3.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-3.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-phase-4
+    phase: module-run-v2-autodrive-phase-4
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-4.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-4.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-phase-5
+    phase: module-run-v2-autodrive-phase-5
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-5.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-5.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-phase-6
+    phase: module-run-v2-autodrive-phase-6
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-6.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-6.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-phase-7
+    phase: module-run-v2-autodrive-phase-7
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-7.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-7.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-phase-8
+    phase: module-run-v2-autodrive-phase-8
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-phase-8.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-phase-8.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-recovery-chain-hardening
+    phase: module-run-v2-recovery-chain-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-recovery-chain-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-recovery-chain-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-post-closeout-lifecycle-hardening
+    phase: module-run-v2-post-closeout-lifecycle-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-post-closeout-lifecycle-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-post-closeout-lifecycle-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-orphan-worktree-cleanup-hardening
+    phase: module-run-v2-orphan-worktree-cleanup-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-orphan-worktree-cleanup-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-idle-and-hygiene-hardening
+    phase: module-run-v2-idle-and-hygiene-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-idle-and-hygiene-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-auto-seed-bridge
+    phase: module-run-v2-auto-seed-bridge
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-auto-seed-bridge.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-auto-seed-bridge.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-activation
+    phase: module-run-v2-autodrive-activation
+    status: done
+    taskKind: automation_activation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-activation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-activation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autodrive-seed-recovery-hardening
+    phase: module-run-v2-autodrive-seed-recovery-hardening
+    status: done
+    taskKind: automation_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-09-module-run-v2-autodrive-seed-recovery-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-09"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    phase: batch-101-authorization-and-access-authorization-read-model-and-display-contrac
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    phase: batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-102-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    phase: batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-103-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    phase: batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-104-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-deferred-cleanup-continuation
+    phase: module-run-v2-deferred-cleanup-continuation
+    status: done
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-deferred-cleanup-continuation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-deferred-cleanup-continuation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-validation-closeout-recovery-hardening
+    phase: module-run-v2-validation-closeout-recovery-hardening
+    status: done
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-validation-closeout-recovery-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-registry-finalizer-validation-lifecycle-hardening
+    phase: module-run-v2-registry-finalizer-validation-lifecycle-hardening
+    status: done
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-registry-finalizer-validation-lifecycle-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-registry-finalizer-validation-lifecycle-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-standing-unattended-local-closeout-approval
+    phase: module-run-v2-standing-unattended-local-closeout-approval
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-standing-unattended-local-closeout-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-db-capability-governance-approval
+    phase: module-run-v2-db-capability-governance-approval
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-db-capability-governance-approval.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-db-capability-governance-approval.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-autopilot-loop-hardening
+    phase: module-run-v2-autopilot-loop-hardening
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-module-run-v2-autopilot-loop-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-module-run-v2-autopilot-loop-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: post-closeout-reconcile-and-posture-cleanup
+    phase: post-closeout-reconcile-and-posture-cleanup
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-post-closeout-reconcile-and-posture-cleanup.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness
+    phase: advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-10-advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-10-advanced-edition-implementation-consistency-review-and-autodrive-resume-readiness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-10"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-operating-manual-baseline
+    phase: mechanism-serial-governance
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-operating-manual-baseline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-operating-manual-baseline.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-next-action-readonly-diagnostic
+    phase: mechanism-serial-governance
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-next-action-readonly-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-next-action-readonly-diagnostic.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-status-and-drift-diagnostics
+    phase: mechanism-serial-governance
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-status-and-drift-diagnostics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-status-and-drift-diagnostics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-runner-consumes-next-action
+    phase: mechanism-serial-governance
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-runner-consumes-next-action.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-runner-consumes-next-action.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-planned-pause-and-tuning-mode
+    phase: mechanism-tuning-serial
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-planned-pause-and-tuning-mode.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-project-status-unified-diagnostic
+    phase: mechanism-tuning-serial
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-project-status-unified-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-project-status-unified-diagnostic.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-seed-proposal-next-action-bridge
+    phase: mechanism-tuning-serial
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-seed-proposal-next-action-bridge.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-seed-proposal-next-action-bridge.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mechanism-active-queue-slimming-plan
+    phase: mechanism-tuning-serial
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mechanism-active-queue-slimming-plan.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mechanism-active-queue-slimming-plan.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: ai-task-and-provider-auto-seed-approval-decision
+    phase: mechanism-tuning-serial
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-ai-task-and-provider-auto-seed-approval-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: runner-pending-seed-decision-gate
+    phase: mechanism-tuning-serial
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-runner-pending-seed-decision-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-runner-pending-seed-decision-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: controlled-auto-seed-policy
+    phase: mechanism-tuning-controlled-auto-seed
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-controlled-auto-seed-policy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-controlled-auto-seed-policy.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: mece-seed-self-review-gate
+    phase: mechanism-tuning-controlled-auto-seed
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-mece-seed-self-review-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-mece-seed-self-review-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: stop-card-recovery-clarity
+    phase: mechanism-tuning-controlled-auto-seed
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-stop-card-recovery-clarity.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-stop-card-recovery-clarity.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: closeout-noise-reduction
+    phase: mechanism-tuning-controlled-auto-seed
+    status: closed
+    taskKind: mechanism_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-closeout-noise-reduction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-closeout-noise-reduction.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: full-autodrive-dry-run
+    phase: mechanism-tuning-controlled-auto-seed
+    status: closed
+    taskKind: mechanism_validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-full-autodrive-dry-run.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-full-autodrive-dry-run.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
+  - id: standing-push-approval-rule-alignment
+    phase: mechanism-tuning-serial
+    status: closed
+    taskKind: mechanism_governance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-standing-push-approval-rule-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-standing-push-approval-rule-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-2026-06-11
