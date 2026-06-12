@@ -56,9 +56,23 @@ result: pass
 
 ## Commit
 
-- Commit: `b6f81531c5136f6785062a1b1d8c56ffa923aca6` is the accepted ancestor checkpoint synchronized by this repair.
-- The final immutable repair commit SHA is reported in the final response because this evidence file participates in the
-  commit object.
+- Commit: `5774064b2e30acff2fc3066abf290a061851453b` is the first immutable governance repair commit merged to `master`.
+- The final immutable closeout evidence commit SHA is reported in the final response because this evidence file
+  participates in that commit object.
+
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/fix-project-state-sha-sync-after-batch-122` into `master`.
+- Merged master SHA before this post-merge evidence note:
+  `5774064b2e30acff2fc3066abf290a061851453b`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `git diff --check`: passed on `master`.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-project-state-sha-sync-after-batch-122`: passed on `master`.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-project-state-sha-sync-after-batch-122`: passed on `master` with
+  `OK_PRE_PUSH_STATE_SHA_ANCESTOR master`.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, and Cost Calibration Gate remain blocked.
 
 ## Out Of Scope
 

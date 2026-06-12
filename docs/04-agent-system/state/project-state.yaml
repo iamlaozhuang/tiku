@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: fix-project-state-sha-sync-after-batch-122
-updatedAt: "2026-06-12T11:21:50-07:00"
+updatedAt: "2026-06-12T11:25:46-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,7 +266,7 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b6f81531c5136f6785062a1b1d8c56ffa923aca6
+  lastKnownMasterSha: 5774064b2e30acff2fc3066abf290a061851453b
   lastKnownOriginMasterSha: b6f81531c5136f6785062a1b1d8c56ffa923aca6
 currentTask:
   id: fix-project-state-sha-sync-after-batch-122
@@ -276,7 +276,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
   branch: codex/fix-project-state-sha-sync-after-batch-122
-  commitSha: b6f81531c5136f6785062a1b1d8c56ffa923aca6
+  commitSha: 5774064b2e30acff2fc3066abf290a061851453b
   prUrl: null
   retryCount: 0
   lastFailurePath: null
