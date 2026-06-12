@@ -80,7 +80,7 @@ tasks:
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: mechanism_hardening
@@ -5233,7 +5233,7 @@ tasks:
         deleteShortBranch: true
         parkWorktree: false
     registryLifecycle:
-      runStatus: pending
+      runStatus: active
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -5282,7 +5282,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-124-personal-learning-ai-student-local-request-entry-ui
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-125-personal-learning-ai-redacted-reference-display-integration
     title: Integrate redacted personal learning AI result and reference display

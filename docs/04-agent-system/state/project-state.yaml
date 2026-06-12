@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-123-personal-learning-ai-api-route-local-contract-bridge
-updatedAt: "2026-06-12T11:50:38-07:00"
+currentPhase: batch-124-personal-learning-ai-student-local-request-entry-ui
+updatedAt: "2026-06-12T12:18:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,14 +269,14 @@ repository:
   lastKnownMasterSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
   lastKnownOriginMasterSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
 currentTask:
-  id: batch-123-personal-learning-ai-api-route-local-contract-bridge
+  id: batch-124-personal-learning-ai-student-local-request-entry-ui
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
-  branch: codex/batch-123-personal-learning-ai-api-route-local-contract-bridge
-  commitSha: 24b0edd32e8217f524eb00a184abfc10a79f0a32
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+  branch: codex/batch-124-personal-learning-ai-student-local-request-entry-ui
+  commitSha: 730c6382dc9da8dbf2ee0ffc2ac350d31fff0729
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_123_personal_learning_ai_api_route_local_contract_bridge
+    readiness: pass_batch_124_git_completion_readiness
     lint: pass
     typecheck: pass
-    unit: pass_243_files_869_tests
-    build: pass
-    e2e: not_run_docs_state_only
+    unit: pass_244_files_872_tests
+    build: pass_55_static_pages
+    e2e: pass_27_tests
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-123 local API route/route-service bridge is closed after validation. After merge and push, reclaim from master
-    before starting the next pending task, batch-124-personal-learning-ai-student-local-request-entry-ui. Batch-124
-    touches student UI and therefore must run the declared focused unit, lint, typecheck, unit, build, git diff,
-    test:e2e -- --list, and test:e2e gates. Keep provider, env/secret, schema/migration, dependency, deploy, payment,
-    external-service, PR, force-push, formal generated-content write paths, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+    Batch-124 student local request-entry UI is closed after focused RED/GREEN, lint, typecheck, unit, build, local e2e,
+    and Browser checks. After merge and push, reclaim from master before starting the next pending task,
+    batch-125-personal-learning-ai-redacted-reference-display-integration. Keep provider, env/secret, schema/migration,
+    dependency, deploy, payment, external-service, PR, force-push, formal generated-content write paths, and Cost
+    Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
