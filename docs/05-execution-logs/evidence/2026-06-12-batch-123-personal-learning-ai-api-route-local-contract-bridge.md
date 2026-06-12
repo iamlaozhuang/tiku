@@ -66,8 +66,28 @@ result: pass
 
 ## Commit
 
-- Commit: `24b0edd32e8217f524eb00a184abfc10a79f0a32` is the pre-batch-123 baseline checkpoint. The final immutable SHA is
-  reported after commit because this evidence file participates in the commit object.
+- Commit: `08ba0de193a15c28523d4dcd7098b424af4c12a9` recorded the batch-123 implementation commit.
+- The final immutable post-merge evidence commit SHA is reported in the final response because this evidence file
+  participates in that commit object.
+
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/batch-123-personal-learning-ai-api-route-local-contract-bridge` into `master`.
+- Merged master SHA before this post-merge evidence note:
+  `08ba0de193a15c28523d4dcd7098b424af4c12a9`.
+- `npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts`: passed on `master`,
+  `Test Files 1 passed (1)`, `Tests 5 passed (5)`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `npm.cmd run build`: passed on `master`, Next.js 16.2.6 compiled successfully and generated 54 static pages.
+- `git diff --check`: passed on `master`.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge`:
+  passed on `master`.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge`: passed
+  on `master` with `localAhead: 1` before this evidence-only closeout commit.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, UI/e2e edits, formal generated-content write paths, and Cost Calibration Gate remain
+  blocked.
 
 ## Out Of Scope
 
