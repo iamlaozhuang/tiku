@@ -1,6 +1,6 @@
-﻿# Module Run v2 Seeded Task Evidence: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+# Module Run v2 Seeded Task Evidence: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
 
-result: pending
+result: passed
 
 ## Summary
 
@@ -8,19 +8,58 @@ result: pending
 - sourcePlanningTask: phase-69-advanced-authorization-context-implementation-planning
 - targetClosureItem: redeem_code, audit_log, and ai_call_log redacted references
 - moduleRunVersion: 2
+- productClosureContribution: `ops`: local authorization contract summaries now expose a single redacted evidence reference group for `redeem_code`, `audit_log`, and `ai_call_log`.
 
 ## Required Anchors
 
-- Batch range: pending
-- RED: pending
-- GREEN: pending
-- Commit: pending
-- localFullLoopGate: L4 pending
-- threadRolloverGate: pending
-- nextModuleRunCandidate: pending
-- blocked remainder: high-risk gates remain separately blocked.
+- Batch range: Batch 118 only.
+- RED: `npm.cmd run test -- --run src/server/services/authorization-local-contract-summary-service.test.ts` failed as expected for the new assertion because `redactedEvidenceReferences` was `undefined`. The command also invoked the repository's full unit/e2e test chain; two pre-existing non-Batch-118 failures appeared outside the changed surface.
+- GREEN: `npx vitest run src/server/services/authorization-local-contract-summary-service.test.ts` passed after adding the redacted evidence reference DTO and service mapping.
+- Commit: `71c36f9a4b8ed60a6e704cecb0b83cff77b09fe6` pre-closeout base; approved closeout will create and report the final task SHA.
+- localFullLoopGate: L4 local implementation validation passed for focused test, lint, typecheck, diff check, and implementation auto-seed readiness.
+- threadRolloverGate: not needed; same Codex thread stayed within the claimed Batch 118 branch.
+- nextModuleRunCandidate: none in current queue after Batch 118; rerun supervisor/runner after closeout for any future seeded work.
+- blocked remainder: none for Batch 118. High-risk gates remain separately blocked.
 - Cost Calibration Gate remains blocked.
+
+## Changed Runtime Surface
+
+- `src/server/contracts/authorization-local-contract-summary-contract.ts`
+- `src/server/services/authorization-local-contract-summary-service.ts`
+- `src/server/services/authorization-local-contract-summary-service.test.ts`
+
+The DTO addition is `redactedEvidenceReferences`, containing:
+
+- `redeemCodeReference`
+- `auditLogReference`
+- `aiCallLogReference`
+
+Each reference contains only `publicId`, `redactionStatus`, and `referenceStatus`.
 
 ## Validation
 
-Pending implementation and local validation.
+| Command                                                                                                                                                                                                                                                                                                       | Result                         | Notes                                                                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.ps1 -PlanOnly`                                                                                                                                                                         | pass                           | Supervisor returned `ready_for_agent_task` for Batch 118 with `low_risk_local_code` eligibility.                                                                                                             |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.ps1 -TaskId batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact`                                                                                          | pass                           | Dispatcher returned `agentAction: claim_task`.                                                                                                                                                               |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 -AgentActionOverride claim_task -AgentActionTaskOverride batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact`                                       | expected stop                  | Detached HEAD was blocked and short branch preparation was required.                                                                                                                                         |
+| `git switch -c codex/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact origin/master`                                                                                                                                                                                           | pass                           | Created the required short branch.                                                                                                                                                                           |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.ps1 -AgentActionOverride claim_task -AgentActionTaskOverride batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact -Execute`                              | pass                           | Queue and project state were updated for claimed Batch 118.                                                                                                                                                  |
+| `npm.cmd run test -- --run src/server/services/authorization-local-contract-summary-service.test.ts`                                                                                                                                                                                                          | fail as RED                    | Target failure proved missing `redactedEvidenceReferences`; two unrelated existing failures also appeared because the script ran the full unit/e2e chain.                                                    |
+| `npx vitest run src/server/services/authorization-local-contract-summary-service.test.ts`                                                                                                                                                                                                                     | pass                           | Focused Batch 118 tests passed: 1 file, 4 tests.                                                                                                                                                             |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact` | pass                           | Candidate task approval anchors, allowedFiles, blockedFiles, and validation anchors passed.                                                                                                                  |
+| `npm.cmd run lint`                                                                                                                                                                                                                                                                                            | pass                           | ESLint passed.                                                                                                                                                                                               |
+| `npm.cmd run typecheck`                                                                                                                                                                                                                                                                                       | pass                           | `tsc --noEmit` passed.                                                                                                                                                                                       |
+| `git diff --check`                                                                                                                                                                                                                                                                                            | pass with line-ending warnings | No whitespace errors. Git warned project-state and task-queue CRLF will normalize to LF when touched.                                                                                                        |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact`                                                                                          | fail before evidence repair    | Strict closeout readiness required this command and a SHA-shaped `Commit:` anchor to be recorded in evidence before it can pass.                                                                             |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact`                                                                                          | pass                           | Module closeout readiness passed after evidence repair.                                                                                                                                                      |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact`                                                                                               | fail, then pass                | Initial failure found a test fixture using a protected sensitive placeholder; the fixture was renamed to neutral private placeholder text, focused tests still passed, and pre-commit hardening then passed. |
+| `npx vitest run src/server/services/authorization-local-contract-summary-service.test.ts`                                                                                                                                                                                                                     | pass after fixture rename      | Focused Batch 118 tests passed: 1 file, 4 tests.                                                                                                                                                             |
+| `npm.cmd run lint`                                                                                                                                                                                                                                                                                            | pass after fixture rename      | ESLint passed after the final test fixture rename.                                                                                                                                                           |
+| `npm.cmd run typecheck`                                                                                                                                                                                                                                                                                       | pass after fixture rename      | `tsc --noEmit` passed after the final test fixture rename.                                                                                                                                                   |
+
+Task status: `ready_for_closeout` in project-state and task-queue before approved closeout.
+
+## Redaction Review
+
+Evidence records only command outcomes, public identifier categories, and redacted DTO behavior. It does not include secrets, tokens, database URLs, Authorization headers, provider payloads, raw prompts, raw model responses, raw generated AI content, plaintext `redeem_code`, code hashes, employee subjective answer text, full `paper` content, full `material` content, or raw DB rows.

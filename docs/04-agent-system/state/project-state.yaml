@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-117-authorization-and-access-paper-and-mock-exam-access-context-without-c
-updatedAt: "2026-06-11T23:11:27-07:00"
+  currentPhase: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+updatedAt: "2026-06-12T02:36:44-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,14 +269,14 @@ repository:
   lastKnownMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
   lastKnownOriginMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
 currentTask:
-  id: module-run-v2-low-risk-product-code-queue-drain
+  id: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
   status: closed
-  sourceStory: user-request-2026-06-12-low-risk-product-code-queue-drain
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-low-risk-product-code-queue-drain.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-low-risk-product-code-queue-drain.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-low-risk-product-code-queue-drain.md
-  branch: codex/low-risk-product-code-queue-drain
-  commitSha: c368930adee2f6753530f430045adf0eac50a6dd
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+  evidencePath: docs/05-execution-logs/evidence/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+  branch: codex/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+  commitSha: 71c36f9a4b8ed60a6e704cecb0b83cff77b09fe6
   prUrl: null
   retryCount: 0
   lastFailurePath: null

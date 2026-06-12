@@ -93,6 +93,23 @@ function mapAuthorizationLocalContractSummaryToDto(
       redactionStatus: "redacted",
       referenceStatus: "redacted_reference",
     },
+    redactedEvidenceReferences: {
+      redeemCodeReference: {
+        publicId: input.redeemCodePublicId,
+        redactionStatus: "redacted",
+        referenceStatus: "redacted_reference",
+      },
+      auditLogReference: {
+        publicId: input.auditLogPublicId,
+        redactionStatus: "redacted",
+        referenceStatus: "redacted_reference",
+      },
+      aiCallLogReference: {
+        publicId: input.aiCallLogPublicId,
+        redactionStatus: "redacted",
+        referenceStatus: "redacted_reference",
+      },
+    },
   };
 }
 

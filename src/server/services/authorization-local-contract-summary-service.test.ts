@@ -112,11 +112,60 @@ describe("authorization local contract summary service", () => {
           redactionStatus: "redacted",
           referenceStatus: "redacted_reference",
         },
+        redactedEvidenceReferences: {
+          redeemCodeReference: {
+            publicId: "redeem_code_public_123",
+            redactionStatus: "redacted",
+            referenceStatus: "redacted_reference",
+          },
+          auditLogReference: {
+            publicId: "audit_log_public_123",
+            redactionStatus: "redacted",
+            referenceStatus: "redacted_reference",
+          },
+          aiCallLogReference: {
+            publicId: "ai_call_log_public_123",
+            redactionStatus: "redacted",
+            referenceStatus: "redacted_reference",
+          },
+        },
       },
     });
     expect(serializedResult).not.toMatch(/"id":/);
     expect(serializedResult).not.toContain(plaintextRedeemCode);
     expect(serializedResult).not.toContain(sensitiveEvidencePayload);
+  });
+
+  it("groups redeem_code, audit_log, and ai_call_log as redacted evidence references", () => {
+    const input = {
+      ...createBaseInput(),
+      privateSourceText: "private-source-text",
+      privateRuntimeBody: "private-runtime-body",
+      privateCodeDigest: "private-code-digest",
+    };
+    const result = buildAuthorizationLocalContractSummaryReadModel(input);
+    const serializedResult = JSON.stringify(result);
+
+    expect(result.data?.redactedEvidenceReferences).toEqual({
+      redeemCodeReference: {
+        publicId: "redeem_code_public_123",
+        redactionStatus: "redacted",
+        referenceStatus: "redacted_reference",
+      },
+      auditLogReference: {
+        publicId: "audit_log_public_123",
+        redactionStatus: "redacted",
+        referenceStatus: "redacted_reference",
+      },
+      aiCallLogReference: {
+        publicId: "ai_call_log_public_123",
+        redactionStatus: "redacted",
+        referenceStatus: "redacted_reference",
+      },
+    });
+    expect(serializedResult).not.toContain(input.privateSourceText);
+    expect(serializedResult).not.toContain(input.privateRuntimeBody);
+    expect(serializedResult).not.toContain(input.privateCodeDigest);
   });
 
   it("keeps paper and mock_exam as scope context when they mismatch authorization metadata", () => {

@@ -3370,6 +3370,7 @@ tasks:
     dependencies:
       - phase-69-advanced-authorization-context-implementation-planning
     taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module authorization-and-access low-risk local implementation tasks only. standingUnattendedLocalCloseoutApproval: User approves Module Run v2 unattended local autodrive for low-risk local implementation tasks only, including task claim, task plan/evidence/audit creation, scoped local implementation, local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking, when repository readiness, validation surface, module closeout readiness, pre-push readiness, allowedFiles/blockedFiles, active-owner, lease, registry, hygiene, and remote-divergence gates all pass. High-risk capability gates remain blocked unless separately approved.
     autoDriveLocalImplementationApproval: >-
@@ -3488,7 +3489,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
     evidencePath: docs/05-execution-logs/evidence/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
-    status: pending
+    status: closed
     retryCount: 0
 
   - id: module-run-v2-automation-startup-archive-dependency-repair

@@ -26,6 +26,12 @@ export type AuthorizationLocalContractEvidenceReferencesDto = {
   referenceStatus: AuthorizationLocalContractReferenceStatus;
 };
 
+export type AuthorizationLocalContractRedactedEvidenceReferencesDto = {
+  redeemCodeReference: AuthorizationLocalContractRedactedReferenceDto;
+  auditLogReference: AuthorizationLocalContractRedactedReferenceDto;
+  aiCallLogReference: AuthorizationLocalContractRedactedReferenceDto;
+};
+
 export type AuthorizationLocalContractSummaryDto = {
   userPublicId: string;
   runtimeStatus: AuthorizationLocalContractRuntimeStatus;
@@ -35,4 +41,5 @@ export type AuthorizationLocalContractSummaryDto = {
   contextScope: AuthorizationScopeSummaryContextDto;
   redeemCodeReference: AuthorizationLocalContractRedactedReferenceDto;
   evidenceReferences: AuthorizationLocalContractEvidenceReferencesDto;
+  redactedEvidenceReferences: AuthorizationLocalContractRedactedEvidenceReferencesDto;
 };
