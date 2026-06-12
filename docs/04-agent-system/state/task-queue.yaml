@@ -2595,6 +2595,96 @@ tasks:
     status: closed
     retryCount: 0
 
+  - id: module-run-v2-low-risk-product-code-queue-drain
+    title: Module Run v2 low-risk product code queue drain
+    phase: module-run-v2-low-risk-product-code-queue-drain
+    sourceStory: user-request-2026-06-12-low-risk-product-code-queue-drain
+    dependencies:
+      - module-run-v2-bounded-queue-drain
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-low-risk-product-code-queue-drain.md
+    humanApproval: >-
+      User requested implementing the proposed plan for single-wake multi-batch product-code progression, then explicitly
+      requested commit, merge, push, and cleanup. Scope is limited to Module Run v2 mechanism scripts, smoke scripts,
+      governance docs/state, task plan, evidence, audit review, and the local active automation prompt. Product
+      implementation, dependencies, lockfiles, schema, migrations, env/secret, provider, staging/prod/cloud/deploy,
+      payment, external-service, PR, force push, e2e, and Cost Calibration Gate remain blocked.
+    validationProfile: mechanism-hardening
+    localFullLoopGate: mechanism
+    blockedRemainder:
+      - product implementation remains blocked in this mechanism task
+      - provider/env/secret/schema/migration/dependency/deploy/payment/external-service work remains blocked
+      - PR, force push, e2e, and Cost Calibration Gate remain blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    drainPolicy:
+      drainEligible: true
+      riskProfile: mechanism_low_risk
+      validationCostClass: standard
+      requiredFreshApproval: false
+      maxTasksPerWake: 2
+      maxChangedFiles: 20
+      maxChangedLines: 800
+      autoRepairAllowance: format_lint_evidence_once
+    taskKind: mechanism_hardening
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-low-risk-product-code-queue-drain.md
+      - docs/05-execution-logs/evidence/2026-06-12-low-risk-product-code-queue-drain.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-low-risk-product-code-queue-drain.md
+      - scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1
+      - scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - mechanism_hardening
+      - automation_policy
+      - bounded_queue_drain
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveControlLoopAcceptance.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-low-risk-product-code-queue-drain.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-low-risk-product-code-queue-drain.md
+    status: ready_for_closeout
+    retryCount: 0
+
   - id: batch-114-personal-learning-ai-local-e2e-smoke-planning
     title: Personal learning AI local E2E smoke planning
     phase: batch-114-personal-learning-ai-local-e2e-smoke-planning

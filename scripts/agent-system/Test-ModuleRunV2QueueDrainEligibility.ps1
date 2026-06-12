@@ -308,19 +308,21 @@ try {
     }
 
     $taskText = ($taskBlock -join "`n")
+    $taskKind = Get-ScalarValue -Block $taskBlock -Key "taskKind"
     $hasDrainPolicy = $taskText -match "(?im)^\s+drainPolicy:\s*$"
-    if (-not $hasDrainPolicy) {
+    $usesDefaultLowRiskLocalCodeDrain = -not $hasDrainPolicy -and $taskKind -eq "implementation"
+    if (-not $hasDrainPolicy -and -not $usesDefaultLowRiskLocalCodeDrain) {
         Write-EligibilityResult -Decision "not_eligible" -ResolvedTaskId $TaskId -Reason "task has no drainPolicy; default is no drain" -ExitCode 0
     }
 
-    $drainEligible = (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "drainEligible").ToLowerInvariant()
-    $riskProfile = Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "riskProfile"
-    $validationCostClass = Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "validationCostClass"
-    $requiredFreshApproval = (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "requiredFreshApproval").ToLowerInvariant()
-    $maxTasksPerPolicy = Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxTasksPerWake") -Default 1
-    $maxChangedFiles = Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedFiles") -Default 20
-    $maxChangedLines = Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedLines") -Default 800
-    $autoRepairAllowance = Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "autoRepairAllowance"
+    $drainEligible = if ($usesDefaultLowRiskLocalCodeDrain) { "true" } else { (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "drainEligible").ToLowerInvariant() }
+    $riskProfile = if ($usesDefaultLowRiskLocalCodeDrain) { "low_risk_local_code" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "riskProfile" }
+    $validationCostClass = if ($usesDefaultLowRiskLocalCodeDrain) { "standard" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "validationCostClass" }
+    $requiredFreshApproval = if ($usesDefaultLowRiskLocalCodeDrain) { "false" } else { (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "requiredFreshApproval").ToLowerInvariant() }
+    $maxTasksPerPolicy = if ($usesDefaultLowRiskLocalCodeDrain) { 2 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxTasksPerWake") -Default 1 }
+    $maxChangedFiles = if ($usesDefaultLowRiskLocalCodeDrain) { 20 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedFiles") -Default 20 }
+    $maxChangedLines = if ($usesDefaultLowRiskLocalCodeDrain) { 800 } else { Convert-ToPositiveIntOrDefault -Value (Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "maxChangedLines") -Default 800 }
+    $autoRepairAllowance = if ($usesDefaultLowRiskLocalCodeDrain) { "format_lint_evidence_once" } else { Get-SectionScalarValue -Block $taskBlock -SectionKey "drainPolicy" -ScalarKey "autoRepairAllowance" }
     if ([string]::IsNullOrWhiteSpace($validationCostClass)) {
         $validationCostClass = "standard"
     }
@@ -358,11 +360,11 @@ try {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task requires fresh approval" -ExitCode 1
     }
 
-    if ($riskProfile -in @("low_risk_local_code", "single_task_only")) {
+    if ($riskProfile -eq "single_task_only") {
         Write-EligibilityResult @resultBase -Decision "single_task_only" -Reason "risk profile is not eligible for multi-task drain in this phase" -ExitCode 0
     }
 
-    if ($riskProfile -notin @("docs_governance", "mechanism_low_risk")) {
+    if ($riskProfile -notin @("docs_governance", "mechanism_low_risk", "low_risk_local_code")) {
         Write-EligibilityResult @resultBase -Decision "stop_for_hard_block" -Reason "drainEligible task uses blocked or unknown riskProfile: $riskProfile" -ExitCode 1
     }
 

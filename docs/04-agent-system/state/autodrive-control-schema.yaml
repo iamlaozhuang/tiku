@@ -218,7 +218,7 @@ autoSeedBridge:
     maxBatchParameter: AutoSeedMaxBatchCount
 boundedQueueDrain:
   purpose: Allow one automation wake to continue across multiple low-risk Module Run v2 batches without weakening quality gates.
-  defaultMode: disabled_without_task_drainPolicy
+  defaultMode: explicit_drainPolicy_or_synthesized_low_risk_local_code
   eligibilityGate:
     scriptPath: scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
@@ -259,7 +259,7 @@ boundedQueueDrain:
             - none
             - format_lint_evidence_once
           default: none
-    executionRule: Missing drainPolicy defaults to not_eligible. drainEligible true is accepted only for docs_governance and mechanism_low_risk. low_risk_local_code returns single_task_only in this phase. High-risk riskTypes, requiredFreshApproval true, missing evidence/audit, missing validation surface, or missing structured closeoutPolicy hard-block drain.
+    executionRule: Missing drainPolicy defaults to not_eligible except for taskKind implementation tasks that satisfy the low-risk local implementation gate; those synthesize drainEligible true, riskProfile low_risk_local_code, validationCostClass standard, maxTasksPerWake 2, maxChangedFiles 20, maxChangedLines 800, and autoRepairAllowance format_lint_evidence_once. drainEligible true is accepted for docs_governance, mechanism_low_risk, and low_risk_local_code. single_task_only still returns single_task_only. High-risk riskTypes, requiredFreshApproval true, missing evidence/audit, missing validation surface, or missing structured closeoutPolicy hard-block drain.
   supervisor:
     scriptPath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1

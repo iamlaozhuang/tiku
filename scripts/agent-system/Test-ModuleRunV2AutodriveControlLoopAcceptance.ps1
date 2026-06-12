@@ -46,7 +46,7 @@ function Write-AcceptanceResult {
     Write-Output "serialBoundary: validation_filter_before_execution"
     Write-Output "registrationBoundary: primary_active_autopilot_only"
     Write-Output "autoSeedBoundary: proposal_transaction_self_review"
-    Write-Output "queueDrainBoundary: explicit_drainPolicy_budgeted_low_risk_only"
+    Write-Output "queueDrainBoundary: explicit_or_synthesized_low_risk_policy_budgeted_only"
     Write-Output "closeoutBoundary: structured_closeout_policy_only"
     Write-Output "stopTaxonomyBoundary: terminal_decisions_emit_stopTaxonomy"
     Write-Output "reconcileBoundary: accepted_ancestor_state_reconcile_only"

@@ -268,12 +268,12 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2QueueDrainEligibility.Smoke.ps1
     decisionOutput: queueDrainEligibilityDecision
-    role: read-only task-level gate for drainPolicy, low-risk eligibility, approval anchors, validation surface, closeoutPolicy, riskTypes, allowedFiles, and blockedFiles before any bounded queue drain continuation
+    role: read-only task-level gate for explicit drainPolicy or synthesized low_risk_local_code defaults, low-risk eligibility, approval anchors, validation surface, closeoutPolicy, riskTypes, allowedFiles, and blockedFiles before any bounded queue drain continuation
   - id: module-run-v2-queue-drain-supervisor
     path: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
     decisionOutput: queueDrainDecision
-    role: repo-external-manifest supervisor that consumes runner and dispatcher decisions, enforces wake budgets and repeated blocker fingerprints, and returns the next agent-layer action without bypassing existing gates
+    role: repo-external-manifest supervisor that consumes runner and dispatcher decisions, enforces wake budgets and repeated blocker fingerprints, and returns the next agent-layer action so each drained batch still passes serial execution, approved closeout, finalizer, and startup gates
   - id: module-run-v2-stop-economics
     path: scripts/agent-system/Get-ModuleRunV2StopEconomics.ps1
     smokePath: scripts/agent-system/Get-ModuleRunV2StopEconomics.Smoke.ps1

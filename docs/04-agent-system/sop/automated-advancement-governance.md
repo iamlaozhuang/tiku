@@ -225,11 +225,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\I
 ```
 
 The supervisor is an outer protocol layer. It does not write product code, broaden scope, bypass validation, or replace
-the existing runner, dispatcher, or approved closeout scripts. It consumes `runnerDecision` and `agentAction` outputs,
-checks `drainPolicy`, writes a redacted manifest under `%USERPROFILE%\.codex\tiku\drain-runs`, and returns the next
-agent-layer action.
+the existing runner, dispatcher, serial executor, finalizer, or approved closeout scripts. It consumes `runnerDecision`
+and `agentAction` outputs, checks explicit or synthesized drain policy, writes a redacted manifest under
+`%USERPROFILE%\.codex\tiku\drain-runs`, and returns the next agent-layer action.
 
-Task drain is disabled unless the task block explicitly records:
+Task drain is enabled only when the task block explicitly records:
 
 ```yaml
 drainPolicy:
@@ -243,10 +243,15 @@ drainPolicy:
   autoRepairAllowance: format_lint_evidence_once
 ```
 
-Only `docs_governance` and `mechanism_low_risk` are multi-task drain eligible in this phase. `low_risk_local_code` must
-return `single_task_only`; product code remains one task per wake by default. Missing `drainPolicy`, missing evidence or
-audit paths, missing validation surface, missing structured `closeoutPolicy`, `requiredFreshApproval: true`, high-risk
-`riskTypes`, or any blocked-files conflict stops drain before the next task is claimed.
+For `taskKind: implementation`, missing `drainPolicy` may synthesize the same defaults with
+`riskProfile: low_risk_local_code` only when the task also records low-risk local implementation approvals, evidence and
+audit paths, validation surface, allowed files, blocked files, and structured `closeoutPolicy`. High-risk `riskTypes`,
+`requiredFreshApproval: true`, missing evidence or audit paths, missing validation surface, missing structured
+`closeoutPolicy`, or any blocked-files conflict stops drain before the next task is claimed.
+
+Low-risk product-code drain must preserve one batch per branch, commit, closeout, push, cleanup, and worktree parking
+cycle. After each batch closes, the supervisor may rerun startup within budget only after the worktree is clean, the run
+registry is terminal, and `HEAD`, `master`, and `origin/master` agree at the approved closeout checkpoint.
 
 Queue drain budgets are hard ceilings, not targets:
 

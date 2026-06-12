@@ -77,6 +77,25 @@ function Write-Queue {
     }
 
     $riskTypeLines = @($RiskTypes | ForEach-Object { "      - $_" })
+    $allowedFileLines = if ($TaskKind -eq "implementation") {
+        @(
+            "      - src/server/models/**",
+            "      - src/server/contracts/**",
+            "      - src/server/validators/**",
+            "      - src/server/services/**",
+            "      - docs/04-agent-system/state/project-state.yaml",
+            "      - docs/04-agent-system/state/task-queue.yaml",
+            "      - docs/05-execution-logs/task-plans/**",
+            "      - docs/05-execution-logs/evidence/**",
+            "      - docs/05-execution-logs/audits-reviews/**"
+        )
+    } else {
+        @(
+            "      - docs/04-agent-system/state/autodrive-control-schema.yaml",
+            "      - docs/04-agent-system/sop/automated-advancement-governance.md"
+        )
+    }
+
     @(
         "schemaVersion: 1",
         "tasks:",
@@ -84,15 +103,16 @@ function Write-Queue {
         "    title: Queue Drain Smoke",
         "    status: pending",
         "    taskKind: $TaskKind",
-        "    humanApproval: User approved bounded queue drain smoke scope.",
+        "    humanApproval: autoDriveLocalImplementationApproval: user-approved low-risk local implementation drain smoke. standingUnattendedLocalCloseoutApproval: user-approved local closeout smoke.",
         $drainPolicy,
         $nestedTaskLocalId,
         "    allowedFiles:",
-        "      - docs/04-agent-system/state/autodrive-control-schema.yaml",
-        "      - docs/04-agent-system/sop/automated-advancement-governance.md",
+        $allowedFileLines,
         "    blockedFiles:",
         "      - .env.local",
+        "      - .env.example",
         "      - package.json",
+        "      - pnpm-lock.yaml",
         "      - package-lock.json",
         "      - src/db/schema/**",
         "      - drizzle/**",
@@ -146,19 +166,28 @@ try {
     }
     Assert-Contains -Output $nestedOutput -Pattern "queueDrainEligibilityDecision: eligible"
 
-    Write-Queue -Path $queuePath -TaskId "missing-policy-task"
+    Write-Queue -Path $queuePath -TaskId "missing-policy-task" -TaskKind "mechanism_hardening"
     $missingPolicyOutput = @(& $scriptPath -TaskId "missing-policy-task" -ProjectStatePath $projectStatePath -QueuePath $queuePath)
     if ($LASTEXITCODE -ne 0) {
         throw "Missing drainPolicy should be a safe non-error no-drain decision.`n$($missingPolicyOutput -join "`n")"
     }
     Assert-Contains -Output $missingPolicyOutput -Pattern "queueDrainEligibilityDecision: not_eligible"
 
-    Write-Queue -Path $queuePath -TaskId "code-task" -IncludeDrainPolicy -RiskProfile "low_risk_local_code" -TaskKind "implementation"
+    Write-Queue -Path $queuePath -TaskId "code-task" -IncludeDrainPolicy -RiskProfile "low_risk_local_code" -TaskKind "implementation" -RiskTypes @("local_implementation", "local_validation", "evidence_redaction", "automation_policy")
     $codeOutput = @(& $scriptPath -TaskId "code-task" -ProjectStatePath $projectStatePath -QueuePath $queuePath)
     if ($LASTEXITCODE -ne 0) {
-        throw "Low-risk local code should downgrade to single_task_only.`n$($codeOutput -join "`n")"
+        throw "Low-risk local code should be eligible for bounded queue drain.`n$($codeOutput -join "`n")"
     }
-    Assert-Contains -Output $codeOutput -Pattern "queueDrainEligibilityDecision: single_task_only"
+    Assert-Contains -Output $codeOutput -Pattern "queueDrainEligibilityDecision: eligible"
+    Assert-Contains -Output $codeOutput -Pattern "drainRiskProfile: low_risk_local_code"
+
+    Write-Queue -Path $queuePath -TaskId "implicit-code-task" -TaskKind "implementation" -RiskTypes @("local_implementation", "local_validation", "evidence_redaction", "automation_policy")
+    $implicitCodeOutput = @(& $scriptPath -TaskId "implicit-code-task" -ProjectStatePath $projectStatePath -QueuePath $queuePath)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Low-risk implementation tasks without explicit drainPolicy should synthesize default eligibility.`n$($implicitCodeOutput -join "`n")"
+    }
+    Assert-Contains -Output $implicitCodeOutput -Pattern "queueDrainEligibilityDecision: eligible"
+    Assert-Contains -Output $implicitCodeOutput -Pattern "drainRiskProfile: low_risk_local_code"
 
     Write-Queue -Path $queuePath -TaskId "high-risk-task" -IncludeDrainPolicy -RiskTypes @("automation_policy", "env_secret")
     Invoke-ExpectFailure -ExpectedPattern "queueDrainEligibilityDecision: stop_for_hard_block" -Command {

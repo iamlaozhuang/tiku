@@ -15,8 +15,9 @@ Use this file as the first short read after `AGENTS.md`, code taste rules, and A
   `project-state.yaml` records `plannedPauseStatus: active`.
 - Default rhythm: queue-first, local-first, evidence-first, guardian-first.
 - Default execution shape: one focused task, one focused local commit, then an explicit closeout decision.
-- Bounded queue drain may continue across multiple low-risk governance/mechanism batches in one wake only when the
-  target task records an explicit `drainPolicy` and the supervisor budgets remain open.
+- Bounded queue drain may continue across multiple low-risk batches in one wake when eligibility, startup, dispatcher,
+  closeout, registry, and supervisor budgets remain green. Low-risk product-code implementation tasks default to
+  `low_risk_local_code` drain eligibility when their task metadata satisfies the full local implementation gate.
 - Post-merge evidence-only commits are not required by default; use final handoff or `project-state.yaml` for final SHAs
   unless durable post-merge evidence is needed for recovery or a gate explicitly requires it.
 - Module Run v2 may group Batches, but every Batch still needs focused evidence and a reviewable boundary.
@@ -88,9 +89,11 @@ queueDrainNextAction: agent_execute_task
 The agent layer may then execute only that task and must return to the supervisor after validation or closeout. The
 supervisor writes its run manifest outside the repository under `%USERPROFILE%\.codex\tiku\drain-runs`.
 
-Do not drain when `drainPolicy` is missing, `riskProfile` is `low_risk_local_code` or higher risk, fresh approval is
+Do not drain when a non-implementation task lacks `drainPolicy`, risk metadata is high or ambiguous, fresh approval is
 required, validation fails, evidence/audit is missing, blocked files are touched, a repeated `blockerFingerprint` is
-seen, or the wake exceeds its task/time/diff budgets.
+seen, or the wake exceeds its task/time/diff budgets. Low-risk product-code implementation tasks without an explicit
+`drainPolicy` are treated as `low_risk_local_code` only after approval anchors, structured closeout, validation surface,
+allowed/blocked files, and redaction-safe evidence paths are present.
 
 When `plannedPauseStatus: active` and `plannedPauseKeepsAutomationPaused: true` are recorded in `project-state.yaml`,
 diagnostics should report `planned_pause_for_tuning`. This is an intentional human-controlled stop state, not approval
