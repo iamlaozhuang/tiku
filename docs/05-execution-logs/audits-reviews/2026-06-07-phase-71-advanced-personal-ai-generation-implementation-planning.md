@@ -36,3 +36,14 @@ No blocking finding identified in the implementation planning task.
 ## Residual Risk
 
 Future implementation may require new persistence for generated personal learning content. If so, schema and migration work must be isolated into a separately approved task.
+
+## 2026-06-12 Compatibility Review Addendum
+
+The Phase 71 evidence now includes an append-only auto-seed readiness compatibility addendum for the current Module Run
+v2 gate. This is a docs/state repair only:
+
+- It records the current `implementationAutoSeedGate`, `localExperienceClosureGate`, `seededImplementationTask`,
+  focused test plan, and `localFullLoopGate` anchors required by the readiness script.
+- It does not claim Phase 71 performed runtime implementation, provider calls, product code changes, or L5 execution.
+- It preserves the original planning-only decision and keeps provider, env/secret, dependency, schema/migration, deploy,
+  payment, external-service, and Cost Calibration Gate work blocked.

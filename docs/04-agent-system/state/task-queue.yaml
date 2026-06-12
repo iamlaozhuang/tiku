@@ -3653,12 +3653,91 @@ tasks:
     status: closed
     retryCount: 0
 
+  - id: fix-phase-71-personal-ai-generation-auto-seed-anchors
+    title: Repair Phase 71 personal-learning-ai auto-seed readiness anchors
+    phase: fix-phase-71-personal-ai-generation-auto-seed-anchors
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - module-run-v2-automation-startup-archive-dependency-repair
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+    humanApproval: >-
+      User requested implementation of the Phase 71 Auto-Seed Gate Repair serial plan. Scope is limited to docs/state
+      compatibility repair for the historical Phase 71 evidence anchors, targeted readiness checks for batch-119 through
+      batch-122, task plan, evidence, and audit review. No scripts, product code, tests, e2e, dependency/package/lockfile,
+      schema/migration, env/secret, provider, deploy, payment, external-service, PR, force-push, or Cost Calibration Gate
+      work is approved.
+    validationProfile: docs-state-auto-seed-readiness-repair
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5-readiness-repair
+    blockedRemainder:
+      - batch-119 through batch-122 product implementation remains pending after this docs/state repair
+      - provider/env/secret/schema/migration/dependency/deploy/payment/external-service work remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: docs_state_repair
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+      - docs/05-execution-logs/evidence/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - scripts/**
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state_repair
+      - auto_seed_readiness
+      - evidence_redaction
+      - automation_policy
+    validationCommands:
+      - Select-String -Path docs\05-execution-logs\evidence\2026-06-07-phase-71-advanced-personal-ai-generation-implementation-planning.md -Pattern implementationAutoSeedGate,localExperienceClosureGate,seededImplementationTask,'focused test plan',localFullLoopGate,'Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-119-personal-learning-ai-personal-generation-request-flow
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-122-personal-learning-ai-redacted-ai-call-log-reference
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+    status: closed
+    retryCount: 0
+
   - id: batch-119-personal-learning-ai-personal-generation-request-flow
     title: Module Run v2 personal-learning-ai implementation seed
     phase: batch-119-personal-learning-ai-personal-generation-request-flow
     sourceStory: module-run-v2-auto-seed-bridge
     dependencies:
       - phase-71-advanced-personal-ai-generation-implementation-planning
+      - fix-phase-71-personal-ai-generation-auto-seed-anchors
     taskPlanPolicy: required_before_edit
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
@@ -3786,6 +3865,7 @@ tasks:
     sourceStory: module-run-v2-auto-seed-bridge
     dependencies:
       - phase-71-advanced-personal-ai-generation-implementation-planning
+      - fix-phase-71-personal-ai-generation-auto-seed-anchors
     taskPlanPolicy: required_before_edit
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
@@ -3913,6 +3993,7 @@ tasks:
     sourceStory: module-run-v2-auto-seed-bridge
     dependencies:
       - phase-71-advanced-personal-ai-generation-implementation-planning
+      - fix-phase-71-personal-ai-generation-auto-seed-anchors
     taskPlanPolicy: required_before_edit
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
@@ -4040,6 +4121,7 @@ tasks:
     sourceStory: module-run-v2-auto-seed-bridge
     dependencies:
       - phase-71-advanced-personal-ai-generation-implementation-planning
+      - fix-phase-71-personal-ai-generation-auto-seed-anchors
     taskPlanPolicy: required_before_edit
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved

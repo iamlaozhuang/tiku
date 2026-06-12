@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-local-business-flow-mock-exam-isolation
-updatedAt: "2026-06-12T08:58:11-07:00"
+currentPhase: fix-phase-71-personal-ai-generation-auto-seed-anchors
+updatedAt: "2026-06-12T12:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1f541bd9c437185d836ede65f67a91750b023358
-  lastKnownOriginMasterSha: 1f541bd9c437185d836ede65f67a91750b023358
+  lastKnownMasterSha: d828d3d0f3633da346851debee5de195629f623c
+  lastKnownOriginMasterSha: d828d3d0f3633da346851debee5de195629f623c
 currentTask:
-  id: fix-local-business-flow-mock-exam-isolation
+  id: fix-phase-71-personal-ai-generation-auto-seed-anchors
   status: closed
-  sourceStory: health-audit-local-baseline
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
-  branch: codex/fix-local-business-flow-mock-exam-isolation
-  commitSha: pending_e2e_hardening_commit
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+  branch: codex/fix-phase-71-personal-ai-generation-auto-seed-anchors
+  commitSha: 8e34b1fd7c796c974d2243b1892a090470284942
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -316,8 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    P1 local-business-flow mock_exam isolation hardening passed focused unit, focused e2e, and first-run fresh-server
-    full e2e. Next recommended work is either a lightweight e2e flake monitor/recheck batch or moving back to the next
-    pending product task with the full local gates as baseline. Keep provider, env/secret, schema/migration, dependency,
-    deploy, payment, external-service, PR, force-push, and Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+    Phase 71 auto-seed readiness evidence anchors are repaired and batch-119 through batch-122 implementation auto-seed
+    readiness passed. Next recommended work is batch-119 personal-learning-ai product implementation. Keep provider,
+    env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, and Cost Calibration
+    Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
