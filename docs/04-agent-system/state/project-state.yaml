@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: active-queue-slimming-2026-06-11
-updatedAt: "2026-06-11T20:00:52-07:00"
+  currentPhase: module-run-v2-auto-seed-authorization-and-access
+updatedAt: "2026-06-11T20:32:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -270,13 +270,13 @@ repository:
   lastKnownMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
   lastKnownOriginMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
 currentTask:
-  id: active-queue-slimming-2026-06-11
+  id: module-run-v2-auto-seed-authorization-and-access
   status: closed
-  sourceStory: user-request-2026-06-11-active-queue-slimming
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-active-queue-slimming.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-11-active-queue-slimming.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-active-queue-slimming.md
-  branch: codex/active-queue-slimming
+  sourceStory: user-request-2026-06-11-authorization-access-seed
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
+  branch: codex/authorization-access-seed
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -314,10 +314,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Active queue slimming 2026-06-11 reduced task-queue.yaml to the current recovery pointer, evidence-gap debt entries,
-    and the recent local closeout window. Historical terminal entries moved to
-    docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml and are locatable through
-    docs/04-agent-system/state/task-history-index.yaml. Local automation pause remains user-controlled. Keep provider,
+    Module Run v2 authorization-and-access auto-seed appended pending implementation tasks batch-115 through batch-118.
+    The next automatic implementation candidate is
+    batch-115-authorization-and-access-authorization-read-model-and-display-contrac. New seeded implementation tasks use
+    validationCommandLifecycle with pre_edit, post_edit, advisory_baseline, and closeout phases. Keep provider,
     env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and Cost
     Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-active-queue-slimming.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
