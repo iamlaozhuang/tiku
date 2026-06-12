@@ -79,6 +79,20 @@ result: pass pending closeout scripts
 - e2e: not run because batch-121 did not touch UI/e2e files and does not declare `localE2EValidation`; allowed files
   prohibit UI/e2e implementation.
 
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and` into
+  `master`.
+- Merged master SHA before this post-merge evidence note:
+  `750886146b76905ccabbaba9e5f349eb4b4c8d09`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `npm.cmd run test:unit`: passed on `master`, `Test Files 242 passed (242)`, `Tests 865 passed (865)`.
+- `npm.cmd run build`: passed on `master`, Next.js 16.2.6 compiled successfully and generated 54 static pages.
+- `git diff --check`: passed on `master`.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, and Cost Calibration Gate remain blocked.
+
 ## Commit
 
 - Commit: `3b47f2dcf53da89dc4cf7373bb4c191fbcd13beb` recorded as the post-commit evidence anchor before final amend; the
