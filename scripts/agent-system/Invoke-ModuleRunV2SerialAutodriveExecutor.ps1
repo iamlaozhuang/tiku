@@ -213,6 +213,89 @@ function Get-TaskValidationLifecycleCommands {
     return $commands.ToArray()
 }
 
+function Test-ApprovedCommitMergePushCloseoutPolicy {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock)
+
+    $closeoutLines = New-Object System.Collections.Generic.List[string]
+    $insideCloseoutPolicy = $false
+    foreach ($line in $TaskBlock) {
+        if ($line -match "^\s{4}closeoutPolicy:\s*$") {
+            $insideCloseoutPolicy = $true
+            $closeoutLines.Add($line)
+            continue
+        }
+
+        if ($insideCloseoutPolicy -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if ($insideCloseoutPolicy) {
+            $closeoutLines.Add($line)
+        }
+    }
+
+    if ($closeoutLines.Count -eq 0) {
+        return $false
+    }
+
+    $closeoutText = $closeoutLines.ToArray() -join "`n"
+    $approvedCount = ([regex]::Matches($closeoutText, "(?im)^\s+approved:\s*true\s*$")).Count
+    return $closeoutText -match "(?im)^\s+localCommit:\s*approved\s*$" `
+        -and $closeoutText -match "(?im)^\s+fastForwardMerge:\s*$" `
+        -and $approvedCount -ge 2 `
+        -and $closeoutText -match "(?im)^\s+targetBranch:\s*master\s*$" `
+        -and $closeoutText -match "(?im)^\s+push:\s*$" `
+        -and $closeoutText -match "(?im)^\s+target:\s*origin/master\s*$" `
+        -and $closeoutText -match "(?im)^\s+cleanup:\s*$" `
+        -and $closeoutText -match "(?im)^\s+deleteShortBranch:\s*true\s*$" `
+        -and $closeoutText -match "(?im)^\s+parkWorktree:\s*true\s*$"
+}
+
+function Get-CurrentGitBranchName {
+    $currentBranch = ((& git branch --show-current) -join "").Trim()
+    if ([string]::IsNullOrWhiteSpace($currentBranch)) {
+        return "(detached HEAD)"
+    }
+
+    return $currentBranch
+}
+
+function Assert-ClaimBranchPosture {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$TaskBlock,
+        [Parameter(Mandatory = $true)][string]$TargetTaskId
+    )
+
+    if (-not (Test-ApprovedCommitMergePushCloseoutPolicy -TaskBlock $TaskBlock)) {
+        return
+    }
+
+    $currentBranch = Get-CurrentGitBranchName
+    Write-Section -Title "Claim Branch Posture"
+    Write-Output "branch: $currentBranch"
+    Write-Output "claimRequiresShortBranch: true"
+
+    if ($currentBranch -like "codex/*") {
+        Write-Output "claimBranchPosture: ready"
+        return
+    }
+
+    $reason = if ($currentBranch -eq "(detached HEAD)") {
+        "claim_task requires a codex/* short branch before approved commit/merge/push closeout; current branch is detached HEAD"
+    } elseif ($currentBranch -in @("master", "main")) {
+        "claim_task requires a codex/* short branch before approved commit/merge/push closeout; current branch is protected: $currentBranch"
+    } else {
+        "claim_task requires a codex/* short branch before approved commit/merge/push closeout; current branch is not allowed: $currentBranch"
+    }
+
+    Write-SerialExecutorResult `
+        -Decision "prepare_short_branch_required" `
+        -Action "prepare_short_branch" `
+        -Reason "$reason. Create or switch to codex/$TargetTaskId, then rerun claim_task." `
+        -ExitCode 1 `
+        -TargetTaskId $TargetTaskId
+}
+
 function Get-CurrentTaskId {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
 
@@ -327,6 +410,7 @@ function Get-SerialStopTaxonomy {
     )
 
     if ($Decision -eq "validation_command_normalization_required") { return "repair_required" }
+    if ($Decision -eq "prepare_short_branch_required" -or $Action -eq "prepare_short_branch" -or $Reason -match "short branch|branch posture") { return "branch_posture_required" }
     if ($Reason -match "validation|blocked command") { return "validation_failed" }
     if ($Reason -match "manual|approval") { return "approval_missing" }
     if ($Reason -match "active owner") { return "active_owner" }
@@ -799,6 +883,7 @@ try {
                 Write-SerialExecutorResult -Decision "stop_for_hard_block" -Action "stop_for_hard_block" -Reason "claim_task requires pending status, actual: $status" -ExitCode 1 -TargetTaskId $targetTask
             }
             Assert-TaskDependenciesComplete -QueueContext $queueContext -TaskBlock $taskBlock -TargetTaskId $targetTask
+            Assert-ClaimBranchPosture -TaskBlock $taskBlock -TargetTaskId $targetTask
 
             if (-not $Execute) {
                 Write-SerialExecutorResult -Decision "ready_to_claim" -Action "claim_task" -Reason "claim transaction is ready; rerun with -Execute to write queue and project state" -ExitCode 0 -TargetTaskId $targetTask

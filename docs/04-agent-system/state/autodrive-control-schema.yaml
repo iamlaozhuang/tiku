@@ -23,6 +23,7 @@ taskAutodrivePolicy:
         - open_recovery_plan
         - run_closeout_recovery
         - run_approved_closeout
+        - prepare_short_branch
         - request_owner_recovery
         - reconcile_post_closeout_state
         - confirm_post_closeout_checkpoint
@@ -76,6 +77,7 @@ startupDiagnostics:
     - repair_required
     - no_task
     - registration_mismatch
+    - branch_posture_required
     - closeout_pending
     - hard_block
   automationRegistration:
@@ -125,6 +127,17 @@ startupDiagnostics:
     - manual_review_available
     - clean
     - advisory_unavailable
+  branchPosture:
+    decisionOutput: serialExecutorDecision
+    decisions:
+      - prepare_short_branch_required
+      - ready_to_claim
+      - task_claimed
+    actionOutput: serialExecutorAction
+    action: prepare_short_branch
+    requiredBranchPattern: codex/*
+    appliesWhen: task closeoutPolicy approves local commit, fast-forward merge to master, push origin/master, and cleanup
+    executionRule: claim_task must not write queue or project-state for approved commit/merge/push closeout tasks unless the current branch is a codex/* short branch. Detached HEAD, master, main, and other branches must return branch_posture_required with prepare_short_branch guidance.
   executionRule: startup diagnostics are advisory unless startupDecision itself returns a hard block. Safe cleanup candidates emit startupHygieneAdvisory and must not preempt continue_current_task, closeout_recovery, prepare_next_task, or adopt_recoverable_run; cleanup_stale_artifacts is returned only when no executable task is available.
 autoSeedBridge:
   purpose: Bridge no_executable_task into a guarded proposal or approved queue seed transaction.

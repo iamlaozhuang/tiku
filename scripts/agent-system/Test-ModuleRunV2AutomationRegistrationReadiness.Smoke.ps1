@@ -116,8 +116,18 @@ try {
     Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot" -Status "PAUSED"
     $pausedOutput = Invoke-ExpectFailure -Command { & $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot } -ExpectedPattern "HARD_BLOCK_AUTOMATION_STATUS_MISMATCH"
     Assert-Contains -Output $pausedOutput -Pattern "stopTaxonomy: registration_mismatch"
+    Assert-Contains -Output $pausedOutput -Pattern "registrationReconcileAction: align_project_state_or_toml"
+    Assert-Contains -Output $pausedOutput -Pattern "registrationReconcileNextCommand: record an activation reconcile task or restore the primary automation TOML status before rerun"
+
+    Write-ProjectState -Path $projectStatePath -AutomationId "tiku-module-run-v2-autopilot" -Status "PAUSED"
+    Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot" -Status "ACTIVE"
+    $activeTomlPausedStateOutput = Invoke-ExpectFailure -Command { & $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot } -ExpectedPattern "HARD_BLOCK_AUTOMATION_STATUS_MISMATCH"
+    Assert-Contains -Output $activeTomlPausedStateOutput -Pattern "HARD_BLOCK_AUTOMATION_STATUS_MISMATCH project=PAUSED toml=ACTIVE"
+    Assert-Contains -Output $activeTomlPausedStateOutput -Pattern "registrationReconcileAction: align_project_state_or_toml"
+    Assert-Contains -Output $activeTomlPausedStateOutput -Pattern "registrationReconcileStatePath:"
 
     Write-ProjectState -Path $projectStatePath -AutomationId "tiku-module-run-v2-autopilot" -Status "ACTIVE" -PlannedPause
+    Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot" -Status "PAUSED"
     $plannedPauseOutput = @(& $scriptPath -ProjectStatePath $projectStatePath -AutomationRoot $automationRoot -OnDemandAutomationRoot $onDemandRoot)
     Assert-Contains -Output $plannedPauseOutput -Pattern "plannedPauseForTuning: true"
     Assert-Contains -Output $plannedPauseOutput -Pattern "automationRegistrationDecision: planned_pause_for_tuning"

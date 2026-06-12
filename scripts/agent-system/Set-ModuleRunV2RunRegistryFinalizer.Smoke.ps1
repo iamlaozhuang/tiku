@@ -200,6 +200,28 @@ try {
     Assert-Equal -Actual ([string]$cleanupRegistry.resumePointer) -Expected "cleanupPolicy=cleanup_ready" -Label "cleanup registry resume pointer"
     Assert-Equal -Actual (@($cleanupRegistry.changedFiles).Count) -Expected 0 -Label "cleanup registry changed files"
 
+    $branchPostureOutput = @(
+        & powershell.exe `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File $scriptPath `
+            -TaskId "batch-branch-posture" `
+            -RunRegistryRoot $runRegistryRoot `
+            -WorktreePath $repoPath `
+            -Status "stopped" `
+            -Phase "branch_posture" `
+            -BlockerKind "branch_posture_requires_short_branch" `
+            -EvidencePath "docs/05-execution-logs/evidence/batch-branch-posture.md" `
+            -AuditReviewPath "docs/05-execution-logs/audits-reviews/batch-branch-posture.md"
+    )
+
+    Assert-Contains -Output $branchPostureOutput -Pattern "blockerKind: branch_posture_requires_short_branch"
+    Assert-Contains -Output $branchPostureOutput -Pattern "stopTaxonomy: branch_posture_required"
+    Assert-Contains -Output $branchPostureOutput -Pattern "severity: auto_recoverable"
+    Assert-Contains -Output $branchPostureOutput -Pattern "requiresHuman: false"
+    Assert-Contains -Output $branchPostureOutput -Pattern "nextCommand: prepare_short_branch"
+    Assert-Contains -Output $branchPostureOutput -Pattern "riskIfAutoContinued: task claim would enter implementation without a closeout-compatible short branch"
+
     $noWriteOutput = @(
         & powershell.exe `
             -NoProfile `

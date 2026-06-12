@@ -89,6 +89,10 @@ function Test-PromptAnchor {
 
 $findings = New-Object System.Collections.Generic.List[string]
 $registrationPlannedPauseForTuning = $false
+$registrationStatusMismatchFound = $false
+$registrationStatusMismatchProjectStatus = ""
+$registrationStatusMismatchTomlStatus = ""
+$registrationStatusMismatchTomlPath = ""
 
 try {
     Write-Section -Title "Module Run v2 Automation Registration Readiness"
@@ -183,6 +187,10 @@ try {
 
             if ($tomlStatus -ne $projectAutomationStatus -and -not $isPlannedPauseForTuning) {
                 Add-Finding "HARD_BLOCK_AUTOMATION_STATUS_MISMATCH project=$projectAutomationStatus toml=$tomlStatus"
+                $script:registrationStatusMismatchFound = $true
+                $script:registrationStatusMismatchProjectStatus = $projectAutomationStatus
+                $script:registrationStatusMismatchTomlStatus = $tomlStatus
+                $script:registrationStatusMismatchTomlPath = $expectedTomlPath
             }
             if ($projectAutomationStatus -eq "ACTIVE" -and $tomlStatus -ne "ACTIVE" -and -not $isPlannedPauseForTuning) {
                 Add-Finding "HARD_BLOCK_PRIMARY_AUTOMATION_NOT_ACTIVE status=$tomlStatus"
@@ -223,6 +231,13 @@ try {
     }
 
     if ($findings.Count -gt 0) {
+        if ($registrationStatusMismatchFound) {
+            Write-Output "registrationReconcileAction: align_project_state_or_toml"
+            Write-Output "registrationReconcileStatePath: $ProjectStatePath"
+            Write-Output "registrationReconcileTomlPath: $registrationStatusMismatchTomlPath"
+            Write-Output "registrationReconcileObservedStatus: project=$registrationStatusMismatchProjectStatus; toml=$registrationStatusMismatchTomlStatus"
+            Write-Output "registrationReconcileNextCommand: record an activation reconcile task or restore the primary automation TOML status before rerun"
+        }
         Write-RegistrationResult -Decision "stop_for_hard_block" -StopTaxonomy "registration_mismatch" -Reason "automation registration failed with $($findings.Count) finding(s)" -ExitCode 1
     }
 

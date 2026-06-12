@@ -194,6 +194,37 @@ if ([string]::IsNullOrWhiteSpace($TaskId)) {
     throw "Run registry finalizer requires TaskId."
 }
 
+$isBranchPostureBlocker = $BlockerKind -in @(
+    "branch_posture_requires_short_branch",
+    "detached_head_requires_short_branch"
+)
+if ($isBranchPostureBlocker) {
+    if ($StopTaxonomy -eq "hard_block") {
+        $StopTaxonomy = "branch_posture_required"
+    }
+    if ($Severity -eq "hard_block") {
+        $Severity = "auto_recoverable"
+    }
+    if ($RequiresHuman -eq "true") {
+        $RequiresHuman = "false"
+    }
+    if ($CloseoutTransactionState -eq "unknown") {
+        $CloseoutTransactionState = "pre_claim_branch_posture_required"
+    }
+    if ($NextRecommendedAction -eq "manual_required_owner_recovery") {
+        $NextRecommendedAction = "prepare_short_branch"
+    }
+    if ($NextCommand -eq "manual_required_owner_recovery") {
+        $NextCommand = "prepare_short_branch"
+    }
+    if ($RiskIfAutoContinued -eq "unsafe or impossible to continue until resolved") {
+        $RiskIfAutoContinued = "task claim would enter implementation without a closeout-compatible short branch"
+    }
+    if ([string]::IsNullOrWhiteSpace($ResumePointer)) {
+        $ResumePointer = "taskId=$TaskId;branch=$Branch"
+    }
+}
+
 $fullWorktreePath = (Resolve-Path -LiteralPath $WorktreePath).Path
 $changedFiles = @(Get-GitChangedFiles -Path $fullWorktreePath)
 $normalizedWorktreePath = ConvertTo-NormalizedPath -Path $fullWorktreePath

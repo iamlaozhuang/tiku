@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-  currentPhase: batch-115-authorization-and-access-authorization-read-model-and-display-contrac
-updatedAt: "2026-06-11T22:00:13-07:00"
+  currentPhase: module-run-v2-activation-branch-posture-hardening
+updatedAt: "2026-06-11T22:33:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -235,7 +235,7 @@ automation:
       statement: >-
         User enables a governed task-scoped destructive local Docker DB approval path. Destructive DB work is executable only for an explicitly scoped task against local Docker dev resources after capability gates pass and redacted evidence records the operation kind, target alias, backup/disposable rationale, and rollback/recovery boundary. It is not a global standing destructive DB approval.
     codexAutomationId: tiku-module-run-v2-autopilot
-    codexAutomationStatus: PAUSED
+    codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
     codexAutomationExecutionEnvironment: worktree
     plannedPauseStatus: closed
@@ -244,9 +244,9 @@ automation:
     plannedPauseKeepsAutomationPaused: false
     plannedPauseStatement: >-
       Phase85 closed the planned pause after restoring the primary automation prompt anchors and recording activation
-      preflight evidence. Local automation remains PAUSED by explicit user choice. Registration readiness is expected to
-      be consistent while the primary automation TOML is PAUSED; do not activate tiku-module-run-v2-autopilot,
-      tiku-module-run-v2-autopilot-2, or tiku-module-run-v2-mechanic-2 without separate user action.
+      preflight evidence. This mechanism hardening task reconciles durable state with the already ACTIVE primary
+      tiku-module-run-v2-autopilot TOML after explicit user approval to implement the activation and branch posture
+      hardening plan. Historical automation ids and on-demand mechanic ids remain paused unless separately approved.
     defaultStopOn:
       - hard block
       - blocked gate
@@ -269,14 +269,14 @@ repository:
   lastKnownMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
   lastKnownOriginMasterSha: 8833ff99f0c0ed5cfe75e4fde6c7b46ea17c85d1
 currentTask:
-  id: batch-115-authorization-and-access-authorization-read-model-and-display-contrac
+  id: module-run-v2-activation-branch-posture-hardening
   status: closed
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-11-batch-115-authorization-and-access-authorization-read-model-and-display-contract.md
-  evidencePath: docs/05-execution-logs/evidence/batch-115-authorization-and-access-authorization-read-model-and-display-contrac.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-115-authorization-and-access-authorization-read-model-and-display-contrac.md
-  branch: (detached HEAD)
-  commitSha: 83d24c9833f6546bf08244e527334ea1d04e344a
+  sourceStory: user-request-2026-06-11-mechanism-hardening-plan
+  planPath: docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+  branch: codex/module-run-v2-branch-posture-registration-hardening
+  commitSha: 25382855b4e0e0c4a4ad92367e9ab681a3717b45
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -313,10 +313,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Module Run v2 automation startup archive dependency repair keeps the primary automation PAUSED and aligns durable
-    state with the app TOML. Startup, next-action, serial claim, and implementation auto-seed readiness can now treat
-    terminal dependencies found in task-history-index.yaml as complete when evidence exists. The next manual run target
-    remains batch-115-authorization-and-access-authorization-read-model-and-display-contrac. Keep provider, env/secret,
-    schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate
-    blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+    Implement the Module Run v2 activation and branch posture hardening task before resuming batch-116. The task must
+    keep provider, env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and
+    Cost Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-activation-branch-posture-hardening.md

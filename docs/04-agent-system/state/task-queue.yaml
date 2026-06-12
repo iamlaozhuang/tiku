@@ -1,5 +1,172 @@
 ﻿schemaVersion: 1
 tasks:
+  - id: module-run-v2-activation-branch-posture-hardening
+    title: Module Run v2 activation and branch posture hardening
+    phase: module-run-v2-activation-branch-posture-hardening
+    sourceStory: user-request-2026-06-11-mechanism-hardening-plan
+    dependencies:
+      - module-run-v2-automation-startup-archive-dependency-repair
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+    humanApproval: >-
+      User explicitly requested implementation of the Module Run v2 activation and branch posture hardening plan. Scope
+      is limited to mechanism scripts, smoke tests, durable schema/state, task plan, evidence, and audit review. The task
+      may reconcile project-state codexAutomationStatus with the already ACTIVE primary tiku-module-run-v2-autopilot
+      TOML, add branch posture gates before claim_task, add registration mismatch reconcile output, and close out through
+      local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking
+      after repository gates pass. No product source code, dependency/package/lockfile, env/secret, provider,
+      schema/migration, e2e, deploy, payment, external-service, PR, force-push, historical automation activation,
+      on-demand mechanic activation, or Cost Calibration Gate work is approved.
+    validationProfile: mechanism-hardening
+    localFullLoopGate: mechanism
+    activationBoundary:
+      primaryAutomationId: tiku-module-run-v2-autopilot
+      reconcilePrimaryTomlStatus: ACTIVE
+      projectStateStatusAfterReconcile: ACTIVE
+      blockedAutomationIds:
+        - tiku-module-run-v2-autopilot-2
+        - tiku-module-run-v2-mechanic-2
+    blockedRemainder:
+      - batch-116 business implementation remains deferred until this mechanism task closes
+      - e2e execution remains blocked
+      - provider/env/schema/deploy/dependency/payment/external-service work remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+        - prepare_short_branch
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - e2e
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: approved_read_only_redacted
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: mechanism_hardening
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
+      - scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - mechanism_hardening
+      - automation_policy
+      - activation_readiness
+      - branch_posture
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-activation-branch-posture-hardening
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-activation-branch-posture-hardening
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-activation-branch-posture-hardening
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AgentActionDispatcher.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-activation-branch-posture-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-activation-branch-posture-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-activation-branch-posture-hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+    status: closed
+    retryCount: 0
+
   - id: phase-85-automation-activation-readiness-sync
     title: Automation activation readiness sync
     phase: phase-85-automation-activation-readiness-sync

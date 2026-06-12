@@ -28,6 +28,7 @@ function Invoke-SerialExecutor {
         [Parameter(Mandatory = $false)][string]$ActionTask = "",
         [Parameter(Mandatory = $false)][string]$DispatcherOutputPath = "",
         [Parameter(Mandatory = $false)][string]$TaskHistoryIndexPath = "",
+        [Parameter(Mandatory = $false)][string]$WorkingDirectory = "",
         [Parameter(Mandatory = $false)][switch]$Execute,
         [Parameter(Mandatory = $false)][switch]$RunValidation
     )
@@ -75,9 +76,15 @@ function Invoke-SerialExecutor {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
+        if (-not [string]::IsNullOrWhiteSpace($WorkingDirectory)) {
+            Push-Location -LiteralPath $WorkingDirectory
+        }
         $output = @(& powershell.exe @arguments 2>&1)
         $exitCode = $LASTEXITCODE
     } finally {
+        if (-not [string]::IsNullOrWhiteSpace($WorkingDirectory)) {
+            Pop-Location
+        }
         $ErrorActionPreference = $previousErrorActionPreference
     }
 
@@ -100,7 +107,8 @@ function Write-SmokeFiles {
         [Parameter(Mandatory = $false)][string]$NextStatus = "pending",
         [Parameter(Mandatory = $false)][string]$NextDependencies = "",
         [Parameter(Mandatory = $false)][string]$ValidationCommand = "powershell.exe -NoProfile -Command `"Write-Output safe-validation`"",
-        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$ValidationLifecycleBlock = ""
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$ValidationLifecycleBlock = "",
+        [Parameter(Mandatory = $false)][switch]$ApprovedCloseoutPolicy
     )
 
     $caseRoot = Join-Path -Path $Root -ChildPath ("case-" + [guid]::NewGuid().ToString("N"))
@@ -131,6 +139,7 @@ currentTask:
       - $NextDependencies
 "@
     }
+    $closeoutApproved = if ($ApprovedCloseoutPolicy) { "true" } else { "false" }
 
     @"
 schemaVersion: 1
@@ -145,14 +154,14 @@ tasks:
     closeoutPolicy:
       localCommit: approved
       fastForwardMerge:
-        approved: false
+        approved: $closeoutApproved
         targetBranch: master
       push:
-        approved: false
+        approved: $closeoutApproved
         target: origin/master
       cleanup:
-        deleteShortBranch: false
-        parkWorktree: false
+        deleteShortBranch: $closeoutApproved
+        parkWorktree: $closeoutApproved
     autodrivePolicy:
       mode: guarded_serial
       allowedAgentActions:
@@ -217,14 +226,14 @@ $nextDependencyBlock
     closeoutPolicy:
       localCommit: approved
       fastForwardMerge:
-        approved: false
+        approved: $closeoutApproved
         targetBranch: master
       push:
-        approved: false
+        approved: $closeoutApproved
         target: origin/master
       cleanup:
-        deleteShortBranch: false
-        parkWorktree: false
+        deleteShortBranch: $closeoutApproved
+        parkWorktree: $closeoutApproved
     autodrivePolicy:
       mode: guarded_serial
       allowedAgentActions:
@@ -324,6 +333,49 @@ function Write-DispatcherOutput {
     return $path
 }
 
+function New-SmokeGitRepository {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $false)][string]$Branch = "",
+        [Parameter(Mandatory = $false)][switch]$Detached
+    )
+
+    $repoPath = Join-Path -Path $Root -ChildPath ("repo-" + [guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $repoPath | Out-Null
+    & git -C $repoPath init | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize serial executor smoke git repository."
+    }
+
+    Set-Content -LiteralPath (Join-Path -Path $repoPath -ChildPath "README.md") -Value "serial smoke" -Encoding UTF8
+    & git -C $repoPath add README.md | Out-Null
+    & git -C $repoPath -c user.name="Tiku Smoke" -c user.email="tiku-smoke@example.invalid" commit -m "baseline" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to commit serial executor smoke baseline."
+    }
+
+    & git -C $repoPath branch -M master | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create serial executor smoke master branch."
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($Branch)) {
+        & git -C $repoPath switch -c $Branch | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to create serial executor smoke branch: $Branch"
+        }
+    }
+
+    if ($Detached) {
+        & git -C $repoPath checkout --detach HEAD | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to detach serial executor smoke repository."
+        }
+    }
+
+    return $repoPath
+}
+
 $smokeRoot = New-SmokeRoot
 try {
     $script:serialSmokeRunRegistryRoot = Join-Path -Path $smokeRoot -ChildPath "automation-runs"
@@ -376,6 +428,24 @@ agentActionTask: current-task
         throw "Claim-ready archived dependency fixture failed.`n$($claimArchivedReadyResult.Output -join "`n")"
     }
     Assert-Contains -Output $claimArchivedReadyResult.Output -Pattern "serialExecutorDecision: ready_to_claim"
+
+    $detachedClaimFiles = Write-SmokeFiles -Root $smokeRoot -CurrentStatus "closed" -NextDependencies "current-task" -ApprovedCloseoutPolicy
+    $detachedRepoPath = New-SmokeGitRepository -Root $smokeRoot -Detached
+    $detachedClaimResult = Invoke-SerialExecutor -ProjectStatePath $detachedClaimFiles.StatePath -QueuePath $detachedClaimFiles.QueuePath -SchemaPath $detachedClaimFiles.SchemaPath -Action "claim_task" -ActionTask "next-task" -WorkingDirectory $detachedRepoPath
+    if ($detachedClaimResult.ExitCode -eq 0) {
+        throw "Detached-HEAD claim fixture unexpectedly passed.`n$($detachedClaimResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $detachedClaimResult.Output -Pattern "serialExecutorDecision: prepare_short_branch_required"
+    Assert-Contains -Output $detachedClaimResult.Output -Pattern "serialExecutorAction: prepare_short_branch"
+    Assert-Contains -Output $detachedClaimResult.Output -Pattern "stopTaxonomy: branch_posture_required"
+
+    $codexBranchClaimFiles = Write-SmokeFiles -Root $smokeRoot -CurrentStatus "closed" -NextDependencies "current-task" -ApprovedCloseoutPolicy
+    $codexBranchRepoPath = New-SmokeGitRepository -Root $smokeRoot -Branch "codex/serial-claim-posture-smoke"
+    $codexBranchClaimResult = Invoke-SerialExecutor -ProjectStatePath $codexBranchClaimFiles.StatePath -QueuePath $codexBranchClaimFiles.QueuePath -SchemaPath $codexBranchClaimFiles.SchemaPath -Action "claim_task" -ActionTask "next-task" -WorkingDirectory $codexBranchRepoPath
+    if ($codexBranchClaimResult.ExitCode -ne 0) {
+        throw "Codex branch claim posture fixture failed.`n$($codexBranchClaimResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $codexBranchClaimResult.Output -Pattern "serialExecutorDecision: ready_to_claim"
 
     $claimExecuteFiles = Write-SmokeFiles -Root $smokeRoot -CurrentStatus "closed" -NextDependencies "current-task"
     $claimExecuteResult = Invoke-SerialExecutor -ProjectStatePath $claimExecuteFiles.StatePath -QueuePath $claimExecuteFiles.QueuePath -SchemaPath $claimExecuteFiles.SchemaPath -Action "claim_task" -ActionTask "next-task" -Execute

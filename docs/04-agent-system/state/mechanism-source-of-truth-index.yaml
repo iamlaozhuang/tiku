@@ -213,7 +213,7 @@ scriptControls:
     path: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.ps1
     smokePath: scripts/agent-system/Set-ModuleRunV2RunRegistryFinalizer.Smoke.ps1
     decisionOutput: runRegistryFinalizer
-    role: terminal writer for run registry state before thread exit; records real changed files, phase, blocker kind, stop taxonomy, evidence/audit paths, closeout transaction state, safeToAdopt, and cleanup policy
+    role: terminal writer for run registry state before thread exit; records real changed files, phase, blocker kind, stop taxonomy, evidence/audit paths, closeout transaction state, safeToAdopt, cleanup policy, and recoverable branch-posture blockers such as prepare_short_branch
   - id: module-run-v2-post-closeout-state-reconcile
     path: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2PostCloseoutStateReconcile.Smoke.ps1
@@ -248,7 +248,7 @@ scriptControls:
     path: scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutomationRegistrationReadiness.Smoke.ps1
     decisionOutput: automationRegistrationDecision
-    role: hard-blocks local scheduler drift when project-state codexAutomationId/status does not match local automation TOML, when more than one scheduled active automation is present, or when the primary prompt lacks identity, mechanic boundary, or standing closeout anchors
+    role: hard-blocks local scheduler drift when project-state codexAutomationId/status does not match local automation TOML, emits activation reconcile guidance for status mismatch, and blocks when more than one scheduled active automation is present or when the primary prompt lacks identity, mechanic boundary, or standing closeout anchors
   - id: module-run-v2-automation-startup-readiness
     path: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.ps1
     smokePath: scripts/agent-system/Test-ModuleRunV2AutomationStartupReadiness.Smoke.ps1
@@ -318,7 +318,7 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2SerialAutodriveExecutor.Smoke.ps1
     decisionOutput: serialExecutorDecision
-    role: guardian-first serial executor for claim_task, continue_task, and lifecycle-aware run_validation with explicit Execute or RunValidation gates
+    role: guardian-first serial executor for claim_task, continue_task, lifecycle-aware run_validation, and pre-claim branch posture gating for approved commit/merge/push closeout tasks, with explicit Execute or RunValidation gates
   - id: module-run-v2-parallel-coordinator-executor
     path: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2ParallelCoordinatorExecutor.Smoke.ps1
