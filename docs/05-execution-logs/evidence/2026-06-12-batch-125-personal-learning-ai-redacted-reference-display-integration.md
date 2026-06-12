@@ -83,6 +83,28 @@ result: pass
 - Commit: `f9e9627d4c84787641db68fb16ca4304c7de89bd` captured the initial batch-125 implementation commit before the
   final evidence amend; the immutable final branch SHA is reported in closeout.
 
+## Post-Merge Master Validation
+
+- Merge: fast-forwarded `codex/batch-125-personal-learning-ai-redacted-reference-display-integration` into `master`.
+- Merged master SHA before this post-merge evidence note:
+  `c88f9e4c97cf85c4383e10e9da25e0a572254424`.
+- `npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts`: passed on `master`,
+  `Test Files 1 passed (1)`, `Tests 4 passed (4)`.
+- `npm.cmd run lint`: passed on `master`.
+- `npm.cmd run typecheck`: passed on `master`.
+- `npm.cmd run test:unit`: passed on `master`, `Test Files 244 passed (244)`, `Tests 873 passed (873)`.
+- `npm.cmd run build`: passed on `master`, Next.js 16.2.6 compiled successfully and generated 55 static pages including
+  `/ai-generation`.
+- `git diff --check`: passed on `master`.
+- `npm.cmd run test:e2e -- --list`: passed on `master`, 27 tests listed in 10 files.
+- `npm.cmd run test:e2e`: passed on `master`, 27 tests passed.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-125-personal-learning-ai-redacted-reference-display-integration`:
+  passed on `master` before this evidence-only closeout commit.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-125-personal-learning-ai-redacted-reference-display-integration`:
+  passed on `master` with `localAhead: 1` before this evidence-only closeout commit.
+- Push target remains `origin master`; PR, force push, deploy, provider, env/secret, schema/migration, dependency,
+  payment, external-service, e2e edits, formal generated-content write paths, and Cost Calibration Gate remain blocked.
+
 ## Out Of Scope
 
 - No package.json or lockfile changes.
