@@ -45,6 +45,7 @@ function createService(): EffectiveAuthorizationService {
             {
               profession: "monopoly",
               level: 3,
+              contextDisplayStatus: "display_only",
               effectiveEdition: "standard",
               authorizationSource: "personal_auth",
               authorizationPublicId: `${userContext.userPublicId}_personal_auth_123`,
@@ -108,6 +109,7 @@ describe("effective authorization route handlers", () => {
           {
             profession: "monopoly",
             level: 3,
+            contextDisplayStatus: "display_only",
             effectiveEdition: "standard",
             authorizationSource: "personal_auth",
             authorizationPublicId: "user_public_123_personal_auth_123",

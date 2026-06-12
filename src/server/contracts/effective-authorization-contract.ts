@@ -13,6 +13,8 @@ export type EffectiveAuthorizationBlockedReason =
   | "authorization_missing"
   | "production_enablement_blocked";
 
+export type EffectiveAuthorizationContextDisplayStatus = "display_only";
+
 export type EffectiveAuthorizationCapabilitiesDto = {
   canGenerateAiQuestion: boolean;
   canGenerateAiPaper: boolean;
@@ -45,6 +47,7 @@ export type EffectiveAuthorizationDto = {
 export type EffectiveAuthorizationContextDto = {
   profession: Profession;
   level: number;
+  contextDisplayStatus: EffectiveAuthorizationContextDisplayStatus;
   effectiveEdition: EffectiveAuthorizationEdition;
   authorizationSource: AuthorizationType;
   authorizationPublicId: string;

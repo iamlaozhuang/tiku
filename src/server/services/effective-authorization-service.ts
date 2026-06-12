@@ -141,6 +141,7 @@ function mapPersonalAuthToAuthorizationContext(
   return {
     profession: personalAuth.profession,
     level: personalAuth.level,
+    contextDisplayStatus: "display_only",
     effectiveEdition,
     authorizationSource: "personal_auth",
     authorizationPublicId: personalAuth.public_id,
@@ -169,6 +170,7 @@ function mapOrgAuthToAuthorizationContext(
   return {
     profession: orgAuth.profession,
     level: orgAuth.level,
+    contextDisplayStatus: "display_only",
     effectiveEdition,
     authorizationSource: "org_auth",
     authorizationPublicId: orgAuth.public_id,

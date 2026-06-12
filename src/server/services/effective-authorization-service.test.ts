@@ -139,6 +139,7 @@ describe("effective authorization service", () => {
           {
             profession: "monopoly",
             level: 3,
+            contextDisplayStatus: "display_only",
             effectiveEdition: "standard",
             authorizationSource: "personal_auth",
             authorizationPublicId: "personal_auth_public_123",
@@ -153,6 +154,7 @@ describe("effective authorization service", () => {
           {
             profession: "monopoly",
             level: 3,
+            contextDisplayStatus: "display_only",
             effectiveEdition: "standard",
             authorizationSource: "org_auth",
             authorizationPublicId: "org_auth_public_456",
@@ -167,6 +169,77 @@ describe("effective authorization service", () => {
         ],
       },
     });
+  });
+
+  it("builds org advanced display contexts without leaking sensitive source fields", async () => {
+    const plaintextRedeemCode = "plain-redeem-code-value";
+    const rawProviderPayload = "raw-provider-payload";
+    const rawPrompt = "raw-prompt-value";
+    const connectionLocator = "sensitive-connection-locator";
+    const credentialMarker = "sensitive-credential-marker";
+    const sessionMarker = "sensitive-session-marker";
+    const authorizationService = createEffectiveAuthorizationService(
+      createRepository({
+        async listPersonalAuthsByUserPublicId() {
+          return [];
+        },
+        async listOrgAuthsByUserPublicId() {
+          return [
+            createOrgAuth({
+              effective_edition: "advanced",
+              plaintextRedeemCode,
+              rawProviderPayload,
+              rawPrompt,
+              connectionLocator,
+              credentialMarker,
+              sessionMarker,
+            } as Partial<EffectiveOrgAuthRowFixture>),
+          ];
+        },
+      }),
+      clock,
+      {
+        isProductionEnablementConfigured: true,
+      },
+    );
+
+    const response = await authorizationService.listEffectiveAuthorizations({
+      userPublicId: "employee_public_123",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(response).toMatchObject({
+      code: 0,
+      data: {
+        authorizationContexts: [
+          {
+            contextDisplayStatus: "display_only",
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            authorizationPublicId: "org_auth_public_456",
+            ownerType: "organization",
+            ownerPublicId: "org_city_123",
+            organizationPublicId: "org_city_123",
+            quotaOwnerType: "organization",
+            quotaOwnerPublicId: "org_city_123",
+            capabilities: {
+              ...disabledCapabilities,
+              canCreateOrganizationTraining: true,
+              canAnswerOrganizationTraining: true,
+              canViewOrganizationTrainingSummary: true,
+            },
+            blockedReason: null,
+          },
+        ],
+      },
+    });
+    expect(serializedResponse).not.toMatch(/"id":/);
+    expect(serializedResponse).not.toContain(plaintextRedeemCode);
+    expect(serializedResponse).not.toContain(rawProviderPayload);
+    expect(serializedResponse).not.toContain(rawPrompt);
+    expect(serializedResponse).not.toContain(connectionLocator);
+    expect(serializedResponse).not.toContain(credentialMarker);
+    expect(serializedResponse).not.toContain(sessionMarker);
   });
 
   it("excludes expired, cancelled, disabled, and not-yet-started authorization sources", async () => {
