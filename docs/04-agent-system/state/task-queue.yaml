@@ -2682,7 +2682,7 @@ tasks:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-low-risk-product-code-queue-drain.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-low-risk-product-code-queue-drain.md
-    status: ready_for_closeout
+    status: closed
     retryCount: 0
 
   - id: batch-114-personal-learning-ai-local-e2e-smoke-planning
