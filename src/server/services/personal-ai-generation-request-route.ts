@@ -7,6 +7,7 @@ import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
 } from "./route-error-response";
+import { buildPersonalAiGenerationLocalBrowserExperienceReadModel } from "./personal-ai-generation-local-browser-experience-service";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -51,6 +52,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function shouldReturnLocalBrowserExperience(input: unknown): boolean {
+  return isRecord(input) && input.responseMode === "local_browser_experience";
+}
+
 function createRequestInputWithUserContext(
   input: unknown,
   userContext: PersonalAiGenerationRequestUserContext,
@@ -77,13 +82,21 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             return createJsonResponse(userContext);
           }
 
-          return createJsonResponse(
-            buildPersonalAiGenerationRequestReadModel(
-              createRequestInputWithUserContext(
-                await readRequestJson(request),
-                userContext,
+          const requestInput = createRequestInputWithUserContext(
+            await readRequestJson(request),
+            userContext,
+          );
+
+          if (shouldReturnLocalBrowserExperience(requestInput)) {
+            return createJsonResponse(
+              buildPersonalAiGenerationLocalBrowserExperienceReadModel(
+                requestInput,
               ),
-            ),
+            );
+          }
+
+          return createJsonResponse(
+            buildPersonalAiGenerationRequestReadModel(requestInput),
           );
         },
       ),

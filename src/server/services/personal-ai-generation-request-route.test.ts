@@ -33,6 +33,33 @@ function createBaseBody() {
   };
 }
 
+function createBaseFlowBody() {
+  return {
+    ...createBaseBody(),
+    responseMode: "local_browser_experience",
+    taskPublicId: "ai_generation_task_public_route_123",
+    taskType: "ai_question_generation",
+    actorPublicId: userContext.userPublicId,
+    authorizationSource: "personal_auth",
+    ownerType: "personal",
+    ownerPublicId: userContext.userPublicId,
+    organizationPublicId: null,
+    quotaOwnerType: "personal",
+    quotaOwnerPublicId: userContext.userPublicId,
+    effectiveEdition: "advanced",
+    isAuthorizationActive: true,
+    isScopeAllowed: true,
+    isQuotaAvailable: true,
+    isRuntimeConfigReady: true,
+    idempotencyKeyHash: "sha256:personal_generation_route_123",
+    existingTaskPublicId: null,
+    existingTaskStatus: null,
+    resultPublicId: null,
+    evidenceStatus: "none",
+    citationCount: 0,
+  };
+}
+
 function createPostRequest(body: Record<string, unknown>): Request {
   return new Request(
     "http://localhost/api/v1/personal-ai-generation-requests",
@@ -96,6 +123,59 @@ describe("personal AI generation request route handlers", () => {
       code: 401001,
       message: "User session is required.",
       data: null,
+    });
+  });
+
+  it("returns the local browser experience contract when requested", async () => {
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        runtimeStatus: "local_contract_only",
+        experienceSurface: "student_local_browser",
+        flowStatus: "accepted",
+        redactionStatus: "redacted",
+        requestState: {
+          status: "ready",
+          selectedContext: {
+            contextType: "paper",
+            contextPublicId: "paper_public_123",
+          },
+          action: {
+            actionType: "submit_personal_ai_generation_request",
+            isEnabled: true,
+            disabledReason: null,
+          },
+        },
+        resultState: {
+          status: "pending",
+          taskPublicId: "ai_generation_task_public_route_123",
+          resultPublicId: null,
+          contentVisibility: "summary_only",
+          evidenceStatus: "none",
+          citationCount: 0,
+          redactionStatus: "redacted",
+        },
+        stateCoverage: {
+          loadingState: "supported",
+          emptyState: "supported",
+          errorState: "supported",
+          permissionBlockedState: "supported",
+        },
+        requestFlow: {
+          request: {
+            userPublicId: "resolver_user_public_123",
+          },
+        },
+      },
     });
   });
 

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: seed-next-personal-learning-ai-product-tasks
-updatedAt: "2026-06-12T11:38:52-07:00"
+currentPhase: batch-123-personal-learning-ai-api-route-local-contract-bridge
+updatedAt: "2026-06-12T11:50:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,14 +269,14 @@ repository:
   lastKnownMasterSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
   lastKnownOriginMasterSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
 currentTask:
-  id: seed-next-personal-learning-ai-product-tasks
+  id: batch-123-personal-learning-ai-api-route-local-contract-bridge
   status: closed
-  sourceStory: user-request-2026-06-12-next-personal-learning-ai-product-tasks
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
-  branch: codex/seed-next-personal-learning-ai-product-tasks
-  commitSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
+  sourceStory: personal-learning-ai-experience
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+  branch: codex/batch-123-personal-learning-ai-api-route-local-contract-bridge
+  commitSha: 24b0edd32e8217f524eb00a184abfc10a79f0a32
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,10 +293,10 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_seed_next_personal_learning_ai_product_tasks
+    readiness: pass_batch_123_personal_learning_ai_api_route_local_contract_bridge
     lint: pass
     typecheck: pass
-    unit: pass_243_files_868_tests
+    unit: pass_243_files_869_tests
     build: pass
     e2e: not_run_docs_state_only
     preCommitHook: pass
@@ -316,8 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Next personal-learning-ai product tasks are seeded. After this docs/state-only seed task is merged and pushed,
-    reclaim from master and start the first pending task, batch-123-personal-learning-ai-api-route-local-contract-bridge,
-    on its own short branch. Keep provider, env/secret, schema/migration, dependency, deploy, payment, external-service,
-    PR, force-push, formal generated-content write paths, and Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+    Batch-123 local API route/route-service bridge is closed after validation. After merge and push, reclaim from master
+    before starting the next pending task, batch-124-personal-learning-ai-student-local-request-entry-ui. Batch-124
+    touches student UI and therefore must run the declared focused unit, lint, typecheck, unit, build, git diff,
+    test:e2e -- --list, and test:e2e gates. Keep provider, env/secret, schema/migration, dependency, deploy, payment,
+    external-service, PR, force-push, formal generated-content write paths, and Cost Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md

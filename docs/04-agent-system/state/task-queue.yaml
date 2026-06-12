@@ -5101,7 +5101,7 @@ tasks:
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: pending
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -5168,7 +5168,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-124-personal-learning-ai-student-local-request-entry-ui
     title: Add student local personal learning AI request entry UI
