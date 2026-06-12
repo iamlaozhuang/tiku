@@ -22,7 +22,7 @@ import type {
   RedeemCodeRedemptionDto,
 } from "@/server/contracts/authorization-contract";
 import type { AuthContextDto } from "@/server/contracts/auth-contract";
-import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/server/contracts/contact-config-contract";
+import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "@/lib/local-purchase-guidance-contact-config";
 import type {
   AuthorizationListItemDto,
   EffectiveAuthorizationDto,
@@ -430,9 +430,9 @@ export function StudentProfilePage() {
     let isActive = true;
 
     async function loadProfile() {
-      const token = getStoredStudentSessionToken();
+      const storedSessionToken = getStoredStudentSessionToken();
 
-      if (token === null) {
+      if (storedSessionToken === null) {
         if (isActive) {
           setLoadState("unauthorized");
         }
@@ -442,12 +442,15 @@ export function StudentProfilePage() {
       try {
         const [sessionResponse, authorizationResponse, personalAuthResponse] =
           await Promise.all([
-            fetchApi<AuthContextDto>("/api/v1/sessions", token),
+            fetchApi<AuthContextDto>("/api/v1/sessions", storedSessionToken),
             fetchApi<EffectiveAuthorizationListDto>(
               "/api/v1/authorizations",
-              token,
+              storedSessionToken,
             ),
-            fetchApi<PersonalAuthListDto>("/api/v1/personal-auths", token),
+            fetchApi<PersonalAuthListDto>(
+              "/api/v1/personal-auths",
+              storedSessionToken,
+            ),
           ]);
 
         if (!isActive) {
@@ -613,9 +616,9 @@ export function StudentRedeemCodePage() {
     let isActive = true;
 
     async function loadPersonalAuths() {
-      const token = getStoredStudentSessionToken();
+      const storedSessionToken = getStoredStudentSessionToken();
 
-      if (token === null) {
+      if (storedSessionToken === null) {
         if (isActive) {
           setLoadState("unauthorized");
         }
@@ -624,8 +627,11 @@ export function StudentRedeemCodePage() {
 
       try {
         const [sessionResponse, personalAuthResponse] = await Promise.all([
-          fetchApi<AuthContextDto>("/api/v1/sessions", token),
-          fetchApi<PersonalAuthListDto>("/api/v1/personal-auths", token),
+          fetchApi<AuthContextDto>("/api/v1/sessions", storedSessionToken),
+          fetchApi<PersonalAuthListDto>(
+            "/api/v1/personal-auths",
+            storedSessionToken,
+          ),
         ]);
 
         if (!isActive) {
@@ -650,7 +656,7 @@ export function StudentRedeemCodePage() {
           return;
         }
 
-        setSessionToken(token);
+        setSessionToken(storedSessionToken);
         setPersonalAuths(personalAuthResponse.data.personalAuths);
         setLoadState("ready");
       } catch {

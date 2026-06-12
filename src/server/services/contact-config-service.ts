@@ -3,8 +3,8 @@ import {
   createErrorResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import { LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG } from "../../lib/local-purchase-guidance-contact-config";
 import {
-  LOCAL_PURCHASE_GUIDANCE_CONTACT_CONFIG,
   type ContactConfigChannelDto,
   type PurchaseGuidanceContactConfigDto,
   type PurchaseGuidanceContactConfigResultDto,
