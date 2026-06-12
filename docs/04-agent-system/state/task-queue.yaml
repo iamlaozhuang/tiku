@@ -4593,3 +4593,68 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
     status: closed
     retryCount: 0
+  - id: validation-l5-fresh-playwright-existing-specs
+    title: Validate existing Playwright specs with fresh local server
+    phase: validation-l5-fresh-playwright-existing-specs
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - fix-unit-gate-student-authorization-context-contract
+    taskPlanPolicy: required_before_validation
+    humanApproval: >-
+      User explicitly requested on 2026-06-12 that only after the unit gate is green, a separate L5 local e2e validation
+      task should run existing Playwright specs using the fresh Playwright server behavior. Scope is limited to local
+      e2e list/run commands and redacted validation evidence. No dependency/package/lockfile, schema/migration,
+      env/secret, provider, deploy, payment, external-service, PR, force-push, test:e2e:ui, headed/debug browser mode,
+      or Cost Calibration Gate work is approved.
+    validationProfile: L5-local-e2e
+    localFullLoopGate: L5
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: validation_only
+    moduleRunVersion: 2
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      freshPlaywrightServer: required
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+      - docs/05-execution-logs/evidence/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+    status: closed
+    result: pass_after_retry_with_documented_409311_first_run
+    retryCount: 0
