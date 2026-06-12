@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: validation-l5-fresh-playwright-existing-specs
-updatedAt: "2026-06-12T08:35:51-07:00"
+currentPhase: fix-local-business-flow-mock-exam-isolation
+updatedAt: "2026-06-12T08:58:11-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7eb26454286bb856503c0d9896e7bde80359ec6e
-  lastKnownOriginMasterSha: 7eb26454286bb856503c0d9896e7bde80359ec6e
+  lastKnownMasterSha: 1f541bd9c437185d836ede65f67a91750b023358
+  lastKnownOriginMasterSha: 1f541bd9c437185d836ede65f67a91750b023358
 currentTask:
-  id: validation-l5-fresh-playwright-existing-specs
+  id: fix-local-business-flow-mock-exam-isolation
   status: closed
   sourceStory: health-audit-local-baseline
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
-  branch: codex/validation-l5-fresh-playwright-existing-specs
-  commitSha: pending_l5_e2e_validation_commit
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+  branch: codex/fix-local-business-flow-mock-exam-isolation
+  commitSha: pending_e2e_hardening_commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_l5_local_e2e_after_retry_with_residual_flake_risk
+    readiness: pass_l5_first_run_e2e_after_p1_hardening
     lint: pass
     typecheck: pass
     unit: pass
     build: pass
-    e2e: pass_after_retry
+    e2e: pass_first_run_full_suite
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,8 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    L5 local e2e validation completed with a documented first-run local-business-flow 409311 transient and a full-suite
-    rerun pass. Next recommended work is a separate P1 hardening task for local-business-flow mock_exam data isolation or
-    state reset so first-run L5 evidence is deterministic. Keep provider, env/secret, schema/migration, dependency,
+    P1 local-business-flow mock_exam isolation hardening passed focused unit, focused e2e, and first-run fresh-server
+    full e2e. Next recommended work is either a lightweight e2e flake monitor/recheck batch or moving back to the next
+    pending product task with the full local gates as baseline. Keep provider, env/secret, schema/migration, dependency,
     deploy, payment, external-service, PR, force-push, and Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-fix-local-business-flow-mock-exam-isolation.md

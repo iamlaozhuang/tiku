@@ -4658,3 +4658,72 @@ tasks:
     status: closed
     result: pass_after_retry_with_documented_409311_first_run
     retryCount: 0
+  - id: fix-local-business-flow-mock-exam-isolation
+    title: Harden local-business-flow mock_exam isolation for first-run L5
+    phase: e2e-hardening
+    sourceStory: health-audit-local-baseline
+    dependencies:
+      - validation-l5-fresh-playwright-existing-specs
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User explicitly requested on 2026-06-12 to open a separate P1 e2e hardening task for local-business-flow
+      mock_exam state isolation/reset so fresh-server full e2e is first-run green. Scope is limited to the existing
+      local-business-flow e2e hardening surface, docs/state queue tracking, redacted evidence, and local validation.
+      No dependency/package/lockfile, schema/migration, env/secret, provider, deploy, payment, external-service, PR,
+      force-push, headed/debug/UI e2e, or Cost Calibration Gate work is approved.
+    validationProfile: P1-e2e-hardening
+    localFullLoopGate: L5
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    taskKind: e2e_hardening
+    moduleRunVersion: 2
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      freshPlaywrightServer: required
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - e2e/local-business-flow.spec.ts
+      - e2e/local-business-flow-mock-exam-isolation.ts
+      - tests/unit/local-business-flow-mock-exam-isolation.test.ts
+      - docs/05-execution-logs/task-plans/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+      - docs/05-execution-logs/evidence/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - e2e_hardening
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/local-business-flow-mock-exam-isolation.test.ts
+      - npm.cmd run test:unit
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run build
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+    status: closed
+    result: first_run_fresh_server_full_e2e_pass
+    retryCount: 0

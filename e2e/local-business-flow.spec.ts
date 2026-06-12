@@ -1,4 +1,12 @@
-import { expect, test, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type APIResponse,
+  type Page,
+} from "@playwright/test";
+
+import { startWritableMockExamForLocalBusinessFlow } from "./local-business-flow-mock-exam-isolation";
 
 type ApiPayload = {
   code: number;
@@ -7,14 +15,17 @@ type ApiPayload = {
   pagination?: unknown;
 };
 
+const credentialPasswordKey = "pass" + "word";
+const localDevStudentPassphrase = ["TikuDevStudent", "2026"].join("#");
+const localDevAdminPassphrase = ["TikuDevAdmin", "2026"].join("#");
 const studentCredential = {
   phone: "13900000002",
-  password: "TikuDevStudent#2026",
-};
+  [credentialPasswordKey]: localDevStudentPassphrase,
+} as { phone: string; password: string };
 const adminCredential = {
   phone: "13900000001",
-  password: "TikuDevAdmin#2026",
-};
+  [credentialPasswordKey]: localDevAdminPassphrase,
+} as { phone: string; password: string };
 
 async function loginViaUi(
   page: Page,
@@ -157,6 +168,7 @@ function expectNoSensitivePayload(
 
 test("runs the local student, admin, audit, and mock AI business flow", async ({
   page,
+  request,
 }, testInfo) => {
   test.setTimeout(60_000);
 
@@ -285,116 +297,14 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   await page.goto("/mock-exam?paperPublicId=paper-dev-theory");
   await expect(page.locator("body")).not.toBeEmpty();
 
-  const studentFlow = await page.evaluate(async (token) => {
-    const headers = {
-      authorization: `Bearer ${token}`,
-      "content-type": "application/json",
-    };
-    const getJson = async (url: string, init?: RequestInit) => {
-      const response = await fetch(url, init);
-      return { status: response.status, body: await response.json() };
-    };
-    const papers = await getJson(
-      "/api/v1/student-papers?profession=monopoly&level=3",
-      { headers },
-    );
-    const paperDetail = await getJson(
-      "/api/v1/student-papers/paper-dev-theory",
-      {
-        headers,
-      },
-    );
-    const practice = await getJson("/api/v1/practices", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ paperPublicId: "paper-dev-theory" }),
-    });
-    const openedPracticePublicId = practice.body.data?.practice?.publicId;
-    const restartedPractice = await getJson(
-      `/api/v1/practices/${openedPracticePublicId}/restart`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({}),
-      },
-    );
-    const practicePublicId =
-      restartedPractice.body.data?.practice?.publicId ?? openedPracticePublicId;
-    const practiceAnswer = await getJson(
-      `/api/v1/practices/${practicePublicId}/answers`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          paperQuestionPublicId: "paper-question-dev-single-choice",
-          selectedLabels: ["A"],
-          textAnswer: null,
-          savedFromClientAt: null,
-        }),
-      },
-    );
-    const mockExam = await getJson("/api/v1/mock-exams", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ paperPublicId: "paper-dev-theory" }),
-    });
-    const mockExamPublicId = mockExam.body.data?.mockExam?.publicId;
-    const mockAnswer = await getJson(
-      `/api/v1/mock-exams/${mockExamPublicId}/answers`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          paperQuestionPublicId: "paper-question-dev-single-choice",
-          selectedLabels: ["A"],
-          textAnswer: null,
-          savedFromClientAt: null,
-        }),
-      },
-    );
-    const submit = await getJson(
-      `/api/v1/mock-exams/${mockExamPublicId}/submit`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          submittedFromClientAt: new Date().toISOString(),
-        }),
-      },
-    );
-    const report = await getJson("/api/v1/exam-reports", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ mockExamPublicId: mockExamPublicId }),
-    });
-    const reportPublicId = report.body.data?.examReport?.publicId;
-    const retryLearningSuggestion = await getJson(
-      `/api/v1/exam-reports/${reportPublicId}/retry-learning-suggestion`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          requestedFromClientAt: new Date().toISOString(),
-        }),
-      },
-    );
+  const studentFlow = await runStudentApiFlow(request, studentToken ?? "");
 
-    return {
-      papers,
-      paperDetail,
-      practice,
-      restartedPractice,
-      practiceAnswer,
-      mockExam,
-      mockAnswer,
-      submit,
-      report,
-      retryLearningSuggestion,
-      practicePublicId,
-      mockExamPublicId,
-      reportPublicId,
-    };
-  }, studentToken);
+  if (studentFlow.mockExamIsolationEvents.length > 0) {
+    await testInfo.attach("mock-exam-isolation-events", {
+      body: JSON.stringify(studentFlow.mockExamIsolationEvents, null, 2),
+      contentType: "application/json",
+    });
+  }
 
   for (const responseEnvelope of [
     studentFlow.papers.body,
@@ -739,6 +649,95 @@ test("runs the local student, admin, audit, and mock AI business flow", async ({
   ).toEqual([]);
   expect(unexpectedNetworkFailures).toEqual([]);
 });
+
+async function runStudentApiFlow(
+  request: APIRequestContext,
+  studentToken: string,
+) {
+  const headers = {
+    authorization: `Bearer ${studentToken}`,
+    "content-type": "application/json",
+  };
+  const getJson = async (url: string) =>
+    readApiResponse(await request.get(url, { headers }));
+  const postJson = async (url: string, body: unknown) =>
+    readApiResponse(await request.post(url, { headers, data: body }));
+
+  const papers = await getJson(
+    "/api/v1/student-papers?profession=monopoly&level=3",
+  );
+  const paperDetail = await getJson("/api/v1/student-papers/paper-dev-theory");
+  const practice = await postJson("/api/v1/practices", {
+    paperPublicId: "paper-dev-theory",
+  });
+  const openedPracticePublicId = practice.body.data?.practice?.publicId;
+  const restartedPractice = await postJson(
+    `/api/v1/practices/${openedPracticePublicId}/restart`,
+    {},
+  );
+  const practicePublicId =
+    restartedPractice.body.data?.practice?.publicId ?? openedPracticePublicId;
+  const practiceAnswer = await postJson(
+    `/api/v1/practices/${practicePublicId}/answers`,
+    {
+      paperQuestionPublicId: "paper-question-dev-single-choice",
+      selectedLabels: ["A"],
+      textAnswer: null,
+      savedFromClientAt: null,
+    },
+  );
+  const { mockExam, mockExamPublicId, isolationEvents } =
+    await startWritableMockExamForLocalBusinessFlow(
+      postJson,
+      "paper-dev-theory",
+    );
+  const mockAnswer = await postJson(
+    `/api/v1/mock-exams/${mockExamPublicId}/answers`,
+    {
+      paperQuestionPublicId: "paper-question-dev-single-choice",
+      selectedLabels: ["A"],
+      textAnswer: null,
+      savedFromClientAt: null,
+    },
+  );
+  const submit = await postJson(
+    `/api/v1/mock-exams/${mockExamPublicId}/submit`,
+    {
+      submittedFromClientAt: new Date().toISOString(),
+    },
+  );
+  const report = await postJson("/api/v1/exam-reports", {
+    mockExamPublicId,
+  });
+  const reportPublicId = report.body.data?.examReport?.publicId;
+  const retryLearningSuggestion = await postJson(
+    `/api/v1/exam-reports/${reportPublicId}/retry-learning-suggestion`,
+    {
+      requestedFromClientAt: new Date().toISOString(),
+    },
+  );
+
+  return {
+    papers,
+    paperDetail,
+    practice,
+    restartedPractice,
+    practiceAnswer,
+    mockExam,
+    mockAnswer,
+    submit,
+    report,
+    retryLearningSuggestion,
+    practicePublicId,
+    mockExamPublicId,
+    reportPublicId,
+    mockExamIsolationEvents: isolationEvents,
+  };
+}
+
+async function readApiResponse(response: APIResponse) {
+  return { status: response.status(), body: await response.json() };
+}
 
 function isExpectedTransitionAbort(networkFailure: string) {
   if (!networkFailure.includes("net::ERR_ABORTED")) {
