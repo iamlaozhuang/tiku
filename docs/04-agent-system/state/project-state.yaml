@@ -1,7 +1,7 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-119-personal-learning-ai-personal-generation-request-flow
+currentPhase: batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
 updatedAt: "2026-06-12T12:00:00-07:00"
 architecture:
   status: complete
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3f6134b8608f6248fc5006fb0bf031ea2cc88317
-  lastKnownOriginMasterSha: 3f6134b8608f6248fc5006fb0bf031ea2cc88317
+  lastKnownMasterSha: 90759b089c488b732d486da1163652e68da1faf4
+  lastKnownOriginMasterSha: 90759b089c488b732d486da1163652e68da1faf4
 currentTask:
-  id: batch-119-personal-learning-ai-personal-generation-request-flow
+  id: batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
-  branch: codex/batch-119-personal-learning-ai-personal-generation-request-flow
-  commitSha: 7c1833bdf0cea0505dba9b9477119904a2c35e39
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  branch: codex/batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+  commitSha: 84ad14fddbbaa8e68e1f0d3a46f18e14e52632e0
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_119_local_implementation
+    readiness: pass_batch_120_pre_edit_readiness
     lint: pass
     typecheck: pass
-    unit: pass_241_files_861_tests
+    unit: pass_241_files_862_tests
     build: pass
-    e2e: not_run_batch119_not_in_scope
+    e2e: pass_27_tests
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,7 +316,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Start batch-120 personal-learning-ai paper and mock_exam context selection from master after batch-119
-    is fast-forward merged and pushed. Keep provider, env/secret, schema/migration, dependency, deploy,
-    payment, external-service, PR, force-push, and Cost Calibration Gate blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
+    Start batch-121 personal-learning-ai local UI/browser experience from master after batch-120 is fast-forward merged
+    and pushed. Keep provider, env/secret, schema/migration, dependency, deploy, payment, external-service, PR,
+    force-push, and Cost Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md

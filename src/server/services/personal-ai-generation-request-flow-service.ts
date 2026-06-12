@@ -16,6 +16,7 @@ import {
 } from "../models/personal-ai-generation-result-reference";
 import { normalizePersonalAiGenerationRequestFlowInput } from "../validators/personal-ai-generation-request-flow";
 import { buildAiGenerationTaskRequestPolicyReadModel } from "./ai-generation-task-request-service";
+import { buildPersonalAiGenerationRequestContextReadModel } from "./personal-ai-generation-request-context-service";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
 import { buildPersonalAiGenerationResultReferenceReadModel } from "./personal-ai-generation-result-reference-service";
 
@@ -83,6 +84,9 @@ export function buildPersonalAiGenerationRequestFlowReadModel(
   const request = buildPersonalAiGenerationRequestReadModel(
     requestFlowInput.value.requestInput,
   );
+  const contextSelection = buildPersonalAiGenerationRequestContextReadModel(
+    requestFlowInput.value.requestInput,
+  );
   const taskRequest = buildAiGenerationTaskRequestPolicyReadModel(
     requestFlowInput.value.taskRequestInput,
   );
@@ -90,6 +94,8 @@ export function buildPersonalAiGenerationRequestFlowReadModel(
   if (
     request.code !== 0 ||
     request.data === null ||
+    contextSelection.code !== 0 ||
+    contextSelection.data === null ||
     taskRequest.code !== 0 ||
     taskRequest.data === null
   ) {
@@ -120,6 +126,7 @@ export function buildPersonalAiGenerationRequestFlowReadModel(
     flowStatus,
     redactionStatus: "redacted",
     request: request.data,
+    contextSelection: contextSelection.data,
     taskRequest: taskRequest.data,
     resultReference: resultReference.data,
   });

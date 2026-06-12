@@ -87,6 +87,22 @@ describe("personal AI generation request flow service", () => {
             redactionStatus: "redacted",
           },
         },
+        contextSelection: {
+          userPublicId: "student_public_119",
+          authorizationBoundary: {
+            authorizationSource: "personal_auth",
+            authorizationPublicId: "personal_auth_public_119",
+            ownerType: "personal",
+            quotaOwnerType: "personal",
+          },
+          aiFuncType: "explanation",
+          runtimeStatus: "local_contract_only",
+          selectedContext: {
+            contextType: "paper",
+            contextPublicId: "paper_public_119",
+          },
+          redactionStatus: "redacted",
+        },
         taskRequest: {
           runtimeStatus: "local_contract_only",
           decision: "create_pending_task",
@@ -149,6 +165,37 @@ describe("personal AI generation request flow service", () => {
     expect(serializedResult).not.toContain(input.omittedPaperFixture);
   });
 
+  it("builds a mock_exam context selection at the flow level", () => {
+    expect(
+      buildPersonalAiGenerationRequestFlowReadModel({
+        ...createBaseInput(),
+        paperPublicId: null,
+        mockExamPublicId: "mock_exam_public_119",
+      }),
+    ).toMatchObject({
+      code: 0,
+      data: {
+        flowStatus: "accepted",
+        request: {
+          generationContext: {
+            paperPublicId: null,
+            mockExamPublicId: "mock_exam_public_119",
+            selectedContext: {
+              contextType: "mock_exam",
+              contextPublicId: "mock_exam_public_119",
+            },
+          },
+        },
+        contextSelection: {
+          selectedContext: {
+            contextType: "mock_exam",
+            contextPublicId: "mock_exam_public_119",
+          },
+        },
+      },
+    });
+  });
+
   it("maps an idempotent existing task to a reused personal flow", () => {
     expect(
       buildPersonalAiGenerationRequestFlowReadModel({
@@ -181,6 +228,17 @@ describe("personal AI generation request flow service", () => {
   });
 
   it("rejects non-personal generation boundaries before provider execution", () => {
+    expect(
+      buildPersonalAiGenerationRequestFlowReadModel({
+        ...createBaseInput(),
+        mockExamPublicId: "mock_exam_public_119",
+      }),
+    ).toEqual({
+      code: 400015,
+      message: "Invalid personal AI generation request flow input.",
+      data: null,
+    });
+
     expect(
       buildPersonalAiGenerationRequestFlowReadModel({
         ...createBaseInput(),

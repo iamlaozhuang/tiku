@@ -3868,6 +3868,7 @@ tasks:
       - phase-71-advanced-personal-ai-generation-implementation-planning
       - fix-phase-71-personal-ai-generation-auto-seed-anchors
     taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
     humanApproval: >-
       autoDriveLocalImplementationApproval: user-approved controlled auto-seed for module personal-learning-ai low-risk local implementation tasks only; standingUnattendedLocalCloseoutApproval: user-approved unattended local low-risk implementation closeout after all repository gates pass, including local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking; High-risk capability gates remain blocked unless separately approved
     autoDriveLocalImplementationApproval: >-
@@ -3936,7 +3937,7 @@ tasks:
       schemaMigration: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -3969,24 +3970,39 @@ tasks:
       - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
       - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-flow-service.test.ts
+      - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
         command: npm.cmd run typecheck
       - phase: post_edit
+        command: npm.cmd run test:unit
+      - phase: post_edit
+        command: npm.cmd run build
+      - phase: post_edit
         command: git diff --check
+      - phase: post_edit
+        command: npm.cmd run test:e2e -- --list
+      - phase: post_edit
+        command: npm.cmd run test:e2e
       - phase: advisory_baseline
         command: npm.cmd run test -- --run focused # focused test anchor
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-71-advanced-personal-ai-generation-implementation-planning -CandidateTaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-flow-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
       - git diff --check
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
-    evidencePath: docs/05-execution-logs/evidence/batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
-    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
-    status: pending
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    status: closed
     retryCount: 0
   - id: batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
     title: Module Run v2 personal-learning-ai implementation seed

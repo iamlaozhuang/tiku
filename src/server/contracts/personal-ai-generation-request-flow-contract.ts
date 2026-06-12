@@ -1,5 +1,8 @@
 import type { AiGenerationTaskRequestPolicyDto } from "./ai-generation-task-request-contract";
-import type { PersonalAiGenerationRequestDto } from "./personal-ai-generation-request-contract";
+import type {
+  PersonalAiGenerationRequestContextDto,
+  PersonalAiGenerationRequestDto,
+} from "./personal-ai-generation-request-contract";
 import type { PersonalAiGenerationResultReferenceDto } from "./personal-ai-generation-result-reference-contract";
 import type {
   PersonalAiGenerationRequestFlowRuntimeStatus,
@@ -11,6 +14,7 @@ export type PersonalAiGenerationRequestFlowDto = {
   flowStatus: PersonalAiGenerationRequestFlowStatus;
   redactionStatus: "redacted";
   request: PersonalAiGenerationRequestDto;
+  contextSelection: PersonalAiGenerationRequestContextDto;
   taskRequest: AiGenerationTaskRequestPolicyDto;
   resultReference: PersonalAiGenerationResultReferenceDto;
 };
