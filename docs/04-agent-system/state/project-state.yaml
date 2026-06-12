@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-project-state-sha-sync-after-batch-122
-updatedAt: "2026-06-12T11:25:46-07:00"
+currentPhase: seed-next-personal-learning-ai-product-tasks
+updatedAt: "2026-06-12T11:38:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5774064b2e30acff2fc3066abf290a061851453b
-  lastKnownOriginMasterSha: b6f81531c5136f6785062a1b1d8c56ffa923aca6
+  lastKnownMasterSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
+  lastKnownOriginMasterSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
 currentTask:
-  id: fix-project-state-sha-sync-after-batch-122
+  id: seed-next-personal-learning-ai-product-tasks
   status: closed
-  sourceStory: user-request-2026-06-12-governance-detail-repair
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
-  branch: codex/fix-project-state-sha-sync-after-batch-122
-  commitSha: 5774064b2e30acff2fc3066abf290a061851453b
+  sourceStory: user-request-2026-06-12-next-personal-learning-ai-product-tasks
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+  branch: codex/seed-next-personal-learning-ai-product-tasks
+  commitSha: 01788105fc4c43f0b3946a17444660a3bd3ce902
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,7 +293,7 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_project_state_sha_sync_after_batch_122
+    readiness: pass_seed_next_personal_learning_ai_product_tasks
     lint: pass
     typecheck: pass
     unit: pass_243_files_868_tests
@@ -316,9 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Project-state repository checkpoints are synchronized to the accepted post-batch-122 master baseline. No pending
-    personal-learning-ai seeded implementation tasks remain in the active queue after batch-122 closeout. Before further
-    product work, choose a fresh scoped queued task or seed the next roadmap unit. Keep provider, env/secret,
-    schema/migration, dependency, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate blocked
-    unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+    Next personal-learning-ai product tasks are seeded. After this docs/state-only seed task is merged and pushed,
+    reclaim from master and start the first pending task, batch-123-personal-learning-ai-api-route-local-contract-bridge,
+    on its own short branch. Keep provider, env/secret, schema/migration, dependency, deploy, payment, external-service,
+    PR, force-push, formal generated-content write paths, and Cost Calibration Gate blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-seed-next-personal-learning-ai-product-tasks.md

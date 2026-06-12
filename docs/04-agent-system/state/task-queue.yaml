@@ -4897,3 +4897,602 @@ tasks:
     status: closed
     result: pass
     retryCount: 0
+  - id: seed-next-personal-learning-ai-product-tasks
+    title: Seed next personal-learning-ai product tasks
+    phase: seed-next-personal-learning-ai-product-tasks
+    sourceStory: user-request-2026-06-12-next-personal-learning-ai-product-tasks
+    dependencies:
+      - fix-project-state-sha-sync-after-batch-122
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+    humanApproval: >-
+      User explicitly requested on 2026-06-12 to first perform a docs/state-only task seed on branch
+      codex/seed-next-personal-learning-ai-product-tasks, then independently advance suitable low-risk
+      personal-learning-ai product tasks. Scope is limited to project state, task queue, task plan, evidence, and audit
+      review. Local commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup are
+      approved after validation passes. No product source, tests, e2e edits, dependency/package/lockfile, schema,
+      migration, env/secret, provider, formal generated-content write path, deploy, payment, external-service, PR,
+      force-push, or Cost Calibration Gate work is approved.
+    validationProfile: docs-state-product-task-seed
+    localFullLoopGate: L2
+    implementationAutoSeedGate: product_task_seed
+    localExperienceClosureGate: personal-learning-ai-experience
+    blockedRemainder:
+      - product implementation remains blocked until a seeded pending task is reclaimed from master
+      - provider/env/secret/schema/migration/dependency/deploy/payment/external-service work remains blocked
+      - formal generated-content write paths remain blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: blocked_without_task_approval
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: approved_read_only_redacted
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: closed
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - docs_state_seed
+      - product_task_definition
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks -CandidateTaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit
+      - phase: post_edit
+        command: npm.cmd run build
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId seed-next-personal-learning-ai-product-tasks
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks -CandidateTaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId seed-next-personal-learning-ai-product-tasks
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: batch-123-personal-learning-ai-api-route-local-contract-bridge
+    title: Bridge personal learning AI local contract to API route
+    phase: batch-123-personal-learning-ai-api-route-local-contract-bridge
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - seed-next-personal-learning-ai-product-tasks
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+    humanApproval: >-
+      autoDriveLocalImplementationApproval: user-approved controlled seed for low-risk personal-learning-ai local
+      implementation tasks from the 2026-06-12 request. localExperienceAcceptanceBridgeApproved: user authorizes this
+      scoped local API route/route-service bridge only. Scope is limited to the existing
+      /api/v1/personal-ai-generation-requests route adapter and route-service test surface plus docs/state/evidence.
+      No dependency/package/lockfile, schema/migration, env/secret, provider call, formal generated-content write path,
+      deploy, payment, external-service, PR, force-push, or Cost Calibration Gate work is approved.
+    autoDriveLocalImplementationApproval: >-
+      User-approved 2026-06-12 next personal-learning-ai seed for low-risk local implementation tasks only; local
+      commit, fast-forward merge to master, push origin/master, and merged short-branch cleanup are approved after all
+      gates pass.
+    localExperienceAcceptanceBridgeApproved: >-
+      User-approved 2026-06-12 bridge task for the existing local API route/route-service contract. This approval does
+      not permit provider calls, persistence, schema/migration, dependency changes, or formal generated-content writes.
+    seededByTask: seed-next-personal-learning-ai-product-tasks
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: API route/local contract bridge
+    behaviorBoundary: personal-learning-ai::api route local contract bridge
+    requirementRefs:
+      - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
+      - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-主观题-ai-提示与重答
+      - docs/02-architecture/adr/adr-002-runtime-architecture-and-multi-client-contract.md
+    useCases:
+      - local student client can post a redacted personal AI generation request through the REST boundary
+      - route returns standard API envelopes and never exposes numeric ids or protected AI payloads
+    acceptanceScenarios:
+      - route merges resolver user context over request body user identity
+      - route can return the local browser experience read-model when requested
+      - unauthorized requests return the standard 401001 envelope with data null
+    nonGoals:
+      - provider calls, persistence, schema/migration, formal generated-content write paths, and UI rendering
+    validationProfile: L4-api-route-contract
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L4
+    blockedRemainder:
+      - student UI remains for the next task
+      - local e2e validation remains for a later task
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    capabilities:
+      localDockerDatabase: blocked_without_task_approval
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: approved_read_only_redacted
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: pending
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/features/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - api_contract
+      - local_validation
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks -CandidateTaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit
+      - phase: post_edit
+        command: npm.cmd run build
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId seed-next-personal-learning-ai-product-tasks -CandidateTaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-123-personal-learning-ai-api-route-local-contract-bridge
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+    status: pending
+    retryCount: 0
+  - id: batch-124-personal-learning-ai-student-local-request-entry-ui
+    title: Add student local personal learning AI request entry UI
+    phase: batch-124-personal-learning-ai-student-local-request-entry-ui
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-123-personal-learning-ai-api-route-local-contract-bridge
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+    humanApproval: >-
+      User explicitly requested the next personal-learning-ai batch and authorized UI/e2e tasks only when
+      task-queue.yaml names allowedFiles. Scope is limited to a local student request-entry UI that calls the approved
+      local route contract and records redacted evidence. No dependency/package/lockfile, schema/migration, env/secret,
+      provider call, formal generated-content write path, deploy, payment, external-service, PR, force-push, or Cost
+      Calibration Gate work is approved.
+    localExperienceAcceptanceBridgeApproved: >-
+      User-approved 2026-06-12 student-side local request entry bridge for explicitly named student UI files and unit
+      tests. Existing local Playwright validation commands are approved as local-only validation evidence for this
+      scoped task.
+    seededByTask: seed-next-personal-learning-ai-product-tasks
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: student-side local request entry UI
+    behaviorBoundary: personal-learning-ai::student local request entry UI
+    requirementRefs:
+      - docs/01-requirements/stories/epic-03-student-experience.md
+      - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
+      - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-主观题-ai-提示与重答
+    useCases:
+      - student can open a local personal AI learning entry from the student experience
+      - entry sends only public ids and selected local context to the local route contract
+      - UI shows loading, empty, error, and permission blocked states
+    acceptanceScenarios:
+      - unit test proves request button posts camelCase public-id payload without exposing session token text
+      - UI renders local contract response summary and explicit blocked state without provider content
+      - full local e2e suite is run because this task touches student flow
+    nonGoals:
+      - real provider execution, persistence, generated content storage, and e2e spec authoring
+    validationProfile: L5-student-ui-local
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      freshPlaywrightServer: required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - redacted result/reference display integration remains for the next task
+      - provider/env/secret/schema/migration/dependency work remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: pending
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/app/(student)/ai-generation/page.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - student_ui
+      - local_browser_flow
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-124-personal-learning-ai-student-local-request-entry-ui
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-124-personal-learning-ai-student-local-request-entry-ui
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-124-personal-learning-ai-student-local-request-entry-ui
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+    status: pending
+    retryCount: 0
+  - id: batch-125-personal-learning-ai-redacted-reference-display-integration
+    title: Integrate redacted personal learning AI result and reference display
+    phase: batch-125-personal-learning-ai-redacted-reference-display-integration
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-124-personal-learning-ai-student-local-request-entry-ui
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+    humanApproval: >-
+      User explicitly requested a redacted result/reference display integration task in the next personal-learning-ai
+      batch. Scope is limited to the named student UI display surface, local route response handling, focused unit tests,
+      and redacted evidence. No dependency/package/lockfile, schema/migration, env/secret, provider call, formal
+      generated-content write path, deploy, payment, external-service, PR, force-push, or Cost Calibration Gate work is
+      approved.
+    localExperienceAcceptanceBridgeApproved: >-
+      User-approved 2026-06-12 student-side redacted result/reference display bridge for explicitly named files and
+      local-only validation commands.
+    seededByTask: seed-next-personal-learning-ai-product-tasks
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: redacted result/reference display integration
+    behaviorBoundary: personal-learning-ai::redacted result reference display
+    requirementRefs:
+      - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-04-客观题-ai-讲解
+      - docs/01-requirements/stories/epic-04-ai-scoring.md#us-04-05-主观题-ai-提示与重答
+      - docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    useCases:
+      - student sees redacted result-reference metadata after a local request
+      - student sees evidence status, citation count, and ai_call_log public reference without raw provider payload
+      - UI handles insufficient evidence and no-reference states with explicit null-aware rendering
+    acceptanceScenarios:
+      - unit test proves result/reference summary renders from camelCase local DTO fields
+      - unit test proves raw prompt, raw generated content, provider payload, numeric ids, and full paper content are absent
+      - full local e2e suite is run because this task touches student flow
+    nonGoals:
+      - real generated content, provider execution, persistence, schema/migration, and new e2e spec authoring
+    validationProfile: L5-student-ui-redacted-reference
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      freshPlaywrightServer: required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - local browser flow validation remains for the next validation-only task
+      - provider/env/secret/schema/migration/dependency work remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: pending
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - student_ui
+      - redacted_reference_display
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-125-personal-learning-ai-redacted-reference-display-integration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-125-personal-learning-ai-redacted-reference-display-integration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-125-personal-learning-ai-redacted-reference-display-integration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+    status: pending
+    retryCount: 0
+  - id: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+    title: Validate personal learning AI local browser flow with existing e2e suite
+    phase: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-125-personal-learning-ai-redacted-reference-display-integration
+    taskPlanPolicy: required_before_validation
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    humanApproval: >-
+      User explicitly requested local browser flow/e2e validation for personal-learning-ai after the route and student UI
+      tasks. Scope is validation-only and limited to docs/state/evidence plus local existing Playwright list/run
+      commands. No product source edits, e2e spec edits, dependency/package/lockfile, schema/migration, env/secret,
+      provider call, deploy, payment, external-service, PR, force-push, headed/debug/browser UI mode, or Cost Calibration
+      Gate work is approved.
+    localExperienceAcceptanceBridgeApproved: >-
+      User-approved 2026-06-12 local browser validation bridge. This task may run local-only existing Playwright
+      validation commands and write redacted evidence only.
+    seededByTask: seed-next-personal-learning-ai-product-tasks
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local browser flow/e2e validation
+    behaviorBoundary: personal-learning-ai::local browser validation
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    useCases:
+      - local browser validation proves the student flow can be exercised without provider calls
+      - validation evidence records only commands, pass/fail, spec counts, and redacted summaries
+    acceptanceScenarios:
+      - e2e list command passes
+      - e2e run command passes or records a hard block without modifying code
+      - lint, typecheck, unit, build, diff, closeout, and pre-push gates pass before closeout
+    nonGoals:
+      - e2e spec authoring, product code changes, provider execution, persistence, deployment, and PR creation
+    validationProfile: L5-local-e2e-validation
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      freshPlaywrightServer: required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - provider/env/secret/schema/migration/dependency work remains blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: pending
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: validation_only
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    status: pending
+    retryCount: 0
