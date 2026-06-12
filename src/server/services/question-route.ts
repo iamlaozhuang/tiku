@@ -1,5 +1,6 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { QuestionService } from "./question-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -40,7 +41,7 @@ function readQuestionQuery(request: Request): Record<string, unknown> {
 }
 
 export function createQuestionRouteHandlers(questionService: QuestionService) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(
@@ -84,5 +85,5 @@ export function createQuestionRouteHandlers(questionService: QuestionService) {
         return createJsonResponse(await questionService.copyQuestion(publicId));
       },
     },
-  };
+  });
 }

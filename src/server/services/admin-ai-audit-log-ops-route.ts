@@ -6,6 +6,7 @@ import type {
   AdminAiAuditLogApiResponse,
   AdminAiAuditLogOpsService,
 } from "./admin-ai-audit-log-ops-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -37,7 +38,7 @@ function readListQuery(request: Request): Partial<AdminAiAuditLogListQuery> {
 export function createAdminAiAuditLogOpsRouteHandlers(
   service: AdminAiAuditLogOpsService,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     modelConfigs: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(
@@ -80,5 +81,5 @@ export function createAdminAiAuditLogOpsRouteHandlers(
         );
       },
     },
-  };
+  });
 }

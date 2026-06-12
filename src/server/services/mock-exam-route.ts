@@ -2,7 +2,10 @@ import {
   createErrorResponse,
   type ApiResponse,
 } from "../contracts/api-response";
-import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlerWithErrorEnvelope,
+  createRouteHandlersWithErrorEnvelope,
+} from "./route-error-response";
 import type { MockExamService, MockExamUserContext } from "./mock-exam-service";
 
 type MockExamRouteContext = {
@@ -50,7 +53,7 @@ export function createMockExamRouteHandlers(
   mockExamService: MockExamService,
   resolveUserContext: MockExamUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async POST(request: Request): Promise<Response> {
         const userContext = await resolveRequiredUserContext(
@@ -187,7 +190,7 @@ export function createMockExamRouteHandlers(
         );
       },
     },
-  };
+  });
 }
 
 export function createUnavailableMockExamUserResolver(): MockExamUserResolver {

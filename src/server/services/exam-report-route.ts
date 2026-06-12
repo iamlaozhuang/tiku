@@ -6,6 +6,7 @@ import type {
   ExamReportService,
   ExamReportUserContext,
 } from "./exam-report-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type ExamReportRouteContext = {
   params: Promise<{
@@ -56,7 +57,7 @@ export function createExamReportRouteHandlers(
   examReportService: ExamReportService,
   resolveUserContext: ExamReportUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async GET(request: Request): Promise<Response> {
         const userContext = await resolveRequiredUserContext(
@@ -141,7 +142,7 @@ export function createExamReportRouteHandlers(
         );
       },
     },
-  };
+  });
 }
 
 export function createUnavailableExamReportUserResolver(): ExamReportUserResolver {

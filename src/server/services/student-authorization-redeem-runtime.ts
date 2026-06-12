@@ -17,6 +17,7 @@ import {
 } from "./redeem-code-route";
 import { createRedeemCodeAuthorizationService } from "./redeem-code-authorization-service";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type StudentAuthorizationRedeemRuntimeOptions =
   StudentAuthorizationRedeemRuntimeRepositoryOptions &
@@ -78,7 +79,7 @@ export function createStudentAuthorizationRedeemRuntimeRouteHandlers(
     createStudentAuthorizationRedeemUserResolver(sessionService);
   const clock = options.now === undefined ? undefined : { now: options.now };
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     authorizations: createEffectiveAuthorizationRouteHandlers(
       createEffectiveAuthorizationService(
         repositories.effectiveAuthorizationRepository,
@@ -102,5 +103,5 @@ export function createStudentAuthorizationRedeemRuntimeRouteHandlers(
         resolveUserContext,
       ),
     },
-  };
+  });
 }

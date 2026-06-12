@@ -1,5 +1,6 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { MaterialService } from "./material-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -35,7 +36,7 @@ function readMaterialQuery(request: Request): Record<string, unknown> {
 }
 
 export function createMaterialRouteHandlers(materialService: MaterialService) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(
@@ -79,5 +80,5 @@ export function createMaterialRouteHandlers(materialService: MaterialService) {
         return createJsonResponse(await materialService.copyMaterial(publicId));
       },
     },
-  };
+  });
 }

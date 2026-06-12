@@ -6,7 +6,10 @@ import type {
   EffectiveAuthorizationService,
   EffectiveAuthorizationUserContext,
 } from "./effective-authorization-service";
-import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlerWithErrorEnvelope,
+  createRouteHandlersWithErrorEnvelope,
+} from "./route-error-response";
 
 export type EffectiveAuthorizationUserResolver = (
   request: Request,
@@ -39,7 +42,7 @@ export function createEffectiveAuthorizationRouteHandlers(
   effectiveAuthorizationService: EffectiveAuthorizationService,
   resolveUserContext: EffectiveAuthorizationUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     GET: createRouteHandlerWithErrorEnvelope(
       async (request: Request): Promise<Response> => {
         const userContext = await resolveRequiredUserContext(
@@ -58,7 +61,7 @@ export function createEffectiveAuthorizationRouteHandlers(
         );
       },
     ),
-  };
+  });
 }
 
 export function createUnavailableEffectiveAuthorizationUserResolver(): EffectiveAuthorizationUserResolver {

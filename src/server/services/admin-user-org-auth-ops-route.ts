@@ -6,6 +6,7 @@ import type {
   AdminOpsApiResponse,
   AdminUserOrgAuthOpsService,
 } from "./admin-user-org-auth-ops-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -37,7 +38,7 @@ function readListQuery(request: Request): Partial<AdminAuthOperationListQuery> {
 export function createAdminUserOrgAuthOpsRouteHandlers(
   service: AdminUserOrgAuthOpsService,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     users: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(
@@ -80,5 +81,5 @@ export function createAdminUserOrgAuthOpsRouteHandlers(
         return createJsonResponse(await service.resetUserPassword(publicId));
       },
     },
-  };
+  });
 }

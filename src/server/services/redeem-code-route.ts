@@ -6,7 +6,10 @@ import type {
   AuthorizationUserContext,
   RedeemCodeAuthorizationService,
 } from "./redeem-code-authorization-service";
-import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlerWithErrorEnvelope,
+  createRouteHandlersWithErrorEnvelope,
+} from "./route-error-response";
 
 export type AuthorizationUserResolver = (
   request: Request,
@@ -47,7 +50,7 @@ export function createRedeemCodeRouteHandlers(
   authorizationService: RedeemCodeAuthorizationService,
   resolveUserContext: AuthorizationUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     POST: createRouteHandlerWithErrorEnvelope(
       async (request: Request): Promise<Response> => {
         const userContext = await resolveRequiredUserContext(
@@ -66,14 +69,14 @@ export function createRedeemCodeRouteHandlers(
         );
       },
     ),
-  };
+  });
 }
 
 export function createPersonalAuthRouteHandlers(
   authorizationService: RedeemCodeAuthorizationService,
   resolveUserContext: AuthorizationUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     GET: createRouteHandlerWithErrorEnvelope(
       async (request: Request): Promise<Response> => {
         const userContext = await resolveRequiredUserContext(
@@ -90,7 +93,7 @@ export function createPersonalAuthRouteHandlers(
         );
       },
     ),
-  };
+  });
 }
 
 export function createUnavailableAuthorizationUserResolver(): AuthorizationUserResolver {

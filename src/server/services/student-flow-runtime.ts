@@ -67,6 +67,7 @@ import {
   type StudentPaperUserResolver,
 } from "./student-paper-route";
 import { createStudentPaperService } from "./student-paper-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type StudentFlowPublicIdPrefix =
   | Parameters<PracticePublicIdFactory["createPublicId"]>[0]
@@ -490,7 +491,7 @@ export function createStudentFlowRuntimeRouteHandlers(
   const createPublicId = options.createPublicId ?? createDefaultPublicId;
   const clock = options.now === undefined ? undefined : { now: options.now };
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     studentPapers: createStudentPaperRouteHandlers(
       createStudentPaperService(repositories.studentPaperRepository),
       resolveUserContext,
@@ -535,5 +536,5 @@ export function createStudentFlowRuntimeRouteHandlers(
       ),
       resolveUserContext,
     ),
-  };
+  });
 }

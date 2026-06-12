@@ -24,7 +24,10 @@ import {
 import { storeLocalPaperAssetFile } from "./local-paper-asset-storage";
 import { createPaperAssetService } from "./paper-asset-service";
 import { createPaperDraftService } from "./paper-draft-service";
-import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlerWithErrorEnvelope,
+  createRouteHandlersWithErrorEnvelope,
+} from "./route-error-response";
 import type { SessionService } from "./session-service";
 
 type RouteContext = {
@@ -369,7 +372,7 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
     });
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     papers: {
       collection: {
         async GET(request: Request): Promise<Response> {
@@ -765,5 +768,5 @@ export function createPaperCompositionLifecycleRuntimeRouteHandlers(
         },
       },
     },
-  };
+  });
 }

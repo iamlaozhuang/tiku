@@ -1,5 +1,6 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { OrganizationAuthService } from "./organization-auth-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -22,7 +23,7 @@ function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
 export function createOrganizationRouteHandlers(
   organizationAuthService: OrganizationAuthService,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     async POST(request: Request): Promise<Response> {
       const input = await readRequestJson(request);
 
@@ -48,13 +49,13 @@ export function createOrganizationRouteHandlers(
         );
       },
     },
-  };
+  });
 }
 
 export function createOrgAuthRouteHandlers(
   organizationAuthService: OrganizationAuthService,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     async POST(request: Request): Promise<Response> {
       const input = await readRequestJson(request);
 
@@ -71,5 +72,5 @@ export function createOrgAuthRouteHandlers(
         );
       },
     },
-  };
+  });
 }

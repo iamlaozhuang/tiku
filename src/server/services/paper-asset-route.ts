@@ -1,5 +1,6 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { PaperAssetService } from "./paper-asset-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -35,7 +36,7 @@ function readPaperAssetQuery(request: Request): Record<string, unknown> {
 export function createPaperAssetRouteHandlers(
   paperAssetService: PaperAssetService,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(
@@ -69,5 +70,5 @@ export function createPaperAssetRouteHandlers(
         );
       },
     },
-  };
+  });
 }

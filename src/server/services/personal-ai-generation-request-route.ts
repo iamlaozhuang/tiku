@@ -3,7 +3,10 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
-import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlerWithErrorEnvelope,
+  createRouteHandlersWithErrorEnvelope,
+} from "./route-error-response";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -61,7 +64,7 @@ function createRequestInputWithUserContext(
 export function createPersonalAiGenerationRequestRouteHandlers(
   resolveUserContext: PersonalAiGenerationRequestUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       POST: createRouteHandlerWithErrorEnvelope(
         async (request: Request): Promise<Response> => {
@@ -85,7 +88,7 @@ export function createPersonalAiGenerationRequestRouteHandlers(
         },
       ),
     },
-  };
+  });
 }
 
 export function createUnavailablePersonalAiGenerationRequestUserResolver(): PersonalAiGenerationRequestUserResolver {

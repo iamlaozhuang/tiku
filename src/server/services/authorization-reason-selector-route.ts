@@ -3,7 +3,10 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import { buildAuthorizationReasonSelectorApiContract } from "./authorization-reason-selector-api-contract-service";
-import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlerWithErrorEnvelope,
+  createRouteHandlersWithErrorEnvelope,
+} from "./route-error-response";
 
 type AuthorizationReasonSelectorRouteContext = {
   params: Promise<{
@@ -45,7 +48,7 @@ function isAuthorizationReasonSelectorUserContext(
 export function createAuthorizationReasonSelectorRouteHandlers(
   resolveUserContext: AuthorizationReasonSelectorUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     detail: {
       POST: createRouteHandlerWithErrorEnvelope(
         async (
@@ -75,7 +78,7 @@ export function createAuthorizationReasonSelectorRouteHandlers(
         },
       ),
     },
-  };
+  });
 }
 
 export function createUnavailableAuthorizationReasonSelectorUserResolver(): AuthorizationReasonSelectorUserResolver {

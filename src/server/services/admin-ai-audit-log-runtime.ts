@@ -30,6 +30,7 @@ import {
 } from "../validators/ai-rag";
 import { attachModelConfigRuntimeAlignment } from "./model-config-runtime";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type { AdminAiAuditLogRuntimeRepositories };
 
@@ -399,7 +400,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     data: TData,
     query: AdminAiAuditLogListQuery,
   ) {
-    return {
+    return createRouteHandlersWithErrorEnvelope({
       ...data,
       pagination: {
         page: query.page,
@@ -408,7 +409,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
         sortOrder: query.sortOrder,
         total: 0,
       },
-    };
+    });
   }
 
   async function readRuntimePage<TData extends Record<string, unknown>>(input: {
@@ -515,7 +516,7 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
     );
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     modelProviders: {
       async GET(request: Request): Promise<Response> {
         const authError = await requireReadableAdminActor(request);
@@ -961,5 +962,5 @@ export function createAdminAiAuditLogRuntimeRouteHandlers(
         );
       },
     },
-  };
+  });
 }

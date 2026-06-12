@@ -29,6 +29,7 @@ import {
 } from "../repositories/admin-flow-runtime-repository";
 import { normalizeUserPasswordResetInput } from "../validators/user-password-reset";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type { AdminFlowRuntimeRepositories };
 
@@ -393,7 +394,7 @@ export function createAdminFlowRuntimeRouteHandlers(
     );
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     users: {
       collection: {
         async GET(request: Request): Promise<Response> {
@@ -666,5 +667,5 @@ export function createAdminFlowRuntimeRouteHandlers(
         },
       },
     },
-  };
+  });
 }

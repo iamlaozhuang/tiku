@@ -53,6 +53,7 @@ import {
 import { buildResourceChunks } from "./rag-chunking-service";
 import { buildRagRetrievalContextFromChunks } from "./rag-retrieval-service";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -1208,7 +1209,7 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
     return actor;
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     resources: {
       collection: {
         async GET(request: Request): Promise<Response> {
@@ -1622,5 +1623,5 @@ export function createRagResourceKnowledgeRuntimeRouteHandlers(
         },
       },
     },
-  };
+  });
 }

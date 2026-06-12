@@ -3,6 +3,7 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type { PracticeService, PracticeUserContext } from "./practice-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type PracticeRouteContext = {
   params: Promise<{
@@ -49,7 +50,7 @@ export function createPracticeRouteHandlers(
   practiceService: PracticeService,
   resolveUserContext: PracticeUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async POST(request: Request): Promise<Response> {
         const userContext = await resolveRequiredUserContext(
@@ -182,7 +183,7 @@ export function createPracticeRouteHandlers(
         );
       },
     },
-  };
+  });
 }
 
 export function createUnavailablePracticeUserResolver(): PracticeUserResolver {

@@ -1,5 +1,6 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { PaperDraftService } from "./paper-draft-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type PaperRouteContext = {
   params: Promise<{
@@ -42,7 +43,7 @@ function readPaperQuery(request: Request): Record<string, unknown> {
 }
 
 export function createPaperDraftRouteHandlers(paperService: PaperDraftService) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(
@@ -155,5 +156,5 @@ export function createPaperDraftRouteHandlers(paperService: PaperDraftService) {
         return createJsonResponse(await paperService.copyPaper(publicId));
       },
     },
-  };
+  });
 }

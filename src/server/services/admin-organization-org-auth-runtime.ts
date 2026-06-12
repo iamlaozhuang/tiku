@@ -49,6 +49,7 @@ import {
   type NormalizedUpdateOrganizationInput,
 } from "../validators/organization";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type { AdminOrganizationOrgAuthRuntimeRepositories };
 
@@ -809,7 +810,7 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
     return actor;
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     organizations: {
       collection: {
         async GET(request: Request): Promise<Response> {
@@ -1605,5 +1606,5 @@ export function createAdminOrganizationOrgAuthRuntimeRouteHandlers(
         },
       },
     },
-  };
+  });
 }

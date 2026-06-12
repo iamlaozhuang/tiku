@@ -6,6 +6,7 @@ import type {
   MistakeBookService,
   MistakeBookUserContext,
 } from "./mistake-book-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type MistakeBookRouteContext = {
   params: Promise<{
@@ -79,7 +80,7 @@ export function createMistakeBookRouteHandlers(
   mistakeBookService: MistakeBookService,
   resolveUserContext: MistakeBookUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     collection: {
       async GET(request: Request): Promise<Response> {
         const userContext = await resolveRequiredUserContext(
@@ -194,7 +195,7 @@ export function createMistakeBookRouteHandlers(
         );
       },
     },
-  };
+  });
 }
 
 export function createUnavailableMistakeBookUserResolver(): MistakeBookUserResolver {

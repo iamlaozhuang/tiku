@@ -6,6 +6,7 @@ import type {
   AdminContentKnowledgeApiResponse,
   AdminContentKnowledgeOpsService,
 } from "./admin-content-knowledge-ops-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -39,7 +40,7 @@ function readListQuery(
 export function createAdminContentKnowledgeOpsRouteHandlers(
   service: AdminContentKnowledgeOpsService,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     questions: {
       async GET(request: Request): Promise<Response> {
         return createJsonResponse(
@@ -77,5 +78,5 @@ export function createAdminContentKnowledgeOpsRouteHandlers(
         );
       },
     },
-  };
+  });
 }

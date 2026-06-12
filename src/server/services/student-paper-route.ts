@@ -6,7 +6,10 @@ import type {
   StudentPaperService,
   StudentPaperUserContext,
 } from "./student-paper-service";
-import { createRouteHandlerWithErrorEnvelope } from "./route-error-response";
+import {
+  createRouteHandlerWithErrorEnvelope,
+  createRouteHandlersWithErrorEnvelope,
+} from "./route-error-response";
 
 type StudentPaperRouteContext = {
   params: Promise<{
@@ -59,7 +62,7 @@ export function createStudentPaperRouteHandlers(
   studentPaperService: StudentPaperService,
   resolveUserContext: StudentPaperUserResolver,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     scopes: {
       GET: createRouteHandlerWithErrorEnvelope(
         async (request: Request): Promise<Response> => {
@@ -122,7 +125,7 @@ export function createStudentPaperRouteHandlers(
         },
       ),
     },
-  };
+  });
 }
 
 export function createUnavailableStudentPaperUserResolver(): StudentPaperUserResolver {

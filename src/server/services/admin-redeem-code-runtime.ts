@@ -22,6 +22,7 @@ import {
   RedeemCodeGenerationConflictError,
 } from "../repositories/admin-redeem-code-runtime-repository";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type { AdminRedeemCodeRuntimeRepositories };
 
@@ -333,7 +334,7 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
     return canReadRedeemCode(actor) ? null : adminPermissionDeniedResponse;
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     redeemCodes: {
       async GET(request: Request): Promise<Response> {
         const authError = await requireReadableAdminActor(request);
@@ -414,5 +415,5 @@ export function createAdminRedeemCodeRuntimeRouteHandlers(
         );
       },
     },
-  };
+  });
 }

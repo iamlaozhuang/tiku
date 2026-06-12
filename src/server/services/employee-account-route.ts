@@ -1,5 +1,6 @@
 import type { ApiResponse } from "../contracts/api-response";
 import type { EmployeeAccountService } from "./employee-account-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -16,7 +17,7 @@ function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
 export function createEmployeeAccountRouteHandlers(
   employeeAccountService: EmployeeAccountService,
 ) {
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     async POST(request: Request): Promise<Response> {
       const input = await readRequestJson(request);
 
@@ -24,5 +25,5 @@ export function createEmployeeAccountRouteHandlers(
         await employeeAccountService.createEmployeeAccount(input),
       );
     },
-  };
+  });
 }

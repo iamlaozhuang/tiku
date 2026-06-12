@@ -13,6 +13,7 @@ import {
 import { ADMIN_AUTH_OPERATION_ERROR_CODES } from "../contracts/admin-user-org-auth-ops-contract";
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 export type ContactConfigService = {
   getPurchaseGuidance(): ApiResponse<PurchaseGuidanceContactConfigResultDto>;
@@ -304,7 +305,7 @@ export function createContactConfigRuntimeRouteHandlers(
       : contactConfigPermissionDeniedResponse;
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     contactConfigs: {
       async GET(request: Request): Promise<Response> {
         const actorOrError = await requireManager(request);
@@ -358,5 +359,5 @@ export function createContactConfigRuntimeRouteHandlers(
         );
       },
     },
-  };
+  });
 }

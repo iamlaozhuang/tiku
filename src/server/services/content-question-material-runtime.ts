@@ -46,6 +46,7 @@ import {
 import { createMaterialService } from "./material-service";
 import { createQuestionService } from "./question-service";
 import type { SessionService } from "./session-service";
+import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 
 type RouteContext = {
   params: Promise<{
@@ -525,7 +526,7 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
     });
   }
 
-  return {
+  return createRouteHandlersWithErrorEnvelope({
     questions: {
       collection: {
         async GET(request: Request): Promise<Response> {
@@ -963,5 +964,5 @@ export function createContentQuestionMaterialRuntimeRouteHandlers(
         );
       },
     },
-  };
+  });
 }
