@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-146-personal-learning-ai-next-seeding-planning-closed
-updatedAt: "2026-06-13T02:57:57-07:00"
+currentPhase: batch-147-personal-learning-ai-server-owned-metadata-hardening-closed
+updatedAt: "2026-06-13T03:12:25-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
   lastKnownOriginMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
 currentTask:
-  id: batch-146-personal-learning-ai-next-seeding-planning
+  id: batch-147-personal-learning-ai-server-owned-metadata-hardening
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
-  branch: codex/batch-146-personal-learning-ai-next-seeding-planning
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+  branch: codex/batch-147-personal-learning-ai-server-owned-metadata-hardening
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_146_personal_learning_ai_next_seeding_planning
+    readiness: pass_batch_147_personal_learning_ai_server_owned_metadata_hardening
     lint: pass
     typecheck: pass
-    unit: pass_247_files_902_tests
+    unit: pass_247_files_903_tests
     build: pass_55_static_pages
-    e2e: not_required_l0_docs_only
-    preCommitHook: pass_batch_146_pre_commit_hardening
-    prePushHook: pass_batch_146_pre_push_readiness
+    e2e: not_required_l4_local_api_contract
+    preCommitHook: pass_batch_147_pre_commit_hardening
+    prePushHook: pass_batch_147_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,10 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-146 seeded the next personal-learning-ai local sequence after batch-145 because no batch-146+ pending task
-    existed in task-queue.yaml. The next executable task is
-    batch-147-personal-learning-ai-server-owned-metadata-hardening after batch-146 closeout. The seeded sequence keeps
-    provider/env/dependency, local provider sandbox, generated-content write paths, schema/migration, deploy, payment,
-    external-service, PR, force-push, and Cost Calibration Gate execution blocked unless a later queued task has
-    explicit approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+    Batch-147 hardened personal-learning-ai local request metadata ownership so client-supplied result/evidence,
+    ai_call_log, audit, and authorization status metadata cannot become durable server metadata for new local pending
+    task creation. The next executable queue item is batch-148 security review after batch-147 closeout. Provider/env,
+    dependency, local provider sandbox, generated-content writes, schema/migration, deploy, payment, external-service,
+    PR, force-push, and Cost Calibration Gate execution remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md

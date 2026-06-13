@@ -508,7 +508,7 @@ describe("personal AI generation request route handlers", () => {
         resultPublicId: null,
         evidenceStatus: "none",
         citationCount: 0,
-        aiCallLogPublicId: "ai_call_log_public_123",
+        aiCallLogPublicId: null,
         isAuthorizationActive: true,
         isScopeAllowed: true,
         isQuotaAvailable: true,
@@ -516,6 +516,85 @@ describe("personal AI generation request route handlers", () => {
       },
     ]);
     expect(serializedPayload).not.toContain(staleBodyPublicId);
+  });
+
+  it("uses server-owned pending metadata instead of client-supplied result and evidence references", async () => {
+    const staleClientResultPublicId = "client_result_public_stale_route";
+    const staleClientAiCallLogPublicId =
+      "client_ai_call_log_public_stale_route";
+    const staleClientAuditLogPublicId = "client_audit_log_public_stale_route";
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository,
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        resultPublicId: staleClientResultPublicId,
+        evidenceStatus: "sufficient",
+        citationCount: 9,
+        aiCallLogPublicId: staleClientAiCallLogPublicId,
+        auditLogPublicId: staleClientAuditLogPublicId,
+        isAuthorizationActive: false,
+        isScopeAllowed: false,
+        isQuotaAvailable: false,
+        isRuntimeConfigReady: false,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        requestFlow: {
+          request: {
+            evidenceReferences: {
+              auditLogPublicId: null,
+              aiCallLogPublicId: null,
+            },
+          },
+          taskRequest: {
+            decision: "create_pending_task",
+            resultReference: {
+              resultPublicId: null,
+              evidenceStatus: "none",
+              citationCount: 0,
+            },
+            evidenceReferences: {
+              auditLogPublicId: null,
+              aiCallLogPublicId: null,
+            },
+          },
+        },
+        resultState: {
+          status: "pending",
+          resultPublicId: null,
+          evidenceStatus: "none",
+          citationCount: 0,
+        },
+      },
+    });
+    expect(requestRepository.createCalls).toHaveLength(1);
+    expect(requestRepository.createCalls[0]).toMatchObject({
+      resultPublicId: null,
+      evidenceStatus: "none",
+      citationCount: 0,
+      aiCallLogPublicId: null,
+      isAuthorizationActive: true,
+      isScopeAllowed: true,
+      isQuotaAvailable: true,
+      isRuntimeConfigReady: true,
+    });
+    expect(serializedPayload).not.toContain(staleClientResultPublicId);
+    expect(serializedPayload).not.toContain(staleClientAiCallLogPublicId);
+    expect(serializedPayload).not.toContain(staleClientAuditLogPublicId);
   });
 
   it("uses reused persistent task metadata for idempotent local browser POST responses", async () => {

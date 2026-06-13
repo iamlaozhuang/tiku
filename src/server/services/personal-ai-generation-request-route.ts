@@ -149,6 +149,30 @@ function createRequestInputWithUserContext(
   };
 }
 
+function createServerOwnedLocalBrowserRequestInput(
+  input: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    ...input,
+    authorizationSource: "personal_auth",
+    ownerType: "personal",
+    organizationPublicId: null,
+    quotaOwnerType: "personal",
+    effectiveEdition: "advanced",
+    isAuthorizationActive: true,
+    isScopeAllowed: true,
+    isQuotaAvailable: true,
+    isRuntimeConfigReady: true,
+    existingTaskPublicId: null,
+    existingTaskStatus: null,
+    resultPublicId: null,
+    evidenceStatus: "none",
+    citationCount: 0,
+    auditLogPublicId: null,
+    aiCallLogPublicId: null,
+  };
+}
+
 function createPersistentRequestInput(
   input: Record<string, unknown>,
   requestedAt: Date,
@@ -347,9 +371,11 @@ export function createPersonalAiGenerationRequestRouteHandlers(
           );
 
           if (shouldReturnLocalBrowserExperience(requestInput)) {
+            const serverOwnedRequestInput =
+              createServerOwnedLocalBrowserRequestInput(requestInput);
             const localBrowserRequestInput =
               await createRequestInputWithPersistentRequestMetadata(
-                requestInput,
+                serverOwnedRequestInput,
                 requestRepository,
                 now(),
               );
