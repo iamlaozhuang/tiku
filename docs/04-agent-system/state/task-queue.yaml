@@ -9560,12 +9560,31 @@ tasks:
       Fresh approval is required before reading, creating, or modifying `.env.example`, any env file, any secret file,
       provider configuration, or provider key destination. Approval must specify exact files, destination type,
       redaction rules, and whether `.env.example` may be updated. `.env.local` and real secret values remain blocked.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 explicitly approves executing
+      `batch-164-personal-learning-ai-provider-env-secret-destination` using only the task allowedFiles. `.env.example`
+      may be modified to record variable-name placeholders only. Real secret values, `.env.local`, real env/provider
+      configuration, provider calls, sandbox execution, schema/migration, e2e, deploy, payment, external-service, and
+      Cost Calibration remain blocked.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
     targetClosureItem: provider env secret destination gate
     behaviorBoundary: personal-learning-ai::provider env secret destination
-    status: blocked
+    moduleRunVersion: 2
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - .env.example
@@ -9595,6 +9614,8 @@ tasks:
       - npm.cmd run typecheck
       - npm.cmd run test:unit
       - npm.cmd run build
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
   - id: batch-165-personal-learning-ai-provider-adapter-implementation
     title: Implement personal learning AI provider adapter boundary
     phase: batch-165-personal-learning-ai-provider-adapter-implementation
