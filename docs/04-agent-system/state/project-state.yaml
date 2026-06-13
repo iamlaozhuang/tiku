@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-153-personal-learning-ai-route-service-repository-metadata-security-review-closed
-updatedAt: "2026-06-13T05:10:00-07:00"
+currentPhase: batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation-closed
+updatedAt: "2026-06-13T05:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
   lastKnownOriginMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
 currentTask:
-  id: batch-153-personal-learning-ai-route-service-repository-metadata-security-review
+  id: batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
-  branch: codex/batch-153-personal-learning-ai-route-service-repository-metadata-security-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
+  branch: codex/batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_153_personal_learning_ai_route_service_repository_metadata_security_review
+    readiness: pass_batch_154_personal_learning_ai_existing_local_e2e_defense_in_depth_validation
     lint: pass
     typecheck: pass
     unit: pass_247_files_904_tests
     build: pass_55_static_pages
-    e2e: not_required_l0_security_review_docs_only
-    preCommitHook: pass_batch_153_pre_commit_hardening
-    prePushHook: pass_batch_153_pre_push_readiness
+    e2e: pass_existing_personal_ai_local_request_1_test
+    preCommitHook: pass_batch_154_pre_commit_hardening
+    prePushHook: pass_batch_154_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-153 closed the docs-only route/service/repository metadata ownership security review after batch-152. The
-    next queued task is batch-154, existing local personal AI e2e validation. Provider/env/secret,
-    dependency/package/lockfile, local provider sandbox, generated-content write, deploy, payment, external-service, PR,
-    force-push, schema/migration, and Cost Calibration work remain blocked unless a future queued task carries explicit
-    fresh approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
+    Batch-154 closed the existing local personal AI e2e validation after repository/service hardening. The next queued
+    task is batch-155, docs-only provider/env/dependency/local provider sandbox/generated-content/deploy/payment/
+    external-service/Cost Calibration blocked gate refresh. Provider/env/secret, dependency/package/lockfile, local
+    provider sandbox, generated-content write, deploy, payment, external-service, PR, force-push, schema/migration, and
+    Cost Calibration work remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
