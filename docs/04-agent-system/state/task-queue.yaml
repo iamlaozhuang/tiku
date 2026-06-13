@@ -9628,12 +9628,31 @@ tasks:
       Fresh approval is required before source/test changes for provider adapter implementation. This task must not call
       providers or read secrets unless a separate provider execution approval is recorded. Adapter code must stay behind
       server-side services and must keep client-side provider access blocked.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 explicitly approves executing
+      `batch-165-personal-learning-ai-provider-adapter-implementation`, limited to the task allowedFiles for server-side
+      adapter code and corresponding unit tests. Real provider calls, env/secret reads or use, sandbox execution,
+      generated-content persistence, schema/migration, e2e, deploy, payment, external-service, and Cost Calibration
+      remain blocked.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
     targetClosureItem: provider adapter implementation
     behaviorBoundary: personal-learning-ai::provider adapter
-    status: blocked
+    moduleRunVersion: 2
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - src/ai/**
@@ -9666,6 +9685,8 @@ tasks:
       - npm.cmd run test:unit
       - npm.cmd run build
       - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
   - id: batch-166-personal-learning-ai-local-provider-sandbox-execution
     title: Execute approved local provider sandbox
     phase: batch-166-personal-learning-ai-local-provider-sandbox-execution
