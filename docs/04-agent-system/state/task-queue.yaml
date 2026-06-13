@@ -5789,6 +5789,7 @@ tasks:
     dependencies:
       - batch-127-personal-learning-ai-student-session-auth-bridge
     taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
     humanApproval: >-
       User requested the next personal-learning-ai task seed and prioritized redacted request history/read-model work.
       Scope is limited to local read-model types, contract, validator/service, co-located focused unit tests, docs/state,
@@ -5841,7 +5842,7 @@ tasks:
         deleteShortBranch: true
         parkWorktree: false
     registryLifecycle:
-      runStatus: pending
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -5891,7 +5892,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-128-personal-learning-ai-request-history-read-model
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-129-personal-learning-ai-redacted-request-history-display
     title: Display redacted personal learning AI request history summary

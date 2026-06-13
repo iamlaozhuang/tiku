@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-127-personal-learning-ai-student-session-auth-bridge
-updatedAt: "2026-06-12T18:50:40-07:00"
+currentPhase: batch-128-personal-learning-ai-request-history-read-model
+updatedAt: "2026-06-12T19:05:15-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b7e5a2a335098257269a00de73d64292009c513b
-  lastKnownOriginMasterSha: b7e5a2a335098257269a00de73d64292009c513b
+  lastKnownMasterSha: d8f8bab312259735bb15c464a545be1d7ce154d5
+  lastKnownOriginMasterSha: d8f8bab312259735bb15c464a545be1d7ce154d5
 currentTask:
-  id: batch-127-personal-learning-ai-student-session-auth-bridge
+  id: batch-128-personal-learning-ai-request-history-read-model
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-127-personal-learning-ai-student-session-auth-bridge.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-127-personal-learning-ai-student-session-auth-bridge.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-127-personal-learning-ai-student-session-auth-bridge.md
-  branch: codex/batch-127-personal-learning-ai-student-session-auth-bridge
-  commitSha: b7e5a2a335098257269a00de73d64292009c513b
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
+  branch: codex/batch-128-personal-learning-ai-request-history-read-model
+  commitSha: d8f8bab312259735bb15c464a545be1d7ce154d5
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_127_personal_learning_ai_student_session_auth_bridge
+    readiness: pass_batch_128_personal_learning_ai_request_history_read_model
     lint: pass
     typecheck: pass
-    unit: pass_244_files_874_tests
+    unit: pass_245_files_877_tests
     build: pass_55_static_pages
-    e2e: pass_existing_local_auth_route_guard_10_tests
+    e2e: not_applicable_server_read_model
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Continue serial personal-learning-ai queue from master after batch-127 closes. Next executable candidate is
-    batch-128-personal-learning-ai-request-history-read-model after refreshing state/queue from master. Dedicated local
-    e2e spec authoring remains blocked until fresh approval because current standing local e2e approval only covers
+    Continue serial personal-learning-ai queue from master after batch-128 closes. Next executable candidate is
+    batch-129-personal-learning-ai-redacted-request-history-display after refreshing state/queue from master. Dedicated
+    local e2e spec authoring remains blocked until fresh approval because current standing local e2e approval only covers
     running existing specs. Keep provider, env/secret, schema/migration, dependency, deploy, payment, external-service,
     PR, force-push, formal generated-content write paths, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-127-personal-learning-ai-student-session-auth-bridge.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
