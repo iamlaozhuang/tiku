@@ -9362,3 +9362,463 @@ tasks:
     status: closed
     result: pass
     retryCount: 0
+  - id: batch-162-personal-learning-ai-implementation-queue-seeding
+    title: Seed blocked personal learning AI implementation queue
+    phase: batch-162-personal-learning-ai-implementation-queue-seeding
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+    humanApproval: >-
+      User approved the conservative docs-only batch-162 implementation queue seeding path. This task may only seed
+      future personal-learning-ai implementation tasks with explicit blocked status, allowedFiles, blockedFiles,
+      dependency order, freshApprovalRequired text, and validation surfaces. It must not modify source/tests/e2e,
+      package/lockfile, env/secret/provider configuration, schema/migration, generated-content paths, deploy, payment,
+      external-service, PR, force-push, or Cost Calibration surfaces.
+    freshApprovalRequired: >-
+      Any future execution of the seeded batch-163+ tasks requires task-specific fresh approval before status can change
+      from blocked to pending or in_progress.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: implementation queue seeding
+    behaviorBoundary: personal-learning-ai::implementation queue governance
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+      - docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+    acceptanceScenarios:
+      - task queue records batch-163+ personal-learning-ai implementation tasks as blocked
+      - seeded tasks split dependency, env/secret, provider adapter, sandbox, generated content, API/UI, and e2e surfaces
+      - seeded tasks preserve all high-risk gates until future task-specific fresh approval
+    validationProfile: L0-implementation-queue-seeding-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      implementationQueueSeeding: approved_docs_only_by_user_prompt_2026_06_13
+      dependencyChange: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      providerCall: blocked_without_fresh_task_approval
+      providerConfiguration: blocked_without_fresh_task_approval
+      schemaMigration: blocked_without_fresh_task_approval
+      generatedContentPersistence: blocked_without_fresh_task_approval
+      localE2EValidation: blocked_without_fresh_task_approval
+      deploy: blocked_without_fresh_task_approval
+      externalService: blocked_without_fresh_task_approval
+      payment: blocked_without_fresh_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - batch-163+ tasks remain blocked until future task-specific fresh approval
+      - source/tests/e2e changes remain blocked
+      - package/lockfile changes remain blocked
+      - provider/env/secret work remains blocked
+      - local provider sandbox remains blocked
+      - generated-content writes and formal content adoption remain blocked
+      - schema/migration, destructive DB, staging/prod/cloud, deploy, payment, external-service, PR, force-push, and Cost
+        Calibration Gate remain blocked
+    taskKind: queue_seeding
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - queue_seeding
+      - implementation_planning
+      - dependency_blocked
+      - provider_blocked
+      - env_secret_blocked
+      - generated_content
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md docs/05-execution-logs/evidence/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md -Pattern 'batch-163+ tasks remain blocked','dependency implementation remains blocked','provider/env/secret work remains blocked','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-162-personal-learning-ai-implementation-queue-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-162-personal-learning-ai-implementation-queue-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-162-personal-learning-ai-implementation-queue-seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: batch-163-personal-learning-ai-dependency-implementation
+    title: Introduce personal learning AI provider dependencies
+    phase: batch-163-personal-learning-ai-dependency-implementation
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-162-personal-learning-ai-implementation-queue-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+    freshApprovalRequired: >-
+      Fresh approval is required before changing `package.json` or `pnpm-lock.yaml`. Approval must name the dependency
+      candidates, package manager command, package/lockfile isolation strategy, validation commands, and human approval
+      evidence. No source, env/secret, provider execution, schema/migration, e2e, deploy, payment, external-service, or
+      Cost Calibration work is approved by this blocked seed.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: dependency implementation gate
+    behaviorBoundary: personal-learning-ai::dependency implementation
+    status: blocked
+    retryCount: 0
+    allowedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+  - id: batch-164-personal-learning-ai-provider-env-secret-destination
+    title: Confirm personal learning AI provider env and secret destination
+    phase: batch-164-personal-learning-ai-provider-env-secret-destination
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-163-personal-learning-ai-dependency-implementation
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
+    freshApprovalRequired: >-
+      Fresh approval is required before reading, creating, or modifying `.env.example`, any env file, any secret file,
+      provider configuration, or provider key destination. Approval must specify exact files, destination type,
+      redaction rules, and whether `.env.example` may be updated. `.env.local` and real secret values remain blocked.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: provider env secret destination gate
+    behaviorBoundary: personal-learning-ai::provider env secret destination
+    status: blocked
+    retryCount: 0
+    allowedFiles:
+      - .env.example
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
+    blockedFiles:
+      - .env.local
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+  - id: batch-165-personal-learning-ai-provider-adapter-implementation
+    title: Implement personal learning AI provider adapter boundary
+    phase: batch-165-personal-learning-ai-provider-adapter-implementation
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-164-personal-learning-ai-provider-env-secret-destination
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
+    freshApprovalRequired: >-
+      Fresh approval is required before source/test changes for provider adapter implementation. This task must not call
+      providers or read secrets unless a separate provider execution approval is recorded. Adapter code must stay behind
+      server-side services and must keep client-side provider access blocked.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: provider adapter implementation
+    behaviorBoundary: personal-learning-ai::provider adapter
+    status: blocked
+    retryCount: 0
+    allowedFiles:
+      - src/ai/**
+      - src/server/services/ai-generation-task-provider-*.ts
+      - src/server/services/ai-generation-task-provider-*.test.ts
+      - src/server/contracts/ai-generation-task-provider-*.ts
+      - src/server/validators/ai-generation-task-provider-*.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+  - id: batch-166-personal-learning-ai-local-provider-sandbox-execution
+    title: Execute approved local provider sandbox
+    phase: batch-166-personal-learning-ai-local-provider-sandbox-execution
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-165-personal-learning-ai-provider-adapter-implementation
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+    freshApprovalRequired: >-
+      Fresh approval is required before any local provider sandbox run, provider call, model request, cost measurement,
+      env/secret use, or generated-content write. Approval must set provider, model, request count, spend ceiling,
+      secret destination, redaction policy, and no-formal-write boundary.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local provider sandbox execution
+    behaviorBoundary: personal-learning-ai::local provider sandbox execution
+    status: blocked
+    retryCount: 0
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+  - id: batch-167-personal-learning-ai-generated-content-persistence
+    title: Implement personal learning AI generated content persistence
+    phase: batch-167-personal-learning-ai-generated-content-persistence
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-166-personal-learning-ai-local-provider-sandbox-execution
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+    freshApprovalRequired: >-
+      Fresh approval is required before generated-content persistence, schema/migration, repository/service changes, or
+      generated output storage. Approval must define storage boundary, redaction rules, rollback/recovery, and explicit
+      no-adoption controls for formal question, paper, practice, mock_exam, exam_report, and mistake_book domains.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: generated content persistence
+    behaviorBoundary: personal-learning-ai::generated content persistence
+    status: blocked
+    retryCount: 0
+    allowedFiles:
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/personal-ai-generation-*.ts
+      - src/server/repositories/personal-ai-generation-*.test.ts
+      - src/server/services/personal-ai-generation-*.ts
+      - src/server/services/personal-ai-generation-*.test.ts
+      - src/server/contracts/personal-ai-generation-*.ts
+      - src/server/validators/personal-ai-generation-*.ts
+      - src/server/mappers/personal-ai-generation-*.ts
+      - src/server/mappers/personal-ai-generation-*.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+  - id: batch-168-personal-learning-ai-api-ui-wiring
+    title: Wire personal learning AI API and student UI flow
+    phase: batch-168-personal-learning-ai-api-ui-wiring
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-167-personal-learning-ai-generated-content-persistence
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+    freshApprovalRequired: >-
+      Fresh approval is required before API/UI source changes. Approval must define student flow scope, API contract,
+      authorization boundary, loading/empty/error states, no-formal-adoption behavior, and validation commands.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: API UI wiring
+    behaviorBoundary: personal-learning-ai::api ui wiring
+    status: blocked
+    retryCount: 0
+    allowedFiles:
+      - src/app/api/v1/personal-ai-generation-requests/**
+      - src/app/(student)/ai-generation/**
+      - src/features/student/ai-generation/**
+      - src/server/services/personal-ai-generation-*.ts
+      - src/server/services/personal-ai-generation-*.test.ts
+      - src/server/contracts/personal-ai-generation-*.ts
+      - src/server/validators/personal-ai-generation-*.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+  - id: batch-169-personal-learning-ai-local-e2e-validation
+    title: Validate personal learning AI local e2e flow
+    phase: batch-169-personal-learning-ai-local-e2e-validation
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-168-personal-learning-ai-api-ui-wiring
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+    freshApprovalRequired: >-
+      Fresh approval is required before modifying e2e files or running local e2e beyond already approved existing-spec
+      validation. Approval must name exact specs, local-only target, generated artifact handling, and redacted evidence
+      rules. Provider calls, env/secret work, deploy, payment, external-service, PR, force-push, and Cost Calibration
+      remain blocked unless separately approved.
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local e2e validation
+    behaviorBoundary: personal-learning-ai::local e2e validation
+    status: blocked
+    retryCount: 0
+    allowedFiles:
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
