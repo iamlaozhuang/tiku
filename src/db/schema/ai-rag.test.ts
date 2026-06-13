@@ -510,3 +510,101 @@ describe("personal learning AI task persistence schema", () => {
     );
   });
 });
+
+describe("personal learning AI generated content result schema", () => {
+  const schemaExports = aiRagSchema as Record<string, unknown>;
+  const personalAiGenerationResult =
+    schemaExports.personalAiGenerationResult as
+      | Parameters<typeof getTableConfig>[0]
+      | undefined;
+
+  it("registers draft-only result status values", () => {
+    expect(schemaExports.personalAiGenerationResultStatusValues).toEqual([
+      "draft",
+      "discarded",
+    ]);
+  });
+
+  it("defines a separate generated result table instead of expanding ai_generation_task", () => {
+    expect(personalAiGenerationResult).toBeDefined();
+
+    if (personalAiGenerationResult === undefined) {
+      return;
+    }
+
+    expect(getTableName(personalAiGenerationResult)).toBe(
+      "personal_ai_generation_result",
+    );
+    expect(getColumnNames(personalAiGenerationResult)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "ai_generation_task_id",
+        "task_public_id",
+        "request_public_id",
+        "owner_public_id",
+        "task_type",
+        "result_status",
+        "content_redacted_snapshot",
+        "content_digest",
+        "content_preview_masked",
+        "citation_redacted_snapshot",
+        "evidence_status",
+        "citation_count",
+        "ai_call_log_public_id",
+        "is_formal_adoption_blocked",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+  });
+
+  it("keeps generated content candidates away from provider and formal-domain columns", () => {
+    expect(personalAiGenerationResult).toBeDefined();
+
+    if (personalAiGenerationResult === undefined) {
+      return;
+    }
+
+    expect(getColumnNames(personalAiGenerationResult)).not.toEqual(
+      expect.arrayContaining([
+        "prompt",
+        "prompt_text",
+        "provider_payload",
+        "raw_generated_content",
+        "generated_content",
+        "question_id",
+        "paper_id",
+        "practice_id",
+        "mock_exam_id",
+        "exam_report_id",
+        "mistake_book_id",
+        "adopted_question_id",
+        "adopted_paper_id",
+      ]),
+    );
+  });
+
+  it("adds public-id indexes and a task foreign key for result lookup", () => {
+    expect(personalAiGenerationResult).toBeDefined();
+
+    if (personalAiGenerationResult === undefined) {
+      return;
+    }
+
+    expect(getIndexNames(personalAiGenerationResult)).toEqual(
+      expect.arrayContaining([
+        "udx_personal_ai_generation_result_public_id",
+        "udx_personal_ai_generation_result_ai_generation_task_id",
+        "idx_personal_ai_generation_result_owner_public_id_created_at",
+        "idx_personal_ai_generation_result_task_public_id",
+        "idx_personal_ai_generation_result_result_status",
+      ]),
+    );
+    expect(getForeignKeyNames(personalAiGenerationResult)).toEqual(
+      expect.arrayContaining([
+        "personal_ai_generation_result_ai_generation_task_id_ai_generation_task_id_fk",
+      ]),
+    );
+  });
+});

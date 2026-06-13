@@ -84,6 +84,16 @@ export const aiGenerationTaskStatusEnum = pgEnum(
   aiGenerationTaskStatusValues,
 );
 
+export const personalAiGenerationResultStatusValues = [
+  "draft",
+  "discarded",
+] as const;
+
+export const personalAiGenerationResultStatusEnum = pgEnum(
+  "personal_ai_generation_result_status",
+  personalAiGenerationResultStatusValues,
+);
+
 export const aiGenerationTaskFailureCategoryValues = [
   "system_error",
   "provider_temporary_error",
@@ -394,6 +404,58 @@ export const aiGenerationTask = pgTable(
       table.task_status,
     ),
     index("idx_ai_generation_task_ai_call_log_id").on(table.ai_call_log_id),
+  ],
+);
+
+export const personalAiGenerationResult = pgTable(
+  "personal_ai_generation_result",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    ai_generation_task_id: bigint("ai_generation_task_id", {
+      mode: "number",
+    })
+      .notNull()
+      .references(() => aiGenerationTask.id, { onDelete: "restrict" }),
+    task_public_id: text("task_public_id").notNull(),
+    request_public_id: text("request_public_id").notNull(),
+    owner_public_id: text("owner_public_id").notNull(),
+    task_type: aiGenerationTaskTypeEnum("task_type").notNull(),
+    result_status: personalAiGenerationResultStatusEnum("result_status")
+      .default("draft")
+      .notNull(),
+    content_redacted_snapshot: jsonb("content_redacted_snapshot").notNull(),
+    content_digest: text("content_digest").notNull(),
+    content_preview_masked: text("content_preview_masked").notNull(),
+    citation_redacted_snapshot: jsonb("citation_redacted_snapshot"),
+    evidence_status: evidenceStatusEnum("evidence_status")
+      .default("none")
+      .notNull(),
+    citation_count: integer("citation_count").default(0).notNull(),
+    ai_call_log_public_id: text("ai_call_log_public_id"),
+    is_formal_adoption_blocked: boolean("is_formal_adoption_blocked")
+      .default(true)
+      .notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_personal_ai_generation_result_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_personal_ai_generation_result_ai_generation_task_id").on(
+      table.ai_generation_task_id,
+    ),
+    index("idx_personal_ai_generation_result_owner_public_id_created_at").on(
+      table.owner_public_id,
+      table.created_at,
+    ),
+    index("idx_personal_ai_generation_result_task_public_id").on(
+      table.task_public_id,
+    ),
+    index("idx_personal_ai_generation_result_result_status").on(
+      table.result_status,
+    ),
   ],
 );
 

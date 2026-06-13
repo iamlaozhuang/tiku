@@ -57,6 +57,13 @@
       "when": 1781335623402,
       "tag": "20260613072703_add_ai_generation_task",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781362103012,
+      "tag": "20260613074823_add_personal_ai_generation_result",
+      "breakpoints": true
     }
   ]
 }
