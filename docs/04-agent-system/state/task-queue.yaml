@@ -6011,7 +6011,9 @@ tasks:
     dependencies:
       - batch-129-personal-learning-ai-redacted-request-history-display
     taskPlanPolicy: required_before_edit
-    humanApproval: fresh_approval_required_before_implementation
+    humanApproval: >-
+      User approved batch-130 execution and allowed adding a dedicated local e2e spec. Provider, env, schema,
+      dependency, deploy, payment, external-service, PR, and force-push work remain forbidden.
     freshApprovalRequired: >-
       This task would create a new file under `e2e/**`. The standing local e2e approval currently covers running
       existing local specs only, so implementation must not start until the user gives fresh approval for dedicated e2e
@@ -6037,28 +6039,28 @@ tasks:
     localExperienceClosureGate: personal-learning-ai-experience
     localFullLoopGate: L5
     capabilities:
-      localE2ESpecAuthoring: fresh_approval_required
-      localE2EValidation: blocked_until_fresh_approval
+      localE2ESpecAuthoring: approved_local_only_dedicated_spec
+      localE2EValidation: approved_local_only_dedicated_spec
       providerCall: blocked_without_task_approval
       schemaMigration: blocked_without_task_approval
       costCalibrationGate: blocked
     blockedRemainder:
-      - implementation is blocked until fresh approval explicitly authorizes new e2e spec authoring
+      - fresh approval was consumed only for dedicated local e2e spec authoring
       - provider/env/secret/schema/migration/dependency/deploy/payment/external-service work remains blocked
       - Cost Calibration Gate remains blocked
     closeoutPolicy:
-      localCommit: blocked_until_fresh_approval
+      localCommit: approved
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
-        deleteShortBranch: false
+        deleteShortBranch: true
         parkWorktree: false
     registryLifecycle:
-      runStatus: blocked
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: e2e_spec_authoring
@@ -6101,6 +6103,6 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-130-personal-learning-ai-dedicated-local-e2e-spec
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
-    status: blocked
-    result: needs_fresh_e2e_spec_authoring_approval
+    status: closed
+    result: pass
     retryCount: 0
