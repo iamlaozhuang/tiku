@@ -50,6 +50,13 @@
       "when": 1780249500000,
       "tag": "20260531104500_add_ai_scoring_attempt",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781335623402,
+      "tag": "20260613072703_add_ai_generation_task",
+      "breakpoints": true
     }
   ]
 }

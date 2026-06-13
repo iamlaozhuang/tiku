@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-136-personal-learning-ai-persistence-schema-approval-gate-closed
-updatedAt: "2026-06-12T23:56:17-07:00"
+currentPhase: batch-137-personal-learning-ai-task-persistence-schema-migration-closed
+updatedAt: "2026-06-13T00:38:09-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d6256ac9c332c728895246809a312a1b843ac5f1
-  lastKnownOriginMasterSha: d6256ac9c332c728895246809a312a1b843ac5f1
+  lastKnownMasterSha: c540ea037656975878b5be83c1975f1a5a9d98af
+  lastKnownOriginMasterSha: c540ea037656975878b5be83c1975f1a5a9d98af
 currentTask:
-  id: batch-136-personal-learning-ai-persistence-schema-approval-gate
+  id: batch-137-personal-learning-ai-task-persistence-schema-migration
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
-  branch: codex/batch-136-personal-learning-ai-persistence-schema-approval-gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+  branch: codex/batch-137-personal-learning-ai-task-persistence-schema-migration
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -292,15 +292,15 @@ qualityGates:
     - unit
     - build
   lastRun:
-    date: "2026-06-12"
-    readiness: pass_batch_136_personal_learning_ai_persistence_schema_approval_gate
+    date: "2026-06-13"
+    readiness: pass_batch_137_personal_learning_ai_task_persistence_schema_migration
     lint: pass
     typecheck: pass
-    unit: pass_245_files_884_tests
+    unit: pass_245_files_888_tests
     build: pass_55_static_pages
-    e2e: not_run_docs_only_batch_136
-    preCommitHook: pass
-    prePushHook: pass_batch_136_pre_push_readiness
+    e2e: not_required_schema_migration_batch_137
+    preCommitHook: pass_batch_137_pre_commit_hardening
+    prePushHook: pass_batch_137_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-136 recorded the persistence schema approval gate as docs-only. The exact next schema task remains
-    batch-137-personal-learning-ai-task-persistence-schema-migration, and it still requires fresh approval before any
-    local schema/migration execution. Product code, tests, e2e specs, dependency, provider, env/secret, deploy, payment,
-    external-service, PR, force-push, formal generated-content write paths, authorization model changes, and Cost
-    Calibration Gate execution remain blocked outside their own approved tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+    Batch-137 closed the local dev ai_generation_task schema/migration task with redacted metadata only. The exact next
+    pending queue task is batch-138-personal-learning-ai-request-history-repository. Route, UI, e2e, dependency, provider,
+    env/secret, deploy, payment, external-service, destructive DB, formal generated-content write paths, authorization
+    model changes, PR, force-push, and Cost Calibration Gate execution remain blocked outside their own approved tasks.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md

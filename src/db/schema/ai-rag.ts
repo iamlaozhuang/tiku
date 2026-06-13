@@ -27,6 +27,11 @@ const createdAtColumn = () => timestampColumn("created_at").defaultNow();
 
 const updatedAtColumn = () => timestampColumn("updated_at").defaultNow();
 
+// Avoid importing student-experience here because paper -> ai-rag already owns a schema dependency.
+const answerRecordReference = pgTable("answer_record", {
+  id: bigint("id", { mode: "number" }).primaryKey(),
+});
+
 export const aiFuncTypeValues = [
   "scoring",
   "explanation",
@@ -53,6 +58,59 @@ export const aiScoringAttemptStatusValues = [
 export const aiScoringAttemptStatusEnum = pgEnum(
   "ai_scoring_attempt_status",
   aiScoringAttemptStatusValues,
+);
+
+export const aiGenerationTaskTypeValues = [
+  "ai_question_generation",
+  "ai_paper_generation",
+  "organization_training_generation",
+] as const;
+
+export const aiGenerationTaskTypeEnum = pgEnum(
+  "ai_generation_task_type",
+  aiGenerationTaskTypeValues,
+);
+
+export const aiGenerationTaskStatusValues = [
+  "pending",
+  "running",
+  "succeeded",
+  "failed",
+  "cancelled",
+] as const;
+
+export const aiGenerationTaskStatusEnum = pgEnum(
+  "ai_generation_task_status",
+  aiGenerationTaskStatusValues,
+);
+
+export const aiGenerationTaskFailureCategoryValues = [
+  "system_error",
+  "provider_temporary_error",
+  "network_error",
+  "rate_limited",
+  "rag_temporary_error",
+  "running_timeout",
+  "invalid_input",
+  "authorization_missing",
+  "authorization_invalid",
+  "edition_not_allowed",
+  "quota_insufficient",
+  "scope_forbidden",
+  "configuration_missing",
+  "production_enablement_blocked",
+] as const;
+
+export const aiGenerationTaskFailureCategoryEnum = pgEnum(
+  "ai_generation_task_failure_category",
+  aiGenerationTaskFailureCategoryValues,
+);
+
+export const evidenceStatusValues = ["sufficient", "weak", "none"] as const;
+
+export const evidenceStatusEnum = pgEnum(
+  "evidence_status",
+  evidenceStatusValues,
 );
 
 export const resourceTypeValues = [
@@ -241,7 +299,9 @@ export const aiScoringAttempt = pgTable(
   "ai_scoring_attempt",
   {
     id: idColumn(),
-    answer_record_id: bigint("answer_record_id", { mode: "number" }).notNull(),
+    answer_record_id: bigint("answer_record_id", { mode: "number" })
+      .notNull()
+      .references(() => answerRecordReference.id, { onDelete: "cascade" }),
     attempt_number: integer("attempt_number").notNull(),
     ai_call_log_id: bigint("ai_call_log_id", {
       mode: "number",
@@ -265,6 +325,75 @@ export const aiScoringAttempt = pgTable(
       table.answer_record_id,
       table.attempt_number,
     ),
+  ],
+);
+
+export const aiGenerationTask = pgTable(
+  "ai_generation_task",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    request_public_id: text("request_public_id").notNull(),
+    task_type: aiGenerationTaskTypeEnum("task_type").notNull(),
+    ai_func_type: aiFuncTypeEnum("ai_func_type").notNull(),
+    authorization_public_id: text("authorization_public_id").notNull(),
+    actor_public_id: text("actor_public_id").notNull(),
+    owner_type: text("owner_type").notNull(),
+    owner_public_id: text("owner_public_id").notNull(),
+    organization_public_id: text("organization_public_id"),
+    quota_owner_type: text("quota_owner_type").notNull(),
+    quota_owner_public_id: text("quota_owner_public_id").notNull(),
+    effective_edition: text("effective_edition").notNull(),
+    question_public_id: text("question_public_id").notNull(),
+    answer_record_public_id: text("answer_record_public_id"),
+    paper_public_id: text("paper_public_id"),
+    mock_exam_public_id: text("mock_exam_public_id"),
+    idempotency_key_hash: text("idempotency_key_hash").notNull(),
+    task_status: aiGenerationTaskStatusEnum("task_status")
+      .default("pending")
+      .notNull(),
+    retry_count: integer("retry_count").default(0).notNull(),
+    failure_category: aiGenerationTaskFailureCategoryEnum("failure_category"),
+    result_public_id: text("result_public_id"),
+    evidence_status: evidenceStatusEnum("evidence_status")
+      .default("none")
+      .notNull(),
+    citation_count: integer("citation_count").default(0).notNull(),
+    is_authorization_active: boolean("is_authorization_active")
+      .default(false)
+      .notNull(),
+    is_scope_allowed: boolean("is_scope_allowed").default(false).notNull(),
+    is_quota_available: boolean("is_quota_available").default(false).notNull(),
+    is_runtime_config_ready: boolean("is_runtime_config_ready")
+      .default(false)
+      .notNull(),
+    ai_call_log_id: bigint("ai_call_log_id", {
+      mode: "number",
+    }).references(() => aiCallLog.id, { onDelete: "set null" }),
+    ai_call_log_public_id: text("ai_call_log_public_id"),
+    requested_at: timestampColumn("requested_at").defaultNow(),
+    started_at: nullableTimestampColumn("started_at"),
+    finished_at: nullableTimestampColumn("finished_at"),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_ai_generation_task_public_id").on(table.public_id),
+    uniqueIndex("udx_ai_generation_task_request_public_id").on(
+      table.request_public_id,
+    ),
+    uniqueIndex(
+      "udx_ai_generation_task_owner_public_id_idempotency_key_hash",
+    ).on(table.owner_public_id, table.idempotency_key_hash),
+    index("idx_ai_generation_task_owner_public_id_requested_at").on(
+      table.owner_public_id,
+      table.requested_at,
+    ),
+    index("idx_ai_generation_task_owner_public_id_task_status").on(
+      table.owner_public_id,
+      table.task_status,
+    ),
+    index("idx_ai_generation_task_ai_call_log_id").on(table.ai_call_log_id),
   ],
 );
 

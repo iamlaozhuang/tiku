@@ -2,9 +2,11 @@ import { getTableName } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
+import * as aiRagSchema from "./ai-rag";
 import {
   aiCallLog,
   aiCallStatusValues,
+  aiFuncTypeEnum,
   aiFuncTypeValues,
   aiScoringAttempt,
   aiScoringAttemptStatusValues,
@@ -27,6 +29,14 @@ function getColumnNames(table: Parameters<typeof getTableConfig>[0]): string[] {
 function getIndexNames(table: Parameters<typeof getTableConfig>[0]): string[] {
   return getTableConfig(table).indexes.flatMap((schemaIndex) =>
     schemaIndex.config.name ? [schemaIndex.config.name] : [],
+  );
+}
+
+function getForeignKeyNames(
+  table: Parameters<typeof getTableConfig>[0],
+): string[] {
+  return getTableConfig(table).foreignKeys.map((foreignKey) =>
+    foreignKey.getName(),
   );
 }
 
@@ -373,6 +383,130 @@ describe("AI/RAG model config and prompt template schema baseline", () => {
         "idx_knowledge_node_resource_knowledge_node_id",
         "idx_knowledge_node_resource_resource_id",
       ]),
+    );
+  });
+});
+
+describe("personal learning AI task persistence schema", () => {
+  const schemaExports = aiRagSchema as Record<string, unknown>;
+  const aiGenerationTask = schemaExports.aiGenerationTask as Parameters<
+    typeof getTableConfig
+  >[0];
+
+  it("registers AI generation task enum values for personal history persistence", () => {
+    expect(schemaExports.aiGenerationTaskTypeValues).toEqual([
+      "ai_question_generation",
+      "ai_paper_generation",
+      "organization_training_generation",
+    ]);
+    expect(schemaExports.aiGenerationTaskStatusValues).toEqual([
+      "pending",
+      "running",
+      "succeeded",
+      "failed",
+      "cancelled",
+    ]);
+    expect(schemaExports.aiGenerationTaskFailureCategoryValues).toEqual([
+      "system_error",
+      "provider_temporary_error",
+      "network_error",
+      "rate_limited",
+      "rag_temporary_error",
+      "running_timeout",
+      "invalid_input",
+      "authorization_missing",
+      "authorization_invalid",
+      "edition_not_allowed",
+      "quota_insufficient",
+      "scope_forbidden",
+      "configuration_missing",
+      "production_enablement_blocked",
+    ]);
+    expect(schemaExports.evidenceStatusValues).toEqual([
+      "sufficient",
+      "weak",
+      "none",
+    ]);
+  });
+
+  it("defines a redacted personal AI generation task table with public ids only", () => {
+    expect(aiGenerationTask).toBeDefined();
+    expect(getTableName(aiGenerationTask)).toBe("ai_generation_task");
+    expect(getColumnNames(aiGenerationTask)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "request_public_id",
+        "task_type",
+        "ai_func_type",
+        "authorization_public_id",
+        "actor_public_id",
+        "owner_type",
+        "owner_public_id",
+        "organization_public_id",
+        "quota_owner_type",
+        "quota_owner_public_id",
+        "effective_edition",
+        "question_public_id",
+        "answer_record_public_id",
+        "paper_public_id",
+        "mock_exam_public_id",
+        "idempotency_key_hash",
+        "task_status",
+        "retry_count",
+        "failure_category",
+        "result_public_id",
+        "evidence_status",
+        "citation_count",
+        "ai_call_log_id",
+        "ai_call_log_public_id",
+        "requested_at",
+        "started_at",
+        "finished_at",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+    expect(getColumnNames(aiGenerationTask)).not.toEqual(
+      expect.arrayContaining([
+        "prompt",
+        "prompt_text",
+        "provider_payload",
+        "raw_answer",
+        "raw_generated_content",
+        "generated_content",
+        "question_id",
+        "paper_id",
+        "practice_id",
+        "mock_exam_id",
+        "exam_report_id",
+        "mistake_book_id",
+      ]),
+    );
+  });
+
+  it("adds naming-compliant indexes and ai_call_log linkage for personal task history", () => {
+    expect(getIndexNames(aiGenerationTask)).toEqual(
+      expect.arrayContaining([
+        "udx_ai_generation_task_public_id",
+        "udx_ai_generation_task_request_public_id",
+        "udx_ai_generation_task_owner_public_id_idempotency_key_hash",
+        "idx_ai_generation_task_owner_public_id_requested_at",
+        "idx_ai_generation_task_owner_public_id_task_status",
+        "idx_ai_generation_task_ai_call_log_id",
+      ]),
+    );
+    expect(getForeignKeyNames(aiGenerationTask)).toEqual(
+      expect.arrayContaining([
+        "ai_generation_task_ai_call_log_id_ai_call_log_id_fk",
+      ]),
+    );
+  });
+
+  it("keeps personal task status values separate from scoring attempt status values", () => {
+    expect(aiFuncTypeEnum).toBeDefined();
+    expect(schemaExports.aiGenerationTaskStatusValues).not.toEqual(
+      aiScoringAttemptStatusValues,
     );
   });
 });

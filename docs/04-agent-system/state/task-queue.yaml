@@ -6810,9 +6810,10 @@ tasks:
     taskPlanPolicy: required_before_edit
     planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
     humanApproval: >-
-      Seeded by batch-135 only. This schema/migration task is not approved by batch-135. It may start only after a fresh
-      task-specific approval records the local dev schema/migration plan, rollback boundary, redacted evidence plan, and
-      exact allowed files.
+      Fresh user approval recorded in the 2026-06-13 session for batch-137 local dev schema/migration work only, limited
+      to task-queue.yaml allowedFiles and preserving destructive DB, drizzle-kit push, staging/prod/cloud/env/provider,
+      deploy, payment, external-service, package/lockfile, formal generated-content write path, and Cost Calibration Gate
+      blocks.
     freshApprovalRequired: >-
       Must not start without fresh user approval for local dev schema/migration work. Approval must preserve env/secret,
       provider, dependency/package/lockfile, staging/prod/cloud/deploy, payment, external-service, destructive DB,
@@ -6841,7 +6842,7 @@ tasks:
     localExperienceClosureGate: personal-learning-ai-experience
     localFullLoopGate: L3
     capabilities:
-      schemaMigration: blocked_until_fresh_approval
+      schemaMigration: approved_migration_plan
       localDockerDatabase: blocked_until_fresh_approval
       providerCall: blocked_without_task_approval
       costCalibrationGate: blocked
@@ -6890,14 +6891,14 @@ tasks:
       - npm.cmd run test:unit
       - npm.cmd run build
       - git diff --check
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration -Capability schemaMigration -Decision use_capability
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration -Capability schemaMigration -Intent use_capability
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
-    status: pending
-    result: null
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-138-personal-learning-ai-request-history-repository
     title: Add personal learning AI request persistence repository and redacted mapper
