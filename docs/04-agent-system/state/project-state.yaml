@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-133-personal-learning-ai-request-history-route-session-boundary
-updatedAt: "2026-06-12T22:10:29-07:00"
+currentPhase: batch-134-personal-learning-ai-ui-initial-history-fetch
+updatedAt: "2026-06-12T22:56:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: fd2d6fe7bc4187be9d626dd7296f6ef224106c18
-  lastKnownOriginMasterSha: fd2d6fe7bc4187be9d626dd7296f6ef224106c18
+  lastKnownMasterSha: 1601190c7a56e94974da0c54c96ac9303bdad26e
+  lastKnownOriginMasterSha: 1601190c7a56e94974da0c54c96ac9303bdad26e
 currentTask:
-  id: batch-133-personal-learning-ai-request-history-route-session-boundary
+  id: batch-134-personal-learning-ai-ui-initial-history-fetch
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
-  branch: codex/batch-133-personal-learning-ai-request-history-route-session-boundary
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+  branch: codex/batch-134-personal-learning-ai-ui-initial-history-fetch
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_133_personal_learning_ai_request_history_route_session_boundary
+    readiness: pass_batch_134_personal_learning_ai_ui_initial_history_fetch
     lint: pass
     typecheck: pass
-    unit: pass_245_files_882_tests
+    unit: pass_245_files_884_tests
     build: pass_55_static_pages
-    e2e: pass_personal_ai_generation_local_request_with_history_get_1_test
+    e2e: pass_personal_ai_generation_local_request_initial_history_get_1_test
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,8 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-133 closed the personal-learning-ai request history GET route session boundary follow-up. Keep provider,
-    env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, formal
-    generated-content write paths, authorization model changes, persistence/repository work, and Cost Calibration Gate
-    blocked. A later scoped task may wire the student UI initial history fetch to this GET route.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+    Batch-134 closed the student personal-learning-ai UI initial redacted request history fetch. Keep provider,
+    env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, formal generated-content
+    write paths, authorization model changes, persistence/repository work, and Cost Calibration Gate blocked. Future
+    personal-learning-ai follow-ups should be seeded as separate queued tasks with explicit allowedFiles.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md

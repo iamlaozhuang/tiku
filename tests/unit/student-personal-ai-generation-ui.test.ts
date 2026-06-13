@@ -19,6 +19,30 @@ const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
 const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
 const localSessionUserPublicId = "user-dev-student";
 
+const serverHistoryResponse = {
+  code: 0,
+  message: "ok",
+  data: [
+    {
+      requestPublicId: "personal-ai-request-public-initial-001",
+      taskPublicId: "ai-generation-task-public-initial-001",
+      status: "succeeded",
+      requestedAt: "2026-06-12T10:00:00.000Z",
+      resultPublicId: "ai-result-public-initial-001",
+      evidenceStatus: "sufficient",
+      citationCount: 1,
+      aiCallLogPublicId: "ai-call-log-public-initial-001",
+      redactionStatus: "redacted",
+    },
+  ],
+};
+
+const emptyServerHistoryResponse = {
+  code: 0,
+  message: "ok",
+  data: [],
+};
+
 const localExperienceResponse = {
   code: 0,
   message: "ok",
@@ -159,7 +183,8 @@ const localSessionResponse = {
 };
 
 function createPersonalAiGenerationFetchMock(
-  response: unknown = localExperienceResponse,
+  experienceResponse: unknown = localExperienceResponse,
+  historyResponse: unknown = emptyServerHistoryResponse,
 ) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
@@ -178,10 +203,24 @@ function createPersonalAiGenerationFetchMock(
     }
 
     if (path === "/api/v1/personal-ai-generation-requests") {
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      if (init?.method === "GET") {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => historyResponse,
+        };
+      }
+
+      expect(init?.method).toBe("POST");
+
       return {
         ok: true,
         status: 200,
-        json: async () => response,
+        json: async () => experienceResponse,
       };
     }
 
@@ -197,10 +236,76 @@ afterEach(() => {
 });
 
 describe("StudentPersonalAiGenerationPage", () => {
+  it("loads redacted request history from the server on initial render when a student session token exists", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        expect(String(url)).toBe("/api/v1/personal-ai-generation-requests");
+        expect(init?.method).toBe("GET");
+        expect(init?.headers).toMatchObject({
+          authorization: "Bearer unit-test-session-token",
+        });
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => serverHistoryResponse,
+        };
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(
+      await screen.findByText("personal-ai-request-public-initial-001"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("ai-generation-task-public-initial-001"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("2026-06-12T10:00:00.000Z")).toBeInTheDocument();
+    expect(
+      screen.getByText("ai-result-public-initial-001"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("ai-call-log-public-initial-001"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("sufficient")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("posts a session-aligned camelCase public-id payload to the local route contract without rendering the session token", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          expect(init?.method).toBe("POST");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+            "content-type": "application/json",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
         if (String(url) === "/api/v1/sessions") {
           expect(init?.method).toBe("GET");
           expect(init?.headers).toMatchObject({
@@ -214,18 +319,7 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
-        expect(String(url)).toBe("/api/v1/personal-ai-generation-requests");
-        expect(init?.method).toBe("POST");
-        expect(init?.headers).toMatchObject({
-          authorization: "Bearer unit-test-session-token",
-          "content-type": "application/json",
-        });
-
-        return {
-          ok: true,
-          status: 200,
-          json: async () => localExperienceResponse,
-        };
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
       },
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -238,6 +332,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(
       screen.getByText("\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42"),
     ).toBeInTheDocument();
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
@@ -248,14 +343,18 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
     expect(screen.getByText("summary_only")).toBeInTheDocument();
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/sessions");
-    expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-requests",
+    );
+    expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[1]?.[0])).toBe("/api/v1/sessions");
+    expect(String(fetchMock.mock.calls[2]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests",
     );
 
     const requestBody = JSON.parse(
-      String(fetchMock.mock.calls[1]?.[1]?.body),
+      String(fetchMock.mock.calls[2]?.[1]?.body),
     ) as Record<string, unknown>;
 
     expect(requestBody).toEqual({
@@ -454,7 +553,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
 
     expect(screen.getByText(historyTitle)).toBeInTheDocument();
-    expect(screen.getByText(historyEmptyTitle)).toBeInTheDocument();
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
@@ -492,6 +591,25 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     render(createElement(StudentPersonalAiGenerationPage));
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(await screen.findByText(historyErrorTitle)).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("generated content");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("renders the initial request history error state without exposing private content", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    vi.stubGlobal(
+      "fetch",
+      createPersonalAiGenerationFetchMock(localExperienceResponse, {
+        code: 500001,
+        message: "local failure",
+        data: null,
+      }),
+    );
+
+    render(createElement(StudentPersonalAiGenerationPage));
 
     expect(await screen.findByText(historyErrorTitle)).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("provider payload");

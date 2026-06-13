@@ -20,6 +20,7 @@ const localSessionStorageKey = "tiku.localSessionToken";
 const localStudentPublicId = "user-dev-student";
 const requestButtonName = "\u53d1\u8d77\u672c\u5730 AI \u8bf7\u6c42";
 const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
+const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
 
 const forbiddenVisibleMarkers = [
   "provider payload",
@@ -164,9 +165,35 @@ test.describe("personal AI generation local request", () => {
       data: [],
     });
 
+    const initialHistoryResponsePromise = page.waitForResponse((response) => {
+      const request = response.request();
+
+      return (
+        request.method() === "GET" &&
+        new URL(response.url()).pathname ===
+          "/api/v1/personal-ai-generation-requests"
+      );
+    });
+
     await page.goto("/ai-generation");
+
+    const initialHistoryResponse = await initialHistoryResponsePromise;
+    expect(initialHistoryResponse.ok()).toBe(true);
+
+    const initialHistoryPayload = await initialHistoryResponse.json();
+    expectStandardEnvelope(initialHistoryPayload);
+    expectCamelCaseJsonKeys(initialHistoryPayload);
+    expectNoInternalIdKeys(initialHistoryPayload);
+    expectNoSensitivePayload(initialHistoryPayload, [localAuthHeaderValue]);
+    expect(initialHistoryPayload).toEqual({
+      code: 0,
+      message: "ok",
+      data: [],
+    });
+
     await expect(page.locator("body")).toContainText("personal-learning-ai");
     await expect(page.getByText(historyTitle)).toBeVisible();
+    await expect(page.getByText(historyEmptyTitle)).toBeVisible();
     await expect(page.getByText("runtimeStatus")).toHaveCount(0);
     await expectForbiddenMarkersHidden(page, [storedLocalAuthValue ?? ""]);
 

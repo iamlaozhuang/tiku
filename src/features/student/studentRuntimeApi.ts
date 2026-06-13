@@ -59,6 +59,18 @@ export async function fetchCurrentStudentSession(
   });
 }
 
+export async function fetchPersonalAiGenerationRequestHistory(
+  token: string,
+): Promise<ApiResponse<PersonalAiGenerationRequestHistoryDto | null>> {
+  return fetchStudentApi<PersonalAiGenerationRequestHistoryDto>(
+    "/api/v1/personal-ai-generation-requests",
+    token,
+    {
+      method: "GET",
+    },
+  );
+}
+
 function normalizePersonalAiGenerationHistoryStatus(
   status: PersonalAiGenerationLocalBrowserExperienceDto["resultState"]["status"],
 ): AiGenerationTaskStatus | null {

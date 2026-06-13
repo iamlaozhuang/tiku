@@ -6452,3 +6452,125 @@ tasks:
     status: closed
     result: pass
     retryCount: 0
+  - id: batch-134-personal-learning-ai-ui-initial-history-fetch
+    title: Wire student personal learning AI UI initial redacted request history fetch
+    phase: batch-134-personal-learning-ai-ui-initial-history-fetch
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-133-personal-learning-ai-request-history-route-session-boundary
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    humanApproval: >-
+      User approved executing the next suggested follow-up. Scope is limited to wiring the existing student
+      personal-learning-ai page initial history surface to the already-approved local GET
+      /api/v1/personal-ai-generation-requests route, adding focused UI unit coverage, extending the existing dedicated
+      local e2e spec, and updating docs/state/evidence/audit. Provider, env, schema, dependency, deploy, payment,
+      external-service, PR, force-push, formal generated-content write paths, authorization model changes,
+      persistence/repository work, and Cost Calibration Gate work remain forbidden.
+    autoDriveLocalImplementationApproval: >-
+      User approval covers this scoped low-risk local implementation only when changes remain inside the declared
+      allowedFiles, preserve the standard response envelope and redacted history DTO, use local-only focused unit tests
+      plus the existing local e2e spec validation, keep evidence redacted, and preserve provider, env/secret,
+      schema/migration, dependency, deploy, payment, external-service, PR, force-push, formal generated-content write
+      path, persistence/repository, authorization model, and Cost Calibration Gate blocks.
+    seededByTask: user-approved-batch-134-follow-up
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: student UI initial redacted request history fetch
+    behaviorBoundary: personal-learning-ai::student UI initial history fetch
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+    useCases:
+      - student page loads the redacted personal AI request history from the local GET route when a local session token exists
+      - history loading, empty, error, and unauthorized states are independent from the submit request state
+      - submit continues to post a session-aligned request and render only redacted public summary fields
+    acceptanceScenarios:
+      - focused UI unit test fails RED before implementation because initial render does not call GET history
+      - focused UI unit test passes after implementation and renders server-returned camelCase redacted history rows
+      - focused UI unit test proves initial history failure renders the redacted history error state without exposing session material
+      - targeted existing local e2e spec observes the page's initial GET history call and standard empty history envelope
+      - evidence proves provider payload, generated content, numeric ids, full paper content, and session material are absent
+    nonGoals:
+      - new route creation, persistence/repository queries, schema/migration, provider execution, dependency changes, deployment, PR, and force push
+    validationProfile: L5-student-ui-initial-history-fetch
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localImplementation: approved
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - persistence/repository/schema/migration work remains blocked
+      - provider/env/secret/dependency/deploy/payment/external-service work remains blocked
+      - authorization model changes remain blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - student_ui
+      - request_history
+      - authorization_boundary
+      - local_browser_flow
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-134-personal-learning-ai-ui-initial-history-fetch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-134-personal-learning-ai-ui-initial-history-fetch
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-134-personal-learning-ai-ui-initial-history-fetch
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    status: closed
+    result: pass
+    retryCount: 0

@@ -7,11 +7,12 @@ import {
   Sparkles,
   ShieldAlert,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   createLocalPersonalAiGenerationRequestHistory,
   fetchCurrentStudentSession,
+  fetchPersonalAiGenerationRequestHistory,
   fetchStudentApi,
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
@@ -21,6 +22,13 @@ import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/p
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 
 type StudentPersonalAiGenerationPageState =
+  | "empty"
+  | "loading"
+  | "ready"
+  | "error"
+  | "unauthorized";
+
+type StudentPersonalAiGenerationHistoryState =
   | "empty"
   | "loading"
   | "ready"
@@ -265,14 +273,14 @@ function StudentPersonalAiGenerationContractSummary({
 }
 
 function StudentPersonalAiGenerationHistorySummary({
-  pageState,
+  historyState,
   historyRows,
 }: {
-  pageState: StudentPersonalAiGenerationPageState;
+  historyState: StudentPersonalAiGenerationHistoryState;
   historyRows: PersonalAiGenerationRequestHistoryDto;
 }) {
   function renderHistoryBody() {
-    if (pageState === "loading") {
+    if (historyState === "loading") {
       return (
         <div className="flex items-center gap-3 py-3">
           <Loader2
@@ -286,7 +294,7 @@ function StudentPersonalAiGenerationHistorySummary({
       );
     }
 
-    if (pageState === "unauthorized") {
+    if (historyState === "unauthorized") {
       return (
         <p className="text-text-secondary border-border rounded-lg border border-dashed px-3 py-3 text-sm">
           {copy.historyUnauthorizedTitle}
@@ -294,7 +302,7 @@ function StudentPersonalAiGenerationHistorySummary({
       );
     }
 
-    if (pageState === "error") {
+    if (historyState === "error") {
       return (
         <p className="text-warning bg-warning/10 rounded-lg px-3 py-3 text-sm font-medium">
           {copy.historyErrorTitle}
@@ -383,8 +391,61 @@ export function StudentPersonalAiGenerationPage() {
     );
   const [experience, setExperience] =
     useState<PersonalAiGenerationLocalBrowserExperienceDto | null>(null);
+  const [historyState, setHistoryState] =
+    useState<StudentPersonalAiGenerationHistoryState>(
+      hasSessionToken ? "loading" : "unauthorized",
+    );
   const [requestHistory, setRequestHistory] =
     useState<PersonalAiGenerationRequestHistoryDto>([]);
+
+  useEffect(() => {
+    const storedSessionValue = getStoredStudentSessionToken();
+
+    if (storedSessionValue === null) {
+      return;
+    }
+
+    const storedSessionToken = storedSessionValue;
+    let isCancelled = false;
+
+    async function fetchInitialRequestHistory() {
+      try {
+        const historyResponse =
+          await fetchPersonalAiGenerationRequestHistory(storedSessionToken);
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(historyResponse)) {
+          setHasSessionToken(false);
+          setHistoryState("unauthorized");
+          setRequestHistory([]);
+          return;
+        }
+
+        if (historyResponse.code !== 0 || historyResponse.data === null) {
+          setHistoryState("error");
+          setRequestHistory([]);
+          return;
+        }
+
+        setRequestHistory(historyResponse.data);
+        setHistoryState(historyResponse.data.length === 0 ? "empty" : "ready");
+      } catch {
+        if (!isCancelled) {
+          setHistoryState("error");
+          setRequestHistory([]);
+        }
+      }
+    }
+
+    void fetchInitialRequestHistory();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   async function handleSubmitPersonalAiGenerationRequest() {
     const storedSessionValue = getStoredStudentSessionToken();
@@ -392,32 +453,36 @@ export function StudentPersonalAiGenerationPage() {
     if (storedSessionValue === null) {
       setHasSessionToken(false);
       setPageState("unauthorized");
+      setHistoryState("unauthorized");
       setRequestHistory([]);
       return;
     }
 
     setHasSessionToken(true);
     setPageState("loading");
-    setRequestHistory([]);
 
     try {
       const sessionResponse =
         await fetchCurrentStudentSession(storedSessionValue);
 
       if (isStudentUnauthorizedResponse(sessionResponse)) {
+        setHasSessionToken(false);
         setPageState("unauthorized");
+        setHistoryState("unauthorized");
         setRequestHistory([]);
         return;
       }
 
       if (sessionResponse.code !== 0 || sessionResponse.data === null) {
         setPageState("error");
+        setHistoryState("error");
         setRequestHistory([]);
         return;
       }
 
       if (sessionResponse.data.user.userType === null) {
         setPageState("unauthorized");
+        setHistoryState("unauthorized");
         setRequestHistory([]);
         return;
       }
@@ -441,24 +506,31 @@ export function StudentPersonalAiGenerationPage() {
         );
 
       if (isStudentUnauthorizedResponse(response)) {
+        setHasSessionToken(false);
         setPageState("unauthorized");
+        setHistoryState("unauthorized");
         setRequestHistory([]);
         return;
       }
 
       if (response.code !== 0 || response.data === null) {
         setPageState("error");
+        setHistoryState("error");
         setRequestHistory([]);
         return;
       }
 
       setExperience(response.data);
-      setRequestHistory(
-        createLocalPersonalAiGenerationRequestHistory(response.data),
+      const localRequestHistory = createLocalPersonalAiGenerationRequestHistory(
+        response.data,
       );
+
+      setRequestHistory(localRequestHistory);
+      setHistoryState(localRequestHistory.length === 0 ? "empty" : "ready");
       setPageState("ready");
     } catch {
       setPageState("error");
+      setHistoryState("error");
       setRequestHistory([]);
     }
   }
@@ -534,7 +606,7 @@ export function StudentPersonalAiGenerationPage() {
       ) : null}
 
       <StudentPersonalAiGenerationHistorySummary
-        pageState={pageState}
+        historyState={historyState}
         historyRows={requestHistory}
       />
     </section>
