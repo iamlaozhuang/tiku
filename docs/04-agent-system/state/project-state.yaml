@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-137-personal-learning-ai-task-persistence-schema-migration-closed
-updatedAt: "2026-06-13T00:38:09-07:00"
+currentPhase: batch-138-personal-learning-ai-request-history-repository-closed
+updatedAt: "2026-06-13T00:52:23-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c540ea037656975878b5be83c1975f1a5a9d98af
-  lastKnownOriginMasterSha: c540ea037656975878b5be83c1975f1a5a9d98af
+  lastKnownMasterSha: 70d5fa65042349bbd483617fa046e7e81729e260
+  lastKnownOriginMasterSha: 70d5fa65042349bbd483617fa046e7e81729e260
 currentTask:
-  id: batch-137-personal-learning-ai-task-persistence-schema-migration
+  id: batch-138-personal-learning-ai-request-history-repository
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
-  branch: codex/batch-137-personal-learning-ai-task-persistence-schema-migration
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+  branch: codex/batch-138-personal-learning-ai-request-history-repository
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_137_personal_learning_ai_task_persistence_schema_migration
+    readiness: pass_batch_138_personal_learning_ai_request_history_repository
     lint: pass
     typecheck: pass
-    unit: pass_245_files_888_tests
+    unit: pass_247_files_895_tests
     build: pass_55_static_pages
-    e2e: not_required_schema_migration_batch_137
-    preCommitHook: pass_batch_137_pre_commit_hardening
-    prePushHook: pass_batch_137_pre_push_readiness
+    e2e: not_required_repository_batch_138
+    preCommitHook: pass_batch_138_pre_commit_hardening
+    prePushHook: pass_batch_138_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,8 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-137 closed the local dev ai_generation_task schema/migration task with redacted metadata only. The exact next
-    pending queue task is batch-138-personal-learning-ai-request-history-repository. Route, UI, e2e, dependency, provider,
-    env/secret, deploy, payment, external-service, destructive DB, formal generated-content write paths, authorization
-    model changes, PR, force-push, and Cost Calibration Gate execution remain blocked outside their own approved tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    Batch-138 closed the request history repository and redacted mapper. The exact next pending queue task is
+    batch-139-personal-learning-ai-route-get-persistent-history. Schema/drizzle, UI, dependency, provider, env/secret,
+    deploy, payment, external-service, destructive DB, formal generated-content write paths, authorization model
+    changes, PR, force-push, and Cost Calibration Gate execution remain blocked outside their own approved tasks.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
