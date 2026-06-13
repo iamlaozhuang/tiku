@@ -1,9 +1,11 @@
 import {
   createErrorResponse,
+  createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import type { PersonalAiGenerationRequestHistoryDto } from "../contracts/personal-ai-generation-request-history-contract";
+import type { PersonalAiGenerationRequestRepository } from "../repositories/personal-ai-generation-request-repository";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
-import { buildPersonalAiGenerationRequestHistoryReadModel } from "./personal-ai-generation-request-history-service";
 import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
@@ -18,6 +20,25 @@ export type PersonalAiGenerationRequestUserContext = {
 export type PersonalAiGenerationRequestUserResolver = (
   request: Request,
 ) => Promise<PersonalAiGenerationRequestUserContext | null>;
+
+export type PersonalAiGenerationRequestRouteDependencies = {
+  requestRepository?: Pick<
+    PersonalAiGenerationRequestRepository,
+    "listRequestHistory"
+  >;
+};
+
+const REQUEST_HISTORY_UNAVAILABLE_CODE = 500017;
+const REQUEST_HISTORY_UNAVAILABLE_MESSAGE =
+  "Personal AI request history is temporarily unavailable.";
+const emptyRequestRepository: Pick<
+  PersonalAiGenerationRequestRepository,
+  "listRequestHistory"
+> = {
+  async listRequestHistory() {
+    return [];
+  },
+};
 
 async function readRequestJson(request: Request): Promise<unknown> {
   try {
@@ -103,7 +124,11 @@ export function createPersonalAiGenerationRequestUserResolver(
 
 export function createPersonalAiGenerationRequestRouteHandlers(
   resolveUserContext: PersonalAiGenerationRequestUserResolver,
+  dependencies: PersonalAiGenerationRequestRouteDependencies = {},
 ) {
+  const requestRepository =
+    dependencies.requestRepository ?? emptyRequestRepository;
+
   return createRouteHandlersWithErrorEnvelope({
     collection: {
       GET: createRouteHandlerWithErrorEnvelope(
@@ -117,9 +142,24 @@ export function createPersonalAiGenerationRequestRouteHandlers(
             return createJsonResponse(userContext);
           }
 
-          return createJsonResponse(
-            buildPersonalAiGenerationRequestHistoryReadModel([]),
-          );
+          try {
+            const history = await requestRepository.listRequestHistory({
+              ownerPublicId: userContext.userPublicId,
+            });
+
+            return createJsonResponse(
+              createSuccessResponse<PersonalAiGenerationRequestHistoryDto>(
+                history,
+              ),
+            );
+          } catch {
+            return createJsonResponse(
+              createErrorResponse(
+                REQUEST_HISTORY_UNAVAILABLE_CODE,
+                REQUEST_HISTORY_UNAVAILABLE_MESSAGE,
+              ),
+            );
+          }
         },
       ),
       POST: createRouteHandlerWithErrorEnvelope(

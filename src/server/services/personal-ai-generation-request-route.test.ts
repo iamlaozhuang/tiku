@@ -4,6 +4,7 @@ import {
   createPersonalAiGenerationRequestRouteHandlers,
   createPersonalAiGenerationRequestUserResolver,
 } from "./personal-ai-generation-request-route";
+import type { PersonalAiGenerationRequestRepository } from "../repositories/personal-ai-generation-request-repository";
 import type { SessionService } from "./session-service";
 
 const userContext = {
@@ -98,6 +99,25 @@ function getPersonalAiGenerationRequestHistoryRouteHandler(
   expect(getHandler).toEqual(expect.any(Function));
 
   return getHandler as (request: Request) => Promise<Response>;
+}
+
+function createRequestRepository(
+  historyRows: Awaited<
+    ReturnType<PersonalAiGenerationRequestRepository["listRequestHistory"]>
+  > = [],
+): Pick<PersonalAiGenerationRequestRepository, "listRequestHistory"> & {
+  calls: Array<{ ownerPublicId: string; limit?: number }>;
+} {
+  const calls: Array<{ ownerPublicId: string; limit?: number }> = [];
+
+  return {
+    calls,
+    async listRequestHistory(query) {
+      calls.push(query);
+
+      return historyRows;
+    },
+  };
 }
 
 describe("personal AI generation request route handlers", () => {
@@ -223,8 +243,12 @@ describe("personal AI generation request route handlers", () => {
 
   it("returns a session-owned empty request history list without echoing query user ids", async () => {
     const staleQueryUserPublicId = "query_stale_user_public_999";
+    const requestRepository = createRequestRepository();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,
+      {
+        requestRepository,
+      },
     );
 
     const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
@@ -238,8 +262,100 @@ describe("personal AI generation request route handlers", () => {
       message: "ok",
       data: [],
     });
+    expect(requestRepository.calls).toEqual([
+      {
+        ownerPublicId: userContext.userPublicId,
+      },
+    ]);
     expect(serializedPayload).not.toContain(staleQueryUserPublicId);
     expect(serializedPayload).not.toMatch(/"id":/);
+  });
+
+  it("returns persisted redacted request history rows from the repository", async () => {
+    const requestRepository = createRequestRepository([
+      {
+        requestPublicId: "personal_ai_request_public_route_301",
+        taskPublicId: "ai_generation_task_public_route_301",
+        status: "succeeded",
+        requestedAt: "2026-06-12T16:30:00.000Z",
+        resultPublicId: "ai_generation_result_public_route_301",
+        evidenceStatus: "sufficient",
+        citationCount: 2,
+        aiCallLogPublicId: "ai_call_log_public_route_301",
+        redactionStatus: "redacted",
+      },
+    ]);
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository,
+      },
+    );
+
+    const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+      collection,
+    )(createGetRequest("?userPublicId=stale_client_user&id=701"));
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: [
+        {
+          requestPublicId: "personal_ai_request_public_route_301",
+          taskPublicId: "ai_generation_task_public_route_301",
+          status: "succeeded",
+          requestedAt: "2026-06-12T16:30:00.000Z",
+          resultPublicId: "ai_generation_result_public_route_301",
+          evidenceStatus: "sufficient",
+          citationCount: 2,
+          aiCallLogPublicId: "ai_call_log_public_route_301",
+          redactionStatus: "redacted",
+        },
+      ],
+    });
+    expect(requestRepository.calls).toEqual([
+      {
+        ownerPublicId: userContext.userPublicId,
+      },
+    ]);
+    expect(serializedPayload).not.toContain("stale_client_user");
+    expect(serializedPayload).not.toMatch(/"id":/);
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("generated content");
+  });
+
+  it("returns a standard error envelope when persistent history lookup fails", async () => {
+    const requestRepository: Pick<
+      PersonalAiGenerationRequestRepository,
+      "listRequestHistory"
+    > = {
+      async listRequestHistory() {
+        throw new Error("database stack with internal connection details");
+      },
+    };
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository,
+      },
+    );
+
+    const response =
+      await getPersonalAiGenerationRequestHistoryRouteHandler(collection)(
+        createGetRequest(),
+      );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 500017,
+      message: "Personal AI request history is temporarily unavailable.",
+      data: null,
+    });
+    expect(serializedPayload).not.toContain("database stack");
+    expect(serializedPayload).not.toContain("internal connection details");
   });
 
   it("returns the local browser experience contract when requested", async () => {

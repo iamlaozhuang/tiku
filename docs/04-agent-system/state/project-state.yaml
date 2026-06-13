@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-138-personal-learning-ai-request-history-repository-closed
-updatedAt: "2026-06-13T00:52:23-07:00"
+currentPhase: batch-139-personal-learning-ai-route-get-persistent-history-closed
+updatedAt: "2026-06-13T01:04:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 70d5fa65042349bbd483617fa046e7e81729e260
-  lastKnownOriginMasterSha: 70d5fa65042349bbd483617fa046e7e81729e260
+  lastKnownMasterSha: f08cdcd1733d1d6dd92bae9ab6445acbd6116630
+  lastKnownOriginMasterSha: f08cdcd1733d1d6dd92bae9ab6445acbd6116630
 currentTask:
-  id: batch-138-personal-learning-ai-request-history-repository
+  id: batch-139-personal-learning-ai-route-get-persistent-history
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
-  branch: codex/batch-138-personal-learning-ai-request-history-repository
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+  branch: codex/batch-139-personal-learning-ai-route-get-persistent-history
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_138_personal_learning_ai_request_history_repository
+    readiness: pass_batch_139_personal_learning_ai_route_get_persistent_history
     lint: pass
     typecheck: pass
-    unit: pass_247_files_895_tests
+    unit: pass_247_files_897_tests
     build: pass_55_static_pages
-    e2e: not_required_repository_batch_138
-    preCommitHook: pass_batch_138_pre_commit_hardening
-    prePushHook: pass_batch_138_pre_push_readiness
+    e2e: pass_existing_personal_ai_generation_local_request_spec
+    preCommitHook: pass_batch_139_pre_commit_hardening
+    prePushHook: pass_batch_139_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,8 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-138 closed the request history repository and redacted mapper. The exact next pending queue task is
-    batch-139-personal-learning-ai-route-get-persistent-history. Schema/drizzle, UI, dependency, provider, env/secret,
-    deploy, payment, external-service, destructive DB, formal generated-content write paths, authorization model
-    changes, PR, force-push, and Cost Calibration Gate execution remain blocked outside their own approved tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    Batch-139 closed the GET persistent history route wiring. The exact next pending queue task is
+    batch-140-personal-learning-ai-route-post-persistent-request. UI, schema/drizzle, repository/mapper/contract/model
+    edits, dependency, provider, env/secret, deploy, payment, external-service, destructive DB, formal generated-content
+    write paths, authorization model changes, PR, force-push, and Cost Calibration Gate execution remain blocked outside
+    their own approved tasks.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md

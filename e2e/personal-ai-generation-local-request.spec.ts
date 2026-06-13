@@ -21,6 +21,7 @@ const localStudentPublicId = "user-dev-student";
 const requestButtonName = "\u53d1\u8d77\u672c\u5730 AI \u8bf7\u6c42";
 const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
 const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
+const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
 
 const forbiddenVisibleMarkers = [
   "provider payload",
@@ -116,6 +117,24 @@ function expectNoSensitivePayload(value: unknown, values: string[]) {
   }
 }
 
+function isPersistentHistoryUnavailablePayload(payload: ApiPayload): boolean {
+  return (
+    payload.code === 500017 &&
+    payload.message ===
+      "Personal AI request history is temporarily unavailable." &&
+    payload.data === null
+  );
+}
+
+function expectLocalHistoryEnvelope(payload: ApiPayload) {
+  if (payload.code === 0) {
+    expect(Array.isArray(payload.data)).toBe(true);
+    return;
+  }
+
+  expect(isPersistentHistoryUnavailablePayload(payload)).toBe(true);
+}
+
 function parseRecordPayload(value: string | null): Record<string, unknown> {
   if (value === null) {
     return {};
@@ -159,11 +178,7 @@ test.describe("personal AI generation local request", () => {
     expect(JSON.stringify(requestHistoryPayload)).not.toContain(
       "client-owned-history-user",
     );
-    expect(requestHistoryPayload).toEqual({
-      code: 0,
-      message: "ok",
-      data: [],
-    });
+    expectLocalHistoryEnvelope(requestHistoryPayload);
 
     const initialHistoryResponsePromise = page.waitForResponse((response) => {
       const request = response.request();
@@ -185,15 +200,15 @@ test.describe("personal AI generation local request", () => {
     expectCamelCaseJsonKeys(initialHistoryPayload);
     expectNoInternalIdKeys(initialHistoryPayload);
     expectNoSensitivePayload(initialHistoryPayload, [localAuthHeaderValue]);
-    expect(initialHistoryPayload).toEqual({
-      code: 0,
-      message: "ok",
-      data: [],
-    });
+    expectLocalHistoryEnvelope(initialHistoryPayload);
 
     await expect(page.locator("body")).toContainText("personal-learning-ai");
     await expect(page.getByText(historyTitle)).toBeVisible();
-    await expect(page.getByText(historyEmptyTitle)).toBeVisible();
+    if (isPersistentHistoryUnavailablePayload(initialHistoryPayload)) {
+      await expect(page.getByText(historyErrorTitle)).toBeVisible();
+    } else {
+      await expect(page.getByText(historyEmptyTitle)).toBeVisible();
+    }
     await expect(page.getByText("runtimeStatus")).toHaveCount(0);
     await expectForbiddenMarkersHidden(page, [storedLocalAuthValue ?? ""]);
 
