@@ -145,38 +145,6 @@ test.describe("personal AI generation local request", () => {
     await expect(page.getByText("runtimeStatus")).toHaveCount(0);
     await expectForbiddenMarkersHidden(page, [storedLocalAuthValue ?? ""]);
 
-    await page.route(
-      "**/api/v1/personal-ai-generation-requests",
-      async (route) => {
-        const request = route.request();
-
-        if (request.method() !== "POST") {
-          await route.continue();
-          return;
-        }
-
-        const requestPayload = parseRecordPayload(request.postData());
-        const sessionAlignedPayload = {
-          ...requestPayload,
-          actorPublicId: localStudentPublicId,
-          ownerPublicId: localStudentPublicId,
-          quotaOwnerPublicId: localStudentPublicId,
-        };
-
-        expectNoSensitivePayload(sessionAlignedPayload, [
-          storedLocalAuthValue ?? "",
-        ]);
-
-        await route.continue({
-          headers: {
-            ...request.headers(),
-            "content-type": "application/json",
-          },
-          postData: JSON.stringify(sessionAlignedPayload),
-        });
-      },
-    );
-
     const requestResponsePromise = page.waitForResponse((response) => {
       const request = response.request();
 
@@ -191,6 +159,19 @@ test.describe("personal AI generation local request", () => {
 
     const requestResponse = await requestResponsePromise;
     expect(requestResponse.ok()).toBe(true);
+
+    const postedRequestPayload = parseRecordPayload(
+      requestResponse.request().postData(),
+    );
+    expect(postedRequestPayload).toMatchObject({
+      actorPublicId: localStudentPublicId,
+      ownerPublicId: localStudentPublicId,
+      quotaOwnerPublicId: localStudentPublicId,
+      userPublicId: localStudentPublicId,
+    });
+    expectNoSensitivePayload(postedRequestPayload, [
+      storedLocalAuthValue ?? "",
+    ]);
 
     const requestPayload = await requestResponse.json();
     expectStandardEnvelope(requestPayload);

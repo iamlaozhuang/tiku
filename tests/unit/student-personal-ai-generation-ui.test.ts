@@ -17,6 +17,7 @@ const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
 const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
 const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
 const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
+const localSessionUserPublicId = "user-dev-student";
 
 const localExperienceResponse = {
   code: 0,
@@ -135,6 +136,59 @@ const localExperienceResponse = {
   },
 };
 
+const localSessionResponse = {
+  code: 0,
+  message: "ok",
+  data: {
+    user: {
+      publicId: localSessionUserPublicId,
+      phone: "13900000002",
+      name: "Local Student",
+      userType: "personal",
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: null,
+      adminPublicId: null,
+      adminRoles: [],
+    },
+    session: {
+      expiresAt: "2026-06-19T12:00:00.000Z",
+    },
+  },
+};
+
+function createPersonalAiGenerationFetchMock(
+  response: unknown = localExperienceResponse,
+) {
+  return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+    const path = String(url);
+
+    if (path === "/api/v1/sessions") {
+      expect(init?.method).toBe("GET");
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => localSessionResponse,
+      };
+    }
+
+    if (path === "/api/v1/personal-ai-generation-requests") {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => response,
+      };
+    }
+
+    throw new Error(`Unexpected fetch path: ${path}`);
+  });
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -143,10 +197,23 @@ afterEach(() => {
 });
 
 describe("StudentPersonalAiGenerationPage", () => {
-  it("posts a camelCase public-id payload to the local route contract without rendering the session token", async () => {
+  it("posts a session-aligned camelCase public-id payload to the local route contract without rendering the session token", async () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/sessions") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
         expect(String(url)).toBe("/api/v1/personal-ai-generation-requests");
         expect(init?.method).toBe("POST");
         expect(init?.headers).toMatchObject({
@@ -181,15 +248,19 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
     expect(screen.getByText("summary_only")).toBeInTheDocument();
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe("/api/v1/sessions");
+    expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-requests",
+    );
 
     const requestBody = JSON.parse(
-      String(fetchMock.mock.calls[0]?.[1]?.body),
+      String(fetchMock.mock.calls[1]?.[1]?.body),
     ) as Record<string, unknown>;
 
     expect(requestBody).toEqual({
       responseMode: "local_browser_experience",
-      userPublicId: "student-public-001",
+      userPublicId: localSessionUserPublicId,
       authorizationPublicId: "personal-auth-public-001",
       aiFuncType: "explanation",
       questionPublicId: "question-public-001",
@@ -201,13 +272,13 @@ describe("StudentPersonalAiGenerationPage", () => {
       aiCallLogPublicId: null,
       taskPublicId: "ai-generation-task-public-001",
       taskType: "ai_question_generation",
-      actorPublicId: "student-public-001",
+      actorPublicId: localSessionUserPublicId,
       authorizationSource: "personal_auth",
       ownerType: "personal",
-      ownerPublicId: "student-public-001",
+      ownerPublicId: localSessionUserPublicId,
       organizationPublicId: null,
       quotaOwnerType: "personal",
-      quotaOwnerPublicId: "student-public-001",
+      quotaOwnerPublicId: localSessionUserPublicId,
       effectiveEdition: "advanced",
       isAuthorizationActive: true,
       isScopeAllowed: true,
@@ -263,11 +334,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     };
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => blockedResponse,
-      })),
+      createPersonalAiGenerationFetchMock(blockedResponse),
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
@@ -318,11 +385,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     };
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => redactedReferenceResponse,
-      })),
+      createPersonalAiGenerationFetchMock(redactedReferenceResponse),
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
@@ -385,11 +448,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     };
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => redactedReferenceResponse,
-      })),
+      createPersonalAiGenerationFetchMock(redactedReferenceResponse),
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
@@ -424,15 +483,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          code: 500001,
-          message: "local failure",
-          data: null,
-        }),
-      })),
+      createPersonalAiGenerationFetchMock({
+        code: 500001,
+        message: "local failure",
+        data: null,
+      }),
     );
 
     render(createElement(StudentPersonalAiGenerationPage));

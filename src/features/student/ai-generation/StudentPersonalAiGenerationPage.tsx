@@ -11,6 +11,7 @@ import { useState } from "react";
 
 import {
   createLocalPersonalAiGenerationRequestHistory,
+  fetchCurrentStudentSession,
   fetchStudentApi,
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
@@ -128,10 +129,15 @@ function readHasStudentSessionToken(): boolean {
 
 function createPersonalAiGenerationRequestBody(
   draft: StudentPersonalAiGenerationRequestDraft,
+  userPublicId: string,
 ) {
   return {
     responseMode: "local_browser_experience",
     ...draft,
+    userPublicId,
+    actorPublicId: userPublicId,
+    ownerPublicId: userPublicId,
+    quotaOwnerPublicId: userPublicId,
   };
 }
 
@@ -395,6 +401,27 @@ export function StudentPersonalAiGenerationPage() {
     setRequestHistory([]);
 
     try {
+      const sessionResponse =
+        await fetchCurrentStudentSession(storedSessionValue);
+
+      if (isStudentUnauthorizedResponse(sessionResponse)) {
+        setPageState("unauthorized");
+        setRequestHistory([]);
+        return;
+      }
+
+      if (sessionResponse.code !== 0 || sessionResponse.data === null) {
+        setPageState("error");
+        setRequestHistory([]);
+        return;
+      }
+
+      if (sessionResponse.data.user.userType === null) {
+        setPageState("unauthorized");
+        setRequestHistory([]);
+        return;
+      }
+
       const response =
         await fetchStudentApi<PersonalAiGenerationLocalBrowserExperienceDto>(
           "/api/v1/personal-ai-generation-requests",
@@ -407,6 +434,7 @@ export function StudentPersonalAiGenerationPage() {
             body: JSON.stringify(
               createPersonalAiGenerationRequestBody(
                 personalAiGenerationRequestDraft,
+                sessionResponse.data.user.publicId,
               ),
             ),
           },

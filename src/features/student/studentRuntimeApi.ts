@@ -1,4 +1,5 @@
 import type { ApiResponse } from "@/server/contracts/api-response";
+import type { AuthContextDto } from "@/server/contracts/auth-contract";
 import type { PersonalAiGenerationLocalBrowserExperienceDto } from "@/server/contracts/personal-ai-generation-local-browser-experience-contract";
 import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/personal-ai-generation-request-history-contract";
 import type { AiGenerationTaskStatus } from "@/server/models/ai-generation-task";
@@ -48,6 +49,14 @@ export function isStudentUnauthorizedResponse(
   payload: ApiResponse<unknown>,
 ): boolean {
   return payload.code === 401001;
+}
+
+export async function fetchCurrentStudentSession(
+  token: string,
+): Promise<ApiResponse<AuthContextDto | null>> {
+  return fetchStudentApi<AuthContextDto>("/api/v1/sessions", token, {
+    method: "GET",
+  });
 }
 
 function normalizePersonalAiGenerationHistoryStatus(

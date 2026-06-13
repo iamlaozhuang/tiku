@@ -4134,6 +4134,116 @@ tasks:
     status: closed
     result: pass
     retryCount: 0
+  - id: batch-131-personal-learning-ai-session-public-id-request-alignment
+    title: Align personal learning AI request publicIds with current student session
+    phase: batch-131-personal-learning-ai-session-public-id-request-alignment
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-130-personal-learning-ai-dedicated-local-e2e-spec
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+    humanApproval: >-
+      User approved executing the suggested follow-up task after batch-130: align personal-learning-ai request
+      actor/owner/quota publicIds with the current student session and remove the batch-130 test-only e2e payload
+      alignment. Provider, env, schema, dependency, deploy, payment, external-service, PR, and force-push work remain
+      forbidden.
+    autoDriveLocalImplementationApproval: >-
+      User approval covers this scoped low-risk local implementation only when changes remain inside the declared
+      allowedFiles, use existing local session/runtime API surfaces, keep evidence redacted, and preserve provider,
+      env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, formal
+      generated-content write path, and Cost Calibration Gate blocks.
+    seededByTask: user-approved-batch-131-follow-up
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: remove test-only public-id payload alignment from the dedicated local e2e spec
+    behaviorBoundary: personal-learning-ai::session public-id request alignment
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
+    useCases:
+      - student local browser flow derives request ownership publicIds from the current session
+      - dedicated local e2e spec submits through the real page request without route payload rewriting
+      - request and history display remain redacted and provider-free
+    acceptanceScenarios:
+      - unit test proves `/api/v1/sessions` is read with the local session token before the personal AI request is submitted
+      - unit test proves `actorPublicId`, `ownerPublicId`, and `quotaOwnerPublicId` equal the current session user publicId
+      - e2e spec logs in a local student, submits the local personal AI request, and observes a standard success envelope without rewriting request payload
+      - evidence proves provider payload, generated content, numeric ids, full paper content, and session material are absent
+    nonGoals:
+      - route/service/repository rewrites, authorization model changes, provider execution, schema/migration, dependency changes, deployment, PR, and force push
+    validationProfile: L5-local-session-aligned-e2e
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localImplementation: approved
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - provider/env/secret/schema/migration/dependency/deploy/payment/external-service work remains blocked
+      - authorization model changes remain blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: closed
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - student_flow
+      - authorization_boundary
+      - local_browser_flow
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-131-personal-learning-ai-session-public-id-request-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-131-personal-learning-ai-session-public-id-request-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-131-personal-learning-ai-session-public-id-request-alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+    status: closed
+    result: pass
+    retryCount: 0
   - id: batch-122-personal-learning-ai-redacted-ai-call-log-reference
     title: Module Run v2 personal-learning-ai implementation seed
     phase: batch-122-personal-learning-ai-redacted-ai-call-log-reference

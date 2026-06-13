@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-130-personal-learning-ai-dedicated-local-e2e-spec
-updatedAt: "2026-06-12T20:05:00-07:00"
+currentPhase: batch-131-personal-learning-ai-session-public-id-request-alignment
+updatedAt: "2026-06-12T21:14:42-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,17 +266,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a260394628b0ca12d461904a924a6ed15464a67f
-  lastKnownOriginMasterSha: a260394628b0ca12d461904a924a6ed15464a67f
+  lastKnownMasterSha: aba3cb866887f539ca37e206b2a2463a66acad61
+  lastKnownOriginMasterSha: aba3cb866887f539ca37e206b2a2463a66acad61
 currentTask:
-  id: batch-130-personal-learning-ai-dedicated-local-e2e-spec
+  id: batch-131-personal-learning-ai-session-public-id-request-alignment
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
-  branch: codex/batch-130-personal-learning-ai-dedicated-local-e2e-spec
-  commitSha: a260394628b0ca12d461904a924a6ed15464a67f
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+  branch: codex/batch-131-personal-learning-ai-session-public-id-request-alignment
+  commitSha: aba3cb866887f539ca37e206b2a2463a66acad61
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -293,12 +293,12 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_130_personal_learning_ai_dedicated_local_e2e_spec
+    readiness: pass_batch_131_personal_learning_ai_session_public_id_request_alignment
     lint: pass
     typecheck: pass
     unit: pass_245_files_879_tests
     build: pass_55_static_pages
-    e2e: pass_dedicated_personal_ai_generation_local_request_1_test
+    e2e: pass_session_aligned_personal_ai_generation_local_request_1_test
     preCommitHook: pass
     prePushHook: pass
 riskGates:
@@ -316,7 +316,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Personal-learning-ai seeded auth-flow sequence is closed through batch-130. No further queued personal-learning-ai
-    seeded task is executable from this batch sequence. Keep provider, env/secret, schema/migration, dependency, deploy,
-    payment, external-service, PR, force-push, formal generated-content write paths, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
+    Batch-131 closed the personal-learning-ai session public-id alignment follow-up. The dedicated local e2e spec no
+    longer rewrites request payloads. Keep provider, env/secret, schema/migration, dependency, deploy, payment,
+    external-service, PR, force-push, formal generated-content write paths, and Cost Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
