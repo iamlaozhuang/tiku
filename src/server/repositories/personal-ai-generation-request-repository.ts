@@ -149,7 +149,9 @@ export function createPersonalAiGenerationRequestRepository(
         };
       }
 
-      const insertedRow = await gateway.insertPendingRequest(input);
+      const insertedRow = await gateway.insertPendingRequest(
+        createServerOwnedPendingRequestInput(input),
+      );
       const resolvedRow =
         insertedRow ??
         (await gateway.findRequestByIdempotencyKey({
@@ -166,6 +168,18 @@ export function createPersonalAiGenerationRequestRepository(
         historyItem: mapPersonalAiGenerationRequestRowToHistoryDto(resolvedRow),
       };
     },
+  };
+}
+
+function createServerOwnedPendingRequestInput(
+  input: CreatePersonalAiGenerationRequestInput,
+): CreatePersonalAiGenerationRequestInput {
+  return {
+    ...input,
+    resultPublicId: null,
+    evidenceStatus: "none",
+    citationCount: 0,
+    aiCallLogPublicId: null,
   };
 }
 

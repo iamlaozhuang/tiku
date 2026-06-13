@@ -251,4 +251,44 @@ describe("personal AI generation request repository", () => {
     expect(gateway.insertInputs).toHaveLength(1);
     expect(JSON.stringify(result)).not.toMatch(/"id":/);
   });
+
+  it("creates new pending requests with server-owned result metadata", async () => {
+    const gateway = createGateway([]);
+    const repository = createPersonalAiGenerationRequestRepository(gateway);
+
+    await repository.createOrReuseRequest({
+      requestPublicId: "personal_ai_request_public_server_owned",
+      taskPublicId: "ai_generation_task_public_server_owned",
+      taskType: "ai_question_generation",
+      aiFuncType: "explanation",
+      authorizationPublicId: "personal_auth_public_server_owned",
+      actorPublicId: "student_public_server_owned",
+      ownerPublicId: "student_public_server_owned",
+      organizationPublicId: null,
+      quotaOwnerPublicId: "student_public_server_owned",
+      effectiveEdition: "advanced",
+      questionPublicId: "question_public_server_owned",
+      answerRecordPublicId: "answer_record_public_server_owned",
+      paperPublicId: "paper_public_server_owned",
+      mockExamPublicId: null,
+      idempotencyKeyHash: "sha256:personal_ai_generation_server_owned",
+      requestedAt: new Date("2026-06-12T12:30:00.000Z"),
+      resultPublicId: "client_result_public_stale_repository",
+      evidenceStatus: "sufficient",
+      citationCount: 9,
+      aiCallLogPublicId: "client_ai_call_log_public_stale_repository",
+      isAuthorizationActive: true,
+      isScopeAllowed: true,
+      isQuotaAvailable: true,
+      isRuntimeConfigReady: true,
+    });
+
+    expect(gateway.insertInputs).toHaveLength(1);
+    expect(gateway.insertInputs[0]).toMatchObject({
+      resultPublicId: null,
+      evidenceStatus: "none",
+      citationCount: 0,
+      aiCallLogPublicId: null,
+    });
+  });
 });
