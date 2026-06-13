@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation-closed
-updatedAt: "2026-06-13T03:32:45-07:00"
+currentPhase: batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement-closed
+updatedAt: "2026-06-13T03:37:25-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
   lastKnownOriginMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
 currentTask:
-  id: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+  id: batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
-  branch: codex/batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+  branch: codex/batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_149_personal_learning_ai_local_role_flow_server_owned_metadata_validation
+    readiness: pass_batch_150_personal_learning_ai_provider_env_dependency_cost_blocked_gate_refinement
     lint: pass
     typecheck: pass
     unit: pass_247_files_903_tests
     build: pass_55_static_pages
-    e2e: pass_personal_ai_generation_local_request_1_test
-    preCommitHook: pass_batch_149_pre_commit_hardening
-    prePushHook: pass_batch_149_pre_push_readiness
+    e2e: not_required_l0_blocked_gate_docs_only
+    preCommitHook: pass_batch_150_pre_commit_hardening
+    prePushHook: pass_batch_150_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-149 validated the queued existing local personal-learning-ai student role-flow e2e spec after server-owned
-    metadata hardening and security review. The next executable queue item is batch-150 provider/env/dependency/cost
-    blocked-gate refinement. Source edits, e2e edits, provider/env/dependency execution, generated-content writes,
-    schema/migration, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate execution remain
-    blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+    Batch-150 recorded the provider/env/dependency/local provider sandbox and Cost Calibration blocked gate after
+    batch-149 validation. No batch-151+ personal-learning-ai task is currently queued by this run. Future provider,
+    env/secret, dependency/package/lockfile, local provider sandbox, generated-content write, deploy, payment,
+    external-service, PR, force-push, or Cost Calibration work needs a fresh queued task and explicit fresh approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
