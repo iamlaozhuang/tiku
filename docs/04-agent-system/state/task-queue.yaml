@@ -8661,3 +8661,699 @@ tasks:
     status: closed
     result: pass
     retryCount: 0
+  - id: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    title: Seed personal AI provider dependency sandbox generated content and staging approval boundary tasks
+    phase: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+    humanApproval: >-
+      User explicitly approved a low-risk docs-only queue-seeding/planning task because no batch-156+ pending
+      personal-learning-ai task exists after batch-155. This task may edit only project state, task queue, and
+      batch-156 task plan/evidence/audit files. It may seed future docs-only dependency, provider/env/secret,
+      generated-content adoption boundary, local provider sandbox planning, and staging/provider/deploy blocked-gate
+      tasks. It must not edit product source, tests, e2e, schema/migration, dependency/package/lockfile, env/secret,
+      provider, local provider sandbox, generated-content write paths, formal content adoption, deploy, payment,
+      external-service, PR, force-push, or Cost Calibration surfaces.
+    seededByTask: batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: next personal-learning-ai approval boundary task seeding
+    behaviorBoundary: personal-learning-ai::docs-only approval boundary queue seeding
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-13-batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh.md
+      - docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+    acceptanceScenarios:
+      - task queue contains ordered batch-157 through batch-161 follow-up tasks
+      - every seeded task records concrete dependencies, allowedFiles, blockedFiles, fresh approval requirements,
+        validation commands, evidence path, audit path, risk tags, and blocked remainder
+      - seeded tasks separate dependency, provider/env/secret, generated-content adoption, local provider sandbox, and
+        staging/provider/deploy/payment/external-service approval boundaries
+      - high-risk provider/env/dependency/schema/generated-content/sandbox/deploy/payment/external-service/Cost
+        Calibration work remains blocked
+    nonGoals:
+      - product source edits, tests/e2e edits, schema/migration, dependency changes, env/secret, provider execution,
+        local provider sandbox, generated-content writes, formal content adoption, deploy, payment, external-service work
+    validationProfile: L0-docs-only-seeding
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      queueSeeding: approved_docs_only_by_user_prompt_2026_06_13
+      providerCall: blocked_without_task_approval
+      providerConfiguration: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      dependencyChange: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      generatedContentPersistence: blocked_without_task_approval
+      localProviderSandbox: blocked_without_task_approval
+      stagingDeploy: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - batch-157 dependency gate remains pending after this docs-only task
+      - provider/env/secret work remains blocked
+      - dependency/package/lockfile changes remain blocked
+      - local provider sandbox remains blocked
+      - generated-content writes and formal content adoption remain blocked
+      - staging/prod/cloud, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - implementation_planning
+      - task_queue
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - dependency
+      - generated_content
+      - local_provider_sandbox
+      - external_service
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - phase: post_edit
+        command: node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+      - phase: post_edit
+        command: git diff --check
+      - phase: post_edit
+        command: Select-String -Path docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md -Pattern 'batch-157','batch-158','batch-159','batch-160','batch-161','package/lockfile changes remain blocked','provider/env/secret work remains blocked','Cost Calibration Gate remains blocked'
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit
+      - phase: post_edit
+        command: npm.cmd run build
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-156-personal-learning-ai-approval-boundary-seeding-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-156-personal-learning-ai-approval-boundary-seeding-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+      - git diff --check
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md -Pattern 'batch-157','batch-158','batch-159','batch-160','batch-161','package/lockfile changes remain blocked','provider/env/secret work remains blocked','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-156-personal-learning-ai-approval-boundary-seeding-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-156-personal-learning-ai-approval-boundary-seeding-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: batch-157-personal-learning-ai-dependency-introduction-gate-docs
+    title: Record personal AI dependency introduction gate
+    phase: batch-157-personal-learning-ai-dependency-introduction-gate-docs
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    humanApproval: >-
+      User approved docs-only dependency gate recording for personal-learning-ai. This task may record AI SDK/provider
+      dependency candidates, reasons, package/lockfile isolation strategy, and human approval requirements. It must not
+      modify package.json, any lockfile, install/remove/upgrade npm packages, CLIs, SDKs, or test frameworks, call
+      providers, read/write env files, change schema/migration, deploy, touch payment/external-service surfaces, create
+      a PR, force-push, or execute Cost Calibration.
+    freshApprovalRequired: >-
+      Actual dependency/package/lockfile changes require a future task with explicit fresh human approval, allowedFiles
+      that include package.json and the relevant lockfile, dependency introduction gate evidence, and isolated validation
+      evidence. This docs-only task does not approve dependency changes.
+    seededByTask: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: dependency introduction gate docs
+    behaviorBoundary: personal-learning-ai::dependency gate documentation
+    requirementRefs:
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+    acceptanceScenarios:
+      - evidence records AI SDK/provider dependency candidates and reasons without changing package or lock files
+      - evidence records package/lockfile isolation strategy and human approval requirements
+      - dependency changes, provider calls, provider configuration, env/secret, schema/migration, deploy, payment,
+        external-service, and Cost Calibration remain blocked
+    validationProfile: L0-dependency-gate-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      dependencyGateRecording: approved_docs_only_by_user_prompt_2026_06_13
+      dependencyChange: blocked_without_fresh_task_approval
+      providerCall: blocked_without_task_approval
+      providerConfiguration: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - package/lockfile changes remain blocked
+      - provider/env/secret work remains blocked
+      - local provider sandbox remains blocked
+      - generated-content writes and formal content adoption remain blocked
+      - staging/prod/cloud, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - blocked_gate
+      - dependency
+      - provider_blocked
+      - env_secret_blocked
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md -Pattern 'AI SDK/provider dependency candidates','package/lockfile changes remain blocked','human approval','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-157-personal-learning-ai-dependency-introduction-gate-docs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-157-personal-learning-ai-dependency-introduction-gate-docs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-157-personal-learning-ai-dependency-introduction-gate-docs
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    status: pending
+    retryCount: 0
+  - id: batch-158-personal-learning-ai-provider-env-secret-gate-docs
+    title: Record personal AI provider env and secret gate
+    phase: batch-158-personal-learning-ai-provider-env-secret-gate-docs
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-157-personal-learning-ai-dependency-introduction-gate-docs
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+    humanApproval: >-
+      User approved docs-only provider/env/secret gate recording for personal-learning-ai. This task may record provider
+      key destination, environment variable naming, secret handling boundaries, and fresh approval requirements. It must
+      not read, create, or modify .env.local, .env.example, any secret/env/provider configuration, package/lockfile,
+      schema/migration, source code, tests, e2e, provider endpoints, deploy, payment, external-service, PR, force-push,
+      or Cost Calibration surfaces.
+    freshApprovalRequired: >-
+      Any provider key, provider configuration, env/secret destination, env file, secret creation, or provider call work
+      requires a future task with explicit fresh approval. This docs-only task does not approve reading or modifying env
+      files or secrets.
+    seededByTask: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: provider env secret gate docs
+    behaviorBoundary: personal-learning-ai::provider-env-secret gate documentation
+    requirementRefs:
+      - docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    acceptanceScenarios:
+      - evidence records provider key destination and environment variable naming boundaries without reading env files
+      - evidence records secret handling and redaction rules
+      - provider calls, provider configuration, env/secret changes, package/lockfile changes, deploy/payment/external
+        service, and Cost Calibration remain blocked
+    validationProfile: L0-provider-env-secret-gate-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      providerEnvSecretGateRecording: approved_docs_only_by_user_prompt_2026_06_13
+      providerCall: blocked_without_fresh_task_approval
+      providerConfiguration: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      dependencyChange: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - provider/env/secret work remains blocked
+      - provider calls and provider configuration remain blocked
+      - package/lockfile changes remain blocked
+      - local provider sandbox remains blocked
+      - generated-content writes and formal content adoption remain blocked
+      - staging/prod/cloud, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - blocked_gate
+      - provider_blocked
+      - env_secret_blocked
+      - dependency
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md -Pattern 'provider key destination','environment variable naming','provider/env/secret work remains blocked','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-158-personal-learning-ai-provider-env-secret-gate-docs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-158-personal-learning-ai-provider-env-secret-gate-docs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-158-personal-learning-ai-provider-env-secret-gate-docs
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+    status: pending
+    retryCount: 0
+  - id: batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+    title: Review personal AI generated content adoption boundary
+    phase: batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-158-personal-learning-ai-provider-env-secret-gate-docs
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+    humanApproval: >-
+      User approved docs-only generated-content adoption boundary and security review. This task may record the boundary
+      between personal AI results and formal question, paper, practice, mock_exam, exam_report, and mistake_book content
+      domains. It must not write generated content, adopt provider output into formal content, edit source/tests/e2e,
+      change schema/migration, package/lockfile, env/secret, provider configuration, deploy, payment, external-service,
+      PR, force-push, or Cost Calibration surfaces.
+    freshApprovalRequired: >-
+      Any generated-content write, formal content adoption, provider result persistence, schema/migration, source code
+      implementation, or e2e expansion requires a future task with explicit fresh approval. This docs-only review does
+      not approve adoption.
+    seededByTask: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: generated content adoption boundary review
+    behaviorBoundary: personal-learning-ai::generated-content adoption governance
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+    acceptanceScenarios:
+      - audit records isolation between personal AI results and formal content domains
+      - audit records future adoption governance requirements and redaction requirements
+      - provider calls, generated-content writes, formal adoption, schema/migration, dependency, env/secret, deploy,
+        payment, external-service, and Cost Calibration remain blocked
+    validationProfile: L0-generated-content-boundary-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      securityReview: approved_docs_only_by_user_prompt_2026_06_13
+      generatedContentPersistence: blocked_without_fresh_task_approval
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      dependencyChange: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - generated-content writes remain blocked
+      - formal question, paper, practice, mock_exam, exam_report, and mistake_book adoption remains blocked
+      - provider/env/secret work remains blocked
+      - package/lockfile changes remain blocked
+      - local provider sandbox remains blocked
+      - staging/prod/cloud, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: security_review
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - security_review
+      - generated_content
+      - provider_blocked
+      - env_secret_blocked
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md docs/05-execution-logs/evidence/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md -Pattern 'personal AI results','formal question, paper, practice, mock_exam, exam_report, and mistake_book adoption remains blocked','generated-content writes remain blocked','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+    status: pending
+    retryCount: 0
+  - id: batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+    title: Plan local provider sandbox boundary without execution
+    phase: batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    humanApproval: >-
+      User approved docs-only local provider sandbox planning and blocked-gate recording. This task may only plan sandbox
+      boundaries, redacted evidence rules, no-formal-write controls, and future cost measurement requirements. It must
+      not run a sandbox, call providers, read/write env or secrets, configure providers, change package/lockfile,
+      schema/migration, source/tests/e2e, generated-content paths, deploy, payment, external-service, PR, force-push, or
+      Cost Calibration surfaces.
+    freshApprovalRequired: >-
+      Running any local provider sandbox, provider call, model request, cost measurement, provider configuration,
+      dependency change, env/secret handling, or generated-content write requires a future task with explicit fresh
+      approval. This docs-only task is a blocked gate.
+    seededByTask: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local provider sandbox blocked gate plan
+    behaviorBoundary: personal-learning-ai::local provider sandbox planning boundary
+    requirementRefs:
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+    acceptanceScenarios:
+      - evidence records sandbox boundaries, evidence redaction, no formal write controls, and cost measurement block
+      - evidence confirms no sandbox execution, provider call, env/secret read/write, or generated-content write occurred
+      - Cost Calibration Gate remains blocked
+    validationProfile: L0-local-provider-sandbox-plan-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      localProviderSandboxPlanning: approved_docs_only_by_user_prompt_2026_06_13
+      localProviderSandbox: blocked_without_fresh_task_approval
+      providerCall: blocked_without_fresh_task_approval
+      providerConfiguration: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      dependencyChange: blocked_without_task_approval
+      generatedContentPersistence: blocked_without_fresh_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - local provider sandbox remains blocked
+      - provider calls and provider configuration remain blocked
+      - provider/env/secret work remains blocked
+      - package/lockfile changes remain blocked
+      - generated-content writes and formal content adoption remain blocked
+      - staging/prod/cloud, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - blocked_gate
+      - local_provider_sandbox
+      - provider_blocked
+      - env_secret_blocked
+      - generated_content
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md -Pattern 'local provider sandbox remains blocked','redacted evidence','no formal write','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    status: pending
+    retryCount: 0
+  - id: batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+    title: Record staging provider deploy payment and external service blocked gate
+    phase: batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+    humanApproval: >-
+      User approved docs-only staging/provider/deploy blocked-gate recording. This task may record that staging, prod,
+      cloud, provider execution, deploy, payment, and external-service work all require separate fresh approval. It must
+      not create or modify cloud resources, deploy, connect to staging/prod, read/write env or secrets, configure
+      providers, change package/lockfile, schema/migration, source/tests/e2e, generated-content paths, payment or
+      external-service configuration, create a PR, force-push, or execute Cost Calibration.
+    freshApprovalRequired: >-
+      Any staging/prod/cloud/deploy/payment/external-service action, provider execution, provider configuration,
+      env/secret handling, schema/migration, dependency change, PR, force-push, or Cost Calibration action requires a
+      future task with explicit fresh approval. This docs-only task is a blocked gate.
+    seededByTask: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: staging provider deploy blocked gate
+    behaviorBoundary: personal-learning-ai::staging-provider-deploy blocked gate
+    requirementRefs:
+      - docs/02-architecture/adr/adr-004-environment-isolation-and-release-boundaries.md
+      - docs/02-architecture/adr/adr-005-staging-architecture-and-release-boundaries.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    acceptanceScenarios:
+      - evidence records staging/prod/cloud/deploy/payment/external-service blocked gate boundaries
+      - evidence records provider and env/secret actions remain separately gated
+      - evidence confirms no remote action, provider call, env/secret work, deploy, payment, or external-service action
+        occurred
+      - Cost Calibration Gate remains blocked
+    validationProfile: L0-staging-provider-deploy-blocked-gate-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      stagingProviderDeployGateRecording: approved_docs_only_by_user_prompt_2026_06_13
+      deploy: blocked_without_fresh_task_approval
+      externalService: blocked_without_fresh_task_approval
+      payment: blocked_without_fresh_task_approval
+      providerCall: blocked_without_fresh_task_approval
+      providerConfiguration: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      dependencyChange: blocked_without_task_approval
+      schemaMigration: blocked_without_fresh_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - staging/prod/cloud work remains blocked
+      - deploy/payment/external-service work remains blocked
+      - provider calls and provider configuration remain blocked
+      - provider/env/secret work remains blocked
+      - package/lockfile changes remain blocked
+      - generated-content writes and formal content adoption remain blocked
+      - schema/migration, destructive DB, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - blocked_gate
+      - staging
+      - deploy
+      - provider_blocked
+      - env_secret_blocked
+      - external_service
+      - payment
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md -Pattern 'staging/prod/cloud work remains blocked','deploy/payment/external-service work remains blocked','provider/env/secret work remains blocked','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+    status: pending
+    retryCount: 0
