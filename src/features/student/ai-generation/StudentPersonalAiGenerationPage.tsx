@@ -1,14 +1,22 @@
 "use client";
 
-import { AlertCircle, Loader2, Sparkles, ShieldAlert } from "lucide-react";
+import {
+  AlertCircle,
+  History,
+  Loader2,
+  Sparkles,
+  ShieldAlert,
+} from "lucide-react";
 import { useState } from "react";
 
 import {
+  createLocalPersonalAiGenerationRequestHistory,
   fetchStudentApi,
   getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
 import type { PersonalAiGenerationLocalBrowserExperienceDto } from "@/server/contracts/personal-ai-generation-local-browser-experience-contract";
+import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/personal-ai-generation-request-history-contract";
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 
 type StudentPersonalAiGenerationPageState =
@@ -68,6 +76,12 @@ const copy = {
     "\u4e2a\u4eba AI \u5b66\u4e60\u9700\u8981\u6709\u6548\u7684\u5b66\u5458\u4f1a\u8bdd\u3002",
   blockedTitle: "\u8bf7\u6c42\u5df2\u963b\u65ad",
   contractTitle: "\u672c\u5730\u5408\u7ea6\u6458\u8981",
+  historyTitle: "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2",
+  historyEmptyTitle: "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42",
+  historyLoadingTitle: "\u5386\u53f2\u8bf7\u6c42\u540c\u6b65\u4e2d",
+  historyErrorTitle: "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528",
+  historyUnauthorizedTitle:
+    "\u767b\u5f55\u540e\u67e5\u770b\u8bf7\u6c42\u5386\u53f2",
 };
 
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
@@ -244,6 +258,115 @@ function StudentPersonalAiGenerationContractSummary({
   );
 }
 
+function StudentPersonalAiGenerationHistorySummary({
+  pageState,
+  historyRows,
+}: {
+  pageState: StudentPersonalAiGenerationPageState;
+  historyRows: PersonalAiGenerationRequestHistoryDto;
+}) {
+  function renderHistoryBody() {
+    if (pageState === "loading") {
+      return (
+        <div className="flex items-center gap-3 py-3">
+          <Loader2
+            className="text-brand-primary size-5 animate-spin"
+            aria-hidden="true"
+          />
+          <p className="text-text-primary text-sm font-medium">
+            {copy.historyLoadingTitle}
+          </p>
+        </div>
+      );
+    }
+
+    if (pageState === "unauthorized") {
+      return (
+        <p className="text-text-secondary border-border rounded-lg border border-dashed px-3 py-3 text-sm">
+          {copy.historyUnauthorizedTitle}
+        </p>
+      );
+    }
+
+    if (pageState === "error") {
+      return (
+        <p className="text-warning bg-warning/10 rounded-lg px-3 py-3 text-sm font-medium">
+          {copy.historyErrorTitle}
+        </p>
+      );
+    }
+
+    if (historyRows.length === 0) {
+      return (
+        <p className="text-text-secondary border-border rounded-lg border border-dashed px-3 py-3 text-sm">
+          {copy.historyEmptyTitle}
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {historyRows.map((historyRow) => (
+          <article
+            key={historyRow.requestPublicId}
+            className="border-border rounded-lg border px-3"
+          >
+            <dl>
+              <ContractField
+                label="requestPublicId"
+                value={historyRow.requestPublicId}
+              />
+              <ContractField
+                label="taskPublicId"
+                value={historyRow.taskPublicId}
+              />
+              <ContractField label="status" value={historyRow.status} />
+              <ContractField
+                label="requestedAt"
+                value={historyRow.requestedAt}
+              />
+              <ContractField
+                label="resultPublicId"
+                value={formatNullableText(historyRow.resultPublicId)}
+              />
+              <ContractField
+                label="evidenceStatus"
+                value={historyRow.evidenceStatus}
+              />
+              <ContractField
+                label="citationCount"
+                value={String(historyRow.citationCount)}
+              />
+              <ContractField
+                label="aiCallLogPublicId"
+                value={formatNullableText(historyRow.aiCallLogPublicId)}
+              />
+              <ContractField
+                label="redactionStatus"
+                value={historyRow.redactionStatus}
+              />
+            </dl>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <section className="border-border bg-surface rounded-xl border p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <History className="size-4" aria-hidden="true" />
+        </div>
+        <h2 className="font-heading text-text-primary text-base font-semibold">
+          {copy.historyTitle}
+        </h2>
+      </div>
+      {renderHistoryBody()}
+    </section>
+  );
+}
+
 export function StudentPersonalAiGenerationPage() {
   const [hasSessionToken, setHasSessionToken] = useState(
     readHasStudentSessionToken,
@@ -254,6 +377,8 @@ export function StudentPersonalAiGenerationPage() {
     );
   const [experience, setExperience] =
     useState<PersonalAiGenerationLocalBrowserExperienceDto | null>(null);
+  const [requestHistory, setRequestHistory] =
+    useState<PersonalAiGenerationRequestHistoryDto>([]);
 
   async function handleSubmitPersonalAiGenerationRequest() {
     const storedSessionValue = getStoredStudentSessionToken();
@@ -261,11 +386,13 @@ export function StudentPersonalAiGenerationPage() {
     if (storedSessionValue === null) {
       setHasSessionToken(false);
       setPageState("unauthorized");
+      setRequestHistory([]);
       return;
     }
 
     setHasSessionToken(true);
     setPageState("loading");
+    setRequestHistory([]);
 
     try {
       const response =
@@ -287,18 +414,24 @@ export function StudentPersonalAiGenerationPage() {
 
       if (isStudentUnauthorizedResponse(response)) {
         setPageState("unauthorized");
+        setRequestHistory([]);
         return;
       }
 
       if (response.code !== 0 || response.data === null) {
         setPageState("error");
+        setRequestHistory([]);
         return;
       }
 
       setExperience(response.data);
+      setRequestHistory(
+        createLocalPersonalAiGenerationRequestHistory(response.data),
+      );
       setPageState("ready");
     } catch {
       setPageState("error");
+      setRequestHistory([]);
     }
   }
 
@@ -371,6 +504,11 @@ export function StudentPersonalAiGenerationPage() {
       {pageState === "ready" && experience !== null ? (
         <StudentPersonalAiGenerationContractSummary experience={experience} />
       ) : null}
+
+      <StudentPersonalAiGenerationHistorySummary
+        pageState={pageState}
+        historyRows={requestHistory}
+      />
     </section>
   );
 }

@@ -5953,7 +5953,7 @@ tasks:
         deleteShortBranch: true
         parkWorktree: false
     registryLifecycle:
-      runStatus: pending
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: implementation
@@ -6001,7 +6001,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-129-personal-learning-ai-redacted-request-history-display
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-129-personal-learning-ai-redacted-request-history-display.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-129-personal-learning-ai-redacted-request-history-display.md
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-130-personal-learning-ai-dedicated-local-e2e-spec
     title: Add dedicated local e2e spec for personal learning AI request and redacted summary

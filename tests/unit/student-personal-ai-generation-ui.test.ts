@@ -14,6 +14,9 @@ const pageTitle = "\u4e2a\u4eba AI \u5b66\u4e60";
 const requestButtonLabel = "\u53d1\u8d77\u672c\u5730 AI \u8bf7\u6c42";
 const blockedTitle = "\u8bf7\u6c42\u5df2\u963b\u65ad";
 const unauthorizedTitle = "\u8bf7\u5148\u767b\u5f55";
+const historyTitle = "\u8fd1\u671f AI \u8bf7\u6c42\u5386\u53f2";
+const historyEmptyTitle = "\u6682\u65e0\u5386\u53f2\u8bf7\u6c42";
+const historyErrorTitle = "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528";
 
 const localExperienceResponse = {
   code: 0,
@@ -175,7 +178,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByText("student_local_browser")).toBeInTheDocument();
     expect(screen.getByText("accepted")).toBeInTheDocument();
     expect(screen.getByText("paper-public-001")).toBeInTheDocument();
-    expect(screen.getByText("pending")).toBeInTheDocument();
+    expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
     expect(screen.getByText("summary_only")).toBeInTheDocument();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
@@ -325,15 +328,117 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("aiCallLogPublicId")).toBeInTheDocument();
-    expect(screen.getByText("ai-call-log-public-001")).toBeInTheDocument();
-    expect(screen.getByText("resultPublicId")).toBeInTheDocument();
-    expect(screen.getByText("ai-result-public-001")).toBeInTheDocument();
-    expect(screen.getByText("evidenceStatus")).toBeInTheDocument();
-    expect(screen.getByText("sufficient")).toBeInTheDocument();
-    expect(screen.getByText("citationCount")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(await screen.findAllByText("aiCallLogPublicId")).not.toHaveLength(0);
+    expect(
+      screen.getAllByText("ai-call-log-public-001").length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("resultPublicId").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("ai-result-public-001").length).toBeGreaterThan(
+      0,
+    );
+    expect(screen.getAllByText("evidenceStatus").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("sufficient").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("citationCount").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("2").length).toBeGreaterThan(0);
     expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("generated content");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("renders redacted recent request history rows from camelCase read-model fields", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const redactedReferenceResponse = {
+      ...localExperienceResponse,
+      data: {
+        ...localExperienceResponse.data,
+        resultState: {
+          ...localExperienceResponse.data.resultState,
+          status: "succeeded",
+          taskPublicId: "ai-generation-task-public-history-001",
+          resultPublicId: "ai-result-public-history-001",
+          contentVisibility: "summary_only",
+          evidenceStatus: "weak",
+          citationCount: 3,
+        },
+        requestFlow: {
+          ...localExperienceResponse.data.requestFlow,
+          resultReference: {
+            ...localExperienceResponse.data.requestFlow.resultReference,
+            taskPublicId: "ai-generation-task-public-history-001",
+            status: "succeeded",
+            resultReference: {
+              resultPublicId: "ai-result-public-history-001",
+              contentVisibility: "summary_only",
+              evidenceStatus: "weak",
+              citationCount: 3,
+              redactionStatus: "redacted",
+            },
+            aiCallLogReference: {
+              aiCallLogPublicId: "ai-call-log-public-history-001",
+              contentVisibility: "summary_only",
+              redactionStatus: "redacted",
+            },
+          },
+        },
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => redactedReferenceResponse,
+      })),
+    );
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(screen.getByText(historyTitle)).toBeInTheDocument();
+    expect(screen.getByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(await screen.findByText("requestPublicId")).toBeInTheDocument();
+    expect(
+      screen.getByText("personal-ai-request-public-001"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("requestedAt")).toBeInTheDocument();
+    expect(screen.getByText("2026-06-12T12:00:00.000Z")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("ai-generation-task-public-history-001").length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("ai-result-public-history-001").length).toBe(2);
+    expect(screen.getAllByText("weak").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("3").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("ai-call-log-public-history-001").length,
+    ).toBeGreaterThan(0);
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("generated content");
+    expect(document.body.textContent).not.toContain("full paper content");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("renders request history error state without exposing private content", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          code: 500001,
+          message: "local failure",
+          data: null,
+        }),
+      })),
+    );
+
+    render(createElement(StudentPersonalAiGenerationPage));
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(await screen.findByText(historyErrorTitle)).toBeInTheDocument();
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
