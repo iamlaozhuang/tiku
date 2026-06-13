@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-140-personal-learning-ai-route-post-persistent-request-closed
-updatedAt: "2026-06-13T01:20:48-07:00"
+currentPhase: batch-141-personal-learning-ai-ui-server-backed-history-after-submit-closed
+updatedAt: "2026-06-13T01:44:02-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c6facfbe3a3f18dff59583f26b8efea25ac99667
-  lastKnownOriginMasterSha: c6facfbe3a3f18dff59583f26b8efea25ac99667
+  lastKnownMasterSha: b3d67e6e3c9518d6106b3774c9d54d4f03878901
+  lastKnownOriginMasterSha: b3d67e6e3c9518d6106b3774c9d54d4f03878901
 currentTask:
-  id: batch-140-personal-learning-ai-route-post-persistent-request
+  id: batch-141-personal-learning-ai-ui-server-backed-history-after-submit
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
-  branch: codex/batch-140-personal-learning-ai-route-post-persistent-request
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+  branch: codex/batch-141-personal-learning-ai-ui-server-backed-history-after-submit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_139_personal_learning_ai_route_get_persistent_history
+    readiness: pass_batch_141_personal_learning_ai_ui_server_backed_history_after_submit
     lint: pass
     typecheck: pass
-    unit: pass_247_files_897_tests
+    unit: pass_247_files_902_tests
     build: pass_55_static_pages
     e2e: pass_existing_personal_ai_generation_local_request_spec
-    preCommitHook: pass_batch_139_pre_commit_hardening
-    prePushHook: pass_batch_139_pre_push_readiness
+    preCommitHook: pass_batch_141_pre_commit_hardening
+    prePushHook: pass_batch_141_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-140 closed the POST persistent request metadata route wiring. The exact next pending queue task is
-    batch-141-personal-learning-ai-ui-server-backed-history-after-submit. Route/repository/schema/drizzle/contract/model
-    edits, dependency, provider, env/secret, deploy, payment, external-service, destructive DB, formal generated-content
-    write paths, authorization model changes, PR, force-push, and Cost Calibration Gate execution remain blocked outside
-    their own approved tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    Batch-141 closed the student UI server-backed personal AI history refresh after submit. The exact next pending queue
+    task is batch-142-personal-learning-ai-persistent-history-security-review. Route, repository, schema/drizzle,
+    contract/model, dependency, provider, env/secret, deploy, payment, external-service, destructive DB, formal
+    generated-content write paths, authorization model changes, PR, force-push, and Cost Calibration Gate execution remain
+    blocked outside their own approved tasks.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md

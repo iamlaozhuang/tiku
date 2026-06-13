@@ -37,6 +37,24 @@ const serverHistoryResponse = {
   ],
 };
 
+const serverHistoryAfterSubmitResponse = {
+  code: 0,
+  message: "ok",
+  data: [
+    {
+      requestPublicId: "personal-ai-request-public-server-after-submit-001",
+      taskPublicId: "ai-generation-task-public-server-after-submit-001",
+      status: "pending",
+      requestedAt: "2026-06-12T12:30:00.000Z",
+      resultPublicId: null,
+      evidenceStatus: "none",
+      citationCount: 0,
+      aiCallLogPublicId: null,
+      redactionStatus: "redacted",
+    },
+  ],
+};
+
 const emptyServerHistoryResponse = {
   code: 0,
   message: "ok",
@@ -228,6 +246,57 @@ function createPersonalAiGenerationFetchMock(
   });
 }
 
+function createPersonalAiGenerationFetchMockWithHistorySequence(
+  historyResponses: unknown[],
+  experienceResponse: unknown = localExperienceResponse,
+) {
+  const remainingHistoryResponses = [...historyResponses];
+
+  return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+    const path = String(url);
+
+    if (path === "/api/v1/sessions") {
+      expect(init?.method).toBe("GET");
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => localSessionResponse,
+      };
+    }
+
+    if (path === "/api/v1/personal-ai-generation-requests") {
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      if (init?.method === "GET") {
+        const historyResponse =
+          remainingHistoryResponses.shift() ?? emptyServerHistoryResponse;
+
+        return {
+          ok: true,
+          status: 200,
+          json: async () => historyResponse,
+        };
+      }
+
+      expect(init?.method).toBe("POST");
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => experienceResponse,
+      };
+    }
+
+    throw new Error(`Unexpected fetch path: ${path}`);
+  });
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -343,7 +412,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
     expect(screen.getByText("summary_only")).toBeInTheDocument();
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests",
     );
@@ -352,6 +421,11 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(String(fetchMock.mock.calls[2]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests",
     );
+    expect(fetchMock.mock.calls[2]?.[1]?.method).toBe("POST");
+    expect(String(fetchMock.mock.calls[3]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-requests",
+    );
+    expect(fetchMock.mock.calls[3]?.[1]?.method).toBe("GET");
 
     const requestBody = JSON.parse(
       String(fetchMock.mock.calls[2]?.[1]?.body),
@@ -360,6 +434,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(requestBody).toEqual({
       responseMode: "local_browser_experience",
       userPublicId: localSessionUserPublicId,
+      requestPublicId: "personal-ai-request-public-001",
       authorizationPublicId: "personal-auth-public-001",
       aiFuncType: "explanation",
       questionPublicId: "question-public-001",
@@ -394,6 +469,80 @@ describe("StudentPersonalAiGenerationPage", () => {
       "unit-test-session-token",
     );
     expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("refreshes server-backed request history after successful submit", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = createPersonalAiGenerationFetchMockWithHistorySequence([
+      emptyServerHistoryResponse,
+      serverHistoryAfterSubmitResponse,
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        "personal-ai-request-public-server-after-submit-001",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText("ai-generation-task-public-server-after-submit-001")
+        .length,
+    ).toBeGreaterThan(0);
+    expect(screen.getByText("2026-06-12T12:30:00.000Z")).toBeInTheDocument();
+    expect(screen.queryByText("personal-ai-request-public-001")).toBeNull();
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("generated content");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
+      "/api/v1/personal-ai-generation-requests",
+      "/api/v1/sessions",
+      "/api/v1/personal-ai-generation-requests",
+      "/api/v1/personal-ai-generation-requests",
+    ]);
+    expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
+      "GET",
+      "GET",
+      "POST",
+      "GET",
+    ]);
+  });
+
+  it("renders a redacted history error state when the post-submit server refresh fails", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const fetchMock = createPersonalAiGenerationFetchMockWithHistorySequence([
+      emptyServerHistoryResponse,
+      {
+        code: 500017,
+        message:
+          "Personal AI request history is temporarily unavailable. database stack provider payload",
+        data: null,
+      },
+    ]);
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
+    expect(await screen.findByText(historyErrorTitle)).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("database stack");
+    expect(document.body.textContent).not.toContain("provider payload");
+    expect(document.body.textContent).not.toContain("raw prompt");
+    expect(document.body.textContent).not.toContain("generated content");
+    expect(document.body.textContent).not.toContain("unit-test-session-token");
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
   });
 
   it("renders a permission blocked state when no student session token exists", () => {
@@ -484,7 +633,30 @@ describe("StudentPersonalAiGenerationPage", () => {
     };
     vi.stubGlobal(
       "fetch",
-      createPersonalAiGenerationFetchMock(redactedReferenceResponse),
+      createPersonalAiGenerationFetchMockWithHistorySequence(
+        [
+          emptyServerHistoryResponse,
+          {
+            code: 0,
+            message: "ok",
+            data: [
+              {
+                requestPublicId:
+                  "personal-ai-request-public-server-history-001",
+                taskPublicId: "ai-generation-task-public-history-001",
+                status: "succeeded",
+                requestedAt: "2026-06-12T12:45:00.000Z",
+                resultPublicId: "ai-result-public-history-001",
+                evidenceStatus: "weak",
+                citationCount: 3,
+                aiCallLogPublicId: "ai-call-log-public-history-001",
+                redactionStatus: "redacted",
+              },
+            ],
+          },
+        ],
+        redactedReferenceResponse,
+      ),
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
@@ -547,7 +719,30 @@ describe("StudentPersonalAiGenerationPage", () => {
     };
     vi.stubGlobal(
       "fetch",
-      createPersonalAiGenerationFetchMock(redactedReferenceResponse),
+      createPersonalAiGenerationFetchMockWithHistorySequence(
+        [
+          emptyServerHistoryResponse,
+          {
+            code: 0,
+            message: "ok",
+            data: [
+              {
+                requestPublicId:
+                  "personal-ai-request-public-server-history-001",
+                taskPublicId: "ai-generation-task-public-history-001",
+                status: "succeeded",
+                requestedAt: "2026-06-12T12:45:00.000Z",
+                resultPublicId: "ai-result-public-history-001",
+                evidenceStatus: "weak",
+                citationCount: 3,
+                aiCallLogPublicId: "ai-call-log-public-history-001",
+                redactionStatus: "redacted",
+              },
+            ],
+          },
+        ],
+        redactedReferenceResponse,
+      ),
     );
 
     render(createElement(StudentPersonalAiGenerationPage));
@@ -557,16 +752,18 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findByText("requestPublicId")).toBeInTheDocument();
     expect(
-      screen.getByText("personal-ai-request-public-001"),
+      await screen.findByText("personal-ai-request-public-server-history-001"),
     ).toBeInTheDocument();
+    expect(screen.getByText("requestPublicId")).toBeInTheDocument();
     expect(screen.getByText("requestedAt")).toBeInTheDocument();
-    expect(screen.getByText("2026-06-12T12:00:00.000Z")).toBeInTheDocument();
+    expect(screen.getByText("2026-06-12T12:45:00.000Z")).toBeInTheDocument();
     expect(
       screen.getAllByText("ai-generation-task-public-history-001").length,
     ).toBeGreaterThan(0);
-    expect(screen.getAllByText("ai-result-public-history-001").length).toBe(2);
+    expect(
+      screen.getAllByText("ai-result-public-history-001").length,
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText("weak").length).toBeGreaterThan(0);
     expect(screen.getAllByText("3").length).toBeGreaterThan(0);
     expect(

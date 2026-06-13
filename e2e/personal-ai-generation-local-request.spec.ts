@@ -147,6 +147,22 @@ function parseRecordPayload(value: string | null): Record<string, unknown> {
     : {};
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readFirstHistoryRow(
+  payload: ApiPayload,
+): Record<string, unknown> | null {
+  if (payload.code !== 0 || !Array.isArray(payload.data)) {
+    return null;
+  }
+
+  const [firstRow] = payload.data;
+
+  return isRecord(firstRow) ? firstRow : null;
+}
+
 test.describe("personal AI generation local request", () => {
   test("submits the local request and renders only redacted public summaries", async ({
     page,
@@ -221,6 +237,17 @@ test.describe("personal AI generation local request", () => {
           "/api/v1/personal-ai-generation-requests"
       );
     });
+    const postSubmitHistoryResponsePromise = page.waitForResponse(
+      (response) => {
+        const request = response.request();
+
+        return (
+          request.method() === "GET" &&
+          new URL(response.url()).pathname ===
+            "/api/v1/personal-ai-generation-requests"
+        );
+      },
+    );
 
     await page.getByRole("button", { name: requestButtonName }).click();
 
@@ -234,6 +261,7 @@ test.describe("personal AI generation local request", () => {
       actorPublicId: localStudentPublicId,
       ownerPublicId: localStudentPublicId,
       quotaOwnerPublicId: localStudentPublicId,
+      requestPublicId: "personal-ai-request-public-001",
       userPublicId: localStudentPublicId,
     });
     expectNoSensitivePayload(postedRequestPayload, [
@@ -274,24 +302,58 @@ test.describe("personal AI generation local request", () => {
     await expect(page.getByText("accepted")).toBeVisible();
     await expect(page.getByText("contentVisibility")).toBeVisible();
     await expect(page.getByText("summary_only")).toBeVisible();
-    await expect(page.getByText("requestPublicId")).toBeVisible();
-    await expect(
-      page.getByText("personal-ai-request-public-001"),
-    ).toBeVisible();
-    await expect(page.getByText("taskPublicId").first()).toBeVisible();
-    await expect(
-      page.getByText("ai-generation-task-public-001").first(),
-    ).toBeVisible();
-    await expect(page.getByText("requestedAt")).toBeVisible();
-    await expect(page.getByText("2026-06-12T12:00:00.000Z")).toBeVisible();
-    await expect(page.getByText("evidenceStatus").first()).toBeVisible();
-    await expect(page.getByText("none").first()).toBeVisible();
-    await expect(page.getByText("citationCount").first()).toBeVisible();
-    await expect(page.getByText("0").first()).toBeVisible();
-    await expect(
-      page.getByText("redactionStatus", { exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("redacted").first()).toBeVisible();
+
+    const postSubmitHistoryResponse = await postSubmitHistoryResponsePromise;
+    expect(postSubmitHistoryResponse.ok()).toBe(true);
+
+    const postSubmitHistoryPayload = await postSubmitHistoryResponse.json();
+    expectStandardEnvelope(postSubmitHistoryPayload);
+    expectCamelCaseJsonKeys(postSubmitHistoryPayload);
+    expectNoInternalIdKeys(postSubmitHistoryPayload);
+    expectNoSensitivePayload(postSubmitHistoryPayload, [
+      storedLocalAuthValue ?? "",
+    ]);
+    expectLocalHistoryEnvelope(postSubmitHistoryPayload);
+
+    const firstHistoryRow = readFirstHistoryRow(postSubmitHistoryPayload);
+
+    if (firstHistoryRow !== null) {
+      await expect(page.getByText("requestPublicId")).toBeVisible();
+      await expect(
+        page.getByText(String(firstHistoryRow.requestPublicId)),
+      ).toBeVisible();
+      await expect(page.getByText("taskPublicId").first()).toBeVisible();
+      await expect(
+        page.getByText(String(firstHistoryRow.taskPublicId)).first(),
+      ).toBeVisible();
+      await expect(page.getByText("requestedAt")).toBeVisible();
+      await expect(
+        page.getByText(String(firstHistoryRow.requestedAt)),
+      ).toBeVisible();
+      await expect(page.getByText("evidenceStatus").first()).toBeVisible();
+      await expect(
+        page.getByText(String(firstHistoryRow.evidenceStatus)).first(),
+      ).toBeVisible();
+      await expect(page.getByText("citationCount").first()).toBeVisible();
+      await expect(
+        page.getByText(String(firstHistoryRow.citationCount)).first(),
+      ).toBeVisible();
+      await expect(
+        page.getByText("redactionStatus", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(String(firstHistoryRow.redactionStatus)).first(),
+      ).toBeVisible();
+    } else if (
+      isPersistentHistoryUnavailablePayload(postSubmitHistoryPayload)
+    ) {
+      await expect(page.getByText(historyErrorTitle)).toBeVisible();
+      await expect(page.getByText("requestPublicId")).toHaveCount(0);
+    } else {
+      await expect(page.getByText(historyEmptyTitle)).toBeVisible();
+      await expect(page.getByText("requestPublicId")).toHaveCount(0);
+    }
+
     await expect(page.locator("[data-id]")).toHaveCount(0);
     await expectForbiddenMarkersHidden(page, [storedLocalAuthValue ?? ""]);
   });

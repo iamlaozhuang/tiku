@@ -10,7 +10,6 @@ import {
 import { useEffect, useState } from "react";
 
 import {
-  createLocalPersonalAiGenerationRequestHistory,
   fetchCurrentStudentSession,
   fetchPersonalAiGenerationRequestHistory,
   fetchStudentApi,
@@ -37,6 +36,7 @@ type StudentPersonalAiGenerationHistoryState =
 
 type StudentPersonalAiGenerationRequestDraft = {
   userPublicId: string;
+  requestPublicId: string;
   authorizationPublicId: string;
   aiFuncType: PersonalAiGenerationFuncType;
   questionPublicId: string;
@@ -96,6 +96,7 @@ const copy = {
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
   {
     userPublicId: "student-public-001",
+    requestPublicId: "personal-ai-request-public-001",
     authorizationPublicId: "personal-auth-public-001",
     aiFuncType: "explanation",
     questionPublicId: "question-public-001",
@@ -521,13 +522,33 @@ export function StudentPersonalAiGenerationPage() {
       }
 
       setExperience(response.data);
-      const localRequestHistory = createLocalPersonalAiGenerationRequestHistory(
-        response.data,
-      );
-
-      setRequestHistory(localRequestHistory);
-      setHistoryState(localRequestHistory.length === 0 ? "empty" : "ready");
       setPageState("ready");
+      setHistoryState("loading");
+
+      try {
+        const historyResponse =
+          await fetchPersonalAiGenerationRequestHistory(storedSessionValue);
+
+        if (isStudentUnauthorizedResponse(historyResponse)) {
+          setHasSessionToken(false);
+          setPageState("unauthorized");
+          setHistoryState("unauthorized");
+          setRequestHistory([]);
+          return;
+        }
+
+        if (historyResponse.code !== 0 || historyResponse.data === null) {
+          setHistoryState("error");
+          setRequestHistory([]);
+          return;
+        }
+
+        setRequestHistory(historyResponse.data);
+        setHistoryState(historyResponse.data.length === 0 ? "empty" : "ready");
+      } catch {
+        setHistoryState("error");
+        setRequestHistory([]);
+      }
     } catch {
       setPageState("error");
       setHistoryState("error");
