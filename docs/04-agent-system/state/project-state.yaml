@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-157-personal-learning-ai-dependency-introduction-gate-docs-closed
-updatedAt: "2026-06-13T08:05:00-07:00"
+currentPhase: batch-158-personal-learning-ai-provider-env-secret-gate-docs-closed
+updatedAt: "2026-06-13T08:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 06e90ecb875da3b5b4f29f3aadb419df9dcb7b6a
-  lastKnownOriginMasterSha: 06e90ecb875da3b5b4f29f3aadb419df9dcb7b6a
+  lastKnownMasterSha: fdf99a625d78963fc8fea93e660edad8b0587e7d
+  lastKnownOriginMasterSha: fdf99a625d78963fc8fea93e660edad8b0587e7d
 currentTask:
-  id: batch-157-personal-learning-ai-dependency-introduction-gate-docs
+  id: batch-158-personal-learning-ai-provider-env-secret-gate-docs
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
-  branch: codex/batch-157-personal-learning-ai-dependency-introduction-gate-docs
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+  branch: codex/batch-158-personal-learning-ai-provider-env-secret-gate-docs
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_157_personal_learning_ai_dependency_introduction_gate_docs
+    readiness: pass_batch_158_personal_learning_ai_provider_env_secret_gate_docs
     lint: pass
     typecheck: pass
     unit: pass_247_files_904_tests
     build: pass_55_static_pages
-    e2e: not_required_l0_dependency_gate_docs_only
-    preCommitHook: pass_batch_157_pre_commit_hardening
-    prePushHook: pass_batch_157_pre_push_readiness
+    e2e: not_required_l0_provider_env_secret_gate_docs_only
+    preCommitHook: pass_batch_158_pre_commit_hardening
+    prePushHook: pass_batch_158_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-157 closed the docs-only personal-learning-ai dependency introduction gate. The evidence records AI
-    SDK/provider dependency candidates, package/lockfile isolation strategy, and human approval requirements without
-    changing dependencies. Package/lockfile changes, env/secret, provider execution, sandbox execution,
-    generated-content writes, deploy, payment, external-service, PR, force-push, schema/migration, destructive DB, and
-    Cost Calibration remain blocked. Next recommended action is batch-158 after rereading state and queue from master.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    Batch-158 closed the docs-only personal-learning-ai provider/env/secret gate. The evidence records provider key
+    destination, environment variable naming, secret handling boundaries, and fresh approval requirements without
+    reading or modifying env/secret/provider configuration. Provider execution, package/lockfile changes, sandbox
+    execution, generated-content writes, deploy, payment, external-service, PR, force-push, schema/migration,
+    destructive DB, and Cost Calibration remain blocked. Next recommended action is batch-159 after rereading state and
+    queue from master.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md

@@ -9021,7 +9021,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-158-personal-learning-ai-provider-env-secret-gate-docs
     evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-159-personal-learning-ai-generated-content-adoption-boundary-review
     title: Review personal AI generated content adoption boundary
