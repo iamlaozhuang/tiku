@@ -6743,6 +6743,21 @@ tasks:
       - provider/env/secret/dependency/deploy/payment/external-service work remains blocked
       - formal generated-content write paths remain blocked
       - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: closed
+      cleanupPolicy: none
+      redactionRequired: true
     taskKind: blocked_gate
     moduleRunVersion: 2
     allowedFiles:
@@ -6769,15 +6784,22 @@ tasks:
       - schema_migration
       - evidence_redaction
     validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
       - git diff --check
       - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md,docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md -Pattern 'schema/migration execution remains blocked','batch-137','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-136-personal-learning-ai-persistence-schema-approval-gate
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-136-personal-learning-ai-persistence-schema-approval-gate
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-136-personal-learning-ai-persistence-schema-approval-gate
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
-    status: pending
-    result: null
+    status: closed
+    result: pass
     retryCount: 0
   - id: batch-137-personal-learning-ai-task-persistence-schema-migration
     title: Add local dev schema and migration for personal learning AI task persistence

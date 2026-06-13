@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-135-personal-learning-ai-next-persistence-seeding-closed
-updatedAt: "2026-06-12T23:30:40-07:00"
+currentPhase: batch-136-personal-learning-ai-persistence-schema-approval-gate-closed
+updatedAt: "2026-06-12T23:56:17-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: ee316358b15cbd5010c544ffb1406661dfb0f0e3
-  lastKnownOriginMasterSha: ee316358b15cbd5010c544ffb1406661dfb0f0e3
+  lastKnownMasterSha: d6256ac9c332c728895246809a312a1b843ac5f1
+  lastKnownOriginMasterSha: d6256ac9c332c728895246809a312a1b843ac5f1
 currentTask:
-  id: batch-135-personal-learning-ai-next-persistence-seeding
+  id: batch-136-personal-learning-ai-persistence-schema-approval-gate
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
-  branch: codex/batch-135-personal-learning-ai-next-persistence-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+  branch: codex/batch-136-personal-learning-ai-persistence-schema-approval-gate
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_135_personal_learning_ai_next_persistence_seeding
+    readiness: pass_batch_136_personal_learning_ai_persistence_schema_approval_gate
     lint: pass
     typecheck: pass
     unit: pass_245_files_884_tests
     build: pass_55_static_pages
-    e2e: not_run_docs_only_batch_135
+    e2e: not_run_docs_only_batch_136
     preCommitHook: pass
-    prePushHook: pass_batch_135_pre_push_readiness
+    prePushHook: pass_batch_136_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-135 seeded the next personal-learning-ai persistence and blocked-gate queue sequence. The next queued item is
-    batch-136-personal-learning-ai-persistence-schema-approval-gate, but it requires fresh approval before execution.
-    Product code, tests, e2e specs, schema/migration, dependency, provider, env/secret, deploy, payment,
+    Batch-136 recorded the persistence schema approval gate as docs-only. The exact next schema task remains
+    batch-137-personal-learning-ai-task-persistence-schema-migration, and it still requires fresh approval before any
+    local schema/migration execution. Product code, tests, e2e specs, dependency, provider, env/secret, deploy, payment,
     external-service, PR, force-push, formal generated-content write paths, authorization model changes, and Cost
     Calibration Gate execution remain blocked outside their own approved tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
