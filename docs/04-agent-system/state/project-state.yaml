@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-145-personal-learning-ai-provider-env-cost-blocked-gate-closed
-updatedAt: "2026-06-13T02:22:23-07:00"
+currentPhase: batch-146-personal-learning-ai-next-seeding-planning-closed
+updatedAt: "2026-06-13T02:57:57-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 39fb4d851c30b756c4adcb626d4a364ac55d104b
-  lastKnownOriginMasterSha: 39fb4d851c30b756c4adcb626d4a364ac55d104b
+  lastKnownMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
+  lastKnownOriginMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
 currentTask:
-  id: batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+  id: batch-146-personal-learning-ai-next-seeding-planning
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
-  branch: codex/batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+  branch: codex/batch-146-personal-learning-ai-next-seeding-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_145_personal_learning_ai_provider_env_cost_blocked_gate
+    readiness: pass_batch_146_personal_learning_ai_next_seeding_planning
     lint: pass
     typecheck: pass
     unit: pass_247_files_902_tests
     build: pass_55_static_pages
     e2e: not_required_l0_docs_only
-    preCommitHook: pass_batch_145_pre_commit_hardening
-    prePushHook: pass_batch_145_pre_push_readiness
+    preCommitHook: pass_batch_146_pre_commit_hardening
+    prePushHook: pass_batch_146_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-145 closed the docs-only provider/env/dependency/Cost Calibration blocked gate record. The batch-137 through
-    batch-145 personal-learning-ai sequence is locally closed. Dependency introduction, provider calls, provider
-    configuration, env/secret work, local provider sandbox execution, generated-content writes, deploy, payment,
-    external-service, PR, force-push, and Cost Calibration Gate execution remain blocked until a later queued task has
-    explicit fresh approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    Batch-146 seeded the next personal-learning-ai local sequence after batch-145 because no batch-146+ pending task
+    existed in task-queue.yaml. The next executable task is
+    batch-147-personal-learning-ai-server-owned-metadata-hardening after batch-146 closeout. The seeded sequence keeps
+    provider/env/dependency, local provider sandbox, generated-content write paths, schema/migration, deploy, payment,
+    external-service, PR, force-push, and Cost Calibration Gate execution blocked unless a later queued task has
+    explicit approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md

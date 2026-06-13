@@ -7611,3 +7611,518 @@ tasks:
     status: closed
     result: pass
     retryCount: 0
+  - id: batch-146-personal-learning-ai-next-seeding-planning
+    title: Seed next personal learning AI server-owned metadata tasks
+    phase: batch-146-personal-learning-ai-next-seeding-planning
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+    humanApproval: >-
+      User explicitly approved a low-risk docs-only queue-seeding/planning task when no batch-146+ pending
+      personal-learning-ai task exists. The approval permits editing only project state, task queue, and batch-146 task
+      plan/evidence/audit files. It does not approve product source edits, tests/e2e edits, schema/migration,
+      dependency/package/lockfile changes, env/secret work, provider calls, local provider sandbox, generated-content
+      writes, formal content adoption, deploy, payment, external-service, PR, force-push, or Cost Calibration Gate
+      execution.
+    seededByTask: batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: next personal-learning-ai task seeding after provider/env/cost blocked gate
+    behaviorBoundary: personal-learning-ai::docs-only queue seeding
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    useCases:
+      - reviewer can see the next personal-learning-ai local hardening sequence after batch-145
+      - server-owned metadata, security review, local e2e validation, and provider/env/cost blocked gates are separated
+        into reviewable tasks
+    acceptanceScenarios:
+      - task queue contains ordered batch-147 through batch-150 follow-up tasks
+      - every seeded task records concrete dependencies, allowedFiles, blockedFiles, and validation commands
+      - high-risk provider/env/dependency/schema/generated-content/deploy/payment/external-service/Cost Calibration work
+        remains blocked
+    nonGoals:
+      - product source edits, e2e edits, schema/migration, dependency changes, env/secret, provider execution,
+        generated-content writes, formal content adoption, deploy, payment, external-service work
+    validationProfile: L0-docs-only-seeding
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    capabilities:
+      queueSeeding: approved_docs_only_by_user_prompt_2026_06_13
+      providerCall: blocked_without_task_approval
+      providerConfiguration: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      dependencyChange: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      generatedContentPersistence: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - batch-147 server-owned metadata hardening remains pending after this docs-only task
+      - provider/env/secret work remains blocked
+      - dependency/package/lockfile changes remain blocked
+      - local provider sandbox remains blocked
+      - generated-content writes and formal content adoption remain blocked
+      - schema/migration, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - implementation_planning
+      - task_queue
+      - evidence_redaction
+      - provider_blocked
+      - env_secret_blocked
+      - dependency
+      - blocked_gate
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - phase: post_edit
+        command: node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+      - phase: post_edit
+        command: git diff --check
+      - phase: post_edit
+        command: Select-String -Path docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md -Pattern 'batch-147','batch-148','batch-149','batch-150','server-owned metadata','Cost Calibration Gate remains blocked'
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: npm.cmd run test:unit
+      - phase: post_edit
+        command: npm.cmd run build
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-146-personal-learning-ai-next-seeding-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-146-personal-learning-ai-next-seeding-planning
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-146-personal-learning-ai-next-seeding-planning
+    validationCommands:
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+      - git diff --check
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md -Pattern 'batch-147','batch-148','batch-149','batch-150','server-owned metadata','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-146-personal-learning-ai-next-seeding-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-146-personal-learning-ai-next-seeding-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-146-personal-learning-ai-next-seeding-planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: batch-147-personal-learning-ai-server-owned-metadata-hardening
+    title: Harden personal AI request server-owned metadata before provider or generated content
+    phase: batch-147-personal-learning-ai-server-owned-metadata-hardening
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-146-personal-learning-ai-next-seeding-planning
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+    humanApproval: >-
+      User explicitly approved local source hardening for server-owned metadata when the queue declares exact
+      allowedFiles and dependencies are satisfied. This task may harden local_contract_only request metadata handling so
+      client-supplied resultPublicId, aiCallLogPublicId, audit/evidence/citation, owner/quota owner, and authorization
+      status fields cannot become durable server metadata. It must not change the authorization permission model, call a
+      provider, write generated content, change schema/migration, edit dependencies, read/write env files, execute e2e,
+      deploy, touch payment/external-service surfaces, create a PR, force-push, or execute Cost Calibration.
+    autoDriveLocalImplementationApproval: approved_by_user_prompt_2026_06_13
+    seededByTask: batch-146-personal-learning-ai-next-seeding-planning
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: server-owned metadata hardening
+    behaviorBoundary: personal-learning-ai::request metadata ownership
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    useCases:
+      - local POST persistence stores only server-owned defaults or repository-returned values for result and evidence metadata
+      - stale client-owned resultPublicId, aiCallLogPublicId, audit/evidence/citation, owner, quota, or auth status fields are ignored in durable task metadata
+      - reused persistent tasks may still return existing repository metadata that was already stored by server-side persistence
+    acceptanceScenarios:
+      - focused unit tests fail before hardening if client-supplied result/evidence/reference metadata is persisted
+      - focused unit tests pass after route/service hardening
+      - API envelopes remain standard and camelCase
+      - no formal generated-content, `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book`
+        write path is touched
+    nonGoals:
+      - provider calls, real provider result adoption, generated-content persistence, authorization permission model
+        changes, schema/migration, e2e execution, dependency changes, env/secret, deploy, payment, external-service work
+    validationProfile: L4-local-api-contract
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L4
+    capabilities:
+      providerCall: blocked_without_task_approval
+      providerConfiguration: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      dependencyChange: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      generatedContentPersistence: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - security review remains batch-148
+      - local role-flow e2e validation remains batch-149
+      - provider/env/dependency/local provider sandbox/Cost Calibration blocked gate remains batch-150
+      - generated-content writes and formal content adoption remain blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/services/personal-ai-generation-request-flow-service.ts
+      - src/server/services/personal-ai-generation-request-flow-service.test.ts
+      - src/server/services/ai-generation-task-request-service.ts
+      - src/server/services/ai-generation-task-request-service.test.ts
+      - src/server/validators/ai-generation-task-request.ts
+      - src/server/validators/personal-ai-generation-request-flow.ts
+      - src/server/models/ai-generation-task-request.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - implementation
+      - authorization_boundary
+      - ai_call_log
+      - request_history
+      - evidence_redaction
+      - provider_blocked
+      - generated_content
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-flow-service.test.ts
+      - npm.cmd run test:unit -- src/server/services/ai-generation-task-request-service.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md -Pattern 'server-owned metadata','client-supplied','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-147-personal-learning-ai-server-owned-metadata-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-147-personal-learning-ai-server-owned-metadata-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-147-personal-learning-ai-server-owned-metadata-hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+    status: pending
+    retryCount: 0
+  - id: batch-148-personal-learning-ai-server-owned-metadata-security-review
+    title: Review persistent history and server-owned metadata security boundary
+    phase: batch-148-personal-learning-ai-server-owned-metadata-security-review
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-147-personal-learning-ai-server-owned-metadata-hardening
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+    humanApproval: >-
+      User approved security review for the server-owned metadata and persistent history boundary. This task is
+      docs-only/read-only for product code and must not edit source, tests, e2e, schema/migration, dependencies,
+      env/secret, provider, generated-content, deploy, payment, external-service, PR, force-push, or Cost Calibration
+      surfaces.
+    seededByTask: batch-146-personal-learning-ai-next-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: server-owned metadata security review
+    behaviorBoundary: personal-learning-ai::request history security review
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+    acceptanceScenarios:
+      - audit confirms client-owned metadata cannot become durable result/evidence/reference metadata
+      - audit confirms session ownership and redacted public-id-only history boundaries
+      - audit confirms formal generated-content and provider paths remain blocked
+    validationProfile: L0-security-review-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    capabilities:
+      securityReview: approved_after_dependency_close
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - local role-flow validation remains batch-149
+      - provider and generated-content write paths remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: security_review
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - security_review
+      - authorization_boundary
+      - ai_call_log
+      - request_history
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md -Pattern 'server-owned metadata','public ids only','ai_call_log','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-148-personal-learning-ai-server-owned-metadata-security-review
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-148-personal-learning-ai-server-owned-metadata-security-review
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-148-personal-learning-ai-server-owned-metadata-security-review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+    status: pending
+    retryCount: 0
+  - id: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+    title: Validate local student role flow after server-owned metadata hardening
+    phase: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-148-personal-learning-ai-server-owned-metadata-security-review
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+    humanApproval: >-
+      User approved running the queue-declared existing local e2e spec for personal-learning-ai validation. This task may
+      execute only local Playwright e2e list and the existing `e2e/personal-ai-generation-local-request.spec.ts` through
+      the npm scripts. It must not edit e2e specs, run full suite by default, use headed/debug mode, read/write env files,
+      call providers, change schema/migration or dependencies, deploy, touch payment/external-service surfaces, create a
+      PR, force-push, or execute Cost Calibration.
+    seededByTask: batch-146-personal-learning-ai-next-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local role-flow validation after metadata hardening
+    behaviorBoundary: personal-learning-ai::local student role flow validation
+    requirementRefs:
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+    acceptanceScenarios:
+      - existing local e2e spec passes for submit and persisted history reload
+      - evidence records only command, pass/fail status, spec name, and test count
+      - provider/generated-content/staging/prod remain blocked remainders
+    nonGoals:
+      - e2e spec authoring, product source edits, schema/migration, provider execution, generated-content persistence,
+        full-suite e2e default expansion
+    validationProfile: L6-local-role-flow
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L6
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - provider execution remains blocked
+      - generated-content writes remain blocked
+      - staging/prod/deploy/payment/external-service remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: local_verification
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_e2e_validation
+      - student_role_flow
+      - request_history
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+    status: pending
+    retryCount: 0
+  - id: batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
+    title: Refine blocked gate for provider env dependency local sandbox and Cost Calibration
+    phase: batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+    humanApproval: >-
+      User approved docs-only blocked gate recording and refinement for provider/env/dependency/local provider sandbox
+      and Cost Calibration boundaries. This task may only record the decision boundary and next approval requirements.
+      It must not read or write env files, install dependencies, edit package or lock files, call providers, configure
+      provider endpoints, run local provider sandbox, deploy, touch payment/external-service surfaces, write generated
+      content, create a PR, force-push, or execute Cost Calibration.
+    freshApprovalRequired: >-
+      Must not execute provider calls, provider configuration, env/secret work, dependency/package/lockfile changes,
+      local provider sandbox, deploy/payment/external-service work, or Cost Calibration Gate. This task only records the
+      blocked gate and the fresh approval evidence needed by future work.
+    seededByTask: batch-146-personal-learning-ai-next-seeding-planning
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: provider env dependency cost blocked gate refinement
+    behaviorBoundary: personal-learning-ai::provider-env-cost blocked gate
+    requirementRefs:
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+    acceptanceScenarios:
+      - evidence separates dependency, provider/env, local provider sandbox, generated-content writes, and Cost
+        Calibration decisions
+      - evidence confirms no env/secret, package/lockfile, provider call, deployment, payment, or external-service action
+        occurred
+      - Cost Calibration Gate remains blocked unless separately and explicitly approved in a later task
+    nonGoals:
+      - installing packages, reading secrets, provider calls, provider configuration, deployment, payment,
+        external-service work, generated-content writes
+    validationProfile: L0-blocked-gate-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    capabilities:
+      blockedGateRecording: approved_by_user_prompt_2026_06_13
+      dependencyChange: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      providerConfiguration: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - dependency introduction remains blocked
+      - provider/env/secret work remains blocked
+      - local provider sandbox remains blocked
+      - generated-content writes remain blocked
+      - deploy/payment/external-service remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - blocked_gate
+      - dependency
+      - provider_blocked
+      - env_secret_blocked
+      - generated_content
+      - external_service
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md,docs/05-execution-logs/audits-reviews/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md -Pattern 'dependency introduction remains blocked','provider/env/secret work remains blocked','local provider sandbox remains blocked','Cost Calibration Gate remains blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+    status: pending
+    retryCount: 0
