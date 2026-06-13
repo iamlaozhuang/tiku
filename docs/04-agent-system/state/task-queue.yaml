@@ -9699,12 +9699,46 @@ tasks:
       Fresh approval is required before any local provider sandbox run, provider call, model request, cost measurement,
       env/secret use, or generated-content write. Approval must set provider, model, request count, spend ceiling,
       secret destination, redaction policy, and no-formal-write boundary.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 explicitly did not approve real provider calls, model requests,
+      sandbox execution, cost measurement, or env/secret use for
+      `batch-166-personal-learning-ai-local-provider-sandbox-execution`. The prompt allowed only stopping at a blocked
+      gate or writing blocked evidence if batch-166 became the next task. This task is therefore docs-only blocked-gate
+      closeout and must not execute sandbox/provider/model/cost/env/secret work.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
     targetClosureItem: local provider sandbox execution
     behaviorBoundary: personal-learning-ai::local provider sandbox execution
-    status: blocked
+    capabilities:
+      localProviderSandbox: blocked_without_fresh_task_approval
+      providerCall: blocked_without_fresh_task_approval
+      providerConfiguration: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      generatedContentPersistence: blocked_without_fresh_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - local provider sandbox remains blocked
+      - provider calls, model requests, and provider configuration remain blocked
+      - env/secret reads or use remain blocked
+      - cost measurement remains blocked
+      - generated-content writes and formal adoption remain blocked
+      - schema/migration, e2e, staging/prod/cloud, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -9734,6 +9768,11 @@ tasks:
       - npm.cmd run typecheck
       - npm.cmd run test:unit
       - npm.cmd run build
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-166-personal-learning-ai-local-provider-sandbox-execution
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-166-personal-learning-ai-local-provider-sandbox-execution
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-166-personal-learning-ai-local-provider-sandbox-execution
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
   - id: batch-167-personal-learning-ai-generated-content-persistence
     title: Implement personal learning AI generated content persistence
     phase: batch-167-personal-learning-ai-generated-content-persistence
