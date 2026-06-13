@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate-closed
-updatedAt: "2026-06-13T09:55:00-07:00"
+currentPhase: batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs-closed
+updatedAt: "2026-06-13T10:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 440db7d6513ee4380faeb514dd56c407c7e253f7
-  lastKnownOriginMasterSha: 440db7d6513ee4380faeb514dd56c407c7e253f7
+  lastKnownMasterSha: 4eff299c53a5dcb1056eb7a73c4936ea3f81aefc
+  lastKnownOriginMasterSha: 4eff299c53a5dcb1056eb7a73c4936ea3f81aefc
 currentTask:
-  id: batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+  id: batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
-  branch: codex/batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+  branch: codex/batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_160_personal_learning_ai_local_provider_sandbox_plan_blocked_gate
+    readiness: pass_batch_161_personal_learning_ai_staging_provider_deploy_blocked_gate_docs
     lint: pass
     typecheck: pass
     unit: pass_247_files_904_tests
     build: pass_55_static_pages
-    e2e: not_required_l0_local_provider_sandbox_plan_docs_only
-    preCommitHook: pass_batch_160_pre_commit_hardening
-    prePushHook: pass_batch_160_pre_push_readiness
+    e2e: not_required_l0_staging_provider_deploy_blocked_gate_docs_only
+    preCommitHook: pass_batch_161_pre_commit_hardening
+    prePushHook: pass_batch_161_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-160 closed the docs-only local provider sandbox blocked-gate plan. The evidence records sandbox boundaries,
-    redacted evidence rules, no-formal-write controls, and the requirement that any provider execution, sandbox run,
-    env/secret handling, generated-content write, dependency change, or cost measurement needs separate fresh approval.
-    Staging/prod/cloud, deploy, payment, external-service, PR, force-push, schema/migration, destructive DB, and Cost
-    Calibration remain blocked. Next recommended action is batch-161 after rereading state and queue from master.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    Batch-161 closed the docs-only staging/provider/deploy blocked gate. The evidence records that staging/prod/cloud,
+    deploy, payment, external-service, provider execution, provider configuration, and provider/env/secret work all
+    require separate fresh approval. No remote action, provider call, env/secret work, deploy, payment, or
+    external-service action occurred. The batch-156 seeded personal-learning-ai boundary tasks are closed; future
+    implementation work requires a new queued task with precise allowedFiles, blockedFiles, validation, and fresh
+    approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
