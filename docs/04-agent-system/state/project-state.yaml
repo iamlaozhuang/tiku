@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-166-personal-learning-ai-local-provider-sandbox-execution-blocked-gate-closed
-updatedAt: "2026-06-13T07:13:42-07:00"
+currentPhase: batch-167-personal-learning-ai-generated-content-persistence-blocked-gate-closed
+updatedAt: "2026-06-13T07:21:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2b7da9d64c5b49479daf574a18c1166128fc6090
-  lastKnownOriginMasterSha: 2b7da9d64c5b49479daf574a18c1166128fc6090
+  lastKnownMasterSha: 5bb4115f146c8ad7df7d6a4d577e54f8d6ba16f7
+  lastKnownOriginMasterSha: 5bb4115f146c8ad7df7d6a4d577e54f8d6ba16f7
 currentTask:
-  id: batch-166-personal-learning-ai-local-provider-sandbox-execution
+  id: batch-167-personal-learning-ai-generated-content-persistence
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
-  branch: codex/batch-166-personal-learning-ai-local-provider-sandbox-execution
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+  branch: codex/batch-167-personal-learning-ai-generated-content-persistence
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_166_personal_learning_ai_local_provider_sandbox_blocked_gate
+    readiness: pass_batch_167_personal_learning_ai_generated_content_persistence_blocked_gate
     lint: pass
     typecheck: pass
     unit: pass_248_files_908_tests
     build: pass_55_static_pages
     e2e: not_required_blocked_gate
-    preCommitHook: pass_batch_166_pre_commit_hardening
-    prePushHook: pass_batch_166_pre_push_readiness
+    preCommitHook: pass_batch_167_pre_commit_hardening
+    prePushHook: pass_batch_167_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-166 closed as a blocked gate only. No local provider sandbox, model request, provider call, cost measurement,
-    env/secret access, generated-content write, schema/migration, e2e, deploy, payment, external-service, PR, force-push,
-    or Cost Calibration work was performed. After merge/push/branch cleanup, re-read state/queue from master. Batch-167
-    remains blocked under the current prompt because generated-content persistence, schema/migration, formal writes, and
-    formal adoption were not approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+    Batch-167 closed as a blocked gate only. No generated-content persistence, schema/migration, generated-content
+    writes, formal adoption into question/paper/practice/mock_exam/exam_report/mistake_book, e2e, deploy, payment,
+    external-service, PR, force-push, or Cost Calibration work was performed. After merge/push/branch cleanup, re-read
+    state/queue from master. Batch-168 remains blocked without fresh approval for API/UI source changes.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
