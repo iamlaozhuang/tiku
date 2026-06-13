@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-148-personal-learning-ai-server-owned-metadata-security-review-closed
-updatedAt: "2026-06-13T03:19:59-07:00"
+currentPhase: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation-closed
+updatedAt: "2026-06-13T03:32:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
   lastKnownOriginMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
 currentTask:
-  id: batch-148-personal-learning-ai-server-owned-metadata-security-review
+  id: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
-  branch: codex/batch-148-personal-learning-ai-server-owned-metadata-security-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+  branch: codex/batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_148_personal_learning_ai_server_owned_metadata_security_review
+    readiness: pass_batch_149_personal_learning_ai_local_role_flow_server_owned_metadata_validation
     lint: pass
     typecheck: pass
     unit: pass_247_files_903_tests
     build: pass_55_static_pages
-    e2e: not_required_l0_security_review_docs_only
-    preCommitHook: pass_batch_148_pre_commit_hardening
-    prePushHook: pass_batch_148_pre_push_readiness
+    e2e: pass_personal_ai_generation_local_request_1_test
+    preCommitHook: pass_batch_149_pre_commit_hardening
+    prePushHook: pass_batch_149_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,10 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-148 completed the docs-only security review for personal-learning-ai persistent history and server-owned
-    metadata. No blocking findings were found; route-level hardening owns new local pending task result/evidence and
-    ai_call_log metadata, while history remains owner-scoped and public ids only. The next executable queue item is
-    batch-149 local role-flow validation after batch-148 closeout. Provider/env/dependency, generated-content writes,
+    Batch-149 validated the queued existing local personal-learning-ai student role-flow e2e spec after server-owned
+    metadata hardening and security review. The next executable queue item is batch-150 provider/env/dependency/cost
+    blocked-gate refinement. Source edits, e2e edits, provider/env/dependency execution, generated-content writes,
     schema/migration, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate execution remain
     blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
