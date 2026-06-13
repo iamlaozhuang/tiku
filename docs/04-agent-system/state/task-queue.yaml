@@ -9975,12 +9975,112 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-170-personal-learning-ai-generated-content-persistence-implementation
     evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
+  - id: batch-171-personal-learning-ai-result-fk-name-hardening
+    title: Harden personal AI generation result foreign key name
+    phase: batch-171-personal-learning-ai-result-fk-name-hardening
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-170-personal-learning-ai-generated-content-persistence-implementation
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+    freshApprovalRequired: >-
+      Fresh approval is required before local schema/migration hardening. This task consumes the 2026-06-13 user
+      approval to execute FK-name hardening and local schema/migration hardening only.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 approved executing the FK-name hardening task and approved local
+      schema/migration hardening. The approval does not permit provider calls, sandbox execution, env/secret reads or
+      writes, e2e, staging/prod/cloud, deploy, payment, external-service, dependency/package/lockfile changes,
+      destructive database operation, formal generated content adoption, PR, force-push, or Cost Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: generated content persistence FK name hardening
+    behaviorBoundary: personal-learning-ai::generated content draft persistence schema hardening
+    capabilities:
+      generatedContentPersistence: approved_local_draft_persistence
+      schemaMigration: approved_migration_plan
+      formalGeneratedContentAdoption: blocked_without_fresh_task_approval
+      providerCall: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      localE2EValidation: blocked_without_fresh_task_approval
+      costCalibrationGate: blocked
+    approvedMigrationPlan:
+      scope: rename personal_ai_generation_result FK constraint to fk_personal_ai_generation_result_task
+      command: pnpm.exe exec drizzle-kit generate; pnpm.exe exec drizzle-kit migrate
+      environment: dev_local_only
+      destructiveDatabaseOperation: blocked
+      rollbackOrRecovery: stop on failure; do not run destructive repair; revert branch changes before merge if needed
+      redaction: no database URL, secret, row data, raw prompt, provider payload, or raw generated output in evidence
+    blockedRemainder:
+      - provider calls, model requests, sandbox execution, and cost measurement remain blocked
+      - env/secret reads or writes remain blocked
+      - formal generated-content adoption remains blocked
+      - API/UI wiring remains blocked pending fresh batch-168 approval
+      - e2e, staging/prod/cloud, deploy, payment, external-service, PR, force-push, destructive database operation, dependency changes, and Cost Calibration remain blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    allowedFiles:
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - drizzle/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/features/**
+      - src/ai/**
+      - src/server/**
+      - tests/**
+      - e2e/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId batch-171-personal-learning-ai-result-fk-name-hardening -Capability schemaMigration -Intent use_capability
+      - npm.cmd run test:unit -- src/db/schema/ai-rag.test.ts
+      - pnpm.exe exec drizzle-kit generate
+      - pnpm.exe exec drizzle-kit migrate
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-171-personal-learning-ai-result-fk-name-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-171-personal-learning-ai-result-fk-name-hardening
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-171-personal-learning-ai-result-fk-name-hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
   - id: batch-168-personal-learning-ai-api-ui-wiring
     title: Wire personal learning AI API and student UI flow
     phase: batch-168-personal-learning-ai-api-ui-wiring
     sourceStory: personal-learning-ai-experience
     dependencies:
-      - batch-170-personal-learning-ai-generated-content-persistence-implementation
+      - batch-171-personal-learning-ai-result-fk-name-hardening
     taskPlanPolicy: required_before_edit
     planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
     freshApprovalRequired: >-

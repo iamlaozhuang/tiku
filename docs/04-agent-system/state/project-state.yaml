@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-170-personal-learning-ai-generated-content-persistence-implementation-closed
-updatedAt: "2026-06-13T07:54:27-07:00"
+currentPhase: batch-171-personal-learning-ai-result-fk-name-hardening
+updatedAt: "2026-06-13T08:16:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 989dff3233e56a0ef8369c29e2275952c49f7f26
-  lastKnownOriginMasterSha: 989dff3233e56a0ef8369c29e2275952c49f7f26
+  lastKnownMasterSha: 0fceac7556b0a9eef444b3cd765c433c53568495
+  lastKnownOriginMasterSha: 0fceac7556b0a9eef444b3cd765c433c53568495
 currentTask:
-  id: batch-170-personal-learning-ai-generated-content-persistence-implementation
+  id: batch-171-personal-learning-ai-result-fk-name-hardening
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
-  branch: codex/batch-170-personal-learning-ai-generated-content-persistence-implementation
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+  branch: codex/batch-171-personal-learning-ai-result-fk-name-hardening
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_170_personal_learning_ai_generated_content_persistence_implementation
+    readiness: pass_batch_171_pre_edit_readiness
     lint: pass
     typecheck: pass
     unit: pass_250_files_920_tests
     build: pass_55_static_pages
-    e2e: not_required_batch_170
-    preCommitHook: pass_batch_170_pre_commit_hardening
-    prePushHook: pass_batch_170_pre_push_readiness
+    e2e: not_required_batch_171
+    preCommitHook: pass_batch_171
+    prePushHook: pass_batch_171
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,8 +316,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-170 closed with local generated-content draft persistence, local Drizzle migration, repository/service, and
-    unit tests. Batch-168 API/UI wiring remains blocked pending fresh approval. Keep provider calls, sandbox execution,
-    env/secret work, e2e, staging/prod/cloud, deploy, payment, external-service, formal adoption, PR, force-push,
-    destructive database operations, dependency changes, and Cost Calibration blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
+    Batch-171 closed the personal_ai_generation_result foreign-key name hardening with a local Drizzle migration and
+    redacted evidence. Batch-168 API/UI wiring remains blocked pending fresh approval that defines API contract,
+    authorization boundary, student flow states, no-formal-adoption behavior, and validation commands.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md

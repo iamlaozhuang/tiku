@@ -1,6 +1,7 @@
 import {
   bigint,
   boolean,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -414,9 +415,7 @@ export const personalAiGenerationResult = pgTable(
     public_id: text("public_id").notNull(),
     ai_generation_task_id: bigint("ai_generation_task_id", {
       mode: "number",
-    })
-      .notNull()
-      .references(() => aiGenerationTask.id, { onDelete: "restrict" }),
+    }).notNull(),
     task_public_id: text("task_public_id").notNull(),
     request_public_id: text("request_public_id").notNull(),
     owner_public_id: text("owner_public_id").notNull(),
@@ -440,6 +439,11 @@ export const personalAiGenerationResult = pgTable(
     updated_at: updatedAtColumn(),
   },
   (table) => [
+    foreignKey({
+      columns: [table.ai_generation_task_id],
+      foreignColumns: [aiGenerationTask.id],
+      name: "fk_personal_ai_generation_result_task",
+    }).onDelete("restrict"),
     uniqueIndex("udx_personal_ai_generation_result_public_id").on(
       table.public_id,
     ),

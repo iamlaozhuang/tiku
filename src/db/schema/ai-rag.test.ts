@@ -601,10 +601,16 @@ describe("personal learning AI generated content result schema", () => {
         "idx_personal_ai_generation_result_result_status",
       ]),
     );
-    expect(getForeignKeyNames(personalAiGenerationResult)).toEqual(
-      expect.arrayContaining([
-        "personal_ai_generation_result_ai_generation_task_id_ai_generation_task_id_fk",
-      ]),
+    const foreignKeyNames = getForeignKeyNames(personalAiGenerationResult);
+
+    expect(foreignKeyNames).toEqual(
+      expect.arrayContaining(["fk_personal_ai_generation_result_task"]),
     );
+    expect(foreignKeyNames).not.toContain(
+      "personal_ai_generation_result_ai_generation_task_id_ai_generation_task_id_fk",
+    );
+    expect(
+      foreignKeyNames.every((foreignKeyName) => foreignKeyName.length <= 63),
+    ).toBe(true);
   });
 });

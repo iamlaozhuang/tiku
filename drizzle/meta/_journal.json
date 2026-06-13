@@ -64,6 +64,13 @@
       "when": 1781362103012,
       "tag": "20260613074823_add_personal_ai_generation_result",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781363408851,
+      "tag": "20260613081008_harden_personal_ai_generation_result_fk_name",
+      "breakpoints": true
     }
   ]
 }
