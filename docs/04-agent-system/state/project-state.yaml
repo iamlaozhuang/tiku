@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation-closed
-updatedAt: "2026-06-13T05:35:00-07:00"
+currentPhase: batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh-closed
+updatedAt: "2026-06-13T06:00:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
   lastKnownOriginMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
 currentTask:
-  id: batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation
+  id: batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
-  branch: codex/batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh.md
+  branch: codex/batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_154_personal_learning_ai_existing_local_e2e_defense_in_depth_validation
+    readiness: pass_batch_155_personal_learning_ai_provider_env_dependency_cost_blocked_gate_refresh
     lint: pass
     typecheck: pass
     unit: pass_247_files_904_tests
     build: pass_55_static_pages
-    e2e: pass_existing_personal_ai_local_request_1_test
-    preCommitHook: pass_batch_154_pre_commit_hardening
-    prePushHook: pass_batch_154_pre_push_readiness
+    e2e: not_required_l0_blocked_gate_docs_only
+    preCommitHook: pass_batch_155_pre_commit_hardening
+    prePushHook: pass_batch_155_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-154 closed the existing local personal AI e2e validation after repository/service hardening. The next queued
-    task is batch-155, docs-only provider/env/dependency/local provider sandbox/generated-content/deploy/payment/
-    external-service/Cost Calibration blocked gate refresh. Provider/env/secret, dependency/package/lockfile, local
-    provider sandbox, generated-content write, deploy, payment, external-service, PR, force-push, schema/migration, and
-    Cost Calibration work remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
+    Batch-155 closed the docs-only provider/env/dependency/local provider sandbox/generated-content/deploy/payment/
+    external-service/Cost Calibration blocked gate refresh after repository/service hardening and local validation.
+    No further batch-151 seeded personal-learning-ai task remains queued. Any provider, env/secret, dependency,
+    generated-content adoption, deploy, payment, external-service, schema/migration, PR, force-push, or Cost Calibration
+    work requires a future queued task with explicit fresh approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh.md
