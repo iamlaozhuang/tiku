@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-144-personal-learning-ai-generated-content-domain-blocked-gate-closed
-updatedAt: "2026-06-13T02:12:15-07:00"
+currentPhase: batch-145-personal-learning-ai-provider-env-cost-blocked-gate-closed
+updatedAt: "2026-06-13T02:22:23-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e0f414e43a9188c70b5e4aa87d96b8787c2182ea
-  lastKnownOriginMasterSha: e0f414e43a9188c70b5e4aa87d96b8787c2182ea
+  lastKnownMasterSha: 39fb4d851c30b756c4adcb626d4a364ac55d104b
+  lastKnownOriginMasterSha: 39fb4d851c30b756c4adcb626d4a364ac55d104b
 currentTask:
-  id: batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+  id: batch-145-personal-learning-ai-provider-env-cost-blocked-gate
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
-  branch: codex/batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+  branch: codex/batch-145-personal-learning-ai-provider-env-cost-blocked-gate
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_144_personal_learning_ai_generated_content_domain_blocked_gate
+    readiness: pass_batch_145_personal_learning_ai_provider_env_cost_blocked_gate
     lint: pass
     typecheck: pass
     unit: pass_247_files_902_tests
     build: pass_55_static_pages
-    e2e: pass_existing_personal_ai_generation_local_request_spec
-    preCommitHook: pass_batch_144_pre_commit_hardening
-    prePushHook: pass_batch_144_pre_push_readiness
+    e2e: not_required_l0_docs_only
+    preCommitHook: pass_batch_145_pre_commit_hardening
+    prePushHook: pass_batch_145_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-144 closed the docs-only generated-content domain blocked gate record. The exact next pending queue task is
-    batch-145-personal-learning-ai-provider-env-cost-blocked-gate, also docs-only under the current user prompt's explicit
-    approval. Generated-content writes, formal question/paper/practice/mock_exam/exam_report/mistake_book adoption,
-    provider calls, schema/migration, dependency, env/secret, deploy, payment, external-service, PR, force-push, and Cost
-    Calibration Gate execution remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+    Batch-145 closed the docs-only provider/env/dependency/Cost Calibration blocked gate record. The batch-137 through
+    batch-145 personal-learning-ai sequence is locally closed. Dependency introduction, provider calls, provider
+    configuration, env/secret work, local provider sandbox execution, generated-content writes, deploy, payment,
+    external-service, PR, force-push, and Cost Calibration Gate execution remain blocked until a later queued task has
+    explicit fresh approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
