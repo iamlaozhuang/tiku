@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-162-personal-learning-ai-implementation-queue-seeding-closed
-updatedAt: "2026-06-13T11:10:00-07:00"
+currentPhase: batch-163-personal-learning-ai-dependency-implementation-closed
+updatedAt: "2026-06-13T06:33:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1f12ccc35a7b2f540a62503de39d70a475c86434
-  lastKnownOriginMasterSha: 1f12ccc35a7b2f540a62503de39d70a475c86434
+  lastKnownMasterSha: 48bed19a69c5e6d0019f1a9b0d34e82d6728657b
+  lastKnownOriginMasterSha: 48bed19a69c5e6d0019f1a9b0d34e82d6728657b
 currentTask:
-  id: batch-162-personal-learning-ai-implementation-queue-seeding
+  id: batch-163-personal-learning-ai-dependency-implementation
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
-  branch: codex/batch-162-personal-learning-ai-implementation-queue-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+  branch: codex/batch-163-personal-learning-ai-dependency-implementation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_162_personal_learning_ai_implementation_queue_seeding
+    readiness: pass_batch_163_personal_learning_ai_dependency_implementation
     lint: pass
     typecheck: pass
     unit: pass_247_files_904_tests
     build: pass_55_static_pages
-    e2e: not_required_l0_implementation_queue_seeding_docs_only
-    preCommitHook: pass_batch_162_pre_commit_hardening
-    prePushHook: pass_batch_162_pre_push_readiness
+    e2e: not_required_dependency_task
+    preCommitHook: pass_batch_163_pre_commit_hardening
+    prePushHook: pass_batch_163_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,10 +316,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-162 seeded the next personal-learning-ai implementation queue as blocked tasks. The new blocked tasks split
-    dependency installation, provider/env destination confirmation, provider adapter implementation, local provider
-    sandbox execution, generated-content persistence, API/UI wiring, and local e2e validation into separate approval
-    surfaces. No source, test, e2e, schema, dependency, env/secret, provider, sandbox, generated-content, deploy,
-    payment, external-service, PR, force-push, or Cost Calibration work occurred. Next action is to choose one blocked
-    batch-163+ task and provide task-specific fresh approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+    Batch-163 closed the isolated dependency implementation task by adding `ai`, `@ai-sdk/alibaba`, and
+    `@ai-sdk/openai-compatible` only. Next action is to re-read state/queue from master after closeout and claim
+    `batch-164-personal-learning-ai-provider-env-secret-destination` only if the repository remains clean and the
+    approved `.env.example` placeholder-only boundary is preserved. Real secrets, `.env.local`, provider calls, sandbox,
+    generated-content persistence, schema/migration, e2e, deploy, payment, external-service, PR, force-push, and Cost
+    Calibration remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md

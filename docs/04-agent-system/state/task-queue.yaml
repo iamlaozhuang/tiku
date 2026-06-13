@@ -9493,12 +9493,32 @@ tasks:
       candidates, package manager command, package/lockfile isolation strategy, validation commands, and human approval
       evidence. No source, env/secret, provider execution, schema/migration, e2e, deploy, payment, external-service, or
       Cost Calibration work is approved by this blocked seed.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 explicitly approves executing
+      `batch-163-personal-learning-ai-dependency-implementation`, limited to `package.json`, `pnpm-lock.yaml`,
+      `project-state.yaml`, `task-queue.yaml`, and the corresponding task plan/evidence/audit. Approved dependency
+      candidates are `ai`, `@ai-sdk/alibaba`, and `@ai-sdk/openai-compatible`. The dependency change must be isolated in
+      its own commit. Source, tests, e2e, schema/drizzle, env/secret, provider execution, sandbox, deploy, payment,
+      external-service, and Cost Calibration remain blocked.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
     targetClosureItem: dependency implementation gate
     behaviorBoundary: personal-learning-ai::dependency implementation
-    status: blocked
+    moduleRunVersion: 2
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - package.json
@@ -9526,6 +9546,8 @@ tasks:
       - npm.cmd run typecheck
       - npm.cmd run test:unit
       - npm.cmd run build
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
   - id: batch-164-personal-learning-ai-provider-env-secret-destination
     title: Confirm personal learning AI provider env and secret destination
     phase: batch-164-personal-learning-ai-provider-env-secret-destination
