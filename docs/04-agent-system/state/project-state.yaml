@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-134-personal-learning-ai-ui-initial-history-fetch
-updatedAt: "2026-06-12T22:56:33-07:00"
+currentPhase: batch-135-personal-learning-ai-next-persistence-seeding-closed
+updatedAt: "2026-06-12T23:30:40-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1601190c7a56e94974da0c54c96ac9303bdad26e
-  lastKnownOriginMasterSha: 1601190c7a56e94974da0c54c96ac9303bdad26e
+  lastKnownMasterSha: ee316358b15cbd5010c544ffb1406661dfb0f0e3
+  lastKnownOriginMasterSha: ee316358b15cbd5010c544ffb1406661dfb0f0e3
 currentTask:
-  id: batch-134-personal-learning-ai-ui-initial-history-fetch
+  id: batch-135-personal-learning-ai-next-persistence-seeding
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
-  branch: codex/batch-134-personal-learning-ai-ui-initial-history-fetch
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+  branch: codex/batch-135-personal-learning-ai-next-persistence-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-12"
-    readiness: pass_batch_134_personal_learning_ai_ui_initial_history_fetch
+    readiness: pass_batch_135_personal_learning_ai_next_persistence_seeding
     lint: pass
     typecheck: pass
     unit: pass_245_files_884_tests
     build: pass_55_static_pages
-    e2e: pass_personal_ai_generation_local_request_initial_history_get_1_test
+    e2e: not_run_docs_only_batch_135
     preCommitHook: pass
-    prePushHook: pass
+    prePushHook: pass_batch_135_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,8 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-134 closed the student personal-learning-ai UI initial redacted request history fetch. Keep provider,
-    env/secret, schema/migration, dependency, deploy, payment, external-service, PR, force-push, formal generated-content
-    write paths, authorization model changes, persistence/repository work, and Cost Calibration Gate blocked. Future
-    personal-learning-ai follow-ups should be seeded as separate queued tasks with explicit allowedFiles.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    Batch-135 seeded the next personal-learning-ai persistence and blocked-gate queue sequence. The next queued item is
+    batch-136-personal-learning-ai-persistence-schema-approval-gate, but it requires fresh approval before execution.
+    Product code, tests, e2e specs, schema/migration, dependency, provider, env/secret, deploy, payment,
+    external-service, PR, force-push, formal generated-content write paths, authorization model changes, and Cost
+    Calibration Gate execution remain blocked outside their own approved tasks.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md

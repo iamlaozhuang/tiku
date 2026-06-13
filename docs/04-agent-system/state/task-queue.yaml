@@ -6574,3 +6574,1017 @@ tasks:
     status: closed
     result: pass
     retryCount: 0
+  - id: batch-135-personal-learning-ai-next-persistence-seeding
+    title: Seed next personal learning AI persistence and blocked-gate task sequence
+    phase: batch-135-personal-learning-ai-next-persistence-seeding
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-134-personal-learning-ai-ui-initial-history-fetch
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    humanApproval: >-
+      User approved executing the docs-only next-task decomposition and explicitly required that task splitting must not
+      omit or mis-scope follow-up work. Scope is limited to project state, task queue, task plan, evidence, and audit
+      review updates. Product source, tests, e2e specs, package/lockfile, schema/migration, env/secret, provider,
+      deploy, payment, external-service, PR, force-push, formal generated-content write paths, authorization model
+      changes, and Cost Calibration Gate execution remain forbidden.
+    autoDriveLocalImplementationApproval: >-
+      User approval covers this scoped docs-only seeding task only when changes remain inside the declared allowedFiles,
+      evidence is redacted, and every high-risk follow-up is split into separate tasks with freshApprovalRequired or
+      blocked-gate wording. This approval does not authorize any seeded product implementation, schema/migration,
+      dependency, provider, env/secret, deploy, payment, external-service, formal generated-content write path,
+      authorization model, PR, force-push, or Cost Calibration Gate action.
+    seededByTask: user-approved-batch-135-next-persistence-seeding
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: next personal-learning-ai persistence task queue
+    behaviorBoundary: personal-learning-ai::queue seeding only
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    useCases:
+      - future personal-learning-ai tasks are serially claimable without mixing schema, repository, route, UI, provider, or generated-content work
+      - blocked high-risk surfaces remain explicit and require fresh approval
+      - local-first validation levels and evidence requirements are concrete before any implementation starts
+    acceptanceScenarios:
+      - task queue gains a complete ordered sequence for persistence, repository, GET, POST, UI refetch, role-flow validation, security review, generated-content domain, and provider/env/cost blocked gates
+      - each seeded task has concrete dependencies, allowedFiles, blockedFiles, validation commands, evidence path, audit path, risk tags, and blocked remainder
+      - schema/migration, provider/env/dependency, authorization model, generated-content write path, deploy/payment/external-service, PR, force-push, and Cost Calibration Gate execution are not authorized by this seeding task
+      - evidence records that no product code, tests, e2e specs, schema/migration, package/lockfile, or env/provider files changed
+    nonGoals:
+      - product implementation, schema/migration execution, dependency changes, local e2e execution, provider calls, generated content persistence, deployment, PR, and force push
+    validationProfile: L0-docs-only-queue-seeding
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    capabilities:
+      docsOnlySeeding: approved
+      localImplementation: blocked_without_future_task_approval
+      localE2EValidation: blocked_without_future_task_approval
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      dependencyChange: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - seeded implementation tasks are not approved for execution by this docs-only task
+      - schema/migration work requires a separate fresh approval and task-specific allowedFiles
+      - provider/env/secret/dependency/deploy/payment/external-service work remains blocked
+      - formal generated-content write paths remain blocked pending a separate personal-generated-content domain task
+      - authorization model changes remain blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: closed
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - implementation_planning
+      - request_history
+      - schema_migration
+      - provider_blocked
+      - env_secret_blocked
+      - evidence_redaction
+      - blocked_gate
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - node .\node_modules\prettier\bin\prettier.cjs --write docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml,docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md,docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md -Pattern 'batch-136','batch-137','batch-138','batch-139','batch-140','batch-141','batch-142','batch-143','batch-144','batch-145','freshApprovalRequired','Cost Calibration Gate remains blocked','formal generated-content write paths remain blocked'
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-135-personal-learning-ai-next-persistence-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-135-personal-learning-ai-next-persistence-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-135-personal-learning-ai-next-persistence-seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: batch-136-personal-learning-ai-persistence-schema-approval-gate
+    title: Record approval gate for personal learning AI persistence schema
+    phase: batch-136-personal-learning-ai-persistence-schema-approval-gate
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-135-personal-learning-ai-next-persistence-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+    humanApproval: >-
+      Seeded by batch-135 as a blocked-gate follow-up. This task may only record the exact schema/migration approval
+      decision needed for personal-learning-ai persistence. It must not edit product source, tests, e2e specs, schema,
+      migrations, package/lockfile, env/secret, provider, deploy, payment, external-service, PR, force-push, formal
+      generated-content write paths, authorization model behavior, or Cost Calibration Gate state.
+    freshApprovalRequired: >-
+      Execution must not start until the user gives fresh approval to open the persistence schema approval gate. Approval
+      for batch-135 did not approve schema or migration execution.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: persistence schema approval gate
+    behaviorBoundary: personal-learning-ai::schema approval gate only
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    useCases:
+      - reviewer can decide whether to allow local dev schema/migration work for `ai_generation_task` persistence
+      - schema scope is separated from repository, route, UI, provider, and generated-content execution
+    acceptanceScenarios:
+      - evidence records whether schema/migration execution is approved, rejected, or still blocked
+      - evidence names the exact next schema task and confirms Cost Calibration Gate remains blocked
+      - no runtime, schema, migration, dependency, provider, env, or e2e files change
+    nonGoals:
+      - creating schema, generating migrations, running migrations, writing repository code, or changing runtime behavior
+    validationProfile: L0-blocked-gate-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    capabilities:
+      blockedGateRecording: approved_after_fresh_task_approval
+      schemaMigration: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - local schema/migration execution remains blocked until batch-137 receives fresh approval
+      - provider/env/secret/dependency/deploy/payment/external-service work remains blocked
+      - formal generated-content write paths remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - blocked_gate
+      - schema_migration
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - node .\node_modules\prettier\bin\prettier.cjs --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-136-personal-learning-ai-persistence-schema-approval-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-136-personal-learning-ai-persistence-schema-approval-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-136-personal-learning-ai-persistence-schema-approval-gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-137-personal-learning-ai-task-persistence-schema-migration
+    title: Add local dev schema and migration for personal learning AI task persistence
+    phase: batch-137-personal-learning-ai-task-persistence-schema-migration
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-136-personal-learning-ai-persistence-schema-approval-gate
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    humanApproval: >-
+      Seeded by batch-135 only. This schema/migration task is not approved by batch-135. It may start only after a fresh
+      task-specific approval records the local dev schema/migration plan, rollback boundary, redacted evidence plan, and
+      exact allowed files.
+    freshApprovalRequired: >-
+      Must not start without fresh user approval for local dev schema/migration work. Approval must preserve env/secret,
+      provider, dependency/package/lockfile, staging/prod/cloud/deploy, payment, external-service, destructive DB,
+      formal generated-content write paths, authorization model changes, PR, force-push, and Cost Calibration Gate
+      blocks.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local ai_generation_task persistence schema
+    behaviorBoundary: personal-learning-ai::local schema/migration only
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    useCases:
+      - local dev database can persist redacted `ai_generation_task` metadata for personal AI generation requests
+      - persisted task rows support public task ids, owner/quota metadata, status, result reference, redacted failure category, and ai_call_log linkage
+      - schema does not store raw prompts, provider payloads, raw generated content, secrets, tokens, or formal generated content
+    acceptanceScenarios:
+      - schema defines a task persistence surface using project naming conventions and public ids
+      - migration and schema tests prove indexes and foreign keys follow naming conventions
+      - evidence records local dev only migration boundary and rollback/recovery statement
+    nonGoals:
+      - repository implementation, route wiring, UI wiring, provider execution, generated content persistence, auth model changes, staging/prod migration, and destructive DB operations
+    validationProfile: L3-local-schema-migration
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L3
+    capabilities:
+      schemaMigration: blocked_until_fresh_approval
+      localDockerDatabase: blocked_until_fresh_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - repository, route, UI, provider, generated-content, and role-flow work remain separate tasks
+      - staging/prod migration remains blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: schema_migration
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/ai-rag.test.ts
+      - drizzle/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/features/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - schema_migration
+      - ai_call_log
+      - audit_log
+      - provider_blocked
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/db/schema/ai-rag.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration -Capability schemaMigration -Decision use_capability
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-137-personal-learning-ai-task-persistence-schema-migration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-138-personal-learning-ai-request-history-repository
+    title: Add personal learning AI request persistence repository and redacted mapper
+    phase: batch-138-personal-learning-ai-request-history-repository
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-137-personal-learning-ai-task-persistence-schema-migration
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    humanApproval: >-
+      Seeded by batch-135 as a future local implementation task after schema/migration closes. This task is not approved
+      for execution by batch-135 and must be explicitly approved or claimed under a valid low-risk implementation
+      policy after dependencies close.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: request history repository
+    behaviorBoundary: personal-learning-ai::repository and redacted mapper only
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    useCases:
+      - repository can list session-owned personal AI request history rows as redacted read-model inputs
+      - repository can create or reuse a task request record without exposing internal numeric ids
+      - mapper prevents DB snake_case fields and raw payloads from leaking to API JSON
+    acceptanceScenarios:
+      - focused repository/mapper tests prove owner filtering by session user public id
+      - focused tests prove requested history sorts newest first and uses public ids only
+      - focused tests prove raw prompt/provider/generated content fields are absent from mapped outputs
+    nonGoals:
+      - route wiring, UI wiring, provider execution, schema/migration changes, generated content storage, auth model changes, e2e execution
+    validationProfile: L3-local-repository
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L3
+    capabilities:
+      localImplementation: approved_after_dependency_close
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - GET/POST route wiring remains batch-139 and batch-140
+      - UI server-backed refetch remains batch-141
+      - provider and generated-content write paths remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - src/server/mappers/personal-ai-generation-request-mapper.ts
+      - src/server/mappers/personal-ai-generation-request-mapper.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/**
+      - src/features/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - repository
+      - request_history
+      - ai_call_log
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/server/repositories/personal-ai-generation-request-repository.test.ts src/server/mappers/personal-ai-generation-request-mapper.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-138-personal-learning-ai-request-history-repository
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-138-personal-learning-ai-request-history-repository
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-138-personal-learning-ai-request-history-repository
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-139-personal-learning-ai-route-get-persistent-history
+    title: Wire GET personal learning AI history route to persistence repository
+    phase: batch-139-personal-learning-ai-route-get-persistent-history
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-138-personal-learning-ai-request-history-repository
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    humanApproval: >-
+      Seeded by batch-135 as a future route implementation task after repository work closes. This task is not approved
+      for execution by batch-135 and must be claimed only after dependencies and approval policy allow it.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: persistent GET request history route
+    behaviorBoundary: personal-learning-ai::GET route repository integration
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    useCases:
+      - authenticated student GET returns persisted redacted personal AI request history owned by the resolved session user
+      - query/body user ids and numeric ids are ignored and not echoed
+      - route remains a thin adapter over service/repository and returns standard envelope
+    acceptanceScenarios:
+      - focused route unit tests prove GET calls repository with resolved session user public id
+      - focused route unit tests prove GET returns persisted rows as redacted camelCase DTOs
+      - focused route unit tests prove repository errors return standard error envelope without stack traces
+      - targeted existing e2e spec still observes a standard envelope and no sensitive content
+    nonGoals:
+      - POST persistence, UI refetch behavior, provider execution, generated-content persistence, schema/migration, dependency changes, auth model changes
+    validationProfile: L4-local-api-route
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L4
+    capabilities:
+      localImplementation: approved_after_dependency_close
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - POST persistence remains batch-140
+      - UI refetch remains batch-141
+      - provider and generated-content write paths remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/features/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - server_route
+      - request_history
+      - authorization_boundary
+      - ai_call_log
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-139-personal-learning-ai-route-get-persistent-history
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-139-personal-learning-ai-route-get-persistent-history
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-139-personal-learning-ai-route-get-persistent-history
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-140-personal-learning-ai-route-post-persistent-request
+    title: Persist personal learning AI request metadata on POST
+    phase: batch-140-personal-learning-ai-route-post-persistent-request
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-139-personal-learning-ai-route-get-persistent-history
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+    humanApproval: >-
+      Seeded by batch-135 as a future POST persistence task. This task is not approved for execution by batch-135 and
+      must be claimed only after dependencies and approval policy allow it.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: persistent POST request metadata
+    behaviorBoundary: personal-learning-ai::POST route persistence without provider execution
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    useCases:
+      - POST creates or reuses a session-owned task request record using redacted metadata only
+      - idempotency key hash can reuse an existing task public id without duplicate task rows
+      - POST response remains local browser experience and does not call providers or write generated content
+    acceptanceScenarios:
+      - focused route unit tests prove stale client owner ids are overwritten from session before persistence
+      - focused route/repository tests prove idempotent POST returns existing task metadata when appropriate
+      - focused tests prove no provider payload, raw prompt, raw answer, raw generated content, or numeric ids appear in API output
+      - targeted existing e2e spec still passes without provider execution
+    nonGoals:
+      - real provider call, generated result storage, UI server refetch, schema/migration changes, auth model changes, Cost Calibration Gate
+    validationProfile: L4-local-api-route
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L4
+    capabilities:
+      localImplementation: approved_after_dependency_close
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - UI server-backed refetch remains batch-141
+      - provider execution and generated-content persistence remain blocked
+      - authorization model changes remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - src/server/repositories/personal-ai-generation-request-repository.ts
+      - src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/features/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - server_route
+      - request_history
+      - authorization_boundary
+      - ai_call_log
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts src/server/repositories/personal-ai-generation-request-repository.test.ts
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-140-personal-learning-ai-route-post-persistent-request
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-140-personal-learning-ai-route-post-persistent-request
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-140-personal-learning-ai-route-post-persistent-request
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+    title: Refetch server-backed personal learning AI history after submit
+    phase: batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-140-personal-learning-ai-route-post-persistent-request
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+    humanApproval: >-
+      Seeded by batch-135 as a future UI follow-up after POST persistence closes. This task is not approved for
+      execution by batch-135 and must be claimed only after dependencies and approval policy allow it.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: server-backed history refresh after submit
+    behaviorBoundary: personal-learning-ai::student UI history refetch
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+    useCases:
+      - after a successful POST, the student UI refreshes history from GET instead of relying on synthetic local rows
+      - reload shows the persisted redacted request history
+      - UI still shows loading, empty, error, and unauthorized states without exposing session material
+    acceptanceScenarios:
+      - focused UI unit tests prove POST success triggers a server GET history refresh
+      - focused UI unit tests prove history refresh errors do not expose provider payloads or session tokens
+      - targeted existing e2e spec proves submit then history display uses server-backed public ids
+    nonGoals:
+      - route/repository/schema changes, provider execution, generated-content persistence, new e2e spec authoring, auth model changes
+    validationProfile: L5-local-ui-browser
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localImplementation: approved_after_dependency_close
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - role-flow verification remains batch-143
+      - provider and generated-content write paths remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/**
+      - src/server/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - student_ui
+      - request_history
+      - local_e2e_validation
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-142-personal-learning-ai-persistent-history-security-review
+    title: Review persistent personal learning AI history redaction and authorization boundaries
+    phase: batch-142-personal-learning-ai-persistent-history-security-review
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    humanApproval: >-
+      Seeded by batch-135 as a future security review after persistent history is wired. This task is not approved for
+      execution by batch-135 and must be claimed only after dependencies and approval policy allow it.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: persistent history security and redaction review
+    behaviorBoundary: personal-learning-ai::security review
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+    useCases:
+      - reviewer verifies session ownership, public-id-only API output, ai_call_log redaction, and blocked raw-content paths
+      - residual provider/generated-content risks are explicitly recorded before role-flow validation
+    acceptanceScenarios:
+      - audit records no internal numeric ids, session material, raw prompts, provider payloads, raw answers, or generated content in persistent history surfaces
+      - audit confirms GET/POST owner boundaries derive from session context
+      - audit confirms formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book` write paths remain untouched
+    nonGoals:
+      - product source edits, schema/migration, provider calls, e2e execution, generated-content persistence
+    validationProfile: L0-security-review-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    capabilities:
+      securityReview: approved_after_dependency_close
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - role-flow validation remains batch-143
+      - provider and generated-content write paths remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: security_review
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - security_review
+      - authorization_boundary
+      - request_history
+      - ai_call_log
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md,docs/05-execution-logs/audits-reviews/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md -Pattern 'session ownership','public ids only','ai_call_log','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-142-personal-learning-ai-persistent-history-security-review
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-142-personal-learning-ai-persistent-history-security-review
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-142-personal-learning-ai-persistent-history-security-review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+    title: Validate local student role flow for persisted personal learning AI history
+    phase: batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-142-personal-learning-ai-persistent-history-security-review
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+    humanApproval: >-
+      Seeded by batch-135 as a future local validation task after security review. This task is not approved for
+      execution by batch-135 and must be claimed only after dependencies and local e2e approval policy allow it.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local role-flow persisted history validation
+    behaviorBoundary: personal-learning-ai::local student role flow validation
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    useCases:
+      - local student logs in, opens `/ai-generation`, submits a request, reloads, and sees persisted redacted history
+      - validation records only command, pass/fail status, spec name, and test count
+    acceptanceScenarios:
+      - existing local e2e spec passes for submit then persisted history reload
+      - evidence proves no provider payload, raw generated content, full paper content, credentials, tokens, or database rows are recorded
+      - final handoff labels provider/generated-content/staging/prod as blocked remainders
+    nonGoals:
+      - e2e spec authoring, product source edits, schema/migration, provider execution, generated-content persistence, full-suite e2e default expansion
+    validationProfile: L6-local-role-flow
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L6
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - provider execution remains batch-145 blocked gate
+      - personal generated-content domain remains batch-144 blocked gate
+      - staging/prod/deploy/payment/external-service remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: local_verification
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - local_e2e_validation
+      - student_role_flow
+      - request_history
+      - evidence_redaction
+    validationCommands:
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+    title: Record blocked gate for personal AI generated content domain persistence
+    phase: batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+    humanApproval: >-
+      Seeded by batch-135 as a future blocked gate. This task may only record the approval decision for personal
+      generated-content domain persistence. It must not write generated content, formal question/paper records,
+      practice, mock_exam, exam_report, mistake_book, provider payloads, or storage paths.
+    freshApprovalRequired: >-
+      Must not start without fresh user approval because formal generated-content write paths and personal generated
+      content persistence remain blocked. Approval must define whether a personal-only generated content domain is
+      allowed and must preserve the non-goal that generated content does not automatically become formal `question` or
+      `paper`.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: generated-content domain approval gate
+    behaviorBoundary: personal-learning-ai::generated-content blocked gate
+    requirementRefs:
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/stories/epic-01-personal-ai-generation.md
+    useCases:
+      - reviewer can decide whether and how personal generated content may be persisted without touching formal content domains
+      - generated-content approval remains separate from provider execution and cost calibration
+    acceptanceScenarios:
+      - evidence records approval status and explicit non-goals for formal `question`, `paper`, `practice`, `mock_exam`, `exam_report`, and `mistake_book`
+      - evidence confirms no generated content or provider payload is written or displayed
+      - Cost Calibration Gate remains blocked
+    nonGoals:
+      - schema/migration execution, provider calls, generated content writes, object storage, formal content draft adoption, payment/deploy/external-service work
+    validationProfile: L0-blocked-gate-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    capabilities:
+      blockedGateRecording: approved_after_fresh_task_approval
+      generatedContentPersistence: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - generated-content persistence remains blocked until separate approval
+      - provider execution remains blocked until batch-145 or later approval
+      - formal content adoption paths remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - blocked_gate
+      - generated_content
+      - paper
+      - mock_exam
+      - provider_blocked
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md,docs/05-execution-logs/audits-reviews/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md -Pattern 'formal generated-content write paths remain blocked','question','paper','mock_exam','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+    status: pending
+    result: null
+    retryCount: 0
+  - id: batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+    title: Record blocked gate for provider env dependency and Cost Calibration
+    phase: batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    humanApproval: >-
+      Seeded by batch-135 as a future blocked gate. This task may only record the approval decision for provider/env,
+      dependency, local provider sandbox, and Cost Calibration work. It must not read or write env files, install
+      dependencies, call providers, configure provider endpoints, deploy, touch payment/external-service surfaces, or run
+      Cost Calibration.
+    freshApprovalRequired: >-
+      Must not start without fresh user approval because provider calls, provider configuration, env/secret work,
+      dependency/package/lockfile changes, local provider sandbox execution, deploy/payment/external-service work, and
+      Cost Calibration Gate execution remain blocked.
+    seededByTask: batch-135-personal-learning-ai-next-persistence-seeding
+    seededImplementationTask: false
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: provider env dependency and cost blocked gate
+    behaviorBoundary: personal-learning-ai::provider-env-cost blocked gate
+    requirementRefs:
+      - docs/02-architecture/adr/adr-006-runtime-dependency-alignment.md
+      - docs/01-requirements/advanced-edition/modules/03-personal-ai-generation.md
+      - docs/01-requirements/advanced-edition/modules/02-ai-task-domain.md
+    useCases:
+      - reviewer can decide whether to approve dependency introduction for AI SDK packages
+      - reviewer can decide whether to approve local provider sandbox execution and separate Cost Calibration work
+      - env/secret and provider configuration remain blocked until explicit scope and evidence rules exist
+    acceptanceScenarios:
+      - evidence records the approval state for dependency, provider/env, local provider sandbox, and Cost Calibration separately
+      - evidence confirms no env/secret, package/lockfile, provider call, deployment, payment, or external-service action occurred
+      - Cost Calibration Gate remains blocked unless separately and explicitly approved in a later task
+    nonGoals:
+      - installing packages, reading secrets, provider calls, provider configuration, deployment, payment, external-service work, generated content writes
+    validationProfile: L0-blocked-gate-docs-only
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L0
+    capabilities:
+      blockedGateRecording: approved_after_fresh_task_approval
+      dependencyChange: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      providerConfiguration: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - dependency introduction remains blocked
+      - provider/env/secret work remains blocked
+      - local provider sandbox remains blocked
+      - deploy/payment/external-service remain blocked
+      - Cost Calibration Gate remains blocked
+    taskKind: blocked_gate
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - blocked_gate
+      - dependency
+      - provider_blocked
+      - env_secret_blocked
+      - external_service
+      - evidence_redaction
+    validationCommands:
+      - git diff --check
+      - Select-String -Path docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md,docs/05-execution-logs/audits-reviews/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md -Pattern 'dependency introduction remains blocked','provider/env/secret work remains blocked','Cost Calibration Gate remains blocked'
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    status: pending
+    result: null
+    retryCount: 0
