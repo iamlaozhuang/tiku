@@ -138,6 +138,31 @@ test.describe("personal AI generation local request", () => {
     }, localSessionStorageKey);
 
     expect(storedLocalAuthValue).toEqual(expect.any(String));
+    const localAuthHeaderValue = storedLocalAuthValue ?? "";
+
+    const requestHistoryResponse = await page.request.get(
+      "/api/v1/personal-ai-generation-requests?userPublicId=client-owned-history-user&id=701",
+      {
+        headers: {
+          authorization: `Bearer ${localAuthHeaderValue}`,
+        },
+      },
+    );
+    expect(requestHistoryResponse.ok()).toBe(true);
+
+    const requestHistoryPayload = await requestHistoryResponse.json();
+    expectStandardEnvelope(requestHistoryPayload);
+    expectCamelCaseJsonKeys(requestHistoryPayload);
+    expectNoInternalIdKeys(requestHistoryPayload);
+    expectNoSensitivePayload(requestHistoryPayload, [localAuthHeaderValue]);
+    expect(JSON.stringify(requestHistoryPayload)).not.toContain(
+      "client-owned-history-user",
+    );
+    expect(requestHistoryPayload).toEqual({
+      code: 0,
+      message: "ok",
+      data: [],
+    });
 
     await page.goto("/ai-generation");
     await expect(page.locator("body")).toContainText("personal-learning-ai");

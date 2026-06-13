@@ -10,3 +10,4 @@ const personalAiGenerationRequestRouteHandlers =
   );
 
 export const POST = personalAiGenerationRequestRouteHandlers.collection.POST;
+export const GET = personalAiGenerationRequestRouteHandlers.collection.GET;

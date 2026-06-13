@@ -356,7 +356,7 @@ tasks:
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: mechanism_hardening
@@ -6328,6 +6328,127 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-132-personal-learning-ai-server-session-ownership-normalization
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: batch-133-personal-learning-ai-request-history-route-session-boundary
+    title: Add personal learning AI request history route session boundary
+    phase: batch-133-personal-learning-ai-request-history-route-session-boundary
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-132-personal-learning-ai-server-session-ownership-normalization
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+    humanApproval: >-
+      User approved executing this follow-up and explicitly required careful task decomposition without omissions or
+      mis-scoping. Scope is limited to the personal-learning-ai request history GET route session boundary, focused
+      route tests, the existing dedicated local e2e spec API assertion, docs/state, and redacted evidence. Provider,
+      env, schema, dependency, deploy, payment, external-service, PR, force-push, formal generated-content write paths,
+      authorization model changes, UI initial history fetch integration, persistence/repository work, and Cost
+      Calibration Gate work remain forbidden.
+    autoDriveLocalImplementationApproval: >-
+      User approval covers this scoped low-risk local implementation only when changes remain inside the declared
+      allowedFiles, preserve the standard response envelope, use local-only tests and existing e2e spec validation, keep
+      evidence redacted, and preserve provider, env/secret, schema/migration, dependency, deploy, payment,
+      external-service, PR, force-push, formal generated-content write path, UI initial history fetch integration,
+      persistence/repository, and Cost Calibration Gate blocks.
+    seededByTask: user-approved-batch-133-follow-up
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: request history GET route session boundary
+    behaviorBoundary: personal-learning-ai::request history route session boundary
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+    useCases:
+      - student local API clients can request recent personal AI history only with a valid local session
+      - history GET ignores query/client-owned user ids and is owned by the resolved session boundary
+      - local history remains redacted and provider-free while persistence remains a later task
+    acceptanceScenarios:
+      - focused route unit test proves `GET` requires a resolved user session and returns `401001` without one
+      - focused route unit test proves successful `GET` returns `{ code, message, data }` with an empty redacted history list for local no-persistence mode
+      - focused route unit test proves query/client-owned user ids are not echoed
+      - targeted existing e2e spec calls the real GET API with the local student token and observes a standard success envelope
+      - evidence proves provider payload, generated content, numeric ids, full paper content, and session material are absent
+    nonGoals:
+      - UI initial history fetch integration, persistence/repository queries, schema/migration, provider execution, dependency changes, deployment, PR, and force push
+    validationProfile: L4-server-route-history-session-boundary
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localImplementation: approved
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - UI initial history fetch integration remains for a later task
+      - persistence/repository/schema/migration work remains blocked
+      - provider/env/secret/dependency/deploy/payment/external-service work remains blocked
+      - authorization model changes remain blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/app/api/v1/personal-ai-generation-requests/route.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/features/**
+      - tests/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - server_route
+      - request_history
+      - authorization_boundary
+      - local_browser_flow
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-133-personal-learning-ai-request-history-route-session-boundary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-133-personal-learning-ai-request-history-route-session-boundary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-133-personal-learning-ai-request-history-route-session-boundary
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
     status: closed
     result: pass
     retryCount: 0

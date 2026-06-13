@@ -77,6 +77,29 @@ function createPostRequest(body: Record<string, unknown>): Request {
   );
 }
 
+function createGetRequest(query = ""): Request {
+  return new Request(
+    `http://localhost/api/v1/personal-ai-generation-requests${query}`,
+    {
+      method: "GET",
+    },
+  );
+}
+
+function getPersonalAiGenerationRequestHistoryRouteHandler(
+  collection: unknown,
+) {
+  const getHandler = (
+    collection as {
+      GET?: (request: Request) => Promise<Response>;
+    }
+  ).GET;
+
+  expect(getHandler).toEqual(expect.any(Function));
+
+  return getHandler as (request: Request) => Promise<Response>;
+}
+
 describe("personal AI generation request route handlers", () => {
   it("resolves user public id from the local session runtime without exposing session material", async () => {
     const observedAuthorizationValues: Array<string | null | undefined> = [];
@@ -179,6 +202,44 @@ describe("personal AI generation request route handlers", () => {
       message: "User session is required.",
       data: null,
     });
+  });
+
+  it("returns the standard unauthorized response when request history user context is missing", async () => {
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => null,
+    );
+
+    const response =
+      await getPersonalAiGenerationRequestHistoryRouteHandler(collection)(
+        createGetRequest(),
+      );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 401001,
+      message: "User session is required.",
+      data: null,
+    });
+  });
+
+  it("returns a session-owned empty request history list without echoing query user ids", async () => {
+    const staleQueryUserPublicId = "query_stale_user_public_999";
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+    );
+
+    const response = await getPersonalAiGenerationRequestHistoryRouteHandler(
+      collection,
+    )(createGetRequest(`?userPublicId=${staleQueryUserPublicId}&id=701`));
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: [],
+    });
+    expect(serializedPayload).not.toContain(staleQueryUserPublicId);
+    expect(serializedPayload).not.toMatch(/"id":/);
   });
 
   it("returns the local browser experience contract when requested", async () => {

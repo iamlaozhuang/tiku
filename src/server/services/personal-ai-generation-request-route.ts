@@ -3,6 +3,7 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import { buildPersonalAiGenerationRequestReadModel } from "./personal-ai-generation-request-service";
+import { buildPersonalAiGenerationRequestHistoryReadModel } from "./personal-ai-generation-request-history-service";
 import {
   createRouteHandlerWithErrorEnvelope,
   createRouteHandlersWithErrorEnvelope,
@@ -105,6 +106,22 @@ export function createPersonalAiGenerationRequestRouteHandlers(
 ) {
   return createRouteHandlersWithErrorEnvelope({
     collection: {
+      GET: createRouteHandlerWithErrorEnvelope(
+        async (request: Request): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
+
+          if (!isPersonalAiGenerationRequestUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
+
+          return createJsonResponse(
+            buildPersonalAiGenerationRequestHistoryReadModel([]),
+          );
+        },
+      ),
       POST: createRouteHandlerWithErrorEnvelope(
         async (request: Request): Promise<Response> => {
           const userContext = await resolveRequiredUserContext(
