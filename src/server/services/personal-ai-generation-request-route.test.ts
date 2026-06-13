@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createPersonalAiGenerationRequestRouteHandlers } from "./personal-ai-generation-request-route";
+import {
+  createPersonalAiGenerationRequestRouteHandlers,
+  createPersonalAiGenerationRequestUserResolver,
+} from "./personal-ai-generation-request-route";
+import type { SessionService } from "./session-service";
 
 const userContext = {
   userPublicId: "resolver_user_public_123",
@@ -74,6 +78,57 @@ function createPostRequest(body: Record<string, unknown>): Request {
 }
 
 describe("personal AI generation request route handlers", () => {
+  it("resolves user public id from the local session runtime without exposing session material", async () => {
+    const observedAuthorizationValues: Array<string | null | undefined> = [];
+    const sessionService: Pick<SessionService, "getCurrentSession"> = {
+      async getCurrentSession(input) {
+        observedAuthorizationValues.push(input.authorization);
+
+        return {
+          code: 0,
+          message: "ok",
+          data: {
+            user: {
+              publicId: "session_user_public_123",
+              phone: "13800000000",
+              name: "本地学员",
+              userType: "personal",
+              status: "active",
+              lockedUntilAt: null,
+              employeePublicId: null,
+              organizationPublicId: null,
+              adminPublicId: null,
+              adminRoles: [],
+            },
+            session: {
+              expiresAt: "2026-06-19T12:00:00.000Z",
+            },
+          },
+        };
+      },
+    };
+    const resolveUserContext =
+      createPersonalAiGenerationRequestUserResolver(sessionService);
+
+    const resolvedUserContext = await resolveUserContext(
+      new Request("http://localhost/api/v1/personal-ai-generation-requests", {
+        headers: {
+          authorization: "Bearer synthetic-local-session-token",
+        },
+      }),
+    );
+
+    expect(resolvedUserContext).toEqual({
+      userPublicId: "session_user_public_123",
+    });
+    expect(observedAuthorizationValues).toEqual([
+      "Bearer synthetic-local-session-token",
+    ]);
+    expect(JSON.stringify(resolvedUserContext)).not.toContain(
+      "synthetic-local-session-token",
+    );
+  });
+
   it("merges resolver user context and returns a redacted local request contract", async () => {
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,

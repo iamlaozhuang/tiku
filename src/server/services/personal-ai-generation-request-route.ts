@@ -8,6 +8,7 @@ import {
   createRouteHandlersWithErrorEnvelope,
 } from "./route-error-response";
 import { buildPersonalAiGenerationLocalBrowserExperienceReadModel } from "./personal-ai-generation-local-browser-experience-service";
+import type { SessionService } from "./session-service";
 
 export type PersonalAiGenerationRequestUserContext = {
   userPublicId: string;
@@ -63,6 +64,36 @@ function createRequestInputWithUserContext(
   return {
     ...(isRecord(input) ? input : {}),
     userPublicId: userContext.userPublicId,
+  };
+}
+
+function isSuccessfulSessionResponse(
+  response: Awaited<ReturnType<SessionService["getCurrentSession"]>>,
+): response is ApiResponse<NonNullable<typeof response.data>> & {
+  data: NonNullable<typeof response.data>;
+} {
+  return response.code === 0 && response.data !== null;
+}
+
+export function createPersonalAiGenerationRequestUserResolver(
+  sessionService: Pick<SessionService, "getCurrentSession">,
+): PersonalAiGenerationRequestUserResolver {
+  return async (request) => {
+    const sessionResponse = await sessionService.getCurrentSession({
+      authorization: request.headers.get("authorization"),
+    });
+
+    if (!isSuccessfulSessionResponse(sessionResponse)) {
+      return null;
+    }
+
+    if (sessionResponse.data.user.userType === null) {
+      return null;
+    }
+
+    return {
+      userPublicId: sessionResponse.data.user.publicId,
+    };
   };
 }
 
