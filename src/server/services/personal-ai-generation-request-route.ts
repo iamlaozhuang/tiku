@@ -64,6 +64,9 @@ function createRequestInputWithUserContext(
   return {
     ...(isRecord(input) ? input : {}),
     userPublicId: userContext.userPublicId,
+    actorPublicId: userContext.userPublicId,
+    ownerPublicId: userContext.userPublicId,
+    quotaOwnerPublicId: userContext.userPublicId,
   };
 }
 

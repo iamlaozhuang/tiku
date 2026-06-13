@@ -244,7 +244,7 @@ tasks:
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
     registryLifecycle:
-      runStatus: active
+      runStatus: closed
       cleanupPolicy: none
       redactionRequired: true
     taskKind: mechanism_hardening
@@ -6213,6 +6213,121 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-130-personal-learning-ai-dedicated-local-e2e-spec
     evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
+    status: closed
+    result: pass
+    retryCount: 0
+  - id: batch-132-personal-learning-ai-server-session-ownership-normalization
+    title: Normalize personal learning AI server ownership publicIds from session
+    phase: batch-132-personal-learning-ai-server-session-ownership-normalization
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-131-personal-learning-ai-session-public-id-request-alignment
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+    humanApproval: >-
+      User approved executing the suggested follow-up task after batch-131: harden the personal-learning-ai server
+      request route so actor, owner, and quota owner publicIds are normalized from the resolved current session, not
+      from client-owned request body fields. Provider, env, schema, dependency, deploy, payment, external-service, PR,
+      force-push, formal generated-content write paths, authorization model changes, and Cost Calibration Gate work
+      remain forbidden.
+    autoDriveLocalImplementationApproval: >-
+      User approval covers this scoped low-risk local implementation only when changes remain inside the declared
+      allowedFiles, preserve the existing standard response envelope, use local-only tests and existing e2e spec
+      validation, keep evidence redacted, and preserve provider, env/secret, schema/migration, dependency, deploy,
+      payment, external-service, PR, force-push, formal generated-content write path, and Cost Calibration Gate blocks.
+    seededByTask: user-approved-batch-132-follow-up
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: server-side session ownership normalization for personal AI request route
+    behaviorBoundary: personal-learning-ai::server session ownership normalization
+    requirementRefs:
+      - docs/05-execution-logs/evidence/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+    useCases:
+      - server route ignores stale or malicious body ownership publicIds for local personal AI generation requests
+      - request flow user, actor, owner, and quota owner publicIds remain aligned with the current session publicId
+      - dedicated local e2e browser flow continues to return redacted public summaries without provider execution
+    acceptanceScenarios:
+      - focused route unit test proves body `actorPublicId`, `ownerPublicId`, and `quotaOwnerPublicId` are overridden by the resolved session user publicId
+      - focused route unit test proves stale body ownership publicIds are absent from the serialized standard response
+      - targeted existing e2e spec still logs in a local student, submits the local personal AI request, and observes a standard success envelope
+      - evidence proves provider payload, generated content, numeric ids, full paper content, and session material are absent
+    nonGoals:
+      - client UI changes, repository rewrites, authorization model changes, provider execution, schema/migration, dependency changes, deployment, PR, and force push
+    validationProfile: L4-server-route-session-ownership-hardening
+    localExperienceClosureGate: personal-learning-ai-experience
+    localFullLoopGate: L5
+    capabilities:
+      localImplementation: approved
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - provider/env/secret/schema/migration/dependency/deploy/payment/external-service work remains blocked
+      - authorization model changes remain blocked
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+      - e2e/personal-ai-generation-local-request.spec.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+      - docs/05-execution-logs/audits-reviews/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/app/**
+      - src/features/**
+      - tests/**
+      - playwright-report/**
+      - test-results/**
+    riskTypes:
+      - server_route
+      - authorization_boundary
+      - local_browser_flow
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run build
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-132-personal-learning-ai-server-session-ownership-normalization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-132-personal-learning-ai-server-session-ownership-normalization
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-132-personal-learning-ai-server-session-ownership-normalization
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
     status: closed
     result: pass
     retryCount: 0

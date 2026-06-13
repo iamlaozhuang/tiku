@@ -234,6 +234,42 @@ describe("personal AI generation request route handlers", () => {
     });
   });
 
+  it("normalizes request ownership public ids from the resolver user context", async () => {
+    const staleBodyPublicId = "body_stale_owner_public_999";
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        actorPublicId: staleBodyPublicId,
+        ownerPublicId: staleBodyPublicId,
+        quotaOwnerPublicId: staleBodyPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        requestFlow: {
+          request: {
+            userPublicId: userContext.userPublicId,
+          },
+          taskRequest: {
+            actorPublicId: userContext.userPublicId,
+            ownerPublicId: userContext.userPublicId,
+            quotaOwnerPublicId: userContext.userPublicId,
+          },
+        },
+      },
+    });
+    expect(serializedPayload).not.toContain(staleBodyPublicId);
+  });
+
   it("does not expose body user id or sensitive request payload fields", async () => {
     const body = createBaseBody();
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
