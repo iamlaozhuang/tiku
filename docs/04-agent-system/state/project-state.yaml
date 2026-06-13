@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-142-personal-learning-ai-persistent-history-security-review-closed
-updatedAt: "2026-06-13T01:55:23-07:00"
+currentPhase: batch-143-personal-learning-ai-local-role-flow-persistent-history-validation-closed
+updatedAt: "2026-06-13T02:04:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e5e1f1fb2fd41394a3a3a142a309b7bd64f2343c
-  lastKnownOriginMasterSha: e5e1f1fb2fd41394a3a3a142a309b7bd64f2343c
+  lastKnownMasterSha: e2068bfdd1632f3fe2324db189293a228f4c09e2
+  lastKnownOriginMasterSha: e2068bfdd1632f3fe2324db189293a228f4c09e2
 currentTask:
-  id: batch-142-personal-learning-ai-persistent-history-security-review
+  id: batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
-  branch: codex/batch-142-personal-learning-ai-persistent-history-security-review
+  planPath: docs/05-execution-logs/task-plans/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+  branch: codex/batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_142_personal_learning_ai_persistent_history_security_review
+    readiness: pass_batch_143_personal_learning_ai_local_role_flow_persistent_history_validation
     lint: pass
     typecheck: pass
     unit: pass_247_files_902_tests
     build: pass_55_static_pages
     e2e: pass_existing_personal_ai_generation_local_request_spec
-    preCommitHook: pass_batch_142_pre_commit_hardening
-    prePushHook: pass_batch_142_pre_push_readiness
+    preCommitHook: pass_batch_143_pre_commit_hardening
+    prePushHook: pass_batch_143_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-142 closed the docs-only security review of persistent personal AI request history. The exact next pending
-    queue task is batch-143-personal-learning-ai-local-role-flow-persistent-history-validation. Product source edits,
+    Batch-143 closed the local role-flow persistent history validation using the declared existing local e2e spec. The
+    exact next pending queue task is batch-144-personal-learning-ai-generated-content-domain-blocked-gate, which remains
+    docs-only and requires the fresh approval already supplied in the current user prompt. Product source edits,
     schema/migration, dependency, provider, env/secret, deploy, payment, external-service, destructive DB, formal
-    generated-content write paths, PR, force-push, and Cost Calibration Gate execution remain blocked outside their own
-    approved tasks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    generated-content write paths, PR, force-push, and Cost Calibration Gate execution remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
