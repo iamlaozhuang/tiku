@@ -35,6 +35,7 @@ export type PersonalAiGenerationLocalBrowserExperienceDto = {
     taskPublicId: string;
     resultPublicId: string | null;
     contentVisibility: PersonalAiGenerationResultContentVisibility;
+    isFormalAdoptionBlocked: boolean;
     evidenceStatus: EvidenceStatus;
     citationCount: number;
     redactionStatus: PersonalAiGenerationResultReferenceRedactionStatus;

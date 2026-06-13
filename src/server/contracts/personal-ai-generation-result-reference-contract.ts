@@ -19,6 +19,7 @@ export type PersonalAiGenerationResultReferenceDto = {
   resultReference: {
     resultPublicId: string | null;
     contentVisibility: PersonalAiGenerationResultContentVisibility;
+    isFormalAdoptionBlocked: boolean;
     redactionStatus: PersonalAiGenerationResultReferenceRedactionStatus;
     evidenceStatus: EvidenceStatus;
     citationCount: number;

@@ -43,6 +43,7 @@ function mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
       taskPublicId: requestFlow.resultReference.taskPublicId,
       resultPublicId: resultReference.resultPublicId,
       contentVisibility: resultReference.contentVisibility,
+      isFormalAdoptionBlocked: resultReference.isFormalAdoptionBlocked,
       evidenceStatus: resultReference.evidenceStatus,
       citationCount: resultReference.citationCount,
       redactionStatus: resultReference.redactionStatus,

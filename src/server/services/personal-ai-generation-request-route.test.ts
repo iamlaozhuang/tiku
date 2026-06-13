@@ -431,6 +431,7 @@ describe("personal AI generation request route handlers", () => {
           taskPublicId: "ai_generation_task_public_route_123",
           resultPublicId: null,
           contentVisibility: "summary_only",
+          isFormalAdoptionBlocked: true,
           evidenceStatus: "none",
           citationCount: 0,
           redactionStatus: "redacted",
@@ -572,10 +573,19 @@ describe("personal AI generation request route handlers", () => {
               aiCallLogPublicId: null,
             },
           },
+          resultReference: {
+            resultReference: {
+              resultPublicId: null,
+              isFormalAdoptionBlocked: true,
+              evidenceStatus: "none",
+              citationCount: 0,
+            },
+          },
         },
         resultState: {
           status: "pending",
           resultPublicId: null,
+          isFormalAdoptionBlocked: true,
           evidenceStatus: "none",
           citationCount: 0,
         },

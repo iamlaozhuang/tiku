@@ -241,6 +241,10 @@ function StudentPersonalAiGenerationContractSummary({
           value={experience.resultState.contentVisibility}
         />
         <ContractField
+          label="isFormalAdoptionBlocked"
+          value={String(experience.resultState.isFormalAdoptionBlocked)}
+        />
+        <ContractField
           label="taskPublicId"
           value={resultReference.taskPublicId}
         />

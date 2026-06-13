@@ -47,6 +47,7 @@ describe("personal AI generation result reference service", () => {
         resultReference: {
           resultPublicId: "ai_generated_question_set_public_112",
           contentVisibility: "summary_only",
+          isFormalAdoptionBlocked: true,
           redactionStatus: "redacted",
           evidenceStatus: "sufficient",
           citationCount: 3,
@@ -88,6 +89,7 @@ describe("personal AI generation result reference service", () => {
         resultReference: {
           resultPublicId: null,
           contentVisibility: "summary_only",
+          isFormalAdoptionBlocked: true,
           redactionStatus: "redacted",
           evidenceStatus: "none",
           citationCount: 0,

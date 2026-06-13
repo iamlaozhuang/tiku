@@ -145,6 +145,7 @@ describe("personal AI generation request flow service", () => {
           resultReference: {
             resultPublicId: null,
             contentVisibility: "summary_only",
+            isFormalAdoptionBlocked: true,
             redactionStatus: "redacted",
             evidenceStatus: "none",
             citationCount: 0,

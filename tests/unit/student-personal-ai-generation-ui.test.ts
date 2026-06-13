@@ -86,6 +86,7 @@ const localExperienceResponse = {
       taskPublicId: "ai-generation-task-public-001",
       resultPublicId: null,
       contentVisibility: "summary_only",
+      isFormalAdoptionBlocked: true,
       evidenceStatus: "none",
       citationCount: 0,
       redactionStatus: "redacted",
@@ -164,6 +165,7 @@ const localExperienceResponse = {
         resultReference: {
           resultPublicId: null,
           contentVisibility: "summary_only",
+          isFormalAdoptionBlocked: true,
           evidenceStatus: "none",
           citationCount: 0,
           redactionStatus: "redacted",
@@ -411,6 +413,8 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(screen.getByText("paper-public-001")).toBeInTheDocument();
     expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
     expect(screen.getByText("summary_only")).toBeInTheDocument();
+    expect(screen.getByText("isFormalAdoptionBlocked")).toBeInTheDocument();
+    expect(screen.getByText("true")).toBeInTheDocument();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(

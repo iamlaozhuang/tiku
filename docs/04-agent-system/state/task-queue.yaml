@@ -10086,12 +10086,40 @@ tasks:
     freshApprovalRequired: >-
       Fresh approval is required before API/UI source changes. Approval must define student flow scope, API contract,
       authorization boundary, loading/empty/error states, no-formal-adoption behavior, and validation commands.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 approved executing
+      `batch-168-personal-learning-ai-api-ui-wiring` according to the recommended minimal scope: wire the
+      `personal-ai-generation-requests` API route and student UI minimal loop, use already implemented local
+      server-side boundaries, avoid real provider calls, avoid env/secret reads, avoid e2e, avoid formal generated
+      content adoption, and validate with lint, typecheck, unit, build, diff check, and Module Run v2 closeout gates.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
     targetClosureItem: API UI wiring
     behaviorBoundary: personal-learning-ai::api ui wiring
-    status: blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    capabilities:
+      providerCall: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      schemaMigration: blocked_without_fresh_task_approval
+      generatedContentPersistence: already_available_read_model_only
+      formalGeneratedContentAdoption: blocked_without_fresh_task_approval
+      localE2EValidation: blocked_without_fresh_task_approval
+      costCalibrationGate: blocked
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - src/app/api/v1/personal-ai-generation-requests/**
@@ -10122,11 +10150,18 @@ tasks:
       - playwright-report/**
       - test-results/**
     validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts tests/unit/student-personal-ai-generation-ui.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - npm.cmd run test:unit
       - npm.cmd run build
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-168-personal-learning-ai-api-ui-wiring
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-168-personal-learning-ai-api-ui-wiring
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-168-personal-learning-ai-api-ui-wiring
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
   - id: batch-169-personal-learning-ai-local-e2e-validation
     title: Validate personal learning AI local e2e flow
     phase: batch-169-personal-learning-ai-local-e2e-validation

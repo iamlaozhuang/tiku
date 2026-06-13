@@ -21,6 +21,7 @@ function mapPersonalAiGenerationResultReferenceToDto(
     resultReference: {
       resultPublicId: input.resultPublicId,
       contentVisibility: "summary_only",
+      isFormalAdoptionBlocked: true,
       redactionStatus: "redacted",
       evidenceStatus: input.evidenceStatus,
       citationCount: input.citationCount,
