@@ -10515,19 +10515,39 @@ tasks:
       Fresh approval is required before formal generated-content adoption design. This design task must not implement
       writes into question, paper, practice, mock_exam, exam_report, mistake_book, or any formal content table unless a
       later implementation task is separately approved.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 approved executing
+      batch-176-personal-learning-ai-formal-adoption-design within docs/state/queue/task-plan/evidence/audit scope only.
+      The approval permits designing generated-content adoption boundaries from draft personal AI content into formal
+      question, paper, practice, mock_exam, exam_report, and mistake_book domains, including review workflow, permission
+      requirements, rollback strategy, audit requirements, and future implementation gates. It does not permit formal
+      writes, source/tests/e2e/schema/Drizzle/package/lockfile/env/secret/provider/deploy/payment/external-service
+      changes, provider calls, model requests, sandbox execution, Cost Calibration, PR creation, or force-push.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-172-personal-learning-ai-next-stage-closure-and-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
     targetClosureItem: formal adoption boundary design
     behaviorBoundary: personal-learning-ai::formal generated-content adoption design
-    taskKind: blocked_design
+    taskKind: design_gate
     moduleRunVersion: 2
     capabilities:
-      formalGeneratedContentAdoption: blocked_without_task_approval
+      formalGeneratedContentAdoption: approved_design_only_no_writes
       providerCall: blocked_without_task_approval
       schemaMigration: blocked_without_task_approval
       costCalibrationGate: blocked
-    status: blocked
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -10550,11 +10570,23 @@ tasks:
       - playwright-report/**
       - test-results/**
     validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-176-personal-learning-ai-formal-adoption-design.md docs/05-execution-logs/evidence/2026-06-13-batch-176-personal-learning-ai-formal-adoption-design.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-176-personal-learning-ai-formal-adoption-design.md
       - npm.cmd run lint
       - npm.cmd run typecheck
+      - npm.cmd run test:unit
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-176-personal-learning-ai-formal-adoption-design
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-176-personal-learning-ai-formal-adoption-design
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-176-personal-learning-ai-formal-adoption-design
     evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-176-personal-learning-ai-formal-adoption-design.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-176-personal-learning-ai-formal-adoption-design.md
+    blockedRemainder:
+      - batch-174 local provider sandbox smoke remains blocked without fresh provider/model/command/quota approval
+      - batch-175 Cost Calibration Gate remains blocked
+      - batch-177 formal adoption implementation remains blocked pending batch-175 and fresh write-target approval
+      - batch-178 staging provider deploy readiness remains blocked
+      - formal generated-content writes remain blocked
   - id: batch-177-personal-learning-ai-formal-adoption-implementation
     title: Implement formal generated-content adoption
     phase: batch-177-personal-learning-ai-formal-adoption-implementation
