@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-168-personal-learning-ai-api-ui-wiring
-updatedAt: "2026-06-13T08:50:09-07:00"
+currentPhase: batch-169-personal-learning-ai-local-e2e-validation
+updatedAt: "2026-06-13T09:05:55-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 744248f0520291ab17813b2297fbc754bfcc02f8
-  lastKnownOriginMasterSha: 744248f0520291ab17813b2297fbc754bfcc02f8
+  lastKnownMasterSha: e86314381c67fe66614ea9a4e3f6b4c5596ad8f1
+  lastKnownOriginMasterSha: e86314381c67fe66614ea9a4e3f6b4c5596ad8f1
 currentTask:
-  id: batch-168-personal-learning-ai-api-ui-wiring
+  id: batch-169-personal-learning-ai-local-e2e-validation
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
-  branch: codex/batch-168-personal-learning-ai-api-ui-wiring
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+  branch: codex/batch-169-personal-learning-ai-local-e2e-validation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_168_pre_edit_readiness
+    readiness: pass_batch_169_pre_edit_readiness
     lint: pass
     typecheck: pass
     unit: pass_250_files_920_tests
     build: pass_55_static_pages
-    e2e: not_required_batch_168
-    preCommitHook: pass_batch_168_module_run_v2_pre_commit_hardening
-    prePushHook: pass_batch_168_module_run_v2_pre_push_readiness
+    e2e: pass_batch_169_existing_spec_1_test
+    preCommitHook: pass_batch_169_module_run_v2_pre_commit_hardening
+    prePushHook: pass_batch_169_module_run_v2_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,8 +316,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-168 is locally complete pending commit/merge/push closeout. Next queue candidate is batch-169 local e2e
-    validation, which remains blocked without fresh approval naming exact local e2e scope and redacted evidence rules.
-    Keep provider calls, env/secret reads, schema/migration, dependency changes, deploy, payment, external-service,
-    formal generated-content adoption, PR, force-push, and Cost Calibration blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+    Batch-169 is locally complete pending commit/merge/push closeout. No additional personal-learning-ai task is
+    approved after the local-only existing Playwright spec validation. Keep provider calls, env/secret reads,
+    schema/migration, dependency changes, deploy, payment, external-service, formal generated-content adoption, PR,
+    force-push, and Cost Calibration blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md

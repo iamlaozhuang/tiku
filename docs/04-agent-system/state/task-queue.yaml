@@ -10175,12 +10175,40 @@ tasks:
       validation. Approval must name exact specs, local-only target, generated artifact handling, and redacted evidence
       rules. Provider calls, env/secret work, deploy, payment, external-service, PR, force-push, and Cost Calibration
       remain blocked unless separately approved.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 approved executing the recommended next work,
+      `batch-169-personal-learning-ai-local-e2e-validation`, after the recommendation named the narrow local-only
+      existing spec `e2e/personal-ai-generation-local-request.spec.ts`. The approval permits only local existing-spec
+      Playwright validation and redacted evidence. It does not permit provider calls, model requests, sandbox execution,
+      env/secret reads or writes, `.env.local`, schema/migration, dependency/package/lockfile changes, staging/prod/cloud,
+      deploy, payment, external-service, formal generated-content adoption, PR, force-push, or Cost Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-162-personal-learning-ai-implementation-queue-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
     targetClosureItem: local e2e validation
     behaviorBoundary: personal-learning-ai::local e2e validation
-    status: blocked
+    taskKind: validation
+    moduleRunVersion: 2
+    capabilities:
+      localE2EValidation: approved_local_only_existing_specs
+      providerCall: blocked_without_fresh_task_approval
+      envSecret: blocked_without_fresh_task_approval
+      schemaMigration: blocked_without_fresh_task_approval
+      formalGeneratedContentAdoption: blocked_without_fresh_task_approval
+      costCalibrationGate: blocked
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - e2e/personal-ai-generation-local-request.spec.ts
@@ -10204,8 +10232,16 @@ tasks:
       - playwright-report/**
       - test-results/**
     validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:e2e -- --list
+      - npm.cmd run test:e2e -- e2e/personal-ai-generation-local-request.spec.ts --reporter=list
       - npm.cmd run lint
       - npm.cmd run typecheck
       - npm.cmd run test:unit
       - npm.cmd run build
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-169-personal-learning-ai-local-e2e-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-169-personal-learning-ai-local-e2e-validation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-169-personal-learning-ai-local-e2e-validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md

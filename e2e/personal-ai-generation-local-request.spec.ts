@@ -286,6 +286,7 @@ test.describe("personal AI generation local request", () => {
         resultState: {
           contentVisibility: "summary_only",
           evidenceStatus: "none",
+          isFormalAdoptionBlocked: true,
           status: "pending",
           taskPublicId: "ai-generation-task-public-001",
         },
@@ -302,6 +303,8 @@ test.describe("personal AI generation local request", () => {
     await expect(page.getByText("accepted")).toBeVisible();
     await expect(page.getByText("contentVisibility")).toBeVisible();
     await expect(page.getByText("summary_only")).toBeVisible();
+    await expect(page.getByText("isFormalAdoptionBlocked")).toBeVisible();
+    await expect(page.getByText("true").first()).toBeVisible();
 
     const postSubmitHistoryResponse = await postSubmitHistoryResponsePromise;
     expect(postSubmitHistoryResponse.ok()).toBe(true);
