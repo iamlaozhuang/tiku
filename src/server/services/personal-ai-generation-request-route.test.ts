@@ -4,7 +4,11 @@ import {
   createPersonalAiGenerationRequestRouteHandlers,
   createPersonalAiGenerationRequestUserResolver,
 } from "./personal-ai-generation-request-route";
-import type { PersonalAiGenerationRequestRepository } from "../repositories/personal-ai-generation-request-repository";
+import type {
+  CreatePersonalAiGenerationRequestInput,
+  PersonalAiGenerationRequestPersistenceResult,
+  PersonalAiGenerationRequestRepository,
+} from "../repositories/personal-ai-generation-request-repository";
 import type { SessionService } from "./session-service";
 
 const userContext = {
@@ -42,6 +46,7 @@ function createBaseFlowBody() {
   return {
     ...createBaseBody(),
     responseMode: "local_browser_experience",
+    requestPublicId: "personal_ai_request_public_route_123",
     taskPublicId: "ai_generation_task_public_route_123",
     taskType: "ai_question_generation",
     actorPublicId: userContext.userPublicId,
@@ -105,17 +110,51 @@ function createRequestRepository(
   historyRows: Awaited<
     ReturnType<PersonalAiGenerationRequestRepository["listRequestHistory"]>
   > = [],
-): Pick<PersonalAiGenerationRequestRepository, "listRequestHistory"> & {
+  options: {
+    createError?: Error;
+    createResult?: PersonalAiGenerationRequestPersistenceResult;
+  } = {},
+): Pick<
+  PersonalAiGenerationRequestRepository,
+  "createOrReuseRequest" | "listRequestHistory"
+> & {
   calls: Array<{ ownerPublicId: string; limit?: number }>;
+  createCalls: CreatePersonalAiGenerationRequestInput[];
 } {
   const calls: Array<{ ownerPublicId: string; limit?: number }> = [];
+  const createCalls: CreatePersonalAiGenerationRequestInput[] = [];
 
   return {
     calls,
+    createCalls,
     async listRequestHistory(query) {
       calls.push(query);
 
       return historyRows;
+    },
+    async createOrReuseRequest(input) {
+      createCalls.push(input);
+
+      if (options.createError !== undefined) {
+        throw options.createError;
+      }
+
+      return (
+        options.createResult ?? {
+          persistenceStatus: "created",
+          historyItem: {
+            requestPublicId: input.requestPublicId,
+            taskPublicId: input.taskPublicId,
+            status: "pending",
+            requestedAt: input.requestedAt.toISOString(),
+            resultPublicId: input.resultPublicId ?? null,
+            evidenceStatus: input.evidenceStatus ?? "none",
+            citationCount: input.citationCount ?? 0,
+            aiCallLogPublicId: input.aiCallLogPublicId ?? null,
+            redactionStatus: "redacted",
+          },
+        }
+      );
     },
   };
 }
@@ -409,6 +448,169 @@ describe("personal AI generation request route handlers", () => {
         },
       },
     });
+  });
+
+  it("persists local browser POST metadata with session-normalized ownership public ids", async () => {
+    const staleBodyPublicId = "body_stale_owner_public_999";
+    const requestedAt = new Date("2026-06-12T18:00:00.000Z");
+    const requestRepository = createRequestRepository();
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository,
+        now: () => requestedAt,
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest({
+        ...createBaseFlowBody(),
+        actorPublicId: staleBodyPublicId,
+        ownerPublicId: staleBodyPublicId,
+        quotaOwnerPublicId: staleBodyPublicId,
+      }),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        requestFlow: {
+          taskRequest: {
+            actorPublicId: userContext.userPublicId,
+            ownerPublicId: userContext.userPublicId,
+            quotaOwnerPublicId: userContext.userPublicId,
+          },
+        },
+      },
+    });
+    expect(requestRepository.createCalls).toEqual([
+      {
+        requestPublicId: "personal_ai_request_public_route_123",
+        taskPublicId: "ai_generation_task_public_route_123",
+        taskType: "ai_question_generation",
+        aiFuncType: "explanation",
+        authorizationPublicId: "personal_auth_public_123",
+        actorPublicId: userContext.userPublicId,
+        ownerPublicId: userContext.userPublicId,
+        organizationPublicId: null,
+        quotaOwnerPublicId: userContext.userPublicId,
+        effectiveEdition: "advanced",
+        questionPublicId: "question_public_123",
+        answerRecordPublicId: "answer_record_public_123",
+        paperPublicId: "paper_public_123",
+        mockExamPublicId: null,
+        idempotencyKeyHash: "sha256:personal_generation_route_123",
+        requestedAt,
+        resultPublicId: null,
+        evidenceStatus: "none",
+        citationCount: 0,
+        aiCallLogPublicId: "ai_call_log_public_123",
+        isAuthorizationActive: true,
+        isScopeAllowed: true,
+        isQuotaAvailable: true,
+        isRuntimeConfigReady: true,
+      },
+    ]);
+    expect(serializedPayload).not.toContain(staleBodyPublicId);
+  });
+
+  it("uses reused persistent task metadata for idempotent local browser POST responses", async () => {
+    const requestRepository = createRequestRepository([], {
+      createResult: {
+        persistenceStatus: "reused",
+        historyItem: {
+          requestPublicId: "personal_ai_request_public_existing_route",
+          taskPublicId: "ai_generation_task_public_existing_route",
+          status: "running",
+          requestedAt: "2026-06-12T17:00:00.000Z",
+          resultPublicId: "ai_generation_result_public_existing_route",
+          evidenceStatus: "weak",
+          citationCount: 2,
+          aiCallLogPublicId: "ai_call_log_public_existing_route",
+          redactionStatus: "redacted",
+        },
+      },
+    });
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository,
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "reused",
+        resultState: {
+          status: "running",
+          taskPublicId: "ai_generation_task_public_existing_route",
+          resultPublicId: "ai_generation_result_public_existing_route",
+          evidenceStatus: "weak",
+          citationCount: 2,
+        },
+        requestFlow: {
+          taskRequest: {
+            decision: "reuse_existing_task",
+            idempotency: {
+              keyHash: "sha256:personal_generation_route_123",
+              reuseTaskPublicId: "ai_generation_task_public_existing_route",
+            },
+          },
+        },
+      },
+    });
+    expect(requestRepository.createCalls).toHaveLength(1);
+    expect(serializedPayload).not.toMatch(/"id":/);
+    expect(serializedPayload).not.toContain("provider payload");
+    expect(serializedPayload).not.toContain("generated content");
+  });
+
+  it("keeps local browser POST responses redacted when persistence is temporarily unavailable", async () => {
+    const requestRepository = createRequestRepository([], {
+      createError: new Error("database stack with internal connection details"),
+    });
+    const { collection } = createPersonalAiGenerationRequestRouteHandlers(
+      async () => userContext,
+      {
+        requestRepository,
+      },
+    );
+
+    const response = await collection.POST(
+      createPostRequest(createBaseFlowBody()),
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toMatchObject({
+      code: 0,
+      message: "ok",
+      data: {
+        flowStatus: "accepted",
+        resultState: {
+          status: "pending",
+          taskPublicId: "ai_generation_task_public_route_123",
+          resultPublicId: null,
+          evidenceStatus: "none",
+          citationCount: 0,
+        },
+      },
+    });
+    expect(requestRepository.createCalls).toHaveLength(1);
+    expect(serializedPayload).not.toContain("database stack");
+    expect(serializedPayload).not.toContain("internal connection details");
   });
 
   it("normalizes request ownership public ids from the resolver user context", async () => {
