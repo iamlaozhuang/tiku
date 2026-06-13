@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-152-personal-learning-ai-repository-service-defense-in-depth-closed
-updatedAt: "2026-06-13T04:44:00-07:00"
+currentPhase: batch-153-personal-learning-ai-route-service-repository-metadata-security-review-closed
+updatedAt: "2026-06-13T05:10:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
   lastKnownOriginMasterSha: d9fb619cdd421b6e04601949a7d4966ee6c39895
 currentTask:
-  id: batch-152-personal-learning-ai-repository-service-defense-in-depth
+  id: batch-153-personal-learning-ai-route-service-repository-metadata-security-review
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-152-personal-learning-ai-repository-service-defense-in-depth.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-152-personal-learning-ai-repository-service-defense-in-depth.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-152-personal-learning-ai-repository-service-defense-in-depth.md
-  branch: codex/batch-152-personal-learning-ai-repository-service-defense-in-depth
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
+  branch: codex/batch-153-personal-learning-ai-route-service-repository-metadata-security-review
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,14 +293,14 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-13"
-    readiness: pass_batch_152_personal_learning_ai_repository_service_defense_in_depth
+    readiness: pass_batch_153_personal_learning_ai_route_service_repository_metadata_security_review
     lint: pass
     typecheck: pass
     unit: pass_247_files_904_tests
     build: pass_55_static_pages
-    e2e: not_required_l4_local_api_contract
-    preCommitHook: pass_batch_152_pre_commit_hardening
-    prePushHook: pass_batch_152_pre_push_readiness
+    e2e: not_required_l0_security_review_docs_only
+    preCommitHook: pass_batch_153_pre_commit_hardening
+    prePushHook: pass_batch_153_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -316,9 +316,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-152 closed repository/service defense-in-depth for new personal AI pending request metadata. The next queued
-    task is batch-153, a docs-only security review of route/service/repository metadata ownership closure.
-    Provider/env/secret, dependency/package/lockfile, local provider sandbox, generated-content write, deploy, payment,
-    external-service, PR, force-push, schema/migration, and Cost Calibration work remain blocked unless a future queued
-    task carries explicit fresh approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-152-personal-learning-ai-repository-service-defense-in-depth.md
+    Batch-153 closed the docs-only route/service/repository metadata ownership security review after batch-152. The
+    next queued task is batch-154, existing local personal AI e2e validation. Provider/env/secret,
+    dependency/package/lockfile, local provider sandbox, generated-content write, deploy, payment, external-service, PR,
+    force-push, schema/migration, and Cost Calibration work remain blocked unless a future queued task carries explicit
+    fresh approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
