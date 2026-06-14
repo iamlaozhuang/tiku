@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-blocked-gate-provider-checkpoint-guard
-updatedAt: "2026-06-14T08:34:00-07:00"
+currentPhase: unified-code-audit-findings-rollup-and-repair-queue-seeding
+updatedAt: "2026-06-14T08:42:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 38a1588d1c837343c11af866fa28cbcfa71979c2
-  lastKnownOriginMasterSha: 38a1588d1c837343c11af866fa28cbcfa71979c2
+  lastKnownMasterSha: 7c6ff4dc61bf289b88c0041627b380342592488d
+  lastKnownOriginMasterSha: 7c6ff4dc61bf289b88c0041627b380342592488d
 currentTask:
-  id: unified-blocked-gate-provider-checkpoint-guard
+  id: unified-code-audit-findings-rollup-and-repair-queue-seeding-entry-creation
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
-  branch: codex/unified-blocked-gate-provider-checkpoint-guard
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+  branch: codex/unified-code-audit-findings-rollup-and-repair-queue-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -324,6 +324,8 @@ qualityGates:
     unifiedAdvancedAiRagQuotaBlockedPlanning: pass_blocked_gate_planning
     unifiedFutureNonGoalAuditOnlyGuard: pass_non_goal_audit_only_guard
     unifiedBlockedGateProviderCheckpointGuard: pass_blocked_gate_guard
+    unifiedCodeAuditFindingsRollupRepairQueueSeedingEntryCreation: pass_docs_only_pending_task_seed
+    unifiedCodeAuditFindingsRollupRepairQueueSeeding: seeded_pending_docs_only
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -342,12 +344,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified blocked gate provider checkpoint guard is closed locally on
-    codex/unified-blocked-gate-provider-checkpoint-guard pending user-approved closeout. The guard output records that
-    batch-178 and batch-180 are blocked-gate/audit references only and are not provider/staging execution approval;
-    current checkpoint findings are audit context only and cannot rewrite requirements or trigger code fixes; provider
-    call, model request, quota use, env/secret/provider configuration, staging/prod/cloud/deploy, e2e, PR, force-push,
-    code audit execution, code fixes, implementation, concrete repair-task claiming, and Cost Calibration work remain
-    blocked. After the approved merge/push/cleanup and state/queue reread, inspect only for an already-seeded docs-only
-    audit-findings rollup / repair-queue seeding task, or seed that docs-only pending task if absent.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
+    Unified code audit findings rollup and repair queue seeding has been seeded as a pending docs-only task only. Stop
+    after the user-approved commit, fast-forward merge, master closeout/pre-push validation, push, short-branch cleanup,
+    and state/queue reread. Do not claim the pending rollup task or any repair implementation task. The pending task may
+    later merge completed code-audit findings, deduplicate, normalize severity, map source/capability/use-case/landing
+    ids, and seed later repair candidates only after fresh user instruction. Code audit execution, code fixes,
+    implementation, schema/migration, provider/env, e2e, dependency changes, deploy, payment, external-service, PR,
+    force-push, concrete repair-task claiming, and Cost Calibration work remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
