@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: current-state-checkpoint-and-implementation-audit
-updatedAt: "2026-06-14T01:39:58-07:00"
+currentPhase: unified-standard-advanced-use-case-audit-planning
+updatedAt: "2026-06-14T02:05:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 8cf0664826b70c3e11c91eb0c9d558af3e1a2105
   lastKnownOriginMasterSha: 8cf0664826b70c3e11c91eb0c9d558af3e1a2105
 currentTask:
-  id: current-state-checkpoint-and-implementation-audit
+  id: unified-standard-advanced-use-case-audit-planning
   status: closed
-  sourceStory: project-governance-and-implementation-audit
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-current-state-checkpoint-and-implementation-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-current-state-checkpoint-and-implementation-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
-  branch: codex/current-state-checkpoint-and-implementation-audit
+  sourceStory: unified-standard-advanced-requirement-audit-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-use-case-audit-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-use-case-audit-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-use-case-audit-planning.md
+  branch: codex/unified-standard-advanced-use-case-audit-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -305,9 +305,10 @@ qualityGates:
     stagingProviderDeployReadiness: pass_batch_178_planning_only_no_real_provider_or_deploy
     stagingExecutionApprovalPackage: pass_batch_180_docs_only_future_approval_package
     implementationAudit: pass_current_state_checkpoint_readonly_audit
+    unifiedUseCaseAuditPlanning: pass_docs_only_planning_contract
     preCommitHook: pass_current_state_checkpoint_module_run_v2_pre_commit_hardening
-    moduleCloseout: pass_current_state_checkpoint_module_run_v2_closeout_readiness
-    prePushHook: pass_current_state_checkpoint_module_run_v2_pre_push_readiness
+    moduleCloseout: pass_unified_standard_advanced_use_case_audit_planning_closeout_readiness
+    prePushHook: not_run_no_push_approval_for_planning_task
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -323,10 +324,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Current-state checkpoint and read-only implementation audit is locally closed. It freezes the post-batch-180 state
-    and records implementation findings for personal learning AI request durability, personal-vs-employee authorization
-    boundary, persistence failure semantics, and mock provider payload shape. No source, tests, e2e, script,
-    schema/migration, dependency, env/secret, provider, staging/prod/cloud/deploy, payment, external-service, PR, or
-    force-push work was performed. Do not claim a follow-up implementation, staging/provider/deploy, or Cost Calibration
-    task without fresh user approval and a queued task boundary.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    Unified standard/advanced use-case audit planning is locally closed as a docs-only planning task. It creates the
+    planning contract for a canonical capability catalog, user use case catalog, edition delta matrix, technical landing
+    matrix, consistency checks, and serial audit task order. The next recommended task is
+    unified-standard-advanced-input-freeze-and-source-index, but it must not be claimed without fresh user instruction.
+    No source, tests, e2e, script, schema/migration, dependency, env/secret, provider, staging/prod/cloud/deploy,
+    payment, external-service, PR, force-push, or Cost Calibration work was performed.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-use-case-audit-planning.md
