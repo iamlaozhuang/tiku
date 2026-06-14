@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-standard-advanced-audit-campaign-seeding
-updatedAt: "2026-06-14T02:46:20-07:00"
+currentPhase: unified-standard-advanced-planning-closeout-baseline
+updatedAt: "2026-06-14T03:18:42-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 8cf0664826b70c3e11c91eb0c9d558af3e1a2105
   lastKnownOriginMasterSha: 8cf0664826b70c3e11c91eb0c9d558af3e1a2105
 currentTask:
-  id: unified-standard-advanced-audit-campaign-seeding
+  id: unified-standard-advanced-planning-closeout-baseline
   status: closed
-  sourceStory: unified-standard-advanced-requirement-audit-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-audit-campaign-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-audit-campaign-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-audit-campaign-seeding.md
-  branch: codex/unified-standard-advanced-audit-campaign-seeding
+  sourceStory: unified-standard-advanced-audit-campaign
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-planning-closeout-baseline.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-planning-closeout-baseline.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-planning-closeout-baseline.md
+  branch: codex/unified-standard-advanced-planning-closeout-baseline
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -307,9 +307,10 @@ qualityGates:
     implementationAudit: pass_current_state_checkpoint_readonly_audit
     unifiedUseCaseAuditPlanning: pass_docs_only_planning_contract
     unifiedAuditCampaignSeeding: pass_docs_only_serial_campaign_seed
-    preCommitHook: pass_unified_standard_advanced_audit_campaign_seeding_pre_commit_hardening
-    moduleCloseout: pass_unified_standard_advanced_audit_campaign_seeding_closeout_readiness
-    prePushHook: not_run_no_push_or_merge_approval_for_campaign_seeding_task
+    unifiedPlanningCloseoutBaseline: pass_fresh_approval_merge_push_cleanup
+    preCommitHook: pass_unified_standard_advanced_planning_closeout_baseline_pre_commit_hardening
+    moduleCloseout: pass_unified_standard_advanced_planning_closeout_baseline_closeout_readiness
+    prePushHook: pass_unified_standard_advanced_planning_closeout_baseline_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -325,12 +326,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified standard/advanced audit campaign seeding is locally closed as a docs-only orchestration task. It registers a
-    serial campaign for planning closeout baseline, input freeze and source index, capability catalog, use case catalog
-    with edition delta, technical landing matrix, and consistency/risk audit. The next recommended task is
-    unified-standard-advanced-planning-closeout-baseline, but it must not be claimed without fresh user instruction
-    because the current planning/campaign commits are not merged to master and no merge/push/cleanup approval exists for
-    this seeding task. No source, tests, e2e, script, schema/migration, dependency, env/secret, provider,
+    Unified standard/advanced planning closeout baseline is closed after fresh user approval for fast-forward merge to
+    master, master closeout/pre-push validation, push to origin/master, and merged short-branch cleanup. The next
+    recommended task is unified-standard-advanced-input-freeze-and-source-index, but it must not be claimed without fresh
+    user instruction. No source, tests, e2e, script, schema/migration, dependency, env/secret, provider,
     staging/prod/cloud/deploy, payment, external-service, PR, force-push, code audit, implementation, or Cost Calibration
     work was performed.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-audit-campaign-seeding.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-planning-closeout-baseline.md
