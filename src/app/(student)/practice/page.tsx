@@ -1,4 +1,9 @@
 import { StudentPracticePage } from "@/features/student/practice/StudentPracticePage";
+import { studentExperiencePageBoundary } from "../student-experience-page-boundary";
+
+const pageBoundary = studentExperiencePageBoundary.practice;
+
+void pageBoundary;
 
 type StudentPracticeRoutePageProps = {
   searchParams?: Promise<{

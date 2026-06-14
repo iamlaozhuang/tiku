@@ -1,6 +1,6 @@
-import { createStudentMistakeBookRuntimeRouteHandlers } from "@/server/services/student-mistake-book-runtime";
+import { createStudentExperienceRouteHandlers } from "@/server/services/student-experience/route-handlers";
 
-const mistakeBookRouteHandlers = createStudentMistakeBookRuntimeRouteHandlers();
+const studentExperienceRouteHandlers = createStudentExperienceRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -10,4 +10,4 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = mistakeBookRouteHandlers.collection.GET;
+export const GET = studentExperienceRouteHandlers.mistakeBooks.collection.GET;

@@ -1,6 +1,6 @@
-import { createStudentFlowRuntimeRouteHandlers } from "@/server/services/student-flow-runtime";
+import { createStudentExperienceRouteHandlers } from "@/server/services/student-experience/route-handlers";
 
-const studentFlowRouteHandlers = createStudentFlowRuntimeRouteHandlers();
+const studentExperienceRouteHandlers = createStudentExperienceRouteHandlers();
 
 const responseContract = {
   code: 401001,
@@ -10,5 +10,5 @@ const responseContract = {
 
 void responseContract;
 
-export const GET = studentFlowRouteHandlers.examReports.collection.GET;
-export const POST = studentFlowRouteHandlers.examReports.generation.POST;
+export const GET = studentExperienceRouteHandlers.examReports.collection.GET;
+export const POST = studentExperienceRouteHandlers.examReports.generation.POST;

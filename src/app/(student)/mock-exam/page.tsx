@@ -1,4 +1,9 @@
 import { StudentMockExamPage } from "@/features/student/mock-exam/StudentMockExamReportPage";
+import { studentExperiencePageBoundary } from "../student-experience-page-boundary";
+
+const pageBoundary = studentExperiencePageBoundary.mockExam;
+
+void pageBoundary;
 
 type StudentMockExamRoutePageProps = {
   searchParams?: Promise<{
