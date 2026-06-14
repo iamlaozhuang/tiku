@@ -11527,6 +11527,10 @@ tasks:
     title: Unified standard and advanced use case catalog and edition delta
     phase: unified-standard-advanced-use-case-catalog-and-edition-delta
     sourceStory: unified-standard-advanced-audit-campaign
+    humanApproval: >-
+      User explicitly approved only the use case catalog + edition delta task. This approval does not cover technical
+      matrixing, code audit, implementation, provider/env/schema/deploy/payment/external-service/e2e work, PR,
+      force-push, fast-forward merge, push, cleanup, or follow-up task claiming.
     dependencies:
       - unified-standard-advanced-capability-catalog
     taskPlanPolicy: required_before_edit
@@ -11553,7 +11557,12 @@ tasks:
       schemaMigration: blocked_without_task_approval
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
-    status: pending
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-use-case-catalog-and-edition-delta.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-use-case-catalog-and-edition-delta.md
+    status: closed
+    result: pass
+    useCaseCatalogPath: docs/01-requirements/use-cases/use-case-catalog.md
+    editionDeltaMatrixPath: docs/01-requirements/traceability/unified-edition-delta-matrix.md
     retryCount: 0
     allowedFiles:
       - docs/01-requirements/use-cases/use-case-catalog.md
