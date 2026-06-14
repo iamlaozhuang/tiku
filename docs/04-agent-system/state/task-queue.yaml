@@ -12847,10 +12847,45 @@ tasks:
     seedCategory: audit_only_future_non_goal_guard
     taskKind: non_goal_guard
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
     dependencies:
       - unified-standard-advanced-implementation-queue-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+    closeoutPolicy:
+      localCommit: approved_after_fresh_task_claim
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: fresh_user_approval_2026-06-14
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: fresh_user_approval_2026-06-14
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+        approvalSource: fresh_user_approval_2026-06-14
+    threadRolloverGate: no rollover requested; stop after the user-approved local commit, closeout, push, and reread.
+    automationHandoffPolicy: do not claim any task outside this user-approved task.
+    nextModuleRunCandidate: none authorized; follow-up tasks remain pending and blocked without fresh user instruction.
+    planningOutputs:
+      - outputId: FUTURE-NON-GOAL-GUARD-PAYMENT-001
+        summary: Payment guard for online payment, refund, invoice, settlement, reconciliation, and external service.
+      - outputId: FUTURE-NON-GOAL-GUARD-OCR-002
+        summary: OCR and automatic import guard; scanned PDFs remain preprocessed outside the system.
+      - outputId: FUTURE-NON-GOAL-GUARD-EXPORT-003
+        summary: Organization data export guard; analytics remain online summary views only.
+      - outputId: AUDIT-ONLY-GUARD-RUNTIME-CAPABILITY-004
+        summary: Runtime capability-list guard; traceability catalogs are not runtime feature implementation.
+      - outputId: AUDIT-ONLY-GUARD-SOURCE-GOVERNANCE-005
+        summary: Audit source governance guard; catalogs and findings cannot seed implementation by themselves.
+      - outputId: EXCLUDED-SOURCE-GUARD-006
+        summary: Excluded source and evidence hygiene guard for code, schema, env, tests, scripts, and raw data.
     traceability:
       landingIds:
         - LAND-PAYMENT-NON-GOAL
@@ -12892,9 +12927,12 @@ tasks:
         - DELTA-DATA-EXPORT
         - DELTA-RUNTIME-CAPABILITY-LIST
     humanApproval: >-
-      Seeded as a pending guard task only. A future fresh user instruction is required before this task may be claimed.
-      This entry exists to preserve non-goal and audit-only exclusions and does not approve payment, OCR/import, export,
-      runtime capability-list implementation, code audit execution, code fixes, implementation, e2e, PR, merge, push, or
+      Fresh user approval on 2026-06-14 authorized this non-goal and audit-only guard task, one local independent
+      commit, and after all gates pass, fast-forward merge of
+      codex/unified-future-non-goal-and-audit-only-guard to master, closeout and pre-push validation on master, push
+      origin master, deletion of the merged short branch, rereading state and queue, then stop. This entry does not
+      approve code audit, code fixes, implementation, schema/migration, provider/env, dependency changes, real
+      provider/model requests, quota use, e2e, deploy, payment, external-service, PR, force-push, Cost Calibration, or
       follow-up execution.
     blockedGates:
       - payment/refund/invoice/reconciliation
@@ -12935,6 +12973,11 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-future-non-goal-and-audit-only-guard
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-future-non-goal-and-audit-only-guard
+    blockedRemainder:
+      - Code audit execution, code fixes, implementation, schema/migration, provider/env, real provider/model requests,
+        quota use, dependency changes, e2e, deploy, payment, external-service, PR, force-push, follow-up task claiming,
+        payment/refund/invoice/reconciliation, OCR/parser/import implementation, data export/file generation/download,
+        runtime capability-list implementation, raw sensitive viewers, and Cost Calibration work remain blocked.
   - id: unified-blocked-gate-provider-checkpoint-guard
     title: Unified blocked gate provider and checkpoint guard
     phase: unified-blocked-gate-provider-checkpoint-guard
