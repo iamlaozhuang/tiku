@@ -11745,3 +11745,941 @@ tasks:
     blockedRemainder:
       - Implementation queue seeding, code fixes, implementation, e2e, provider/env/schema/deploy, payment,
         external-service, PR, force-push, and Cost Calibration work remain blocked.
+  - id: unified-standard-advanced-implementation-queue-seeding
+    title: Unified standard and advanced implementation queue seeding
+    phase: unified-standard-advanced-implementation-queue-seeding
+    sourceStory: unified-standard-advanced-audit-campaign
+    humanApproval: >-
+      User explicitly approved only the implementation queue seeding task. This approval permits docs/state updates and
+      pending task entry creation only. It does not approve code audit execution, code fixes, implementation,
+      schema/migration, provider/env, e2e, deploy, payment, external-service, PR, force-push, fast-forward merge, push,
+      cleanup, or follow-up task claiming.
+    dependencies:
+      - unified-standard-advanced-consistency-and-risk-audit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+    closeoutPolicy:
+      localCommit: approved_after_fresh_task_claim
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    taskKind: docs_implementation_queue_seeding
+    moduleRunVersion: 2
+    capabilities:
+      projectResourceRead: approved_read_only_redacted
+      requirementPlanning: approved_docs_only
+      implementationQueueSeeding: approved_docs_only
+      implementationAudit: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      dependencyPackageLockfile: blocked_without_task_approval
+      costCalibrationGate: blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+    status: closed
+    result: pass
+    retryCount: 0
+    seededTaskCount: 10
+    seedCategories:
+      standardOnlyAuditCandidates: 6
+      advancedBlockedCandidates: 2
+      auditOnlyAndFutureNonGoalGuards: 1
+      blockedGateGuards: 1
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-advanced-implementation-queue-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-advanced-implementation-queue-seeding
+    blockedRemainder:
+      - Seeded follow-up tasks remain pending and unclaimed. Code audit execution, code fixes, implementation, e2e,
+        provider/env/schema/deploy, payment, external-service, PR, force-push, fast-forward merge, push, cleanup, and
+        Cost Calibration work remain blocked.
+  - id: unified-standard-mvp-auth-scope-code-audit
+    title: Unified standard MVP auth scope read-only code audit
+    phase: unified-standard-mvp-auth-scope-code-audit
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: standard_only_audit_candidate
+    taskKind: readonly_code_audit_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-AUTH-ACCOUNT-SESSION
+        - LAND-PERSONAL-AUTH-REDEEM-QUOTA
+      sourceIds:
+        - STD-REQ-01
+        - STD-STORY-01
+        - STD-REQ-06
+      capabilityIds:
+        - CAP-STD-ACCOUNT-SESSION
+        - CAP-STD-PERSONAL-AUTH
+      useCaseIds:
+        - UC-STD-ACCOUNT-SESSION
+        - UC-STD-PERSONAL-AUTH-REDEEM
+      deltaIds:
+        - DELTA-AUTH-ACCOUNT-SESSION
+        - DELTA-PERSONAL-AUTH
+    humanApproval: >-
+      Seeded as a pending read-only code audit candidate only. A future fresh user instruction is required before this
+      task may be claimed. This entry does not approve code fixes, implementation, auth model changes, schema/migration,
+      provider/env, payment, e2e, PR, merge, push, or follow-up execution.
+    blockedGates:
+      - auth model change
+      - cleartext redeem_code handling
+      - schema/migration
+      - provider/env/secret
+      - payment
+      - e2e
+      - implementation
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+      - src/app/api/v1/users/**
+      - src/server/services/user-auth/**
+      - src/server/repositories/user-auth/**
+      - src/server/validators/user-auth/**
+      - src/server/mappers/user-auth/**
+      - src/server/services/authorization/**
+      - src/server/repositories/authorization/**
+      - src/server/validators/authorization/**
+      - src/server/mappers/authorization/**
+      - src/app/(auth)/**
+      - src/app/(student)/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-mvp-auth-scope-code-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-mvp-auth-scope-code-audit
+  - id: unified-standard-mvp-organization-auth-code-audit
+    title: Unified standard MVP organization auth read-only code audit
+    phase: unified-standard-mvp-organization-auth-code-audit
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: standard_only_audit_candidate
+    taskKind: readonly_code_audit_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-ORG-AUTH-PORTAL
+      sourceIds:
+        - STD-REQ-00
+        - STD-REQ-01
+        - STD-REQ-06
+        - STD-STORY-01
+        - STD-STORY-06
+      capabilityIds:
+        - CAP-STD-ORG-AUTH-OPS-MANAGED
+      useCaseIds:
+        - UC-STD-ORG-AUTH-MANAGED
+      deltaIds:
+        - DELTA-ORG-AUTH-PORTAL
+    humanApproval: >-
+      Seeded as a pending read-only code audit candidate for platform-managed organization authorization only. A future
+      fresh user instruction is required before this task may be claimed. This entry does not approve organization
+      self-service, advanced portal implementation, schema/migration, privacy-sensitive raw data access, e2e, PR, merge,
+      push, or follow-up execution.
+    blockedGates:
+      - organization self-service non-goal
+      - advanced organization portal
+      - privacy/raw answer access
+      - schema/migration
+      - provider/env/secret
+      - e2e
+      - implementation
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+      - src/app/(admin)/**
+      - src/app/api/v1/organizations/**
+      - src/server/services/organization/**
+      - src/server/repositories/organization/**
+      - src/server/contracts/organization/**
+      - src/server/mappers/organization/**
+      - src/server/validators/organization/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-mvp-organization-auth-code-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-mvp-organization-auth-code-audit
+  - id: unified-standard-mvp-question-paper-code-audit
+    title: Unified standard MVP question and paper read-only code audit
+    phase: unified-standard-mvp-question-paper-code-audit
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: standard_only_audit_candidate
+    taskKind: readonly_code_audit_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-FORMAL-CONTENT-QUESTION-PAPER
+      sourceIds:
+        - STD-REQ-02
+        - STD-STORY-02
+        - STD-REQ-06
+        - STD-STORY-06
+      capabilityIds:
+        - CAP-STD-QUESTION-CONTENT
+        - CAP-STD-PAPER-LIFECYCLE
+      useCaseIds:
+        - UC-STD-QUESTION-MATERIAL-MANAGE
+        - UC-STD-PAPER-LIFECYCLE
+      deltaIds:
+        - DELTA-FORMAL-CONTENT
+    humanApproval: >-
+      Seeded as a pending read-only code audit candidate for standard question/material and paper lifecycle surfaces.
+      A future fresh user instruction is required before this task may be claimed. This entry does not approve formal
+      content separation implementation, AI generation, organization training content, storage/schema changes, e2e, PR,
+      merge, push, or follow-up execution.
+    blockedGates:
+      - advanced formal content separation
+      - AI generation
+      - organization training content
+      - storage/schema/UI changes
+      - provider/env/secret/quota
+      - formal adoption review write
+      - implementation
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-question-paper-code-audit.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-question-paper-code-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-question-paper-code-audit.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+      - src/app/(admin)/**
+      - src/app/api/v1/questions/**
+      - src/app/api/v1/exam-papers/**
+      - src/server/services/question-paper/**
+      - src/server/repositories/question-paper/**
+      - src/server/contracts/question-paper/**
+      - src/server/mappers/question-paper/**
+      - src/server/validators/question-paper/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-mvp-question-paper-code-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-mvp-question-paper-code-audit
+  - id: unified-standard-mvp-student-experience-code-audit
+    title: Unified standard MVP student experience read-only code audit
+    phase: unified-standard-mvp-student-experience-code-audit
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: standard_only_audit_candidate
+    taskKind: readonly_code_audit_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-PRACTICE-MOCK-REPORT
+      sourceIds:
+        - STD-REQ-03
+        - STD-STORY-03
+        - STD-REQ-04
+        - STD-STORY-04
+        - STD-REQ-02
+      capabilityIds:
+        - CAP-STD-PRACTICE
+        - CAP-STD-MOCK-EXAM
+        - CAP-STD-EXAM-REPORT-MISTAKE-BOOK
+      useCaseIds:
+        - UC-STD-PRACTICE
+        - UC-STD-MOCK-EXAM
+        - UC-STD-REPORT-MISTAKE-BOOK
+      deltaIds:
+        - DELTA-PRACTICE-MOCK-REPORT
+    humanApproval: >-
+      Seeded as a pending read-only code audit candidate for standard practice, mock_exam, exam_report, and
+      mistake_book surfaces. A future fresh user instruction is required before this task may be claimed. This entry
+      does not approve employee training answer features, organization snapshots, raw answer viewing, AI scoring calls,
+      e2e, PR, merge, push, or follow-up execution.
+    blockedGates:
+      - employee training answer
+      - organization snapshots
+      - raw answer viewer
+      - provider/model request
+      - e2e
+      - schema/migration
+      - implementation
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-student-experience-code-audit.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-student-experience-code-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-student-experience-code-audit.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+      - src/app/(student)/**
+      - src/app/api/v1/practices/**
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/server/services/student-experience/**
+      - src/server/repositories/student-experience/**
+      - src/server/contracts/student-experience/**
+      - src/server/mappers/student-experience/**
+      - src/server/validators/student-experience/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-mvp-student-experience-code-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-mvp-student-experience-code-audit
+  - id: unified-standard-mvp-ai-rag-governed-code-audit
+    title: Unified standard MVP AI and RAG governed read-only code audit
+    phase: unified-standard-mvp-ai-rag-governed-code-audit
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: standard_only_blocked_gate_audit_candidate
+    taskKind: readonly_code_audit_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-AI-SCORING-AND-GENERATION
+        - LAND-RAG-KNOWLEDGE
+      sourceIds:
+        - STD-REQ-04
+        - STD-STORY-04
+        - STD-REQ-05
+        - STD-STORY-05
+        - STD-REQ-06
+        - STD-STORY-06
+      capabilityIds:
+        - CAP-STD-AI-SCORING-EXPLANATION
+        - CAP-STD-KN-RECOMMENDATION
+        - CAP-STD-RAG-KNOWLEDGE-BASE
+      useCaseIds:
+        - UC-STD-AI-SCORING-EXPLANATION
+        - UC-STD-KN-RECOMMENDATION
+        - UC-STD-RAG-KNOWLEDGE-BASE
+      deltaIds:
+        - DELTA-AI-SCORING-VS-GENERATION
+        - DELTA-RAG-KNOWLEDGE
+        - DELTA-PROVIDER-STAGING-GATE
+    humanApproval: >-
+      Seeded as a pending read-only code audit candidate for standard AI scoring/explanation and knowledge-base
+      boundaries only. A future fresh user instruction is required before this task may be claimed. This entry does not
+      approve provider calls, model requests, env/secret access, dependency changes, vector provider work, quota use,
+      schema/migration, e2e, PR, merge, push, or follow-up execution.
+    blockedGates:
+      - provider call/model request
+      - env/secret
+      - dependency/package/lockfile
+      - vector provider/RAG execution
+      - quota/cost measurement
+      - schema/migration
+      - implementation
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-ai-rag-governed-code-audit.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-ai-rag-governed-code-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-ai-rag-governed-code-audit.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+      - src/server/services/ai-scoring/**
+      - src/server/services/rag-knowledge/**
+      - src/server/repositories/rag-knowledge/**
+      - src/server/contracts/rag-knowledge/**
+      - src/server/mappers/rag-knowledge/**
+      - src/server/validators/rag-knowledge/**
+      - src/ai/**
+      - src/app/(student)/**
+      - src/app/(admin)/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-mvp-ai-rag-governed-code-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-mvp-ai-rag-governed-code-audit
+  - id: unified-standard-mvp-admin-ops-logs-code-audit
+    title: Unified standard MVP admin ops and logs read-only code audit
+    phase: unified-standard-mvp-admin-ops-logs-code-audit
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: standard_only_audit_candidate
+    taskKind: readonly_code_audit_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-ORG-ANALYTICS
+        - LAND-OPS-QUOTA-LEDGER
+        - LAND-RETENTION-LOG-GOVERNANCE
+      sourceIds:
+        - STD-REQ-06
+        - STD-STORY-06
+      capabilityIds:
+        - CAP-STD-ADMIN-OPS-LOGS
+      useCaseIds:
+        - UC-STD-ADMIN-OPS-LOGS
+      deltaIds:
+        - DELTA-ORG-ANALYTICS
+        - DELTA-OPS-QUOTA
+        - DELTA-RETENTION-LOG
+    humanApproval: >-
+      Seeded as a pending read-only code audit candidate for standard admin operations and redacted log surfaces. A
+      future fresh user instruction is required before this task may be claimed. This entry does not approve raw prompt
+      or provider response viewing, hard-delete executors, export, provider calls, schema/migration, e2e, PR, merge,
+      push, or follow-up execution.
+    blockedGates:
+      - raw prompt/provider response viewer
+      - raw sensitive viewer
+      - hard-delete executor
+      - export
+      - provider/env/secret
+      - schema/migration
+      - implementation
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+      - src/app/(admin)/**
+      - src/app/api/v1/audit-logs/**
+      - src/app/api/v1/ai-call-logs/**
+      - src/app/api/v1/quotas/**
+      - src/server/services/audit-log/**
+      - src/server/services/ai-call-log/**
+      - src/server/services/quota/**
+      - src/server/repositories/audit-log/**
+      - src/server/repositories/ai-call-log/**
+      - src/server/repositories/quota/**
+      - src/server/mappers/audit-log/**
+      - src/server/validators/audit-log/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-mvp-admin-ops-logs-code-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-mvp-admin-ops-logs-code-audit
+  - id: unified-advanced-auth-org-training-blocked-planning
+    title: Unified advanced auth organization and training blocked planning
+    phase: unified-advanced-auth-org-training-blocked-planning
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: advanced_blocked_candidate
+    taskKind: blocked_gate_planning
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-AUTH-ACCOUNT-SESSION
+        - LAND-PERSONAL-AUTH-REDEEM-QUOTA
+        - LAND-ORG-AUTH-PORTAL
+        - LAND-ORG-TRAINING
+        - LAND-ORG-ANALYTICS
+      sourceIds:
+        - ADV-SPEC-01
+        - ADV-SPEC-02
+        - ADV-MOD-01
+        - ADV-MOD-04
+        - ADV-MOD-05
+        - ADV-STORY-02
+        - ADV-STORY-03
+        - ADV-STORY-04
+        - ADV-STORY-05
+      capabilityIds:
+        - CAP-ADV-AUTH-CONTEXT
+        - CAP-ADV-ORG-PORTAL-ADMIN
+        - CAP-ADV-ORG-TRAINING-CONTENT
+        - CAP-ADV-EMPLOYEE-TRAINING-ANSWER
+        - CAP-ADV-ORG-ANALYTICS
+      useCaseIds:
+        - UC-ADV-AUTH-CONTEXT-UPGRADE
+        - UC-ADV-ORG-PORTAL-ADMIN
+        - UC-ADV-ORG-TRAINING-CONTENT-LIFECYCLE
+        - UC-ADV-EMPLOYEE-TRAINING-ANSWER
+        - UC-ADV-ORG-ANALYTICS-SUMMARY
+      deltaIds:
+        - DELTA-AUTH-ACCOUNT-SESSION
+        - DELTA-ORG-AUTH-PORTAL
+        - DELTA-ORG-TRAINING
+        - DELTA-ORG-ANALYTICS
+    humanApproval: >-
+      Seeded as a pending blocked planning task only. A future fresh user instruction is required before this task may
+      be claimed, and a separate approval is required before any implementation, schema/migration, privacy-sensitive raw
+      data access, e2e, deploy, PR, merge, push, or follow-up execution.
+    blockedGates:
+      - advanced auth context implementation
+      - organization portal implementation
+      - organization training implementation
+      - employee raw answer access
+      - privacy/export
+      - schema/migration
+      - staging/prod/cloud/deploy
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-advanced-auth-org-training-blocked-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-advanced-auth-org-training-blocked-planning
+  - id: unified-advanced-ai-rag-quota-blocked-planning
+    title: Unified advanced AI RAG and quota blocked planning
+    phase: unified-advanced-ai-rag-quota-blocked-planning
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: advanced_blocked_candidate
+    taskKind: blocked_gate_planning
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-AI-SCORING-AND-GENERATION
+        - LAND-RAG-KNOWLEDGE
+        - LAND-OPS-QUOTA-LEDGER
+        - LAND-RETENTION-LOG-GOVERNANCE
+      sourceIds:
+        - ADV-SPEC-01
+        - ADV-SPEC-02
+        - ADV-SPEC-03
+        - ADV-MOD-02
+        - ADV-MOD-03
+        - ADV-MOD-06
+        - ADV-MOD-07
+        - ADV-STORY-01
+        - ADV-STORY-04
+        - ADV-STORY-06
+        - GATE-B178-EV
+        - GATE-B180-EV
+      capabilityIds:
+        - CAP-ADV-AI-TASK-DOMAIN
+        - CAP-ADV-PERSONAL-AI-QUESTION-GENERATION
+        - CAP-ADV-PERSONAL-AI-PAPER-GENERATION
+        - CAP-ADV-OPS-AUTH-QUOTA
+        - CAP-ADV-RETENTION-LOG-GOVERNANCE
+        - CAP-ADV-FORMAL-CONTENT-SEPARATION
+      useCaseIds:
+        - UC-ADV-AI-TASK-LIFECYCLE
+        - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+        - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+        - UC-ADV-OPS-AUTH-QUOTA
+        - UC-ADV-RETENTION-LOG-GOVERNANCE
+        - UC-ADV-FORMAL-CONTENT-SEPARATION
+      deltaIds:
+        - DELTA-AI-SCORING-VS-GENERATION
+        - DELTA-RAG-KNOWLEDGE
+        - DELTA-OPS-QUOTA
+        - DELTA-RETENTION-LOG
+        - DELTA-PROVIDER-STAGING-GATE
+    humanApproval: >-
+      Seeded as a pending blocked planning task only. A future fresh user instruction is required before this task may
+      be claimed, and a separate approval is required before any provider call, model request, env/secret access,
+      dependency change, quota measurement, schema/migration, e2e, deploy, PR, merge, push, or follow-up execution.
+    blockedGates:
+      - provider call/model request
+      - env/secret/provider configuration
+      - dependency/package/lockfile
+      - quota/cost measurement
+      - vector/RAG execution
+      - schema/migration
+      - staging/prod/cloud/deploy
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-advanced-ai-rag-quota-blocked-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-advanced-ai-rag-quota-blocked-planning
+  - id: unified-future-non-goal-and-audit-only-guard
+    title: Unified future non-goal and audit-only guard
+    phase: unified-future-non-goal-and-audit-only-guard
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: audit_only_future_non_goal_guard
+    taskKind: non_goal_guard
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-PAYMENT-NON-GOAL
+        - LAND-OCR-AUTO-IMPORT-NON-GOAL
+        - LAND-DATA-EXPORT-NON-GOAL
+        - LAND-RUNTIME-CAPABILITY-LIST-AUDIT-ONLY
+      sourceIds:
+        - STD-REQ-00
+        - STD-REQ-02
+        - STD-STORY-02
+        - ADV-SPEC-01
+        - ADV-SPEC-02
+        - ADV-SPEC-03
+        - ADV-MOD-05
+        - ADV-MOD-06
+        - ADV-STORY-03
+        - ADV-STORY-04
+        - ADV-PLAN-01
+        - ADV-PLAN-02
+        - PLAN-UNIFIED-01
+        - PLAN-UNIFIED-02
+        - EXC-CODE-001
+        - EXC-SCHEMA-001
+      capabilityIds:
+        - CAP-FUTURE-ONLINE-PAYMENT
+        - CAP-FUTURE-OCR-AND-AUTO-IMPORT
+        - CAP-FUTURE-DATA-EXPORT
+        - CAP-FUTURE-RUNTIME-CAPABILITY-LIST
+        - CAP-AUDIT-SOURCE-GOVERNANCE
+      useCaseIds:
+        - UC-FUTURE-ONLINE-PAYMENT
+        - UC-FUTURE-OCR-AUTO-IMPORT
+        - UC-FUTURE-ORG-DATA-EXPORT
+        - UC-FUTURE-RUNTIME-CAPABILITY-LIST
+        - UC-AUDIT-SOURCE-GOVERNANCE
+      deltaIds:
+        - DELTA-PAYMENT
+        - DELTA-OCR-AUTO-IMPORT
+        - DELTA-DATA-EXPORT
+        - DELTA-RUNTIME-CAPABILITY-LIST
+    humanApproval: >-
+      Seeded as a pending guard task only. A future fresh user instruction is required before this task may be claimed.
+      This entry exists to preserve non-goal and audit-only exclusions and does not approve payment, OCR/import, export,
+      runtime capability-list implementation, code audit execution, code fixes, implementation, e2e, PR, merge, push, or
+      follow-up execution.
+    blockedGates:
+      - payment/refund/invoice/reconciliation
+      - OCR/parser/import implementation
+      - data export/file generation/download
+      - runtime capability-list implementation
+      - external-service/provider/env/secret
+      - schema/migration
+      - implementation
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-future-non-goal-and-audit-only-guard
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-future-non-goal-and-audit-only-guard
+  - id: unified-blocked-gate-provider-checkpoint-guard
+    title: Unified blocked gate provider and checkpoint guard
+    phase: unified-blocked-gate-provider-checkpoint-guard
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-standard-advanced-implementation-queue-seeding
+    seedCategory: blocked_gate_guard
+    taskKind: blocked_gate_guard
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-standard-advanced-implementation-queue-seeding
+    traceability:
+      landingIds:
+        - LAND-PROVIDER-STAGING-GATE
+        - LAND-CURRENT-CHECKPOINT-AUDIT
+      sourceIds:
+        - GATE-B178-EV
+        - GATE-B178-AUD
+        - GATE-B180-EV
+        - GATE-B180-AUD
+        - GATE-CHECK-EV
+        - GATE-CHECK-AUD
+        - PLAN-UNIFIED-01
+        - PLAN-UNIFIED-02
+      capabilityIds:
+        - CAP-GATE-PROVIDER-STAGING-EXECUTION
+        - CAP-GATE-CURRENT-CHECKPOINT
+        - CAP-AUDIT-SOURCE-GOVERNANCE
+      useCaseIds:
+        - UC-GATE-PROVIDER-STAGING-EXECUTION
+        - UC-GATE-CURRENT-CHECKPOINT
+        - UC-AUDIT-SOURCE-GOVERNANCE
+      deltaIds:
+        - DELTA-PROVIDER-STAGING-GATE
+        - DELTA-CURRENT-CHECKPOINT-AUDIT
+    humanApproval: >-
+      Seeded as a pending blocked-gate guard only. A future fresh user instruction is required before this task may be
+      claimed. Historical provider/staging evidence and current checkpoint findings are audit references only and do not
+      approve provider calls, model requests, env/secret access, staging/prod/cloud/deploy, code audit execution, code
+      fixes, implementation, e2e, PR, merge, push, or follow-up execution.
+    blockedGates:
+      - provider call/model request/quota use
+      - env/secret/provider configuration
+      - staging/prod/cloud/deploy
+      - code audit execution
+      - code fixes/implementation
+      - e2e
+      - PR/force-push/merge/push
+      - Cost Calibration Gate
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
+      - docs/05-execution-logs/evidence/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-blocked-gate-provider-checkpoint-guard
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-blocked-gate-provider-checkpoint-guard
