@@ -1,7 +1,5 @@
-import { createAdminOrganizationOrgAuthRuntimeRouteHandlers } from "@/server/services/admin-organization-org-auth-runtime";
+import { createOrganizationRouteHandlers } from "@/server/services/organization/route-handlers";
 
-const adminOrganizationOrgAuthRuntimeRouteHandlers =
-  createAdminOrganizationOrgAuthRuntimeRouteHandlers();
+const organizationRouteHandlers = createOrganizationRouteHandlers();
 
-export const POST =
-  adminOrganizationOrgAuthRuntimeRouteHandlers.organizations.enable.POST;
+export const POST = organizationRouteHandlers.organizations.enable.POST;
