@@ -11370,22 +11370,32 @@ tasks:
       - unified-standard-advanced-planning-closeout-baseline
     taskPlanPolicy: required_before_edit
     planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-14 approved executing
+      unified-standard-advanced-input-freeze-and-source-index as a docs-only source-freeze task. Approved writes are
+      limited to the source index, project state, task queue, and this task's task-plan/evidence/audit files. If the
+      task-level closeout policy is legally materialized and all gates pass, the user approves fast-forward merge to
+      master, master closeout/pre-push validation, push origin master, deletion of the merged short branch, state/queue
+      reread, and stop. Capability catalog, use case catalog, technical matrix, code audit, implementation, source/test
+      edits, e2e, scripts, schema/migration/drizzle, dependency/package/lockfile, env/secret, provider, staging/prod/cloud
+      deploy, payment, external-service, PR, force-push, and Cost Calibration work remain blocked.
     closeoutPolicy:
-      localCommit: approved_after_fresh_task_claim
+      localCommit: approved
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
-        deleteShortBranch: false
+        deleteShortBranch: true
         parkWorktree: false
     taskKind: docs_source_freeze
     moduleRunVersion: 2
     capabilities:
       projectResourceRead: approved_read_only_redacted
       requirementPlanning: approved_docs_only
+      gitCloseout: approved_fresh_user_input_freeze_closeout
       implementationAudit: blocked_without_task_approval
       codeChange: blocked_without_task_approval
       providerCall: blocked_without_task_approval
@@ -11393,8 +11403,10 @@ tasks:
       schemaMigration: blocked_without_task_approval
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
+    sourceIndexPath: docs/01-requirements/traceability/unified-standard-advanced-source-index.md
     allowedFiles:
       - docs/01-requirements/traceability/unified-standard-advanced-source-index.md
       - docs/04-agent-system/state/project-state.yaml
@@ -11421,11 +11433,15 @@ tasks:
       - scripts/**
     validationCommands:
       - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/01-requirements/traceability/unified-standard-advanced-source-index.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
       - npm.cmd run lint
       - npm.cmd run typecheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-advanced-input-freeze-and-source-index
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-advanced-input-freeze-and-source-index
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId unified-standard-advanced-input-freeze-and-source-index
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
     blockedRemainder:
       - Capability catalog, use case catalog, technical matrix, code audit, implementation, provider/env/schema/deploy,
         payment, external-service, e2e, PR, force-push, and Cost Calibration work remain blocked.
