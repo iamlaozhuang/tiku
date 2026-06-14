@@ -11603,6 +11603,10 @@ tasks:
     title: Unified standard and advanced technical landing matrix
     phase: unified-standard-advanced-technical-landing-matrix
     sourceStory: unified-standard-advanced-audit-campaign
+    humanApproval: >-
+      User explicitly approved only the unified standard/advanced technical landing matrix task. This approval does not
+      cover code audit, code fixes, implementation, schema/migration, provider/env, e2e, deploy, payment,
+      external-service, PR, force-push, fast-forward merge, push, cleanup, or follow-up task claiming.
     dependencies:
       - unified-standard-advanced-use-case-catalog-and-edition-delta
     taskPlanPolicy: required_before_edit
@@ -11629,7 +11633,11 @@ tasks:
       schemaMigration: blocked_without_task_approval
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
-    status: pending
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-technical-landing-matrix.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-technical-landing-matrix.md
+    status: closed
+    result: pass
+    technicalMatrixPath: docs/01-requirements/traceability/unified-use-case-technical-matrix.md
     retryCount: 0
     allowedFiles:
       - docs/01-requirements/traceability/unified-use-case-technical-matrix.md
