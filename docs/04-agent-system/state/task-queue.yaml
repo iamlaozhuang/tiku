@@ -10924,3 +10924,91 @@ tasks:
       - Concrete staging/prod/cloud resources, deployment commands, external-service configuration, provider quota, real
         provider calls, env/secret reads or writes, `.env.local` or `.env.*` access, schema/migration, package/lockfile,
         source/tests/e2e changes, payment work, PR creation, force-push, and further Cost Calibration remain blocked.
+  - id: batch-180-personal-learning-ai-staging-execution-approval-package
+    title: Create personal learning AI staging execution approval package
+    phase: batch-180-personal-learning-ai-staging-execution-approval-package
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-178-personal-learning-ai-staging-provider-deploy-readiness
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+    freshApprovalRequired: >-
+      Fresh approval is required before concrete staging resources, provider quota or real provider calls, env/secret
+      handling, `.env.*` access, deployment commands, cloud resources, external-service configuration, payment work,
+      schema/migration, package/lockfile, source/test/e2e changes, PR creation, or force-push.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-14 approved creating the next-stage docs-only staging execution
+      approval package. Scope is limited to docs/state/queue/task-plan/evidence/audit and to refining batch-178
+      planning-only output into a concrete future approval checklist for real staging/provider/deploy work. The task
+      must not execute real provider calls, read or modify env or secrets, access `.env.local` or `.env.*`, touch
+      staging/prod/cloud/deploy/payment/external-service surfaces, change schema/migration/package/lockfile/src/tests/e2e
+      files, or perform concrete resource, command, or secret/env operations. If concrete resources, commands, provider
+      quota, or secret/env operations become necessary, the task must stop for secondary approval.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    seededByTask: batch-178-personal-learning-ai-staging-provider-deploy-readiness
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: staging execution approval package
+    behaviorBoundary: personal-learning-ai::staging execution approval package
+    taskKind: blocked_design
+    moduleRunVersion: 2
+    capabilities:
+      providerCall: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      providerConfiguration: blocked_without_task_approval
+      stagingCloudDeploy: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      dependencyPackageLockfile: blocked_without_task_approval
+      costCalibrationGate: blocked
+    planningOnlyMode: approved_docs_only_future_execution_approval_package
+    status: closed
+    result: pass
+    retryCount: 0
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+      - docs/05-execution-logs/evidence/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+      - scripts/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md docs/05-execution-logs/evidence/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md docs/05-execution-logs/audits-reviews/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-180-personal-learning-ai-staging-execution-approval-package
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-180-personal-learning-ai-staging-execution-approval-package
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-180-personal-learning-ai-staging-execution-approval-package
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+    blockedRemainder:
+      - Actual staging/prod/cloud resources, provider quota, real provider calls, env/secret reads or writes,
+        `.env.local` or `.env.*` access, deployment commands, external-service configuration, payment, schema/migration,
+        package/lockfile, source/tests/e2e, PR creation, force-push, and further Cost Calibration remain blocked.
