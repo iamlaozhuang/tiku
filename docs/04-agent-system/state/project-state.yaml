@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-repair-auth-session-personal-auth-boundary
-updatedAt: "2026-06-14T10:18:00-07:00"
+currentPhase: unified-repair-question-paper-rest-layering
+updatedAt: "2026-06-14T10:56:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
   lastKnownOriginMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
 currentTask:
-  id: unified-repair-auth-session-personal-auth-boundary
+  id: unified-repair-question-paper-rest-layering
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
-  branch: codex/unified-repair-auth-session-personal-auth-boundary
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-question-paper-rest-layering.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-question-paper-rest-layering.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-question-paper-rest-layering.md
+  branch: codex/unified-repair-question-paper-rest-layering
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -327,6 +327,7 @@ qualityGates:
     unifiedCodeAuditFindingsRollupRepairQueueSeedingEntryCreation: pass_docs_only_pending_task_seed
     unifiedCodeAuditFindingsRollupRepairQueueSeeding: pass_docs_only_findings_rollup_and_repair_queue_seed
     unifiedRepairAuthSessionPersonalAuthBoundary: pass_scoped_red_green_auth_boundary_repair
+    unifiedRepairQuestionPaperRestLayering: pass_scoped_red_green_rest_layering_repair
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -345,8 +346,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified repair auth session personal authorization boundary is closed locally after scoped RED/GREEN repair,
-    evidence, audit review, and validation. Continue only through local commit, fast-forward merge to master, push
-    origin/master, and merged short-branch cleanup under the user's fresh instruction. Do not claim another
-    unified-repair task until this closeout is complete.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
+    Unified repair question paper REST layering is closed locally after scoped RED/GREEN repair, evidence, audit review,
+    and validation. Continue only through local commit, fast-forward merge to master, push origin/master, and merged
+    short-branch cleanup under the user's fresh instruction. Do not claim another unified-repair task until this
+    closeout is complete.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-question-paper-rest-layering.md
