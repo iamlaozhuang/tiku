@@ -14053,7 +14053,10 @@ tasks:
     seedCategory: repair_candidate
     taskKind: docs_only_edition_boundary_repair_planning
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
     retryCount: 0
     dependencies:
       - unified-code-audit-findings-rollup-and-repair-queue-seeding
