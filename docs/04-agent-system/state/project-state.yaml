@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: unified-code-audit-findings-rollup-and-repair-queue-seeding
-updatedAt: "2026-06-14T08:42:26-07:00"
+updatedAt: "2026-06-14T09:02:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,10 +266,10 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 7c6ff4dc61bf289b88c0041627b380342592488d
-  lastKnownOriginMasterSha: 7c6ff4dc61bf289b88c0041627b380342592488d
+  lastKnownMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
+  lastKnownOriginMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
 currentTask:
-  id: unified-code-audit-findings-rollup-and-repair-queue-seeding-entry-creation
+  id: unified-code-audit-findings-rollup-and-repair-queue-seeding
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
   planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
@@ -325,7 +325,7 @@ qualityGates:
     unifiedFutureNonGoalAuditOnlyGuard: pass_non_goal_audit_only_guard
     unifiedBlockedGateProviderCheckpointGuard: pass_blocked_gate_guard
     unifiedCodeAuditFindingsRollupRepairQueueSeedingEntryCreation: pass_docs_only_pending_task_seed
-    unifiedCodeAuditFindingsRollupRepairQueueSeeding: seeded_pending_docs_only
+    unifiedCodeAuditFindingsRollupRepairQueueSeeding: pass_docs_only_findings_rollup_and_repair_queue_seed
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -344,11 +344,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified code audit findings rollup and repair queue seeding has been seeded as a pending docs-only task only. Stop
-    after the user-approved commit, fast-forward merge, master closeout/pre-push validation, push, short-branch cleanup,
-    and state/queue reread. Do not claim the pending rollup task or any repair implementation task. The pending task may
-    later merge completed code-audit findings, deduplicate, normalize severity, map source/capability/use-case/landing
-    ids, and seed later repair candidates only after fresh user instruction. Code audit execution, code fixes,
-    implementation, schema/migration, provider/env, e2e, dependency changes, deploy, payment, external-service, PR,
-    force-push, concrete repair-task claiming, and Cost Calibration work remain blocked.
+    Unified code audit findings rollup and repair queue seeding is closed on the local short branch as a docs-only
+    governance task. The six completed code audit findings were deduplicated into repair themes and later repair
+    candidates were seeded as pending queue entries only. Do not claim any repair candidate, code implementation,
+    schema/migration, provider/env, e2e, dependency, deploy, payment, external-service, PR, force-push, or Cost
+    Calibration task without a fresh user instruction. If the user approves closeout, run the declared closeout gates
+    first; merge/push are not approved by this task record.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md

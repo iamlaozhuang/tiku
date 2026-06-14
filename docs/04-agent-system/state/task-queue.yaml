@@ -13189,7 +13189,8 @@ tasks:
     seedCategory: audit_findings_rollup_repair_queue_seeding
     taskKind: docs_only_audit_findings_rollup_queue_seeding
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
     dependencies:
       - unified-standard-mvp-auth-scope-code-audit
@@ -13203,13 +13204,24 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+    closeoutPolicy:
+      localCommit: approved_after_fresh_task_claim
+      fastForwardMerge:
+        approved: false
+        reason: not_requested_by_current_user_instruction
+      push:
+        approved: false
+        reason: not_requested_by_current_user_instruction
+      cleanup:
+        deleteShortBranch: false
+        reason: keep local short branch until closeout approval
+    threadRolloverGate: no rollover requested; stop after local commit and report that repair candidates remain pending.
+    automationHandoffPolicy: do not claim any seeded repair candidate, implementation task, provider/env task, e2e task, PR, force-push, deploy, payment, external-service, or Cost Calibration work.
+    nextModuleRunCandidate: repair candidates are pending only and require future fresh user instruction before claim.
     humanApproval: >-
-      Seeded as a pending docs-only audit-findings rollup and repair-queue seeding task after first-task closeout. A
-      future fresh user instruction is required before this task may be claimed. The task may only merge completed
-      code-audit findings, deduplicate, normalize severity, map sourceId/capabilityId/useCaseId/landingId/deltaId, and
-      seed later repair candidate tasks with allowedFiles, blockedFiles, validationCommands, blockedGates, evidence
-      redaction boundary, and human approval boundary. This entry does not approve executing this task now, code audit
-      execution, code fixes, implementation, schema/migration, provider/env, e2e, dependency changes, deploy, payment,
+      Fresh user instruction on 2026-06-14 approved executing this docs-only task to roll up completed code-audit
+      findings and seed later repair candidate tasks only. This approval does not approve code audit execution, code
+      fixes, implementation, schema/migration, provider/env, e2e, dependency changes, deploy, payment,
       external-service, PR, force-push, concrete repair-task claiming, or Cost Calibration.
     rollupInputs:
       completedCodeAuditEvidence:
@@ -13226,6 +13238,20 @@ tasks:
         - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-student-experience-code-audit.md
         - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-ai-rag-governed-code-audit.md
         - docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
+    rollupResult:
+      sourceFindingCount: 29
+      deduplicatedThemeCount: 9
+      repairCandidateCount: 9
+      candidateTaskIds:
+        - unified-repair-auth-session-personal-auth-boundary
+        - unified-repair-organization-auth-layering-lifecycle
+        - unified-repair-question-paper-rest-layering
+        - unified-repair-student-experience-layering-mistake-book
+        - unified-repair-ai-provider-redaction-function-contract
+        - unified-repair-rag-knowledge-layering-retrieval-governance
+        - unified-repair-admin-log-retention-redaction-layering
+        - unified-repair-quota-ledger-blocked-gate-planning
+        - unified-repair-standard-advanced-ai-generation-boundary-guard
     requiredRepairCandidateFields:
       - allowedFiles
       - blockedFiles
@@ -13269,7 +13295,6 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-code-audit-findings-rollup-and-repair-queue-seeding
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-code-audit-findings-rollup-and-repair-queue-seeding
     blockedGates:
-      - executing this pending task without fresh user instruction
       - new code audit execution
       - code fixes/implementation
       - concrete repair-task claiming
@@ -13278,6 +13303,805 @@ tasks:
       - real provider/model request/quota use
       - e2e
       - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-repair-auth-session-personal-auth-boundary
+    title: Repair auth session and personal authorization boundary
+    phase: unified-repair-auth-session-personal-auth-boundary
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: implementation_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - AUTH-AUDIT-001
+      - AUTH-AUDIT-002
+      - AUTH-AUDIT-003
+      - AUTH-AUDIT-004
+      - ADMIN-OPS-LOGS-AUDIT-006
+    severity: P1
+    sourceIds:
+      - STD-REQ-01
+      - STD-STORY-01
+      - STD-REQ-06
+    capabilityIds:
+      - CAP-STD-ACCOUNT-SESSION
+      - CAP-STD-PERSONAL-AUTH
+      - CAP-STD-ADMIN-OPS-LOGS
+    useCaseIds:
+      - UC-STD-ACCOUNT-SESSION
+      - UC-STD-PERSONAL-AUTH-REDEEM
+      - UC-STD-ADMIN-OPS-LOGS
+    landingIds:
+      - LAND-AUTH-ACCOUNT-SESSION
+      - LAND-PERSONAL-AUTH-REDEEM-QUOTA
+      - LAND-RETENTION-LOG-GOVERNANCE
+    deltaIds:
+      - DELTA-AUTH-ACCOUNT-SESSION
+      - DELTA-PERSONAL-AUTH
+      - DELTA-RETENTION-LOG
+    humanApprovalBoundary: >-
+      Future fresh approval is required before any auth/session implementation. This candidate may address the
+      browser localStorage bearer-token pattern, registration-to-redeem continuity, scoped user-auth/authorization
+      layering, and password-reset coverage. Auth model, schema/migration, env/secret, deploy, PR, force-push, and
+      Cost Calibration remain blocked unless separately approved.
+    evidenceRedactionBoundary: no cleartext redeem_code, token, Authorization header, password, session value, database URL, row data, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/(auth)/**
+      - src/app/(student)/redeem-code/**
+      - src/app/api/v1/users/**
+      - src/server/services/user-auth/**
+      - src/server/services/authorization/**
+      - src/server/repositories/user-auth/**
+      - src/server/repositories/authorization/**
+      - src/server/contracts/user-auth/**
+      - src/server/contracts/authorization/**
+      - src/server/mappers/user-auth/**
+      - src/server/mappers/authorization/**
+      - src/server/validators/user-auth/**
+      - src/server/validators/authorization/**
+      - tests/unit/auth/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- tests/unit/auth/session-personal-auth-boundary.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-auth-session-personal-auth-boundary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-auth-session-personal-auth-boundary
+    blockedGates:
+      - executing without future fresh user instruction
+      - auth model/schema/migration changes unless separately approved
+      - env/secret/provider configuration
+      - e2e
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-repair-organization-auth-layering-lifecycle
+    title: Repair organization auth layering and lifecycle
+    phase: unified-repair-organization-auth-layering-lifecycle
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: implementation_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - ORG-AUDIT-001
+      - ORG-AUDIT-002
+      - ORG-AUDIT-003
+      - ORG-AUDIT-004
+    severity: P2
+    sourceIds:
+      - STD-REQ-01
+      - STD-REQ-06
+      - STD-STORY-01
+      - STD-STORY-06
+    capabilityIds:
+      - CAP-STD-ORG-AUTH-OPS-MANAGED
+    useCaseIds:
+      - UC-STD-ORG-AUTH-MANAGED
+    landingIds:
+      - LAND-ORG-AUTH-PORTAL
+    deltaIds:
+      - DELTA-ORG-AUTH-PORTAL
+    humanApprovalBoundary: >-
+      Future fresh approval is required before organization auth implementation. This candidate may establish scoped
+      organization service/repository/contract/mapper/validator boundaries and verify employee lifecycle,
+      hierarchy, overlap, and standard-vs-advanced separation. Schema/migration and advanced organization portal work
+      remain blocked unless separately approved.
+    evidenceRedactionBoundary: no cleartext redeem_code, org_auth row data, employee private data, Authorization header, token, secret, or database URL.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/api/v1/organizations/**
+      - src/app/(admin)/ops/organizations/**
+      - src/app/(admin)/ops/redeem-codes/**
+      - src/server/services/organization/**
+      - src/server/repositories/organization/**
+      - src/server/contracts/organization/**
+      - src/server/mappers/organization/**
+      - src/server/validators/organization/**
+      - tests/unit/organization/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- tests/unit/organization/organization-auth-layering-lifecycle.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-organization-auth-layering-lifecycle
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-organization-auth-layering-lifecycle
+    blockedGates:
+      - executing without future fresh user instruction
+      - schema/migration
+      - advanced organization portal/training implementation
+      - env/secret/provider configuration
+      - e2e
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-repair-question-paper-rest-layering
+    title: Repair question paper REST surface and layering
+    phase: unified-repair-question-paper-rest-layering
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: implementation_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - QP-AUDIT-001
+      - QP-AUDIT-002
+      - QP-AUDIT-003
+      - QP-AUDIT-004
+    severity: P1
+    sourceIds:
+      - STD-REQ-02
+      - STD-STORY-02
+      - STD-REQ-06
+      - STD-STORY-06
+    capabilityIds:
+      - CAP-STD-QUESTION-CONTENT
+      - CAP-STD-PAPER-LIFECYCLE
+    useCaseIds:
+      - UC-STD-QUESTION-MATERIAL-MANAGE
+      - UC-STD-PAPER-LIFECYCLE
+    landingIds:
+      - LAND-FORMAL-CONTENT-QUESTION-PAPER
+    deltaIds:
+      - DELTA-FORMAL-CONTENT
+      - DELTA-OCR-AUTO-IMPORT
+    humanApprovalBoundary: >-
+      Future fresh approval is required before question/paper implementation. This candidate may add or repair
+      standard `paper` REST adapters, question-paper service layers, material lifecycle verification, and admin
+      acceptance coverage. Schema/migration, storage/object operations, raw content output, AI generation, formal
+      adoption, and provider work remain blocked unless separately approved.
+    evidenceRedactionBoundary: no raw question bank content, raw material content, original paper payload, storage URL, row data, secret, or database URL.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/api/v1/questions/**
+      - src/app/api/v1/exam-papers/**
+      - src/app/(admin)/content/questions/**
+      - src/app/(admin)/content/materials/**
+      - src/app/(admin)/content/papers/**
+      - src/server/services/question-paper/**
+      - src/server/repositories/question-paper/**
+      - src/server/contracts/question-paper/**
+      - src/server/mappers/question-paper/**
+      - src/server/validators/question-paper/**
+      - tests/unit/question-paper/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- tests/unit/question-paper/question-paper-rest-layering.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-question-paper-rest-layering
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-question-paper-rest-layering
+    blockedGates:
+      - executing without future fresh user instruction
+      - schema/migration
+      - object storage or raw content import/export
+      - AI generation or formal adoption workflow
+      - env/secret/provider configuration
+      - e2e
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-repair-student-experience-layering-mistake-book
+    title: Repair student experience layering and mistake book scope
+    phase: unified-repair-student-experience-layering-mistake-book
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: implementation_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - SE-AUDIT-001
+      - SE-AUDIT-002
+      - SE-AUDIT-003
+      - SE-AUDIT-004
+    severity: P1
+    sourceIds:
+      - STD-REQ-03
+      - STD-STORY-03
+      - STD-REQ-04
+      - STD-STORY-04
+    capabilityIds:
+      - CAP-STD-PRACTICE
+      - CAP-STD-MOCK-EXAM
+      - CAP-STD-EXAM-REPORT-MISTAKE-BOOK
+    useCaseIds:
+      - UC-STD-PRACTICE
+      - UC-STD-MOCK-EXAM
+      - UC-STD-REPORT-MISTAKE-BOOK
+    landingIds:
+      - LAND-PRACTICE-MOCK-REPORT
+    deltaIds:
+      - DELTA-PRACTICE-MOCK-REPORT
+    humanApprovalBoundary: >-
+      Future fresh approval is required before student experience implementation. This candidate may establish scoped
+      practice/mock-exam/report/mistake-book service layers and verify route/UI coverage. Provider scoring, model
+      requests, quota use, e2e, schema/migration, and raw student answer evidence remain blocked unless separately
+      approved.
+    evidenceRedactionBoundary: no student answer text, report row data, raw question content, prompt, provider payload, token, secret, or database URL.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/(student)/**
+      - src/app/api/v1/practices/**
+      - src/app/api/v1/mock-exams/**
+      - src/app/api/v1/exam-reports/**
+      - src/app/api/v1/mistake-books/**
+      - src/server/services/student-experience/**
+      - src/server/repositories/student-experience/**
+      - src/server/contracts/student-experience/**
+      - src/server/mappers/student-experience/**
+      - src/server/validators/student-experience/**
+      - tests/unit/student-experience/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-student-experience-layering-mistake-book
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-student-experience-layering-mistake-book
+    blockedGates:
+      - executing without future fresh user instruction
+      - provider/model request/quota use
+      - raw student answer evidence
+      - schema/migration
+      - e2e
+      - dependency/package/lockfile
+      - env/secret/provider configuration
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-repair-ai-provider-redaction-function-contract
+    title: Repair AI provider redaction and function contract
+    phase: unified-repair-ai-provider-redaction-function-contract
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: implementation_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - AI-RAG-AUDIT-002
+      - AI-RAG-AUDIT-003
+      - AI-RAG-AUDIT-005
+      - SE-AUDIT-004
+      - ADMIN-OPS-LOGS-AUDIT-005
+    severity: P1
+    sourceIds:
+      - STD-REQ-04
+      - STD-STORY-04
+      - STD-REQ-06
+      - STD-STORY-06
+      - GATE-B178-EV
+      - GATE-B180-EV
+    capabilityIds:
+      - CAP-STD-AI-SCORING-EXPLANATION
+      - CAP-STD-KN-RECOMMENDATION
+      - CAP-GATE-PROVIDER-STAGING-EXECUTION
+      - CAP-STD-ADMIN-OPS-LOGS
+    useCaseIds:
+      - UC-STD-AI-SCORING-EXPLANATION
+      - UC-STD-KN-RECOMMENDATION
+      - UC-GATE-PROVIDER-STAGING-EXECUTION
+      - UC-STD-ADMIN-OPS-LOGS
+    landingIds:
+      - LAND-AI-SCORING-AND-GENERATION
+      - LAND-OPS-QUOTA-LEDGER
+      - LAND-PROVIDER-STAGING-GATE
+      - LAND-RETENTION-LOG-GOVERNANCE
+    deltaIds:
+      - DELTA-AI-SCORING-VS-GENERATION
+      - DELTA-PROVIDER-STAGING-GATE
+      - DELTA-OPS-QUOTA
+      - DELTA-RETENTION-LOG
+    humanApprovalBoundary: >-
+      Future fresh approval is required before AI provider/redaction implementation. This candidate may add hard
+      redaction boundaries, normalize AI function values, and separate model-config/log surfaces from provider
+      execution gates. Real provider/model requests, env/secret, quota use, Cost Calibration, schema/migration, and
+      deployment remain blocked.
+    evidenceRedactionBoundary: no raw prompt, raw answer, provider request, provider response, API key, Authorization header, model secret, token, database URL, or row data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/ai/**
+      - src/app/(admin)/ops/ai-audit-logs/**
+      - src/app/api/v1/ai-call-logs/**
+      - src/server/contracts/ai/**
+      - src/server/mappers/ai/**
+      - src/server/validators/ai/**
+      - tests/unit/ai/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- tests/unit/ai/provider-redaction-function-contract.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-ai-provider-redaction-function-contract
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-ai-provider-redaction-function-contract
+    blockedGates:
+      - executing without future fresh user instruction
+      - real provider/model request/quota use
+      - env/secret/provider configuration
+      - Cost Calibration Gate
+      - schema/migration
+      - e2e
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+  - id: unified-repair-rag-knowledge-layering-retrieval-governance
+    title: Repair RAG knowledge layering and retrieval governance
+    phase: unified-repair-rag-knowledge-layering-retrieval-governance
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: implementation_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - AI-RAG-AUDIT-001
+      - AI-RAG-AUDIT-004
+    severity: P1
+    sourceIds:
+      - STD-REQ-04
+      - STD-STORY-04
+      - STD-REQ-05
+      - STD-STORY-05
+      - STD-REQ-06
+      - STD-STORY-06
+    capabilityIds:
+      - CAP-STD-KN-RECOMMENDATION
+      - CAP-STD-RAG-KNOWLEDGE-BASE
+    useCaseIds:
+      - UC-STD-KN-RECOMMENDATION
+      - UC-STD-RAG-KNOWLEDGE-BASE
+    landingIds:
+      - LAND-RAG-KNOWLEDGE
+      - LAND-AI-SCORING-AND-GENERATION
+    deltaIds:
+      - DELTA-RAG-KNOWLEDGE
+      - DELTA-PROVIDER-STAGING-GATE
+    humanApprovalBoundary: >-
+      Future fresh approval is required before RAG implementation. This candidate may establish scoped RAG knowledge
+      services, contracts, mappers, validators, and retrieval governance. Vector provider work, dependency changes,
+      storage/file access, schema/migration, provider/model requests, env/secret, quota use, and Cost Calibration
+      remain blocked unless separately approved.
+    evidenceRedactionBoundary: no raw resource document content, private file URL, embedding vector data, provider payload, prompt, answer, secret, token, database URL, or row data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/(admin)/ops/resources/**
+      - src/app/(admin)/content/knowledge-nodes/**
+      - src/server/services/rag-knowledge/**
+      - src/server/repositories/rag-knowledge/**
+      - src/server/contracts/rag-knowledge/**
+      - src/server/mappers/rag-knowledge/**
+      - src/server/validators/rag-knowledge/**
+      - tests/unit/rag-knowledge/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- tests/unit/rag-knowledge/rag-layering-retrieval-governance.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-rag-knowledge-layering-retrieval-governance
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-rag-knowledge-layering-retrieval-governance
+    blockedGates:
+      - executing without future fresh user instruction
+      - dependency/package/lockfile
+      - schema/migration/vector provider/storage work
+      - real provider/model request/quota use
+      - env/secret/provider configuration
+      - e2e
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-repair-admin-log-retention-redaction-layering
+    title: Repair admin log retention redaction and layering
+    phase: unified-repair-admin-log-retention-redaction-layering
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: implementation_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - ADMIN-OPS-LOGS-AUDIT-001
+      - ADMIN-OPS-LOGS-AUDIT-003
+      - ADMIN-OPS-LOGS-AUDIT-004
+    severity: P1
+    sourceIds:
+      - STD-REQ-06
+      - STD-STORY-06
+      - ADV-SPEC-03
+      - ADV-MOD-07
+      - ADV-STORY-06
+    capabilityIds:
+      - CAP-STD-ADMIN-OPS-LOGS
+      - CAP-ADV-RETENTION-LOG-GOVERNANCE
+    useCaseIds:
+      - UC-STD-ADMIN-OPS-LOGS
+      - UC-ADV-RETENTION-LOG-GOVERNANCE
+    landingIds:
+      - LAND-RETENTION-LOG-GOVERNANCE
+      - LAND-ORG-ANALYTICS
+    deltaIds:
+      - DELTA-RETENTION-LOG
+      - DELTA-ORG-ANALYTICS
+    humanApprovalBoundary: >-
+      Future fresh approval is required before admin log implementation. This candidate may establish scoped
+      `audit_log` and `ai_call_log` service layers and verify redaction/retention controls and admin operation audit
+      side effects. Raw prompt/provider response viewers, raw sensitive viewers, hard-delete executors, export,
+      provider/env, schema/migration, deploy, PR, force-push, and Cost Calibration remain blocked unless separately
+      approved.
+    evidenceRedactionBoundary: public ids, counts, statuses, timestamps, and redacted summaries only; no raw prompt, provider response, token, secret, database URL, row data, or private user/customer data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/api/v1/audit-logs/**
+      - src/app/api/v1/ai-call-logs/**
+      - src/app/(admin)/ops/**
+      - src/server/services/audit-log/**
+      - src/server/services/ai-call-log/**
+      - src/server/repositories/audit-log/**
+      - src/server/repositories/ai-call-log/**
+      - src/server/contracts/audit-log/**
+      - src/server/contracts/ai-call-log/**
+      - src/server/mappers/audit-log/**
+      - src/server/mappers/ai-call-log/**
+      - src/server/validators/audit-log/**
+      - src/server/validators/ai-call-log/**
+      - tests/unit/admin-logs/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- tests/unit/admin-logs/admin-log-retention-redaction-layering.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-admin-log-retention-redaction-layering
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-admin-log-retention-redaction-layering
+    blockedGates:
+      - executing without future fresh user instruction
+      - raw prompt/provider response viewer
+      - raw sensitive viewer or hard-delete executor
+      - export/file generation/download
+      - provider/env/secret
+      - schema/migration
+      - e2e
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-repair-quota-ledger-blocked-gate-planning
+    title: Repair quota ledger blocked gate planning
+    phase: unified-repair-quota-ledger-blocked-gate-planning
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: docs_only_blocked_gate_planning
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - ADMIN-OPS-LOGS-AUDIT-002
+      - ADMIN-OPS-LOGS-AUDIT-005
+      - AI-RAG-AUDIT-005
+    severity: P1
+    sourceIds:
+      - STD-REQ-06
+      - STD-STORY-06
+      - ADV-SPEC-02
+      - ADV-SPEC-03
+      - ADV-MOD-06
+      - ADV-STORY-04
+      - GATE-B178-EV
+      - GATE-B180-EV
+    capabilityIds:
+      - CAP-ADV-OPS-AUTH-QUOTA
+      - CAP-GATE-PROVIDER-STAGING-EXECUTION
+      - CAP-STD-ADMIN-OPS-LOGS
+    useCaseIds:
+      - UC-ADV-OPS-AUTH-QUOTA
+      - UC-GATE-PROVIDER-STAGING-EXECUTION
+      - UC-STD-ADMIN-OPS-LOGS
+    landingIds:
+      - LAND-OPS-QUOTA-LEDGER
+      - LAND-PROVIDER-STAGING-GATE
+    deltaIds:
+      - DELTA-OPS-QUOTA
+      - DELTA-PROVIDER-STAGING-GATE
+      - DELTA-PAYMENT
+    humanApprovalBoundary: >-
+      Future fresh approval is required before this blocked-gate planning task may be claimed. It may define a quota
+      ledger repair plan and exact future implementation gates only. It must not implement quota, call providers,
+      measure cost, change env/secret, change schema, introduce dependencies, or execute Cost Calibration.
+    evidenceRedactionBoundary: no quota row data, pricing, cost measurement output, provider payload, prompt, token, secret, database URL, or payment data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-quota-ledger-blocked-gate-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-quota-ledger-blocked-gate-planning
+    blockedGates:
+      - executing without future fresh user instruction
+      - quota implementation or quota use
+      - provider/model request/cost measurement
+      - Cost Calibration Gate
+      - env/secret/provider configuration
+      - schema/migration
+      - dependency/package/lockfile
+      - e2e
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+  - id: unified-repair-standard-advanced-ai-generation-boundary-guard
+    title: Repair standard and advanced AI generation boundary guard
+    phase: unified-repair-standard-advanced-ai-generation-boundary-guard
+    sourceStory: unified-standard-advanced-audit-campaign
+    seededFromTask: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    seedCategory: repair_candidate
+    taskKind: docs_only_edition_boundary_repair_planning
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-code-audit-findings-rollup-and-repair-queue-seeding
+    sourceFindingIds:
+      - SE-AUDIT-005
+      - AI-RAG-AUDIT-006
+    severity: P3
+    sourceIds:
+      - STD-REQ-00
+      - STD-REQ-04
+      - ADV-SPEC-01
+      - ADV-SPEC-02
+      - ADV-MOD-03
+      - ADV-STORY-01
+    capabilityIds:
+      - CAP-STD-FUTURE-AI-GENERATION-NON-GOAL
+      - CAP-ADV-AI-TASK-DOMAIN
+      - CAP-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - CAP-ADV-PERSONAL-AI-PAPER-GENERATION
+    useCaseIds:
+      - UC-FUTURE-STANDARD-AI-GENERATION-NON-GOAL
+      - UC-ADV-AI-TASK-LIFECYCLE
+      - UC-ADV-PERSONAL-AI-QUESTION-GENERATION
+      - UC-ADV-PERSONAL-AI-PAPER-GENERATION
+    landingIds:
+      - LAND-AI-SCORING-AND-GENERATION
+    deltaIds:
+      - DELTA-AI-SCORING-VS-GENERATION
+      - DELTA-PROVIDER-STAGING-GATE
+    humanApprovalBoundary: >-
+      Future fresh approval is required before this edition-boundary planning task may be claimed. It may define how to
+      prevent advanced AI generation route presence from being treated as standard MVP coverage or provider execution
+      approval. It must not implement route guards, call providers, use quota, edit env/secret files, or start code
+      fixes without a separate scoped task.
+    evidenceRedactionBoundary: no prompt, generated content, provider payload, model response, token, secret, database URL, or private answer data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-repair-standard-advanced-ai-generation-boundary-guard
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-repair-standard-advanced-ai-generation-boundary-guard
+    blockedGates:
+      - executing without future fresh user instruction
+      - code fixes/implementation
+      - provider/model request/quota use
+      - env/secret/provider configuration
+      - schema/migration
+      - dependency/package/lockfile
+      - e2e
       - staging/prod/cloud/deploy
       - payment/external-service
       - PR/force-push
