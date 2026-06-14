@@ -13960,8 +13960,11 @@ tasks:
     seedCategory: repair_candidate
     taskKind: docs_only_blocked_gate_planning
     moduleRunVersion: 2
-    status: pending
+    status: closed
     retryCount: 0
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-quota-ledger-blocked-gate-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-quota-ledger-blocked-gate-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-quota-ledger-blocked-gate-planning.md
     dependencies:
       - unified-code-audit-findings-rollup-and-repair-queue-seeding
     sourceFindingIds:
