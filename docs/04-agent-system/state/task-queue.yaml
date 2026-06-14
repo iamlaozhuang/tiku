@@ -10401,19 +10401,126 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-173-personal-learning-ai-provider-secret-runtime-readiness
     evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-173-personal-learning-ai-provider-secret-runtime-readiness.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-173-personal-learning-ai-provider-secret-runtime-readiness.md
+  - id: batch-179-personal-learning-ai-provider-sandbox-command
+    title: Add personal learning AI provider sandbox command
+    phase: batch-179-personal-learning-ai-provider-sandbox-command
+    sourceStory: personal-learning-ai-experience
+    dependencies:
+      - batch-173-personal-learning-ai-provider-secret-runtime-readiness
+      - batch-176-personal-learning-ai-formal-adoption-design
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 approved one small task to add a sandbox command before separately
+      approving batch-174 to execute it. The approval permits adding a local provider smoke command, focused unit tests,
+      and task/state/evidence/audit records only. It does not permit provider calls, model requests, quota use, reading
+      `.env.local`, reading or writing real secrets/env/provider configuration, Cost Calibration, formal
+      generated-content writes, schema/migration, e2e, package/lockfile changes, deploy, payment, external-service, PR
+      creation, or force-push.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    seededByTask: user-request-2026-06-13-provider-sandbox-command
+    seededImplementationTask: true
+    seededExecutionModule: personal-learning-ai
+    targetClosureItem: local provider sandbox command readiness
+    behaviorBoundary: personal-learning-ai::provider sandbox command only
+    taskKind: implementation
+    moduleRunVersion: 2
+    capabilities:
+      providerSandboxCommand: approved_command_only_no_execution
+      providerCall: blocked_without_batch_174_fresh_approval
+      envSecret: blocked_without_batch_174_fresh_approval
+      localE2EValidation: blocked_without_task_approval
+      costCalibrationGate: blocked
+    status: closed
+    result: pass
+    retryCount: 0
+    allowedFiles:
+      - scripts/ai/run-personal-ai-provider-smoke.mjs
+      - tests/unit/run-personal-ai-provider-smoke.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
+      - docs/05-execution-logs/evidence/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
+      - docs/05-execution-logs/audits-reviews/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - playwright-report/**
+      - test-results/**
+    sandboxCommandBoundary:
+      dryRunCommand: node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      futureBatch174ExecutionCommandTemplate: "$env:TIKU_PROVIDER_SMOKE_APPROVED='1'; node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model <approved-model> --env-key <approved-env-var-name> --max-requests 1 --timeout-ms <approved-timeout-ms> --execute"
+      executionRequiresFreshApproval: true
+      maxRequests: 1
+      evidenceAllowedFields:
+        - provider
+        - model
+        - requestCount
+        - timeoutMs
+        - resultStatus
+        - failureCategory
+        - durationMs
+        - usageSummary
+        - redactionStatus
+      evidenceForbiddenFields:
+        - apiKey
+        - authorizationHeader
+        - secret
+        - token
+        - databaseUrl
+        - rawPrompt
+        - providerPayload
+        - providerResponse
+        - rawGeneratedOutput
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- tests/unit/run-personal-ai-provider-smoke.test.ts
+      - node scripts/ai/run-personal-ai-provider-smoke.mjs --provider alibaba --model qwen-plus --env-key ALIBABA_API_KEY --max-requests 1 --timeout-ms 30000 --dry-run
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md docs/05-execution-logs/evidence/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md scripts/ai/run-personal-ai-provider-smoke.mjs tests/unit/run-personal-ai-provider-smoke.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-179-personal-learning-ai-provider-sandbox-command
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-179-personal-learning-ai-provider-sandbox-command
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-179-personal-learning-ai-provider-sandbox-command
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
   - id: batch-174-personal-learning-ai-local-provider-sandbox-smoke
     title: Execute personal learning AI local provider sandbox smoke
     phase: batch-174-personal-learning-ai-local-provider-sandbox-smoke
     sourceStory: personal-learning-ai-experience
     dependencies:
       - batch-173-personal-learning-ai-provider-secret-runtime-readiness
+      - batch-179-personal-learning-ai-provider-sandbox-command
     taskPlanPolicy: required_before_edit
     planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md
     freshApprovalRequired: >-
       Fresh approval is required before any real provider call, model request, local provider sandbox execution, quota
       use, or provider response evidence. Approval must name provider, model, max requests, max spend or quota cap,
-      timeout, redaction rules, and exact command. Raw prompt, raw provider payload, raw provider response, Authorization
-      header, API key, secret, token, database URL, row data, and raw generated output must not be recorded.
+      timeout, redaction rules, exact command, stop conditions, whether reading the named process env secret is allowed,
+      and evidence fields. After batch-179 closes, the exact command must use
+      `node scripts/ai/run-personal-ai-provider-smoke.mjs` with `--execute` and `TIKU_PROVIDER_SMOKE_APPROVED=1`.
+      Raw prompt, raw provider payload, raw provider response, Authorization header, API key, secret, token, database URL,
+      row data, and raw generated output must not be recorded.
     seededByTask: batch-172-personal-learning-ai-next-stage-closure-and-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
