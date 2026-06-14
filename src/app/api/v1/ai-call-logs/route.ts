@@ -1,6 +1,5 @@
-import { createAdminAiAuditLogRuntimeRouteHandlers } from "@/server/services/admin-ai-audit-log-runtime";
+import { createAiCallLogRouteHandlers } from "@/server/services/ai-call-log/route-handlers";
 
-const adminAiAuditLogRuntimeRouteHandlers =
-  createAdminAiAuditLogRuntimeRouteHandlers();
+const aiCallLogRouteHandlers = createAiCallLogRouteHandlers();
 
-export const GET = adminAiAuditLogRuntimeRouteHandlers.aiCallLogs.GET;
+export const GET = aiCallLogRouteHandlers.aiCallLogs.GET;

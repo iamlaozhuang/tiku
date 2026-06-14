@@ -1,5 +1,5 @@
-import { createAdminFlowRuntimeRouteHandlers } from "@/server/services/admin-flow-runtime";
+import { createAuditLogRouteHandlers } from "@/server/services/audit-log/route-handlers";
 
-const adminFlowRuntimeRouteHandlers = createAdminFlowRuntimeRouteHandlers();
+const auditLogRouteHandlers = createAuditLogRouteHandlers();
 
-export const GET = adminFlowRuntimeRouteHandlers.auditLogs.collection.GET;
+export const GET = auditLogRouteHandlers.collection.GET;

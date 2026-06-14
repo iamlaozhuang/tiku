@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-repair-rag-knowledge-layering-retrieval-governance
-updatedAt: "2026-06-14T11:45:00-07:00"
+currentPhase: unified-repair-admin-log-retention-redaction-layering
+updatedAt: "2026-06-14T11:17:08-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 0845081dc2f78759cb437e5b53bed56653c9d04b
-  lastKnownOriginMasterSha: 0845081dc2f78759cb437e5b53bed56653c9d04b
+  lastKnownMasterSha: dd130f5c05f38dd098f83b68cd7bfbf630d9a462
+  lastKnownOriginMasterSha: dd130f5c05f38dd098f83b68cd7bfbf630d9a462
 currentTask:
-  id: unified-repair-rag-knowledge-layering-retrieval-governance
+  id: unified-repair-admin-log-retention-redaction-layering
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
-  branch: codex/unified-repair-rag-knowledge-layering-retrieval-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-admin-log-retention-redaction-layering.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-admin-log-retention-redaction-layering.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-admin-log-retention-redaction-layering.md
+  branch: codex/unified-repair-admin-log-retention-redaction-layering
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -330,6 +330,7 @@ qualityGates:
     unifiedRepairQuestionPaperRestLayering: pass_scoped_red_green_rest_layering_repair
     unifiedRepairStudentExperienceLayeringMistakeBook: pass_scoped_red_green_student_experience_repair
     unifiedRepairRagKnowledgeLayeringRetrievalGovernance: pass_scoped_red_green_rag_knowledge_repair
+    unifiedRepairAdminLogRetentionRedactionLayering: pass_scoped_red_green_admin_log_repair
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -348,9 +349,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified repair RAG knowledge layering and retrieval governance is locally closed after scoped RED/GREEN repair,
+    Unified repair admin log retention redaction and layering is locally closed after scoped RED/GREEN repair,
     evidence, audit review, lint, typecheck, target unit validation, Module Run v2 pre-commit hardening, and Module Run
     v2 closeout readiness. Continue only through local commit, fast-forward merge to master, master-side validation,
     push origin/master, and merged short-branch cleanup under the user's fresh instruction. Do not claim another
     unified-repair task until this closeout is complete.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-admin-log-retention-redaction-layering.md
