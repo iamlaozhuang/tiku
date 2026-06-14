@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-standard-mvp-auth-scope-code-audit
-updatedAt: "2026-06-14T05:53:53-07:00"
+currentPhase: unified-standard-mvp-organization-auth-code-audit
+updatedAt: "2026-06-14T06:01:35-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: c7a6186cf53a87c7006200265c05b4c429ccd456
   lastKnownOriginMasterSha: c7a6186cf53a87c7006200265c05b4c429ccd456
 currentTask:
-  id: unified-standard-mvp-auth-scope-code-audit
+  id: unified-standard-mvp-organization-auth-code-audit
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
-  branch: codex/unified-standard-mvp-auth-scope-code-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+  branch: codex/unified-standard-mvp-organization-auth-code-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -315,8 +315,9 @@ qualityGates:
     unifiedConsistencyRiskAudit: pass_docs_only_traceability_consistency_risk_audit
     unifiedImplementationQueueSeeding: pass_docs_only_pending_queue_seed
     unifiedStandardMvpAuthScopeCodeAudit: pass_readonly_audit_with_findings
-    preCommitHook: pass_unified_standard_mvp_auth_scope_code_audit_pre_commit_hardening
-    moduleCloseout: pass_unified_standard_mvp_auth_scope_code_audit_closeout_readiness
+    unifiedStandardMvpOrganizationAuthCodeAudit: pass_readonly_audit_with_findings
+    preCommitHook: pass_unified_standard_mvp_organization_auth_code_audit_pre_commit_hardening
+    moduleCloseout: pass_unified_standard_mvp_organization_auth_code_audit_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
 riskGates:
   requireHumanApproval:
@@ -333,11 +334,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified standard MVP auth-scope read-only code audit is closed as the first task in the user-approved two-task
-    batch on branch codex/unified-standard-mvp-auth-scope-code-audit. The audit recorded findings for browser
-    localStorage token persistence, registration-to-redeem continuity, missing scoped user-auth/authorization layering,
-    and password reset coverage. No source code was modified. The only next authorized task is
-    unified-standard-mvp-organization-auth-code-audit. Code fixes, implementation, schema/migration, provider/env, e2e,
-    dependency changes, deploy, payment, external-service, PR, force-push, merge, push, cleanup, and Cost Calibration
-    work remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
+    Unified standard MVP auth-scope and organization-auth read-only code audit batch is closed locally as a stacked
+    two-commit branch chain ending at codex/unified-standard-mvp-organization-auth-code-audit. The audits recorded
+    findings for localStorage token persistence, registration-to-redeem continuity, missing scoped user-auth and
+    organization layering, password reset coverage, shared out-of-scope admin feature modules, employee lifecycle
+    coverage, and organization hierarchy/overlap auditability. No source code was modified. The user explicitly
+    prohibited claiming unified-standard-mvp-question-paper-code-audit or any later task. Code fixes, implementation,
+    schema/migration, provider/env, e2e, dependency changes, deploy, payment, external-service, PR, force-push, merge,
+    push, cleanup, and Cost Calibration work remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md

@@ -11956,10 +11956,48 @@ tasks:
     seedCategory: standard_only_audit_candidate
     taskKind: readonly_code_audit_candidate
     moduleRunVersion: 2
-    status: pending
     retryCount: 0
     dependencies:
       - unified-standard-advanced-implementation-queue-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+    closeoutPolicy:
+      localCommit: approved_after_fresh_task_claim
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        parkWorktree: false
+    capabilities:
+      projectResourceRead: approved_read_only_redacted
+      implementationAudit: approved_read_only_no_code_fixes
+      providerCall: blocked_without_task_approval
+      envSecret: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      localE2EValidation: blocked_without_task_approval
+      dependencyPackageLockfile: blocked_without_task_approval
+      costCalibrationGate: blocked
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+    status: closed
+    result: pass
+    auditFindings:
+      - findingId: ORG-AUDIT-001
+        severity: P2
+        summary: Scoped organization layering is absent.
+      - findingId: ORG-AUDIT-002
+        severity: P2
+        summary: Admin organization and redeem-code pages share an out-of-scope feature module.
+      - findingId: ORG-AUDIT-003
+        severity: P3
+        summary: Employee organization lifecycle coverage is only visible for unbind.
+      - findingId: ORG-AUDIT-004
+        severity: P3
+        summary: Organization hierarchy and overlap rules are not auditable from scoped files.
     traceability:
       landingIds:
         - LAND-ORG-AUTH-PORTAL
@@ -11976,10 +12014,10 @@ tasks:
       deltaIds:
         - DELTA-ORG-AUTH-PORTAL
     humanApproval: >-
-      Seeded as a pending read-only code audit candidate for platform-managed organization authorization only. A future
-      fresh user instruction is required before this task may be claimed. This entry does not approve organization
-      self-service, advanced portal implementation, schema/migration, privacy-sensitive raw data access, e2e, PR, merge,
-      push, or follow-up execution.
+      User approved this task as the second task in a two-task read-only audit batch. This approval covers read-only
+      code audit and governance records only. It does not approve organization self-service, advanced portal
+      implementation, schema/migration, privacy-sensitive raw data access, e2e, PR, merge, push, or follow-up execution
+      outside the approved batch.
     blockedGates:
       - organization self-service non-goal
       - advanced organization portal
