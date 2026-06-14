@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-standard-advanced-input-freeze-and-source-index
-updatedAt: "2026-06-14T03:38:14-07:00"
+currentPhase: unified-standard-advanced-capability-catalog
+updatedAt: "2026-06-14T04:20:38-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 8cf0664826b70c3e11c91eb0c9d558af3e1a2105
   lastKnownOriginMasterSha: 8cf0664826b70c3e11c91eb0c9d558af3e1a2105
 currentTask:
-  id: unified-standard-advanced-input-freeze-and-source-index
+  id: unified-standard-advanced-capability-catalog
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
-  branch: codex/unified-standard-advanced-input-freeze-and-source-index
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-advanced-capability-catalog.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-capability-catalog.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-capability-catalog.md
+  branch: codex/unified-standard-advanced-capability-catalog
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -309,8 +309,9 @@ qualityGates:
     unifiedAuditCampaignSeeding: pass_docs_only_serial_campaign_seed
     unifiedPlanningCloseoutBaseline: pass_fresh_approval_merge_push_cleanup
     unifiedInputFreezeSourceIndex: pass_docs_only_source_freeze_index
-    preCommitHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_commit_hardening
-    moduleCloseout: pass_unified_standard_advanced_input_freeze_and_source_index_closeout_readiness
+    unifiedCapabilityCatalog: pass_docs_only_capability_catalog
+    preCommitHook: pass_unified_standard_advanced_capability_catalog_pre_commit_hardening
+    moduleCloseout: pass_unified_standard_advanced_capability_catalog_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
 riskGates:
   requireHumanApproval:
@@ -327,10 +328,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified standard/advanced input freeze and source index is closed after fresh user approval for docs-only source
-    freezing, fast-forward merge to master, master closeout/pre-push validation, push to origin/master, and merged
-    short-branch cleanup. The next recommended task is unified-standard-advanced-capability-catalog, but it must not be
-    claimed without fresh user instruction. Capability catalog, use case catalog, technical matrixing, code audit,
-    implementation, source/test/script/schema/migration/dependency/env/secret/provider/staging/prod/cloud/deploy/payment,
-    external-service, e2e, PR, force-push, and Cost Calibration work remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
+    Unified standard/advanced capability catalog is closed as a docs-only local commit on branch
+    codex/unified-standard-advanced-capability-catalog. The task-level closeout policy does not approve fast-forward merge
+    or push, so the branch must remain for user review or a future explicit closeout instruction. The next queued task is
+    unified-standard-advanced-use-case-catalog-and-edition-delta, but it must not be claimed without fresh user
+    instruction. Use case catalog, technical matrixing, code audit, implementation,
+    source/test/script/schema/migration/dependency/env/secret/provider/staging/prod/cloud/deploy/payment, external-service,
+    e2e, PR, force-push, and Cost Calibration work remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-capability-catalog.md
