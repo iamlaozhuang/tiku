@@ -10770,6 +10770,15 @@ tasks:
       write targets, allowed tables/routes/UI surfaces, authorization model, review workflow, rollback behavior, e2e
       scope, and whether schema/migration is allowed. Provider calls, env/secret work, and Cost Calibration remain
       blocked unless explicitly approved in the same task.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-14 approved executing the first implementation slice for
+      batch-177-personal-learning-ai-formal-adoption-implementation. Scope is limited to a minimal manual review
+      adoption gate for formal generated-content adoption. The task may modify task-queue/project-state/task-plan/
+      evidence/audit and necessary src/** and tests/** files, provided it does not involve schema/migration,
+      provider calls, env/secret access, `.env.local` or `.env.*` access, deploy/payment/external-service work,
+      package/lockfile changes, or automatic AI generated-content adoption. The adoption behavior must remain admin-only
+      or within the existing authorization model, preserve a human review gate, and stop for secondary approval if
+      schema/migration, e2e, provider/env, or dependency work becomes necessary.
     seededByTask: batch-172-personal-learning-ai-next-stage-closure-and-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
@@ -10778,13 +10787,14 @@ tasks:
     taskKind: blocked_implementation
     moduleRunVersion: 2
     capabilities:
-      formalGeneratedContentAdoption: blocked_without_task_approval
+      formalGeneratedContentAdoption: approved_first_slice_manual_review_gate_only
       schemaMigration: blocked_without_task_approval
       localE2EValidation: blocked_without_task_approval
       providerCall: blocked_without_task_approval
       envSecret: blocked_without_task_approval
       costCalibrationGate: blocked
-    status: blocked
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -10792,6 +10802,15 @@ tasks:
       - docs/05-execution-logs/task-plans/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
       - docs/05-execution-logs/evidence/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
       - docs/05-execution-logs/audits-reviews/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
+      - src/server/models/personal-ai-generation-formal-adoption.ts
+      - src/server/contracts/personal-ai-generation-formal-adoption-contract.ts
+      - src/server/validators/personal-ai-generation-formal-adoption.ts
+      - src/server/repositories/personal-ai-generation-formal-adoption-repository.ts
+      - src/server/services/personal-ai-generation-formal-adoption-service.ts
+      - src/server/services/personal-ai-generation-formal-adoption-service.test.ts
+      - src/server/services/personal-ai-generation-formal-adoption-runtime.ts
+      - src/server/services/personal-ai-generation-formal-adoption-runtime.test.ts
+      - src/app/api/v1/personal-ai-generation-results/*/formal-adoption-reviews/route.ts
     blockedFiles:
       - .env.local
       - .env.example
@@ -10799,19 +10818,28 @@ tasks:
       - pnpm-lock.yaml
       - package-lock.yaml
       - package-lock.json
-      - src/**
-      - tests/**
       - e2e/**
       - src/db/schema/**
       - drizzle/**
       - playwright-report/**
       - test-results/**
     validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-formal-adoption-service.test.ts src/server/services/personal-ai-generation-formal-adoption-runtime.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
+      - npm.cmd run test:unit
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-177-personal-learning-ai-formal-adoption-implementation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-177-personal-learning-ai-formal-adoption-implementation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-177-personal-learning-ai-formal-adoption-implementation
     evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
+    blockedRemainder:
+      - Formal writes into `question`, `paper`, `practice`, `mock_exam`, `exam_report`, or `mistake_book` remain blocked.
+      - Schema/migration, provider calls, env/secret work, `.env.local` or `.env.*` access, e2e, package/lockfile
+        changes, staging/prod/cloud, deploy, payment, external-service, PR creation, force-push, and Cost Calibration
+        remain blocked.
   - id: batch-178-personal-learning-ai-staging-provider-deploy-readiness
     title: Plan personal learning AI staging provider and deploy readiness
     phase: batch-178-personal-learning-ai-staging-provider-deploy-readiness

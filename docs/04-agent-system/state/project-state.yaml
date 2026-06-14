@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-175-personal-learning-ai-cost-calibration-gate
-updatedAt: "2026-06-14T00:10:29-07:00"
+currentPhase: batch-177-personal-learning-ai-formal-adoption-implementation
+updatedAt: "2026-06-14T00:44:18-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 802df7c8db303da90322f98f109a621cb4118701
   lastKnownOriginMasterSha: 802df7c8db303da90322f98f109a621cb4118701
 currentTask:
-  id: batch-175-personal-learning-ai-cost-calibration-gate
+  id: batch-177-personal-learning-ai-formal-adoption-implementation
   status: closed
   sourceStory: personal-learning-ai-experience
-  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-175-personal-learning-ai-cost-calibration-gate.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-175-personal-learning-ai-cost-calibration-gate.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-175-personal-learning-ai-cost-calibration-gate.md
-  branch: codex/batch-175-personal-learning-ai-cost-calibration-gate
+  planPath: docs/05-execution-logs/task-plans/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
+  branch: codex/batch-177-personal-learning-ai-formal-adoption-implementation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -293,17 +293,18 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-14"
-    readiness: pass_batch_175_pre_edit_readiness
+    readiness: pass_batch_177_pre_edit_readiness
     lint: pass
     typecheck: pass
-    unit: pass_251_files_926_tests
+    unit: pass_253_files_933_tests
     build: skipped_batch_175_no_env_secret_access
     e2e: pass_batch_169_existing_spec_1_test
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
-    preCommitHook: pass_batch_175_module_run_v2_pre_commit_hardening
-    moduleCloseout: pass_batch_175_module_run_v2_closeout_readiness
-    prePushHook: pass_batch_175_module_run_v2_pre_push_readiness
+    formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
+    preCommitHook: pass_batch_177_module_run_v2_pre_commit_hardening
+    moduleCloseout: pass_batch_177_module_run_v2_closeout_readiness
+    prePushHook: pass_batch_177_module_run_v2_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -319,8 +320,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch-175 is locally closed with docs-only cost calibration based on the batch-174 redacted DeepSeek usage summary
-    and public pricing lookup. No additional provider call, quota use, env/secret access, or provider configuration work
-    was performed. Batch-177 remains blocked until fresh approval names exact formal write targets, allowed files,
-    authorization/review workflow, rollback behavior, and whether schema/e2e/provider/env work is allowed.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-175-personal-learning-ai-cost-calibration-gate.md
+    Batch-177 first implementation slice is locally closed after implementing an admin-gated personal AI formal adoption
+    review gate. The slice adds a manual review API boundary and redacted audit evidence without formal question/paper
+    writes, schema/migration, provider calls, env/secret access, deploy/payment/external-service work, or package/lockfile
+    changes. Batch-178 remains blocked until fresh staging/provider/deploy readiness approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
