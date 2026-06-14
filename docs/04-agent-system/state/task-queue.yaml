@@ -13775,8 +13775,11 @@ tasks:
     seedCategory: repair_candidate
     taskKind: implementation_candidate
     moduleRunVersion: 2
-    status: pending
+    status: closed
     retryCount: 0
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
     dependencies:
       - unified-code-audit-findings-rollup-and-repair-queue-seeding
     sourceFindingIds:

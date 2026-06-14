@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-repair-student-experience-layering-mistake-book
-updatedAt: "2026-06-14T11:25:00-07:00"
+currentPhase: unified-repair-rag-knowledge-layering-retrieval-governance
+updatedAt: "2026-06-14T11:45:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
-  lastKnownOriginMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
+  lastKnownMasterSha: 0845081dc2f78759cb437e5b53bed56653c9d04b
+  lastKnownOriginMasterSha: 0845081dc2f78759cb437e5b53bed56653c9d04b
 currentTask:
-  id: unified-repair-student-experience-layering-mistake-book
+  id: unified-repair-rag-knowledge-layering-retrieval-governance
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-student-experience-layering-mistake-book.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-student-experience-layering-mistake-book.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-student-experience-layering-mistake-book.md
-  branch: codex/unified-repair-student-experience-layering-mistake-book
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+  branch: codex/unified-repair-rag-knowledge-layering-retrieval-governance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -329,6 +329,7 @@ qualityGates:
     unifiedRepairAuthSessionPersonalAuthBoundary: pass_scoped_red_green_auth_boundary_repair
     unifiedRepairQuestionPaperRestLayering: pass_scoped_red_green_rest_layering_repair
     unifiedRepairStudentExperienceLayeringMistakeBook: pass_scoped_red_green_student_experience_repair
+    unifiedRepairRagKnowledgeLayeringRetrievalGovernance: pass_scoped_red_green_rag_knowledge_repair
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -347,8 +348,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified repair student experience layering and mistake book scope is locally closed after scoped RED/GREEN repair,
-    evidence, audit review, lint, typecheck, and target unit validation. Continue only through local commit,
-    fast-forward merge to master, master-side validation, push origin/master, and merged short-branch cleanup under the
-    user's fresh instruction. Do not claim another unified-repair task until this closeout is complete.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-student-experience-layering-mistake-book.md
+    Unified repair RAG knowledge layering and retrieval governance is locally closed after scoped RED/GREEN repair,
+    evidence, audit review, lint, typecheck, target unit validation, Module Run v2 pre-commit hardening, and Module Run
+    v2 closeout readiness. Continue only through local commit, fast-forward merge to master, master-side validation,
+    push origin/master, and merged short-branch cleanup under the user's fresh instruction. Do not claim another
+    unified-repair task until this closeout is complete.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
