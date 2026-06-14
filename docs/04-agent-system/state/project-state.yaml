@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-repair-ai-provider-redaction-function-contract
-updatedAt: "2026-06-14T09:34:50-07:00"
+currentPhase: unified-repair-auth-session-personal-auth-boundary
+updatedAt: "2026-06-14T10:18:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
   lastKnownOriginMasterSha: 83d5f6c7eb03064bcc4f3495f806b866248c8c0f
 currentTask:
-  id: unified-repair-ai-provider-redaction-function-contract
+  id: unified-repair-auth-session-personal-auth-boundary
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-ai-provider-redaction-function-contract.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-ai-provider-redaction-function-contract.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-ai-provider-redaction-function-contract.md
-  branch: codex/unified-repair-ai-provider-redaction-function-contract
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
+  branch: codex/unified-repair-auth-session-personal-auth-boundary
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -326,6 +326,7 @@ qualityGates:
     unifiedBlockedGateProviderCheckpointGuard: pass_blocked_gate_guard
     unifiedCodeAuditFindingsRollupRepairQueueSeedingEntryCreation: pass_docs_only_pending_task_seed
     unifiedCodeAuditFindingsRollupRepairQueueSeeding: pass_docs_only_findings_rollup_and_repair_queue_seed
+    unifiedRepairAuthSessionPersonalAuthBoundary: pass_scoped_red_green_auth_boundary_repair
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -344,9 +345,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified repair AI provider redaction function contract is closed locally on its short branch after scoped AI
-    redaction/function-contract repair, evidence, audit review, and local commit. Stop here unless the user gives fresh
-    approval. Do not merge, push, delete the short branch, claim another unified-repair task, execute provider/model
-    requests, use quota, read or modify env/secret/provider configuration, run e2e, change schema/migration,
-    dependency/package/lockfile, deploy, payment, external-service, PR, force-push, or Cost Calibration work.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-ai-provider-redaction-function-contract.md
+    Unified repair auth session personal authorization boundary is closed locally after scoped RED/GREEN repair,
+    evidence, audit review, and validation. Continue only through local commit, fast-forward merge to master, push
+    origin/master, and merged short-branch cleanup under the user's fresh instruction. Do not claim another
+    unified-repair task until this closeout is complete.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md

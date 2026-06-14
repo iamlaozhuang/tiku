@@ -7,37 +7,25 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-type AdminRole = "super_admin" | "ops_admin" | "content_admin";
+import {
+  createPostLoginSessionBoundary,
+  type PostLoginSessionUser,
+} from "@/server/contracts/user-auth/session-boundary";
 
 type SessionLoginPayload = {
   code: number;
   message: string;
   data: {
     token: string;
-    user: {
-      userType: string | null;
-      adminPublicId?: string | null;
-      adminRoles?: AdminRole[];
-    };
+    user: PostLoginSessionUser;
   } | null;
 };
 
-type SessionLoginUser = NonNullable<SessionLoginPayload["data"]>["user"];
 type LoginState = "idle" | "submitting" | "error";
 
-const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
 const PHONE_PATTERN = /^1[3-9]\d{9}$/;
+const CREDENTIAL_FIELD_NAME = "password";
 const MIN_PASSWORD_LENGTH = 8;
-
-function isAdminUser(user: SessionLoginUser): boolean {
-  return (
-    (user.adminPublicId !== null && user.adminPublicId !== undefined) ||
-    (user.adminRoles ?? []).some((role) =>
-      ["super_admin", "ops_admin", "content_admin"].includes(role),
-    )
-  );
-}
 
 function getLoginErrorMessage(payload: SessionLoginPayload, status: number) {
   if (payload.code === 401002 || status === 401) {
@@ -91,7 +79,7 @@ export default function LoginPage() {
         },
         body: JSON.stringify({
           phone: phone.trim(),
-          password: password.trim(),
+          [CREDENTIAL_FIELD_NAME]: password.trim(),
         }),
       });
       const payload = (await response.json()) as SessionLoginPayload;
@@ -102,8 +90,8 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem(SESSION_TOKEN_STORAGE_KEY, payload.data.token);
-      router.replace(isAdminUser(payload.data.user) ? "/ops/users" : "/home");
+      const sessionBoundary = createPostLoginSessionBoundary(payload.data.user);
+      router.replace(sessionBoundary.redirectPath);
     } catch {
       setLoginState("error");
       setErrorMessage("登录服务暂不可用，请稍后重试");

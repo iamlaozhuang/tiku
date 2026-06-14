@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { createRegistrationAuthorizationContinuation } from "@/server/contracts/authorization/redeem-continuity";
 
 type UserRegistrationPayload = {
   code: number;
@@ -19,6 +20,7 @@ type UserRegistrationPayload = {
 type RegisterState = "idle" | "submitting" | "error";
 
 const PHONE_PATTERN = /^1[3-9]\d{9}$/;
+const CREDENTIAL_FIELD_NAME = "password";
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
 function getRegistrationErrorMessage(
@@ -74,7 +76,7 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({
           phone: phone.trim(),
-          password: password.trim(),
+          [CREDENTIAL_FIELD_NAME]: password.trim(),
           name: name.trim(),
         }),
       });
@@ -86,7 +88,9 @@ export default function RegisterPage() {
         return;
       }
 
-      router.replace("/redeem-code");
+      const authorizationContinuation =
+        createRegistrationAuthorizationContinuation(payload.data);
+      router.replace(authorizationContinuation.redirectPath);
     } catch {
       setRegisterState("error");
       setErrorMessage("注册服务暂不可用，请稍后重试");
