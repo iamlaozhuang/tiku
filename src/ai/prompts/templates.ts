@@ -1,8 +1,11 @@
-import type { AiFuncType } from "@/server/models/ai-rag";
+import {
+  normalizeAiFunctionContractValue,
+  type AiFunctionContractValue,
+} from "@/server/contracts/ai/function-contract";
 
 export type PromptTemplateDefinition = {
   promptTemplateKey: string;
-  aiFuncType: AiFuncType;
+  aiFuncType: AiFunctionContractValue;
   version: number;
   templateContent: string;
   templateHash: string;
@@ -13,7 +16,7 @@ export type PromptTemplateDefinition = {
 export const promptTemplateDefinitions: PromptTemplateDefinition[] = [
   {
     promptTemplateKey: "ai_scoring_v1",
-    aiFuncType: "scoring",
+    aiFuncType: normalizeAiFunctionContractValue("scoring"),
     version: 1,
     templateContent:
       "Score the student answer using the question, scoring points, standard answer, and authorized RAG context. Return only the approved structured scoring result.",
@@ -28,7 +31,7 @@ export const promptTemplateDefinitions: PromptTemplateDefinition[] = [
   },
   {
     promptTemplateKey: "ai_explanation_v1",
-    aiFuncType: "explanation",
+    aiFuncType: normalizeAiFunctionContractValue("explanation"),
     version: 1,
     templateContent:
       "Explain the question using the standard answer, teacher analysis, learner answer, and authorized RAG context. Do not fabricate citations.",
@@ -44,7 +47,7 @@ export const promptTemplateDefinitions: PromptTemplateDefinition[] = [
   },
   {
     promptTemplateKey: "ai_hint_v1",
-    aiFuncType: "hint",
+    aiFuncType: normalizeAiFunctionContractValue("hint"),
     version: 1,
     templateContent:
       "Give improvement guidance for the subjective answer without directly revealing the final answer. Use authorized RAG context only.",
@@ -78,10 +81,13 @@ export const promptTemplateDefinitions: PromptTemplateDefinition[] = [
   },
 ];
 
-export const promptTemplateKeysByFuncType: Record<AiFuncType, string> = {
-  scoring: "ai_scoring_v1",
-  explanation: "ai_explanation_v1",
-  hint: "ai_hint_v1",
+export const promptTemplateKeysByFuncType: Record<
+  AiFunctionContractValue,
+  string
+> = {
+  ai_scoring: "ai_scoring_v1",
+  ai_explanation: "ai_explanation_v1",
+  ai_hint: "ai_hint_v1",
   kn_recommendation: "kn_recommendation_v1",
   learning_suggestion: "learning_suggestion_v1",
 };

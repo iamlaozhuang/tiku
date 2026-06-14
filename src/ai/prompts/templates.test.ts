@@ -8,9 +8,9 @@ import {
 describe("Phase 5 prompt template definitions", () => {
   it("registers one versioned baseline template for each AI function", () => {
     expect(promptTemplateKeysByFuncType).toEqual({
-      scoring: "ai_scoring_v1",
-      explanation: "ai_explanation_v1",
-      hint: "ai_hint_v1",
+      ai_scoring: "ai_scoring_v1",
+      ai_explanation: "ai_explanation_v1",
+      ai_hint: "ai_hint_v1",
       kn_recommendation: "kn_recommendation_v1",
       learning_suggestion: "learning_suggestion_v1",
     });
@@ -28,19 +28,19 @@ describe("Phase 5 prompt template definitions", () => {
     ).toEqual([
       {
         key: "ai_scoring_v1",
-        aiFuncType: "scoring",
+        aiFuncType: "ai_scoring",
         version: 1,
         isActive: true,
       },
       {
         key: "ai_explanation_v1",
-        aiFuncType: "explanation",
+        aiFuncType: "ai_explanation",
         version: 1,
         isActive: true,
       },
       {
         key: "ai_hint_v1",
-        aiFuncType: "hint",
+        aiFuncType: "ai_hint",
         version: 1,
         isActive: true,
       },

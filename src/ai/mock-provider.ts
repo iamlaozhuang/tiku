@@ -1,4 +1,9 @@
 import type { ModelConfigSnapshot } from "@/server/models/ai-rag";
+import {
+  createBlockedProviderExecutionGate,
+  createRedactedProviderPayloadEnvelope,
+  type AiProviderExecutionGate,
+} from "@/server/contracts/ai/provider-redaction-contract";
 
 export type MockLearningSuggestionInput = {
   rawPrompt: string;
@@ -13,6 +18,7 @@ export type MockLearningSuggestionInput = {
 
 export type MockLearningSuggestionResult = {
   learningSuggestion: string;
+  providerExecutionGate?: AiProviderExecutionGate;
   providerRequestPayload: unknown;
   providerResponsePayload: unknown;
   promptTokenCount: number;
@@ -43,17 +49,11 @@ export function createMockAiProvider(): MockAiProvider {
 
       return {
         learningSuggestion,
-        providerRequestPayload: {
-          apiKey: "sk-real-secret",
-          model: input.modelConfigSnapshot.modelName,
-          prompt: input.rawPrompt,
-          answer: input.rawAnswer,
-          templateHash: input.promptTemplate.templateHash,
-        },
-        providerResponsePayload: {
-          output: learningSuggestion,
-          requestId: "mock-ai-request-dev-001",
-        },
+        providerExecutionGate: createBlockedProviderExecutionGate(),
+        providerRequestPayload:
+          createRedactedProviderPayloadEnvelope("provider_request"),
+        providerResponsePayload:
+          createRedactedProviderPayloadEnvelope("provider_response"),
         promptTokenCount,
         completionTokenCount,
         totalTokenCount: promptTokenCount + completionTokenCount,
