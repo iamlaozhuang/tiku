@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-advanced-auth-org-training-blocked-planning
-updatedAt: "2026-06-14T07:55:18-07:00"
+currentPhase: unified-advanced-ai-rag-quota-blocked-planning
+updatedAt: "2026-06-14T08:08:55-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: acdbce5f90062dceec0b5386b5444d77c0c3e2d0
-  lastKnownOriginMasterSha: acdbce5f90062dceec0b5386b5444d77c0c3e2d0
+  lastKnownMasterSha: 2b9823b787164d359313b7a52e5d9eda5be1de19
+  lastKnownOriginMasterSha: 2b9823b787164d359313b7a52e5d9eda5be1de19
 currentTask:
-  id: unified-advanced-auth-org-training-blocked-planning
+  id: unified-advanced-ai-rag-quota-blocked-planning
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
-  branch: codex/unified-advanced-auth-org-training-blocked-planning
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+  branch: codex/unified-advanced-ai-rag-quota-blocked-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -321,8 +321,9 @@ qualityGates:
     unifiedStandardMvpAiRagGovernedCodeAudit: pass_readonly_audit_with_findings
     unifiedStandardMvpAdminOpsLogsCodeAudit: pass_readonly_audit_with_findings
     unifiedAdvancedAuthOrgTrainingBlockedPlanning: pass_blocked_gate_planning
-    preCommitHook: pass_unified_advanced_auth_org_training_blocked_planning_pre_commit_hardening
-    moduleCloseout: pass_unified_advanced_auth_org_training_blocked_planning_closeout_readiness
+    unifiedAdvancedAiRagQuotaBlockedPlanning: pass_blocked_gate_planning
+    preCommitHook: pass_unified_advanced_ai_rag_quota_blocked_planning_pre_commit_hardening
+    moduleCloseout: pass_unified_advanced_ai_rag_quota_blocked_planning_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
 riskGates:
   requireHumanApproval:
@@ -339,13 +340,14 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified advanced auth/org/training blocked planning is closed locally on
-    codex/unified-advanced-auth-org-training-blocked-planning pending user-approved closeout. The planning output split
-    future gates for advanced authorization context, organization portal administration, organization
-    training lifecycle, employee training answer privacy, organization analytics summaries, and operations auth/quota
-    handoff. No source code was read or modified. The user approved local commit and fast-forward closeout for this task
-    only after all gates pass, then required stopping without claiming unified-advanced-ai-rag-quota-blocked-planning or
-    any follow-up task. Code audit, code fixes, implementation, schema/migration, provider/env, real provider/model
-    requests, quota use, e2e, dependency changes, deploy, payment, external-service, PR, force-push, follow-up task
-    claiming, raw employee answer access, privacy/export exceptions, and Cost Calibration work remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+    Unified advanced AI/RAG/quota blocked planning is closed locally on
+    codex/unified-advanced-ai-rag-quota-blocked-planning pending user-approved closeout. The planning output split
+    future gates for AI task lifecycle, personal AI generation, RAG/vector context, operations quota and ledger,
+    retention/log governance, provider staging execution approval, and formal content separation. No source code was
+    read or modified. The user approved local commit and fast-forward closeout for this task only after all gates pass,
+    then required stopping without claiming unified-future-non-goal-and-audit-only-guard or any follow-up task. Code
+    audit, code fixes, implementation, schema/migration, provider/env, real provider/model requests, vector/RAG
+    execution, quota use, e2e, dependency changes, deploy, payment, external-service, PR, force-push, follow-up task
+    claiming, formal adoption, raw prompt/provider response viewers, quota row access, and Cost Calibration work remain
+    blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md

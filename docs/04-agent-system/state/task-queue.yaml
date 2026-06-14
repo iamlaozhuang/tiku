@@ -12708,10 +12708,47 @@ tasks:
     seedCategory: advanced_blocked_candidate
     taskKind: blocked_gate_planning
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
     dependencies:
       - unified-standard-advanced-implementation-queue-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+    closeoutPolicy:
+      localCommit: approved_after_fresh_task_claim
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: fresh_user_approval_2026-06-14
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: fresh_user_approval_2026-06-14
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+        approvalSource: fresh_user_approval_2026-06-14
+    threadRolloverGate: no rollover requested; stop after the user-approved local commit, closeout, push, and reread.
+    automationHandoffPolicy: do not claim any task outside this user-approved task.
+    nextModuleRunCandidate: none authorized; follow-up tasks remain pending and blocked without fresh user instruction.
+    planningOutputs:
+      - outputId: ADV-AI-RAG-QUOTA-BLOCK-AI-TASK-001
+        summary: AI task lifecycle gate for status, retry, timeout, idempotency, quota precheck, worker, and redacted logs.
+      - outputId: ADV-AI-RAG-QUOTA-BLOCK-GENERATION-002
+        summary: Personal AI question and paper generation gate; generated content stays isolated from formal records.
+      - outputId: ADV-AI-RAG-QUOTA-BLOCK-RAG-003
+        summary: RAG and vector context gate for dependency, vector provider, storage, schema, execution, and redaction.
+      - outputId: ADV-AI-RAG-QUOTA-BLOCK-QUOTA-004
+        summary: Operations quota and ledger gate for quota package, manual grant, adjustment, and Cost Calibration.
+      - outputId: ADV-AI-RAG-QUOTA-BLOCK-RETENTION-005
+        summary: Retention and log governance gate for redacted logs, hidden/restore, snapshots, and hard-delete blocking.
+      - outputId: ADV-AI-RAG-QUOTA-BLOCK-PROVIDER-STAGING-006
+        summary: Provider staging execution approval gate; batch-178 and batch-180 remain non-executable gate evidence.
+      - outputId: ADV-AI-RAG-QUOTA-BLOCK-FORMAL-007
+        summary: Formal content separation gate for read-only sources, isolated outputs, and separately approved adoption.
     traceability:
       landingIds:
         - LAND-AI-SCORING-AND-GENERATION
@@ -12752,9 +12789,12 @@ tasks:
         - DELTA-RETENTION-LOG
         - DELTA-PROVIDER-STAGING-GATE
     humanApproval: >-
-      Seeded as a pending blocked planning task only. A future fresh user instruction is required before this task may
-      be claimed, and a separate approval is required before any provider call, model request, env/secret access,
-      dependency change, quota measurement, schema/migration, e2e, deploy, PR, merge, push, or follow-up execution.
+      Fresh user approval on 2026-06-14 authorized this blocked-gate planning task, one local independent commit, and
+      after all gates pass, fast-forward merge of codex/unified-advanced-ai-rag-quota-blocked-planning to master,
+      closeout and pre-push validation on master, push origin master, deletion of the merged short branch, rereading
+      state and queue, then stop. This entry does not approve code audit, code fixes, implementation, schema/migration,
+      provider/env, dependency changes, real provider/model requests, vector/RAG execution, quota use, e2e, deploy,
+      payment, external-service, PR, force-push, Cost Calibration, or follow-up execution.
     blockedGates:
       - provider call/model request
       - env/secret/provider configuration
@@ -12794,6 +12834,11 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-advanced-ai-rag-quota-blocked-planning
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-advanced-ai-rag-quota-blocked-planning
+    blockedRemainder:
+      - Code audit execution, code fixes, implementation, schema/migration, provider/env, real provider/model requests,
+        vector/RAG execution, quota use, dependency changes, e2e, deploy, payment, external-service, PR, force-push,
+        follow-up task claiming, formal adoption, raw prompt/provider response viewers, quota row access, and Cost
+        Calibration work remain blocked.
   - id: unified-future-non-goal-and-audit-only-guard
     title: Unified future non-goal and audit-only guard
     phase: unified-future-non-goal-and-audit-only-guard
