@@ -12577,10 +12577,45 @@ tasks:
     seedCategory: advanced_blocked_candidate
     taskKind: blocked_gate_planning
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
     dependencies:
       - unified-standard-advanced-implementation-queue-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+    closeoutPolicy:
+      localCommit: approved_after_fresh_task_claim
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: fresh_user_approval_2026-06-14
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: fresh_user_approval_2026-06-14
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+        approvalSource: fresh_user_approval_2026-06-14
+    threadRolloverGate: no rollover requested; stop after the user-approved local commit, closeout, push, and reread.
+    automationHandoffPolicy: do not claim any task outside this user-approved task.
+    nextModuleRunCandidate: none authorized; follow-up tasks remain pending and blocked without fresh user instruction.
+    planningOutputs:
+      - outputId: ADV-BLOCK-AUTH-001
+        summary: Authorization context gate for effectiveEdition, personal_auth, org_auth, auth_upgrade, and redeem_code.
+      - outputId: ADV-BLOCK-ORG-002
+        summary: Organization portal administration gate for scoped organization visibility and self-service separation.
+      - outputId: ADV-BLOCK-TRAINING-003
+        summary: Organization training lifecycle gate for draft, publish, unpublish, versioning, and formal separation.
+      - outputId: ADV-BLOCK-EMPLOYEE-004
+        summary: Employee training answer privacy gate for one-submit-per-version and raw answer access blocking.
+      - outputId: ADV-BLOCK-ANALYTICS-005
+        summary: Organization analytics summary gate for online summaries, privacy, and export/raw viewer blocking.
+      - outputId: ADV-BLOCK-OPS-006
+        summary: Operations authorization and quota handoff gate; quota/cost/provider execution remains unclaimed.
     traceability:
       landingIds:
         - LAND-AUTH-ACCOUNT-SESSION
@@ -12616,9 +12651,12 @@ tasks:
         - DELTA-ORG-TRAINING
         - DELTA-ORG-ANALYTICS
     humanApproval: >-
-      Seeded as a pending blocked planning task only. A future fresh user instruction is required before this task may
-      be claimed, and a separate approval is required before any implementation, schema/migration, privacy-sensitive raw
-      data access, e2e, deploy, PR, merge, push, or follow-up execution.
+      Fresh user approval on 2026-06-14 authorized this blocked-gate planning task, one local independent commit, and
+      after all gates pass, fast-forward merge of codex/unified-advanced-auth-org-training-blocked-planning to master,
+      closeout and pre-push validation on master, push origin master, deletion of the merged short branch, rereading
+      state and queue, then stop. This entry does not approve code audit, code fixes, implementation, schema/migration,
+      privacy-sensitive raw data access, e2e, provider/env, dependency changes, quota use, deploy, payment,
+      external-service, PR, force-push, Cost Calibration, or follow-up execution.
     blockedGates:
       - advanced auth context implementation
       - organization portal implementation
@@ -12658,6 +12696,10 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-advanced-auth-org-training-blocked-planning
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-advanced-auth-org-training-blocked-planning
+    blockedRemainder:
+      - Code audit execution, code fixes, implementation, schema/migration, provider/env, real provider/model requests,
+        quota use, dependency changes, e2e, deploy, payment, external-service, PR, force-push, follow-up task claiming,
+        raw employee answer access, privacy/export exceptions, and Cost Calibration work remain blocked.
   - id: unified-advanced-ai-rag-quota-blocked-planning
     title: Unified advanced AI RAG and quota blocked planning
     phase: unified-advanced-ai-rag-quota-blocked-planning

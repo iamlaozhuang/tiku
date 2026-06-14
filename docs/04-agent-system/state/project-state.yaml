@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-standard-mvp-admin-ops-logs-code-audit
-updatedAt: "2026-06-14T07:42:29-07:00"
+currentPhase: unified-advanced-auth-org-training-blocked-planning
+updatedAt: "2026-06-14T07:55:18-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: acdbce5f90062dceec0b5386b5444d77c0c3e2d0
   lastKnownOriginMasterSha: acdbce5f90062dceec0b5386b5444d77c0c3e2d0
 currentTask:
-  id: unified-standard-mvp-admin-ops-logs-code-audit
+  id: unified-advanced-auth-org-training-blocked-planning
   status: closed
   sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
-  branch: codex/unified-standard-mvp-admin-ops-logs-code-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+  branch: codex/unified-advanced-auth-org-training-blocked-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -320,8 +320,9 @@ qualityGates:
     unifiedStandardMvpStudentExperienceCodeAudit: pass_readonly_audit_with_findings
     unifiedStandardMvpAiRagGovernedCodeAudit: pass_readonly_audit_with_findings
     unifiedStandardMvpAdminOpsLogsCodeAudit: pass_readonly_audit_with_findings
-    preCommitHook: pass_unified_standard_mvp_admin_ops_logs_code_audit_pre_commit_hardening
-    moduleCloseout: pass_unified_standard_mvp_admin_ops_logs_code_audit_closeout_readiness
+    unifiedAdvancedAuthOrgTrainingBlockedPlanning: pass_blocked_gate_planning
+    preCommitHook: pass_unified_advanced_auth_org_training_blocked_planning_pre_commit_hardening
+    moduleCloseout: pass_unified_advanced_auth_org_training_blocked_planning_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
 riskGates:
   requireHumanApproval:
@@ -338,14 +339,13 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified standard MVP admin ops/logs read-only code audit is closed locally on
-    codex/unified-standard-mvp-admin-ops-logs-code-audit pending user-approved closeout. The audit recorded findings for
-    missing scoped admin log service layering, absent quota ledger surface, backend redaction and
-    retention controls not verifiable from scoped files, admin operations pages delegating out of scope,
-    provider/model-configuration mutations co-located with the admin log surface, and localStorage bearer-token use on
-    the admin log runtime. No source code was modified. The user approved local commit and fast-forward closeout for
-    this task only after all gates pass, then required stopping without claiming
-    unified-advanced-auth-org-training-blocked-planning or any follow-up task. Code fixes, implementation,
-    schema/migration, provider/env, real provider/model requests, quota use, e2e, dependency changes, deploy, payment,
-    external-service, PR, force-push, follow-up task claiming, and Cost Calibration work remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
+    Unified advanced auth/org/training blocked planning is closed locally on
+    codex/unified-advanced-auth-org-training-blocked-planning pending user-approved closeout. The planning output split
+    future gates for advanced authorization context, organization portal administration, organization
+    training lifecycle, employee training answer privacy, organization analytics summaries, and operations auth/quota
+    handoff. No source code was read or modified. The user approved local commit and fast-forward closeout for this task
+    only after all gates pass, then required stopping without claiming unified-advanced-ai-rag-quota-blocked-planning or
+    any follow-up task. Code audit, code fixes, implementation, schema/migration, provider/env, real provider/model
+    requests, quota use, e2e, dependency changes, deploy, payment, external-service, PR, force-push, follow-up task
+    claiming, raw employee answer access, privacy/export exceptions, and Cost Calibration work remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
