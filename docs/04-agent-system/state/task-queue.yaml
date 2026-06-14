@@ -10521,6 +10521,31 @@ tasks:
       `node scripts/ai/run-personal-ai-provider-smoke.mjs` with `--execute` and `TIKU_PROVIDER_SMOKE_APPROVED=1`.
       Raw prompt, raw provider payload, raw provider response, Authorization header, API key, secret, token, database URL,
       row data, and raw generated output must not be recorded.
+    humanApproval: >-
+      human approval: The user prompt on 2026-06-13 approved executing
+      batch-174-personal-learning-ai-local-provider-sandbox-smoke for exactly one local DeepSeek provider smoke.
+      Approved command:
+      `$env:TIKU_PROVIDER_SMOKE_APPROVED='1'; node scripts/ai/run-personal-ai-provider-smoke.mjs --provider
+      openai_compatible --provider-name deepseek --base-url https://api.deepseek.com --model deepseek-v4-flash
+      --env-key DEEPSEEK_API_KEY --max-requests 1 --timeout-ms 30000 --execute`. Approved boundaries: provider
+      `openai_compatible`, providerName `deepseek`, baseUrl `https://api.deepseek.com`, model `deepseek-v4-flash`,
+      max requests `1`, spend ceiling `$0.01`, timeout `30000ms`, process env read limited to `DEEPSEEK_API_KEY` value
+      existence and command consumption, and evidence limited to redacted summary fields. Raw prompt, provider payload,
+      raw provider response, raw generated output, Authorization header, token, secret, database URL, row data, `.env.*`
+      access, retries, Cost Calibration, formal generated-content writes, source/tests/e2e/schema/Drizzle/package/lockfile
+      edits, provider configuration edits, staging/prod/cloud/deploy/payment/external-service work, PR creation,
+      force-push, and more than one smoke request remain blocked.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
     seededByTask: batch-172-personal-learning-ai-next-stage-closure-and-seeding
     seededImplementationTask: true
     seededExecutionModule: personal-learning-ai
@@ -10529,11 +10554,12 @@ tasks:
     taskKind: blocked_gate
     moduleRunVersion: 2
     capabilities:
-      providerCall: blocked_without_task_approval
-      envSecret: blocked_without_task_approval
+      providerCall: approved_redacted_local_validation
+      envSecret: approved_process_env_key_for_single_smoke
       localE2EValidation: blocked_without_task_approval
       costCalibrationGate: blocked
-    status: blocked
+    status: closed
+    result: pass
     retryCount: 0
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
@@ -10554,9 +10580,17 @@ tasks:
       - playwright-report/**
       - test-results/**
     validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - if ($env:DEEPSEEK_API_KEY) { "DEEPSEEK_API_KEY is set" } else { "DEEPSEEK_API_KEY is missing" }
+      - $env:TIKU_PROVIDER_SMOKE_APPROVED='1'; node scripts/ai/run-personal-ai-provider-smoke.mjs --provider openai_compatible --provider-name deepseek --base-url https://api.deepseek.com --model deepseek-v4-flash --env-key DEEPSEEK_API_KEY --max-requests 1 --timeout-ms 30000 --execute
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md docs/05-execution-logs/evidence/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md docs/05-execution-logs/audits-reviews/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md
       - npm.cmd run lint
       - npm.cmd run typecheck
+      - npm.cmd run test:unit
       - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-174-personal-learning-ai-local-provider-sandbox-smoke
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-174-personal-learning-ai-local-provider-sandbox-smoke
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-174-personal-learning-ai-local-provider-sandbox-smoke
     evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md
   - id: batch-175-personal-learning-ai-cost-calibration-gate
