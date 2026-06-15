@@ -82,7 +82,7 @@ const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
 const copy = {
   title: "\u4e2a\u4eba AI \u5b66\u4e60",
   subtitle:
-    "\u4ece\u5b66\u5458\u7aef\u53d1\u8d77\u672c\u5730\u5408\u7ea6\u8bf7\u6c42\uff0c\u4ec5\u5c55\u793a\u6458\u8981\u548c\u516c\u5f00\u6807\u8bc6\u3002",
+    "\u4ece\u5b66\u5458\u7aef\u53d1\u8d77\u672c\u5730\u5408\u7ea6\u8bf7\u6c42\uff0c\u4ec5\u5c55\u793a\u8131\u654f\u6458\u8981\u548c\u72b6\u6001\u3002",
   emptyTitle: "\u5c1a\u672a\u63d0\u4ea4\u672c\u5730\u8bf7\u6c42",
   emptyDescription:
     "\u70b9\u51fb\u6309\u94ae\u540e\uff0c\u9875\u9762\u4f1a\u8bf7\u6c42\u672c\u5730 route contract \u5e76\u5448\u73b0\u8fd4\u56de\u6458\u8981\u3002",
@@ -201,10 +201,6 @@ function createPersonalAiGenerationRequestBody(
   };
 }
 
-function formatNullableText(value: string | null | undefined): string {
-  return value ?? "null";
-}
-
 async function fetchPersonalAiGenerationResultHistory(
   studentSessionValue: string,
 ): Promise<{
@@ -313,12 +309,6 @@ function StudentPersonalAiGenerationContractSummary({
         />
         <ContractField label="flowStatus" value={experience.flowStatus} />
         <ContractField
-          label="contextPublicId"
-          value={
-            experience.requestState.selectedContext.contextPublicId ?? "null"
-          }
-        />
-        <ContractField
           label="resultStatus"
           value={experience.resultState.status}
         />
@@ -329,22 +319,6 @@ function StudentPersonalAiGenerationContractSummary({
         <ContractField
           label="isFormalAdoptionBlocked"
           value={String(experience.resultState.isFormalAdoptionBlocked)}
-        />
-        <ContractField
-          label="taskPublicId"
-          value={resultReference.taskPublicId}
-        />
-        <ContractField
-          label="resultPublicId"
-          value={formatNullableText(
-            resultReference.resultReference.resultPublicId,
-          )}
-        />
-        <ContractField
-          label="aiCallLogPublicId"
-          value={formatNullableText(
-            resultReference.aiCallLogReference.aiCallLogPublicId,
-          )}
         />
         <ContractField
           label="evidenceStatus"
@@ -417,22 +391,10 @@ function StudentPersonalAiGenerationHistorySummary({
             className="border-border rounded-lg border px-3"
           >
             <dl>
-              <ContractField
-                label="requestPublicId"
-                value={historyRow.requestPublicId}
-              />
-              <ContractField
-                label="taskPublicId"
-                value={historyRow.taskPublicId}
-              />
               <ContractField label="status" value={historyRow.status} />
               <ContractField
                 label="requestedAt"
                 value={historyRow.requestedAt}
-              />
-              <ContractField
-                label="resultPublicId"
-                value={formatNullableText(historyRow.resultPublicId)}
               />
               <ContractField
                 label="evidenceStatus"
@@ -441,10 +403,6 @@ function StudentPersonalAiGenerationHistorySummary({
               <ContractField
                 label="citationCount"
                 value={String(historyRow.citationCount)}
-              />
-              <ContractField
-                label="aiCallLogPublicId"
-                value={formatNullableText(historyRow.aiCallLogPublicId)}
               />
               <ContractField
                 label="redactionStatus"
@@ -551,18 +509,6 @@ function StudentPersonalAiGenerationResultHistorySummary({
             className="border-border rounded-lg border px-3"
           >
             <dl>
-              <ContractField
-                label="resultPublicId"
-                value={resultRow.resultPublicId}
-              />
-              <ContractField
-                label="taskPublicId"
-                value={resultRow.taskPublicId}
-              />
-              <ContractField
-                label="requestPublicId"
-                value={resultRow.requestPublicId}
-              />
               <ContractField label="taskType" value={resultRow.taskType} />
               <ContractField label="status" value={resultRow.status} />
               <ContractField
@@ -584,12 +530,6 @@ function StudentPersonalAiGenerationResultHistorySummary({
               <ContractField
                 label="citationCount"
                 value={String(resultRow.evidenceReference.citationCount)}
-              />
-              <ContractField
-                label="aiCallLogPublicId"
-                value={formatNullableText(
-                  resultRow.evidenceReference.aiCallLogPublicId,
-                )}
               />
               <ContractField
                 label="formalAdoptionStatus"
@@ -705,18 +645,6 @@ function StudentPersonalAiGenerationResultDetailSummary({
           label="formalAdoptionWriteStatus"
           value={resultDetail.formalAdoptionWriteStatus}
         />
-        <ContractField
-          label="resultPublicId"
-          value={resultDetail.result.resultPublicId}
-        />
-        <ContractField
-          label="taskPublicId"
-          value={resultDetail.result.taskPublicId}
-        />
-        <ContractField
-          label="requestPublicId"
-          value={resultDetail.result.requestPublicId}
-        />
         <ContractField label="taskType" value={resultDetail.result.taskType} />
         <ContractField label="status" value={resultDetail.result.status} />
         <ContractField
@@ -746,12 +674,6 @@ function StudentPersonalAiGenerationResultDetailSummary({
         <ContractField
           label="citationCount"
           value={String(resultDetail.result.evidenceReference.citationCount)}
-        />
-        <ContractField
-          label="aiCallLogPublicId"
-          value={formatNullableText(
-            resultDetail.result.evidenceReference.aiCallLogPublicId,
-          )}
         />
         <ContractField
           label="formalAdoptionStatus"

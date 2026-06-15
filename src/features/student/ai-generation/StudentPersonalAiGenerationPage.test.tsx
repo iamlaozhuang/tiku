@@ -152,12 +152,21 @@ describe("StudentPersonalAiGenerationPage", () => {
       );
     });
     expect(
-      await screen.findByText("personal_ai_result_public_ui_501"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("blocked_without_follow_up_task"),
+      await screen.findByText("blocked_without_follow_up_task"),
     ).toBeInTheDocument();
     expect(screen.getByText("masked preview ui 501")).toBeInTheDocument();
+    expect(
+      screen.queryByText("personal_ai_result_public_ui_501"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("ai_generation_task_public_ui_501"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("personal_ai_request_public_ui_501"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("ai_call_log_public_ui_501"),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("local-session-token")).not.toBeInTheDocument();
   });
 
@@ -223,6 +232,18 @@ describe("StudentPersonalAiGenerationPage", () => {
       screen.getAllByText("blocked_without_follow_up_task").length,
     ).toBeGreaterThan(0);
     expect(screen.getByText("masked preview detail 501")).toBeInTheDocument();
+    expect(
+      screen.queryByText("personal_ai_result_public_ui_501"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("ai_generation_task_public_ui_501"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("personal_ai_request_public_ui_501"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("ai_call_log_public_ui_501"),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByText("DO_NOT_RENDER_PROVIDER_ECHO"),
     ).not.toBeInTheDocument();
@@ -300,7 +321,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("personal_ai_result_public_ui_501"),
-    ).toBeInTheDocument();
+      screen.queryByText("personal_ai_result_public_ui_501"),
+    ).not.toBeInTheDocument();
   });
 });

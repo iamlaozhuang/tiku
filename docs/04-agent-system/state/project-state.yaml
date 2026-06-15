@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-personal-ai-generation-result-public-id-display-policy-decision
-updatedAt: "2026-06-15T07:51:27-07:00"
+currentPhase: advanced-student-ai-generation-result-public-id-display-ux-redaction
+updatedAt: "2026-06-15T08:04:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d5d82b6f57ca2965f8b64724283e620ef10199fa
-  lastKnownOriginMasterSha: d5d82b6f57ca2965f8b64724283e620ef10199fa
+  lastKnownMasterSha: 2b49a6b106f3de44d1ecd40cc18ac801b0ec063f
+  lastKnownOriginMasterSha: 2b49a6b106f3de44d1ecd40cc18ac801b0ec063f
 currentTask:
-  id: advanced-personal-ai-generation-result-public-id-display-policy-decision
+  id: advanced-student-ai-generation-result-public-id-display-ux-redaction
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
-  branch: codex/advanced-personal-ai-generation-result-public-id-display-policy-decision
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+  branch: codex/advanced-student-ai-generation-result-public-id-display-ux-redaction
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -368,6 +368,7 @@ qualityGates:
     advancedPersonalAiGenerationResultPublicIdDisplayPolicyReadonlyAudit: pass_readonly_audit_with_public_id_policy_needs_recheck
     advancedNextImplementationQueueSeeding: pass_docs_only_seeded_public_id_policy_followups
     advancedPersonalAiGenerationResultPublicIdDisplayPolicyDecision: pass_docs_only_policy_decision_hide_public_id_text_by_default
+    advancedStudentAiGenerationResultPublicIdDisplayUxRedaction: pass_tdd_ui_public_id_text_redaction
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -386,11 +387,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-personal-ai-generation-result-public-id-display-policy-decision is closed. Decision: student-facing
-    advanced AI generation result history/detail UI should hide or collapse public identifier text lists by default,
-    while keeping public identifiers in DTOs and internal route mechanics for selected-detail access. The conditional
-    next task advanced-student-ai-generation-result-public-id-display-ux-redaction remains pending and requires fresh
-    user approval before execution. Repository, schema/migration, dependency, e2e/browser/dev-server, DB access,
-    provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment, external-service, raw prompt/raw answer/
-    provider payload, row/private data, formal adoption write, PR, and force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
+    advanced-student-ai-generation-result-public-id-display-ux-redaction is closed. Student-facing advanced AI
+    generation result history/detail UI no longer renders public identifier text lists by default, while preserving
+    internal selected resultPublicId route mechanics, redacted metadata, and formal adoption blocked semantics. Next
+    recommended action is a narrow readonly recheck of the public-id redaction flow after this merge, or a fresh
+    advanced queue seeding pass before selecting the next implementation task. Repository, schema/migration,
+    dependency, e2e/browser/dev-server, DB access, provider/env/secret, quota/cost, staging/prod/cloud, deploy,
+    payment, external-service, raw prompt/raw answer/provider payload, row/private data, formal adoption write, PR, and
+    force-push remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
