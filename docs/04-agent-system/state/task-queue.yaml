@@ -14923,7 +14923,8 @@ tasks:
     seedCategory: blocked_validation_recovery_decision
     taskKind: docs_only_session_policy_decision
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
     dependencies:
       - unified-post-repair-master-health-gap-audit
