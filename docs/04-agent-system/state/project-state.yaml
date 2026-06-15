@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
-updatedAt: "2026-06-15T07:34:20-07:00"
+currentPhase: advanced-next-implementation-queue-seeding
+updatedAt: "2026-06-15T07:41:23-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5b3c8b0a3cafe258fe5871a8d2329b2a04d3a370
-  lastKnownOriginMasterSha: 5b3c8b0a3cafe258fe5871a8d2329b2a04d3a370
+  lastKnownMasterSha: 07b990f92afad8d79ed1d311f1a69ab6416cd32e
+  lastKnownOriginMasterSha: 07b990f92afad8d79ed1d311f1a69ab6416cd32e
 currentTask:
-  id: advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
+  id: advanced-next-implementation-queue-seeding
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
-  branch: codex/advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding.md
+  branch: codex/advanced-next-implementation-queue-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -366,6 +366,7 @@ qualityGates:
     fixStudentAiGenerationResultDetailNotFoundState: pass_narrow_ui_not_found_state_fix
     advancedPersonalAiGenerationResultDetailFlowReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedPersonalAiGenerationResultPublicIdDisplayPolicyReadonlyAudit: pass_readonly_audit_with_public_id_policy_needs_recheck
+    advancedNextImplementationQueueSeeding: pass_docs_only_seeded_public_id_policy_followups
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -384,13 +385,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit is closed with a needs_recheck on
-    product/governance interpretation of public identifier text display. Current route/service/UI behavior uses
-    authorized contract public ids only, no numeric database ids, no raw/private/provider fields, and no copy/share
-    affordance, but the student UI still renders public identifier fields in authorized history/detail metadata.
-    Recommended next action is advanced-next-implementation-queue-seeding to seed a narrow follow-up decision or UX
-    redaction task plus the next safe advanced implementation candidates. Repository, schema/migration, dependency,
+    advanced-next-implementation-queue-seeding is closed and seeded two pending follow-ups:
+    advanced-personal-ai-generation-result-public-id-display-policy-decision first, then conditional
+    advanced-student-ai-generation-result-public-id-display-ux-redaction after policy decision and fresh user approval.
+    The historical fix-student-login-local-session-token task remains blocked_validation_failure and was not selected.
+    Recommended next action is the public id display policy decision task. Repository, schema/migration, dependency,
     e2e/browser/dev-server, DB access, provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment,
     external-service, raw prompt/raw answer/provider payload, row/private data, formal adoption write, PR, and force-push
     remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding.md
