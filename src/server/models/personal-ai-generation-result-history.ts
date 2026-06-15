@@ -14,6 +14,11 @@ export type PersonalAiGenerationResultHistoryQuery = {
   limit?: number;
 };
 
+export type PersonalAiGenerationResultDetailQuery = {
+  ownerPublicId: string;
+  resultPublicId: string;
+};
+
 export type PersonalAiGenerationResultHistoryContentVisibility =
   PersonalAiGenerationResultContentVisibility;
 

@@ -13,3 +13,11 @@ export type PersonalAiGenerationResultHistoryDto = {
   formalAdoptionWriteStatus: PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus;
   results: PersonalAiGenerationResultDto[];
 };
+
+export type PersonalAiGenerationResultDetailDto = {
+  runtimeStatus: PersonalAiGenerationResultHistoryRuntimeStatus;
+  contentVisibility: PersonalAiGenerationResultHistoryContentVisibility;
+  redactionStatus: PersonalAiGenerationResultHistoryRedactionStatus;
+  formalAdoptionWriteStatus: PersonalAiGenerationResultHistoryFormalAdoptionWriteStatus;
+  result: PersonalAiGenerationResultDto;
+};

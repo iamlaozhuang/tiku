@@ -3,19 +3,33 @@ import {
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
-import type { PersonalAiGenerationResultHistoryDto } from "../contracts/personal-ai-generation-result-history-contract";
+import type {
+  PersonalAiGenerationResultDetailDto,
+  PersonalAiGenerationResultHistoryDto,
+} from "../contracts/personal-ai-generation-result-history-contract";
 import type { PersonalAiGenerationResultDto } from "../contracts/personal-ai-generation-result-persistence-contract";
 import {
   comparePersonalAiGenerationResultHistoryItem,
+  type PersonalAiGenerationResultDetailQuery,
   type PersonalAiGenerationResultHistoryQuery,
 } from "../models/personal-ai-generation-result-history";
 import type { PersonalAiGenerationResultRepository } from "../repositories/personal-ai-generation-result-repository";
-import { normalizePersonalAiGenerationResultHistoryQuery } from "../validators/personal-ai-generation-result-history";
+import {
+  normalizePersonalAiGenerationResultDetailQuery,
+  normalizePersonalAiGenerationResultHistoryQuery,
+} from "../validators/personal-ai-generation-result-history";
 
 const INVALID_PERSONAL_AI_GENERATION_RESULT_HISTORY_INPUT_CODE = 400044;
+const INVALID_PERSONAL_AI_GENERATION_RESULT_DETAIL_INPUT_CODE = 400045;
+const RESULT_DETAIL_NOT_FOUND_CODE = 404045;
+const RESULT_DETAIL_NOT_FOUND_MESSAGE =
+  "Personal AI generation result detail was not found.";
 const RESULT_HISTORY_UNAVAILABLE_CODE = 500019;
 const RESULT_HISTORY_UNAVAILABLE_MESSAGE =
   "Personal AI generation result history is temporarily unavailable.";
+const RESULT_DETAIL_UNAVAILABLE_CODE = 500020;
+const RESULT_DETAIL_UNAVAILABLE_MESSAGE =
+  "Personal AI generation result detail is temporarily unavailable.";
 
 type PersonalAiGenerationResultHistoryRepository = Pick<
   PersonalAiGenerationResultRepository,
@@ -26,6 +40,9 @@ export type PersonalAiGenerationResultHistoryService = {
   listDraftResultHistory(
     input: unknown,
   ): Promise<ApiResponse<PersonalAiGenerationResultHistoryDto | null>>;
+  getDraftResultDetail(
+    input: unknown,
+  ): Promise<ApiResponse<PersonalAiGenerationResultDetailDto | null>>;
 };
 
 function mapPersonalAiGenerationResultHistoryItem(
@@ -71,6 +88,18 @@ function buildPersonalAiGenerationResultHistoryDto(
   };
 }
 
+function buildPersonalAiGenerationResultDetailDto(
+  result: PersonalAiGenerationResultDto,
+): PersonalAiGenerationResultDetailDto {
+  return {
+    runtimeStatus: "local_contract_only",
+    contentVisibility: "redacted_snapshot",
+    redactionStatus: "redacted",
+    formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+    result: mapPersonalAiGenerationResultHistoryItem(result),
+  };
+}
+
 async function listDraftResults(
   repository: PersonalAiGenerationResultHistoryRepository,
   query: PersonalAiGenerationResultHistoryQuery,
@@ -79,6 +108,21 @@ async function listDraftResults(
     ownerPublicId: query.ownerPublicId,
     limit: query.limit,
   });
+}
+
+async function findDraftResultDetail(
+  repository: PersonalAiGenerationResultHistoryRepository,
+  query: PersonalAiGenerationResultDetailQuery,
+): Promise<PersonalAiGenerationResultDto | null> {
+  const draftResults = await listDraftResults(repository, {
+    ownerPublicId: query.ownerPublicId,
+  });
+
+  return (
+    draftResults.find(
+      (draftResult) => draftResult.resultPublicId === query.resultPublicId,
+    ) ?? null
+  );
 }
 
 export function createPersonalAiGenerationResultHistoryService(
@@ -106,6 +150,38 @@ export function createPersonalAiGenerationResultHistoryService(
         return createErrorResponse(
           RESULT_HISTORY_UNAVAILABLE_CODE,
           RESULT_HISTORY_UNAVAILABLE_MESSAGE,
+        );
+      }
+    },
+    async getDraftResultDetail(input) {
+      const normalizedQuery =
+        normalizePersonalAiGenerationResultDetailQuery(input);
+
+      if (!normalizedQuery.success) {
+        return createErrorResponse(
+          INVALID_PERSONAL_AI_GENERATION_RESULT_DETAIL_INPUT_CODE,
+          normalizedQuery.message,
+        );
+      }
+
+      try {
+        const draftResult = await findDraftResultDetail(
+          repository,
+          normalizedQuery.value,
+        );
+
+        return draftResult === null
+          ? createErrorResponse(
+              RESULT_DETAIL_NOT_FOUND_CODE,
+              RESULT_DETAIL_NOT_FOUND_MESSAGE,
+            )
+          : createSuccessResponse(
+              buildPersonalAiGenerationResultDetailDto(draftResult),
+            );
+      } catch {
+        return createErrorResponse(
+          RESULT_DETAIL_UNAVAILABLE_CODE,
+          RESULT_DETAIL_UNAVAILABLE_MESSAGE,
         );
       }
     },

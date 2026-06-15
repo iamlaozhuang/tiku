@@ -1,4 +1,7 @@
-import type { PersonalAiGenerationResultHistoryQuery } from "../models/personal-ai-generation-result-history";
+import type {
+  PersonalAiGenerationResultDetailQuery,
+  PersonalAiGenerationResultHistoryQuery,
+} from "../models/personal-ai-generation-result-history";
 
 export type PersonalAiGenerationResultHistoryValidationResult =
   | {
@@ -10,8 +13,20 @@ export type PersonalAiGenerationResultHistoryValidationResult =
       message: string;
     };
 
+export type PersonalAiGenerationResultDetailValidationResult =
+  | {
+      success: true;
+      value: PersonalAiGenerationResultDetailQuery;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
 const INVALID_PERSONAL_AI_GENERATION_RESULT_HISTORY_INPUT_MESSAGE =
   "Invalid personal AI generation result history input.";
+const INVALID_PERSONAL_AI_GENERATION_RESULT_DETAIL_INPUT_MESSAGE =
+  "Invalid personal AI generation result detail input.";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -62,6 +77,35 @@ export function normalizePersonalAiGenerationResultHistoryQuery(
     value: {
       ownerPublicId,
       limit,
+    },
+  };
+}
+
+export function normalizePersonalAiGenerationResultDetailQuery(
+  input: unknown,
+): PersonalAiGenerationResultDetailValidationResult {
+  if (!isRecord(input)) {
+    return {
+      success: false,
+      message: INVALID_PERSONAL_AI_GENERATION_RESULT_DETAIL_INPUT_MESSAGE,
+    };
+  }
+
+  const ownerPublicId = normalizeRequiredText(input.ownerPublicId);
+  const resultPublicId = normalizeRequiredText(input.resultPublicId);
+
+  if (ownerPublicId === null || resultPublicId === null) {
+    return {
+      success: false,
+      message: INVALID_PERSONAL_AI_GENERATION_RESULT_DETAIL_INPUT_MESSAGE,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      ownerPublicId,
+      resultPublicId,
     },
   };
 }

@@ -133,6 +133,134 @@ describe("personal AI generation result history service", () => {
     expect(serializedResponse).not.toContain(omittedProviderPayloadFixture);
   });
 
+  it("returns one redacted detail row by owner-scoped public id", async () => {
+    const omittedGeneratedFixture = ["OMITTED", "DETAIL", "GENERATED"].join(
+      "-",
+    );
+    const generatedContentKey = ["generated", "Content"].join("");
+    const repository = createRepository([
+      createResult({
+        resultPublicId: "personal_ai_result_public_other",
+      }),
+      createResult({
+        resultPublicId: "personal_ai_result_public_detail",
+        [generatedContentKey]: omittedGeneratedFixture,
+      }),
+    ]);
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    const response = await service.getDraftResultDetail({
+      ownerPublicId: "student_public_200",
+      resultPublicId: "personal_ai_result_public_detail",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(response).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        runtimeStatus: "local_contract_only",
+        contentVisibility: "redacted_snapshot",
+        redactionStatus: "redacted",
+        formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+        result: {
+          resultPublicId: "personal_ai_result_public_detail",
+          taskPublicId: "ai_generation_task_public_200",
+          requestPublicId: "personal_ai_request_public_200",
+          taskType: "ai_question_generation",
+          status: "draft",
+          persistedAt: "2026-06-14T10:00:00.000Z",
+          contentReference: {
+            contentDigest: "sha256:content_200",
+            contentPreviewMasked: "masked preview 200",
+            contentVisibility: "redacted_snapshot",
+            redactionStatus: "redacted",
+          },
+          evidenceReference: {
+            evidenceStatus: "weak",
+            citationCount: 1,
+            aiCallLogPublicId: "ai_call_log_public_200",
+            redactionStatus: "redacted",
+          },
+          formalAdoption: {
+            isBlocked: true,
+            status: "blocked",
+          },
+        },
+      },
+    });
+    expect(repository.listDraftResults).toHaveBeenCalledWith({
+      ownerPublicId: "student_public_200",
+      limit: undefined,
+    });
+    expect(serializedResponse).not.toContain(generatedContentKey);
+    expect(serializedResponse).not.toContain(omittedGeneratedFixture);
+  });
+
+  it("returns not found when owner-scoped detail lookup misses", async () => {
+    const repository = createRepository([
+      createResult({
+        resultPublicId: "personal_ai_result_public_other",
+      }),
+    ]);
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    await expect(
+      service.getDraftResultDetail({
+        ownerPublicId: "student_public_200",
+        resultPublicId: "personal_ai_result_public_missing",
+      }),
+    ).resolves.toEqual({
+      code: 404045,
+      message: "Personal AI generation result detail was not found.",
+      data: null,
+    });
+    expect(repository.listDraftResults).toHaveBeenCalledWith({
+      ownerPublicId: "student_public_200",
+      limit: undefined,
+    });
+  });
+
+  it("rejects invalid detail input before touching the repository", async () => {
+    const repository = createRepository();
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    await expect(
+      service.getDraftResultDetail({
+        ownerPublicId: "student_public_200",
+        resultPublicId: "",
+      }),
+    ).resolves.toEqual({
+      code: 400045,
+      message: "Invalid personal AI generation result detail input.",
+      data: null,
+    });
+    expect(repository.listDraftResults).not.toHaveBeenCalled();
+  });
+
+  it("returns a standard error envelope when detail retrieval fails", async () => {
+    const repository = createRepository();
+    vi.mocked(repository.listDraftResults).mockRejectedValueOnce(
+      new Error("database stack with private detail rows"),
+    );
+    const service = createPersonalAiGenerationResultHistoryService(repository);
+
+    const response = await service.getDraftResultDetail({
+      ownerPublicId: "student_public_200",
+      resultPublicId: "personal_ai_result_public_detail",
+    });
+    const serializedResponse = JSON.stringify(response);
+
+    expect(response).toEqual({
+      code: 500020,
+      message:
+        "Personal AI generation result detail is temporarily unavailable.",
+      data: null,
+    });
+    expect(serializedResponse).not.toContain("database stack");
+    expect(serializedResponse).not.toContain("private detail rows");
+  });
+
   it("rejects invalid query input before touching the repository", async () => {
     const repository = createRepository();
     const service = createPersonalAiGenerationResultHistoryService(repository);
