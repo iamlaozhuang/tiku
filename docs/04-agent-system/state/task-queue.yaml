@@ -18978,3 +18978,161 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-contract-validation-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-contract-validation-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-contract-validation-readonly-recheck
+  - id: advanced-organization-training-answer-status-alignment-seeding
+    title: Advanced organization training answer status alignment seeding
+    phase: advanced-organization-training-answer-status-alignment-seeding
+    sourceStory: advanced-edition-organization-training
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-15T11:39:00-07:00"
+    closedAt: "2026-06-15T11:39:00-07:00"
+    dependencies:
+      - advanced-organization-training-contract-validation-readonly-recheck
+    humanApprovalBoundary: >-
+      User-approved docs/state-only seeding task. Scope is limited to converting the readonly recheck needs_recheck into
+      a pending narrow TDD implementation task. It must not modify product source, route, service, repository, mapper,
+      schema, DB, provider, UI, package, lockfile, scripts, or formal content write behavior.
+    humanApproval: >-
+      User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+      limited to task plan/evidence/audit creation, durable state updates, pending queue seed, declared local validation,
+      local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune.
+      Product implementation and all high-risk blocked gates remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/service/repository/API runtime changes
+      - formal content write
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/validators/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-answer-status-alignment-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-answer-status-alignment-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-answer-status-alignment-seeding
+  - id: advanced-organization-training-answer-status-alignment
+    title: Advanced organization training answer status alignment
+    phase: advanced-organization-training-answer-status-alignment
+    sourceStory: advanced-edition-organization-training
+    taskKind: local_contract_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-training-answer-status-alignment-seeding
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation limited to aligning
+      `organizationTrainingAnswerStatusValues` with the current organization training plan before any service, route,
+      repository, mapper, API runtime, or UI consumes the status union. Default path is to remove `not_started` from the
+      answer status union and add a scoped unit assertion for `in_progress`, `submitted`, and `read_only`. If
+      implementation discovers `not_started` is required, stop and report instead of expanding scope into requirements,
+      route, service, repository, mapper, schema, or UI work.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment.md
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/api/v1/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/server/contracts/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/mappers/**
+      - src/server/validators/organization-training.ts
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - route/service/repository/API runtime changes
+      - formal question/paper/practice/mock_exam/exam_report/mistake_book/answer_record writes
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: blocked_until_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/validators/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-answer-status-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-answer-status-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-answer-status-alignment
