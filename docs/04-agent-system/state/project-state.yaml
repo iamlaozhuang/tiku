@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage
-updatedAt: "2026-06-15T13:02:55-07:00"
+currentPhase: advanced-organization-training-subject-authorization-context-boundary-readonly-audit
+updatedAt: "2026-06-15T13:12:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 61e2f80fccdc56a31dd73f6a3bbd1beb847f9ae1
-  lastKnownOriginMasterSha: 61e2f80fccdc56a31dd73f6a3bbd1beb847f9ae1
+  lastKnownMasterSha: 103b800bd3241088469368ddae99668400735a8d
+  lastKnownOriginMasterSha: 103b800bd3241088469368ddae99668400735a8d
 currentTask:
-  id: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage
+  id: advanced-organization-training-subject-authorization-context-boundary-readonly-audit
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage.md
-  branch: codex/advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
+  branch: codex/advanced-organization-training-subject-authorization-context-boundary-readonly-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -394,9 +394,10 @@ qualityGates:
     advancedOrganizationTrainingDraftLifecycleServiceReadonlyRecheck: pass_readonly_recheck_with_level_mismatch_test_coverage_needs_recheck
     advancedOrganizationTrainingDraftLifecycleServiceLevelMismatchTestCoverageSeeding: pass_docs_only_seeded_level_mismatch_test_coverage_task
     advancedOrganizationTrainingDraftLifecycleServiceLevelMismatchTestCoverage: pass_tdd_service_level_mismatch_test_coverage
-    preCommitHook: pass_advanced_organization_training_draft_lifecycle_service_level_mismatch_test_coverage_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_draft_lifecycle_service_level_mismatch_test_coverage_closeout_readiness
-    prePushHook: pass_advanced_organization_training_draft_lifecycle_service_level_mismatch_test_coverage_pre_push_readiness
+    advancedOrganizationTrainingSubjectAuthorizationContextBoundaryReadonlyAudit: pass_with_subject_authorization_contract_needs_recheck
+    preCommitHook: pass_advanced_organization_training_subject_authorization_context_boundary_readonly_audit_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_subject_authorization_context_boundary_readonly_audit_closeout_readiness
+    prePushHook: pass_advanced_organization_training_subject_authorization_context_boundary_readonly_audit_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -412,8 +413,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage closed by adding explicit
-    service unit coverage for manual draft `level` authorization mismatch. Recommended next action is a narrow readonly
-    or planning task to decide whether `subject` belongs in EffectiveAuthorizationContextDto before broader organization
-    training lifecycle expansion.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage.md
+    advanced-organization-training-subject-authorization-context-boundary-readonly-audit closed with a confirmed subject
+    authorization boundary mismatch: requirements and organization training planning expect `subject` in content scope,
+    while EffectiveAuthorizationContextDto currently carries only `profession/level`. Recommended next action is
+    advanced-organization-training-subject-authorization-context-contract-decision before broader organization training
+    lifecycle expansion.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
