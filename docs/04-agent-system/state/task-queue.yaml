@@ -13181,6 +13181,172 @@ tasks:
       - payment/external-service
       - PR/force-push
       - Cost Calibration Gate
+  - id: audit-student-experience-unit-suite-timeout-unblock
+    title: Audit student experience unit suite timeout unblock
+    phase: audit-student-experience-unit-suite-timeout-unblock
+    sourceStory: master-health-baseline
+    taskKind: test_stability_unblock
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-audit-student-experience-unit-suite-timeout-unblock.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-audit-student-experience-unit-suite-timeout-unblock.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-audit-student-experience-unit-suite-timeout-unblock.md
+    lastFailurePath: null
+    dependencies:
+      - fix-student-login-session-policy-consistency
+    humanApprovalBoundary: >-
+      User approved the assistant recommendation on 2026-06-14 local time to resolve the blocked full-unit gate on the
+      existing short branch before claiming task 2. This approval permits read-only diagnosis of the student-experience
+      full-suite timeout and minimal test-stability edits to
+      tests/unit/student-experience/student-experience-layering-mistake-book.test.ts if evidence supports them. Product
+      implementation edits, PR, force-push, deploy, provider/env/secret, schema/migration, dependency/package/lockfile,
+      e2e, payment/external-service, and Cost Calibration Gate work remain blocked.
+    evidenceRedactionBoundary: no token value, Authorization header, password, secret, database URL, row data, provider payload, model response, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - src/app/(auth)/login/page.tsx
+      - tests/unit/student-login-ui.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - src/**
+      - tests/unit/**
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-student-login-session-policy-consistency
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-student-login-session-policy-consistency
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-student-login-session-policy-consistency
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    blockedGates:
+      - product student-experience implementation edits
+      - provider/model request/quota use
+      - env/secret/provider configuration
+      - schema/migration
+      - dependency/package/lockfile
+      - e2e
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: fix-student-login-session-policy-consistency
+    title: Fix student login session policy consistency
+    phase: fix-student-login-session-policy-consistency
+    sourceStory: master-health-baseline
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-student-login-session-policy-consistency.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-session-policy-consistency.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-student-login-session-policy-consistency.md
+    lastFailurePath: null
+    dependencies: []
+    humanApprovalBoundary: >-
+      User explicitly approved Option A on 2026-06-14 local time: preserve server_session and
+      exposeBearerTokenToClient false, do not persist bearer tokens to login-page localStorage, repair the conflicting
+      student login UI test expectation, and close out through local commit, fast-forward merge to master, push
+      origin/master, and merged short-branch cleanup if gates pass. PR, force-push, deploy, provider/env/secret,
+      schema/migration, dependency/package/lockfile, e2e, payment/external-service, and Cost Calibration Gate work
+      remain blocked.
+    evidenceRedactionBoundary: no token value, Authorization header, password, secret, database URL, row data, provider payload, model response, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/app/(auth)/login/page.tsx
+      - tests/unit/student-login-ui.test.ts
+      - tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - src/server/contracts/user-auth/session-boundary.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/server/contracts/user-auth/session-boundary.ts
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts tests/unit/auth/session-personal-auth-boundary.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-student-login-session-policy-consistency
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-student-login-session-policy-consistency
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-student-login-session-policy-consistency
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    blockedGates:
+      - auth/session security boundary change beyond Option A
+      - modifying src/server/contracts/user-auth/session-boundary.ts
+      - provider/model request/quota use
+      - env/secret/provider configuration
+      - schema/migration
+      - dependency/package/lockfile
+      - e2e
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
   - id: unified-code-audit-findings-rollup-and-repair-queue-seeding
     title: Unified code audit findings rollup and repair queue seeding
     phase: unified-code-audit-findings-rollup-and-repair-queue-seeding
@@ -14124,6 +14290,78 @@ tasks:
     blockedGates:
       - executing without future fresh user instruction
       - code fixes/implementation
+      - provider/model request/quota use
+      - env/secret/provider configuration
+      - schema/migration
+      - dependency/package/lockfile
+      - e2e
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: fix-student-login-local-session-token
+    title: Fix student login local session token persistence
+    phase: fix-student-login-local-session-token
+    sourceStory: master-health-baseline
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: blocked_validation_failure
+    result: blocked_validation_failure
+    retryCount: 0
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-student-login-local-session-token.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-local-session-token.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-student-login-local-session-token.md
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-local-session-token.md
+    dependencies: []
+    humanApprovalBoundary: >-
+      User approved executing the recommended scoped master-health bugfix. Execution stopped at full unit validation
+      failure because the targeted student-login token persistence expectation conflicts with the existing
+      server-session auth boundary test. No commit, merge, push, PR, force-push, e2e, provider, env/secret,
+      schema/migration, dependency, deploy, payment, external-service, or Cost Calibration work is approved from this
+      failed attempt.
+    evidenceRedactionBoundary: no token value, Authorization header, password, secret, database URL, row data, provider payload, model response, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-14-fix-student-login-local-session-token.md
+      - docs/05-execution-logs/evidence/2026-06-14-fix-student-login-local-session-token.md
+      - docs/05-execution-logs/audits-reviews/2026-06-14-fix-student-login-local-session-token.md
+      - src/app/(auth)/login/page.tsx
+      - tests/unit/student-login-ui.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - src/**
+      - tests/unit/**
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-login-ui.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - npm.cmd run test:unit -- tests/unit/auth/session-personal-auth-boundary.test.ts tests/unit/student-experience/student-experience-layering-mistake-book.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-student-login-local-session-token
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-student-login-local-session-token
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-student-login-local-session-token
+    blockedGates:
+      - full unit validation failure
+      - auth/session security boundary change without fresh decision
+      - modifying tests/unit/auth/session-personal-auth-boundary.test.ts without fresh decision
       - provider/model request/quota use
       - env/secret/provider configuration
       - schema/migration

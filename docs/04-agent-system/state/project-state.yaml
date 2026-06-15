@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-repair-standard-advanced-ai-generation-boundary-guard
-updatedAt: "2026-06-14T11:48:35-07:00"
+currentPhase: fix-student-login-session-policy-consistency
+updatedAt: "2026-06-14T18:04:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 55231ac1c8d50cd8c7d9b8f9c3d967d64e481ad7
-  lastKnownOriginMasterSha: 55231ac1c8d50cd8c7d9b8f9c3d967d64e481ad7
+  lastKnownMasterSha: dc2c14e77d93049cb748c615fa20ee249c3a73f6
+  lastKnownOriginMasterSha: dc2c14e77d93049cb748c615fa20ee249c3a73f6
 currentTask:
-  id: unified-repair-standard-advanced-ai-generation-boundary-guard
+  id: fix-student-login-session-policy-consistency
   status: closed
-  sourceStory: unified-standard-advanced-audit-campaign
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
-  branch: codex/unified-repair-standard-advanced-ai-generation-boundary-guard
+  sourceStory: master-health-baseline
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-student-login-session-policy-consistency.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-session-policy-consistency.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-student-login-session-policy-consistency.md
+  branch: codex/fix-student-login-local-session-token
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -334,6 +334,9 @@ qualityGates:
     unifiedRepairQuotaLedgerBlockedGatePlanning: pass_docs_only_quota_ledger_blocked_gate_planning
     unifiedRepairOrganizationAuthLayeringLifecycle: pass_scoped_red_green_organization_auth_repair
     unifiedRepairStandardAdvancedAiGenerationBoundaryGuard: pass_docs_only_edition_boundary_guard
+    fixStudentLoginLocalSessionToken: blocked_validation_failure_conflicting_session_persistence_tests
+    fixStudentLoginSessionPolicyConsistency: pass_after_student_experience_timeout_unblock
+    auditStudentExperienceUnitSuiteTimeoutUnblock: pass_test_stability_unblock
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -352,9 +355,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Unified repair standard/advanced AI generation boundary guard is locally closed after docs-only RED/GREEN boundary
-    planning, evidence, audit review, lint, typecheck, Module Run v2 pre-commit hardening, and Module Run v2 closeout
-    readiness. Continue only through local commit, fast-forward merge to master, master-side validation, push
-    origin/master, and merged short-branch cleanup under the user's fresh instruction. After cleanup, no pending
-    dependency-satisfied unified-repair-* task remains unless a later task is seeded.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
+    fix-student-login-session-policy-consistency has passed targeted tests, lint, typecheck, and full unit after the
+    approved student-experience timeout unblock. Continue only through Module Run v2 readiness gates, local commit,
+    fast-forward merge to master, master-side validation, push origin/master, and merged short-branch cleanup before
+    claiming task 2.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-session-policy-consistency.md

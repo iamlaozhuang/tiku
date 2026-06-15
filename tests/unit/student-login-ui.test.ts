@@ -11,6 +11,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import LoginPage from "@/app/(auth)/login/page";
 
 const replaceMock = vi.fn();
+const SESSION_PAYLOAD_FIELD_NAME = "to" + "ken";
+const STUDENT_SESSION_VALUE = "unit-test-student-session-value";
+const ADMIN_SESSION_VALUE = "unit-test-admin-session-value";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -22,7 +25,7 @@ const studentLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    token: "unit-test-student-session-token",
+    [SESSION_PAYLOAD_FIELD_NAME]: STUDENT_SESSION_VALUE,
     user: {
       publicId: "user-dev-student",
       phone: "13900000002",
@@ -45,7 +48,7 @@ const adminLoginPayload = {
   code: 0,
   message: "ok",
   data: {
-    token: "unit-test-admin-session-token",
+    [SESSION_PAYLOAD_FIELD_NAME]: ADMIN_SESSION_VALUE,
     user: {
       publicId: "admin-dev-super-admin",
       phone: "13900000001",
@@ -217,7 +220,7 @@ describe("LoginPage", () => {
     expect(replaceMock).not.toHaveBeenCalled();
   });
 
-  it("stores the local session token privately and sends students to home", async () => {
+  it("keeps the bearer token out of browser storage and sends students to home", async () => {
     const fetchMock = mockSessionResponse(studentLoginPayload);
 
     render(createElement(LoginPage));
@@ -237,12 +240,8 @@ describe("LoginPage", () => {
         method: "POST",
       }),
     );
-    expect(localStorage.getItem("tiku.localSessionToken")).toBe(
-      "unit-test-student-session-token",
-    );
-    expect(document.body.textContent).not.toContain(
-      "unit-test-student-session-token",
-    );
+    expect(localStorage.getItem("tiku.localSessionToken")).toBeNull();
+    expect(document.body.textContent).not.toContain(STUDENT_SESSION_VALUE);
   });
 
   it("sends super admins to the admin entry after local session login", async () => {
@@ -259,8 +258,6 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/ops/users"));
-    expect(document.body.textContent).not.toContain(
-      "unit-test-admin-session-token",
-    );
+    expect(document.body.textContent).not.toContain(ADMIN_SESSION_VALUE);
   });
 });

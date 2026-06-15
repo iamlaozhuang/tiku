@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const workspaceRoot = process.cwd();
+const STUDENT_EXPERIENCE_LAYERING_TEST_TIMEOUT_MS = 15000;
 
 function resolveAllowedSource(sourcePath: string) {
   return join(workspaceRoot, sourcePath);
@@ -29,114 +30,118 @@ function createRouteContext(publicId: string) {
 }
 
 describe("unified repair student experience layering and mistake book scope", () => {
-  it("routes student APIs through the scoped student-experience layer", async () => {
-    const practiceRouteSource = readAllowedSource(
-      "src/app/api/v1/practices/route.ts",
-    );
-    const mockExamRouteSource = readAllowedSource(
-      "src/app/api/v1/mock-exams/route.ts",
-    );
-    const examReportRouteSource = readAllowedSource(
-      "src/app/api/v1/exam-reports/route.ts",
-    );
-    const mistakeBookRouteSource = readAllowedSource(
-      "src/app/api/v1/mistake-books/route.ts",
-    );
-    const routeHandlersSourcePath = expectAllowedSourceExists(
-      "src/server/services/student-experience/route-handlers.ts",
-    );
+  it(
+    "routes student APIs through the scoped student-experience layer",
+    async () => {
+      const practiceRouteSource = readAllowedSource(
+        "src/app/api/v1/practices/route.ts",
+      );
+      const mockExamRouteSource = readAllowedSource(
+        "src/app/api/v1/mock-exams/route.ts",
+      );
+      const examReportRouteSource = readAllowedSource(
+        "src/app/api/v1/exam-reports/route.ts",
+      );
+      const mistakeBookRouteSource = readAllowedSource(
+        "src/app/api/v1/mistake-books/route.ts",
+      );
+      const routeHandlersSourcePath = expectAllowedSourceExists(
+        "src/server/services/student-experience/route-handlers.ts",
+      );
 
-    expect(practiceRouteSource).toContain(
-      "createStudentExperienceRouteHandlers",
-    );
-    expect(practiceRouteSource).toContain(
-      "studentExperienceRouteHandlers.practices.collection.POST",
-    );
-    expect(mockExamRouteSource).toContain(
-      "studentExperienceRouteHandlers.mockExams.collection.POST",
-    );
-    expect(examReportRouteSource).toContain(
-      "studentExperienceRouteHandlers.examReports.collection.GET",
-    );
-    expect(mistakeBookRouteSource).toContain(
-      "studentExperienceRouteHandlers.mistakeBooks.collection.GET",
-    );
+      expect(practiceRouteSource).toContain(
+        "createStudentExperienceRouteHandlers",
+      );
+      expect(practiceRouteSource).toContain(
+        "studentExperienceRouteHandlers.practices.collection.POST",
+      );
+      expect(mockExamRouteSource).toContain(
+        "studentExperienceRouteHandlers.mockExams.collection.POST",
+      );
+      expect(examReportRouteSource).toContain(
+        "studentExperienceRouteHandlers.examReports.collection.GET",
+      );
+      expect(mistakeBookRouteSource).toContain(
+        "studentExperienceRouteHandlers.mistakeBooks.collection.GET",
+      );
 
-    const { createStudentExperienceRouteHandlers } = await import(
-      pathToFileURL(routeHandlersSourcePath).href
-    );
-    const handlers = createStudentExperienceRouteHandlers({
-      repository: {
-        async listMistakeBooks() {
-          return {
-            mistakeBooks: [
-              {
-                isFavorite: false,
-                isQuestionDisabled: true,
-                isRemoved: false,
-                latestWrongAt: "2026-06-14T18:10:00.000Z",
-                masteredAt: null,
-                mistakeBookSource: "wrong_answer",
-                mistakeBookStatus: "unmastered",
-                publicId: "mistake-book-public-001",
-                questionPublicId: "question-public-001",
-                questionType: "single_choice",
-                wrongCount: 2,
+      const { createStudentExperienceRouteHandlers } = await import(
+        pathToFileURL(routeHandlersSourcePath).href
+      );
+      const handlers = createStudentExperienceRouteHandlers({
+        repository: {
+          async listMistakeBooks() {
+            return {
+              mistakeBooks: [
+                {
+                  isFavorite: false,
+                  isQuestionDisabled: true,
+                  isRemoved: false,
+                  latestWrongAt: "2026-06-14T18:10:00.000Z",
+                  masteredAt: null,
+                  mistakeBookSource: "wrong_answer",
+                  mistakeBookStatus: "unmastered",
+                  publicId: "mistake-book-public-001",
+                  questionPublicId: "question-public-001",
+                  questionType: "single_choice",
+                  wrongCount: 2,
+                },
+              ],
+              pagination: {
+                page: 1,
+                pageSize: 10,
+                sortBy: "latestWrongAt",
+                sortOrder: "desc",
+                total: 1,
               },
-            ],
-            pagination: {
-              page: 1,
-              pageSize: 10,
-              sortBy: "latestWrongAt",
-              sortOrder: "desc",
-              total: 1,
-            },
-          };
-        },
-      },
-      resolveUserContext: async () => ({
-        userPublicId: "user-public-001",
-      }),
-    });
-
-    const response = await handlers.mistakeBooks.collection.GET(
-      new Request("http://localhost/api/v1/mistake-books?page=1&pageSize=10"),
-    );
-    const responseBody = await response.json();
-
-    expect(responseBody).toEqual({
-      code: 0,
-      data: {
-        mistakeBooks: [
-          {
-            isFavorite: false,
-            isQuestionDisabled: true,
-            isRemoved: false,
-            latestWrongAt: "2026-06-14T18:10:00.000Z",
-            masteredAt: null,
-            mistakeBookScope: "objective_question",
-            mistakeBookSource: "wrong_answer",
-            mistakeBookStatus: "unmastered",
-            publicId: "mistake-book-public-001",
-            questionPublicId: "question-public-001",
-            questionType: "single_choice",
-            wrongCount: 2,
+            };
           },
-        ],
-      },
-      message: "ok",
-      pagination: {
-        page: 1,
-        pageSize: 10,
-        sortBy: "latestWrongAt",
-        sortOrder: "desc",
-        total: 1,
-      },
-    });
-    expect(JSON.stringify(responseBody)).not.toContain('"id"');
-    expect(JSON.stringify(responseBody)).not.toContain("rawAnswerText");
-    expect(JSON.stringify(responseBody)).not.toContain("answerRecordId");
-  });
+        },
+        resolveUserContext: async () => ({
+          userPublicId: "user-public-001",
+        }),
+      });
+
+      const response = await handlers.mistakeBooks.collection.GET(
+        new Request("http://localhost/api/v1/mistake-books?page=1&pageSize=10"),
+      );
+      const responseBody = await response.json();
+
+      expect(responseBody).toEqual({
+        code: 0,
+        data: {
+          mistakeBooks: [
+            {
+              isFavorite: false,
+              isQuestionDisabled: true,
+              isRemoved: false,
+              latestWrongAt: "2026-06-14T18:10:00.000Z",
+              masteredAt: null,
+              mistakeBookScope: "objective_question",
+              mistakeBookSource: "wrong_answer",
+              mistakeBookStatus: "unmastered",
+              publicId: "mistake-book-public-001",
+              questionPublicId: "question-public-001",
+              questionType: "single_choice",
+              wrongCount: 2,
+            },
+          ],
+        },
+        message: "ok",
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          sortBy: "latestWrongAt",
+          sortOrder: "desc",
+          total: 1,
+        },
+      });
+      expect(JSON.stringify(responseBody)).not.toContain('"id"');
+      expect(JSON.stringify(responseBody)).not.toContain("rawAnswerText");
+      expect(JSON.stringify(responseBody)).not.toContain("answerRecordId");
+    },
+    STUDENT_EXPERIENCE_LAYERING_TEST_TIMEOUT_MS,
+  );
 
   it("keeps mistake_book entries objective-question scoped", async () => {
     const validatorSourcePath = expectAllowedSourceExists(
