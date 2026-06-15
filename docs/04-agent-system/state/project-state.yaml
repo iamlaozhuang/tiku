@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: unified-post-repair-next-queue-seeding
-updatedAt: "2026-06-14T21:31:26-07:00"
+currentPhase: unified-post-repair-master-health-gap-audit
+updatedAt: "2026-06-14T21:54:37-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e29517bbb9bec0ff345c3e96ad74b03c75c9faf3
-  lastKnownOriginMasterSha: e29517bbb9bec0ff345c3e96ad74b03c75c9faf3
+  lastKnownMasterSha: 8727b4af43ee7c5130a76bc9b929ff0a0524d632
+  lastKnownOriginMasterSha: 8727b4af43ee7c5130a76bc9b929ff0a0524d632
 currentTask:
-  id: unified-post-repair-next-queue-seeding
+  id: unified-post-repair-master-health-gap-audit
   status: closed
   sourceStory: post-repair-queue-recovery
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-unified-post-repair-next-queue-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-next-queue-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-next-queue-seeding.md
-  branch: codex/unified-post-repair-next-queue-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-unified-post-repair-master-health-gap-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-master-health-gap-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-master-health-gap-audit.md
+  branch: codex/unified-post-repair-master-health-gap-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -344,6 +344,7 @@ qualityGates:
     fixAiMockProviderSecretLikePayloadShape: pass_local_validation_module_gates
     auditStudentExperienceUnitSuiteTimeout: pass_no_timeout_reproduced_full_unit
     unifiedPostRepairNextQueueSeeding: pass_docs_only_next_queue_seed
+    unifiedPostRepairMasterHealthGapAudit: pass_docs_only_readonly_gap_audit
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -362,9 +363,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    The nine repair/planning candidates are closed and should not be re-claimed. The next seeded serial task is
-    unified-post-repair-master-health-gap-audit, followed by fix-student-login-session-policy-decision and
-    phase-22-post-repair-local-acceptance-reaudit-planning. Claiming any seeded task still requires fresh instruction
-    and must preserve provider, env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR,
-    force-push, and Cost Calibration Gate blocks.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-next-queue-seeding.md
+    After this docs-only/read-only gap audit closes, the next seeded serial task is
+    fix-student-login-session-policy-decision, followed by phase-22-post-repair-local-acceptance-reaudit-planning.
+    Claiming the next task still requires the current branch to be committed, fast-forward merged to master, validated
+    on master, pushed to origin/master, cleaned up, fetched with prune, and confirmed clean/aligned. Provider,
+    env/secret, schema/migration, dependency, e2e/browser verification, deploy, payment, external-service, PR,
+    force-push, and Cost Calibration Gate blocks remain in force.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-master-health-gap-audit.md

@@ -14853,7 +14853,8 @@ tasks:
     seedCategory: post_repair_gap_audit
     taskKind: docs_only_readonly_gap_audit
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
     dependencies:
       - unified-post-repair-next-queue-seeding
