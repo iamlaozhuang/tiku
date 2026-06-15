@@ -18626,3 +18626,324 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck
+  - id: advanced-next-implementation-queue-seeding-post-model-config-redaction
+    title: Advanced next implementation queue seeding after model-config redaction
+    phase: advanced-next-implementation-queue-seeding-post-model-config-redaction
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: docs_only_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-15T10:50:16-07:00"
+    closedAt: "2026-06-15T10:54:15-07:00"
+    dependencies:
+      - advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck
+    humanApprovalBoundary: >-
+      User explicitly approved executing the recommended docs-only queue seeding after
+      advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck. Scope is limited to project state,
+      task queue, task plan, evidence, and audit review. It may seed future pending advanced tasks, but it must not
+      implement product code, modify route/service/repository/schema/provider behavior, access DB, or expose public
+      identifier value lists, row data, private data, raw prompts, raw answers, provider payloads, secrets, or tokens.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+    readonlyFiles:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - public identifier value list exposure
+      - row/private data exposure
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption target write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-auth-service.test.ts" "src/server/services/employee-account-service.test.ts" "src/server/services/personal-ai-generation-result-reference-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-next-implementation-queue-seeding-post-model-config-redaction
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-next-implementation-queue-seeding-post-model-config-redaction
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-next-implementation-queue-seeding-post-model-config-redaction
+  - id: advanced-organization-training-boundary-readonly-audit
+    title: Advanced organization training boundary readonly audit
+    phase: advanced-organization-training-boundary-readonly-audit
+    sourceStory: advanced-edition-organization-training
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-next-implementation-queue-seeding-post-model-config-redaction
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is readonly audit of current organization training
+      boundaries against advanced MVP requirements: organization authorization, employee context, formal content
+      isolation, employee answer privacy, ADR-002 layering expectations, and blocked provider/schema/DB gates.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+    readonlyFiles:
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - src/server/services/organization-auth-service.ts
+      - src/server/services/organization-auth-route.ts
+      - src/server/services/employee-account-service.ts
+      - src/server/validators/ai-generation-task-request.ts
+      - src/server/services/personal-ai-generation-result-reference-service.ts
+      - src/server/services/personal-ai-generation-request-flow-service.ts
+      - src/server/services/personal-ai-generation-request-route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal content write
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: blocked_until_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-auth-service.test.ts" "src/server/services/employee-account-service.test.ts" "src/server/services/personal-ai-generation-result-reference-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-boundary-readonly-audit
+  - id: advanced-organization-training-contract-validation-scaffold
+    title: Advanced organization training contract and validation scaffold
+    phase: advanced-organization-training-contract-validation-scaffold
+    sourceStory: advanced-edition-organization-training
+    taskKind: local_contract_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: blocked_until_fresh_user_approval
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-training-boundary-readonly-audit
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation limited to organization
+      training contract/model/validator/test files. It may define DTOs, statuses, first-release question type allowlist,
+      publish confirmation validation, takedown reason validation, and copy-to-new-draft validation. It must not create
+      repository, route, service, schema, DB, provider, UI, package, lockfile, or formal content write behavior.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/api/v1/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/server/repositories/**
+      - src/server/services/**
+      - src/server/mappers/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - implementation outside contract/model/validator/test files
+      - route/service/repository/API runtime changes
+      - formal question/paper/practice/mock_exam/exam_report/mistake_book/answer_record writes
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: blocked_until_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/validators/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-contract-validation-scaffold
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-contract-validation-scaffold
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-contract-validation-scaffold
+  - id: advanced-organization-training-contract-validation-readonly-recheck
+    title: Advanced organization training contract and validation readonly recheck
+    phase: advanced-organization-training-contract-validation-readonly-recheck
+    sourceStory: advanced-edition-organization-training
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-training-contract-validation-scaffold
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is readonly recheck after the contract/validator
+      scaffold to confirm DTO naming, nullability, redaction, first-release question type validation, formal content
+      isolation, ADR-002 readiness, and blocked gate preservation.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+    readonlyFiles:
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/service/repository/API runtime changes
+      - formal content write
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: blocked_until_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/validators/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-contract-validation-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-contract-validation-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-contract-validation-readonly-recheck
