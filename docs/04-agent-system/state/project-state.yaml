@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
-updatedAt: "2026-06-15T08:33:21-07:00"
+currentPhase: advanced-student-ai-generation-request-history-public-id-redaction-test-coverage
+updatedAt: "2026-06-15T08:44:48-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 96e7dc7a1c5a8cbcb0420724cff7e0f3b577c95d
   lastKnownOriginMasterSha: 96e7dc7a1c5a8cbcb0420724cff7e0f3b577c95d
 currentTask:
-  id: advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+  id: advanced-student-ai-generation-request-history-public-id-redaction-test-coverage
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
-  branch: codex/advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-test-coverage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-test-coverage.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-test-coverage.md
+  branch: codex/advanced-student-ai-generation-request-history-public-id-redaction-test-coverage
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -372,6 +372,7 @@ qualityGates:
     advancedStudentAiGenerationResultPublicIdDisplayUxRedactionReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedNextImplementationQueueSeedingPostPublicIdRedaction: pass_docs_only_seeded_two_readonly_followups
     advancedStudentAiGenerationRequestHistoryPublicIdRedactionReadonlyAudit: pass_readonly_audit_with_test_coverage_needs_recheck
+    advancedStudentAiGenerationRequestHistoryPublicIdRedactionTestCoverage: pass_narrow_ui_test_coverage
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -390,12 +391,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit is closed. Source audit found the
-    request history UI does not render public identifier ContractField rows, but the student page unit test currently
-    uses an empty request history fixture and therefore does not explicitly guard request-history publicId text
-    redaction. Recommended next action is a narrow TDD task to add explicit request-history publicId redaction UI test
-    coverage before continuing to advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.
+    advanced-student-ai-generation-request-history-public-id-redaction-test-coverage is closed. Continue next with
+    advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit as a docs-only/source-readonly audit
+    of the formal adoption review boundary.
     Repository, schema/migration, dependency, e2e/browser/dev-server, DB access, provider/env/secret, quota/cost,
     staging/prod/cloud, deploy, payment, external-service, raw prompt/raw answer/provider payload, row/private data,
     formal adoption write, PR, and force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-test-coverage.md

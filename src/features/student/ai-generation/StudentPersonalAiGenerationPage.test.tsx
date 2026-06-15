@@ -56,6 +56,22 @@ function createResultHistoryPayload() {
   };
 }
 
+function createRequestHistoryPayload() {
+  return [
+    {
+      requestPublicId: "personal_ai_request_history_public_ui_701",
+      taskPublicId: "ai_generation_task_history_public_ui_701",
+      status: "succeeded",
+      requestedAt: "2026-06-14T09:00:00.000Z",
+      resultPublicId: "personal_ai_result_history_public_ui_701",
+      evidenceStatus: "weak",
+      citationCount: 1,
+      aiCallLogPublicId: "ai_call_log_history_public_ui_701",
+      redactionStatus: "redacted",
+    },
+  ];
+}
+
 function createResultDetailPayload(
   unsafeEchoFields: Record<string, string> = {},
 ) {
@@ -166,6 +182,47 @@ describe("StudentPersonalAiGenerationPage", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByText("ai_call_log_public_ui_501"),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("local-session-token")).not.toBeInTheDocument();
+  });
+
+  it("renders request history metadata without public identifier text", async () => {
+    studentRuntimeApiMock.fetchPersonalAiGenerationRequestHistory.mockResolvedValue(
+      {
+        code: 0,
+        message: "ok",
+        data: createRequestHistoryPayload(),
+      },
+    );
+    studentRuntimeApiMock.fetchStudentApi.mockResolvedValue({
+      code: 0,
+      message: "ok",
+      data: createResultHistoryPayload(),
+    });
+
+    render(<StudentPersonalAiGenerationPage />);
+
+    await waitFor(() => {
+      expect(
+        studentRuntimeApiMock.fetchPersonalAiGenerationRequestHistory,
+      ).toHaveBeenCalledWith("local-session-token");
+    });
+    expect(
+      await screen.findByText("2026-06-14T09:00:00.000Z"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("succeeded")).toBeInTheDocument();
+    expect(screen.getByText("weak")).toBeInTheDocument();
+    expect(
+      screen.queryByText("personal_ai_request_history_public_ui_701"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("ai_generation_task_history_public_ui_701"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("personal_ai_result_history_public_ui_701"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("ai_call_log_history_public_ui_701"),
     ).not.toBeInTheDocument();
     expect(screen.queryByText("local-session-token")).not.toBeInTheDocument();
   });
