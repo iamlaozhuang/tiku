@@ -18,6 +18,7 @@ import {
 } from "@/features/student/studentRuntimeApi";
 import type { PersonalAiGenerationLocalBrowserExperienceDto } from "@/server/contracts/personal-ai-generation-local-browser-experience-contract";
 import type { PersonalAiGenerationRequestHistoryDto } from "@/server/contracts/personal-ai-generation-request-history-contract";
+import type { PersonalAiGenerationResultHistoryDto } from "@/server/contracts/personal-ai-generation-result-history-contract";
 import type { PersonalAiGenerationFuncType } from "@/server/models/personal-ai-generation-request";
 
 type StudentPersonalAiGenerationPageState =
@@ -91,6 +92,12 @@ const copy = {
   historyErrorTitle: "\u5386\u53f2\u8bf7\u6c42\u6682\u4e0d\u53ef\u7528",
   historyUnauthorizedTitle:
     "\u767b\u5f55\u540e\u67e5\u770b\u8bf7\u6c42\u5386\u53f2",
+  resultHistoryTitle: "\u8fd1\u671f AI \u7ed3\u679c\u5386\u53f2",
+  resultHistoryEmptyTitle: "\u6682\u65e0\u5386\u53f2\u7ed3\u679c",
+  resultHistoryLoadingTitle: "\u7ed3\u679c\u5386\u53f2\u540c\u6b65\u4e2d",
+  resultHistoryErrorTitle: "\u7ed3\u679c\u5386\u53f2\u6682\u4e0d\u53ef\u7528",
+  resultHistoryUnauthorizedTitle:
+    "\u767b\u5f55\u540e\u67e5\u770b\u7ed3\u679c\u5386\u53f2",
 };
 
 const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft =
@@ -178,6 +185,22 @@ function createPersonalAiGenerationRequestBody(
 
 function formatNullableText(value: string | null | undefined): string {
   return value ?? "null";
+}
+
+async function fetchPersonalAiGenerationResultHistory(
+  studentSessionValue: string,
+): Promise<{
+  code: number;
+  message: string;
+  data: PersonalAiGenerationResultHistoryDto | null;
+}> {
+  return fetchStudentApi<PersonalAiGenerationResultHistoryDto>(
+    "/api/v1/personal-ai-generation-results",
+    studentSessionValue,
+    {
+      method: "GET",
+    },
+  );
 }
 
 function StudentPersonalAiGenerationStateMessage({
@@ -412,6 +435,145 @@ function StudentPersonalAiGenerationHistorySummary({
   );
 }
 
+function StudentPersonalAiGenerationResultHistorySummary({
+  resultHistoryState,
+  resultHistory,
+}: {
+  resultHistoryState: StudentPersonalAiGenerationHistoryState;
+  resultHistory: PersonalAiGenerationResultHistoryDto | null;
+}) {
+  function renderResultHistoryBody() {
+    if (resultHistoryState === "loading") {
+      return (
+        <div className="flex items-center gap-3 py-3">
+          <Loader2
+            className="text-brand-primary size-5 animate-spin"
+            aria-hidden="true"
+          />
+          <p className="text-text-primary text-sm font-medium">
+            {copy.resultHistoryLoadingTitle}
+          </p>
+        </div>
+      );
+    }
+
+    if (resultHistoryState === "unauthorized") {
+      return (
+        <p className="text-text-secondary border-border rounded-lg border border-dashed px-3 py-3 text-sm">
+          {copy.resultHistoryUnauthorizedTitle}
+        </p>
+      );
+    }
+
+    if (resultHistoryState === "error") {
+      return (
+        <p className="text-warning bg-warning/10 rounded-lg px-3 py-3 text-sm font-medium">
+          {copy.resultHistoryErrorTitle}
+        </p>
+      );
+    }
+
+    if (resultHistory === null || resultHistory.results.length === 0) {
+      return (
+        <p className="text-text-secondary border-border rounded-lg border border-dashed px-3 py-3 text-sm">
+          {copy.resultHistoryEmptyTitle}
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        <dl className="border-border rounded-lg border px-3">
+          <ContractField
+            label="runtimeStatus"
+            value={resultHistory.runtimeStatus}
+          />
+          <ContractField
+            label="contentVisibility"
+            value={resultHistory.contentVisibility}
+          />
+          <ContractField
+            label="redactionStatus"
+            value={resultHistory.redactionStatus}
+          />
+          <ContractField
+            label="formalAdoptionWriteStatus"
+            value={resultHistory.formalAdoptionWriteStatus}
+          />
+        </dl>
+
+        {resultHistory.results.map((resultRow) => (
+          <article
+            key={resultRow.resultPublicId}
+            className="border-border rounded-lg border px-3"
+          >
+            <dl>
+              <ContractField
+                label="resultPublicId"
+                value={resultRow.resultPublicId}
+              />
+              <ContractField
+                label="taskPublicId"
+                value={resultRow.taskPublicId}
+              />
+              <ContractField
+                label="requestPublicId"
+                value={resultRow.requestPublicId}
+              />
+              <ContractField label="taskType" value={resultRow.taskType} />
+              <ContractField label="status" value={resultRow.status} />
+              <ContractField
+                label="persistedAt"
+                value={resultRow.persistedAt}
+              />
+              <ContractField
+                label="contentDigest"
+                value={resultRow.contentReference.contentDigest}
+              />
+              <ContractField
+                label="contentPreviewMasked"
+                value={resultRow.contentReference.contentPreviewMasked}
+              />
+              <ContractField
+                label="evidenceStatus"
+                value={resultRow.evidenceReference.evidenceStatus}
+              />
+              <ContractField
+                label="citationCount"
+                value={String(resultRow.evidenceReference.citationCount)}
+              />
+              <ContractField
+                label="aiCallLogPublicId"
+                value={formatNullableText(
+                  resultRow.evidenceReference.aiCallLogPublicId,
+                )}
+              />
+              <ContractField
+                label="formalAdoptionStatus"
+                value={resultRow.formalAdoption.status}
+              />
+            </dl>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <section className="border-border bg-surface rounded-xl border p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="bg-secondary text-secondary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+          <History className="size-4" aria-hidden="true" />
+        </div>
+        <h2 className="font-heading text-text-primary text-base font-semibold">
+          {copy.resultHistoryTitle}
+        </h2>
+      </div>
+      {renderResultHistoryBody()}
+    </section>
+  );
+}
+
 export function StudentPersonalAiGenerationPage() {
   const [hasSessionToken, setHasSessionToken] = useState(
     readHasStudentSessionToken,
@@ -428,6 +590,12 @@ export function StudentPersonalAiGenerationPage() {
     );
   const [requestHistory, setRequestHistory] =
     useState<PersonalAiGenerationRequestHistoryDto>([]);
+  const [resultHistoryState, setResultHistoryState] =
+    useState<StudentPersonalAiGenerationHistoryState>(
+      hasSessionToken ? "loading" : "unauthorized",
+    );
+  const [resultHistory, setResultHistory] =
+    useState<PersonalAiGenerationResultHistoryDto | null>(null);
 
   useEffect(() => {
     const storedSessionValue = getStoredStudentSessionToken();
@@ -450,8 +618,11 @@ export function StudentPersonalAiGenerationPage() {
 
         if (isStudentUnauthorizedResponse(historyResponse)) {
           setHasSessionToken(false);
+          setPageState("unauthorized");
           setHistoryState("unauthorized");
           setRequestHistory([]);
+          setResultHistoryState("unauthorized");
+          setResultHistory(null);
           return;
         }
 
@@ -471,7 +642,45 @@ export function StudentPersonalAiGenerationPage() {
       }
     }
 
+    async function fetchInitialResultHistory() {
+      try {
+        const historyResponse =
+          await fetchPersonalAiGenerationResultHistory(storedSessionToken);
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (isStudentUnauthorizedResponse(historyResponse)) {
+          setHasSessionToken(false);
+          setPageState("unauthorized");
+          setHistoryState("unauthorized");
+          setRequestHistory([]);
+          setResultHistoryState("unauthorized");
+          setResultHistory(null);
+          return;
+        }
+
+        if (historyResponse.code !== 0 || historyResponse.data === null) {
+          setResultHistoryState("error");
+          setResultHistory(null);
+          return;
+        }
+
+        setResultHistory(historyResponse.data);
+        setResultHistoryState(
+          historyResponse.data.results.length === 0 ? "empty" : "ready",
+        );
+      } catch {
+        if (!isCancelled) {
+          setResultHistoryState("error");
+          setResultHistory(null);
+        }
+      }
+    }
+
     void fetchInitialRequestHistory();
+    void fetchInitialResultHistory();
 
     return () => {
       isCancelled = true;
@@ -486,6 +695,8 @@ export function StudentPersonalAiGenerationPage() {
       setPageState("unauthorized");
       setHistoryState("unauthorized");
       setRequestHistory([]);
+      setResultHistoryState("unauthorized");
+      setResultHistory(null);
       return;
     }
 
@@ -501,6 +712,8 @@ export function StudentPersonalAiGenerationPage() {
         setPageState("unauthorized");
         setHistoryState("unauthorized");
         setRequestHistory([]);
+        setResultHistoryState("unauthorized");
+        setResultHistory(null);
         return;
       }
 
@@ -508,6 +721,8 @@ export function StudentPersonalAiGenerationPage() {
         setPageState("error");
         setHistoryState("error");
         setRequestHistory([]);
+        setResultHistoryState("error");
+        setResultHistory(null);
         return;
       }
 
@@ -515,6 +730,8 @@ export function StudentPersonalAiGenerationPage() {
         setPageState("unauthorized");
         setHistoryState("unauthorized");
         setRequestHistory([]);
+        setResultHistoryState("unauthorized");
+        setResultHistory(null);
         return;
       }
 
@@ -541,6 +758,8 @@ export function StudentPersonalAiGenerationPage() {
         setPageState("unauthorized");
         setHistoryState("unauthorized");
         setRequestHistory([]);
+        setResultHistoryState("unauthorized");
+        setResultHistory(null);
         return;
       }
 
@@ -548,12 +767,15 @@ export function StudentPersonalAiGenerationPage() {
         setPageState("error");
         setHistoryState("error");
         setRequestHistory([]);
+        setResultHistoryState("error");
+        setResultHistory(null);
         return;
       }
 
       setExperience(response.data);
       setPageState("ready");
       setHistoryState("loading");
+      setResultHistoryState("loading");
 
       try {
         const historyResponse =
@@ -564,6 +786,8 @@ export function StudentPersonalAiGenerationPage() {
           setPageState("unauthorized");
           setHistoryState("unauthorized");
           setRequestHistory([]);
+          setResultHistoryState("unauthorized");
+          setResultHistory(null);
           return;
         }
 
@@ -579,10 +803,44 @@ export function StudentPersonalAiGenerationPage() {
         setHistoryState("error");
         setRequestHistory([]);
       }
+
+      try {
+        const resultHistoryResponse =
+          await fetchPersonalAiGenerationResultHistory(storedSessionValue);
+
+        if (isStudentUnauthorizedResponse(resultHistoryResponse)) {
+          setHasSessionToken(false);
+          setPageState("unauthorized");
+          setHistoryState("unauthorized");
+          setRequestHistory([]);
+          setResultHistoryState("unauthorized");
+          setResultHistory(null);
+          return;
+        }
+
+        if (
+          resultHistoryResponse.code !== 0 ||
+          resultHistoryResponse.data === null
+        ) {
+          setResultHistoryState("error");
+          setResultHistory(null);
+          return;
+        }
+
+        setResultHistory(resultHistoryResponse.data);
+        setResultHistoryState(
+          resultHistoryResponse.data.results.length === 0 ? "empty" : "ready",
+        );
+      } catch {
+        setResultHistoryState("error");
+        setResultHistory(null);
+      }
     } catch {
       setPageState("error");
       setHistoryState("error");
       setRequestHistory([]);
+      setResultHistoryState("error");
+      setResultHistory(null);
     }
   }
 
@@ -659,6 +917,11 @@ export function StudentPersonalAiGenerationPage() {
       <StudentPersonalAiGenerationHistorySummary
         historyState={historyState}
         historyRows={requestHistory}
+      />
+
+      <StudentPersonalAiGenerationResultHistorySummary
+        resultHistoryState={resultHistoryState}
+        resultHistory={resultHistory}
       />
     </section>
   );

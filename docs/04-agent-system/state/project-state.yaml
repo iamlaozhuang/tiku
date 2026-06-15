@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-personal-ai-generation-result-readonly-route
-updatedAt: "2026-06-15T05:19:35-07:00"
+currentPhase: advanced-student-ai-generation-result-history-ui
+updatedAt: "2026-06-15T05:29:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2d644182e96697198f6ba5d6a326e272864b015a
-  lastKnownOriginMasterSha: 2d644182e96697198f6ba5d6a326e272864b015a
+  lastKnownMasterSha: 2283a3b5c371d0537a3b5da77ca2d3d257b3aa12
+  lastKnownOriginMasterSha: 2283a3b5c371d0537a3b5da77ca2d3d257b3aa12
 currentTask:
-  id: advanced-personal-ai-generation-result-readonly-route
+  id: advanced-student-ai-generation-result-history-ui
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-readonly-route.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-readonly-route.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-readonly-route.md
-  branch: codex/advanced-personal-ai-generation-result-readonly-route
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-result-history-ui.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-history-ui.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-history-ui.md
+  branch: codex/advanced-student-ai-generation-result-history-ui
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -358,6 +358,7 @@ qualityGates:
     advancedCurrentMasterStateHandoffRefresh: pass_docs_state_serial_queue_seed
     advancedPersonalAiGenerationResultRedactedReadModelService: pass_redacted_read_model_service_tdd
     advancedPersonalAiGenerationResultReadonlyRoute: pass_readonly_route_tdd
+    advancedStudentAiGenerationResultHistoryUi: pass_component_result_history_ui_tdd
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -376,11 +377,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Advanced personal AI generation result readonly route is closed on branch
-    codex/advanced-personal-ai-generation-result-readonly-route. It added a session-owned readonly GET route over the
-    approved redacted result history service and exported /api/v1/personal-ai-generation-results GET with focused unit
-    coverage. Real DB access during tests, provider/model execution, env/secret, schema/migration, dependency,
-    e2e/browser/dev-server, quota/cost, staging/prod/cloud/deploy/payment/external-service, formal adoption write, raw
-    prompt/raw answer/provider payload, raw audit log/AI call log viewer, and authorization-model changes remain blocked.
-    Next serial task after merge/push/cleanup is advanced-student-ai-generation-result-history-ui.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-readonly-route.md
+    The approved four-task serial advanced batch is closed after the student result history UI task is merged and pushed.
+    The student AI generation page now reads the redacted personal AI generation result history route through the existing
+    student runtime API helper and renders loading, empty, error, unauthorized, and ready states without raw provider
+    payloads or formal adoption writes. Browser/dev-server/e2e, real DB access, provider/model execution, env/secret,
+    schema/migration, dependency, quota/cost, staging/prod/cloud/deploy/payment, external-service, raw prompt/raw answer,
+    raw audit log/AI call log viewer, and authorization-model changes remain blocked. Next recommended action is a
+    read-only advanced-current-head-implementation-readiness-code-audit on a clean master aligned with origin/master
+    before choosing any further advanced implementation task.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-history-ui.md
