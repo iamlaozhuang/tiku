@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-ai-mock-provider-secret-like-payload-shape
-updatedAt: "2026-06-14T19:16:05-07:00"
+currentPhase: audit-student-experience-unit-suite-timeout
+updatedAt: "2026-06-14T19:29:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f028f0ad126e6662a561119ed9b983418c9a86ec
-  lastKnownOriginMasterSha: f028f0ad126e6662a561119ed9b983418c9a86ec
+  lastKnownMasterSha: b7f96fca3baaa4f460c2b1f02f2c44dc7ac4cadd
+  lastKnownOriginMasterSha: b7f96fca3baaa4f460c2b1f02f2c44dc7ac4cadd
 currentTask:
-  id: fix-ai-mock-provider-secret-like-payload-shape
+  id: audit-student-experience-unit-suite-timeout
   status: closed
   sourceStory: current-state-checkpoint-and-implementation-audit
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
-  branch: codex/fix-ai-mock-provider-secret-like-payload-shape
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-audit-student-experience-unit-suite-timeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-audit-student-experience-unit-suite-timeout.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-audit-student-experience-unit-suite-timeout.md
+  branch: codex/audit-student-experience-unit-suite-timeout
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -341,6 +341,7 @@ qualityGates:
     fixPersonalAiGenerationUniqueRequestIdentifiers: pass_local_validation_module_gates
     fixPersonalAiGenerationPersistenceFailureSemantics: pass_local_validation_module_gates
     fixAiMockProviderSecretLikePayloadShape: pass_local_validation_module_gates
+    auditStudentExperienceUnitSuiteTimeout: pass_no_timeout_reproduced_full_unit
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -359,8 +360,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    fix-ai-mock-provider-secret-like-payload-shape has passed RED/GREEN, targeted AI/redaction test, lint, typecheck,
-    and full unit. Continue only through Module Run v2 readiness gates, local commit, fast-forward merge to master,
-    master-side validation, push origin/master, and merged short-branch cleanup before claiming
-    audit-student-experience-unit-suite-timeout.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
+    audit-student-experience-unit-suite-timeout did not reproduce the historical student-experience full-suite timeout.
+    Continue only through Module Run v2 readiness gates, local commit, fast-forward merge to master, master-side
+    validation, push origin/master, and merged short-branch cleanup. No next task is claimed.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-audit-student-experience-unit-suite-timeout.md
