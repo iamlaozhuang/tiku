@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-subject-authorization-context-boundary-readonly-audit
-updatedAt: "2026-06-15T13:12:59-07:00"
+currentPhase: advanced-organization-training-subject-authorization-context-contract-decision
+updatedAt: "2026-06-15T13:25:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 103b800bd3241088469368ddae99668400735a8d
-  lastKnownOriginMasterSha: 103b800bd3241088469368ddae99668400735a8d
+  lastKnownMasterSha: 97cf3a94e37dd92da97d4522def96ee1ed4a7645
+  lastKnownOriginMasterSha: 97cf3a94e37dd92da97d4522def96ee1ed4a7645
 currentTask:
-  id: advanced-organization-training-subject-authorization-context-boundary-readonly-audit
+  id: advanced-organization-training-subject-authorization-context-contract-decision
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
-  branch: codex/advanced-organization-training-subject-authorization-context-boundary-readonly-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
+  branch: codex/advanced-organization-training-subject-authorization-context-contract-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -395,9 +395,10 @@ qualityGates:
     advancedOrganizationTrainingDraftLifecycleServiceLevelMismatchTestCoverageSeeding: pass_docs_only_seeded_level_mismatch_test_coverage_task
     advancedOrganizationTrainingDraftLifecycleServiceLevelMismatchTestCoverage: pass_tdd_service_level_mismatch_test_coverage
     advancedOrganizationTrainingSubjectAuthorizationContextBoundaryReadonlyAudit: pass_with_subject_authorization_contract_needs_recheck
-    preCommitHook: pass_advanced_organization_training_subject_authorization_context_boundary_readonly_audit_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_subject_authorization_context_boundary_readonly_audit_closeout_readiness
-    prePushHook: pass_advanced_organization_training_subject_authorization_context_boundary_readonly_audit_pre_push_readiness
+    advancedOrganizationTrainingSubjectAuthorizationContextContractDecision: pass_docs_only_decision_subject_is_content_scope_not_effective_auth_context
+    preCommitHook: pass_advanced_organization_training_subject_authorization_context_contract_decision_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_subject_authorization_context_contract_decision_closeout_readiness
+    prePushHook: pass_advanced_organization_training_subject_authorization_context_contract_decision_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -413,9 +414,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-subject-authorization-context-boundary-readonly-audit closed with a confirmed subject
-    authorization boundary mismatch: requirements and organization training planning expect `subject` in content scope,
-    while EffectiveAuthorizationContextDto currently carries only `profession/level`. Recommended next action is
-    advanced-organization-training-subject-authorization-context-contract-decision before broader organization training
+    advanced-organization-training-subject-authorization-context-contract-decision closed with the decision that
+    `subject` should remain a selected content/request scope dimension, not a source-backed
+    EffectiveAuthorizationContextDto field, under the current `profession/level` authorization model. Recommended next
+    action is advanced-organization-training-content-subject-scope-contract-seeding before broader organization training
     lifecycle expansion.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
