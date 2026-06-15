@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-next-implementation-queue-seeding-post-model-config-redaction
-updatedAt: "2026-06-15T10:54:15-07:00"
+currentPhase: advanced-organization-training-boundary-readonly-audit
+updatedAt: "2026-06-15T11:04:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 5d29b6005b826eb7cf99046137d560d8758f8864
   lastKnownOriginMasterSha: 5d29b6005b826eb7cf99046137d560d8758f8864
 currentTask:
-  id: advanced-next-implementation-queue-seeding-post-model-config-redaction
+  id: advanced-organization-training-boundary-readonly-audit
   status: closed
-  sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
-  branch: codex/advanced-next-implementation-queue-seeding-post-model-config-redaction
+  sourceStory: advanced-edition-organization-training
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+  branch: codex/advanced-organization-training-boundary-readonly-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -385,9 +385,10 @@ qualityGates:
     advancedAdminAiOpsModelConfigPublicIdentifierRedactionAffordance: pass_tdd_ui_only_model_config_identifier_redaction
     advancedAdminAiOpsModelConfigPublicIdentifierRedactionReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedNextImplementationQueueSeedingPostModelConfigRedaction: pass_docs_only_seeded_organization_training_queue
+    advancedOrganizationTrainingBoundaryReadonlyAudit: pass_readonly_audit_no_blocking_findings
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
-    moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
-    prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
+    moduleCloseout: pass_advanced_organization_training_boundary_readonly_audit_closeout_readiness
+    prePushHook: pass_advanced_organization_training_boundary_readonly_audit_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -403,9 +404,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-next-implementation-queue-seeding-post-model-config-redaction closed with pass. The next seeded advanced
-    candidate is advanced-organization-training-boundary-readonly-audit after fresh approval, followed strictly by the
-    organization training contract/validation scaffold and readonly recheck. Route/service/repository/schema/API contract
-    changes, DB access, provider/env/secret, quota/cost, e2e/browser/dev-server, staging/prod/cloud, deploy, payment,
+    advanced-organization-training-boundary-readonly-audit closed with pass. The next seeded advanced candidate is
+    advanced-organization-training-contract-validation-scaffold after closeout merge/push/cleanup and fresh approval,
+    limited to TDD contract/model/validator/test scaffold files. Route/service/repository/schema/API runtime changes, DB
+    access, provider/env/secret, quota/cost, e2e/browser/dev-server, staging/prod/cloud, deploy, payment,
     external-service, row/private data, formal content write, PR, and force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
