@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
-updatedAt: "2026-06-15T09:28:21-07:00"
+currentPhase: advanced-admin-ai-generation-public-identifier-display-policy-recheck
+updatedAt: "2026-06-15T09:41:47-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 96e7dc7a1c5a8cbcb0420724cff7e0f3b577c95d
-  lastKnownOriginMasterSha: 96e7dc7a1c5a8cbcb0420724cff7e0f3b577c95d
+  lastKnownMasterSha: ab090674001e8ea406e54d36f2bbcf5aeedfaca8
+  lastKnownOriginMasterSha: ab090674001e8ea406e54d36f2bbcf5aeedfaca8
 currentTask:
-  id: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+  id: advanced-admin-ai-generation-public-identifier-display-policy-recheck
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
-  branch: codex/advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-generation-public-identifier-display-policy-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-public-identifier-display-policy-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-public-identifier-display-policy-recheck.md
+  branch: codex/advanced-admin-ai-generation-public-identifier-display-policy-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -378,6 +378,7 @@ qualityGates:
     advancedAdminAiGenerationFormalAdoptionReviewUiBoundaryReadonlyAudit: pass_readonly_audit_no_blocking_findings
     advancedAdminAiGenerationFormalAdoptionReviewUiAffordance: pass_tdd_admin_ui_metadata_only_affordance
     advancedPersonalAiGenerationFormalAdoptionReviewFlowReadonlyRecheck: pass_readonly_recheck_with_public_id_display_needs_recheck
+    advancedAdminAiGenerationPublicIdentifierDisplayPolicyRecheck: pass_readonly_audit_with_ui_display_needs_recheck
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -396,10 +397,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck is closed with needs_recheck. Recommended
-    next action is a narrow admin public identifier display policy follow-up for the AI audit log summary, unless the user
-    chooses another approved advanced queue task.
+    advanced-admin-ai-generation-public-identifier-display-policy-recheck is closed with needs_recheck. Recommended next
+    action is a narrow UI-only implementation task to hide or collapse admin AI audit log visible public identifier text
+    by default while preserving DTO/route identifiers and DOM metadata only where explicitly needed by tests or routing.
     Repository, schema/migration, dependency, e2e/browser/dev-server, DB access, provider/env/secret, quota/cost,
     staging/prod/cloud, deploy, payment, external-service, raw prompt/raw answer/provider payload, row/private data,
     formal adoption write, PR, and force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-public-identifier-display-policy-recheck.md
