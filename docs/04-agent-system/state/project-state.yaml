@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: phase-22-local-acceptance-content-production-verification
-updatedAt: "2026-06-15T01:04:29-07:00"
+currentPhase: phase-22-local-acceptance-student-answering-verification
+updatedAt: "2026-06-15T03:05:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,20 +266,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b58cc4d3404bf5efc82b0484050076defe553040
-  lastKnownOriginMasterSha: b58cc4d3404bf5efc82b0484050076defe553040
+  lastKnownMasterSha: afbb463815090b23d69da6890ba58965419bab8e
+  lastKnownOriginMasterSha: afbb463815090b23d69da6890ba58965419bab8e
 currentTask:
-  id: phase-22-local-acceptance-content-production-verification
+  id: phase-22-local-acceptance-student-answering-verification
   status: closed
   sourceStory: phase-22-mvp-local-acceptance-reaudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-content-production-verification.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-content-production-verification.md
-  branch: codex/phase-22-local-acceptance-content-production-verification
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+  branch: codex/phase-22-local-acceptance-student-answering-verification
   commitSha: null
   prUrl: null
-  retryCount: 2
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+  retryCount: 0
+  lastFailurePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
 qualityGates:
   desired:
     - lint
@@ -368,10 +368,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 22 task 2 content-production verification passed locally on branch
-    codex/phase-22-local-acceptance-content-production-verification. V6 repaired admin-flow GET /api/v1/papers
-    cookie-backed session handling through the existing session-cookie boundary. Proceed only with the approved task 2
-    closeout sequence: local commit, fast-forward merge to master, master-side validation, push origin/master, delete
-    merged local branch, fetch prune, and confirm clean master == origin/master. Do not claim task 3 until that sequence
-    is complete.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+    Phase 22 task 3 student answering local acceptance verification stopped on branch
+    codex/phase-22-local-acceptance-student-answering-verification because local `exam_report.generation` returned the
+    application-level provider gate `423101` (`provider_model_request_quota`). `practice`, `mock_exam`, and
+    `answer_record` local API paths were partially verified, but full student answering local acceptance is
+    `needs_recheck`. Do not claim task 4 until the blocked task 3 disposition is resolved by fresh user instruction.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md

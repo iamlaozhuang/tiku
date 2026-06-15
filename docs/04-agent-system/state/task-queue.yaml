@@ -15460,8 +15460,13 @@ tasks:
     seedCategory: phase_22_local_acceptance_verification_matrix
     taskKind: local_acceptance_verification_candidate
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: needs_recheck
+    claimedAt: "2026-06-15T02:58:00-07:00"
+    blockedAt: "2026-06-15T03:05:00-07:00"
+    closedAt: "2026-06-15T03:05:00-07:00"
     retryCount: 0
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
     dependencies:
       - phase-22-local-acceptance-verification-seeding
     verificationJourney: student_answering
@@ -15507,6 +15512,56 @@ tasks:
       - drizzle/**
       - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
+    freshInstruction:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved execution after the unified upfront authorization for remaining Phase 22 seeded candidate tasks
+        2-6. For this current task, the approval permits local student answering verification only, one-at-a-time task
+        execution, localhost/127.0.0.1 dev server use, Browser-first or Playwright-fallback local observation,
+        application UI/API mediated local dev DB use, in-process use of the existing project runtime/env loader only for
+        the required local DATABASE_URL, and minimal current-task fixture creation through existing ORM or service-layer
+        paths. It also permits task plan/evidence/audit/state/queue updates, standard validation commands, one local
+        commit, fast-forward merge to master, master validation, push origin/master, merged local short-branch deletion,
+        fetch prune, and clean alignment checks after the task passes.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    localAcceptanceOutcome:
+      practice:
+        status: local_verified
+        summary: "Local API verified practice start, detail, and objective answer submission."
+      mockExam:
+        status: local_verified
+        summary: "Local API verified mock_exam start, detail, answer save, and objective-only submit completion."
+      answerRecord:
+        status: local_verified
+        summary: "answer_record creation was observed through practice and mock_exam answer APIs."
+      examReport:
+        status: needs_recheck
+        blocked:
+          - provider_model_request_quota
+          - exam_report.generation returned HTTP 423 / API code 423101
+        summary: >-
+          `POST /api/v1/exam-reports` is intentionally blocked by the student-experience route provider gate. Provider
+          calls, provider configuration, quota/cost measurement, and Cost Calibration Gate remain outside this task
+          authorization, so full exam_report generation/list/detail/UI verification is not claimed.
+      stopReason: provider_gate_423101_exam_report_generation
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-student-answering-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-student-answering-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-student-answering-verification
   - id: phase-22-local-acceptance-mistake-learning-verification
     title: Phase 22 mistake and learning loop local acceptance verification
     phase: phase-22-local-acceptance-mistake-learning-verification
