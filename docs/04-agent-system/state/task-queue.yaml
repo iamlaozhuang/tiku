@@ -17774,3 +17774,319 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+  - id: advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+    title: Advanced next implementation queue seeding after formal adoption boundary
+    phase: advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: docs_only_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-15T08:59:14-07:00"
+    closedAt: "2026-06-15T08:59:14-07:00"
+    dependencies:
+      - advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+    humanApprovalBoundary: >-
+      User explicitly requested a docs-only advanced-next-implementation-queue-seeding refresh from current master on
+      2026-06-15. Existing task ids advanced-next-implementation-queue-seeding and
+      advanced-next-implementation-queue-seeding-post-public-id-redaction are already closed, so this run uses a unique
+      post-formal-adoption-boundary suffix. Scope is limited to docs/state/task-queue seeding and execution records; it
+      must not execute newly seeded tasks or perform implementation, DB access, provider/model calls, dev-server/browser
+      /e2e work, schema/migration/dependency/script/package/lockfile changes, formal adoption writes, PRs, force-pushes,
+      staging/prod/cloud/deploy/payment/external-service work, or expose private/raw data.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - newly seeded task execution
+      - implementation
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+  - id: advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+    title: Advanced admin AI generation formal adoption review UI boundary readonly audit
+    phase: advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+    humanApprovalBoundary: >-
+      Seeded by advanced-next-implementation-queue-seeding-post-formal-adoption-boundary as a readonly guard before any
+      admin UI formal adoption review affordance implementation. Scope is audit-only and must confirm the exact admin UI
+      target surface, formal adoption review route/service boundary, public identifier display policy, redacted metadata
+      semantics, and blocked formal target write status before a later implementation task is approved.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+    readonlyFiles:
+      - src/app/(admin)/ops/ai-audit-logs/page.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - src/app/api/v1/personal-ai-generation-results/[publicId]/formal-adoption-reviews/route.ts
+      - src/server/contracts/personal-ai-generation-formal-adoption-contract.ts
+      - src/server/services/personal-ai-generation-formal-adoption-service.ts
+      - src/server/services/personal-ai-generation-formal-adoption-runtime.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - formal adoption write
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: fresh_user_approval_required_before_execution
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-formal-adoption-service.test.ts src/server/services/personal-ai-generation-formal-adoption-runtime.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+  - id: advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+    title: Advanced admin AI generation formal adoption review UI affordance
+    phase: advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: local_ui_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: blocked_until_fresh_user_approval
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+    humanApprovalBoundary: >-
+      Seeded as a conditional implementation candidate only. It must not start until the readonly boundary audit closes
+      and the user gives fresh approval. Scope should add a narrow admin-side affordance that consumes only the existing
+      local readonly formal adoption review route/contract, keeps metadata-only/redacted semantics visible, and keeps
+      formal target adoption write blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+      - src/app/(admin)/ops/ai-audit-logs/page.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/api/v1/**
+      - src/server/**
+      - src/features/student/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - execution without fresh user approval
+      - formal adoption target write
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: fresh_user_approval_required_before_execution
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx src/server/services/personal-ai-generation-formal-adoption-service.test.ts src/server/services/personal-ai-generation-formal-adoption-runtime.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+  - id: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+    title: Advanced personal AI generation formal adoption review flow readonly recheck
+    phase: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+    humanApprovalBoundary: >-
+      Seeded as a readonly recheck after the conditional admin formal adoption review UI affordance implementation. It
+      must confirm service, route, and UI consistency; metadata-only/redacted semantics; public identifier display
+      policy; and blocked formal target write status. It must not implement code or write formal content.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+    readonlyFiles:
+      - src/app/(admin)/ops/ai-audit-logs/page.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx
+      - src/app/api/v1/personal-ai-generation-results/[publicId]/formal-adoption-reviews/route.ts
+      - src/server/contracts/personal-ai-generation-formal-adoption-contract.ts
+      - src/server/services/personal-ai-generation-formal-adoption-service.ts
+      - src/server/services/personal-ai-generation-formal-adoption-runtime.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - formal adoption write
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: fresh_user_approval_required_before_execution
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx src/server/services/personal-ai-generation-formal-adoption-service.test.ts src/server/services/personal-ai-generation-formal-adoption-runtime.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
