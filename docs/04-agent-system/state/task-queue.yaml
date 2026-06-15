@@ -19254,10 +19254,10 @@ tasks:
       modify product source, route, service, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts,
       or formal content write behavior.
     humanApproval: >-
-      User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
-      limited to task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
-      commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
-      implementation and all high-risk blocked gates remain blocked.
+      User approved executing this seeding task in the current 2026-06-15 Codex thread with an explicit approved-execute
+      prompt. Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, declared local
+      validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch
+      prune. Product implementation and all high-risk blocked gates remain blocked.
     planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
@@ -19430,3 +19430,176 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-draft-lifecycle-service
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-draft-lifecycle-service
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-draft-lifecycle-service
+  - id: advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+    title: Advanced organization training draft lifecycle service readonly recheck seeding
+    phase: advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+    sourceStory: advanced-edition-organization-training
+    taskKind: readonly_recheck_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-15T12:33:24-07:00"
+    closedAt: "2026-06-15T12:33:24-07:00"
+    dependencies:
+      - advanced-organization-training-draft-lifecycle-service
+    humanApprovalBoundary: >-
+      User-approved docs/state-only seeding task. Scope is limited to converting the draft lifecycle service
+      `pass_with_needs_recheck` outcome into a pending readonly recheck task. It must not modify product source, route,
+      service, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts, or formal content write behavior.
+    humanApproval: >-
+      User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行". Approval is
+      limited to task claim, task plan/evidence/audit creation, durable state updates, declared local validation, local
+      commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
+      implementation and all high-risk blocked gates remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+    readonlyFiles:
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/contracts/effective-authorization-contract.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/service/repository/API runtime changes
+      - formal content write
+      - formal target write
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+  - id: advanced-organization-training-draft-lifecycle-service-readonly-recheck
+    title: Advanced organization training draft lifecycle service readonly recheck
+    phase: advanced-organization-training-draft-lifecycle-service-readonly-recheck
+    sourceStory: advanced-edition-organization-training
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is readonly review of the organization training
+      draft lifecycle service boundary, effective authorization subject gap, metadata-only DTO semantics, formal target
+      write blocks, and ADR-002 layering. It must not implement product behavior or modify product source.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+    readonlyFiles:
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/contracts/effective-authorization-contract.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/service/repository/API runtime changes
+      - formal content write
+      - formal target write
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: blocked_until_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-draft-lifecycle-service-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-draft-lifecycle-service-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-draft-lifecycle-service-readonly-recheck
