@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-personal-ai-generation-result-detail-flow-readonly-recheck
-updatedAt: "2026-06-15T07:17:31-07:00"
+currentPhase: advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
+updatedAt: "2026-06-15T07:34:20-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3f4e2ba9f975b331c163f46e6d0880b0410f16a9
-  lastKnownOriginMasterSha: 3f4e2ba9f975b331c163f46e6d0880b0410f16a9
+  lastKnownMasterSha: 5b3c8b0a3cafe258fe5871a8d2329b2a04d3a370
+  lastKnownOriginMasterSha: 5b3c8b0a3cafe258fe5871a8d2329b2a04d3a370
 currentTask:
-  id: advanced-personal-ai-generation-result-detail-flow-readonly-recheck
+  id: advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-recheck.md
-  branch: codex/advanced-personal-ai-generation-result-detail-flow-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
+  branch: codex/advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -365,6 +365,7 @@ qualityGates:
     advancedPersonalAiGenerationResultDetailFlowReadonlyAudit: pass_readonly_audit_with_needs_recheck
     fixStudentAiGenerationResultDetailNotFoundState: pass_narrow_ui_not_found_state_fix
     advancedPersonalAiGenerationResultDetailFlowReadonlyRecheck: pass_readonly_recheck_no_findings
+    advancedPersonalAiGenerationResultPublicIdDisplayPolicyReadonlyAudit: pass_readonly_audit_with_public_id_policy_needs_recheck
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -383,11 +384,13 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-personal-ai-generation-result-detail-flow-readonly-recheck is closed with no findings. The service,
-    readonly route, student UI detail state mapping, and focused component test coverage are aligned on the 404045 detail
-    not-found response after the narrow UI fix. Recommended next action is the next separately approved advanced
-    implementation task after fresh current-state readiness checks. Repository, schema/migration, dependency,
+    advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit is closed with a needs_recheck on
+    product/governance interpretation of public identifier text display. Current route/service/UI behavior uses
+    authorized contract public ids only, no numeric database ids, no raw/private/provider fields, and no copy/share
+    affordance, but the student UI still renders public identifier fields in authorized history/detail metadata.
+    Recommended next action is advanced-next-implementation-queue-seeding to seed a narrow follow-up decision or UX
+    redaction task plus the next safe advanced implementation candidates. Repository, schema/migration, dependency,
     e2e/browser/dev-server, DB access, provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment,
     external-service, raw prompt/raw answer/provider payload, row/private data, formal adoption write, PR, and force-push
     remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-recheck.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
