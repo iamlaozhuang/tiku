@@ -86,6 +86,14 @@ function createServiceFixture() {
 }
 
 describe("organization training service", () => {
+  it("keeps effective authorization context source-backed without selected subject", () => {
+    const subjectKeyAbsent: "subject" extends keyof EffectiveAuthorizationContextDto
+      ? false
+      : true = true;
+
+    expect(subjectKeyAbsent).toBe(true);
+  });
+
   it("creates a metadata-only manual draft for an advanced org_auth organization admin", async () => {
     const { service, getCreatedDrafts } = createServiceFixture();
 
@@ -322,6 +330,33 @@ describe("organization training service", () => {
     expect(result).toEqual({
       success: false,
       reason: "authorization_scope_mismatch",
+      message: "Organization training manual draft creation is blocked.",
+    });
+    expect(getCreatedDrafts()).toEqual([]);
+  });
+
+  it("blocks manual draft creation when selected content scope subject is invalid", async () => {
+    const { service, getCreatedDrafts } = createServiceFixture();
+
+    const result = await service.createManualDraft({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      authorizationContext: createAdvancedOrgAuthContext(),
+      draftInput: {
+        organizationPublicId: "organization_public_123",
+        profession: "monopoly",
+        level: 3,
+        subject: "invalid_subject" as never,
+        title: "Safety training",
+        description: null,
+      },
+    });
+
+    expect(result).toEqual({
+      success: false,
+      reason: "invalid_manual_draft_input",
       message: "Organization training manual draft creation is blocked.",
     });
     expect(getCreatedDrafts()).toEqual([]);

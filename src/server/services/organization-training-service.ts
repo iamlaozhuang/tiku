@@ -2,7 +2,7 @@ import type { EffectiveAuthorizationContextDto } from "../contracts/effective-au
 import type { OrganizationTrainingDraftDto } from "../contracts/organization-training-contract";
 import type { Profession } from "../models/auth";
 import type { OrganizationTrainingQuestionTypeSummary } from "../models/organization-training";
-import type { Subject } from "../models/paper";
+import { subjectValues, type Subject } from "../models/paper";
 
 export const organizationTrainingManualDraftCreationBlockedMessage =
   "Organization training manual draft creation is blocked.";
@@ -120,6 +120,13 @@ function isValidLevel(value: number): boolean {
   return Number.isInteger(value) && value > 0;
 }
 
+function isSubject(value: unknown): value is Subject {
+  return (
+    typeof value === "string" &&
+    subjectValues.includes(value as (typeof subjectValues)[number])
+  );
+}
+
 function isAdvancedOrgAuthContext(
   authorizationContext: EffectiveAuthorizationContextDto,
 ): boolean {
@@ -177,7 +184,8 @@ export function createOrganizationTrainingService(
       if (
         organizationPublicId === null ||
         title === null ||
-        !isValidLevel(command.draftInput.level)
+        !isValidLevel(command.draftInput.level) ||
+        !isSubject(command.draftInput.subject)
       ) {
         return createBlockedResult("invalid_manual_draft_input");
       }

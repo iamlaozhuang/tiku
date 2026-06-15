@@ -20071,9 +20071,13 @@ tasks:
     sourceStory: advanced-edition-organization-training
     taskKind: local_implementation_tdd
     moduleRunVersion: 2
-    status: pending
-    result: pending
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: approved_by_user_prompt_2026_06_15
+    status: closed
+    result: pass
     retryCount: 0
+    claimedAt: "2026-06-15T16:43:24-07:00"
+    closedAt: "2026-06-15T16:46:36-07:00"
     dependencies:
       - advanced-organization-training-content-subject-scope-contract-seeding
     humanApprovalBoundary: >-
@@ -20082,7 +20086,20 @@ tasks:
       keeping `subject` out of source-backed EffectiveAuthorizationContextDto. Expected changes are limited to
       organization training service/contract/test files. It must not modify route, repository, mapper, schema, DB,
       provider, UI, package, lockfile, scripts, e2e, or formal content write behavior.
-    humanApproval: pending_fresh_user_approval_required
+    humanApproval: >-
+      User approved executing this narrow RED-first TDD implementation task in the current 2026-06-15 Codex thread by
+      saying "批准执行". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+      scoped TDD implementation in `src/server/services/organization-training-service.test.ts`,
+      `src/server/services/organization-training-service.ts`, and
+      `src/server/contracts/organization-training-contract.ts`, declared local validation, local commit,
+      fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Adding `subject`
+      to `EffectiveAuthorizationContextDto`, route/repository/API runtime/validator/UI changes, formal content writes,
+      formal target writes, DB access, provider/model calls, dev server, Browser/Playwright/e2e,
+      staging/prod/cloud/deploy/payment/external-service, schema/drizzle/scripts/package/lockfile/dependency changes,
+      PR, and force push remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -20138,6 +20155,17 @@ tasks:
       - staging/prod/cloud/deploy/payment/external-service
       - PR
       - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     redFirstRequired: true
     expectedRedCoverage:
       - selected content/request scope rejects invalid `subject`
