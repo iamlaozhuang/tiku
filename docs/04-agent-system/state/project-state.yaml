@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-contract-validation-scaffold
-updatedAt: "2026-06-15T11:22:00-07:00"
+currentPhase: advanced-organization-training-contract-validation-readonly-recheck
+updatedAt: "2026-06-15T11:37:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5d29b6005b826eb7cf99046137d560d8758f8864
-  lastKnownOriginMasterSha: 5d29b6005b826eb7cf99046137d560d8758f8864
+  lastKnownMasterSha: cb0b25f14d6d8345d2ffe14f94c21b54cf19a5ec
+  lastKnownOriginMasterSha: cb0b25f14d6d8345d2ffe14f94c21b54cf19a5ec
 currentTask:
-  id: advanced-organization-training-contract-validation-scaffold
+  id: advanced-organization-training-contract-validation-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
-  branch: codex/advanced-organization-training-contract-validation-scaffold
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+  branch: codex/advanced-organization-training-contract-validation-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
