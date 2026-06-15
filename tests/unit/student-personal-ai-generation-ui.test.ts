@@ -438,7 +438,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(requestBody).toEqual({
       responseMode: "local_browser_experience",
       userPublicId: localSessionUserPublicId,
-      requestPublicId: "personal-ai-request-public-001",
+      requestPublicId: expect.stringMatching(/^personal-ai-request-public-/),
       authorizationPublicId: "personal-auth-public-001",
       aiFuncType: "explanation",
       questionPublicId: "question-public-001",
@@ -448,7 +448,7 @@ describe("StudentPersonalAiGenerationPage", () => {
       redeemCodePublicId: null,
       auditLogPublicId: null,
       aiCallLogPublicId: null,
-      taskPublicId: "ai-generation-task-public-001",
+      taskPublicId: expect.stringMatching(/^ai-generation-task-public-/),
       taskType: "ai_question_generation",
       actorPublicId: localSessionUserPublicId,
       authorizationSource: "personal_auth",
@@ -462,7 +462,9 @@ describe("StudentPersonalAiGenerationPage", () => {
       isScopeAllowed: true,
       isQuotaAvailable: true,
       isRuntimeConfigReady: true,
-      idempotencyKeyHash: "sha256:student-local-request",
+      idempotencyKeyHash: expect.stringMatching(
+        /^sha256:student-local-request-/,
+      ),
       existingTaskPublicId: null,
       existingTaskStatus: null,
       resultPublicId: null,
@@ -472,7 +474,85 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(JSON.stringify(requestBody)).not.toContain(
       "unit-test-session-token",
     );
+    expect(requestBody.requestPublicId).not.toBe(
+      "personal-ai-request-public-001",
+    );
+    expect(requestBody.taskPublicId).not.toBe("ai-generation-task-public-001");
+    expect(requestBody.idempotencyKeyHash).not.toBe(
+      "sha256:student-local-request",
+    );
     expect(document.body.textContent).not.toContain("unit-test-session-token");
+  });
+
+  it("generates unique request identifiers for consecutive personal AI generation submits", async () => {
+    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+    const submittedBodies: Array<Record<string, unknown>> = [];
+    const fetchMock = vi.fn(
+      async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url) === "/api/v1/sessions") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localSessionResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          if (init?.method === "GET") {
+            return {
+              ok: true,
+              status: 200,
+              json: async () => emptyServerHistoryResponse,
+            };
+          }
+
+          expect(init).toBeDefined();
+          expect(init?.method).toBe("POST");
+          submittedBodies.push(
+            JSON.parse(String(init?.body)) as Record<string, unknown>,
+          );
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => localExperienceResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(createElement(StudentPersonalAiGenerationPage));
+
+    expect(await screen.findByText(historyEmptyTitle)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(1));
+    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
+
+    await waitFor(() => expect(submittedBodies).toHaveLength(2));
+
+    const [firstRequestBody, secondRequestBody] = submittedBodies as [
+      Record<string, unknown>,
+      Record<string, unknown>,
+    ];
+
+    expect(firstRequestBody.userPublicId).toBe(localSessionUserPublicId);
+    expect(secondRequestBody.userPublicId).toBe(localSessionUserPublicId);
+    expect(firstRequestBody.requestPublicId).not.toBe(
+      secondRequestBody.requestPublicId,
+    );
+    expect(firstRequestBody.taskPublicId).not.toBe(
+      secondRequestBody.taskPublicId,
+    );
+    expect(firstRequestBody.idempotencyKeyHash).not.toBe(
+      secondRequestBody.idempotencyKeyHash,
+    );
   });
 
   it("refreshes server-backed request history after successful submit", async () => {

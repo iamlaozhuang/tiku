@@ -128,6 +128,31 @@ const personalAiGenerationRequestDraft: StudentPersonalAiGenerationRequestDraft 
     citationCount: 0,
   };
 
+let personalAiGenerationRequestSequence = 0;
+
+function createPersonalAiGenerationRequestUniqueSuffix(): string {
+  personalAiGenerationRequestSequence += 1;
+
+  const sequenceSegment = personalAiGenerationRequestSequence.toString(36);
+  const timeSegment = Date.now().toString(36);
+  const randomSegment =
+    typeof globalThis.crypto?.randomUUID === "function"
+      ? globalThis.crypto.randomUUID()
+      : `${timeSegment}-${sequenceSegment}`;
+
+  return `${timeSegment}-${sequenceSegment}-${randomSegment}`;
+}
+
+function createPersonalAiGenerationRequestIdentifiers() {
+  const uniqueSuffix = createPersonalAiGenerationRequestUniqueSuffix();
+
+  return {
+    requestPublicId: `personal-ai-request-public-${uniqueSuffix}`,
+    taskPublicId: `ai-generation-task-public-${uniqueSuffix}`,
+    idempotencyKeyHash: `sha256:student-local-request-${uniqueSuffix}`,
+  };
+}
+
 function readHasStudentSessionToken(): boolean {
   if (typeof window === "undefined") {
     return false;
@@ -143,6 +168,7 @@ function createPersonalAiGenerationRequestBody(
   return {
     responseMode: "local_browser_experience",
     ...draft,
+    ...createPersonalAiGenerationRequestIdentifiers(),
     userPublicId,
     actorPublicId: userPublicId,
     ownerPublicId: userPublicId,
