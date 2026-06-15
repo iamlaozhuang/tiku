@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-student-login-session-policy-decision
-updatedAt: "2026-06-14T22:01:16-07:00"
+currentPhase: phase-22-post-repair-local-acceptance-reaudit-planning
+updatedAt: "2026-06-14T22:09:08-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 0232106827b984e86f6537902ac2d46cddd32e3d
-  lastKnownOriginMasterSha: 0232106827b984e86f6537902ac2d46cddd32e3d
+  lastKnownMasterSha: 42cba7eca148be03637af367b40238487e8426df
+  lastKnownOriginMasterSha: 42cba7eca148be03637af367b40238487e8426df
 currentTask:
-  id: fix-student-login-session-policy-decision
+  id: phase-22-post-repair-local-acceptance-reaudit-planning
   status: closed
-  sourceStory: master-health-baseline
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-fix-student-login-session-policy-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-fix-student-login-session-policy-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-fix-student-login-session-policy-decision.md
-  branch: codex/fix-student-login-session-policy-decision
+  sourceStory: phase-22-mvp-local-acceptance-reaudit
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+  branch: codex/phase-22-post-repair-local-acceptance-reaudit-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -346,6 +346,7 @@ qualityGates:
     unifiedPostRepairNextQueueSeeding: pass_docs_only_next_queue_seed
     unifiedPostRepairMasterHealthGapAudit: pass_docs_only_readonly_gap_audit
     fixStudentLoginSessionPolicyDecision: pass_docs_only_server_session_option_a_decision
+    phase22PostRepairLocalAcceptanceReauditPlanning: pass_docs_only_reaudit_planning
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -364,9 +365,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After this docs-only session policy decision closes, the next seeded serial task is
-    phase-22-post-repair-local-acceptance-reaudit-planning. Claiming the next task still requires the current branch to
-    be committed, fast-forward merged to master, validated on master, pushed to origin/master, cleaned up, fetched with
-    prune, and confirmed clean/aligned. Provider, env/secret, schema/migration, dependency, e2e/browser verification,
-    deploy, payment, external-service, PR, force-push, and Cost Calibration Gate blocks remain in force.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-fix-student-login-session-policy-decision.md
+    The user-authorized three-task post-repair serial set is closed after this Phase 22 docs-only planning task is
+    committed, fast-forward merged to master, validated on master, pushed to origin/master, cleaned up, fetched with
+    prune, and confirmed clean/aligned. Do not auto-claim another task without fresh instruction. Provider, env/secret,
+    schema/migration, dependency, e2e/browser verification, deploy, payment, external-service, PR, force-push, and Cost
+    Calibration Gate blocks remain in force.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md

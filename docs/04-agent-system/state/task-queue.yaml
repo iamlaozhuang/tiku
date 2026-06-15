@@ -14997,7 +14997,8 @@ tasks:
     seedCategory: phase_22_planning
     taskKind: docs_only_local_acceptance_reaudit_planning
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
     dependencies:
       - fix-student-login-session-policy-decision
