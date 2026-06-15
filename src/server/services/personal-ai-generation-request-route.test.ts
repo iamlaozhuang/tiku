@@ -211,6 +211,46 @@ describe("personal AI generation request route handlers", () => {
     );
   });
 
+  it("rejects employee sessions from the personal AI generation request path", async () => {
+    const sessionService: Pick<SessionService, "getCurrentSession"> = {
+      async getCurrentSession() {
+        return {
+          code: 0,
+          message: "ok",
+          data: {
+            user: {
+              publicId: "employee_session_user_public_123",
+              phone: "13900000000",
+              name: "企业员工",
+              userType: "employee",
+              status: "active",
+              lockedUntilAt: null,
+              employeePublicId: "employee_public_123",
+              organizationPublicId: "organization_public_123",
+              adminPublicId: null,
+              adminRoles: [],
+            },
+            session: {
+              expiresAt: "2026-06-19T12:00:00.000Z",
+            },
+          },
+        };
+      },
+    };
+    const resolveUserContext =
+      createPersonalAiGenerationRequestUserResolver(sessionService);
+    const { collection } =
+      createPersonalAiGenerationRequestRouteHandlers(resolveUserContext);
+
+    const response = await collection.POST(createPostRequest(createBaseBody()));
+
+    await expect(response.json()).resolves.toEqual({
+      code: 401001,
+      message: "User session is required.",
+      data: null,
+    });
+  });
+
   it("merges resolver user context and returns a redacted local request contract", async () => {
     const { collection } = createPersonalAiGenerationRequestRouteHandlers(
       async () => userContext,

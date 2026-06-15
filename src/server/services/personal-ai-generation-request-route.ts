@@ -303,7 +303,7 @@ export function createPersonalAiGenerationRequestUserResolver(
       return null;
     }
 
-    if (sessionResponse.data.user.userType === null) {
+    if (sessionResponse.data.user.userType !== "personal") {
       return null;
     }
 

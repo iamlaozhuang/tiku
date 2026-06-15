@@ -13181,6 +13181,83 @@ tasks:
       - payment/external-service
       - PR/force-push
       - Cost Calibration Gate
+  - id: fix-personal-ai-generation-user-type-boundary
+    title: Fix personal AI generation user type boundary
+    phase: fix-personal-ai-generation-user-type-boundary
+    sourceStory: current-state-checkpoint-and-implementation-audit
+    taskKind: implementation
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+    dependencies:
+      - fix-student-login-session-policy-consistency
+    humanApprovalBoundary: >-
+      User approved strict serial execution of this task after task 1 closeout. Scope is limited to adding TDD coverage
+      and a minimal `userType: "personal"` boundary for the personal AI generation request route. Local commit,
+      fast-forward merge to master, push origin/master, and merged short-branch cleanup are approved if all gates pass.
+      PR, force-push, deploy, provider/env/secret, schema/migration, dependency/package/lockfile, e2e,
+      payment/external-service, and Cost Calibration Gate work remain blocked.
+    evidenceRedactionBoundary: no token value, Authorization header, password, secret, database URL, row data, provider payload, model response, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+      - src/server/services/personal-ai-generation-request-route.ts
+      - src/server/services/personal-ai-generation-request-route.test.ts
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - tests/unit/**
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-request-route.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-personal-ai-generation-user-type-boundary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-personal-ai-generation-user-type-boundary
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-personal-ai-generation-user-type-boundary
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+    blockedGates:
+      - provider/model request/quota use
+      - env/secret/provider configuration
+      - schema/migration
+      - dependency/package/lockfile
+      - e2e
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
   - id: audit-student-experience-unit-suite-timeout-unblock
     title: Audit student experience unit suite timeout unblock
     phase: audit-student-experience-unit-suite-timeout-unblock

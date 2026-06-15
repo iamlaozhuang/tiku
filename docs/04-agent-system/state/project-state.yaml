@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-student-login-session-policy-consistency
-updatedAt: "2026-06-14T18:04:30-07:00"
+currentPhase: fix-personal-ai-generation-user-type-boundary
+updatedAt: "2026-06-14T18:32:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: dc2c14e77d93049cb748c615fa20ee249c3a73f6
-  lastKnownOriginMasterSha: dc2c14e77d93049cb748c615fa20ee249c3a73f6
+  lastKnownMasterSha: 33d86504a67c3d44aca6c8eb84d1b35a3699ef92
+  lastKnownOriginMasterSha: 33d86504a67c3d44aca6c8eb84d1b35a3699ef92
 currentTask:
-  id: fix-student-login-session-policy-consistency
+  id: fix-personal-ai-generation-user-type-boundary
   status: closed
-  sourceStory: master-health-baseline
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-student-login-session-policy-consistency.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-session-policy-consistency.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-student-login-session-policy-consistency.md
-  branch: codex/fix-student-login-local-session-token
+  sourceStory: current-state-checkpoint-and-implementation-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+  branch: codex/fix-personal-ai-generation-user-type-boundary
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -337,6 +337,7 @@ qualityGates:
     fixStudentLoginLocalSessionToken: blocked_validation_failure_conflicting_session_persistence_tests
     fixStudentLoginSessionPolicyConsistency: pass_after_student_experience_timeout_unblock
     auditStudentExperienceUnitSuiteTimeoutUnblock: pass_test_stability_unblock
+    fixPersonalAiGenerationUserTypeBoundary: pass_local_validation_module_gates
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -355,8 +356,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    fix-student-login-session-policy-consistency has passed targeted tests, lint, typecheck, and full unit after the
-    approved student-experience timeout unblock. Continue only through Module Run v2 readiness gates, local commit,
-    fast-forward merge to master, master-side validation, push origin/master, and merged short-branch cleanup before
-    claiming task 2.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-session-policy-consistency.md
+    fix-personal-ai-generation-user-type-boundary has passed RED/GREEN, targeted unit, lint, typecheck, and full unit.
+    Continue only through Module Run v2 readiness gates, local commit, fast-forward merge to master, master-side
+    validation, push origin/master, and merged short-branch cleanup before claiming
+    fix-personal-ai-generation-unique-request-identifiers.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
