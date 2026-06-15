@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-answer-status-alignment-readonly-recheck
-updatedAt: "2026-06-15T12:03:43-07:00"
+currentPhase: advanced-organization-training-draft-lifecycle-service-seeding
+updatedAt: "2026-06-15T12:11:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 508ef1ddb80c3913c93e22fef783a5b0d96a1372
-  lastKnownOriginMasterSha: 508ef1ddb80c3913c93e22fef783a5b0d96a1372
+  lastKnownMasterSha: e69ef0a7f1424f47fa154715cd7a6e5dc48bb6b4
+  lastKnownOriginMasterSha: e69ef0a7f1424f47fa154715cd7a6e5dc48bb6b4
 currentTask:
-  id: advanced-organization-training-answer-status-alignment-readonly-recheck
+  id: advanced-organization-training-draft-lifecycle-service-seeding
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
-  branch: codex/advanced-organization-training-answer-status-alignment-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
+  branch: codex/advanced-organization-training-draft-lifecycle-service-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -388,9 +388,10 @@ qualityGates:
     advancedOrganizationTrainingBoundaryReadonlyAudit: pass_readonly_audit_no_blocking_findings
     advancedOrganizationTrainingAnswerStatusAlignment: pass_tdd_answer_status_alignment
     advancedOrganizationTrainingAnswerStatusAlignmentReadonlyRecheck: pass_readonly_recheck_no_findings
-    preCommitHook: pass_advanced_organization_training_answer_status_alignment_readonly_recheck_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_answer_status_alignment_readonly_recheck_closeout_readiness
-    prePushHook: pass_advanced_organization_training_answer_status_alignment_readonly_recheck_pre_push_readiness
+    advancedOrganizationTrainingDraftLifecycleServiceSeeding: pass_docs_only_seeded_manual_draft_service_task
+    preCommitHook: pass_advanced_organization_training_draft_lifecycle_service_seeding_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_draft_lifecycle_service_seeding_closeout_readiness
+    prePushHook: pass_advanced_organization_training_draft_lifecycle_service_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -406,9 +407,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-answer-status-alignment-readonly-recheck closed with pass. The answer status union
-    remains aligned to in_progress, submitted, and read_only; scoped unit coverage is present; no downstream
-    organization training service/route/repository/mapper/API runtime/UI/schema consumer exists yet; ADR-002 layering
-    and blocked gates remain intact. Recommended next action is to seed or execute a narrow TDD organization training
-    draft lifecycle service task only after explicit approval and a separate allowedFiles/blockedFiles boundary.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
+    advanced-organization-training-draft-lifecycle-service-seeding closed with pass. The next queued task is
+    advanced-organization-training-draft-lifecycle-service, a narrow TDD service-only implementation for manual draft
+    creation behavior. It requires fresh approval before claim and must stop if repository, schema, DB, route, UI,
+    provider, quota/cost, or formal target write work is required.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
