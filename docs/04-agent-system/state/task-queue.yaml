@@ -15685,8 +15685,12 @@ tasks:
     seedCategory: phase_22_local_acceptance_verification_matrix
     taskKind: local_acceptance_verification_candidate
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: needs_recheck
+    claimedAt: "2026-06-15T03:02:56-07:00"
+    closedAt: "2026-06-15T03:14:07-07:00"
     retryCount: 0
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
     dependencies:
       - phase-22-local-acceptance-verification-seeding
     verificationJourney: admin_operations
@@ -15738,6 +15742,102 @@ tasks:
       - drizzle/**
       - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
+    freshInstruction:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved approval package v7 to claim Phase 22 task 5 only. The task may verify non-provider,
+        non-external-service, non-real-resource-transfer local admin operations through localhost/127.0.0.1, Browser
+        or Playwright local observation, app UI/API, and existing runtime/ORM minimal local fixtures. resource,
+        knowledge_base, model_config, audit_log, and ai_call_log must remain metadata_only, deferred, or needs_recheck
+        where provider gates, real resource transfer, raw prompt/answer, quota/cost, vector rebuild/full indexing, or
+        external-service behavior would be required.
+    approvalRemainder:
+      stillBlocked:
+        - .env* read/write/value disclosure
+        - provider/model calls or provider configuration
+        - quota/cost measurement or Cost Calibration Gate
+        - source/test/e2e/schema/drizzle/scripts/package/lockfile changes
+        - raw SQL
+        - seed/bootstrap scripts
+        - destructive DB operations
+        - real resource transfer, external object storage, vector rebuild, or full indexing
+        - staging/prod/cloud/deploy/payment/external-service
+        - PR or force push
+        - secret/token/cookie/Authorization header/DB URL/card-code plaintext/publicId/row-data/private-data exposure
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    localAcceptanceOutcome:
+      overallStatus: needs_recheck
+      summary: >-
+        V7 non-provider admin operations local acceptance verification passed for covered local API/UI behavior. Full
+        task target is not claimed as local_verified because resource, knowledge_base, model_config, audit_log, and
+        ai_call_log remain metadata_only or read-only governance where provider/model calls, real resource transfer,
+        vector rebuild/full indexing, raw prompt/answer inspection, quota/cost, external-service behavior, or Cost
+        Calibration would be required.
+      entities:
+        user:
+          status: local_verified
+          summary: "Local API verified registration fixture, admin user list, and admin user detail."
+        organization:
+          status: local_verified
+          summary: "Local API verified organization create and list."
+        employee:
+          status: local_verified
+          summary: "Local API verified binding an existing user to an organization and listing employees."
+        orgAuth:
+          status: local_verified
+          summary: "Local API verified org_auth create, list, and detail."
+        redeemCode:
+          status: local_verified
+          summary: "Local API verified one-item redeem_code batch create and list; plaintext was not recorded."
+        resource:
+          status: metadata_only
+          blocked:
+            - real_resource_transfer
+            - external_object_storage
+            - upload
+            - publish
+            - vector_rebuild
+        knowledgeBase:
+          status: metadata_only
+          blocked:
+            - vector_rebuild
+            - full_indexing
+            - provider_backed_retrieval
+        modelConfig:
+          status: metadata_only
+          blocked:
+            - provider_configuration
+            - provider_model_request
+            - enable_disable_reorder
+            - quota_cost
+        auditLog:
+          status: metadata_only
+          summary: "Read-only governance observed; raw viewer, export, and hard delete remain blocked."
+        aiCallLog:
+          status: metadata_only
+          summary: "Read-only governance observed; raw viewer, provider execution, quota, export, and Cost Calibration remain blocked."
+      uiSurface:
+        status: local_verified
+        summary: "Playwright observed /ops/users, /ops/organizations, /ops/redeem-codes, /ops/resources, and /ops/ai-audit-logs rendering without page errors."
+      stopReason: metadata_only_remainders_preserved_under_v7
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-admin-operations-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-admin-operations-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-admin-operations-verification
   - id: phase-22-local-acceptance-security-evidence-verification
     title: Phase 22 security and evidence local acceptance verification
     phase: phase-22-local-acceptance-security-evidence-verification
