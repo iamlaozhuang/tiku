@@ -15846,7 +15846,8 @@ tasks:
     seedCategory: phase_22_local_acceptance_verification_matrix
     taskKind: local_acceptance_verification_candidate
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: needs_recheck
     retryCount: 0
     dependencies:
       - phase-22-local-acceptance-verification-seeding
@@ -15895,3 +15896,78 @@ tasks:
       - drizzle/**
       - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
+    freshInstruction:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved a narrow local security evidence verification for Phase 22 task 6 only. The task may use
+        localhost/127.0.0.1 dev server, Browser or Playwright local observation, and app UI/API only to verify session
+        route guard, role denial, authorization boundary, public identifier safety, audit_log redaction, ai_call_log
+        redaction, and model_config metadata-only behavior. Existing local UI/API sessions may be used only when safely
+        established without exposing credentials, tokens, cookies, Authorization headers, public identifiers, or row
+        data.
+    approvalRemainder:
+      stillBlocked:
+        - .env* read/write/value disclosure
+        - direct DB fixture when required to establish necessary roles
+        - provider/model calls, provider payloads, raw prompts, or raw answers
+        - quota/cost measurement or Cost Calibration Gate
+        - source/test/e2e/schema/drizzle/scripts/package/lockfile changes
+        - dependency changes
+        - raw SQL
+        - migration
+        - seed/bootstrap scripts
+        - destructive DB operations
+        - staging/prod/cloud/deploy/payment/external-service
+        - PR or force push
+        - secret/token/cookie/Authorization header/DB URL/publicId/row-data/private-data exposure
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-security-evidence-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-security-evidence-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-security-evidence-verification
+    localAcceptanceOutcome:
+      overallStatus: needs_recheck
+      summary: >-
+        Narrow task 6 local security evidence passed for unauthenticated session guard, cookie-backed personal session,
+        authorization envelope boundary, non-admin denial on audit_log, ai_call_log, model_config, and admin user
+        surfaces, and unauthenticated UI redirect to /login. Full task target is not claimed as local_verified because
+        admin-only audit_log redaction inspection, ai_call_log raw prompt/raw answer/provider payload inspection, and
+        model_config admin metadata review remain blocked by the no .env, no direct DB fixture, no provider/model,
+        no quota/cost, and no Cost Calibration boundary.
+      entities:
+        session:
+          status: local_verified
+          summary: "Unauthenticated current-session denial, local public login, and current-session envelope shape passed."
+        authorization:
+          status: local_verified
+          summary: "Logged-in personal-user authorization envelope shape passed without recording row data or identifiers."
+        user:
+          status: local_verified
+          summary: "Public registration and non-admin denial on admin user surfaces passed; numeric route candidate denied."
+        auditLog:
+          status: needs_recheck
+          summary: "Unauthenticated and personal-user denial passed; admin read/redaction inspection remains blocked."
+        aiCallLog:
+          status: needs_recheck
+          summary: "Unauthenticated and personal-user denial passed; raw prompt/raw answer/provider payload redaction remains blocked."
+        modelConfig:
+          status: metadata_only
+          summary: "Unauthenticated and personal-user denial passed; admin metadata review and provider configuration remain blocked."
+      uiSurface:
+        status: local_verified
+        summary: "No-credential Playwright observation of /ops/users redirected to /login with no token/session storage."
+      stopReason: needs_recheck_remainders_preserved_under_narrow_task6_boundary
