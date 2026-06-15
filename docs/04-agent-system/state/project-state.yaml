@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-draft-lifecycle-service-seeding
-updatedAt: "2026-06-15T12:11:16-07:00"
+currentPhase: advanced-organization-training-draft-lifecycle-service
+updatedAt: "2026-06-15T12:24:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e69ef0a7f1424f47fa154715cd7a6e5dc48bb6b4
-  lastKnownOriginMasterSha: e69ef0a7f1424f47fa154715cd7a6e5dc48bb6b4
+  lastKnownMasterSha: 235f4ec50290cb47d06cb94c1f18f1f94e14e833
+  lastKnownOriginMasterSha: 235f4ec50290cb47d06cb94c1f18f1f94e14e833
 currentTask:
-  id: advanced-organization-training-draft-lifecycle-service-seeding
+  id: advanced-organization-training-draft-lifecycle-service
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
-  branch: codex/advanced-organization-training-draft-lifecycle-service-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+  branch: codex/advanced-organization-training-draft-lifecycle-service
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -389,9 +389,10 @@ qualityGates:
     advancedOrganizationTrainingAnswerStatusAlignment: pass_tdd_answer_status_alignment
     advancedOrganizationTrainingAnswerStatusAlignmentReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedOrganizationTrainingDraftLifecycleServiceSeeding: pass_docs_only_seeded_manual_draft_service_task
-    preCommitHook: pass_advanced_organization_training_draft_lifecycle_service_seeding_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_draft_lifecycle_service_seeding_closeout_readiness
-    prePushHook: pass_advanced_organization_training_draft_lifecycle_service_seeding_pre_push_readiness
+    advancedOrganizationTrainingDraftLifecycleService: pass_with_subject_scope_needs_recheck
+    preCommitHook: pass_advanced_organization_training_draft_lifecycle_service_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_draft_lifecycle_service_closeout_readiness
+    prePushHook: pass_advanced_organization_training_draft_lifecycle_service_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -407,8 +408,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-draft-lifecycle-service-seeding closed with pass. The next queued task is
-    advanced-organization-training-draft-lifecycle-service, a narrow TDD service-only implementation for manual draft
-    creation behavior. It requires fresh approval before claim and must stop if repository, schema, DB, route, UI,
-    provider, quota/cost, or formal target write work is required.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
+    advanced-organization-training-draft-lifecycle-service closed with pass_with_needs_recheck. The service-only manual
+    draft creation path is implemented through an injected local draft store port and scoped tests. Recommended next
+    action is a readonly recheck of the service boundary and the subject authorization gap before expanding repository,
+    route, UI, schema, provider, quota/cost, or formal target write work.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
