@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-next-implementation-queue-seeding
-updatedAt: "2026-06-15T07:41:23-07:00"
+currentPhase: advanced-personal-ai-generation-result-public-id-display-policy-decision
+updatedAt: "2026-06-15T07:51:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 07b990f92afad8d79ed1d311f1a69ab6416cd32e
-  lastKnownOriginMasterSha: 07b990f92afad8d79ed1d311f1a69ab6416cd32e
+  lastKnownMasterSha: d5d82b6f57ca2965f8b64724283e620ef10199fa
+  lastKnownOriginMasterSha: d5d82b6f57ca2965f8b64724283e620ef10199fa
 currentTask:
-  id: advanced-next-implementation-queue-seeding
+  id: advanced-personal-ai-generation-result-public-id-display-policy-decision
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding.md
-  branch: codex/advanced-next-implementation-queue-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
+  branch: codex/advanced-personal-ai-generation-result-public-id-display-policy-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -367,6 +367,7 @@ qualityGates:
     advancedPersonalAiGenerationResultDetailFlowReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedPersonalAiGenerationResultPublicIdDisplayPolicyReadonlyAudit: pass_readonly_audit_with_public_id_policy_needs_recheck
     advancedNextImplementationQueueSeeding: pass_docs_only_seeded_public_id_policy_followups
+    advancedPersonalAiGenerationResultPublicIdDisplayPolicyDecision: pass_docs_only_policy_decision_hide_public_id_text_by_default
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -385,12 +386,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-next-implementation-queue-seeding is closed and seeded two pending follow-ups:
-    advanced-personal-ai-generation-result-public-id-display-policy-decision first, then conditional
-    advanced-student-ai-generation-result-public-id-display-ux-redaction after policy decision and fresh user approval.
-    The historical fix-student-login-local-session-token task remains blocked_validation_failure and was not selected.
-    Recommended next action is the public id display policy decision task. Repository, schema/migration, dependency,
-    e2e/browser/dev-server, DB access, provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment,
-    external-service, raw prompt/raw answer/provider payload, row/private data, formal adoption write, PR, and force-push
-    remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding.md
+    advanced-personal-ai-generation-result-public-id-display-policy-decision is closed. Decision: student-facing
+    advanced AI generation result history/detail UI should hide or collapse public identifier text lists by default,
+    while keeping public identifiers in DTOs and internal route mechanics for selected-detail access. The conditional
+    next task advanced-student-ai-generation-result-public-id-display-ux-redaction remains pending and requires fresh
+    user approval before execution. Repository, schema/migration, dependency, e2e/browser/dev-server, DB access,
+    provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment, external-service, raw prompt/raw answer/
+    provider payload, row/private data, formal adoption write, PR, and force-push remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md

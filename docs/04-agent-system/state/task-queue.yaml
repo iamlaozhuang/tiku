@@ -17225,15 +17225,18 @@ tasks:
     sourceStory: advanced-edition-implementation-readiness
     taskKind: docs_only_policy_decision
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
+    claimedAt: "2026-06-15T07:50:13-07:00"
+    closedAt: "2026-06-15T07:51:27-07:00"
     dependencies:
       - advanced-next-implementation-queue-seeding
     humanApprovalBoundary: >-
-      Seeded by advanced-next-implementation-queue-seeding as a follow-up decision task. This task is not execution
-      approval by itself; it should be explicitly selected before work starts. Scope should decide whether student-facing
-      advanced AI result history/detail views may continue displaying contract public identifiers or should hide/collapse
-      public identifier text lists. It must not implement UI changes or alter service/route contracts.
+      Seeded by advanced-next-implementation-queue-seeding as a follow-up decision task. User explicitly requested
+      execution of this task on 2026-06-15. Scope decides whether student-facing advanced AI result history/detail views
+      may continue displaying contract public identifiers or should hide/collapse public identifier text lists. It must
+      not implement UI changes or alter service/route contracts.
     planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
@@ -17277,6 +17280,17 @@ tasks:
       - staging/prod/cloud/deploy/payment/external-service
       - row/private data exposure
       - route or service implementation changes
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     validationCommands:
       - git diff --check
       - npm.cmd run lint
@@ -17284,6 +17298,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-personal-ai-generation-result-public-id-display-policy-decision
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-personal-ai-generation-result-public-id-display-policy-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-personal-ai-generation-result-public-id-display-policy-decision
   - id: advanced-student-ai-generation-result-public-id-display-ux-redaction
     title: Advanced student AI generation result public id display UX redaction
     phase: advanced-student-ai-generation-result-public-id-display-ux-redaction
@@ -17291,16 +17306,17 @@ tasks:
     taskKind: local_ui_implementation
     moduleRunVersion: 2
     seededImplementationTask: true
-    autoDriveLocalImplementationApproval: blocked_until_policy_decision_and_fresh_user_approval
+    autoDriveLocalImplementationApproval: blocked_until_fresh_user_approval
     status: pending
     retryCount: 0
     dependencies:
       - advanced-personal-ai-generation-result-public-id-display-policy-decision
     humanApprovalBoundary: >-
-      Seeded as a conditional implementation candidate only. It must not execute until the policy decision task closes
-      and the user gives fresh approval. If approved, scope should be limited to student UI/test changes that hide or
-      collapse public identifier text display while preserving route usage, selected result detail affordance, redacted
-      metadata, and formal adoption blocked semantics.
+      Seeded as a conditional implementation candidate only. The policy decision task chose to hide or collapse
+      student-facing public identifier text lists by default. This task must still not execute until the user gives fresh
+      approval. If approved, scope should be limited to student UI/test changes that hide or collapse public identifier
+      text display while preserving route usage, selected result detail affordance, redacted metadata, and formal
+      adoption blocked semantics.
     planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
