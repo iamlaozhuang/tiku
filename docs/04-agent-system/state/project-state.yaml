@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-student-ai-generation-result-public-id-display-ux-redaction
-updatedAt: "2026-06-15T08:04:59-07:00"
+currentPhase: advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+updatedAt: "2026-06-15T08:18:46-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 2b49a6b106f3de44d1ecd40cc18ac801b0ec063f
-  lastKnownOriginMasterSha: 2b49a6b106f3de44d1ecd40cc18ac801b0ec063f
+  lastKnownMasterSha: 8899d03a3ef8894cf53d7a87907b68cb4505ac0e
+  lastKnownOriginMasterSha: 8899d03a3ef8894cf53d7a87907b68cb4505ac0e
 currentTask:
-  id: advanced-student-ai-generation-result-public-id-display-ux-redaction
+  id: advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
-  branch: codex/advanced-student-ai-generation-result-public-id-display-ux-redaction
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+  branch: codex/advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -369,6 +369,7 @@ qualityGates:
     advancedNextImplementationQueueSeeding: pass_docs_only_seeded_public_id_policy_followups
     advancedPersonalAiGenerationResultPublicIdDisplayPolicyDecision: pass_docs_only_policy_decision_hide_public_id_text_by_default
     advancedStudentAiGenerationResultPublicIdDisplayUxRedaction: pass_tdd_ui_public_id_text_redaction
+    advancedStudentAiGenerationResultPublicIdDisplayUxRedactionReadonlyRecheck: pass_readonly_recheck_no_findings
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -387,12 +388,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-student-ai-generation-result-public-id-display-ux-redaction is closed. Student-facing advanced AI
-    generation result history/detail UI no longer renders public identifier text lists by default, while preserving
-    internal selected resultPublicId route mechanics, redacted metadata, and formal adoption blocked semantics. Next
-    recommended action is a narrow readonly recheck of the public-id redaction flow after this merge, or a fresh
-    advanced queue seeding pass before selecting the next implementation task. Repository, schema/migration,
-    dependency, e2e/browser/dev-server, DB access, provider/env/secret, quota/cost, staging/prod/cloud, deploy,
-    payment, external-service, raw prompt/raw answer/provider payload, row/private data, formal adoption write, PR, and
-    force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+    advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck is closed with no findings.
+    Service, route, and student UI remain consistent after public-id text redaction: internal selected resultPublicId
+    detail routing is preserved, while student-facing public identifier text lists remain hidden and redacted metadata /
+    formal adoption blocked semantics remain visible. Next approved serial task is docs-only
+    advanced-next-implementation-queue-seeding from current master. Repository, schema/migration, dependency,
+    e2e/browser/dev-server, DB access, provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment,
+    external-service, raw prompt/raw answer/provider payload, row/private data, formal adoption write, PR, and force-push
+    remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md

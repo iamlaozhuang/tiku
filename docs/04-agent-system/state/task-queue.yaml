@@ -16572,7 +16572,7 @@ tasks:
         deleteShortBranch: true
         fetchPruneAfterPush: true
     validationCommands:
-      - npm.cmd run test:unit -- src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-result-history-service.test.ts src/server/services/personal-ai-generation-result-route.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
@@ -17378,3 +17378,87 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction
+  - id: advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+    title: Advanced student AI generation result public id display UX redaction readonly recheck
+    phase: advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-15T08:15:43-07:00"
+    closedAt: "2026-06-15T08:18:46-07:00"
+    dependencies:
+      - advanced-student-ai-generation-result-public-id-display-ux-redaction
+    humanApprovalBoundary: >-
+      User explicitly requested this readonly recheck on 2026-06-15 and approved serial closeout through local commit,
+      fast-forward merge to master, push origin/master, and short-branch cleanup. Scope is docs-only audit of the
+      service/route/UI public identifier redaction flow after the UX redaction merge. It must not implement code or
+      change service, route, contracts, schema, dependency, provider, env, e2e, dev-server, formal adoption, or external
+      service surfaces.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+    readonlyFiles:
+      - src/server/contracts/personal-ai-generation-result-history-contract.ts
+      - src/server/services/personal-ai-generation-result-history-service.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/app/api/v1/personal-ai-generation-results/[publicId]/route.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
