@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
-updatedAt: "2026-06-15T10:22:38-07:00"
+currentPhase: advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance
+updatedAt: "2026-06-15T10:31:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 974f46f0c718f432b7c44963b727fa53ece822f4
-  lastKnownOriginMasterSha: 974f46f0c718f432b7c44963b727fa53ece822f4
+  lastKnownMasterSha: 5d29b6005b826eb7cf99046137d560d8758f8864
+  lastKnownOriginMasterSha: 5d29b6005b826eb7cf99046137d560d8758f8864
 currentTask:
-  id: advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+  id: advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
-  branch: codex/advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance.md
+  branch: codex/advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -382,6 +382,7 @@ qualityGates:
     advancedAdminAiAuditLogPublicIdentifierRedactionAffordance: pass_tdd_ui_public_identifier_redaction
     advancedAdminAiAuditLogPublicIdentifierRedactionReadonlyRecheck: pass_readonly_recheck_with_model_config_identifier_scope_needs_recheck
     advancedAdminAiOpsModelConfigPublicIdentifierDisplayPolicyReadonlyAudit: pass_readonly_policy_audit_with_model_config_redaction_needs_recheck
+    advancedAdminAiOpsModelConfigPublicIdentifierRedactionAffordance: pass_tdd_ui_only_model_config_identifier_redaction
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -400,12 +401,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit closed with
-    pass_with_needs_recheck. Policy decision: model-config public identifiers are permitted admin-only configuration
-    references when needed for provider, fallback, and route binding, but should not be treated as a blanket
-    always-visible page-level diagnostics exception. Recommended next candidate is a TDD UI-only model-config public
-    identifier collapse/redaction affordance or narrow page-copy correction after fresh approval. Product implementation,
-    route/service/repository/schema/API contract changes outside that approved UI-only scope, DB access, provider/env
-    /secret, quota/cost, e2e/browser/dev-server, staging/prod/cloud, deploy, payment, external-service, row/private data,
-    formal adoption write, PR, and force-push remain blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+    advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance closed with pass. The model-config row
+    display now folds public identifier values by default, keeps non-visible row metadata for action binding, and shows
+    metadata-only/redacted semantics. Recommended next candidate is a readonly recheck of the admin AI ops model-config
+    public identifier display boundary after fresh approval. Route/service/repository/schema/API contract changes, DB
+    access, provider/env/secret, quota/cost, e2e/browser/dev-server, staging/prod/cloud, deploy, payment, external-service,
+    row/private data, formal adoption write, PR, and force-push remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance.md

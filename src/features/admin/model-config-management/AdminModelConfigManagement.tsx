@@ -737,7 +737,13 @@ function AdminConfigRow({
       ? "runtime: not evaluated"
       : runtimeAlignment.isRuntimeSelected
         ? `runtime: selected ${runtimeAlignment.selectionReason ?? "primary"} / ${runtimeAlignment.promptTemplateKey ?? "template pending"}`
-        : `runtime: standby / selected: ${runtimeAlignment.selectedModelConfigPublicId ?? "none"}`;
+        : runtimeAlignment.selectedModelConfigPublicId === null
+          ? "runtime: standby / selected: none"
+          : "runtime: standby / selected identifier folded";
+  const fallbackText =
+    modelConfig.fallbackModelConfigPublicId === null
+      ? "fallback: none"
+      : "fallback: identifier values folded";
 
   return (
     <div
@@ -752,9 +758,12 @@ function AdminConfigRow({
         <p className="text-text-muted text-xs">
           {modelConfig.aiFuncType} / {modelConfig.modelAlias} /{" "}
           {modelConfig.status} / priority: {modelConfig.fallbackPriority} /
-          fallback: {modelConfig.fallbackModelConfigPublicId ?? "none"} /{" "}
-          {modelConfig.snapshotPolicy} / {runtimeText}
+          {fallbackText} / {modelConfig.snapshotPolicy} / {runtimeText}
         </p>
+        <div className="mt-2 flex flex-wrap gap-1">
+          <AdminMetadataBadge label="metadata-only" />
+          <AdminMetadataBadge label="redacted" />
+        </div>
       </div>
       <Button variant="outline" onClick={() => onToggle(modelConfig.publicId)}>
         {modelConfig.isEnabled ? (
@@ -765,6 +774,14 @@ function AdminConfigRow({
         {actionLabel}
       </Button>
     </div>
+  );
+}
+
+function AdminMetadataBadge({ label }: { label: string }) {
+  return (
+    <span className="border-border bg-muted text-text-secondary rounded-full border px-2 py-0.5 text-[11px] font-medium">
+      {label}
+    </span>
   );
 }
 

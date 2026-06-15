@@ -115,6 +115,46 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
     );
   });
 
+  it("redacts model configuration public identifiers from visible row text while preserving metadata binding", () => {
+    render(<AdminAiAuditLogOpsBaseline />);
+
+    const providerRow = screen.getByTestId("admin-model-provider-qwen");
+    expect(providerRow).not.toHaveTextContent("model-provider-public-001");
+    expect(providerRow).toHaveAttribute(
+      "data-public-id",
+      "model-provider-public-001",
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Model configs" }));
+    const modelConfigRow = screen.getByTestId(
+      "admin-model-config-model-config-public-001",
+    );
+
+    expect(modelConfigRow).not.toHaveTextContent("model-config-public-001");
+    expect(modelConfigRow).not.toHaveTextContent("model-config-public-002");
+    expect(
+      within(modelConfigRow).getByText("metadata-only"),
+    ).toBeInTheDocument();
+    expect(within(modelConfigRow).getByText("redacted")).toBeInTheDocument();
+    expect(modelConfigRow).toHaveAttribute(
+      "data-public-id",
+      "model-config-public-001",
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Prompt templates" }));
+    const promptTemplateRow = screen.getByTestId(
+      "admin-prompt-template-prompt-template-public-001",
+    );
+
+    expect(promptTemplateRow).not.toHaveTextContent(
+      "prompt-template-public-001",
+    );
+    expect(promptTemplateRow).toHaveAttribute(
+      "data-public-id",
+      "prompt-template-public-001",
+    );
+  });
+
   it("renders the loading state while the formal adoption review request is pending", async () => {
     mockFetchWithResponse(new Promise(() => {}));
 
