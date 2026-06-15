@@ -298,6 +298,35 @@ describe("organization training service", () => {
     }
   });
 
+  it("blocks manual draft creation when authorization level does not match draft level", async () => {
+    const { service, getCreatedDrafts } = createServiceFixture();
+
+    const result = await service.createManualDraft({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      authorizationContext: createAdvancedOrgAuthContext({
+        level: 2,
+      }),
+      draftInput: {
+        organizationPublicId: "organization_public_123",
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training",
+        description: null,
+      },
+    });
+
+    expect(result).toEqual({
+      success: false,
+      reason: "authorization_scope_mismatch",
+      message: "Organization training manual draft creation is blocked.",
+    });
+    expect(getCreatedDrafts()).toEqual([]);
+  });
+
   it("keeps manual draft creation isolated from formal content targets", async () => {
     const { service, getCreatedDrafts } = createServiceFixture();
 
