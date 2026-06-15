@@ -17462,3 +17462,230 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+  - id: advanced-next-implementation-queue-seeding-post-public-id-redaction
+    title: Advanced next implementation queue seeding after public id redaction
+    phase: advanced-next-implementation-queue-seeding-post-public-id-redaction
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: docs_only_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-15T08:22:40-07:00"
+    closedAt: "2026-06-15T08:25:40-07:00"
+    dependencies:
+      - advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+    humanApprovalBoundary: >-
+      User explicitly requested this docs-only queue seeding after the public id redaction readonly recheck passes.
+      Scope is limited to current-state docs/state/task-queue seeding from current master. It must not execute newly
+      seeded tasks or perform implementation, DB access, provider/model calls, dev-server/browser/e2e work,
+      schema/migration/dependency/script/package/lockfile changes, formal adoption writes, PRs, force-pushes,
+      staging/prod/cloud/deploy/payment/external-service work, or expose private/raw data.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - newly seeded task execution
+      - implementation
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-next-implementation-queue-seeding-post-public-id-redaction
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-next-implementation-queue-seeding-post-public-id-redaction
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-next-implementation-queue-seeding-post-public-id-redaction
+  - id: advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+    title: Advanced student AI generation request history public id redaction readonly audit
+    phase: advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-next-implementation-queue-seeding-post-public-id-redaction
+    humanApprovalBoundary: >-
+      Seeded by advanced-next-implementation-queue-seeding-post-public-id-redaction as a narrow readonly follow-up.
+      Scope audits whether request history UI coverage explicitly protects public identifier redaction after result
+      history/detail redaction. It must not implement test or source changes unless a later task is separately approved.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+    readonlyFiles:
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - src/server/contracts/personal-ai-generation-request-history-contract.ts
+      - src/server/services/personal-ai-generation-request-history-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: fresh_user_approval_required_before_execution
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+  - id: advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+    title: Advanced personal AI generation formal adoption review boundary readonly audit
+    phase: advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+    humanApprovalBoundary: >-
+      Seeded by advanced-next-implementation-queue-seeding-post-public-id-redaction as a readonly guard before any
+      future formal-adoption UI or route work. Scope audits existing formal adoption review boundary and confirms formal
+      adoption write remains blocked. It must not implement code, write formal content, access DB rows, call providers,
+      or alter route/service/schema contracts.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+    readonlyFiles:
+      - src/app/api/v1/personal-ai-generation-results/[publicId]/formal-adoption-reviews/route.ts
+      - src/server/contracts/personal-ai-generation-formal-adoption-contract.ts
+      - src/server/services/personal-ai-generation-formal-adoption-service.ts
+      - src/server/services/personal-ai-generation-formal-adoption-runtime.ts
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - formal adoption write
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: fresh_user_approval_required_before_execution
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-formal-adoption-service.test.ts src/server/services/personal-ai-generation-formal-adoption-runtime.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
