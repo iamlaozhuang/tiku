@@ -27,16 +27,22 @@ describe("AI provider redaction and function contract", () => {
       },
     });
     const serializedProviderResult = JSON.stringify(providerResult);
+    const serializedProviderRequestReference = JSON.stringify(
+      providerResult.providerRequestPayload,
+    );
+    const serializedProviderResponseReference = JSON.stringify(
+      providerResult.providerResponsePayload,
+    );
 
     expect(providerResult.providerRequestPayload).toEqual({
-      payloadKind: "provider_request",
+      referenceKind: "request_redaction_boundary",
       redactionStatus: "redacted",
-      summary: "redacted provider request payload",
+      summary: "redacted provider request",
     });
     expect(providerResult.providerResponsePayload).toEqual({
-      payloadKind: "provider_response",
+      referenceKind: "response_redaction_boundary",
       redactionStatus: "redacted",
-      summary: "redacted provider response payload",
+      summary: "redacted provider response",
     });
     expect(providerResult.providerExecutionGate).toEqual({
       gate: "provider_execution",
@@ -48,6 +54,20 @@ describe("AI provider redaction and function contract", () => {
     expect(serializedProviderResult).not.toContain("apiKey");
     expect(serializedProviderResult).not.toContain("secret");
     expect(serializedProviderResult).not.toContain("requestId");
+    expect(serializedProviderRequestReference).not.toContain("payloadKind");
+    expect(serializedProviderRequestReference).not.toContain(
+      "provider_request",
+    );
+    expect(serializedProviderRequestReference).not.toContain(
+      "provider request payload",
+    );
+    expect(serializedProviderResponseReference).not.toContain("payloadKind");
+    expect(serializedProviderResponseReference).not.toContain(
+      "provider_response",
+    );
+    expect(serializedProviderResponseReference).not.toContain(
+      "provider response payload",
+    );
   });
 
   it("uses glossary-compatible AI function values across prompt registry keys", () => {

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: fix-personal-ai-generation-persistence-failure-semantics
-updatedAt: "2026-06-14T19:01:55-07:00"
+currentPhase: fix-ai-mock-provider-secret-like-payload-shape
+updatedAt: "2026-06-14T19:16:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6b313f37b84a48b61fd2cbe11aad2e85c06123fc
-  lastKnownOriginMasterSha: 6b313f37b84a48b61fd2cbe11aad2e85c06123fc
+  lastKnownMasterSha: f028f0ad126e6662a561119ed9b983418c9a86ec
+  lastKnownOriginMasterSha: f028f0ad126e6662a561119ed9b983418c9a86ec
 currentTask:
-  id: fix-personal-ai-generation-persistence-failure-semantics
+  id: fix-ai-mock-provider-secret-like-payload-shape
   status: closed
   sourceStory: current-state-checkpoint-and-implementation-audit
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-personal-ai-generation-persistence-failure-semantics.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-persistence-failure-semantics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-personal-ai-generation-persistence-failure-semantics.md
-  branch: codex/fix-personal-ai-generation-persistence-failure-semantics
+  planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
+  branch: codex/fix-ai-mock-provider-secret-like-payload-shape
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -340,6 +340,7 @@ qualityGates:
     fixPersonalAiGenerationUserTypeBoundary: pass_local_validation_module_gates
     fixPersonalAiGenerationUniqueRequestIdentifiers: pass_local_validation_module_gates
     fixPersonalAiGenerationPersistenceFailureSemantics: pass_local_validation_module_gates
+    fixAiMockProviderSecretLikePayloadShape: pass_local_validation_module_gates
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -358,8 +359,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    fix-personal-ai-generation-persistence-failure-semantics has passed RED/GREEN, targeted route unit, lint,
-    typecheck, and full unit. Continue only through Module Run v2 readiness gates, local commit, fast-forward merge to
-    master, master-side validation, push origin/master, and merged short-branch cleanup before claiming
-    fix-ai-mock-provider-secret-like-payload-shape.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-persistence-failure-semantics.md
+    fix-ai-mock-provider-secret-like-payload-shape has passed RED/GREEN, targeted AI/redaction test, lint, typecheck,
+    and full unit. Continue only through Module Run v2 readiness gates, local commit, fast-forward merge to master,
+    master-side validation, push origin/master, and merged short-branch cleanup before claiming
+    audit-student-experience-unit-suite-timeout.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
