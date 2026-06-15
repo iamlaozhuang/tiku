@@ -14764,3 +14764,294 @@ tasks:
       - payment/external-service
       - PR/force-push
       - Cost Calibration Gate
+  - id: unified-post-repair-next-queue-seeding
+    title: Unified post repair next queue seeding
+    phase: unified-post-repair-next-queue-seeding
+    sourceStory: post-repair-queue-recovery
+    taskKind: docs_only_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    dependencies: []
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-unified-post-repair-next-queue-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-next-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-next-queue-seeding.md
+    humanApproval: >-
+      User approved executing the recommended docs-only post-repair queue recovery. This task may update state/queue,
+      create task plan/evidence/audit records, seed a small pending follow-up queue, locally commit, fast-forward merge
+      to master, push origin/master, and delete the merged short branch after validation. It must not modify source
+      code, tests, e2e, scripts, schema/migration, package/lockfile, env/secret/provider configuration, deploy, payment,
+      external-service, PR, force-push, or Cost Calibration surfaces.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+        approvalSource: fresh_user_approval_2026-06-15
+      push:
+        approved: true
+        target: origin/master
+        approvalSource: fresh_user_approval_2026-06-15
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+        approvalSource: fresh_user_approval_2026-06-15
+    seededTaskCount: 3
+    seededTaskIds:
+      - unified-post-repair-master-health-gap-audit
+      - fix-student-login-session-policy-decision
+      - phase-22-post-repair-local-acceptance-reaudit-planning
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-unified-post-repair-next-queue-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-next-queue-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-next-queue-seeding.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - scripts/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-post-repair-next-queue-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-post-repair-next-queue-seeding
+    blockedGates:
+      - source/test/runtime implementation
+      - e2e
+      - env/secret/provider configuration
+      - provider/model request/quota use
+      - schema/migration
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: unified-post-repair-master-health-gap-audit
+    title: Unified post repair master health and gap audit
+    phase: unified-post-repair-master-health-gap-audit
+    sourceStory: post-repair-queue-recovery
+    seededFromTask: unified-post-repair-next-queue-seeding
+    seedCategory: post_repair_gap_audit
+    taskKind: docs_only_readonly_gap_audit
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-post-repair-next-queue-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-unified-post-repair-master-health-gap-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-master-health-gap-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-master-health-gap-audit.md
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this task. The task may perform a docs-only/read-only audit
+      of post-repair master health, queue state, the blocked student-login session conflict, Phase 22 roadmap posture,
+      and next implementation candidates. It must not modify runtime code, tests, e2e, schema/migration, package files,
+      env/secret/provider configuration, deploy, payment, external-service, PR, force-push, or Cost Calibration surfaces.
+    evidenceRedactionBoundary: no token value, Authorization header, password, secret, database URL, provider payload, raw prompt, raw answer, row data, payment data, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-unified-post-repair-master-health-gap-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-master-health-gap-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-master-health-gap-audit.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - src/**
+      - tests/unit/**
+      - scripts/agent-system/Test-GitCompletionReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-post-repair-master-health-gap-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-post-repair-master-health-gap-audit
+    blockedGates:
+      - executing without future fresh user instruction
+      - source/test/runtime implementation
+      - e2e
+      - env/secret/provider configuration
+      - provider/model request/quota use
+      - schema/migration
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: fix-student-login-session-policy-decision
+    title: Fix student login session policy decision package
+    phase: fix-student-login-session-policy-decision
+    sourceStory: master-health-baseline
+    seededFromTask: unified-post-repair-next-queue-seeding
+    seedCategory: blocked_validation_recovery_decision
+    taskKind: docs_only_session_policy_decision
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - unified-post-repair-master-health-gap-audit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-fix-student-login-session-policy-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-fix-student-login-session-policy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-fix-student-login-session-policy-decision.md
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this task. The task may prepare a docs-only decision package
+      for the conflict between `tests/unit/student-login-ui.test.ts` client-token expectations and the
+      `server_session` auth boundary. It may recommend future implementation paths, but must not change auth behavior,
+      runtime code, tests, session contracts, schema/migration, env/secret, provider configuration, dependency files,
+      e2e, deploy, payment, external-service, PR, force-push, or Cost Calibration surfaces.
+    evidenceRedactionBoundary: no token value, Authorization header, password, secret, database URL, provider payload, row data, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-fix-student-login-session-policy-decision.md
+      - docs/05-execution-logs/evidence/2026-06-15-fix-student-login-session-policy-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-fix-student-login-session-policy-decision.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - src/app/(auth)/login/page.tsx
+      - src/server/contracts/user-auth/session-boundary.ts
+      - tests/unit/student-login-ui.test.ts
+      - tests/unit/auth/session-personal-auth-boundary.test.ts
+      - scripts/agent-system/Test-GitCompletionReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-student-login-session-policy-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-student-login-session-policy-decision
+    blockedGates:
+      - executing without future fresh user instruction
+      - auth/session security boundary change
+      - source/test/runtime implementation
+      - e2e
+      - env/secret/provider configuration
+      - provider/model request/quota use
+      - schema/migration
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: phase-22-post-repair-local-acceptance-reaudit-planning
+    title: Phase 22 post repair local acceptance re-audit planning
+    phase: phase-22-post-repair-local-acceptance-reaudit-planning
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: unified-post-repair-next-queue-seeding
+    seedCategory: phase_22_planning
+    taskKind: docs_only_local_acceptance_reaudit_planning
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - fix-student-login-session-policy-decision
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this task. The task may define a docs-only Phase 22
+      post-repair local acceptance re-audit matrix and future local-verification gates. It must not run e2e, browser
+      verification, migrations, seed/bootstrap, provider calls, deploy, source/test implementation, dependency changes,
+      env/secret work, payment, external-service, PR, force-push, or Cost Calibration.
+    evidenceRedactionBoundary: route names, task ids, status labels, command summaries, and redacted matrix entries only; no secret, token, database URL, provider payload, prompt, answer, row data, or private user data.
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - scripts/agent-system/Test-GitCompletionReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-post-repair-local-acceptance-reaudit-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-post-repair-local-acceptance-reaudit-planning
+    blockedGates:
+      - executing without future fresh user instruction
+      - source/test/runtime implementation
+      - local browser/e2e verification
+      - migration/seed/bootstrap
+      - env/secret/provider configuration
+      - provider/model request/quota use
+      - schema/migration
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: audit-student-experience-unit-suite-timeout
-updatedAt: "2026-06-14T20:57:37-07:00"
+currentPhase: unified-post-repair-next-queue-seeding
+updatedAt: "2026-06-14T21:31:26-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: e29517bbb9bec0ff345c3e96ad74b03c75c9faf3
   lastKnownOriginMasterSha: e29517bbb9bec0ff345c3e96ad74b03c75c9faf3
 currentTask:
-  id: audit-student-experience-unit-suite-timeout
+  id: unified-post-repair-next-queue-seeding
   status: closed
-  sourceStory: current-state-checkpoint-and-implementation-audit
-  planPath: docs/05-execution-logs/task-plans/2026-06-14-audit-student-experience-unit-suite-timeout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-14-audit-student-experience-unit-suite-timeout.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-audit-student-experience-unit-suite-timeout.md
-  branch: codex/audit-student-experience-unit-suite-timeout
+  sourceStory: post-repair-queue-recovery
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-unified-post-repair-next-queue-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-next-queue-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-next-queue-seeding.md
+  branch: codex/unified-post-repair-next-queue-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -343,6 +343,7 @@ qualityGates:
     fixPersonalAiGenerationPersistenceFailureSemantics: pass_local_validation_module_gates
     fixAiMockProviderSecretLikePayloadShape: pass_local_validation_module_gates
     auditStudentExperienceUnitSuiteTimeout: pass_no_timeout_reproduced_full_unit
+    unifiedPostRepairNextQueueSeeding: pass_docs_only_next_queue_seed
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -361,10 +362,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    The requested nine repair/planning candidates are already closed, have pass evidence and audit reviews, and their
-    closeout commits are ancestors of origin/master through e29517bbb9bec0ff345c3e96ad74b03c75c9faf3. The active queue
-    currently has zero pending tasks, so automation should not re-claim those closed candidates. Continue only after a
-    fresh scoped task selection, queue seeding, or explicit approval for another docs-only queue/state update; provider,
-    env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and Cost
-    Calibration Gate work remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-unified-repair-candidates-completion-state-reconciliation.md
+    The nine repair/planning candidates are closed and should not be re-claimed. The next seeded serial task is
+    unified-post-repair-master-health-gap-audit, followed by fix-student-login-session-policy-decision and
+    phase-22-post-repair-local-acceptance-reaudit-planning. Claiming any seeded task still requires fresh instruction
+    and must preserve provider, env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR,
+    force-push, and Cost Calibration Gate blocks.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-next-queue-seeding.md
