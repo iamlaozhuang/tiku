@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-answer-status-alignment
-updatedAt: "2026-06-15T11:54:09-07:00"
+currentPhase: advanced-organization-training-answer-status-alignment-readonly-recheck
+updatedAt: "2026-06-15T12:03:43-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e7828e97c2f9b55b21ca2a6107d23d0d7f8c19f4
-  lastKnownOriginMasterSha: e7828e97c2f9b55b21ca2a6107d23d0d7f8c19f4
+  lastKnownMasterSha: 508ef1ddb80c3913c93e22fef783a5b0d96a1372
+  lastKnownOriginMasterSha: 508ef1ddb80c3913c93e22fef783a5b0d96a1372
 currentTask:
-  id: advanced-organization-training-answer-status-alignment
+  id: advanced-organization-training-answer-status-alignment-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment.md
-  branch: codex/advanced-organization-training-answer-status-alignment
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
+  branch: codex/advanced-organization-training-answer-status-alignment-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -387,9 +387,10 @@ qualityGates:
     advancedNextImplementationQueueSeedingPostModelConfigRedaction: pass_docs_only_seeded_organization_training_queue
     advancedOrganizationTrainingBoundaryReadonlyAudit: pass_readonly_audit_no_blocking_findings
     advancedOrganizationTrainingAnswerStatusAlignment: pass_tdd_answer_status_alignment
-    preCommitHook: pass_advanced_organization_training_answer_status_alignment_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_answer_status_alignment_closeout_readiness
-    prePushHook: pass_advanced_organization_training_answer_status_alignment_pre_push_readiness
+    advancedOrganizationTrainingAnswerStatusAlignmentReadonlyRecheck: pass_readonly_recheck_no_findings
+    preCommitHook: pass_advanced_organization_training_answer_status_alignment_readonly_recheck_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_answer_status_alignment_readonly_recheck_closeout_readiness
+    prePushHook: pass_advanced_organization_training_answer_status_alignment_readonly_recheck_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -405,10 +406,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-answer-status-alignment closed with pass. The answer status union is now aligned to
-    in_progress, submitted, and read_only before downstream organization training service/route/repository/mapper/API
-    runtime/UI work. Recommended next action is a narrow readonly recheck or the next approved organization training
-    queue item after repository readiness reconfirms clean master/origin parity. DB access, provider/env/secret,
-    quota/cost, e2e/browser/dev-server, staging/prod/cloud, deploy, payment, external-service, row/private data, formal
-    content write, PR, and force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment.md
+    advanced-organization-training-answer-status-alignment-readonly-recheck closed with pass. The answer status union
+    remains aligned to in_progress, submitted, and read_only; scoped unit coverage is present; no downstream
+    organization training service/route/repository/mapper/API runtime/UI/schema consumer exists yet; ADR-002 layering
+    and blocked gates remain intact. Recommended next action is to seed or execute a narrow TDD organization training
+    draft lifecycle service task only after explicit approval and a separate allowedFiles/blockedFiles boundary.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
