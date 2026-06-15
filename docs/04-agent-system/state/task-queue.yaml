@@ -18358,3 +18358,93 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck
+  - id: advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+    title: Advanced admin AI ops model-config public identifier display policy readonly audit
+    phase: advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: closed
+    result: pass_with_needs_recheck
+    retryCount: 0
+    claimedAt: "2026-06-15T10:19:29-07:00"
+    closedAt: "2026-06-15T10:22:38-07:00"
+    dependencies:
+      - advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck
+    humanApprovalBoundary: >-
+      User explicitly approved executing the recommended readonly follow-up after
+      advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck. Scope is readonly policy audit of the
+      same-page admin AI ops model-config public identifier display boundary. It may decide whether public identifiers are
+      an admin diagnostics/configuration exception or should be hidden/collapsed by default. It must not implement product
+      code, modify route/service/repository/schema/provider behavior, access DB, or expose public identifier value lists,
+      row data, private data, raw prompts, raw answers, provider payloads, secrets, or tokens.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+    readonlyFiles:
+      - src/app/(admin)/ops/ai-audit-logs/page.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.tsx
+      - src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx
+      - src/features/admin/model-config-management/AdminModelConfigManagement.tsx
+      - src/server/contracts/admin-ai-audit-log-ops-contract.ts
+      - src/server/services/admin-ai-audit-log-runtime.ts
+      - src/server/services/admin-ai-audit-log-ops-route.ts
+      - src/server/services/admin-ai-audit-log-ops-service.ts
+      - src/server/services/model-config-runtime.ts
+      - src/app/api/v1/model-providers/**
+      - src/app/api/v1/model-configs/**
+      - src/app/api/v1/prompt-templates/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - public identifier value list exposure
+      - row/private data exposure
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption target write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/app/(admin)/ops/ai-audit-logs/AdminAiAuditLogOpsBaseline.test.tsx"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
