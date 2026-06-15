@@ -14,6 +14,7 @@ import type { ApiResponse } from "@/server/contracts/api-response";
 import type {
   AiCallLogCostSummaryDto,
   AiCallLogListDto,
+  AuditLogSummaryDto,
   AuditLogListDto,
   ModelConfigListDto,
   ModelConfigSummaryDto,
@@ -22,8 +23,10 @@ import type {
   PromptTemplateListDto,
   PromptTemplateSummaryDto,
 } from "@/server/contracts/admin-ai-audit-log-ops-contract";
+import type { PersonalAiGenerationFormalAdoptionReviewDto } from "@/server/contracts/personal-ai-generation-formal-adoption-contract";
 
 type AdminAiAuditLogOpsState = "ready" | "loading" | "empty" | "error";
+type AdminFormalAdoptionReviewState = "idle" | "loading" | "success" | "error";
 
 type AdminAiAuditRuntimeData = {
   aiCallLogs: AiCallLogListDto["aiCallLogs"];
@@ -36,6 +39,9 @@ type AdminAiAuditRuntimeData = {
 
 const sessionTokenStorageKey = "tiku.localSessionToken";
 const runtimeQuery = "page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc";
+const formalAdoptionTargetResourceType = "personal_ai_generation_result";
+const formalAdoptionReviewTargetType = "question";
+const formalAdoptionReviewReasonCategory = "content_quality_passed";
 
 const staticRuntimeData: AdminAiAuditRuntimeData = {
   modelProviders: [
@@ -91,6 +97,18 @@ const staticRuntimeData: AdminAiAuditRuntimeData = {
     },
   ],
   auditLogs: [
+    {
+      publicId: "audit-log-formal-review-candidate-public-001",
+      actorPublicId: "admin-content-public-001",
+      actorRole: "content_admin",
+      actionType: "personal_ai_generation_result.formal_adoption_review.ready",
+      targetResourceType: formalAdoptionTargetResourceType,
+      targetPublicId: "personal_ai_result_public_admin_901",
+      resultStatus: "success",
+      metadataSummary: "redacted formal adoption candidate metadata",
+      requestIp: null,
+      createdAt: "2026-05-21T08:00:00.000Z",
+    },
     {
       publicId: "audit-log-public-001",
       actorPublicId: "admin-super-001",
@@ -153,8 +171,17 @@ export function AdminAiAuditLogOpsBaseline({
     useState<AdminAiAuditLogOpsState>(state);
   const [runtimeData, setRuntimeData] =
     useState<AdminAiAuditRuntimeData>(staticRuntimeData);
+  const [formalAdoptionReviewState, setFormalAdoptionReviewState] =
+    useState<AdminFormalAdoptionReviewState>("idle");
+  const [formalAdoptionReview, setFormalAdoptionReview] = useState<
+    PersonalAiGenerationFormalAdoptionReviewDto["adoptionReview"] | null
+  >(null);
   const shouldLoadRuntimeData = runtimeEnabled && state === "ready";
   const effectiveRuntimeState = shouldLoadRuntimeData ? runtimeState : state;
+  const formalAdoptionReviewCandidate = useMemo(
+    () => findFormalAdoptionReviewCandidate(runtimeData.auditLogs),
+    [runtimeData.auditLogs],
+  );
   const managementKey = [
     runtimeData.modelProviders.map((provider) => provider.publicId).join(","),
     runtimeData.modelConfigs
@@ -218,6 +245,36 @@ export function AdminAiAuditLogOpsBaseline({
     return createRuntimeCallbacks();
   }, [runtimeEnabled]);
 
+  async function handleSubmitFormalAdoptionReview() {
+    if (formalAdoptionReviewCandidate === null) {
+      return;
+    }
+
+    setFormalAdoptionReview(null);
+    setFormalAdoptionReviewState("loading");
+
+    try {
+      const response =
+        await postAdminApi<PersonalAiGenerationFormalAdoptionReviewDto>(
+          `/api/v1/personal-ai-generation-results/${encodeURIComponent(
+            formalAdoptionReviewCandidate.targetPublicId,
+          )}/formal-adoption-reviews`,
+          readRequiredSessionToken(),
+          {
+            reviewDecision: "approved",
+            reviewReasonCategory: formalAdoptionReviewReasonCategory,
+            reviewerConfirmed: true,
+            targetType: formalAdoptionReviewTargetType,
+          },
+        );
+
+      setFormalAdoptionReview(readApiData(response).adoptionReview);
+      setFormalAdoptionReviewState("success");
+    } catch {
+      setFormalAdoptionReviewState("error");
+    }
+  }
+
   if (effectiveRuntimeState === "loading") {
     return (
       <AdminOpsStatePanel
@@ -266,6 +323,13 @@ export function AdminAiAuditLogOpsBaseline({
         initialModelProviders={runtimeData.modelProviders}
         initialPromptTemplates={runtimeData.promptTemplates}
         {...runtimeCallbacks}
+      />
+
+      <AdminFormalAdoptionReviewPanel
+        candidate={formalAdoptionReviewCandidate}
+        review={formalAdoptionReview}
+        state={formalAdoptionReviewState}
+        onSubmit={() => void handleSubmitFormalAdoptionReview()}
       />
 
       <div className="grid gap-4 xl:grid-cols-3">
@@ -328,6 +392,21 @@ export function AdminAiAuditLogOpsBaseline({
       </div>
     </div>
   );
+}
+
+function findFormalAdoptionReviewCandidate(
+  auditLogs: AuditLogSummaryDto[],
+): { targetPublicId: string } | null {
+  const candidate = auditLogs.find(
+    (auditLog) =>
+      auditLog.targetResourceType === formalAdoptionTargetResourceType &&
+      auditLog.targetPublicId !== null,
+  );
+
+  return candidate?.targetPublicId === undefined ||
+    candidate.targetPublicId === null
+    ? null
+    : { targetPublicId: candidate.targetPublicId };
 }
 
 async function loadRuntimeData(
@@ -578,6 +657,76 @@ function hasAnyRuntimeData(data: AdminAiAuditRuntimeData): boolean {
   );
 }
 
+function AdminFormalAdoptionReviewPanel({
+  candidate,
+  onSubmit,
+  review,
+  state,
+}: {
+  candidate: { targetPublicId: string } | null;
+  onSubmit: () => void;
+  review: PersonalAiGenerationFormalAdoptionReviewDto["adoptionReview"] | null;
+  state: AdminFormalAdoptionReviewState;
+}) {
+  const isSubmitting = state === "loading";
+  const reviewStatus = review?.reviewStatus ?? "awaiting_metadata_review";
+  const formalTargetWriteStatus =
+    review?.formalTargetWriteStatus ?? "blocked_without_follow_up_task";
+  const redactionStatus = review?.sourceReference.redactionStatus ?? "redacted";
+
+  return (
+    <section className="bg-surface border-border rounded-md border p-4 shadow-sm">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 space-y-2">
+          <h2 className="text-text-primary text-base font-semibold">
+            正式入库复核
+          </h2>
+          <p className="text-text-secondary max-w-3xl text-sm leading-6">
+            仅提交 metadata-only 人工复核，结果保持
+            redacted；正式题库写入仍被后续任务阻断。
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <AdminOpsStatusBadge label="metadata-only" />
+            <AdminOpsStatusBadge label={redactionStatus} />
+            <AdminOpsStatusBadge label={formalTargetWriteStatus} />
+          </div>
+        </div>
+        <button
+          type="button"
+          disabled={candidate === null || isSubmitting}
+          onClick={onSubmit}
+          className="bg-secondary text-secondary-foreground flex h-9 shrink-0 items-center justify-center rounded-lg px-3 text-sm font-medium transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          提交元数据复核
+        </button>
+      </div>
+
+      <dl className="border-border mt-4 grid gap-0 rounded-md border px-3 md:grid-cols-3">
+        <AdminOpsDefinition label="reviewStatus" value={reviewStatus} />
+        <AdminOpsDefinition
+          label="formalTargetWriteStatus"
+          value={formalTargetWriteStatus}
+        />
+        <AdminOpsDefinition label="redactionStatus" value={redactionStatus} />
+      </dl>
+
+      {candidate === null ? (
+        <p className="text-text-muted mt-3 text-sm">暂无可复核的脱敏结果</p>
+      ) : null}
+      {state === "loading" ? (
+        <p className="text-brand-primary mt-3 text-sm font-medium">
+          正式入库复核提交中
+        </p>
+      ) : null}
+      {state === "error" ? (
+        <p className="text-warning bg-warning/10 mt-3 rounded-lg px-3 py-2 text-sm font-medium">
+          正式入库复核暂不可用
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function AdminOpsStatePanel({
   icon,
   title,
@@ -593,6 +742,29 @@ function AdminOpsStatePanel({
       <h1 className="text-text-primary mt-4 text-base font-semibold">
         {title}
       </h1>
+    </div>
+  );
+}
+
+function AdminOpsStatusBadge({ label }: { label: string }) {
+  return (
+    <span className="bg-secondary text-secondary-foreground rounded-lg px-2 py-1 text-xs font-medium">
+      {label}
+    </span>
+  );
+}
+
+function AdminOpsDefinition({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="border-border border-b py-3 last:border-b-0 md:border-r md:border-b-0 md:px-3 md:first:pl-0 md:last:border-r-0">
+      <dt className="text-text-muted text-xs">{label}</dt>
+      <dd className="text-text-primary mt-1 text-sm font-medium">{value}</dd>
     </div>
   );
 }
