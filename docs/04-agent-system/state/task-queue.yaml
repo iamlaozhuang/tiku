@@ -9516,6 +9516,7 @@ tasks:
     seededExecutionModule: personal-learning-ai
     targetClosureItem: dependency implementation gate
     behaviorBoundary: personal-learning-ai::dependency implementation
+    taskKind: dependency_implementation
     moduleRunVersion: 2
     status: closed
     result: pass
@@ -9582,6 +9583,7 @@ tasks:
     seededExecutionModule: personal-learning-ai
     targetClosureItem: provider env secret destination gate
     behaviorBoundary: personal-learning-ai::provider env secret destination
+    taskKind: env_secret_destination
     moduleRunVersion: 2
     status: closed
     result: pass
@@ -9650,6 +9652,7 @@ tasks:
     seededExecutionModule: personal-learning-ai
     targetClosureItem: provider adapter implementation
     behaviorBoundary: personal-learning-ai::provider adapter
+    taskKind: provider_adapter_implementation
     moduleRunVersion: 2
     status: closed
     result: pass
@@ -11515,6 +11518,7 @@ tasks:
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
+      - npm.cmd run test:unit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId unified-standard-advanced-capability-catalog
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId unified-standard-advanced-capability-catalog
@@ -16184,3 +16188,87 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-verification-rollup-closeout
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-verification-rollup-closeout
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-verification-rollup-closeout
+  - id: advanced-readiness-state-queue-reconciliation
+    title: Advanced readiness state queue reconciliation
+    phase: advanced-readiness-state-queue-reconciliation
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: docs_state_evidence_reconciliation
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    claimedAt: "2026-06-15T04:13:51-07:00"
+    closedAt: "2026-06-15T04:18:15-07:00"
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-verification-rollup-closeout
+    humanApprovalBoundary: >-
+      User approved step 1 reconciliation after the standard/advanced post-Phase 22 implementation readiness audit. This
+      task may update governance metadata in project-state.yaml, task-queue.yaml, this task's plan/evidence/audit, and
+      the already closed batch-121 and batch-122 evidence result headers. It must not start advanced implementation or
+      code audit execution.
+    reconciliationScope:
+      repositorySha: sync_current_real_master_origin_master
+      queueMetadata:
+        - add missing taskKind for closed batch-163 dependency implementation
+        - add missing taskKind for closed batch-164 provider env secret destination
+        - add missing taskKind for closed batch-165 provider adapter implementation
+      evidenceMetadata:
+        - normalize closed batch-121 evidence result header
+        - normalize closed batch-122 evidence result header
+      activeQueueDecision: no_runtime_implementation_claimed
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+      - docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - source/test/e2e/schema/drizzle/scripts/package/lockfile changes
+      - dependency changes
+      - .env* read/write/value disclosure
+      - database access
+      - dev server
+      - Browser or Playwright
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR or force push
+      - secret/token/cookie/Authorization header/DB URL/publicId/row-data/private-data exposure
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+    validationCommands:
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-15-advanced-readiness-state-queue-reconciliation.md docs/05-execution-logs/evidence/2026-06-15-advanced-readiness-state-queue-reconciliation.md docs/05-execution-logs/audits-reviews/2026-06-15-advanced-readiness-state-queue-reconciliation.md docs/05-execution-logs/evidence/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-readiness-state-queue-reconciliation
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-readiness-state-queue-reconciliation
