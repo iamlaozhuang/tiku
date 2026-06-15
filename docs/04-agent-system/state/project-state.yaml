@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-draft-lifecycle-service-readonly-recheck
-updatedAt: "2026-06-15T12:43:56-07:00"
+currentPhase: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding
+updatedAt: "2026-06-15T12:51:48-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a7d0f8a2910f482c087a69af975711545d18b678
-  lastKnownOriginMasterSha: a7d0f8a2910f482c087a69af975711545d18b678
+  lastKnownMasterSha: ba120b5d546a631d61659395a1ca754da319f7eb
+  lastKnownOriginMasterSha: ba120b5d546a631d61659395a1ca754da319f7eb
 currentTask:
-  id: advanced-organization-training-draft-lifecycle-service-readonly-recheck
+  id: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
-  branch: codex/advanced-organization-training-draft-lifecycle-service-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding.md
+  branch: codex/advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -392,9 +392,10 @@ qualityGates:
     advancedOrganizationTrainingDraftLifecycleService: pass_with_subject_scope_needs_recheck
     advancedOrganizationTrainingDraftLifecycleServiceReadonlyRecheckSeeding: pass_docs_only_seeded_service_readonly_recheck
     advancedOrganizationTrainingDraftLifecycleServiceReadonlyRecheck: pass_readonly_recheck_with_level_mismatch_test_coverage_needs_recheck
-    preCommitHook: pass_advanced_organization_training_draft_lifecycle_service_readonly_recheck_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_draft_lifecycle_service_readonly_recheck_closeout_readiness
-    prePushHook: pass_advanced_organization_training_draft_lifecycle_service_readonly_recheck_pre_push_readiness
+    advancedOrganizationTrainingDraftLifecycleServiceLevelMismatchTestCoverageSeeding: pass_docs_only_seeded_level_mismatch_test_coverage_task
+    preCommitHook: pass_advanced_organization_training_draft_lifecycle_service_level_mismatch_test_coverage_seeding_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_draft_lifecycle_service_level_mismatch_test_coverage_seeding_closeout_readiness
+    prePushHook: pass_advanced_organization_training_draft_lifecycle_service_level_mismatch_test_coverage_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -410,7 +411,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-draft-lifecycle-service-readonly-recheck closed with pass_with_needs_recheck. Current
-    narrow service boundary remains acceptable, but a narrow TDD follow-up should add explicit level mismatch coverage
-    and the subject authorization contract decision remains blocked before broader lifecycle expansion.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+    advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding closed by adding a
+    pending narrow TDD task for explicit level mismatch coverage in the organization training manual draft service tests.
+    Recommended next action is advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage after
+    fresh user approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding.md
