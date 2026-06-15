@@ -317,18 +317,36 @@ afterEach(() => {
 });
 
 describe("AdminPaperManagement", () => {
-  it("renders unauthorized state without calling protected paper APIs when the local session token is missing", () => {
-    const fetchMock = vi.fn();
+  it("renders unauthorized state without calling protected paper APIs when the local session token is missing", async () => {
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse({
+          code: 401001,
+          message: "Admin session is required.",
+          data: null,
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(AdminPaperManagement));
 
-    expect(screen.getByText("请先登录后台")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "前往登录" })).toHaveAttribute(
-      "href",
-      "/login",
+    expect(await screen.findByRole("alert")).toHaveAttribute(
+      "data-admin-ux-state",
+      "permission-denied",
     );
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/login");
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+    ]);
   });
 
   it("loads the paper management runtime with lifecycle actions and safe public identifiers", async () => {

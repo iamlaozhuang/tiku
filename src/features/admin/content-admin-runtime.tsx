@@ -17,6 +17,7 @@ export type AdminLoadState =
 type AdminUxState = "loading" | "empty" | "error" | "permission-denied";
 
 export const SESSION_TOKEN_STORAGE_KEY = "tiku.localSessionToken";
+export const COOKIE_BACKED_SESSION_TOKEN = "__cookie_backed_session__";
 export const DEFAULT_CONTENT_LIST_QUERY =
   "page=1&pageSize=20&sortBy=updatedAt&sortOrder=desc";
 
@@ -34,20 +35,27 @@ export const subjectLabels = {
 export function getStoredSessionToken(): string | null {
   const sessionToken = localStorage.getItem(SESSION_TOKEN_STORAGE_KEY)?.trim();
 
-  return sessionToken === "" ? null : (sessionToken ?? null);
+  return sessionToken === "" || sessionToken === undefined
+    ? COOKIE_BACKED_SESSION_TOKEN
+    : sessionToken;
 }
 
-export function createAdminAuthHeaders(sessionToken: string) {
-  return {
-    authorization: `Bearer ${sessionToken}`,
-  };
+export function createAdminAuthHeaders(
+  sessionToken: string | null,
+): Record<string, string> {
+  if (sessionToken === null || sessionToken === COOKIE_BACKED_SESSION_TOKEN) {
+    return {};
+  }
+
+  return { authorization: `Bearer ${sessionToken}` };
 }
 
 export async function fetchAdminApi<TData>(
   path: string,
-  sessionToken: string,
+  sessionToken: string | null,
 ): Promise<ApiResponse<TData | null>> {
   const response = await fetch(path, {
+    credentials: "same-origin",
     headers: createAdminAuthHeaders(sessionToken),
   });
 

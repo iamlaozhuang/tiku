@@ -709,13 +709,34 @@ describe("admin content and knowledge ops baseline", () => {
   });
 
   it("filters knowledge_node rows and renders empty, unauthorized, and error states", async () => {
-    const fetchMock = vi.fn();
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse({
+          code: 401001,
+          message: "Admin session is required.",
+          data: null,
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(AdminKnowledgeNodeManagement));
 
-    expect(screen.getByText("请先登录后台")).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(await screen.findByRole("alert")).toHaveAttribute(
+      "data-admin-ux-state",
+      "permission-denied",
+    );
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+    ]);
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
@@ -1197,13 +1218,34 @@ describe("admin content and knowledge ops baseline", () => {
   });
 
   it("renders resource empty, unauthorized, error, filtered-empty, and unsafe publicId boundaries", async () => {
-    const fetchMock = vi.fn();
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      const path = String(url);
+
+      if (path === "/api/v1/sessions") {
+        return createJsonResponse({
+          code: 401001,
+          message: "Admin session is required.",
+          data: null,
+        });
+      }
+
+      return createJsonResponse({
+        code: 404001,
+        message: "missing",
+        data: null,
+      });
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(AdminResourceKnowledgeManagement));
 
-    expect(screen.getByText("请先登录后台")).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(await screen.findByRole("alert")).toHaveAttribute(
+      "data-admin-ux-state",
+      "permission-denied",
+    );
+    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual([
+      "/api/v1/sessions",
+    ]);
 
     cleanup();
     localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");

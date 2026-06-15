@@ -14699,7 +14699,7 @@ tasks:
     taskKind: implementation
     moduleRunVersion: 2
     status: blocked_validation_failure
-    result: blocked_validation_failure
+    result: blocked_v5_partial_repair_needs_admin_flow_runtime
     retryCount: 0
     planPath: docs/05-execution-logs/task-plans/2026-06-14-fix-student-login-local-session-token.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-local-session-token.md
@@ -15306,8 +15306,16 @@ tasks:
     seedCategory: phase_22_local_acceptance_verification_matrix
     taskKind: local_acceptance_verification_candidate
     moduleRunVersion: 2
-    status: pending
-    retryCount: 0
+    status: closed
+    result: pass
+    claimedAt: "2026-06-15T00:45:25-07:00"
+    blockedAt: "2026-06-15T01:04:29-07:00"
+    resumedAt: "2026-06-15T02:00:00-07:00"
+    blockedAgainAt: "2026-06-15T02:20:00-07:00"
+    resumedAgainAt: "2026-06-15T02:35:00-07:00"
+    completedAt: "2026-06-15T02:50:00-07:00"
+    retryCount: 2
+    lastFailurePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
     dependencies:
       - phase-22-local-acceptance-verification-seeding
     verificationJourney: content_production
@@ -15338,6 +15346,15 @@ tasks:
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
+      - src/features/admin/content-admin-runtime.tsx
+      - src/server/services/content-question-material-runtime.ts
+      - src/server/services/admin-flow-runtime.ts
+      - src/server/services/paper-composition-lifecycle-runtime.ts
+      - src/server/services/rag-resource-knowledge-runtime.ts
+      - tests/unit/admin-content-knowledge-ops-baseline.test.ts
+      - tests/unit/admin-paper-ui.test.ts
+      - tests/unit/admin-question-material-ui.test.ts
+      - tests/unit/phase-22-content-admin-cookie-session-repair.test.ts
       - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-content-production-verification.md
       - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
       - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-content-production-verification.md
@@ -15356,6 +15373,85 @@ tasks:
       - drizzle/**
       - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
+    freshInstruction:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved a unified upfront authorization for Phase 22 remaining seeded candidate tasks 2-6. For this
+        current task, the approval permits local content-production verification only, one-at-a-time task execution,
+        localhost/127.0.0.1 dev server use, Browser-first or Playwright-fallback local observation, application UI/API
+        mediated local dev DB use, in-process use of the existing project runtime/env loader only for the required local
+        DATABASE_URL, and minimal current-task fixture creation through existing ORM or service-layer paths. It also
+        permits task plan/evidence/audit/state/queue updates, validation commands, one local commit, fast-forward merge
+        to master, master validation, push origin/master, merged local short-branch deletion, fetch prune, and clean
+        alignment checks after the task passes.
+      repairApprovalV5: >-
+        User approved approval package v5 to continue current task 2 repair only and not claim task 3. Source repair is
+        limited to src/features/admin/content-admin-runtime.tsx,
+        src/server/services/content-question-material-runtime.ts,
+        src/server/services/paper-composition-lifecycle-runtime.ts,
+        src/server/services/rag-resource-knowledge-runtime.ts, and necessary minimal corresponding unit tests.
+        The approved repair may make content admin API calls accept cookie-backed sessions via the existing local
+        session/cookie authorization boundary while preserving all secret, env, provider, dependency, schema,
+        migration, e2e, external service, and destructive DB blocks.
+      repairApprovalV6: >-
+        User approved the v6 package to continue current task 2 only and not claim task 3. The approval adds
+        src/server/services/admin-flow-runtime.ts plus minimal corresponding tests under tests/unit/** to the current
+        task allowedFiles so the paper list GET route can use the existing session-cookie authorization boundary.
+    approvalRemainder:
+      stillBlocked:
+        - .env* modification or value disclosure
+        - package or lockfile changes
+        - dependency changes
+        - source/test edits outside the exact v6 approved allowedFiles
+        - e2e/schema/drizzle/script edits
+        - raw SQL
+        - seed/bootstrap scripts
+        - destructive DB operations
+        - object storage, binary upload, OCR, or public URL validation
+        - provider/model calls, quota, cost, or Cost Calibration Gate
+        - staging/prod/cloud/deploy/payment/external-service
+        - PR or force push
+        - secret/token/cookie/Authorization header/DB URL/card-code plaintext/publicId/row-data/private-data exposure
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    localAcceptanceOutcome:
+      apiSurface:
+        status: local_verified
+        summary: >-
+          Bearer-token API path locally verified material, question, knowledge_node, tag binding/filtering, paper,
+          paper_section, publish/archive/copy, and paper_asset metadata.
+      uiSurface:
+        status: local_verified
+        summary: >-
+          V6 local verification passed. Normal admin login kept a cookie-backed session without tiku.localSessionToken,
+          cookie-backed content-production list APIs including GET /api/v1/papers returned code=0, and /content/papers
+          reached ready.
+      paperAssetRemainder:
+        status: metadata_only
+        blocked:
+          - binary upload
+          - object storage
+          - OCR
+          - public URL validation
+      stopReason: null
+    validationCommands:
+      - git diff --check
+      - npm.cmd run test:unit -- tests/unit/phase-22-content-admin-cookie-session-repair.test.ts
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-content-production-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-content-production-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-content-production-verification
   - id: phase-22-local-acceptance-student-answering-verification
     title: Phase 22 student answering local acceptance verification
     phase: phase-22-local-acceptance-student-answering-verification

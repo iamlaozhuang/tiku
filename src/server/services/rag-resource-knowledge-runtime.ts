@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import {
   createErrorResponse,
   createPaginatedResponse,
@@ -182,6 +183,7 @@ const resourceEnableConflictResponse = createErrorResponse(
   ADMIN_CONTENT_KNOWLEDGE_ERROR_CODES.concurrentConflict,
   "Resource cannot be enabled from its current state.",
 );
+const cookieBackedSessionAuthorization = "Bearer __cookie_backed_session__";
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -209,12 +211,27 @@ function canManageContent(actor: ContentAdminActor): boolean {
   );
 }
 
+function getContentAdminAuthorization(request: Request): string | null {
+  if (
+    request.headers.get("authorization")?.trim() ===
+    cookieBackedSessionAuthorization
+  ) {
+    const headers = new Headers(request.headers);
+
+    headers.delete("authorization");
+
+    return getRequestAuthorization(new Request(request.url, { headers }));
+  }
+
+  return getRequestAuthorization(request);
+}
+
 async function resolveAdminActor(
   request: Request,
   sessionService: Pick<SessionService, "getCurrentSession">,
 ): Promise<ContentAdminActor | null> {
   const sessionResponse = await sessionService.getCurrentSession({
-    authorization: request.headers.get("authorization"),
+    authorization: getContentAdminAuthorization(request),
   });
 
   if (sessionResponse.code !== 0 || sessionResponse.data === null) {

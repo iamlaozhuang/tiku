@@ -1,4 +1,5 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import {
   createErrorResponse,
   createPaginatedResponse,
@@ -77,6 +78,7 @@ const userDetailUnavailableResponse = createErrorResponse(
   503603,
   "Admin user detail runtime is not configured.",
 );
+const cookieBackedSessionAuthorization = "Bearer __cookie_backed_session__";
 
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
@@ -96,12 +98,25 @@ function isAdminFlowRole(role: string): role is AdminFlowRole {
   );
 }
 
+function getAdminFlowAuthorization(request: Request): string | null {
+  const authorization = request.headers.get("authorization");
+
+  if (
+    authorization !== null &&
+    authorization !== cookieBackedSessionAuthorization
+  ) {
+    return authorization;
+  }
+
+  return getRequestAuthorization(request);
+}
+
 async function resolveAdminActor(
   request: Request,
   sessionService: Pick<SessionService, "getCurrentSession">,
 ): Promise<AdminFlowActor | null> {
   const sessionResponse = await sessionService.getCurrentSession({
-    authorization: request.headers.get("authorization"),
+    authorization: getAdminFlowAuthorization(request),
   });
 
   if (sessionResponse.code !== 0 || sessionResponse.data === null) {

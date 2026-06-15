@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: phase-22-local-acceptance-account-auth-verification
-updatedAt: "2026-06-15T00:30:00-07:00"
+currentPhase: phase-22-local-acceptance-content-production-verification
+updatedAt: "2026-06-15T01:04:29-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,20 +266,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 33692be4051d8b56f96b0d2751731ee100730603
-  lastKnownOriginMasterSha: 33692be4051d8b56f96b0d2751731ee100730603
+  lastKnownMasterSha: b58cc4d3404bf5efc82b0484050076defe553040
+  lastKnownOriginMasterSha: b58cc4d3404bf5efc82b0484050076defe553040
 currentTask:
-  id: phase-22-local-acceptance-account-auth-verification
+  id: phase-22-local-acceptance-content-production-verification
   status: closed
   sourceStory: phase-22-mvp-local-acceptance-reaudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
-  branch: codex/phase-22-local-acceptance-account-auth-verification
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+  branch: codex/phase-22-local-acceptance-content-production-verification
   commitSha: null
   prUrl: null
-  retryCount: 0
-  lastFailurePath: null
+  retryCount: 2
+  lastFailurePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
 qualityGates:
   desired:
     - lint
@@ -349,6 +349,7 @@ qualityGates:
     phase22PostRepairLocalAcceptanceReauditPlanning: pass_docs_only_reaudit_planning
     phase22LocalAcceptanceVerificationSeeding: pass_docs_only_candidate_matrix_seed
     phase22LocalAcceptanceAccountAuthVerification: pass_local_account_auth_personal_and_employee_authorization_closure
+    phase22LocalAcceptanceContentProductionVerification: pass_v6_local_content_production_cookie_backed_closeout
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -367,17 +368,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Fresh user instruction on 2026-06-15 authorized serial execution of the six seeded Phase 22 local acceptance
-    verification candidates. The account/auth verification task remains blocked on branch
-    codex/phase-22-local-acceptance-account-auth-verification. Scoped repairs now make the session route, approved client
-    surfaces, and approved student runtime resolvers use the HttpOnly tiku_session cookie. Focused unit tests pass, and
-    fresh local Playwright observation shows /api/v1/sessions, /api/v1/student-papers/scopes, /api/v1/authorizations,
-    and /api/v1/personal-auths return code=0 with the same cookie-backed session. Approval v6 allowed a one-time local
-    admin fixture through the existing runtime DB loader and ORM/service-layer path. Redacted local evidence now covers
-    personal registration/login, redeem_code generation/redemption, authorization, personal_auth, organization,
-    org_auth, employee login, scope APIs, /home, /profile, and /redeem-code without recording credentials, card-code
-    plaintext, tokens, cookies, public identifiers, database URL, row data, or private user data. Complete current-task
-    closeout validation, commit, fast-forward merge, push, branch cleanup, and clean alignment checks before claiming the
-    next Phase 22 candidate; keep provider, e2e/schema, dependency, migration, staging/prod/cloud/deploy, payment,
-    external-service, PR, force-push, and Cost Calibration Gate blocks in force.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+    Phase 22 task 2 content-production verification passed locally on branch
+    codex/phase-22-local-acceptance-content-production-verification. V6 repaired admin-flow GET /api/v1/papers
+    cookie-backed session handling through the existing session-cookie boundary. Proceed only with the approved task 2
+    closeout sequence: local commit, fast-forward merge to master, master-side validation, push origin/master, delete
+    merged local branch, fetch prune, and confirm clean master == origin/master. Do not claim task 3 until that sequence
+    is complete.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
