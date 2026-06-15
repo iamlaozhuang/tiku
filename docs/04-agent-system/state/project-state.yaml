@@ -266,8 +266,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 42d958984db763a1222ad5be0c863d184d1de9d6
-  lastKnownOriginMasterSha: 42d958984db763a1222ad5be0c863d184d1de9d6
+  lastKnownMasterSha: e29517bbb9bec0ff345c3e96ad74b03c75c9faf3
+  lastKnownOriginMasterSha: e29517bbb9bec0ff345c3e96ad74b03c75c9faf3
 currentTask:
   id: audit-student-experience-unit-suite-timeout
   status: closed
@@ -327,6 +327,7 @@ qualityGates:
     unifiedCodeAuditFindingsRollupRepairQueueSeedingEntryCreation: pass_docs_only_pending_task_seed
     unifiedCodeAuditFindingsRollupRepairQueueSeeding: pass_docs_only_findings_rollup_and_repair_queue_seed
     unifiedRepairAuthSessionPersonalAuthBoundary: pass_scoped_red_green_auth_boundary_repair
+    unifiedRepairAiProviderRedactionFunctionContract: pass_scoped_red_green_ai_provider_redaction_repair
     unifiedRepairQuestionPaperRestLayering: pass_scoped_red_green_rest_layering_repair
     unifiedRepairStudentExperienceLayeringMistakeBook: pass_scoped_red_green_student_experience_repair
     unifiedRepairRagKnowledgeLayeringRetrievalGovernance: pass_scoped_red_green_rag_knowledge_repair
@@ -360,9 +361,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    The six-task strict serial run is closed and pushed through
-    42d958984db763a1222ad5be0c863d184d1de9d6. Repository checkpoint cleanup has no next task claimed. Continue only
-    after a fresh scoped task selection or explicit approval for another docs-only queue/state update; provider,
+    The requested nine repair/planning candidates are already closed, have pass evidence and audit reviews, and their
+    closeout commits are ancestors of origin/master through e29517bbb9bec0ff345c3e96ad74b03c75c9faf3. The active queue
+    currently has zero pending tasks, so automation should not re-claim those closed candidates. Continue only after a
+    fresh scoped task selection, queue seeding, or explicit approval for another docs-only queue/state update; provider,
     env/secret, schema/migration, dependency, e2e, deploy, payment, external-service, PR, force-push, and Cost
     Calibration Gate work remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-14-project-state-post-closeout-handoff-cleanup.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-unified-repair-candidates-completion-state-reconciliation.md
