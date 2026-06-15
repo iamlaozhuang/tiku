@@ -31,8 +31,6 @@ import type {
 import type { Profession } from "@/server/models/auth";
 import {
   clearStoredStudentSessionToken,
-  createStudentAuthHeaders,
-  getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
 } from "../studentRuntimeApi";
 
@@ -61,16 +59,13 @@ function normalizeRedeemCodeInput(value: string): string {
 
 async function fetchApi<TData>(
   path: string,
-  token: string,
   init?: RequestInit,
 ): Promise<ApiResponse<TData | null>> {
-  const response = await fetch(path, {
+  const request: RequestInit = {
     ...init,
-    headers: {
-      ...createStudentAuthHeaders(token),
-      ...(init?.headers ?? {}),
-    },
-  });
+    credentials: init?.credentials ?? "same-origin",
+  };
+  const response = await fetch(path, request);
 
   return (await response.json()) as ApiResponse<TData | null>;
 }
@@ -430,27 +425,12 @@ export function StudentProfilePage() {
     let isActive = true;
 
     async function loadProfile() {
-      const storedSessionToken = getStoredStudentSessionToken();
-
-      if (storedSessionToken === null) {
-        if (isActive) {
-          setLoadState("unauthorized");
-        }
-        return;
-      }
-
       try {
         const [sessionResponse, authorizationResponse, personalAuthResponse] =
           await Promise.all([
-            fetchApi<AuthContextDto>("/api/v1/sessions", storedSessionToken),
-            fetchApi<EffectiveAuthorizationListDto>(
-              "/api/v1/authorizations",
-              storedSessionToken,
-            ),
-            fetchApi<PersonalAuthListDto>(
-              "/api/v1/personal-auths",
-              storedSessionToken,
-            ),
+            fetchApi<AuthContextDto>("/api/v1/sessions"),
+            fetchApi<EffectiveAuthorizationListDto>("/api/v1/authorizations"),
+            fetchApi<PersonalAuthListDto>("/api/v1/personal-auths"),
           ]);
 
         if (!isActive) {
@@ -597,7 +577,6 @@ export function StudentProfilePage() {
 
 export function StudentRedeemCodePage() {
   const [loadState, setLoadState] = useState<LoadState>("loading");
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [personalAuths, setPersonalAuths] = useState<PersonalAuthDto[]>([]);
   const [redeemCode, setRedeemCode] = useState("");
   const [submitState, setSubmitState] = useState<RedeemSubmitState>("idle");
@@ -616,22 +595,10 @@ export function StudentRedeemCodePage() {
     let isActive = true;
 
     async function loadPersonalAuths() {
-      const storedSessionToken = getStoredStudentSessionToken();
-
-      if (storedSessionToken === null) {
-        if (isActive) {
-          setLoadState("unauthorized");
-        }
-        return;
-      }
-
       try {
         const [sessionResponse, personalAuthResponse] = await Promise.all([
-          fetchApi<AuthContextDto>("/api/v1/sessions", storedSessionToken),
-          fetchApi<PersonalAuthListDto>(
-            "/api/v1/personal-auths",
-            storedSessionToken,
-          ),
+          fetchApi<AuthContextDto>("/api/v1/sessions"),
+          fetchApi<PersonalAuthListDto>("/api/v1/personal-auths"),
         ]);
 
         if (!isActive) {
@@ -656,7 +623,6 @@ export function StudentRedeemCodePage() {
           return;
         }
 
-        setSessionToken(storedSessionToken);
         setPersonalAuths(personalAuthResponse.data.personalAuths);
         setLoadState("ready");
       } catch {
@@ -676,7 +642,7 @@ export function StudentRedeemCodePage() {
   async function handleSubmitRedeemCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!canSubmit || sessionToken === null) {
+    if (!canSubmit) {
       setSubmitState("error");
       setFeedbackMessage("兑换码格式不正确");
       return;
@@ -688,8 +654,8 @@ export function StudentRedeemCodePage() {
     try {
       const response = await fetch("/api/v1/redeem-codes/redeem", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
-          ...createStudentAuthHeaders(sessionToken),
           "content-type": "application/json",
         },
         body: JSON.stringify({ code: normalizedRedeemCode }),

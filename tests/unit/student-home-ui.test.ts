@@ -190,8 +190,7 @@ describe("StudentHomePage", () => {
     );
   });
 
-  it("loads authorization scopes and papers through the student REST runtime without rendering the session token", async () => {
-    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+  it("loads authorization scopes and papers through the cookie-backed student REST runtime", async () => {
     const contentPublishedPaper = {
       ...studentHomeFixture.papers[1],
       publicId: "paper-content-published-001",
@@ -200,9 +199,8 @@ describe("StudentHomePage", () => {
     };
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
-        expect(init?.headers).toMatchObject({
-          authorization: "Bearer unit-test-session-token",
-        });
+        expect(init).toMatchObject({ credentials: "same-origin" });
+        expect(init).not.toHaveProperty("headers");
 
         if (String(url) === "/api/v1/student-papers/scopes") {
           return {
@@ -280,7 +278,6 @@ describe("StudentHomePage", () => {
       "aria-pressed",
       "true",
     );
-    expect(document.body.textContent).not.toContain("unit-test-session-token");
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });

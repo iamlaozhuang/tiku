@@ -114,6 +114,12 @@ function createJsonResponse(payload: unknown, status = 200) {
   };
 }
 
+function getFirstFetchInit(fetchMock: ReturnType<typeof vi.fn>): RequestInit {
+  const [, init] = fetchMock.mock.calls[0] as [RequestInfo | URL, RequestInit];
+
+  return init;
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -122,22 +128,31 @@ afterEach(() => {
 });
 
 describe("StudentProfilePage", () => {
-  it("renders an unauthorized state without calling protected APIs when the local session token is missing", () => {
-    const fetchMock = vi.fn();
+  it("renders an unauthorized state after the server session check fails", async () => {
+    const fetchMock = vi.fn(async () =>
+      createJsonResponse({
+        code: 401001,
+        message: "Unauthorized.",
+        data: null,
+      }),
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     render(createElement(StudentProfilePage));
 
-    expect(screen.getByText("请先登录")).toBeInTheDocument();
+    expect(await screen.findByText("请先登录")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "前往登录" })).toHaveAttribute(
       "href",
       "/login",
     );
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/sessions",
+      expect.objectContaining({ credentials: "same-origin" }),
+    );
+    expect(getFirstFetchInit(fetchMock)).not.toHaveProperty("headers");
   });
 
-  it("loads profile and authorization data through the session runtime without rendering secrets or internal ids", async () => {
-    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+  it("loads profile and authorization data through the cookie-backed session runtime", async () => {
     const fetchMock = mockProfileFetch();
 
     render(createElement(StudentProfilePage));
@@ -147,19 +162,16 @@ describe("StudentProfilePage", () => {
     expect(screen.getByText("13900000002")).toBeInTheDocument();
     expect(screen.getAllByText("专卖 3级").length).toBeGreaterThan(0);
     expect(screen.getAllByText("个人授权").length).toBeGreaterThan(0);
-    expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("code_hash");
     expect(screen.queryByText("1")).toBeNull();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/sessions",
-      expect.objectContaining({
-        headers: { authorization: "Bearer unit-test-session-token" },
-      }),
+      expect.objectContaining({ credentials: "same-origin" }),
     );
+    expect(getFirstFetchInit(fetchMock)).not.toHaveProperty("headers");
   });
 
-  it("clears the local student session token when the profile logout control is used", async () => {
-    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+  it("moves the profile view to the unauthorized state when logout is used", async () => {
     mockProfileFetch();
 
     render(createElement(StudentProfilePage));
@@ -168,7 +180,6 @@ describe("StudentProfilePage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
 
-    expect(localStorage.getItem("tiku.localSessionToken")).toBeNull();
     await waitFor(() =>
       expect(screen.getByRole("link", { name: "前往登录" })).toHaveAttribute(
         "href",
@@ -180,7 +191,6 @@ describe("StudentProfilePage", () => {
 
 describe("StudentRedeemCodePage", () => {
   it("shows empty authorization state and keeps the submit button disabled until the code shape is valid", async () => {
-    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: RequestInfo | URL) => {
@@ -220,8 +230,7 @@ describe("StudentRedeemCodePage", () => {
     expect(screen.getByRole("button", { name: "兑换" })).toBeEnabled();
   });
 
-  it("submits redeem code with the private bearer token and shows contract-safe failure feedback", async () => {
-    localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
+  it("submits redeem code with the cookie-backed session and shows contract-safe failure feedback", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -239,7 +248,6 @@ describe("StudentRedeemCodePage", () => {
           expect(init).toMatchObject({
             method: "POST",
             headers: {
-              authorization: "Bearer unit-test-session-token",
               "content-type": "application/json",
             },
             body: JSON.stringify({ code: "ABCD2345" }),
@@ -275,7 +283,6 @@ describe("StudentRedeemCodePage", () => {
       expect(screen.getByText("该兑换码已被使用")).toBeInTheDocument(),
     );
     expect(screen.queryByText("兑换成功")).toBeNull();
-    expect(document.body.textContent).not.toContain("unit-test-session-token");
     expect(document.body.textContent).not.toContain("code_hash");
   });
 });

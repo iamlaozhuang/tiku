@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: phase-22-local-acceptance-verification-seeding
-updatedAt: "2026-06-14T22:46:17-07:00"
+currentPhase: phase-22-local-acceptance-account-auth-verification
+updatedAt: "2026-06-15T00:30:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f9283b599d07104e9e65bb463493850351722be0
-  lastKnownOriginMasterSha: f9283b599d07104e9e65bb463493850351722be0
+  lastKnownMasterSha: 33692be4051d8b56f96b0d2751731ee100730603
+  lastKnownOriginMasterSha: 33692be4051d8b56f96b0d2751731ee100730603
 currentTask:
-  id: phase-22-local-acceptance-verification-seeding
+  id: phase-22-local-acceptance-account-auth-verification
   status: closed
   sourceStory: phase-22-mvp-local-acceptance-reaudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-verification-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-seeding.md
-  branch: codex/phase-22-local-acceptance-verification-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+  branch: codex/phase-22-local-acceptance-account-auth-verification
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -348,6 +348,7 @@ qualityGates:
     fixStudentLoginSessionPolicyDecision: pass_docs_only_server_session_option_a_decision
     phase22PostRepairLocalAcceptanceReauditPlanning: pass_docs_only_reaudit_planning
     phase22LocalAcceptanceVerificationSeeding: pass_docs_only_candidate_matrix_seed
+    phase22LocalAcceptanceAccountAuthVerification: pass_local_account_auth_personal_and_employee_authorization_closure
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -366,9 +367,17 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    The Phase 22 docs-only local acceptance verification seeding task created six future approval-required candidate
-    tasks. Do not claim or execute any candidate without fresh instruction that explicitly approves the required local
-    verification surface. Browser, Playwright, e2e, dev server, local DB-through-app, seed/bootstrap, migration,
-    env/secret, provider, staging/prod/cloud/deploy, dependency, payment, external-service, PR, force-push, and Cost
-    Calibration Gate blocks remain in force.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+    Fresh user instruction on 2026-06-15 authorized serial execution of the six seeded Phase 22 local acceptance
+    verification candidates. The account/auth verification task remains blocked on branch
+    codex/phase-22-local-acceptance-account-auth-verification. Scoped repairs now make the session route, approved client
+    surfaces, and approved student runtime resolvers use the HttpOnly tiku_session cookie. Focused unit tests pass, and
+    fresh local Playwright observation shows /api/v1/sessions, /api/v1/student-papers/scopes, /api/v1/authorizations,
+    and /api/v1/personal-auths return code=0 with the same cookie-backed session. Approval v6 allowed a one-time local
+    admin fixture through the existing runtime DB loader and ORM/service-layer path. Redacted local evidence now covers
+    personal registration/login, redeem_code generation/redemption, authorization, personal_auth, organization,
+    org_auth, employee login, scope APIs, /home, /profile, and /redeem-code without recording credentials, card-code
+    plaintext, tokens, cookies, public identifiers, database URL, row data, or private user data. Complete current-task
+    closeout validation, commit, fast-forward merge, push, branch cleanup, and clean alignment checks before claiming the
+    next Phase 22 candidate; keep provider, e2e/schema, dependency, migration, staging/prod/cloud/deploy, payment,
+    external-service, PR, force-push, and Cost Calibration Gate blocks in force.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md

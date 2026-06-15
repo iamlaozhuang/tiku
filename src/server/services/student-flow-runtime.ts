@@ -1,4 +1,5 @@
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import { createMockAiProvider } from "@/ai/mock-provider";
 import type { ApiResponse } from "../contracts/api-response";
 import { createAdminAiAuditLogListQuery } from "../contracts/admin-ai-audit-log-ops-contract";
@@ -454,7 +455,7 @@ export function createStudentFlowUserResolver(
 ): StudentFlowUserResolver {
   return async (request) => {
     const sessionResponse = await sessionService.getCurrentSession({
-      authorization: request.headers.get("authorization"),
+      authorization: getRequestAuthorization(request),
     });
 
     if (!isSuccessfulSessionResponse(sessionResponse)) {

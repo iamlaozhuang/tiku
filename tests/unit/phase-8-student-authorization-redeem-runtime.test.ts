@@ -15,6 +15,8 @@ import type {
 const now = new Date("2026-05-22T04:00:00.000Z");
 const startsAt = new Date("2026-05-01T04:00:00.000Z");
 const expiresAt = new Date("2027-05-01T04:00:00.000Z");
+const bearerScheme = "Bearer";
+const sessionCredential = "student-session-token";
 
 function createStudentSession(
   userPublicId = "user_public_student_123",
@@ -123,7 +125,7 @@ function createHandlers(sessionResponse = createStudentSession()) {
     now: () => now,
     sessionService: {
       async getCurrentSession(input) {
-        return input.authorization === "Bearer student-session-token"
+        return input.authorization === `${bearerScheme} ${sessionCredential}`
           ? sessionResponse
           : {
               code: 401001,
@@ -170,6 +172,20 @@ function createHandlers(sessionResponse = createStudentSession()) {
   });
 }
 
+function createRequestAuthHeaders() {
+  return {
+    authorization: `${bearerScheme} ${sessionCredential}`,
+  };
+}
+
+function createSessionCookieHeaders() {
+  return {
+    cookie: `theme=light; tiku_session=${encodeURIComponent(
+      sessionCredential,
+    )}`,
+  };
+}
+
 async function readJson(response: Response) {
   return response.json() as Promise<unknown>;
 }
@@ -179,9 +195,7 @@ describe("phase 8 student authorization redeem runtime", () => {
     const handlers = createHandlers();
     const response = await handlers.authorizations.GET(
       new Request("http://localhost/api/v1/authorizations", {
-        headers: {
-          authorization: "Bearer student-session-token",
-        },
+        headers: createRequestAuthHeaders(),
       }),
     );
 
@@ -275,13 +289,49 @@ describe("phase 8 student authorization redeem runtime", () => {
     expect(JSON.stringify(responsePayload)).not.toContain('"id":');
   });
 
+  it("uses the session cookie for authorization routes without a request auth value", async () => {
+    const handlers = createHandlers();
+    const authorizationResponse = await handlers.authorizations.GET(
+      new Request("http://localhost/api/v1/authorizations", {
+        headers: createSessionCookieHeaders(),
+      }),
+    );
+    const personalAuthResponse = await handlers.personalAuths.GET(
+      new Request("http://localhost/api/v1/personal-auths", {
+        headers: createSessionCookieHeaders(),
+      }),
+    );
+
+    await expect(readJson(authorizationResponse)).resolves.toMatchObject({
+      code: 0,
+      data: {
+        effectiveAuthorizations: [
+          {
+            profession: "monopoly",
+            level: 3,
+            authorizationTypes: ["personal_auth", "org_auth"],
+          },
+        ],
+      },
+    });
+    await expect(readJson(personalAuthResponse)).resolves.toMatchObject({
+      code: 0,
+      data: {
+        personalAuths: [
+          {
+            publicId: "personal_auth_public_123",
+            status: "active",
+          },
+        ],
+      },
+    });
+  });
+
   it("lists personal authorizations for the authenticated student", async () => {
     const handlers = createHandlers();
     const response = await handlers.personalAuths.GET(
       new Request("http://localhost/api/v1/personal-auths", {
-        headers: {
-          authorization: "Bearer student-session-token",
-        },
+        headers: createRequestAuthHeaders(),
       }),
     );
 
@@ -306,9 +356,7 @@ describe("phase 8 student authorization redeem runtime", () => {
     const response = await handlers.redeemCodes.redeem.POST(
       new Request("http://localhost/api/v1/redeem-codes/redeem", {
         method: "POST",
-        headers: {
-          authorization: "Bearer student-session-token",
-        },
+        headers: createRequestAuthHeaders(),
         body: JSON.stringify({
           code: "abcdefg2",
         }),
@@ -347,9 +395,7 @@ describe("phase 8 student authorization redeem runtime", () => {
     const adminHandlers = createHandlers(createAdminSession());
     const adminSessionResponse = await adminHandlers.authorizations.GET(
       new Request("http://localhost/api/v1/authorizations", {
-        headers: {
-          authorization: "Bearer student-session-token",
-        },
+        headers: createRequestAuthHeaders(),
       }),
     );
 

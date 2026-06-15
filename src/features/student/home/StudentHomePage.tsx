@@ -18,7 +18,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   fetchStudentApi,
-  getStoredStudentSessionToken,
   isStudentUnauthorizedResponse,
 } from "@/features/student/studentRuntimeApi";
 import type {
@@ -622,19 +621,9 @@ export function StudentHomePage({
     let isActive = true;
 
     async function loadStudentHome() {
-      const token = getStoredStudentSessionToken();
-
-      if (token === null) {
-        if (isActive) {
-          setRuntimeState("unauthorized");
-        }
-        return;
-      }
-
       try {
         const scopePayload = await fetchStudentApi<StudentPaperScopePayload>(
           "/api/v1/student-papers/scopes",
-          token,
         );
 
         if (!isActive) {
@@ -670,7 +659,6 @@ export function StudentHomePage({
 
         const paperPayload = await fetchStudentApi<StudentPaperListPayload>(
           createStudentPaperListPath(nextScope),
-          token,
         );
 
         if (!isActive) {
@@ -719,19 +707,11 @@ export function StudentHomePage({
       return;
     }
 
-    const token = getStoredStudentSessionToken();
-
-    if (token === null) {
-      setRuntimeState("unauthorized");
-      return;
-    }
-
     setRuntimeState("loading");
 
     try {
       const paperPayload = await fetchStudentApi<StudentPaperListPayload>(
         createStudentPaperListPath(scope),
-        token,
       );
 
       if (isStudentUnauthorizedResponse(paperPayload)) {

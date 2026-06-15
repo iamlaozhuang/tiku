@@ -67,6 +67,12 @@ const adminSessionPayload = {
   },
 };
 
+function getFirstFetchInit(fetchMock: ReturnType<typeof vi.fn>): RequestInit {
+  const [, init] = fetchMock.mock.calls[0] as [RequestInfo | URL, RequestInit];
+
+  return init;
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
@@ -77,8 +83,14 @@ afterEach(() => {
 });
 
 describe("protected route guard UI", () => {
-  it("redirects an unauthenticated student route before rendering the student shell", async () => {
-    const fetchMock = vi.fn();
+  it("redirects an unauthenticated student route after checking the server session", async () => {
+    const fetchMock = vi.fn(async () =>
+      createSessionResponse({
+        code: 401001,
+        message: "Unauthorized.",
+        data: null,
+      }),
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     render(
@@ -90,13 +102,18 @@ describe("protected route guard UI", () => {
     );
 
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/login"));
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/sessions",
+      expect.objectContaining({
+        credentials: "same-origin",
+      }),
+    );
+    expect(getFirstFetchInit(fetchMock)).not.toHaveProperty("headers");
     expect(screen.queryByRole("tablist")).toBeNull();
     expect(screen.queryByTestId("student-child")).toBeNull();
   });
 
-  it("allows a valid student session to render the student shell without exposing the token", async () => {
-    localStorage.setItem("tiku.localSessionToken", "unit-test-student-token");
+  it("allows a valid cookie-backed student session to render the student shell", async () => {
     const fetchMock = vi.fn(async () =>
       createSessionResponse(studentSessionPayload),
     );
@@ -113,18 +130,24 @@ describe("protected route guard UI", () => {
     expect(await screen.findByTestId("student-child")).toBeInTheDocument();
     expect(screen.getByRole("tablist")).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
-    expect(document.body.textContent).not.toContain("unit-test-student-token");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/sessions",
       expect.objectContaining({
-        headers: { authorization: "Bearer unit-test-student-token" },
+        credentials: "same-origin",
       }),
     );
+    expect(getFirstFetchInit(fetchMock)).not.toHaveProperty("headers");
   });
 
-  it("redirects an unauthenticated admin route before rendering admin navigation", async () => {
+  it("redirects an unauthenticated admin route after checking the server session", async () => {
     pathnameMock = "/content/questions";
-    const fetchMock = vi.fn();
+    const fetchMock = vi.fn(async () =>
+      createSessionResponse({
+        code: 401001,
+        message: "Unauthorized.",
+        data: null,
+      }),
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     render(
@@ -136,14 +159,19 @@ describe("protected route guard UI", () => {
     );
 
     await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/login"));
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/sessions",
+      expect.objectContaining({
+        credentials: "same-origin",
+      }),
+    );
+    expect(getFirstFetchInit(fetchMock)).not.toHaveProperty("headers");
     expect(screen.queryByRole("navigation")).toBeNull();
     expect(screen.queryByTestId("admin-child")).toBeNull();
   });
 
-  it("allows a valid admin session to render admin navigation and blocks student tokens", async () => {
+  it("allows a valid cookie-backed admin session to render admin navigation and blocks student sessions", async () => {
     pathnameMock = "/ops/users";
-    localStorage.setItem("tiku.localSessionToken", "unit-test-admin-token");
     const fetchMock = vi.fn(async () =>
       createSessionResponse(adminSessionPayload),
     );
@@ -159,8 +187,8 @@ describe("protected route guard UI", () => {
 
     expect(await screen.findByTestId("admin-child")).toBeInTheDocument();
     expect(screen.getAllByRole("navigation").length).toBeGreaterThan(0);
-    expect(document.body.textContent).not.toContain("unit-test-admin-token");
     expect(replaceMock).not.toHaveBeenCalled();
+    expect(getFirstFetchInit(fetchMock)).not.toHaveProperty("headers");
 
     cleanup();
     replaceMock.mockReset();

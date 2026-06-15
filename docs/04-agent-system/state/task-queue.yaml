@@ -15147,7 +15147,18 @@ tasks:
     seedCategory: phase_22_local_acceptance_verification_matrix
     taskKind: local_acceptance_verification_candidate
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
+    claimedAt: "2026-06-14T23:01:21-07:00"
+    closedAt: "2026-06-15T00:30:00-07:00"
+    closureReason: >-
+      The scoped session route, client-session, and runtime resolver repairs support the local HttpOnly tiku_session
+      cookie, and focused unit tests pass. Approval v6 allowed a one-time local admin fixture through the existing
+      runtime DB loader and ORM/service-layer path. Redacted local evidence now covers personal registration/login,
+      redeem_code generation/redemption, authorization, personal_auth, organization, org_auth, employee login, scope
+      APIs, /home, /profile, and /redeem-code without recording credentials, card-code plaintext, tokens, cookies,
+      public identifiers, database URL, row data, or private user data. The next Phase 22 candidate must not be claimed
+      until post-merge/push clean alignment checks pass.
     retryCount: 0
     dependencies:
       - phase-22-local-acceptance-verification-seeding
@@ -15171,21 +15182,34 @@ tasks:
       - deferred
       - needs_recheck
     humanApprovalBoundary: >-
-      Future fresh instruction is required before claiming this candidate. Execution must explicitly approve the local
-      verification surface before dev server, Browser, Playwright, e2e, local DB-through-app, screenshots, or browser
-      observations. This seeded candidate does not approve env/secret, provider, seed/bootstrap, migration, source/test
-      edits, schema, dependency, staging/prod/cloud/deploy, payment, external-service, PR, force-push, or Cost
-      Calibration work.
+      Fresh instruction and scoped repair approvals were received for this current candidate only. Any further work that
+      requires env/secret/provider access, seed/bootstrap, migration, raw SQL, source/test/e2e edits outside allowed
+      files, schema, dependency, staging/prod/cloud/deploy, payment, external-service, PR, force-push, Cost Calibration
+      work, or validation-data preparation requires a new explicit approval.
     planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
+      - src/components/ProtectedRouteGuard/ProtectedRouteGuard.tsx
+      - src/features/student/studentRuntimeApi.ts
+      - src/features/student/home/StudentHomePage.tsx
+      - src/features/student/profile/StudentProfileRedeemPage.tsx
+      - src/server/auth/session-route.ts
+      - src/server/auth/session-route.test.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/services/student-flow-runtime.ts
+      - src/server/services/student-authorization-redeem-runtime.ts
+      - tests/unit/phase-7-student-flow-runtime-smoke.test.ts
+      - tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - tests/unit/protected-route-guard-ui.test.ts
+      - tests/unit/student-home-ui.test.ts
+      - tests/unit/student-profile-redeem-ui.test.ts
       - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
       - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
       - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
-    blockedFiles: &phase22LocalAcceptanceBlockedFiles
+    blockedFiles:
       - .env.local
       - .env.example
       - .env.*
@@ -15211,6 +15235,69 @@ tasks:
       - payment/external-service
       - PR/force-push
       - Cost Calibration Gate
+    freshInstruction:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User authorized serial execution of the six seeded Phase 22 local acceptance verification candidate tasks,
+        one task at a time, including local dev server, Browser or Playwright against localhost/127.0.0.1,
+        application-mediated local dev DB use, local validation commands, one local commit, fast-forward merge to
+        master, push origin/master, merged local short-branch deletion, and clean post-task alignment checks.
+    scopedRepairApproval:
+      receivedAt: "2026-06-15"
+      summary: >-
+        After the verification evidence exposed a session persistence runtime gap, the user approved a scoped repair
+        package for this current task. The approval permits editing only src/server/auth/session-route.ts and
+        src/server/auth/session-route.test.ts for HttpOnly local session cookie persistence, adding the scoped unit
+        validation command, and replacing Phase 22 blockedFiles YAML anchors with explicit lists so the existing
+        PreCommitHardening scope parser can evaluate blocked files.
+    scopedClientSessionApproval:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved approval package v2 to continue the current task without claiming task 2. The approval permits
+        minimal client server-session integration repairs in ProtectedRouteGuard, studentRuntimeApi, StudentHomePage,
+        StudentProfileRedeemPage, and corresponding focused unit tests so protected student routes can use the
+        HttpOnly cookie-backed session instead of requiring the legacy tiku.localSessionToken bearer credential in
+        localStorage.
+    scopedRuntimeSessionApproval:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved approval package v3 to continue current task 1 without claiming task 2. The approval permits
+        minimal cookie-backed session resolver repairs in session-cookie/session-route, student-flow-runtime,
+        student-authorization-redeem-runtime, and the existing phase 7/phase 8 focused runtime tests. The approval keeps
+        env/secret/provider, seed/bootstrap/raw SQL/migration, dependency/lockfile/package, e2e authoring, staging/prod,
+        PR/force-push, and Cost Calibration Gate blocks in force.
+    scopedLocalFixtureApproval:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved approval package v6 for current task 1 only. The approval permits a one-time local admin fixture
+        through project ORM/service-layer code and explicitly permits using the existing local runtime/env loader to read
+        only the process-required DATABASE_URL for local dev DB connection. It forbids outputting, summarizing,
+        recording, or modifying .env* values and continues to block provider/secret output, package/dependency/schema/e2e
+        changes, raw SQL authored by the agent, destructive DB work, staging/prod/cloud/deploy, external-service, PR,
+        force-push, task 2, and Cost Calibration Gate.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - npm.cmd run test:unit -- src/server/auth/session-route.test.ts
+      - npm.cmd run test:unit -- tests/unit/phase-7-student-flow-runtime-smoke.test.ts
+      - npm.cmd run test:unit -- tests/unit/phase-8-student-authorization-redeem-runtime.test.ts
+      - npm.cmd run test:unit -- tests/unit/protected-route-guard-ui.test.ts tests/unit/student-home-ui.test.ts tests/unit/student-profile-redeem-ui.test.ts
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-account-auth-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-account-auth-verification
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-account-auth-verification
   - id: phase-22-local-acceptance-content-production-verification
     title: Phase 22 content production local acceptance verification
     phase: phase-22-local-acceptance-content-production-verification
@@ -15254,7 +15341,20 @@ tasks:
       - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-content-production-verification.md
       - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
       - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-content-production-verification.md
-    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
   - id: phase-22-local-acceptance-student-answering-verification
     title: Phase 22 student answering local acceptance verification
@@ -15296,7 +15396,20 @@ tasks:
       - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
       - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
       - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
-    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
   - id: phase-22-local-acceptance-mistake-learning-verification
     title: Phase 22 mistake and learning loop local acceptance verification
@@ -15340,7 +15453,20 @@ tasks:
       - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
       - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
       - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
-    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
   - id: phase-22-local-acceptance-admin-operations-verification
     title: Phase 22 admin operations local acceptance verification
@@ -15388,7 +15514,20 @@ tasks:
       - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
       - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
       - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
-    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates
   - id: phase-22-local-acceptance-security-evidence-verification
     title: Phase 22 security and evidence local acceptance verification
@@ -15432,5 +15571,18 @@ tasks:
       - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
       - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
       - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
-    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
     blockedGates: *phase22LocalAcceptanceBlockedGates

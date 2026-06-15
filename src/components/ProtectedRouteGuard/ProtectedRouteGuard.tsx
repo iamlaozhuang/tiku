@@ -16,14 +16,6 @@ type ProtectedRouteGuardProps = {
   requiredRole: ProtectedRouteGuardRole;
 };
 
-const localSessionTokenKey = "tiku.localSessionToken";
-
-function readLocalSessionToken(): string | null {
-  const sessionToken = localStorage.getItem(localSessionTokenKey)?.trim();
-
-  return sessionToken === "" ? null : (sessionToken ?? null);
-}
-
 function isAuthorizedForRole(
   authContext: AuthContextDto,
   requiredRole: ProtectedRouteGuardRole,
@@ -38,13 +30,9 @@ function isAuthorizedForRole(
   return authContext.user.userType !== null;
 }
 
-async function fetchAuthContext(
-  sessionToken: string,
-): Promise<ApiResponse<AuthContextDto | null>> {
+async function fetchAuthContext(): Promise<ApiResponse<AuthContextDto | null>> {
   const response = await fetch("/api/v1/sessions", {
-    headers: {
-      authorization: `Bearer ${sessionToken}`,
-    },
+    credentials: "same-origin",
   });
 
   return (await response.json()) as ApiResponse<AuthContextDto | null>;
@@ -94,23 +82,8 @@ export function ProtectedRouteGuard({
 
   useEffect(() => {
     let isCurrentCheck = true;
-    const sessionToken = readLocalSessionToken();
 
-    if (sessionToken === null) {
-      queueMicrotask(() => {
-        if (!isCurrentCheck) {
-          return;
-        }
-
-        setStatus("unauthorized");
-        router.replace("/login");
-      });
-      return () => {
-        isCurrentCheck = false;
-      };
-    }
-
-    fetchAuthContext(sessionToken)
+    fetchAuthContext()
       .then((sessionResponse) => {
         if (!isCurrentCheck) {
           return;

@@ -9,6 +9,8 @@ import type { ExamReportRepository } from "@/server/repositories/exam-report-rep
 
 const now = new Date("2026-05-21T08:00:00.000Z");
 const expiresAt = new Date("2027-05-21T08:00:00.000Z");
+const bearerScheme = "Bearer";
+const sessionCredential = "student-session-token";
 const paperSnapshot = {
   name: "Phase 7 student smoke paper",
   paperSections: [
@@ -35,7 +37,7 @@ function createSessionService(): SessionService {
       throw new Error("login should not be called by student flow routes");
     },
     async getCurrentSession(input) {
-      if (input.authorization !== "Bearer student-session-token") {
+      if (input.authorization !== `${bearerScheme} ${sessionCredential}`) {
         return {
           code: 401001,
           message: "Unauthorized.",
@@ -65,6 +67,20 @@ function createSessionService(): SessionService {
         },
       };
     },
+  };
+}
+
+function createRequestAuthHeaders() {
+  return {
+    authorization: `${bearerScheme} ${sessionCredential}`,
+  };
+}
+
+function createSessionCookieHeaders() {
+  return {
+    cookie: `theme=light; tiku_session=${encodeURIComponent(
+      sessionCredential,
+    )}`,
   };
 }
 
@@ -445,6 +461,36 @@ describe("phase 7 student flow runtime smoke", () => {
     });
   });
 
+  it("uses the session cookie when listing student authorization scopes without a request auth value", async () => {
+    const handlers = createStudentFlowRuntimeRouteHandlers({
+      sessionService: createSessionService(),
+      studentPaperRepository: createStudentPaperRepository(),
+      practiceRepository: createPracticeRepository(),
+      mockExamRepository: createMockExamRepository(),
+      examReportRepository: createExamReportRepository(),
+      now: () => now,
+      createPublicId: (prefix) => `${prefix}-dev-smoke`,
+    });
+
+    const response = await handlers.studentPapers.scopes.GET(
+      new Request("http://localhost/api/v1/student-papers/scopes", {
+        headers: createSessionCookieHeaders(),
+      }),
+    );
+    const payload = await response.json();
+
+    expect(payload).toMatchObject({
+      code: 0,
+      data: [
+        {
+          profession: "monopoly",
+          level: 3,
+          authorizationTypes: ["personal_auth"],
+        },
+      ],
+    });
+  });
+
   it("runs the narrow paper, practice, mock_exam, and exam_report path with public ids", async () => {
     const handlers = createStudentFlowRuntimeRouteHandlers({
       sessionService: createSessionService(),
@@ -455,9 +501,7 @@ describe("phase 7 student flow runtime smoke", () => {
       now: () => now,
       createPublicId: (prefix) => `${prefix}-dev-smoke`,
     });
-    const authorizedHeaders = {
-      authorization: "Bearer student-session-token",
-    };
+    const authorizedHeaders = createRequestAuthHeaders();
 
     const paperResponse = await handlers.studentPapers.collection.GET(
       new Request(
