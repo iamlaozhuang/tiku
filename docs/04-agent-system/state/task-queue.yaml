@@ -15971,3 +15971,216 @@ tasks:
         status: local_verified
         summary: "No-credential Playwright observation of /ops/users redirected to /login with no token/session storage."
       stopReason: needs_recheck_remainders_preserved_under_narrow_task6_boundary
+  - id: phase-22-local-acceptance-verification-rollup-closeout
+    title: Phase 22 seeded local acceptance verification rollup closeout
+    phase: phase-22-local-acceptance-verification-rollup-closeout
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    taskKind: docs_only_rollup_closeout
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    claimedAt: "2026-06-15T03:40:30-07:00"
+    closedAt: "2026-06-15T03:40:30-07:00"
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-account-auth-verification
+      - phase-22-local-acceptance-content-production-verification
+      - phase-22-local-acceptance-student-answering-verification
+      - phase-22-local-acceptance-mistake-learning-verification
+      - phase-22-local-acceptance-admin-operations-verification
+      - phase-22-local-acceptance-security-evidence-verification
+    verificationJourney: seeded_local_acceptance_rollup
+    targetEntities:
+      - user
+      - student
+      - session
+      - redeem_code
+      - authorization
+      - personal_auth
+      - org_auth
+      - organization
+      - employee
+      - material
+      - question
+      - knowledge_node
+      - tag
+      - paper
+      - paper_section
+      - paper_asset
+      - practice
+      - mock_exam
+      - answer_record
+      - exam_report
+      - mistake_book
+      - ai_explanation
+      - ai_hint
+      - learning_suggestion
+      - kn_recommendation
+      - resource
+      - knowledge_base
+      - model_config
+      - audit_log
+      - ai_call_log
+    statusVocabulary:
+      - local_verified
+      - metadata_only
+      - mock_only
+      - deferred
+      - needs_recheck
+      - blocked
+      - staging_blocked
+    humanApprovalBoundary: >-
+      User approved this docs-only rollup closeout only. Do not claim other tasks. Dev server, Browser, Playwright, DB
+      access, .env* access, provider/model calls, provider payloads, raw prompts/raw answers, quota/cost measurement,
+      Cost Calibration Gate, source/test/e2e/schema/drizzle/scripts/package/lockfile changes, dependency changes, raw
+      SQL, migration, seed/bootstrap, destructive DB, staging/prod/cloud/deploy/payment/external-service, PR, force
+      push, and sensitive data exposure remain blocked unless separately approved.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - dev server
+      - Browser or Playwright
+      - database access
+      - .env* read/write/value disclosure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - quota/cost measurement or Cost Calibration Gate
+      - source/test/e2e/schema/drizzle/scripts/package/lockfile changes
+      - dependency changes
+      - raw SQL
+      - migration
+      - seed/bootstrap
+      - destructive DB operations
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR or force push
+      - secret/token/cookie/Authorization header/DB URL/publicId/row-data/private-data exposure
+    freshInstruction:
+      receivedAt: "2026-06-15"
+      summary: >-
+        User approved Phase 22 seeded local acceptance verification rollup closeout as docs-only archival work. The
+        approval permits summarizing the six seeded candidate task plans, evidence files, audits, state, and queue
+        results into a local acceptance matrix, updating project-state repository SHAs to the current real
+        master/origin/master SHA, running standard docs/readiness validations, creating one local commit, fast-forward
+        merging to master, pushing origin/master, deleting the merged short branch, fetching prune, and confirming clean
+        alignment.
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    localAcceptanceOutcome:
+      overallStatus: pass
+      summary: >-
+        The six Phase 22 seeded local acceptance verification candidates are closed and archived. Scoped local
+        non-provider/local acceptance evidence is closed where covered. Provider/model, raw prompt/raw answer/provider
+        payload inspection, quota/cost, Cost Calibration, staging/prod/cloud, object storage/OCR/public URL validation,
+        and admin-only redaction or metadata remainders remain metadata_only, deferred, needs_recheck, blocked, or
+        staging_blocked.
+      rollupMatrix:
+        accountAndAuthorization:
+          status: local_verified
+          entities:
+            - user
+            - student
+            - session
+            - redeem_code
+            - authorization
+            - personal_auth
+            - org_auth
+            - organization
+            - employee
+        contentProduction:
+          status: local_verified
+          entities:
+            - material
+            - question
+            - knowledge_node
+            - tag
+            - paper
+            - paper_section
+          metadataOnly:
+            - paper_asset
+          stagingBlocked:
+            - binary upload
+            - object storage
+            - OCR
+            - public URL validation
+        studentAnswering:
+          status: needs_recheck
+          localVerified:
+            - practice
+            - mock_exam
+            - answer_record
+          blocked:
+            - exam_report.generation provider_model_request_quota HTTP 423 API 423101
+        mistakeLearning:
+          status: needs_recheck
+          localVerified:
+            - mistake_book
+          deferred:
+            - ai_explanation
+            - ai_hint
+            - learning_suggestion
+            - kn_recommendation
+          needsRecheck:
+            - exam_report
+        adminOperations:
+          status: needs_recheck
+          localVerified:
+            - user
+            - organization
+            - employee
+            - org_auth
+            - redeem_code
+          metadataOnly:
+            - resource
+            - knowledge_base
+            - model_config
+            - audit_log
+            - ai_call_log
+        securityEvidence:
+          status: needs_recheck
+          localVerified:
+            - session
+            - authorization
+            - user
+          metadataOnly:
+            - model_config
+          needsRecheck:
+            - audit_log admin redaction inspection
+            - ai_call_log raw prompt/raw answer/provider payload redaction inspection
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-verification-rollup-closeout
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-verification-rollup-closeout
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-verification-rollup-closeout

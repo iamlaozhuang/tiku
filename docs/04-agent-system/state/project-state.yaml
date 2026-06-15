@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: phase-22-local-acceptance-security-evidence-verification
-updatedAt: "2026-06-15T03:28:26-07:00"
+currentPhase: phase-22-local-acceptance-verification-rollup-closeout
+updatedAt: "2026-06-15T03:40:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,20 +266,20 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cf5a0395e41449688cfb3f5ea71aea86a2f3bfa7
-  lastKnownOriginMasterSha: cf5a0395e41449688cfb3f5ea71aea86a2f3bfa7
+  lastKnownMasterSha: 318b1a7b7026aecc3794e31fe25c717fb5e4b35a
+  lastKnownOriginMasterSha: 318b1a7b7026aecc3794e31fe25c717fb5e4b35a
 currentTask:
-  id: phase-22-local-acceptance-security-evidence-verification
+  id: phase-22-local-acceptance-verification-rollup-closeout
   status: closed
   sourceStory: phase-22-mvp-local-acceptance-reaudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
-  branch: codex/phase-22-local-acceptance-security-evidence-verification
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+  branch: codex/phase-22-local-acceptance-verification-rollup-closeout
   commitSha: null
   prUrl: null
   retryCount: 0
-  lastFailurePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+  lastFailurePath: null
 qualityGates:
   desired:
     - lint
@@ -353,6 +353,7 @@ qualityGates:
     phase22LocalAcceptanceMistakeLearningVerification: pass_non_provider_mistake_book_local_loop_with_provider_gated_remainders
     phase22LocalAcceptanceAdminOperationsVerification: pass_v7_non_provider_admin_ops_with_metadata_only_remainders
     phase22LocalAcceptanceSecurityEvidenceVerification: pass_local_security_guard_and_role_denial_with_needs_recheck_remainders
+    phase22LocalAcceptanceVerificationRollupCloseout: pass_docs_only_seeded_candidate_rollup_with_remainders_archived
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -371,10 +372,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Phase 22 task 6 security evidence local acceptance verification is closed on branch
-    codex/phase-22-local-acceptance-security-evidence-verification under the user's narrow fresh approval. The scoped
-    local security guard and role-denial evidence passed, while audit_log admin redaction inspection, ai_call_log raw
-    prompt/raw answer/provider payload inspection, and model_config admin metadata review remain needs_recheck or
-    metadata_only under the blocked provider/env/direct-DB boundary. Complete merge, push, branch cleanup, fetch prune,
-    and master/origin alignment before any future task is claimed.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+    Phase 22 seeded local acceptance verification rollup closeout is recorded on branch
+    codex/phase-22-local-acceptance-verification-rollup-closeout under the user's docs-only approval. The six seeded
+    candidates are closed. Scoped local non-provider/local acceptance verification is archived as closed where evidence
+    exists, while provider/model calls, raw prompt/raw answer/provider payload inspection, quota/cost, Cost Calibration,
+    staging/prod/cloud, object storage/OCR/public URL validation, and admin-only redaction or metadata remainders remain
+    metadata_only, deferred, needs_recheck, blocked, or staging_blocked. Do not claim a new task without fresh user
+    instruction after this rollup is merged, pushed, cleaned, and master is aligned with origin/master.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
