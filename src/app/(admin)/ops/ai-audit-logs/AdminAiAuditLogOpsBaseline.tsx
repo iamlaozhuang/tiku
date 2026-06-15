@@ -313,7 +313,7 @@ export function AdminAiAuditLogOpsBaseline({
         </h1>
         <p className="text-text-secondary max-w-3xl text-sm leading-6">
           模型配置、Prompt 模板、审计日志与 AI 调用日志均通过本地 runtime API
-          加载；页面只展示脱敏摘要和 publicId。
+          加载；页面默认折叠标识符值，仅展示脱敏摘要和状态语义。
         </p>
       </header>
 
@@ -340,11 +340,12 @@ export function AdminAiAuditLogOpsBaseline({
               key={auditLog.publicId}
               label={auditLog.actionType}
               meta={[
-                auditLog.actorPublicId,
+                "identifier values hidden",
                 auditLog.targetResourceType,
                 auditLog.resultStatus,
                 auditLog.metadataSummary ?? "redacted metadata",
               ].join(" / ")}
+              badges={["metadata-only", "redacted", "summary_only"]}
               publicId={auditLog.publicId}
               testId={`admin-audit-log-${auditLog.publicId}`}
             />
@@ -785,11 +786,13 @@ function AdminOpsPanel({
 }
 
 function AdminOpsSummaryRow({
+  badges = [],
   label,
   meta,
   publicId,
   testId,
 }: {
+  badges?: string[];
   label: string;
   meta: string;
   publicId: string;
@@ -804,6 +807,13 @@ function AdminOpsSummaryRow({
       <div>
         <p className="text-text-primary text-sm font-medium">{label}</p>
         <p className="text-text-muted text-xs">{meta}</p>
+        {badges.length === 0 ? null : (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {badges.map((badge) => (
+              <AdminOpsStatusBadge key={badge} label={badge} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

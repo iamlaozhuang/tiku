@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -74,7 +75,7 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
     render(<AdminAiAuditLogOpsBaseline />);
 
     expect(screen.getByText("正式入库复核")).toBeInTheDocument();
-    expect(screen.getByText("metadata-only")).toBeInTheDocument();
+    expect(screen.getAllByText("metadata-only").length).toBeGreaterThan(0);
     expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
     expect(
       screen.getAllByText("blocked_without_follow_up_task").length,
@@ -85,6 +86,33 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
     expect(
       screen.queryByText("personal_ai_result_public_admin_901"),
     ).not.toBeInTheDocument();
+  });
+
+  it("hides visible admin audit log public identifiers while preserving redacted summary semantics", () => {
+    render(<AdminAiAuditLogOpsBaseline />);
+
+    const auditLogRow = screen.getByTestId(
+      "admin-audit-log-audit-log-formal-review-candidate-public-001",
+    );
+
+    expect(within(auditLogRow).getByText("metadata-only")).toBeInTheDocument();
+    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
+    expect(within(auditLogRow).getByText("summary_only")).toBeInTheDocument();
+    expect(
+      within(auditLogRow).queryByText(
+        "audit-log-formal-review-candidate-public-001",
+      ),
+    ).not.toBeInTheDocument();
+    expect(
+      within(auditLogRow).queryByText("admin-content-public-001"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(auditLogRow).queryByText("personal_ai_result_public_admin_901"),
+    ).not.toBeInTheDocument();
+    expect(auditLogRow).toHaveAttribute(
+      "data-public-id",
+      "audit-log-formal-review-candidate-public-001",
+    );
   });
 
   it("renders the loading state while the formal adoption review request is pending", async () => {
@@ -139,7 +167,7 @@ describe("AdminAiAuditLogOpsBaseline formal adoption review affordance", () => {
       screen.getAllByText("blocked_without_follow_up_task").length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
-    expect(screen.getByText("metadata-only")).toBeInTheDocument();
+    expect(screen.getAllByText("metadata-only").length).toBeGreaterThan(0);
   });
 
   it("does not render raw prompts, raw answers, provider payloads, or public identifier lists from review success data", async () => {
