@@ -706,7 +706,7 @@ describe("personal AI generation request route handlers", () => {
     expect(serializedPayload).not.toContain("generated content");
   });
 
-  it("keeps local browser POST responses redacted when persistence is temporarily unavailable", async () => {
+  it("returns a redacted error envelope when local browser POST persistence fails", async () => {
     const requestRepository = createRequestRepository([], {
       createError: new Error("database stack with internal connection details"),
     });
@@ -724,18 +724,9 @@ describe("personal AI generation request route handlers", () => {
     const serializedPayload = JSON.stringify(payload);
 
     expect(payload).toMatchObject({
-      code: 0,
-      message: "ok",
-      data: {
-        flowStatus: "accepted",
-        resultState: {
-          status: "pending",
-          taskPublicId: "ai_generation_task_public_route_123",
-          resultPublicId: null,
-          evidenceStatus: "none",
-          citationCount: 0,
-        },
-      },
+      code: 500018,
+      message: "Personal AI generation request could not be persisted.",
+      data: null,
     });
     expect(requestRepository.createCalls).toHaveLength(1);
     expect(serializedPayload).not.toContain("database stack");

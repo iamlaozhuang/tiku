@@ -38,6 +38,9 @@ export type PersonalAiGenerationRequestRouteDependencies = {
 const REQUEST_HISTORY_UNAVAILABLE_CODE = 500017;
 const REQUEST_HISTORY_UNAVAILABLE_MESSAGE =
   "Personal AI request history is temporarily unavailable.";
+const REQUEST_PERSISTENCE_UNAVAILABLE_CODE = 500018;
+const REQUEST_PERSISTENCE_UNAVAILABLE_MESSAGE =
+  "Personal AI generation request could not be persisted.";
 const emptyRequestRepository: PersonalAiGenerationRequestRouteRepository = {
   async listRequestHistory() {
     return [];
@@ -251,7 +254,7 @@ async function createRequestInputWithPersistentRequestMetadata(
   input: Record<string, unknown>,
   requestRepository: PersonalAiGenerationRequestRouteRepository,
   requestedAt: Date,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown> | null> {
   if (requestRepository.createOrReuseRequest === undefined) {
     return input;
   }
@@ -279,7 +282,7 @@ async function createRequestInputWithPersistentRequestMetadata(
       aiCallLogPublicId: historyItem.aiCallLogPublicId,
     };
   } catch {
-    return input;
+    return null;
   }
 }
 
@@ -379,6 +382,15 @@ export function createPersonalAiGenerationRequestRouteHandlers(
                 requestRepository,
                 now(),
               );
+
+            if (localBrowserRequestInput === null) {
+              return createJsonResponse(
+                createErrorResponse(
+                  REQUEST_PERSISTENCE_UNAVAILABLE_CODE,
+                  REQUEST_PERSISTENCE_UNAVAILABLE_MESSAGE,
+                ),
+              );
+            }
 
             return createJsonResponse(
               buildPersonalAiGenerationLocalBrowserExperienceReadModel(
