@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-admin-ai-generation-formal-adoption-review-ui-affordance
-updatedAt: "2026-06-15T09:24:51-07:00"
+currentPhase: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+updatedAt: "2026-06-15T09:28:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: 96e7dc7a1c5a8cbcb0420724cff7e0f3b577c95d
   lastKnownOriginMasterSha: 96e7dc7a1c5a8cbcb0420724cff7e0f3b577c95d
 currentTask:
-  id: advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+  id: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
-  branch: codex/advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+  branch: codex/advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -377,6 +377,7 @@ qualityGates:
     advancedNextImplementationQueueSeedingPostFormalAdoptionBoundary: pass_docs_only_seeded_formal_adoption_ui_followups
     advancedAdminAiGenerationFormalAdoptionReviewUiBoundaryReadonlyAudit: pass_readonly_audit_no_blocking_findings
     advancedAdminAiGenerationFormalAdoptionReviewUiAffordance: pass_tdd_admin_ui_metadata_only_affordance
+    advancedPersonalAiGenerationFormalAdoptionReviewFlowReadonlyRecheck: pass_readonly_recheck_with_public_id_display_needs_recheck
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -395,11 +396,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-admin-ai-generation-formal-adoption-review-ui-affordance is closed. Recommended next action is
-    advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck under the user's 2026-06-15 fresh serial
-    batch approval. That recheck must remain readonly and confirm service, route, admin UI, and student readonly display
-    consistency.
+    advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck is closed with needs_recheck. Recommended
+    next action is a narrow admin public identifier display policy follow-up for the AI audit log summary, unless the user
+    chooses another approved advanced queue task.
     Repository, schema/migration, dependency, e2e/browser/dev-server, DB access, provider/env/secret, quota/cost,
     staging/prod/cloud, deploy, payment, external-service, raw prompt/raw answer/provider payload, row/private data,
     formal adoption write, PR, and force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
