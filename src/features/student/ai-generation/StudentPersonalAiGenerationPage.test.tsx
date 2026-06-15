@@ -255,7 +255,7 @@ describe("StudentPersonalAiGenerationPage", () => {
   it("renders the result detail empty state", async () => {
     mockResultHistoryAndDetailResponses({
       detailResponse: {
-        code: 404019,
+        code: 404045,
         message: "Personal AI generation result detail was not found.",
         data: null,
       },

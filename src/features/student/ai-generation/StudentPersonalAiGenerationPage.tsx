@@ -77,6 +77,8 @@ type StudentPersonalAiGenerationRequestDraft = {
   citationCount: number;
 };
 
+const PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE = 404045;
+
 const copy = {
   title: "\u4e2a\u4eba AI \u5b66\u4e60",
   subtitle:
@@ -1130,7 +1132,10 @@ export function StudentPersonalAiGenerationPage() {
         return;
       }
 
-      if (detailResponse.code === 404019) {
+      if (
+        detailResponse.code ===
+        PERSONAL_AI_GENERATION_RESULT_DETAIL_NOT_FOUND_CODE
+      ) {
         setResultDetailState("empty");
         setResultDetail(null);
         return;

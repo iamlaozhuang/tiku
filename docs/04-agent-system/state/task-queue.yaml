@@ -16893,3 +16893,84 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-personal-ai-generation-result-detail-flow-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-personal-ai-generation-result-detail-flow-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-personal-ai-generation-result-detail-flow-readonly-audit
+  - id: fix-student-ai-generation-result-detail-not-found-state
+    title: Fix student AI generation result detail not-found state
+    phase: fix-student-ai-generation-result-detail-not-found-state
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: approved_by_user_prompt_2026_06_15_and_standing_low_risk_closeout
+    status: closed
+    result: pass
+    claimedAt: "2026-06-15T07:03:30-07:00"
+    closedAt: "2026-06-15T07:08:20-07:00"
+    retryCount: 0
+    dependencies:
+      - advanced-personal-ai-generation-result-detail-flow-readonly-audit
+    humanApprovalBoundary: >-
+      User explicitly requested a narrow fix task named
+      fix-student-ai-generation-result-detail-not-found-state. Scope is limited to aligning the student UI redacted
+      detail empty-state handling with the existing readonly detail route/service not-found response code. The task uses
+      standing low-risk Module Run v2 local closeout approval for local commit, fast-forward merge to master, push to
+      origin/master, and merged short-branch cleanup after all repository, validation, allowed-files, closeout, and
+      pre-push gates pass.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+      - docs/05-execution-logs/evidence/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - src/app/api/v1/**
+      - src/server/**
+    blockedGates:
+      - direct database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - row/private data exposure
+      - publicId list policy changes
+      - route or service implementation changes
+    closeoutPolicy:
+      localCommit: approved_by_standing_low_risk_module_run_v2_closeout
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId fix-student-ai-generation-result-detail-not-found-state
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId fix-student-ai-generation-result-detail-not-found-state
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId fix-student-ai-generation-result-detail-not-found-state
