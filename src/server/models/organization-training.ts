@@ -32,7 +32,6 @@ export const organizationTrainingVersionStatusValues = [
 ] as const;
 
 export const organizationTrainingAnswerStatusValues = [
-  "not_started",
   "in_progress",
   "submitted",
   "read_only",

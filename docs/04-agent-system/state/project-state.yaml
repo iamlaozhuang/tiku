@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-answer-status-alignment-seeding
-updatedAt: "2026-06-15T11:39:00-07:00"
+currentPhase: advanced-organization-training-answer-status-alignment
+updatedAt: "2026-06-15T11:54:09-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5a641ffad3d95e4eaec2dd7a29f189db2be235f0
-  lastKnownOriginMasterSha: 5a641ffad3d95e4eaec2dd7a29f189db2be235f0
+  lastKnownMasterSha: e7828e97c2f9b55b21ca2a6107d23d0d7f8c19f4
+  lastKnownOriginMasterSha: e7828e97c2f9b55b21ca2a6107d23d0d7f8c19f4
 currentTask:
-  id: advanced-organization-training-answer-status-alignment-seeding
+  id: advanced-organization-training-answer-status-alignment
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
-  branch: codex/advanced-organization-training-answer-status-alignment-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-answer-status-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment.md
+  branch: codex/advanced-organization-training-answer-status-alignment
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -386,9 +386,10 @@ qualityGates:
     advancedAdminAiOpsModelConfigPublicIdentifierRedactionReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedNextImplementationQueueSeedingPostModelConfigRedaction: pass_docs_only_seeded_organization_training_queue
     advancedOrganizationTrainingBoundaryReadonlyAudit: pass_readonly_audit_no_blocking_findings
-    preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_boundary_readonly_audit_closeout_readiness
-    prePushHook: pass_advanced_organization_training_boundary_readonly_audit_pre_push_readiness
+    advancedOrganizationTrainingAnswerStatusAlignment: pass_tdd_answer_status_alignment
+    preCommitHook: pass_advanced_organization_training_answer_status_alignment_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_answer_status_alignment_closeout_readiness
+    prePushHook: pass_advanced_organization_training_answer_status_alignment_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -404,9 +405,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-answer-status-alignment-seeding closed with pass. The next seeded advanced candidate
-    is advanced-organization-training-answer-status-alignment after fresh approval, limited to TDD alignment of
-    organizationTrainingAnswerStatusValues in the model/test surface before any service/route/repository/mapper/API
-    runtime/UI work. DB access, provider/env/secret, quota/cost, e2e/browser/dev-server, staging/prod/cloud, deploy,
-    payment, external-service, row/private data, formal content write, PR, and force-push remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+    advanced-organization-training-answer-status-alignment closed with pass. The answer status union is now aligned to
+    in_progress, submitted, and read_only before downstream organization training service/route/repository/mapper/API
+    runtime/UI work. Recommended next action is a narrow readonly recheck or the next approved organization training
+    queue item after repository readiness reconfirms clean master/origin parity. DB access, provider/env/secret,
+    quota/cost, e2e/browser/dev-server, staging/prod/cloud, deploy, payment, external-service, row/private data, formal
+    content write, PR, and force-push remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment.md

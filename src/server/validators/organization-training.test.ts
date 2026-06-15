@@ -7,6 +7,7 @@ import type {
   OrganizationTrainingPublishedVersionDto,
 } from "../contracts/organization-training-contract";
 import {
+  organizationTrainingAnswerStatusValues,
   organizationTrainingDeferredQuestionTypeValues,
   organizationTrainingQuestionTypeValues,
   organizationTrainingSensitiveAdminSummaryFieldValues,
@@ -18,6 +19,14 @@ import {
 } from "./organization-training";
 
 describe("organization training contract and validator scaffold", () => {
+  it("keeps employee answer statuses aligned with the organization training plan", () => {
+    expect(organizationTrainingAnswerStatusValues).toEqual([
+      "in_progress",
+      "submitted",
+      "read_only",
+    ]);
+  });
+
   it("normalizes publish input with first-release question types and null optional fields", () => {
     expect(organizationTrainingQuestionTypeValues).toEqual([
       "single_choice",
