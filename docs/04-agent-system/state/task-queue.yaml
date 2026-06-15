@@ -15058,3 +15058,379 @@ tasks:
       - payment/external-service
       - PR/force-push
       - Cost Calibration Gate
+  - id: phase-22-local-acceptance-verification-seeding
+    title: Phase 22 local acceptance verification seeding
+    phase: phase-22-local-acceptance-verification-seeding
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: phase-22-post-repair-local-acceptance-reaudit-planning
+    seedCategory: phase_22_local_acceptance_verification_matrix
+    taskKind: docs_only_local_acceptance_verification_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    dependencies:
+      - phase-22-post-repair-local-acceptance-reaudit-planning
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+    humanApprovalBoundary: >-
+      Fresh user instruction on 2026-06-15 authorizes docs-only Phase 22 local acceptance verification seeding. The task
+      may update project state, task queue, and this task's plan/evidence/audit only, then create a local commit. It must
+      not merge or push without a separate approval. It must not run e2e, Browser, dev server, local DB access,
+      seed/bootstrap, migrations, provider calls, deploy, source/test/schema/dependency changes, env/secret work,
+      payment, external-service, PR, force-push, or Cost Calibration.
+    evidenceRedactionBoundary: route names, task ids, status labels, command summaries, and redacted matrix entries only; no secret, token, database URL, provider payload, prompt, answer, row data, or private user data.
+    seededCandidateTasks:
+      - phase-22-local-acceptance-account-auth-verification
+      - phase-22-local-acceptance-content-production-verification
+      - phase-22-local-acceptance-student-answering-verification
+      - phase-22-local-acceptance-mistake-learning-verification
+      - phase-22-local-acceptance-admin-operations-verification
+      - phase-22-local-acceptance-security-evidence-verification
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/**
+      - scripts/agent-system/Test-GitCompletionReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId phase-22-local-acceptance-verification-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId phase-22-local-acceptance-verification-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId phase-22-local-acceptance-verification-seeding
+    blockedGates:
+      - merge/push without separate approval
+      - source/test/runtime implementation
+      - local browser/e2e verification
+      - dev server
+      - local DB access
+      - migration/seed/bootstrap
+      - env/secret/provider configuration
+      - provider/model request/quota use
+      - schema/migration
+      - dependency/package/lockfile
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: phase-22-local-acceptance-account-auth-verification
+    title: Phase 22 account and authorization local acceptance verification
+    phase: phase-22-local-acceptance-account-auth-verification
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: phase-22-local-acceptance-verification-seeding
+    seedCategory: phase_22_local_acceptance_verification_matrix
+    taskKind: local_acceptance_verification_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-verification-seeding
+    verificationJourney: account_and_authorization
+    targetEntities:
+      - user
+      - student
+      - session
+      - redeem_code
+      - authorization
+      - personal_auth
+      - org_auth
+      - organization
+      - employee
+    statusVocabulary:
+      - runtime_closed
+      - local_verified
+      - mock_only
+      - metadata_only
+      - staging_blocked
+      - deferred
+      - needs_recheck
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this candidate. Execution must explicitly approve the local
+      verification surface before dev server, Browser, Playwright, e2e, local DB-through-app, screenshots, or browser
+      observations. This seeded candidate does not approve env/secret, provider, seed/bootstrap, migration, source/test
+      edits, schema, dependency, staging/prod/cloud/deploy, payment, external-service, PR, force-push, or Cost
+      Calibration work.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+    blockedFiles: &phase22LocalAcceptanceBlockedFiles
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates: &phase22LocalAcceptanceBlockedGates
+      - executing without future fresh user instruction
+      - env/secret/provider configuration
+      - provider/model request/quota use
+      - migration/seed/bootstrap
+      - schema/migration
+      - dependency/package/lockfile
+      - source/test/e2e edits
+      - staging/prod/cloud/deploy
+      - payment/external-service
+      - PR/force-push
+      - Cost Calibration Gate
+  - id: phase-22-local-acceptance-content-production-verification
+    title: Phase 22 content production local acceptance verification
+    phase: phase-22-local-acceptance-content-production-verification
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: phase-22-local-acceptance-verification-seeding
+    seedCategory: phase_22_local_acceptance_verification_matrix
+    taskKind: local_acceptance_verification_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-verification-seeding
+    verificationJourney: content_production
+    targetEntities:
+      - material
+      - question
+      - knowledge_node
+      - tag
+      - paper
+      - paper_section
+      - paper_asset
+    statusVocabulary:
+      - runtime_closed
+      - local_verified
+      - mock_only
+      - metadata_only
+      - staging_blocked
+      - deferred
+      - needs_recheck
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this candidate. Execution must explicitly approve local
+      content-production verification and must keep object storage, binary upload, OCR, public URL, env/secret,
+      provider, source/test/e2e edits, schema, migration, dependency, staging/prod/cloud/deploy, payment,
+      external-service, PR, force-push, and Cost Calibration blocked unless separately approved.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedGates: *phase22LocalAcceptanceBlockedGates
+  - id: phase-22-local-acceptance-student-answering-verification
+    title: Phase 22 student answering local acceptance verification
+    phase: phase-22-local-acceptance-student-answering-verification
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: phase-22-local-acceptance-verification-seeding
+    seedCategory: phase_22_local_acceptance_verification_matrix
+    taskKind: local_acceptance_verification_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-verification-seeding
+    verificationJourney: student_answering
+    targetEntities:
+      - practice
+      - mock_exam
+      - answer_record
+      - exam_report
+    statusVocabulary:
+      - runtime_closed
+      - local_verified
+      - mock_only
+      - metadata_only
+      - staging_blocked
+      - deferred
+      - needs_recheck
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this candidate. Execution must explicitly approve local
+      student journey verification before dev server, Browser, Playwright, e2e, local DB-through-app, screenshots, or
+      browser observations. Source/test/e2e edits, env/secret, provider, schema/migration, dependency, seed/bootstrap,
+      staging/prod/cloud/deploy, payment, external-service, PR, force-push, and Cost Calibration remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedGates: *phase22LocalAcceptanceBlockedGates
+  - id: phase-22-local-acceptance-mistake-learning-verification
+    title: Phase 22 mistake and learning loop local acceptance verification
+    phase: phase-22-local-acceptance-mistake-learning-verification
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: phase-22-local-acceptance-verification-seeding
+    seedCategory: phase_22_local_acceptance_verification_matrix
+    taskKind: local_acceptance_verification_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-verification-seeding
+    verificationJourney: mistake_and_learning_loop
+    targetEntities:
+      - mistake_book
+      - ai_explanation
+      - ai_hint
+      - learning_suggestion
+      - kn_recommendation
+      - exam_report
+    statusVocabulary:
+      - runtime_closed
+      - local_verified
+      - mock_only
+      - metadata_only
+      - staging_blocked
+      - deferred
+      - needs_recheck
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this candidate. Execution must explicitly approve local
+      learning-loop verification and must keep real provider calls, prompt/raw answer capture, quota/cost measurement,
+      env/secret, source/test/e2e edits, schema/migration, dependency, seed/bootstrap, staging/prod/cloud/deploy,
+      payment, external-service, PR, force-push, and Cost Calibration blocked unless separately approved.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedGates: *phase22LocalAcceptanceBlockedGates
+  - id: phase-22-local-acceptance-admin-operations-verification
+    title: Phase 22 admin operations local acceptance verification
+    phase: phase-22-local-acceptance-admin-operations-verification
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: phase-22-local-acceptance-verification-seeding
+    seedCategory: phase_22_local_acceptance_verification_matrix
+    taskKind: local_acceptance_verification_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-verification-seeding
+    verificationJourney: admin_operations
+    targetEntities:
+      - user
+      - organization
+      - employee
+      - org_auth
+      - redeem_code
+      - resource
+      - knowledge_base
+      - model_config
+      - audit_log
+      - ai_call_log
+    statusVocabulary:
+      - runtime_closed
+      - local_verified
+      - mock_only
+      - metadata_only
+      - staging_blocked
+      - deferred
+      - needs_recheck
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this candidate. Execution must explicitly approve local admin
+      operations verification and must keep env/secret, provider, real resource transfer, source/test/e2e edits,
+      schema/migration, dependency, seed/bootstrap, staging/prod/cloud/deploy, payment, external-service, PR,
+      force-push, and Cost Calibration blocked unless separately approved.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedGates: *phase22LocalAcceptanceBlockedGates
+  - id: phase-22-local-acceptance-security-evidence-verification
+    title: Phase 22 security and evidence local acceptance verification
+    phase: phase-22-local-acceptance-security-evidence-verification
+    sourceStory: phase-22-mvp-local-acceptance-reaudit
+    seededFromTask: phase-22-local-acceptance-verification-seeding
+    seedCategory: phase_22_local_acceptance_verification_matrix
+    taskKind: local_acceptance_verification_candidate
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - phase-22-local-acceptance-verification-seeding
+    verificationJourney: security_and_evidence
+    targetEntities:
+      - audit_log
+      - ai_call_log
+      - session
+      - authorization
+      - user
+      - model_config
+    statusVocabulary:
+      - runtime_closed
+      - local_verified
+      - mock_only
+      - metadata_only
+      - staging_blocked
+      - deferred
+      - needs_recheck
+    humanApprovalBoundary: >-
+      Future fresh instruction is required before claiming this candidate. Execution must explicitly approve local
+      security/evidence verification and must keep secret disclosure, token capture, raw prompt/raw answer capture,
+      provider payloads, source/test/e2e edits, schema/migration, dependency, seed/bootstrap, staging/prod/cloud/deploy,
+      payment, external-service, PR, force-push, and Cost Calibration blocked unless separately approved.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+      - docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+    blockedFiles: *phase22LocalAcceptanceBlockedFiles
+    blockedGates: *phase22LocalAcceptanceBlockedGates

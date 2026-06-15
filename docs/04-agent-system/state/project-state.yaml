@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: phase-22-post-repair-local-acceptance-reaudit-planning
-updatedAt: "2026-06-14T22:09:08-07:00"
+currentPhase: phase-22-local-acceptance-verification-seeding
+updatedAt: "2026-06-14T22:46:17-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 42cba7eca148be03637af367b40238487e8426df
-  lastKnownOriginMasterSha: 42cba7eca148be03637af367b40238487e8426df
+  lastKnownMasterSha: f9283b599d07104e9e65bb463493850351722be0
+  lastKnownOriginMasterSha: f9283b599d07104e9e65bb463493850351722be0
 currentTask:
-  id: phase-22-post-repair-local-acceptance-reaudit-planning
+  id: phase-22-local-acceptance-verification-seeding
   status: closed
   sourceStory: phase-22-mvp-local-acceptance-reaudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
-  branch: codex/phase-22-post-repair-local-acceptance-reaudit-planning
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+  branch: codex/phase-22-local-acceptance-verification-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -347,6 +347,7 @@ qualityGates:
     unifiedPostRepairMasterHealthGapAudit: pass_docs_only_readonly_gap_audit
     fixStudentLoginSessionPolicyDecision: pass_docs_only_server_session_option_a_decision
     phase22PostRepairLocalAcceptanceReauditPlanning: pass_docs_only_reaudit_planning
+    phase22LocalAcceptanceVerificationSeeding: pass_docs_only_candidate_matrix_seed
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -365,9 +366,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    The user-authorized three-task post-repair serial set is closed after this Phase 22 docs-only planning task is
-    committed, fast-forward merged to master, validated on master, pushed to origin/master, cleaned up, fetched with
-    prune, and confirmed clean/aligned. Do not auto-claim another task without fresh instruction. Provider, env/secret,
-    schema/migration, dependency, e2e/browser verification, deploy, payment, external-service, PR, force-push, and Cost
+    The Phase 22 docs-only local acceptance verification seeding task created six future approval-required candidate
+    tasks. Do not claim or execute any candidate without fresh instruction that explicitly approves the required local
+    verification surface. Browser, Playwright, e2e, dev server, local DB-through-app, seed/bootstrap, migration,
+    env/secret, provider, staging/prod/cloud/deploy, dependency, payment, external-service, PR, force-push, and Cost
     Calibration Gate blocks remain in force.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-seeding.md
