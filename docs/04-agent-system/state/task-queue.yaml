@@ -16663,3 +16663,81 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-personal-ai-generation-result-redacted-detail-read-model-service
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-personal-ai-generation-result-redacted-detail-read-model-service
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-personal-ai-generation-result-redacted-detail-read-model-service
+  - id: advanced-personal-ai-generation-result-redacted-detail-readonly-route
+    title: Advanced personal AI generation result redacted detail readonly route
+    phase: advanced-personal-ai-generation-result-redacted-detail-readonly-route
+    sourceStory: advanced-edition-implementation-readiness
+    taskKind: local_route_implementation
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    claimedAt: "2026-06-15T06:15:51-07:00"
+    closedAt: "2026-06-15T06:19:17-07:00"
+    retryCount: 0
+    dependencies:
+      - advanced-personal-ai-generation-result-redacted-detail-read-model-service
+    humanApprovalBoundary: >-
+      User approved executing this narrow advanced task and closing it out with local commit, fast-forward merge to
+      master, push origin/master, and short-branch cleanup. Scope is limited to a thin readonly REST detail route over
+      the approved redacted detail read-model service with injected unit coverage. It must preserve provider/env/secret,
+      DB direct access, schema/migration, dependency, e2e/browser/dev-server, quota/cost, Cost Calibration,
+      staging/prod/cloud/deploy/payment/external-service, formal adoption write, raw prompt/raw answer/provider payload,
+      row/private data, public identifier misuse, and authorization-model changes as blocked gates.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+      - src/app/api/v1/personal-ai-generation-results/*/route.ts
+      - src/server/services/personal-ai-generation-result-route.ts
+      - src/server/services/personal-ai-generation-result-route.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - src/features/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+    blockedGates:
+      - real database access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - formal adoption write
+      - authorization model change
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/personal-ai-generation-result-route.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-personal-ai-generation-result-redacted-detail-readonly-route
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-personal-ai-generation-result-redacted-detail-readonly-route
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-personal-ai-generation-result-redacted-detail-readonly-route

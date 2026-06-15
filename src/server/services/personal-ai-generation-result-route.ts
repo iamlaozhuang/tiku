@@ -26,6 +26,12 @@ export type PersonalAiGenerationResultRouteDependencies = {
   >;
 };
 
+type ResultDetailRouteContext = {
+  params: Promise<{
+    publicId: string;
+  }>;
+};
+
 const emptyResultRepository: Pick<
   PersonalAiGenerationResultRepository,
   "listDraftResults"
@@ -84,6 +90,18 @@ function createResultHistoryQuery(
   };
 }
 
+async function createResultDetailQuery(
+  context: ResultDetailRouteContext,
+  userContext: PersonalAiGenerationResultUserContext,
+) {
+  const { publicId } = await context.params;
+
+  return {
+    ownerPublicId: userContext.userPublicId,
+    resultPublicId: publicId,
+  };
+}
+
 export function createPersonalAiGenerationResultUserResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
 ): PersonalAiGenerationResultUserResolver {
@@ -131,6 +149,29 @@ export function createPersonalAiGenerationResultRouteHandlers(
           return createJsonResponse(
             await resultHistoryService.listDraftResultHistory(
               createResultHistoryQuery(request, userContext),
+            ),
+          );
+        },
+      ),
+    },
+    detail: {
+      GET: createRouteHandlerWithErrorEnvelope(
+        async (
+          request: Request,
+          context: ResultDetailRouteContext,
+        ): Promise<Response> => {
+          const userContext = await resolveRequiredUserContext(
+            request,
+            resolveUserContext,
+          );
+
+          if (!isPersonalAiGenerationResultUserContext(userContext)) {
+            return createJsonResponse(userContext);
+          }
+
+          return createJsonResponse(
+            await resultHistoryService.getDraftResultDetail(
+              await createResultDetailQuery(context, userContext),
             ),
           );
         },

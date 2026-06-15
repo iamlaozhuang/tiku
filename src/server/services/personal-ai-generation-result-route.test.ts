@@ -21,6 +21,15 @@ function createGetRequest(query = ""): Request {
   );
 }
 
+function createDetailGetRequest(publicId: string, query = ""): Request {
+  return new Request(
+    `http://localhost/api/v1/personal-ai-generation-results/${publicId}${query}`,
+    {
+      method: "GET",
+    },
+  );
+}
+
 function createResult(
   overrides: Partial<PersonalAiGenerationResultDto> &
     Record<string, unknown> = {},
@@ -86,6 +95,24 @@ function getResultHistoryRouteHandler(collection: unknown) {
   expect(getHandler).toEqual(expect.any(Function));
 
   return getHandler as (request: Request) => Promise<Response>;
+}
+
+function getResultDetailRouteHandler(detail: unknown) {
+  const getHandler = (
+    detail as {
+      GET?: (
+        request: Request,
+        context: { params: Promise<{ publicId: string }> },
+      ) => Promise<Response>;
+    }
+  ).GET;
+
+  expect(getHandler).toEqual(expect.any(Function));
+
+  return getHandler as (
+    request: Request,
+    context: { params: Promise<{ publicId: string }> },
+  ) => Promise<Response>;
 }
 
 describe("personal AI generation result route handlers", () => {
@@ -270,5 +297,173 @@ describe("personal AI generation result route handlers", () => {
     });
     expect(serializedPayload).not.toContain("database stack");
     expect(serializedPayload).not.toContain("internal connection details");
+  });
+
+  it("returns session-owned redacted result detail and ignores stale query ownership", async () => {
+    const staleQueryUserPublicId = "query_stale_detail_user_public_999";
+    const omittedGeneratedText = ["OMITTED", "DETAIL", "TEXT"].join("-");
+    const generatedContentKey = ["generated", "Content"].join("");
+    const resultRepository = createResultRepository([
+      createResult({
+        resultPublicId: "personal_ai_result_public_route_other",
+      }),
+      createResult({
+        resultPublicId: "personal_ai_result_public_route_detail",
+        [generatedContentKey]: omittedGeneratedText,
+      }),
+    ]);
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => userContext,
+      {
+        resultRepository,
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest(
+        "personal_ai_result_public_route_detail",
+        `?userPublicId=${staleQueryUserPublicId}&id=701`,
+      ),
+      {
+        params: Promise.resolve({
+          publicId: "personal_ai_result_public_route_detail",
+        }),
+      },
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        runtimeStatus: "local_contract_only",
+        contentVisibility: "redacted_snapshot",
+        redactionStatus: "redacted",
+        formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+        result: {
+          resultPublicId: "personal_ai_result_public_route_detail",
+          taskPublicId: "ai_generation_task_public_route_401",
+          requestPublicId: "personal_ai_request_public_route_401",
+          taskType: "ai_question_generation",
+          status: "draft",
+          persistedAt: "2026-06-14T10:00:00.000Z",
+          contentReference: {
+            contentDigest: "sha256:content_route_401",
+            contentPreviewMasked: "masked preview route 401",
+            contentVisibility: "redacted_snapshot",
+            redactionStatus: "redacted",
+          },
+          evidenceReference: {
+            evidenceStatus: "sufficient",
+            citationCount: 2,
+            aiCallLogPublicId: "ai_call_log_public_route_401",
+            redactionStatus: "redacted",
+          },
+          formalAdoption: {
+            isBlocked: true,
+            status: "blocked",
+          },
+        },
+      },
+    });
+    expect(resultRepository.calls).toEqual([
+      {
+        ownerPublicId: userContext.userPublicId,
+        limit: undefined,
+      },
+    ]);
+    expect(serializedPayload).not.toContain(staleQueryUserPublicId);
+    expect(serializedPayload).not.toMatch(/"id":/);
+    expect(serializedPayload).not.toContain(generatedContentKey);
+    expect(serializedPayload).not.toContain(omittedGeneratedText);
+  });
+
+  it("rejects non-personal sessions from the personal result detail path", async () => {
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => null,
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest("personal_ai_result_public_route_detail"),
+      {
+        params: Promise.resolve({
+          publicId: "personal_ai_result_public_route_detail",
+        }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 401001,
+      message: "User session is required.",
+      data: null,
+    });
+  });
+
+  it("returns not found for missing session-owned result detail", async () => {
+    const resultRepository = createResultRepository([
+      createResult({
+        resultPublicId: "personal_ai_result_public_route_other",
+      }),
+    ]);
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => userContext,
+      {
+        resultRepository,
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest("personal_ai_result_public_route_missing"),
+      {
+        params: Promise.resolve({
+          publicId: "personal_ai_result_public_route_missing",
+        }),
+      },
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 404045,
+      message: "Personal AI generation result detail was not found.",
+      data: null,
+    });
+    expect(resultRepository.calls).toEqual([
+      {
+        ownerPublicId: userContext.userPublicId,
+        limit: undefined,
+      },
+    ]);
+  });
+
+  it("returns a standard error envelope when persistent result detail lookup fails", async () => {
+    const resultRepository = createResultRepository([], {
+      listError: new Error("database stack with private detail rows"),
+    });
+    const { detail } = createPersonalAiGenerationResultRouteHandlers(
+      async () => userContext,
+      {
+        resultRepository,
+      },
+    );
+
+    const response = await getResultDetailRouteHandler(detail)(
+      createDetailGetRequest("personal_ai_result_public_route_detail"),
+      {
+        params: Promise.resolve({
+          publicId: "personal_ai_result_public_route_detail",
+        }),
+      },
+    );
+    const payload = await response.json();
+    const serializedPayload = JSON.stringify(payload);
+
+    expect(payload).toEqual({
+      code: 500020,
+      message:
+        "Personal AI generation result detail is temporarily unavailable.",
+      data: null,
+    });
+    expect(serializedPayload).not.toContain("database stack");
+    expect(serializedPayload).not.toContain("private detail rows");
   });
 });

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-personal-ai-generation-result-redacted-detail-read-model-service
-updatedAt: "2026-06-15T06:06:08-07:00"
+currentPhase: advanced-personal-ai-generation-result-redacted-detail-readonly-route
+updatedAt: "2026-06-15T06:19:17-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 228e0f94d4fd8ccac0a44b6f68b4415cb5836f8f
-  lastKnownOriginMasterSha: 228e0f94d4fd8ccac0a44b6f68b4415cb5836f8f
+  lastKnownMasterSha: 334b8835a2ca1dcf457ba0fe3fed915476108eb4
+  lastKnownOriginMasterSha: 334b8835a2ca1dcf457ba0fe3fed915476108eb4
 currentTask:
-  id: advanced-personal-ai-generation-result-redacted-detail-read-model-service
+  id: advanced-personal-ai-generation-result-redacted-detail-readonly-route
   status: closed
   sourceStory: advanced-edition-implementation-readiness
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-read-model-service.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-read-model-service.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-read-model-service.md
-  branch: codex/advanced-personal-ai-generation-result-redacted-detail-read-model-service
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+  branch: codex/advanced-personal-ai-generation-result-redacted-detail-readonly-route
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -360,6 +360,7 @@ qualityGates:
     advancedPersonalAiGenerationResultReadonlyRoute: pass_readonly_route_tdd
     advancedStudentAiGenerationResultHistoryUi: pass_component_result_history_ui_tdd
     advancedPersonalAiGenerationResultRedactedDetailReadModelService: pass_redacted_detail_read_model_service_tdd
+    advancedPersonalAiGenerationResultRedactedDetailReadonlyRoute: pass_redacted_detail_readonly_route_tdd
     preCommitHook: pass_unified_future_non_goal_and_audit_only_guard_pre_commit_hardening
     moduleCloseout: pass_unified_future_non_goal_and_audit_only_guard_closeout_readiness
     prePushHook: pass_unified_standard_advanced_input_freeze_and_source_index_pre_push_readiness
@@ -378,9 +379,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-personal-ai-generation-result-redacted-detail-read-model-service is closed locally as a redacted detail
-    read-model service only. Next recommended candidate is a separate, narrow readonly detail route task only after fresh
-    approval and queue seeding. UI, repository, schema/migration, dependency, e2e/browser/dev-server, DB access,
-    provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment, external-service, raw prompt/raw answer/provider
-    payload, row/private data, formal adoption write, PR, and force-push remain blocked unless separately approved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-read-model-service.md
+    advanced-personal-ai-generation-result-redacted-detail-readonly-route is closed locally as a thin readonly detail
+    REST route over the approved redacted detail read-model service. Next recommended candidate is a separate, narrow
+    student UI detail affordance task only after fresh approval and queue seeding. Repository, schema/migration,
+    dependency, e2e/browser/dev-server, DB access, provider/env/secret, quota/cost, staging/prod/cloud, deploy, payment,
+    external-service, raw prompt/raw answer/provider payload, row/private data, formal adoption write, PR, and force-push
+    remain blocked unless separately approved.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
