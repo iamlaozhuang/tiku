@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-subject-authorization-context-contract-decision
-updatedAt: "2026-06-15T13:25:59-07:00"
+currentPhase: advanced-organization-training-content-subject-scope-contract-seeding
+updatedAt: "2026-06-15T16:30:02-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 97cf3a94e37dd92da97d4522def96ee1ed4a7645
-  lastKnownOriginMasterSha: 97cf3a94e37dd92da97d4522def96ee1ed4a7645
+  lastKnownMasterSha: 0f7baef6227f405724440c05ced84fea98b41680
+  lastKnownOriginMasterSha: 0f7baef6227f405724440c05ced84fea98b41680
 currentTask:
-  id: advanced-organization-training-subject-authorization-context-contract-decision
+  id: advanced-organization-training-content-subject-scope-contract-seeding
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
-  branch: codex/advanced-organization-training-subject-authorization-context-contract-decision
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-content-subject-scope-contract-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-contract-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-contract-seeding.md
+  branch: codex/advanced-organization-training-content-subject-scope-contract-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -396,9 +396,10 @@ qualityGates:
     advancedOrganizationTrainingDraftLifecycleServiceLevelMismatchTestCoverage: pass_tdd_service_level_mismatch_test_coverage
     advancedOrganizationTrainingSubjectAuthorizationContextBoundaryReadonlyAudit: pass_with_subject_authorization_contract_needs_recheck
     advancedOrganizationTrainingSubjectAuthorizationContextContractDecision: pass_docs_only_decision_subject_is_content_scope_not_effective_auth_context
-    preCommitHook: pass_advanced_organization_training_subject_authorization_context_contract_decision_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_subject_authorization_context_contract_decision_closeout_readiness
-    prePushHook: pass_advanced_organization_training_subject_authorization_context_contract_decision_pre_push_readiness
+    advancedOrganizationTrainingContentSubjectScopeContractSeeding: pass_docs_only_seeded_content_subject_scope_guard
+    preCommitHook: pass_advanced_organization_training_content_subject_scope_contract_seeding_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_content_subject_scope_contract_seeding_closeout_readiness
+    prePushHook: pass_advanced_organization_training_content_subject_scope_contract_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -414,9 +415,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-subject-authorization-context-contract-decision closed with the decision that
-    `subject` should remain a selected content/request scope dimension, not a source-backed
-    EffectiveAuthorizationContextDto field, under the current `profession/level` authorization model. Recommended next
-    action is advanced-organization-training-content-subject-scope-contract-seeding before broader organization training
-    lifecycle expansion.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
+    advanced-organization-training-content-subject-scope-contract-seeding closed by seeding the pending TDD task
+    advanced-organization-training-content-subject-scope-guard. Recommended next action is to execute that TDD task so
+    selected organization training content/request scope validates `profession + level + subject` while preserving
+    EffectiveAuthorizationContextDto as source-backed `profession/level` authorization context.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-contract-seeding.md
