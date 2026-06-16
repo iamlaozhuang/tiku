@@ -21298,3 +21298,256 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
+  - id: advanced-organization-training-publish-version-persistence-schema-migration-seeding
+    title: Seed organization training publish-version persistence schema migration task
+    phase: advanced-organization-training-publish-version-persistence-schema-migration-seeding
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+    humanApproval: >-
+      Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+      validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
+      does not authorize schema/drizzle edits, DB access, migration generation/execution, provider/model work, dependency
+      changes, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, formal content
+      write, or formal target write.
+    seededByTask: advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version persistence schema migration task seed
+    behaviorBoundary: organization-training::docs-state-queue-seeding-only
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+    useCases:
+      - queue records the exact next schema-migration task after readonly inventory proves storage is missing
+      - future schema/migration work remains blocked until fresh approval and local capability gate readiness
+      - repository/mapper/route work remains blocked until isolated storage exists
+    acceptanceScenarios:
+      - docs/state/log files record the seeding decision and high-risk blocked gates
+      - task queue contains the pending schema-migration task with schema and DB capabilities blocked
+      - closeout evidence names the next module run candidate and validation matrix
+    nonGoals:
+      - schema changes, drizzle migration files, migration generation, migration execution, DB access, repository, mapper, route, UI, provider, dependency, e2e, deploy, payment, formal content write, or formal target write
+    validationProfile: L1-docs-state-seeding
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - future schema/migration task remains pending and requires fresh approval
+      - DB access and migration execution remain blocked
+      - repository/mapper/route/UI implementation remains separate
+      - Cost Calibration Gate remains blocked
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - execution outside docs/state/log queue seeding
+      - schema/migration changes
+      - migration generation or execution
+      - direct database access
+      - row/private data exposure
+      - product source implementation
+      - route/service/repository/mapper/API runtime/contract/model/validator/UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration-seeding
+    status: closed
+    result: pass_docs_only_seeded_schema_migration_task
+    claimedAt: "2026-06-15T19:20:21-07:00"
+    closedAt: "2026-06-15T19:20:21-07:00"
+  - id: advanced-organization-training-publish-version-persistence-schema-migration
+    title: Add isolated organization training publish-version persistence schema migration
+    phase: advanced-organization-training-publish-version-persistence-schema-migration
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-persistence-schema-migration-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+    humanApprovalBoundary: >-
+      Pending only. Must not be claimed or implemented without fresh user approval after this seeding task. Approval must
+      explicitly authorize local schema/drizzle work and preserve env/secret, provider/model, dependency/package/lockfile,
+      route/service/repository/mapper/UI, staging/prod/cloud/deploy/payment/external-service, destructive DB, row/private
+      data, PR, force push, formal content write, formal target write, and Cost Calibration Gate blocks. DB access and
+      migration execution remain blocked unless separately approved by the future task.
+    seededByTask: advanced-organization-training-publish-version-persistence-schema-migration-seeding
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    targetClosureItem: isolated organization training publish-version persistence schema
+    behaviorBoundary: organization-training::local-schema-migration-design-only-until-approved
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+    useCases:
+      - local schema can persist isolated organization training publish-version metadata before repository/mapper TDD
+      - internal `org_auth` lineage can be stored without exposing authorization identifiers in public DTOs
+      - publish scope snapshot, lifecycle status, takedown metadata, and source draft linkage have durable local schema support
+    acceptanceScenarios:
+      - schema defines isolated organization training publish-version storage using project naming conventions
+      - migration file is generated or authored locally without DB URL, row data, or staging/prod/cloud access
+      - schema tests or type-level checks cover public id, ownership, lifecycle, lineage, and index/foreign-key naming expectations
+      - evidence records migration plan, rollback/recovery boundary, and redacted schema diff
+      - repository/mapper/route work remains outside this task
+    nonGoals:
+      - repository implementation, mapper implementation, route wiring, service behavior changes, UI work, provider execution, dependency changes, DB data access, migration execution without separate approval, staging/prod migration, formal content write, and formal target write
+    validationProfile: L3-local-schema-migration-gated
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L3
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - fresh approval required before schema/drizzle edits
+      - DB access and migration execution require separate explicit approval
+      - repository/mapper/route/UI implementation remains separate
+      - provider/model and Cost Calibration Gate remain blocked
+    taskKind: schema_migration
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/db/schema/organization-training.ts
+      - src/db/schema/organization-training.test.ts
+      - src/db/schema/index.ts
+      - drizzle/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - src/db/schema/auth.ts
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/paper.ts
+      - src/db/schema/student-experience.ts
+      - src/db/schema/system.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/server/**
+      - src/app/**
+      - src/features/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution without fresh user approval
+      - schema/drizzle edits before local capability gate readiness
+      - direct database access without separate approval
+      - migration execution without separate approval
+      - drizzle-kit push
+      - destructive database operation
+      - row/private data exposure
+      - route/service/repository/mapper/API runtime/contract/model/validator/UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration -Capability schemaMigration -Intent use_capability
+      - npm.cmd run test:unit -- "src/db/schema/organization-training.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration
+    status: pending
+    result: pending
+    retryCount: 0

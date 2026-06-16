@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
-updatedAt: "2026-06-15T19:06:56-07:00"
+currentPhase: advanced-organization-training-publish-version-persistence-schema-migration-seeding
+updatedAt: "2026-06-15T19:20:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: b970e41cce04514b9b60a061e189e11326953de1
-  lastKnownOriginMasterSha: b970e41cce04514b9b60a061e189e11326953de1
+  lastKnownMasterSha: 90e59628d9a238e1d9df520b064fdbfcff7b0b36
+  lastKnownOriginMasterSha: 90e59628d9a238e1d9df520b064fdbfcff7b0b36
 currentTask:
-  id: advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
+  id: advanced-organization-training-publish-version-persistence-schema-migration-seeding
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
-  branch: codex/advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+  branch: codex/advanced-organization-training-publish-version-persistence-schema-migration-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -409,9 +409,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionPersistenceBoundarySeeding: pass_docs_only_seeded_persistence_boundary_planning
     advancedOrganizationTrainingPublishVersionPersistenceBoundaryPlanning: pass_docs_only_persistence_boundary_plan
     advancedOrganizationTrainingPublishVersionPersistenceSchemaInventoryReadonlyAudit: pass_readonly_inventory_schema_migration_required
-    preCommitHook: pass_advanced_organization_training_publish_version_persistence_schema_inventory_readonly_audit_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_persistence_schema_inventory_readonly_audit_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_persistence_schema_inventory_readonly_audit_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionPersistenceSchemaMigrationSeeding: pass_docs_only_seeded_schema_migration_task
+    preCommitHook: pass_advanced_organization_training_publish_version_persistence_schema_migration_seeding_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_persistence_schema_migration_seeding_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_persistence_schema_migration_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -427,7 +428,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit found no isolated
-    organization training publish-version schema, repository, mapper, or route storage surface. Recommended next action is a
-    fresh-approved schema/migration task for isolated publish-version persistence before repository/mapper TDD.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+    advanced-organization-training-publish-version-persistence-schema-migration is now seeded as the next pending task.
+    It remains blocked until fresh approval records schemaMigration: approved_migration_plan and the local schema migration
+    capability gate passes. DB access and migration execution remain blocked unless separately approved by that future task.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
