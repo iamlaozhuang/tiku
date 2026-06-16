@@ -22530,3 +22530,303 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-boundary-readonly-audit
+  - id: advanced-organization-training-publish-version-route-tdd-seeding
+    title: Seed organization training publish-version route TDD task
+    phase: advanced-organization-training-publish-version-route-tdd-seeding
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-boundary-readonly-audit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+    humanApproval: >-
+      Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+      validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
+      does not authorize route/API runtime implementation, service/repository/mapper implementation, UI work,
+      schema/drizzle/scripts/package/lockfile changes, DB access, migration execution, provider/model work,
+      e2e/browser/dev-server, staging/prod/cloud/deploy/payment external-service, PR, force push, formal content write,
+      formal target write, or Cost Calibration Gate work.
+    seededByTask: advanced-organization-training-publish-version-route-boundary-readonly-audit
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version route TDD task seed
+    behaviorBoundary: organization-training::docs-state-queue-seeding-only
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+    useCases:
+      - queue records the exact next route TDD task after the route boundary readonly audit found no blocking issue
+      - future route implementation remains blocked until fresh approval and RED-first evidence
+      - service/repository/mapper/schema/provider/UI/formal target write remain out of scope
+    acceptanceScenarios:
+      - docs/state/log files record the seeding decision and high-risk blocked gates
+      - task queue contains the pending route TDD task with exact route/runtime/test allowed files
+      - closeout evidence names the next module run candidate and validation matrix
+    nonGoals:
+      - route adapter implementation, API runtime implementation, service implementation, repository implementation,
+        mapper implementation, UI work, schema changes, migration generation, migration execution, DB access, provider
+        execution, dependency changes, e2e, deploy, payment, formal content write, and formal target write
+    validationProfile: L1-docs-state-seeding
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - future route TDD task remains pending and requires fresh approval
+      - future route TDD task must start with failing tests before implementation
+      - DB access and migration execution remain blocked
+      - service/repository/mapper/schema/UI implementation remains separate
+      - provider/model and Cost Calibration Gate remain blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution outside docs/state/log queue seeding
+      - product source implementation
+      - route/API runtime implementation
+      - service/repository/mapper implementation
+      - contract/model/validator/UI changes
+      - schema/migration changes
+      - migration generation or execution
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-tdd-seeding
+    status: closed
+    result: pass_docs_only_seeded_route_tdd_task
+    retryCount: 0
+    claimedAt: "2026-06-15T22:14:49-07:00"
+    closedAt: "2026-06-15T22:14:49-07:00"
+  - id: advanced-organization-training-publish-version-route-tdd
+    title: Implement organization training publish-version route with RED-first TDD
+    phase: advanced-organization-training-publish-version-route-tdd
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-tdd-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is a narrow RED-first TDD route/runtime
+      implementation for `POST /api/v1/organization-trainings/{publicId}/publish` using the existing organization
+      training service, repository, mapper, contract, model, and validator boundaries. It must keep route handlers thin,
+      preserve the standard response envelope, enforce public-id-only URL/body semantics, reject or block path/body public
+      id mismatch, prevent client-supplied internal lineage from being accepted as authoritative input, expose only the
+      metadata-only published version DTO, and keep formal target writes blocked.
+    seededByTask: advanced-organization-training-publish-version-route-tdd-seeding
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: pending_fresh_user_approval
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version route TDD
+    behaviorBoundary: organization-training::route-runtime-only-no-db-execution-no-ui
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+    useCases:
+      - organization admin can call a public-id-only route to publish an organization training draft through existing service logic
+      - route output uses the standard API envelope and returns only metadata-only published version data
+      - blocked route outcomes return a standard error envelope with `data: null`
+      - route rejects or blocks request bodies whose draft public id conflicts with the path public id
+      - client-supplied organizationId, orgAuthId, numeric ids, provider/raw fields, employee answer data, and formal target fields are not accepted or exposed
+    acceptanceScenarios:
+      - RED-first route unit tests fail before route/runtime implementation
+      - route entrypoint exists at `src/app/api/v1/organization-trainings/[publicId]/publish/route.ts`
+      - tests cover method/path shape and thin handler export
+      - tests cover success envelope with `{ version }`
+      - tests cover blocked/error envelope with `data: null`
+      - tests cover path/body public id mismatch handling
+      - tests cover internal lineage non-acceptance from client input
+      - tests cover metadata-only DTO and non-leakage of numeric ids, provider/raw fields, employee answer detail, formal target identifiers, and public identifier value lists
+      - implementation preserves ADR-002 route to service to repository layering
+    nonGoals:
+      - service business-rule changes, repository changes, mapper changes, contract/model/validator changes, UI work,
+        schema changes, drizzle migration files, migration generation, migration execution, DB access, provider execution,
+        dependency changes, e2e, dev server, deploy, payment, formal content write, and formal target write
+    validationProfile: L2-local-route-implementation-tdd-no-db-execution
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L2
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      localE2EValidation: blocked
+    blockedRemainder:
+      - DB access and migration execution remain blocked
+      - service/repository/mapper/schema/UI implementation remains separate
+      - provider/model and Cost Calibration Gate remain blocked
+      - e2e/browser/dev-server remain blocked
+      - formal target write remains blocked
+    closeoutPolicy:
+      localCommit: pending_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: local_implementation_tdd
+    moduleRunVersion: 2
+    redFirstRequired: true
+    allowedFiles:
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - src/server/contracts/api-response.ts
+      - src/server/services/route-error-response.ts
+      - src/server/services/route-error-response.test.ts
+      - src/app/api/v1/papers/[publicId]/publish/route.ts
+      - src/app/api/v1/exam-papers/[publicId]/publish/route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/features/**
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/services/effective-authorization-service.ts
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution without fresh user approval
+      - implementation before TDD RED evidence
+      - direct database access
+      - migration generation or execution
+      - schema/drizzle edits
+      - service business-rule changes
+      - repository/mapper/contract/model/validator changes
+      - UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-route.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-tdd
+    status: pending
+    result: null
+    retryCount: 0
+    claimedAt: null
+    closedAt: null
