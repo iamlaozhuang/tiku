@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-tdd-seeding
-updatedAt: "2026-06-15T22:14:49-07:00"
+currentPhase: advanced-organization-training-publish-version-route-tdd
+updatedAt: "2026-06-15T22:31:21-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e9b0c9236415ccc77f4d7669127f5dd39baa3ff8
-  lastKnownOriginMasterSha: e9b0c9236415ccc77f4d7669127f5dd39baa3ff8
+  lastKnownMasterSha: 982cd85cfaa4b675bfadd2a9a7e8fdb21b28a6bc
+  lastKnownOriginMasterSha: 982cd85cfaa4b675bfadd2a9a7e8fdb21b28a6bc
 currentTask:
-  id: advanced-organization-training-publish-version-route-tdd-seeding
+  id: advanced-organization-training-publish-version-route-tdd
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
-  branch: codex/advanced-organization-training-publish-version-route-tdd-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+  branch: codex/advanced-organization-training-publish-version-route-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -419,9 +419,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiringReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedOrganizationTrainingPublishVersionRouteBoundaryReadonlyAudit: pass_readonly_audit_with_tdd_route_seeding_recommended
     advancedOrganizationTrainingPublishVersionRouteTddSeeding: pass_docs_only_seeded_route_tdd_task
-    preCommitHook: pass_advanced_organization_training_publish_version_route_tdd_seeding_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_route_tdd_seeding_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_route_tdd_seeding_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionRouteTdd: pass_red_first_route_tdd_no_db_execution
+    preCommitHook: pass_advanced_organization_training_publish_version_route_tdd_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_route_tdd_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_route_tdd_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -437,8 +438,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Execute `advanced-organization-training-publish-version-route-tdd` after fresh approval and repository readiness.
-    The task is a narrow RED-first route/runtime TDD implementation for
-    `POST /api/v1/organization-trainings/{publicId}/publish`, with exact allowed files and all DB/provider/schema/UI/e2e
-    and formal target write gates preserved.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+    Seed or execute a readonly recheck of organization training publish-version route flow after route TDD closeout.
+    Recheck should confirm ADR-002 layering, route/service/repository consistency, metadata-only DTO exposure,
+    public-id-only route semantics, trusted lineage boundary, and formal target write blocking.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md

@@ -22679,7 +22679,7 @@ tasks:
       metadata-only published version DTO, and keep formal target writes blocked.
     seededByTask: advanced-organization-training-publish-version-route-tdd-seeding
     seededImplementationTask: true
-    autoDriveLocalImplementationApproval: pending_fresh_user_approval
+    autoDriveLocalImplementationApproval: approved_by_user_prompt_2026_06_15
     seededExecutionModule: organization-training
     targetClosureItem: organization training publish-version route TDD
     behaviorBoundary: organization-training::route-runtime-only-no-db-execution-no-ui
@@ -22725,12 +22725,12 @@ tasks:
       - e2e/browser/dev-server remain blocked
       - formal target write remains blocked
     closeoutPolicy:
-      localCommit: pending_fresh_user_approval
+      localCommit: approved_by_user_prompt_2026_06_15
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
         deleteShortBranch: true
@@ -22739,7 +22739,7 @@ tasks:
     moduleRunVersion: 2
     redFirstRequired: true
     allowedFiles:
-      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/app/api/v1/organization-trainings/*/publish/route.ts
       - src/server/services/organization-training-route.ts
       - src/server/services/organization-training-route.test.ts
       - docs/04-agent-system/state/project-state.yaml
@@ -22825,8 +22825,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-tdd
-    status: pending
-    result: null
+    status: closed
+    result: pass_red_first_route_tdd_no_db_execution
     retryCount: 0
-    claimedAt: null
-    closedAt: null
+    claimedAt: "2026-06-15T22:25:26-07:00"
+    closedAt: "2026-06-15T22:31:21-07:00"
