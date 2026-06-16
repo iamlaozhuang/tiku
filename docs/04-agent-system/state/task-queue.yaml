@@ -21849,3 +21849,257 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-15T20:19:16-07:00"
     closedAt: "2026-06-15T20:25:44-07:00"
+  - id: advanced-organization-training-publish-version-service-runtime-wiring-seeding
+    title: Seed organization training publish-version service runtime wiring task
+    phase: advanced-organization-training-publish-version-service-runtime-wiring-seeding
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-persistence-repository-mapper
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+    humanApproval: >-
+      Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+      validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
+      does not authorize service/repository/mapper implementation, route/API/UI work, schema/drizzle/scripts/package/lockfile
+      changes, DB access, migration execution, provider/model work, e2e/browser/dev-server, staging/prod/cloud/deploy/payment
+      external-service, PR, force push, formal content write, formal target write, or Cost Calibration Gate work.
+    seededByTask: advanced-organization-training-publish-version-persistence-repository-mapper
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version service runtime wiring task seed
+    behaviorBoundary: organization-training::docs-state-queue-seeding-only
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    useCases:
+      - queue records the exact next service runtime wiring TDD task after repository/mapper persistence exists
+      - future service wiring remains blocked until fresh approval and RED-first evidence
+      - route/API/UI, DB execution, and formal target write remain out of scope
+    acceptanceScenarios:
+      - docs/state/log files record the seeding decision and high-risk blocked gates
+      - task queue contains the pending service runtime wiring task with TDD and no-DB-execution boundaries
+      - closeout evidence names the next module run candidate and validation matrix
+    nonGoals:
+      - service implementation, repository implementation, mapper implementation, route adapter, API runtime, UI work,
+        schema changes, migration generation, migration execution, DB access, provider execution, dependency changes,
+        e2e, deploy, payment, formal content write, or formal target write
+    validationProfile: L1-docs-state-seeding
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - future service runtime wiring task remains pending and requires fresh approval
+      - future service runtime wiring task must start with failing tests before implementation
+      - DB access and migration execution remain blocked
+      - route/API/UI implementation remains separate
+      - provider/model and Cost Calibration Gate remain blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - execution outside docs/state/log queue seeding
+      - product source implementation
+      - service/repository/mapper implementation
+      - route/API runtime/contract/model/validator/UI changes
+      - schema/migration changes
+      - migration generation or execution
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-service-runtime-wiring-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-service-runtime-wiring-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-service-runtime-wiring-seeding
+    status: closed
+    result: pass_docs_only_seeded_service_runtime_wiring_task
+    retryCount: 0
+    claimedAt: "2026-06-15T21:03:35-07:00"
+    closedAt: "2026-06-15T21:09:07-07:00"
+  - id: advanced-organization-training-publish-version-service-runtime-wiring
+    title: Wire organization training publish-version service to repository persistence
+    phase: advanced-organization-training-publish-version-service-runtime-wiring
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-service-runtime-wiring-seeding
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation of service runtime wiring for
+      organization training publish-version persistence using the existing repository/mapper boundary. It must not modify
+      routes, API adapters, UI, schema, drizzle migration files, provider/model configuration, package files, lockfiles,
+      scripts, e2e, formal content write, or formal target write behavior.
+    seededByTask: advanced-organization-training-publish-version-service-runtime-wiring-seeding
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version service runtime wiring TDD
+    behaviorBoundary: organization-training::service-runtime-wiring-only-no-db-execution
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    useCases:
+      - service runtime can persist publish-version metadata through the existing repository/mapper boundary
+      - internal organization and org_auth lineage can be supplied to persistence without exposing it in public DTOs
+      - formal learning target writes remain absent from service runtime wiring
+    acceptanceScenarios:
+      - RED-first unit tests fail before service runtime wiring implementation
+      - tests cover successful publish wiring, internal organization_id/org_auth_id lineage handoff, repository injection,
+        public DTO non-exposure, existing blocked-result behavior, and formal target non-write
+      - implementation preserves ADR-002 layering and keeps route/API/UI outside scope
+      - implementation consumes existing repository/mapper contracts without schema/drizzle edits or DB execution
+    nonGoals:
+      - route adapter, API runtime, UI work, schema changes, drizzle migration files, migration generation, migration execution,
+        DB access, provider execution, dependency changes, e2e, deploy, payment, formal content write, and formal target write
+    validationProfile: L2-local-implementation-tdd-no-db-execution
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L2
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - fresh approval required before service runtime wiring implementation
+      - DB access and migration execution remain blocked
+      - route/API/UI implementation remains separate
+      - provider/model and Cost Calibration Gate remain blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - src/db/schema/organization-training.ts
+      - src/db/schema/index.ts
+      - drizzle/20260615193737_add_organization_training_publish_version.sql
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/**
+      - src/features/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - src/server/validators/**
+      - src/server/mappers/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution without fresh user approval
+      - implementation before TDD RED evidence
+      - direct database access without separate approval
+      - migration generation or execution
+      - schema/drizzle edits
+      - route/API runtime/contract/model/validator/UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts"
+      - npm.cmd run test:unit -- "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-service-runtime-wiring
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-service-runtime-wiring
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-service-runtime-wiring
+    status: pending
