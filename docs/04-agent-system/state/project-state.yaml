@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-content-subject-scope-guard
-updatedAt: "2026-06-15T16:46:36-07:00"
+currentPhase: advanced-organization-training-content-subject-scope-readonly-recheck-seeding
+updatedAt: "2026-06-15T16:57:58-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 0527045754b0185586a0f605e852c30e3bab3106
-  lastKnownOriginMasterSha: 0527045754b0185586a0f605e852c30e3bab3106
+  lastKnownMasterSha: 845fa78d0dbd7f4d8889f0c6f735350042481981
+  lastKnownOriginMasterSha: 845fa78d0dbd7f4d8889f0c6f735350042481981
 currentTask:
-  id: advanced-organization-training-content-subject-scope-guard
+  id: advanced-organization-training-content-subject-scope-readonly-recheck-seeding
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
-  branch: codex/advanced-organization-training-content-subject-scope-guard
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
+  branch: codex/advanced-organization-training-content-subject-scope-readonly-recheck-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -398,9 +398,10 @@ qualityGates:
     advancedOrganizationTrainingSubjectAuthorizationContextContractDecision: pass_docs_only_decision_subject_is_content_scope_not_effective_auth_context
     advancedOrganizationTrainingContentSubjectScopeContractSeeding: pass_docs_only_seeded_content_subject_scope_guard
     advancedOrganizationTrainingContentSubjectScopeGuard: pass_tdd_service_subject_scope_guard
-    preCommitHook: pass_advanced_organization_training_content_subject_scope_guard_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_content_subject_scope_guard_closeout_readiness
-    prePushHook: pass_advanced_organization_training_content_subject_scope_guard_pre_push_readiness
+    advancedOrganizationTrainingContentSubjectScopeReadonlyRecheckSeeding: pass_docs_only_seeded_content_subject_scope_readonly_recheck
+    preCommitHook: pass_advanced_organization_training_content_subject_scope_readonly_recheck_seeding_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_content_subject_scope_readonly_recheck_seeding_closeout_readiness
+    prePushHook: pass_advanced_organization_training_content_subject_scope_readonly_recheck_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -416,7 +417,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-content-subject-scope-guard closed by adding a RED-first service-level subject scope
-    guard. Recommended next action is a readonly recheck of service/contract/test consistency and ADR-002 layering before
-    further organization training lifecycle implementation.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
+    advanced-organization-training-content-subject-scope-readonly-recheck-seeding closed by queueing the pending readonly
+    task advanced-organization-training-content-subject-scope-readonly-recheck. Recommended next action is to execute
+    that readonly recheck after fresh approval.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
