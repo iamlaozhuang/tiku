@@ -23557,3 +23557,306 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-15T23:41:42-07:00"
     closedAt: "2026-06-15T23:41:42-07:00"
+  - id: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    title: Module Run v2 docs-only fast lane trial batch for organization training publish boundary
+    phase: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    sourceStory: user-request-2026-06-16-docs-only-fast-lane-trial-batch
+    dependencies:
+      - module-run-v2-docs-only-fast-lane-mechanism
+      - advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+    humanApprovalBoundary: >-
+      User explicitly requested a real docs-only fast lane small-batch trial on 2026-06-16 after repository readiness.
+      Scope is limited to docs/state/task-plan/evidence/audit changes. Product source, tests, scripts, schema/drizzle,
+      dependency/package/lockfile, DB access, provider/model, quota/cost, dev server, Browser, Playwright/e2e,
+      staging/prod/cloud/deploy/payment/external-service, formal target write, PR, and force push remain blocked.
+    autoDriveLocalDocsOnlyApproval: approved_by_user_prompt_2026_06_16
+    validationProfile: docs-only-fast-lane-trial-batch
+    localFullLoopGate: L1
+    taskKind: docs_only_batch_closeout
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    fastLaneBatchId: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    fastLaneBatchRole: parent
+    fastLaneBatchChildren:
+      - advanced-organization-training-publish-version-route-org-admin-actor-contract-decision
+      - advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      localE2EValidation: blocked
+    blockedRemainder:
+      - runtime trusted-lineage resolver implementation remains blocked
+      - organization-admin actor implementation remains blocked
+      - direct database access remains blocked
+      - provider/model and Cost Calibration Gate remain blocked
+      - e2e/browser/dev-server remain blocked
+      - formal target write remains blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+      - docs/05-execution-logs/evidence/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source implementation
+      - route/service/repository/mapper/contract/model/validator/UI runtime changes
+      - DB access or row/private data access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/drizzle edits, migration generation, or migration execution
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2DocsOnlyBatchReadiness.ps1 -BatchId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -Mode hard_block
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -DocsOnlyBatchId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -DocsOnlyBatchMode hard_block
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -DocsOnlyBatchId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -DocsOnlyBatchMode hard_block
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -DocsOnlyBatchId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -DocsOnlyBatchMode hard_block -SkipRemoteAheadCheck
+    status: closed
+    result: pass_hard_block_trial_batch
+    retryCount: 0
+    claimedAt: "2026-06-16T00:13:09-07:00"
+    closedAt: "2026-06-16T00:13:09-07:00"
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-contract-decision
+    title: Decide organization-admin actor contract for organization training publish route
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-contract-decision
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+    humanApprovalBoundary: >-
+      Approved by the 2026-06-16 user prompt as child 1 of the real docs-only fast lane trial batch. Scope is a
+      docs-only boundary decision for organization-admin actor source, visible organization scope source, and trusted
+      lineage resolver readiness. Runtime implementation and all high-risk gates remain blocked.
+    autoDriveLocalDocsOnlyApproval: approved_by_user_prompt_2026_06_16
+    validationProfile: L1-docs-only-boundary-decision
+    localFullLoopGate: L1
+    taskKind: boundary_decision
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    fastLaneBatchId: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    fastLaneBatchRole: child
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/contracts/effective-authorization-contract.ts
+      - src/server/services/effective-authorization-service.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/auth/local-session-runtime.ts
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2DocsOnlyBatchReadiness.ps1 -BatchId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -Mode hard_block
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+    status: closed
+    result: pass_docs_only_contract_decision_current_source_not_sufficient
+    retryCount: 0
+    claimedAt: "2026-06-16T00:13:09-07:00"
+    closedAt: "2026-06-16T00:13:09-07:00"
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding
+    title: Seed follow-up for organization-admin actor contract boundary
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-org-admin-actor-contract-decision
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+    humanApprovalBoundary: >-
+      Approved by the 2026-06-16 user prompt as child 2 of the real docs-only fast lane trial batch. Scope is docs-only
+      queue seeding based on Child 1. It must not seed direct TDD implementation unless Child 1 proves a safe existing
+      actor/scope source.
+    autoDriveLocalDocsOnlyApproval: approved_by_user_prompt_2026_06_16
+    validationProfile: L1-docs-only-queue-seeding
+    localFullLoopGate: L1
+    taskKind: queue_seeding
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    fastLaneBatchId: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    fastLaneBatchRole: child
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2DocsOnlyBatchReadiness.ps1 -BatchId module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary -Mode hard_block
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+    status: closed
+    result: pass_docs_only_seeded_readonly_recheck
+    retryCount: 0
+    claimedAt: "2026-06-16T00:13:09-07:00"
+    closedAt: "2026-06-16T00:13:09-07:00"
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+    title: Recheck organization-admin actor contract boundary before publish route TDD
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is a docs-only readonly recheck to decide whether
+      the organization training publish-version route needs a new actor-context contract before TDD implementation.
+      Product source implementation, tests, scripts, schema/drizzle, dependency/package/lockfile, DB, provider/model,
+      quota/cost, dev server, Browser, Playwright/e2e, staging/prod/cloud/deploy/payment/external-service, formal
+      target write, PR, and force push remain blocked.
+    seededByTask: advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding
+    validationProfile: L1-docs-only-readonly-recheck
+    localFullLoopGate: L1
+    taskKind: readonly_recheck
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/contracts/effective-authorization-contract.ts
+      - src/server/services/effective-authorization-service.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/auth/local-session-runtime.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - execution without fresh user approval
+      - product source implementation
+      - route/service/repository/mapper/contract/model/validator/UI runtime changes
+      - DB access or row/private data access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/drizzle edits, migration generation, or migration execution
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+    status: pending
+    retryCount: 0
