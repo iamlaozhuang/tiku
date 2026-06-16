@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
-updatedAt: "2026-06-16T01:30:33-07:00"
+currentPhase: advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding
+updatedAt: "2026-06-16T01:39:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6be342ef837eafa92065b1fc5fc824f0dfc48938
-  lastKnownOriginMasterSha: 6be342ef837eafa92065b1fc5fc824f0dfc48938
+  lastKnownMasterSha: 7686e98a12ccf8e10174af03f732e5b05fcf210c
+  lastKnownOriginMasterSha: 7686e98a12ccf8e10174af03f732e5b05fcf210c
 currentTask:
-  id: advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
+  id: advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
-  branch: codex/advanced-organization-training-trusted-lineage-resolver
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding.md
+  branch: codex/advanced-organization-training-trusted-lineage-lookup-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -478,9 +478,6 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteFlowReadonlyRecheck: pass_readonly_recheck_with_runtime_lineage_resolver_needs_recheck
     advancedOrganizationTrainingPublishVersionRouteTrustedLineageBoundaryDecision: pass_docs_only_boundary_decision_with_org_admin_actor_needs_recheck
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorBoundaryReadonlyAudit: pass_readonly_audit_with_org_admin_actor_contract_needs_recheck
-    preCommitHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_resolver_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_route_trusted_lineage_resolver_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_resolver_pre_push_readiness
     docsOnlyFastLaneMechanism: pass_shadow_replay_and_smoke_gates
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorContractDecision: pass_docs_only_contract_decision_current_source_not_sufficient
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorContractFollowupSeeding: pass_docs_only_seeded_readonly_recheck
@@ -492,6 +489,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorContractReadonlyRecheck: pass_readonly_recheck_new_actor_context_contract_required
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorContextContract: pass_tdd_route_org_admin_actor_context_contract
     advancedOrganizationTrainingPublishVersionRouteTrustedLineageResolver: pass_tdd_route_trusted_lineage_resolver_contract
+    advancedOrganizationTrainingPublishVersionRouteTrustedLineageRepositoryLookupSeeding: pass_docs_only_seeded_repository_lookup_tdd_task
+    preCommitHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_repository_lookup_seeding_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_route_trusted_lineage_repository_lookup_seeding_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_repository_lookup_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -507,8 +508,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Prepare the next organization-training publish-version trusted-lineage repository lookup task now that the route
-    has a verified resolver contract. Keep real DB access, schema, provider, e2e/browser/dev-server, dependency,
-    deploy, payment, external-service, PR, force-push, and Cost Calibration Gate blocks unless the next task explicitly
-    declares a narrower local capability and evidence boundary.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+    Claim advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-tdd next. Keep the task
+    limited to the repository lookup contract and focused repository unit tests; real DB execution, schema/drizzle,
+    provider, e2e/browser/dev-server, dependency, deploy, payment, external-service, PR, force-push, and Cost
+    Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding.md
