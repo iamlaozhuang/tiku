@@ -5,9 +5,11 @@ import type {
 } from "../contracts/organization-training-contract";
 import type { Profession } from "../models/auth";
 import {
+  type OrganizationTrainingCopyToNewDraftInput,
   organizationTrainingQuestionTypeValues,
   type OrganizationTrainingPublishInput,
   type OrganizationTrainingQuestionTypeSummary,
+  type OrganizationTrainingTakedownInput,
 } from "../models/organization-training";
 import { subjectValues, type Subject } from "../models/paper";
 
@@ -16,6 +18,12 @@ export const organizationTrainingManualDraftCreationBlockedMessage =
 
 export const organizationTrainingPublishBlockedMessage =
   "Organization training publish is blocked.";
+
+export const organizationTrainingTakedownBlockedMessage =
+  "Organization training takedown is blocked.";
+
+export const organizationTrainingCopyToNewDraftBlockedMessage =
+  "Organization training copy-to-new-draft is blocked.";
 
 export type OrganizationTrainingManualDraftCreationBlockedReason =
   | "invalid_manual_draft_input"
@@ -30,6 +38,14 @@ export type OrganizationTrainingPublishBlockedReason =
   | "advanced_edition_required"
   | "org_auth_required"
   | "organization_training_capability_required"
+  | "organization_scope_denied";
+
+export type OrganizationTrainingTakedownBlockedReason =
+  | "invalid_takedown_input"
+  | "organization_scope_denied";
+
+export type OrganizationTrainingCopyToNewDraftBlockedReason =
+  | "invalid_copy_to_new_draft_input"
   | "organization_scope_denied";
 
 export type OrganizationTrainingAdminContext = {
@@ -92,10 +108,55 @@ export type OrganizationTrainingPublishedVersionPersistenceWrite =
   OrganizationTrainingPublishedVersionWrite &
     OrganizationTrainingPersistenceLineage;
 
+export type OrganizationTrainingTakedownAccessPolicy = {
+  allowNewAnswers: false;
+  allowDraftSaves: false;
+  allowQuestionDetailReentry: false;
+  employeeHistoryVisibility: "own_summary_only";
+  preserveHistory: true;
+};
+
+export type OrganizationTrainingVersionTakedownWrite = {
+  versionPublicId: string;
+  organizationPublicId: string;
+  status: "taken_down";
+  takenDownAt: string;
+  takedownReason: string;
+  accessPolicy: OrganizationTrainingTakedownAccessPolicy;
+};
+
+export type OrganizationTrainingVersionCopyPolicy = {
+  preserveSourceVersion: true;
+  preservePublishScopeSnapshot: true;
+  createFreshDraftPublicId: true;
+};
+
+export type OrganizationTrainingVersionCopyToNewDraftWrite = {
+  sourceVersionPublicId: string;
+  organizationPublicId: string;
+  authorizationPublicId: string;
+  sourceVersion: OrganizationTrainingPublishedVersionDto;
+  sourceQuestionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+  newDraftTitle: string;
+  contentType: "organization_training_draft";
+  ownerType: "organization";
+  ownerPublicId: string;
+  quotaOwnerType: "organization";
+  quotaOwnerPublicId: string;
+  createdAt: string;
+  copyPolicy: OrganizationTrainingVersionCopyPolicy;
+};
+
 export type OrganizationTrainingVersionStore = {
   publishVersion(
     versionWrite: OrganizationTrainingPublishedVersionPersistenceWrite,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
+  takeDownVersion(
+    takedownWrite: OrganizationTrainingVersionTakedownWrite,
+  ): Promise<OrganizationTrainingPublishedVersionDto>;
+  copyVersionToNewDraft(
+    copyWrite: OrganizationTrainingVersionCopyToNewDraftWrite,
+  ): Promise<OrganizationTrainingDraftDto>;
 };
 
 export type OrganizationTrainingStore = OrganizationTrainingDraftStore &
@@ -121,6 +182,20 @@ export type OrganizationTrainingPublishVersionCommand = {
   persistenceLineage: OrganizationTrainingPersistenceLineage;
 };
 
+export type OrganizationTrainingTakeDownVersionCommand = {
+  adminContext: OrganizationTrainingAdminContext;
+  versionOrganizationPublicId: string;
+  takedownInput: OrganizationTrainingTakedownInput;
+};
+
+export type OrganizationTrainingCopyVersionToNewDraftCommand = {
+  adminContext: OrganizationTrainingAdminContext;
+  authorizationPublicId: string;
+  copyInput: OrganizationTrainingCopyToNewDraftInput;
+  sourceVersion: OrganizationTrainingPublishedVersionDto;
+  sourceQuestionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+};
+
 export type OrganizationTrainingPublishVersionResult =
   | {
       success: true;
@@ -132,6 +207,28 @@ export type OrganizationTrainingPublishVersionResult =
       message: typeof organizationTrainingPublishBlockedMessage;
     };
 
+export type OrganizationTrainingTakeDownVersionResult =
+  | {
+      success: true;
+      version: OrganizationTrainingPublishedVersionDto;
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingTakedownBlockedReason;
+      message: typeof organizationTrainingTakedownBlockedMessage;
+    };
+
+export type OrganizationTrainingCopyVersionToNewDraftResult =
+  | {
+      success: true;
+      draft: OrganizationTrainingDraftDto;
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingCopyToNewDraftBlockedReason;
+      message: typeof organizationTrainingCopyToNewDraftBlockedMessage;
+    };
+
 export type OrganizationTrainingService = {
   createManualDraft(
     command: OrganizationTrainingCreateManualDraftCommand,
@@ -139,6 +236,12 @@ export type OrganizationTrainingService = {
   publishVersion(
     command: OrganizationTrainingPublishVersionCommand,
   ): Promise<OrganizationTrainingPublishVersionResult>;
+  takeDownVersion(
+    command: OrganizationTrainingTakeDownVersionCommand,
+  ): Promise<OrganizationTrainingTakeDownVersionResult>;
+  copyVersionToNewDraft(
+    command: OrganizationTrainingCopyVersionToNewDraftCommand,
+  ): Promise<OrganizationTrainingCopyVersionToNewDraftResult>;
 };
 
 const systemClock: OrganizationTrainingClock = {
@@ -164,6 +267,26 @@ function createPublishBlockedResult(
     success: false,
     reason,
     message: organizationTrainingPublishBlockedMessage,
+  };
+}
+
+function createTakedownBlockedResult(
+  reason: OrganizationTrainingTakedownBlockedReason,
+): OrganizationTrainingTakeDownVersionResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingTakedownBlockedMessage,
+  };
+}
+
+function createCopyToNewDraftBlockedResult(
+  reason: OrganizationTrainingCopyToNewDraftBlockedReason,
+): OrganizationTrainingCopyVersionToNewDraftResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingCopyToNewDraftBlockedMessage,
   };
 }
 
@@ -398,6 +521,108 @@ function normalizePublishMetadata(
   };
 }
 
+function copyPublishedVersion(
+  sourceVersion: OrganizationTrainingPublishedVersionDto,
+): OrganizationTrainingPublishedVersionDto {
+  return {
+    ...sourceVersion,
+    publishScopeSnapshot: {
+      organizationPublicIds: [
+        ...sourceVersion.publishScopeSnapshot.organizationPublicIds,
+      ],
+      capturedAt: sourceVersion.publishScopeSnapshot.capturedAt,
+    },
+  };
+}
+
+function isCopyableVersionStatus(
+  status: OrganizationTrainingPublishedVersionDto["status"],
+): boolean {
+  return status === "published" || status === "taken_down";
+}
+
+type NormalizedTakedownMetadata = {
+  versionPublicId: string;
+  organizationPublicId: string;
+  takedownReason: string;
+};
+
+function normalizeTakedownMetadata(
+  command: OrganizationTrainingTakeDownVersionCommand,
+): NormalizedTakedownMetadata | null {
+  const versionPublicId = normalizeRequiredText(
+    command.takedownInput.versionPublicId,
+  );
+  const organizationPublicId = normalizeRequiredText(
+    command.versionOrganizationPublicId,
+  );
+  const takedownReason = normalizeRequiredText(
+    command.takedownInput.takedownReason,
+  );
+
+  if (
+    versionPublicId === null ||
+    organizationPublicId === null ||
+    takedownReason === null
+  ) {
+    return null;
+  }
+
+  return {
+    versionPublicId,
+    organizationPublicId,
+    takedownReason,
+  };
+}
+
+type NormalizedCopyToNewDraftMetadata = {
+  sourceVersionPublicId: string;
+  organizationPublicId: string;
+  authorizationPublicId: string;
+  newDraftTitle: string;
+};
+
+function normalizeCopyToNewDraftMetadata(
+  command: OrganizationTrainingCopyVersionToNewDraftCommand,
+): NormalizedCopyToNewDraftMetadata | null {
+  const sourceVersionPublicId = normalizeRequiredText(
+    command.copyInput.sourceVersionPublicId,
+  );
+  const sourceVersionDtoPublicId = normalizeRequiredText(
+    command.sourceVersion.publicId,
+  );
+  const organizationPublicId = normalizeRequiredText(
+    command.sourceVersion.organizationPublicId,
+  );
+  const authorizationPublicId = normalizeRequiredText(
+    command.authorizationPublicId,
+  );
+  const newDraftTitle = normalizeRequiredText(command.copyInput.newDraftTitle);
+
+  if (
+    sourceVersionPublicId === null ||
+    sourceVersionDtoPublicId === null ||
+    sourceVersionPublicId !== sourceVersionDtoPublicId ||
+    organizationPublicId === null ||
+    authorizationPublicId === null ||
+    newDraftTitle === null ||
+    !isCopyableVersionStatus(command.sourceVersion.status) ||
+    !isQuestionTypeSummaryValid(
+      command.sourceQuestionTypeSummary,
+      command.sourceVersion.questionCount,
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    sourceVersionPublicId,
+    organizationPublicId,
+    authorizationPublicId,
+    newDraftTitle,
+  };
+}
+
 function normalizePersistenceLineage(
   persistenceLineage: OrganizationTrainingPersistenceLineage | undefined,
 ): OrganizationTrainingPersistenceLineage | null {
@@ -587,6 +812,87 @@ export function createOrganizationTrainingService(
       return {
         success: true,
         version: await trainingStore.publishVersion(versionWrite),
+      };
+    },
+
+    async takeDownVersion(command) {
+      const normalizedMetadata = normalizeTakedownMetadata(command);
+
+      if (normalizedMetadata === null) {
+        return createTakedownBlockedResult("invalid_takedown_input");
+      }
+
+      if (
+        !isOrganizationVisibleToAdmin(
+          normalizedMetadata.organizationPublicId,
+          command.adminContext,
+        )
+      ) {
+        return createTakedownBlockedResult("organization_scope_denied");
+      }
+
+      const takenDownAt = clock.now().toISOString();
+
+      return {
+        success: true,
+        version: await trainingStore.takeDownVersion({
+          versionPublicId: normalizedMetadata.versionPublicId,
+          organizationPublicId: normalizedMetadata.organizationPublicId,
+          status: "taken_down",
+          takenDownAt,
+          takedownReason: normalizedMetadata.takedownReason,
+          accessPolicy: {
+            allowNewAnswers: false,
+            allowDraftSaves: false,
+            allowQuestionDetailReentry: false,
+            employeeHistoryVisibility: "own_summary_only",
+            preserveHistory: true,
+          },
+        }),
+      };
+    },
+
+    async copyVersionToNewDraft(command) {
+      const normalizedMetadata = normalizeCopyToNewDraftMetadata(command);
+
+      if (normalizedMetadata === null) {
+        return createCopyToNewDraftBlockedResult(
+          "invalid_copy_to_new_draft_input",
+        );
+      }
+
+      if (
+        !isOrganizationVisibleToAdmin(
+          normalizedMetadata.organizationPublicId,
+          command.adminContext,
+        )
+      ) {
+        return createCopyToNewDraftBlockedResult("organization_scope_denied");
+      }
+
+      return {
+        success: true,
+        draft: await trainingStore.copyVersionToNewDraft({
+          sourceVersionPublicId: normalizedMetadata.sourceVersionPublicId,
+          organizationPublicId: normalizedMetadata.organizationPublicId,
+          authorizationPublicId: normalizedMetadata.authorizationPublicId,
+          sourceVersion: copyPublishedVersion(command.sourceVersion),
+          sourceQuestionTypeSummary: copyQuestionTypeSummary(
+            command.sourceQuestionTypeSummary,
+          ),
+          newDraftTitle: normalizedMetadata.newDraftTitle,
+          contentType: "organization_training_draft",
+          ownerType: "organization",
+          ownerPublicId: normalizedMetadata.organizationPublicId,
+          quotaOwnerType: "organization",
+          quotaOwnerPublicId: normalizedMetadata.organizationPublicId,
+          createdAt: clock.now().toISOString(),
+          copyPolicy: {
+            preserveSourceVersion: true,
+            preservePublishScopeSnapshot: true,
+            createFreshDraftPublicId: true,
+          },
+        }),
       };
     },
   };

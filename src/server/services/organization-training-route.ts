@@ -230,6 +230,14 @@ function createRuntimeOrganizationTrainingStore(
       throw new Error("Organization training draft route is not configured.");
     },
     publishVersion: repository.publishVersion,
+    async takeDownVersion() {
+      throw new Error(
+        "Organization training takedown route is not configured.",
+      );
+    },
+    async copyVersionToNewDraft() {
+      throw new Error("Organization training copy route is not configured.");
+    },
   };
 }
 

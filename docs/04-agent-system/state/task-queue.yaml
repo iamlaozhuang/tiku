@@ -26195,6 +26195,8 @@ tasks:
       - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-181-organization-training-organization-admin-training-draft-publish-ta
       - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
+      - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
         command: npm.cmd run typecheck
@@ -26206,13 +26208,20 @@ tasks:
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-181-organization-training-organization-admin-training-draft-publish-ta
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-181-organization-training-organization-admin-training-draft-publish-ta
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
+      - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
-      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-181-organization-training-organization-admin-training-draft-publish-ta
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-181-organization-training-organization-admin-training-draft-publish-ta
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId batch-181-organization-training-organization-admin-training-draft-publish-ta
     evidencePath: docs/05-execution-logs/evidence/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
-    status: pending
+    status: closed
+    claimedAt: "2026-06-16T06:10:46-07:00"
+    closedAt: "2026-06-16T06:19:00-07:00"
+    result: pass
     retryCount: 0
   - id: batch-182-organization-training-employee-answer-lifecycle-local-role-flow
     title: Module Run v2 organization-training implementation seed

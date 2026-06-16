@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver
-updatedAt: "2026-06-16T05:56:00-07:00"
+currentPhase: batch-181-organization-training-organization-admin-training-draft-publish-ta
+updatedAt: "2026-06-16T06:19:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -323,13 +323,13 @@ repository:
   lastKnownMasterSha: 3fe4eee04cbb9cd08288f64b629cdeb0eed5271b
   lastKnownOriginMasterSha: 3fe4eee04cbb9cd08288f64b629cdeb0eed5271b
 currentTask:
-  id: advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver
+  id: batch-181-organization-training-organization-admin-training-draft-publish-ta
   status: closed
-  sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
-  branch: codex/organization-training-next-implementation-seeding
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-181-organization-training-organization-admin-training-draft-publish-ta.md
+  evidencePath: docs/05-execution-logs/evidence/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
+  branch: codex/organization-training-batch-181-draft-publish-flow
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -507,9 +507,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeAdminOrganizationRepositoryResolver: pass_tdd_admin_organization_visible_scope_repository_resolver
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeAdminOrganizationRepositoryResolverReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
     advancedOrganizationTrainingNextImplementationQueueSeedingPostVisibleScopeResolver: pass_auto_seed_transaction_self_review
-    preCommitHook: pass_advanced_organization_training_next_implementation_queue_seeding_post_visible_scope_resolver_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_next_implementation_queue_seeding_post_visible_scope_resolver_closeout_readiness
-    prePushHook: pass_advanced_organization_training_next_implementation_queue_seeding_post_visible_scope_resolver_pre_push_readiness
+    batch181OrganizationTrainingDraftPublishTakedownCopyFlow: pass_tdd_service_lifecycle
+    preCommitHook: pass_batch_181_organization_training_draft_publish_takedown_copy_pre_commit_hardening
+    moduleCloseout: pass_batch_181_organization_training_draft_publish_takedown_copy_closeout_readiness
+    prePushHook: pass_batch_181_organization_training_draft_publish_takedown_copy_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -525,9 +526,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    The post-visible-scope-resolver auto-seed transaction queued four pending organization-training implementation tasks.
-    Start with `batch-181-organization-training-organization-admin-training-draft-publish-ta` after closeout, creating a
-    required task plan before edits and preserving the task-declared blocked gates. `.env*`, real DB execution,
+    Batch 181 closes the organization admin draft, publish, takedown, and copy-to-new-draft service lifecycle boundary.
+    After closeout, continue with `batch-182-organization-training-employee-answer-lifecycle-local-role-flow`, creating
+    the required task plan before edits and preserving the task-declared blocked gates. `.env*`, real DB execution,
     row/private data, dependency, provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
     PR, force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
+  lastSummaryPath: docs/05-execution-logs/evidence/batch-181-organization-training-organization-admin-training-draft-publish-ta.md

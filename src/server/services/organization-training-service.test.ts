@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
-import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
+import type {
+  OrganizationTrainingDraftDto,
+  OrganizationTrainingPublishedVersionDto,
+} from "../contracts/organization-training-contract";
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
 import { normalizeOrganizationTrainingPublishInput } from "../validators/organization-training";
 import {
@@ -9,7 +12,9 @@ import {
   type OrganizationTrainingStore,
   type OrganizationTrainingManualDraftWrite,
   type OrganizationTrainingPersistenceLineage,
+  type OrganizationTrainingVersionCopyToNewDraftWrite,
   type OrganizationTrainingPublishedVersionPersistenceWrite,
+  type OrganizationTrainingVersionTakedownWrite,
 } from "./organization-training-service";
 
 const fixedNow = new Date("2026-06-15T19:20:13.000Z");
@@ -46,6 +51,8 @@ function createDraftStore() {
   let createdDrafts: OrganizationTrainingManualDraftWrite[] = [];
   let publishedVersions: OrganizationTrainingPublishedVersionPersistenceWrite[] =
     [];
+  let takenDownVersions: OrganizationTrainingVersionTakedownWrite[] = [];
+  let copiedDrafts: OrganizationTrainingVersionCopyToNewDraftWrite[] = [];
 
   const draftStore: OrganizationTrainingStore = {
     async createManualDraft(draftWrite) {
@@ -99,18 +106,74 @@ function createDraftStore() {
         takedownReason: versionWrite.takedownReason,
       };
     },
+    async takeDownVersion(takedownWrite) {
+      takenDownVersions = [...takenDownVersions, takedownWrite];
+
+      return {
+        publicId: takedownWrite.versionPublicId,
+        draftPublicId: "training_draft_public_123",
+        versionNumber: 1,
+        organizationPublicId: takedownWrite.organizationPublicId,
+        publishScopeSnapshot: {
+          organizationPublicIds: ["organization_public_123"],
+          capturedAt: "2026-06-15T19:20:13.000Z",
+        },
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training",
+        description: null,
+        questionCount: 2,
+        totalScore: 5,
+        status: takedownWrite.status,
+        publishedAt: "2026-06-15T19:20:13.000Z",
+        takenDownAt: takedownWrite.takenDownAt,
+        takedownReason: takedownWrite.takedownReason,
+      };
+    },
+    async copyVersionToNewDraft(copyWrite) {
+      copiedDrafts = [...copiedDrafts, copyWrite];
+
+      return {
+        publicId: "training_draft_copy_public_123",
+        sourceTaskPublicId: null,
+        organizationPublicId: copyWrite.organizationPublicId,
+        authorizationSource: "org_auth",
+        authorizationPublicId: copyWrite.authorizationPublicId,
+        profession: copyWrite.sourceVersion.profession,
+        level: copyWrite.sourceVersion.level,
+        subject: copyWrite.sourceVersion.subject,
+        title: copyWrite.newDraftTitle,
+        description: copyWrite.sourceVersion.description,
+        questionCount: copyWrite.sourceVersion.questionCount,
+        totalScore: copyWrite.sourceVersion.totalScore,
+        questionTypeSummary: copyWrite.sourceQuestionTypeSummary,
+        evidenceStatus: "none",
+        validationStatus: "needs_review",
+        retentionStatus: "active",
+        createdAt: copyWrite.createdAt,
+        expiresAt: null,
+      };
+    },
   };
 
   return {
     draftStore,
     getCreatedDrafts: () => createdDrafts,
     getPublishedVersions: () => publishedVersions,
+    getTakenDownVersions: () => takenDownVersions,
+    getCopiedDrafts: () => copiedDrafts,
   };
 }
 
 function createServiceFixture() {
-  const { draftStore, getCreatedDrafts, getPublishedVersions } =
-    createDraftStore();
+  const {
+    draftStore,
+    getCreatedDrafts,
+    getPublishedVersions,
+    getTakenDownVersions,
+    getCopiedDrafts,
+  } = createDraftStore();
   const service = createOrganizationTrainingService(draftStore, {
     now: () => fixedNow,
   });
@@ -119,6 +182,8 @@ function createServiceFixture() {
     service,
     getCreatedDrafts,
     getPublishedVersions,
+    getTakenDownVersions,
+    getCopiedDrafts,
   };
 }
 
@@ -181,6 +246,36 @@ function createPersistenceLineage(
   return {
     organizationId: 501,
     orgAuthId: 601,
+    ...overrides,
+  };
+}
+
+function createPublishedVersion(
+  overrides: Partial<OrganizationTrainingPublishedVersionDto> = {},
+): OrganizationTrainingPublishedVersionDto {
+  return {
+    publicId: "training_version_public_123",
+    draftPublicId: "training_draft_public_123",
+    versionNumber: 1,
+    organizationPublicId: "organization_public_123",
+    publishScopeSnapshot: {
+      organizationPublicIds: [
+        "organization_public_123",
+        "organization_branch_public_456",
+      ],
+      capturedAt: fixedNow.toISOString(),
+    },
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    title: "Safety training",
+    description: null,
+    questionCount: 2,
+    totalScore: 5,
+    status: "published",
+    publishedAt: fixedNow.toISOString(),
+    takenDownAt: null,
+    takedownReason: null,
     ...overrides,
   };
 }
@@ -715,5 +810,233 @@ describe("organization training service", () => {
     expect(serializedResult).not.toContain("providerPayload");
     expect(serializedResult).not.toContain("rawPrompt");
     expect(serializedResult).not.toContain("rawAnswer");
+  });
+
+  it("takes down a published version while preserving historical visibility policy", async () => {
+    const { service, getTakenDownVersions } = createServiceFixture();
+
+    const result = await service.takeDownVersion({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      versionOrganizationPublicId: " organization_public_123 ",
+      takedownInput: {
+        versionPublicId: " training_version_public_123 ",
+        takedownReason: " outdated training ",
+      },
+    });
+
+    expect(result).toEqual({
+      success: true,
+      version: {
+        publicId: "training_version_public_123",
+        draftPublicId: "training_draft_public_123",
+        versionNumber: 1,
+        organizationPublicId: "organization_public_123",
+        publishScopeSnapshot: {
+          organizationPublicIds: ["organization_public_123"],
+          capturedAt: fixedNow.toISOString(),
+        },
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training",
+        description: null,
+        questionCount: 2,
+        totalScore: 5,
+        status: "taken_down",
+        publishedAt: fixedNow.toISOString(),
+        takenDownAt: fixedNow.toISOString(),
+        takedownReason: "outdated training",
+      },
+    });
+    expect(getTakenDownVersions()).toEqual([
+      {
+        versionPublicId: "training_version_public_123",
+        organizationPublicId: "organization_public_123",
+        status: "taken_down",
+        takenDownAt: fixedNow.toISOString(),
+        takedownReason: "outdated training",
+        accessPolicy: {
+          allowNewAnswers: false,
+          allowDraftSaves: false,
+          allowQuestionDetailReentry: false,
+          employeeHistoryVisibility: "own_summary_only",
+          preserveHistory: true,
+        },
+      },
+    ]);
+  });
+
+  it("blocks takedown outside visible organization scope or without reason", async () => {
+    const blockedCases = [
+      {
+        name: "missing reason",
+        adminContext: {
+          adminPublicId: "admin_public_123",
+          visibleOrganizationPublicIds: ["organization_public_123"],
+        },
+        versionOrganizationPublicId: "organization_public_123",
+        takedownInput: {
+          versionPublicId: "training_version_public_123",
+          takedownReason: " ",
+        },
+        expectedReason: "invalid_takedown_input",
+      },
+      {
+        name: "outside visible scope",
+        adminContext: {
+          adminPublicId: "admin_public_123",
+          visibleOrganizationPublicIds: ["organization_other_public_999"],
+        },
+        versionOrganizationPublicId: "organization_public_123",
+        takedownInput: {
+          versionPublicId: "training_version_public_123",
+          takedownReason: "outdated training",
+        },
+        expectedReason: "organization_scope_denied",
+      },
+    ] as const;
+
+    for (const blockedCase of blockedCases) {
+      const { service, getTakenDownVersions } = createServiceFixture();
+
+      const result = await service.takeDownVersion({
+        adminContext: blockedCase.adminContext,
+        versionOrganizationPublicId: blockedCase.versionOrganizationPublicId,
+        takedownInput: blockedCase.takedownInput,
+      });
+
+      expect(result).toEqual({
+        success: false,
+        reason: blockedCase.expectedReason,
+        message: "Organization training takedown is blocked.",
+      });
+      expect(getTakenDownVersions()).toEqual([]);
+    }
+  });
+
+  it("copies a published version to a fresh editable draft without overwriting source version state", async () => {
+    const { service, getCopiedDrafts } = createServiceFixture();
+    const sourceVersion = createPublishedVersion();
+    const sourceVersionBeforeCopy = structuredClone(sourceVersion);
+
+    const result = await service.copyVersionToNewDraft({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      authorizationPublicId: " org_auth_public_123 ",
+      copyInput: {
+        sourceVersionPublicId: " training_version_public_123 ",
+        newDraftTitle: " Refreshed training ",
+      },
+      sourceVersion,
+      sourceQuestionTypeSummary: {
+        singleChoice: 1,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 1,
+      },
+    });
+
+    const expectedDraft: OrganizationTrainingDraftDto = {
+      publicId: "training_draft_copy_public_123",
+      sourceTaskPublicId: null,
+      organizationPublicId: "organization_public_123",
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org_auth_public_123",
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: "Refreshed training",
+      description: null,
+      questionCount: 2,
+      totalScore: 5,
+      questionTypeSummary: {
+        singleChoice: 1,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 1,
+      },
+      evidenceStatus: "none",
+      validationStatus: "needs_review",
+      retentionStatus: "active",
+      createdAt: fixedNow.toISOString(),
+      expiresAt: null,
+    };
+
+    expect(result).toEqual({
+      success: true,
+      draft: expectedDraft,
+    });
+    expect(getCopiedDrafts()).toEqual([
+      {
+        sourceVersionPublicId: "training_version_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationPublicId: "org_auth_public_123",
+        sourceVersion: sourceVersionBeforeCopy,
+        sourceQuestionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 1,
+        },
+        newDraftTitle: "Refreshed training",
+        contentType: "organization_training_draft",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_123",
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: "organization_public_123",
+        createdAt: fixedNow.toISOString(),
+        copyPolicy: {
+          preserveSourceVersion: true,
+          preservePublishScopeSnapshot: true,
+          createFreshDraftPublicId: true,
+        },
+      },
+    ]);
+    expect(sourceVersion).toEqual(sourceVersionBeforeCopy);
+    expect(
+      JSON.stringify({ result, copiedDrafts: getCopiedDrafts() }),
+    ).not.toContain("formalPaperPublicId");
+  });
+
+  it("copies a taken-down version to a fresh editable draft for revision", async () => {
+    const { service, getCopiedDrafts } = createServiceFixture();
+    const sourceVersion = createPublishedVersion({
+      status: "taken_down",
+      takenDownAt: fixedNow.toISOString(),
+      takedownReason: "outdated training",
+    });
+
+    const result = await service.copyVersionToNewDraft({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      authorizationPublicId: "org_auth_public_123",
+      copyInput: {
+        sourceVersionPublicId: "training_version_public_123",
+        newDraftTitle: "Revision draft",
+      },
+      sourceVersion,
+      sourceQuestionTypeSummary: {
+        singleChoice: 1,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 1,
+      },
+    });
+
+    expect(result.success).toBe(true);
+    expect(getCopiedDrafts()).toHaveLength(1);
+    expect(getCopiedDrafts()[0]?.sourceVersion).toMatchObject({
+      publicId: "training_version_public_123",
+      status: "taken_down",
+      takenDownAt: fixedNow.toISOString(),
+      takedownReason: "outdated training",
+    });
   });
 });

@@ -38,6 +38,18 @@ Future implementation should be split into separately approved code-stage tasks:
    - Add API and Web surfaces only after separate implementation approval.
    - Include Loading, Empty, Error, Permission Blocked, Takedown, Submitted, and Read-only states.
 
+## Module Run v2 Auto-Seed Readiness Anchors
+
+- implementationAutoSeedGate: source planning may seed guarded local implementation tasks after queue and matrix
+  readiness pass.
+- localExperienceClosureGate: organization-training implementation tasks must prove local lifecycle closure through
+  focused test coverage before closeout.
+- seededImplementationTask: downstream implementation tasks must stay task-scoped and preserve high-risk blocked gates.
+- focused test plan: service and validator implementation tasks should use targeted Vitest unit tests before broader
+  lint/typecheck closeout.
+- localFullLoopGate: L6 local implementation closure requires scoped tests, lint, typecheck, diff check, redacted
+  evidence, ModuleCloseoutReadiness, and PrePushReadiness.
+
 ## Blocked Work
 
 Direct implementation and formal `question`, `paper`, `practice`, `mock_exam`, formal `answer_record`, `exam_report`, or `mistake_book` write-path changes remain unapproved. Real provider calls, provider_cost_measurement, dependency, schema, migration, env/secret, staging/prod/cloud/deploy, payment, external-service, export flows, and Cost Calibration Gate execution remain blocked.
