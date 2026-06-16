@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-content-subject-scope-readonly-recheck-seeding
-updatedAt: "2026-06-15T16:57:58-07:00"
+currentPhase: advanced-organization-training-content-subject-scope-readonly-recheck
+updatedAt: "2026-06-15T17:14:08-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 845fa78d0dbd7f4d8889f0c6f735350042481981
-  lastKnownOriginMasterSha: 845fa78d0dbd7f4d8889f0c6f735350042481981
+  lastKnownMasterSha: 02396ecc1df966ff1bf7cbca752fa6c04a322755
+  lastKnownOriginMasterSha: 02396ecc1df966ff1bf7cbca752fa6c04a322755
 currentTask:
-  id: advanced-organization-training-content-subject-scope-readonly-recheck-seeding
+  id: advanced-organization-training-content-subject-scope-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
-  branch: codex/advanced-organization-training-content-subject-scope-readonly-recheck-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck.md
+  branch: codex/advanced-organization-training-content-subject-scope-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -399,9 +399,10 @@ qualityGates:
     advancedOrganizationTrainingContentSubjectScopeContractSeeding: pass_docs_only_seeded_content_subject_scope_guard
     advancedOrganizationTrainingContentSubjectScopeGuard: pass_tdd_service_subject_scope_guard
     advancedOrganizationTrainingContentSubjectScopeReadonlyRecheckSeeding: pass_docs_only_seeded_content_subject_scope_readonly_recheck
-    preCommitHook: pass_advanced_organization_training_content_subject_scope_readonly_recheck_seeding_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_content_subject_scope_readonly_recheck_seeding_closeout_readiness
-    prePushHook: pass_advanced_organization_training_content_subject_scope_readonly_recheck_seeding_pre_push_readiness
+    advancedOrganizationTrainingContentSubjectScopeReadonlyRecheck: pass_readonly_recheck_no_findings
+    preCommitHook: pass_advanced_organization_training_content_subject_scope_readonly_recheck_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_content_subject_scope_readonly_recheck_closeout_readiness
+    prePushHook: pass_advanced_organization_training_content_subject_scope_readonly_recheck_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -417,7 +418,6 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-content-subject-scope-readonly-recheck-seeding closed by queueing the pending readonly
-    task advanced-organization-training-content-subject-scope-readonly-recheck. Recommended next action is to execute
-    that readonly recheck after fresh approval.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
+    advanced-organization-training-content-subject-scope-readonly-recheck closed with no blocking findings. Recommended
+    next action is to select the next pending queue item after user review.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck.md
