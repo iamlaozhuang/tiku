@@ -6,7 +6,10 @@ import {
 import { createLocalSessionRuntime } from "../auth/local-session-runtime";
 import { getRequestAuthorization } from "../auth/session-cookie";
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
-import { createPostgresOrganizationTrainingRepository } from "../repositories/organization-training-repository";
+import {
+  createPostgresOrganizationTrainingRepository,
+  type OrganizationTrainingRepository,
+} from "../repositories/organization-training-repository";
 import {
   invalidOrganizationTrainingPublishInputMessage,
   normalizeOrganizationTrainingPublishInput,
@@ -138,10 +141,6 @@ async function defaultResolveOrganizationAdminContext(): Promise<null> {
   return null;
 }
 
-async function defaultResolveVisibleOrganizationScope(): Promise<null> {
-  return null;
-}
-
 function isOrganizationTrainingRuntimeAdminRole(
   role: string,
 ): role is OrganizationTrainingRuntimeAdminRole {
@@ -232,6 +231,16 @@ function createRuntimeOrganizationTrainingStore(
     },
     publishVersion: repository.publishVersion,
   };
+}
+
+function createRepositoryBackedVisibleOrganizationScopeResolver(
+  repository: Pick<
+    OrganizationTrainingRepository,
+    "lookupVisibleOrganizationScope"
+  >,
+): OrganizationTrainingVisibleOrganizationScopeResolver {
+  return async ({ adminPublicId }) =>
+    repository.lookupVisibleOrganizationScope({ adminPublicId });
 }
 
 function createInvalidPublishInputResponse(): ApiResponse<null> {
@@ -412,12 +421,14 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
 ) {
   const repository = createPostgresOrganizationTrainingRepository();
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const resolveVisibleOrganizationScope =
+    options.resolveVisibleOrganizationScope ??
+    createRepositoryBackedVisibleOrganizationScopeResolver(repository);
   const resolveOrganizationAdminContext =
     options.resolveOrganizationAdminContext ??
     createSessionBackedOrganizationAdminContextResolver(
       sessionService,
-      options.resolveVisibleOrganizationScope ??
-        defaultResolveVisibleOrganizationScope,
+      resolveVisibleOrganizationScope,
     );
 
   return createOrganizationTrainingRouteHandlers(

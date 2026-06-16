@@ -6,6 +6,7 @@ import {
   type OrganizationTrainingTrustedPersistenceLineage,
   type OrganizationTrainingVersionGateway,
   type OrganizationTrainingVersionInsertInput,
+  type OrganizationTrainingVisibleOrganizationScopeSource,
 } from "./organization-training-repository";
 
 function createVersionWrite(
@@ -53,6 +54,7 @@ function createGateway(
   options: {
     latestVersionNumber?: number | null;
     trustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineage | null;
+    visibleOrganizationScopeSource?: OrganizationTrainingVisibleOrganizationScopeSource | null;
   } = {},
 ) {
   let insertInputs: OrganizationTrainingVersionInsertInput[] = [];
@@ -61,6 +63,9 @@ function createGateway(
   );
   const findTrustedPersistenceLineageByPublicIds = vi.fn(
     async () => options.trustedPersistenceLineage ?? null,
+  );
+  const findVisibleOrganizationScopeSourceByAdminPublicId = vi.fn(
+    async () => options.visibleOrganizationScopeSource ?? null,
   );
   const insertPublishedVersion = vi.fn(
     async (input: OrganizationTrainingVersionInsertInput) => {
@@ -102,6 +107,7 @@ function createGateway(
   const gateway: OrganizationTrainingVersionGateway = {
     findLatestVersionNumberByDraftPublicId,
     findTrustedPersistenceLineageByPublicIds,
+    findVisibleOrganizationScopeSourceByAdminPublicId,
     insertPublishedVersion,
   };
 
@@ -109,6 +115,7 @@ function createGateway(
     gateway,
     findLatestVersionNumberByDraftPublicId,
     findTrustedPersistenceLineageByPublicIds,
+    findVisibleOrganizationScopeSourceByAdminPublicId,
     insertPublishedVersion,
     getInsertInputs: () => insertInputs,
   };
@@ -304,5 +311,76 @@ describe("organization training repository", () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  it("expands assigned root organizations to active descendant public ids for admin visible scope", async () => {
+    const { gateway, findVisibleOrganizationScopeSourceByAdminPublicId } =
+      createGateway({
+        visibleOrganizationScopeSource: {
+          assignedRootOrganizationIds: [101],
+          activeOrganizationRows: [
+            {
+              organizationId: 101,
+              organizationPublicId: "organization_scope_root_public",
+              parentOrganizationId: null,
+            },
+            {
+              organizationId: 102,
+              organizationPublicId: "organization_scope_child_public",
+              parentOrganizationId: 101,
+            },
+            {
+              organizationId: 103,
+              organizationPublicId: "organization_scope_grandchild_public",
+              parentOrganizationId: 102,
+            },
+            {
+              organizationId: 104,
+              organizationPublicId: "organization_scope_unassigned_public",
+              parentOrganizationId: null,
+            },
+          ],
+        },
+      });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.lookupVisibleOrganizationScope({
+      adminPublicId: " organization_admin_public_123 ",
+    });
+
+    expect(
+      findVisibleOrganizationScopeSourceByAdminPublicId,
+    ).toHaveBeenCalledWith("organization_admin_public_123");
+    expect(result).toEqual([
+      "organization_scope_root_public",
+      "organization_scope_child_public",
+      "organization_scope_grandchild_public",
+    ]);
+  });
+
+  it("does not query visible organization scope when admin public id is blank", async () => {
+    const { gateway, findVisibleOrganizationScopeSourceByAdminPublicId } =
+      createGateway({
+        visibleOrganizationScopeSource: {
+          assignedRootOrganizationIds: [101],
+          activeOrganizationRows: [
+            {
+              organizationId: 101,
+              organizationPublicId: "organization_scope_root_public",
+              parentOrganizationId: null,
+            },
+          ],
+        },
+      });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.lookupVisibleOrganizationScope({
+      adminPublicId: " ",
+    });
+
+    expect(result).toBeNull();
+    expect(
+      findVisibleOrganizationScopeSourceByAdminPublicId,
+    ).not.toHaveBeenCalled();
   });
 });

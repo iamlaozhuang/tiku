@@ -20,6 +20,9 @@ import {
 } from "./organization-training-route";
 
 const runtimeRepositoryMock = vi.hoisted(() => ({
+  lookupVisibleOrganizationScope: vi.fn(async () => [
+    "organization_route_public_401",
+  ]),
   lookupTrustedPersistenceLineage: vi.fn(async () => ({
     organizationId: 501,
     orgAuthId: 601,
@@ -246,6 +249,10 @@ describe("organization training publish route handlers", () => {
     runtimeRepositoryMock.lookupTrustedPersistenceLineage.mockResolvedValue(
       trustedLineage,
     );
+    runtimeRepositoryMock.lookupVisibleOrganizationScope.mockClear();
+    runtimeRepositoryMock.lookupVisibleOrganizationScope.mockResolvedValue([
+      "organization_route_public_401",
+    ]);
     runtimeRepositoryMock.publishVersion.mockClear();
     runtimeRepositoryMock.publishVersion.mockResolvedValue(
       createPublishedVersion(),
@@ -356,12 +363,55 @@ describe("organization training publish route handlers", () => {
     });
   });
 
+  it("uses repository visible organization scope for the runtime organization-admin actor context", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput(), {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        version: createPublishedVersion(),
+      },
+    });
+    expect(
+      runtimeRepositoryMock.lookupVisibleOrganizationScope,
+    ).toHaveBeenCalledWith({
+      adminPublicId: "organization_admin_route_public_401",
+    });
+    expect(
+      runtimeRepositoryMock.lookupTrustedPersistenceLineage,
+    ).toHaveBeenCalledWith({
+      adminContext: trustedAdminContext,
+      authorizationPublicId: "org_auth_route_public_401",
+      organizationPublicId: "organization_route_public_401",
+    });
+  });
+
   it("fails closed before trusted lineage lookup when runtime session has no trusted visible organization scope", async () => {
     const sessionService = createCurrentSessionService({
       code: 0,
       message: "ok",
       data: createAdminAuthContext(),
     });
+    runtimeRepositoryMock.lookupVisibleOrganizationScope.mockResolvedValueOnce(
+      [],
+    );
     const handlers = createOrganizationTrainingRuntimeRouteHandlers({
       sessionService,
     });
@@ -385,6 +435,11 @@ describe("organization training publish route handlers", () => {
         authorization: "Bearer organization_training_route_session_401",
       },
     ]);
+    expect(
+      runtimeRepositoryMock.lookupVisibleOrganizationScope,
+    ).toHaveBeenCalledWith({
+      adminPublicId: "organization_admin_route_public_401",
+    });
     expect(
       runtimeRepositoryMock.lookupTrustedPersistenceLineage,
     ).not.toHaveBeenCalled();

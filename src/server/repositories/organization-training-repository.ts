@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 import {
+  admin,
+  adminOrganization,
   orgAuth,
   orgAuthOrganization,
   organization,
@@ -41,6 +43,21 @@ export type OrganizationTrainingTrustedPersistenceLineageLookupInput = {
   authorizationPublicId: string;
 };
 
+export type OrganizationTrainingVisibleOrganizationScopeLookupInput = {
+  adminPublicId: string;
+};
+
+export type OrganizationTrainingVisibleOrganizationScopeRow = {
+  organizationId: number;
+  organizationPublicId: string;
+  parentOrganizationId: number | null;
+};
+
+export type OrganizationTrainingVisibleOrganizationScopeSource = {
+  assignedRootOrganizationIds: readonly number[];
+  activeOrganizationRows: readonly OrganizationTrainingVisibleOrganizationScopeRow[];
+};
+
 export type OrganizationTrainingVersionGateway = {
   findLatestVersionNumberByDraftPublicId(
     draftPublicId: string,
@@ -48,12 +65,18 @@ export type OrganizationTrainingVersionGateway = {
   findTrustedPersistenceLineageByPublicIds(
     input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
+  findVisibleOrganizationScopeSourceByAdminPublicId(
+    adminPublicId: string,
+  ): Promise<OrganizationTrainingVisibleOrganizationScopeSource | null>;
   insertPublishedVersion(
     input: OrganizationTrainingVersionInsertInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
 };
 
 export type OrganizationTrainingRepository = {
+  lookupVisibleOrganizationScope(
+    input: OrganizationTrainingVisibleOrganizationScopeLookupInput,
+  ): Promise<readonly string[] | null>;
   lookupTrustedPersistenceLineage(
     input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
   ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
@@ -105,6 +128,23 @@ export function createOrganizationTrainingRepository(
     options.createVersionPublicId ?? createDefaultVersionPublicId;
 
   return {
+    async lookupVisibleOrganizationScope(input) {
+      const adminPublicId = normalizeRequiredText(input.adminPublicId);
+
+      if (adminPublicId === null) {
+        return null;
+      }
+
+      const visibleOrganizationScopeSource =
+        await gateway.findVisibleOrganizationScopeSourceByAdminPublicId(
+          adminPublicId,
+        );
+
+      return visibleOrganizationScopeSource === null
+        ? null
+        : resolveVisibleOrganizationPublicIds(visibleOrganizationScopeSource);
+    },
+
     async lookupTrustedPersistenceLineage(input) {
       const lookupInput = normalizeTrustedPersistenceLineageLookupInput(input);
 
@@ -157,6 +197,12 @@ export function createPostgresOrganizationTrainingRepository(
     },
     async findTrustedPersistenceLineageByPublicIds(input) {
       return findTrustedPersistenceLineageByPublicIds(getDatabase(), input);
+    },
+    async findVisibleOrganizationScopeSourceByAdminPublicId(adminPublicId) {
+      return findVisibleOrganizationScopeSourceByAdminPublicId(
+        getDatabase(),
+        adminPublicId,
+      );
     },
     async insertPublishedVersion(input) {
       const [row] = await getDatabase()
@@ -242,6 +288,105 @@ function normalizeTrustedPersistenceLineage(
   };
 }
 
+function normalizeVisibleOrganizationScopeRow(
+  scopeRow: OrganizationTrainingVisibleOrganizationScopeRow,
+): OrganizationTrainingVisibleOrganizationScopeRow | null {
+  const organizationPublicId = normalizeRequiredText(
+    scopeRow.organizationPublicId,
+  );
+
+  if (
+    organizationPublicId === null ||
+    !Number.isInteger(scopeRow.organizationId) ||
+    scopeRow.organizationId < 1 ||
+    (scopeRow.parentOrganizationId !== null &&
+      (!Number.isInteger(scopeRow.parentOrganizationId) ||
+        scopeRow.parentOrganizationId < 1))
+  ) {
+    return null;
+  }
+
+  return {
+    organizationId: scopeRow.organizationId,
+    organizationPublicId,
+    parentOrganizationId: scopeRow.parentOrganizationId,
+  };
+}
+
+function resolveVisibleOrganizationPublicIds(
+  visibleOrganizationScopeSource: OrganizationTrainingVisibleOrganizationScopeSource,
+): string[] {
+  const activeOrganizationRows =
+    visibleOrganizationScopeSource.activeOrganizationRows
+      .map(normalizeVisibleOrganizationScopeRow)
+      .filter(
+        (
+          scopeRow,
+        ): scopeRow is OrganizationTrainingVisibleOrganizationScopeRow =>
+          scopeRow !== null,
+      );
+  const activeOrganizationIds = new Set(
+    activeOrganizationRows.map((scopeRow) => scopeRow.organizationId),
+  );
+  const assignedRootOrganizationIds = [
+    ...new Set(
+      visibleOrganizationScopeSource.assignedRootOrganizationIds.filter(
+        (organizationId) =>
+          Number.isInteger(organizationId) &&
+          organizationId > 0 &&
+          activeOrganizationIds.has(organizationId),
+      ),
+    ),
+  ];
+
+  if (assignedRootOrganizationIds.length === 0) {
+    return [];
+  }
+
+  const childOrganizationIdsByParentId = activeOrganizationRows.reduce(
+    (childIdsByParentId, scopeRow) => {
+      if (scopeRow.parentOrganizationId === null) {
+        return childIdsByParentId;
+      }
+
+      const currentChildIds =
+        childIdsByParentId.get(scopeRow.parentOrganizationId) ?? [];
+      childIdsByParentId.set(scopeRow.parentOrganizationId, [
+        ...currentChildIds,
+        scopeRow.organizationId,
+      ]);
+
+      return childIdsByParentId;
+    },
+    new Map<number, number[]>(),
+  );
+  const visibleOrganizationIds = new Set<number>();
+  let pendingOrganizationIds = assignedRootOrganizationIds;
+
+  while (pendingOrganizationIds.length > 0) {
+    const [nextOrganizationId, ...remainingOrganizationIds] =
+      pendingOrganizationIds;
+
+    if (
+      nextOrganizationId === undefined ||
+      visibleOrganizationIds.has(nextOrganizationId)
+    ) {
+      pendingOrganizationIds = remainingOrganizationIds;
+      continue;
+    }
+
+    visibleOrganizationIds.add(nextOrganizationId);
+    pendingOrganizationIds = [
+      ...remainingOrganizationIds,
+      ...(childOrganizationIdsByParentId.get(nextOrganizationId) ?? []),
+    ];
+  }
+
+  return activeOrganizationRows
+    .filter((scopeRow) => visibleOrganizationIds.has(scopeRow.organizationId))
+    .map((scopeRow) => scopeRow.organizationPublicId);
+}
+
 function createVersionInsertInput(
   input: OrganizationTrainingPublishedVersionPersistenceInput,
   generated: {
@@ -314,6 +459,59 @@ async function findTrustedPersistenceLineageByPublicIds(
   return {
     organizationId: row.organization_id,
     orgAuthId: row.org_auth_id,
+  };
+}
+
+async function findVisibleOrganizationScopeSourceByAdminPublicId(
+  database: RuntimeDatabase,
+  adminPublicId: string,
+): Promise<OrganizationTrainingVisibleOrganizationScopeSource> {
+  const assignedRootRows = await database
+    .select({
+      organization_id: adminOrganization.organization_id,
+    })
+    .from(adminOrganization)
+    .innerJoin(admin, eq(adminOrganization.admin_id, admin.id))
+    .innerJoin(
+      organization,
+      eq(adminOrganization.organization_id, organization.id),
+    )
+    .where(
+      and(
+        eq(admin.public_id, adminPublicId),
+        eq(admin.status, "active"),
+        eq(organization.status, "active"),
+      ),
+    );
+  const assignedRootOrganizationIds = assignedRootRows.map(
+    (assignedRootRow) => assignedRootRow.organization_id,
+  );
+
+  if (assignedRootOrganizationIds.length === 0) {
+    return {
+      assignedRootOrganizationIds,
+      activeOrganizationRows: [],
+    };
+  }
+
+  const activeOrganizationRows = await database
+    .select({
+      organization_id: organization.id,
+      organization_public_id: organization.public_id,
+      parent_organization_id: organization.parent_organization_id,
+    })
+    .from(organization)
+    .where(eq(organization.status, "active"));
+
+  return {
+    assignedRootOrganizationIds,
+    activeOrganizationRows: activeOrganizationRows.map(
+      (activeOrganizationRow) => ({
+        organizationId: activeOrganizationRow.organization_id,
+        organizationPublicId: activeOrganizationRow.organization_public_id,
+        parentOrganizationId: activeOrganizationRow.parent_organization_id,
+      }),
+    ),
   };
 }
 
