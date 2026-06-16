@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-mapper-validator-route-contract-tdd
-updatedAt: "2026-06-16T16:44:26-07:00"
+currentPhase: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding
+updatedAt: "2026-06-16T16:53:28-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: c465db3d69c6828484ca94489bfe8df615390597
   lastKnownOriginMasterSha: c465db3d69c6828484ca94489bfe8df615390597
 currentTask:
-  id: advanced-organization-analytics-mapper-validator-route-contract-tdd
+  id: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
-  branch: codex/advanced-organization-analytics-mapper-validator-route-contract-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
+  branch: codex/advanced-organization-analytics-route-runtime-wiring-tdd-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -642,6 +642,7 @@ qualityGates:
     advancedOrganizationAnalyticsRouteRuntimeBoundaryReadonlyAudit: pass_readonly_audit_mapper_validator_boundary_recommended
     advancedOrganizationAnalyticsMapperValidatorRouteContractTddSeeding: pass_docs_state_seeded_mapper_validator_route_contract_tdd
     advancedOrganizationAnalyticsMapperValidatorRouteContractTdd: pass_tdd_mapper_validator_route_contract_no_runtime_wiring
+    advancedOrganizationAnalyticsDashboardSummaryRouteRuntimeWiringTddSeeding: pass_docs_state_seeded_dashboard_summary_route_runtime_tdd
     standingDocsStateFastLaneCloseoutUpgrade: pass_docs_state_authorization_upgrade
     standingLocalE2ESmokeAllowlistAuthorizationUpgrade: pass_docs_state_smoke_allowlist_authorization_upgrade
 riskGates:
@@ -659,12 +660,13 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-mapper-validator-route-contract-tdd` closed as a scoped mapper, validator, and
-    route-contract unit-test task without route runtime wiring. Next organization analytics route runtime work requires a
-    future queued task and must keep App Router files as thin adapters per ADR-002. Future UI/navigation/route-guard tasks may consume
+    `advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding` seeded
+    `advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd` as the next pending task. The pending
+    task is dashboard summary route runtime wiring only and must keep App Router files as thin adapters per ADR-002.
+    Future UI/navigation/route-guard tasks may consume
     `standingLocalE2ESmokeAllowlistApproval` only when they declare `localE2EValidation:
     approved_local_only_existing_specs`, `localE2ESmokeTier: safe_smoke`, and a command targeting one of the allowlisted
     safe smoke specs. Route runtime wiring, service/repository runtime changes, schema/migration, DB execution,
     provider/model calls, dependencies, full e2e suites, staging/prod/cloud/deploy/payment/external-service, PR,
     force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
