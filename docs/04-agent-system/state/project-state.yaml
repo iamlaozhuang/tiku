@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-standing-autonomy-policy-governance
-updatedAt: "2026-06-16T00:48:05-07:00"
+currentPhase: advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+updatedAt: "2026-06-16T01:08:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3ab652a947a8fbc28471ba82099ca587be4b7075
-  lastKnownOriginMasterSha: 3ab652a947a8fbc28471ba82099ca587be4b7075
+  lastKnownMasterSha: 9b88b41c56744c578887daf79c882931e7f1cdf0
+  lastKnownOriginMasterSha: 9b88b41c56744c578887daf79c882931e7f1cdf0
 currentTask:
-  id: module-run-v2-standing-autonomy-policy-governance
+  id: advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
   status: closed
-  sourceStory: user-request-2026-06-16-standing-autonomy-policy
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
-  branch: codex/module-run-v2-standing-autonomy-policy
+  sourceStory: advanced-edition-organization-training
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+  branch: codex/advanced-organization-training-org-admin-actor-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -478,9 +478,9 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteFlowReadonlyRecheck: pass_readonly_recheck_with_runtime_lineage_resolver_needs_recheck
     advancedOrganizationTrainingPublishVersionRouteTrustedLineageBoundaryDecision: pass_docs_only_boundary_decision_with_org_admin_actor_needs_recheck
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorBoundaryReadonlyAudit: pass_readonly_audit_with_org_admin_actor_contract_needs_recheck
-    preCommitHook: pass_advanced_organization_training_publish_version_route_org_admin_actor_boundary_readonly_audit_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_route_org_admin_actor_boundary_readonly_audit_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_route_org_admin_actor_boundary_readonly_audit_pre_push_readiness
+    preCommitHook: pass_advanced_organization_training_publish_version_route_org_admin_actor_contract_readonly_recheck_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_route_org_admin_actor_contract_readonly_recheck_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_route_org_admin_actor_contract_readonly_recheck_pre_push_readiness
     docsOnlyFastLaneMechanism: pass_shadow_replay_and_smoke_gates
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorContractDecision: pass_docs_only_contract_decision_current_source_not_sufficient
     advancedOrganizationTrainingPublishVersionRouteOrgAdminActorContractFollowupSeeding: pass_docs_only_seeded_readonly_recheck
@@ -489,6 +489,7 @@ qualityGates:
     docsOnlyFastLaneTrialBatchModuleCloseout: pass_hard_block_batch_module_closeout
     docsOnlyFastLaneTrialBatchPrePush: pass_hard_block_batch_pre_push
     standingAutonomyGovernance: pass_docs_state_governance_policy
+    advancedOrganizationTrainingPublishVersionRouteOrgAdminActorContractReadonlyRecheck: pass_readonly_recheck_new_actor_context_contract_required
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -504,7 +505,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Execute the seeded readonly recheck for the organization-training publish-version route org-admin actor contract
-    under the standing autonomy policy if the task scope qualifies. Runtime trusted-lineage resolver implementation
-    remains blocked until that recheck proves a narrow organization-admin actor and visible organization scope source.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+    Execute the seeded TDD task for the organization-training publish-version route organization-admin actor context
+    contract under standing autonomy if repository readiness and task gates pass. Runtime trusted-lineage resolver
+    implementation remains blocked until that actor context contract is implemented and verified.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
