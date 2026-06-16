@@ -3,6 +3,8 @@ import {
   createSuccessResponse,
   type ApiResponse,
 } from "../contracts/api-response";
+import { createLocalSessionRuntime } from "../auth/local-session-runtime";
+import { getRequestAuthorization } from "../auth/session-cookie";
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
 import { createPostgresOrganizationTrainingRepository } from "../repositories/organization-training-repository";
 import {
@@ -18,6 +20,7 @@ import {
   type OrganizationTrainingStore,
 } from "./organization-training-service";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
+import type { SessionService } from "./session-service";
 
 export type OrganizationTrainingPublishRouteContext = {
   params: Promise<{
@@ -65,7 +68,14 @@ export type OrganizationTrainingRouteOptions = {
 export type OrganizationTrainingRuntimeRouteOptions = Pick<
   OrganizationTrainingRouteOptions,
   "resolveOrganizationAdminContext"
->;
+> & {
+  sessionService?: Pick<SessionService, "getCurrentSession">;
+};
+
+type OrganizationTrainingRuntimeAdminRole =
+  | "super_admin"
+  | "ops_admin"
+  | "content_admin";
 
 const invalidPublishInputCode = 400061;
 const draftPublicIdMismatchCode = 400062;
@@ -114,6 +124,53 @@ async function defaultResolvePersistenceLineage(): Promise<null> {
 
 async function defaultResolveOrganizationAdminContext(): Promise<null> {
   return null;
+}
+
+function isOrganizationTrainingRuntimeAdminRole(
+  role: string,
+): role is OrganizationTrainingRuntimeAdminRole {
+  return (
+    role === "super_admin" || role === "ops_admin" || role === "content_admin"
+  );
+}
+
+function createSessionBackedOrganizationAdminContextResolver(
+  sessionService: Pick<SessionService, "getCurrentSession">,
+): OrganizationTrainingAdminContextResolver {
+  return async ({ request, publishInput }) => {
+    const sessionResponse = await sessionService.getCurrentSession({
+      authorization: getRequestAuthorization(request),
+    });
+
+    if (sessionResponse.code !== 0 || sessionResponse.data === null) {
+      return null;
+    }
+
+    const rawAdminPublicId = sessionResponse.data.user.adminPublicId;
+    const adminPublicId =
+      typeof rawAdminPublicId === "string"
+        ? normalizeRequiredText(rawAdminPublicId)
+        : null;
+    const organizationPublicId = normalizeRequiredText(
+      publishInput.organizationPublicId,
+    );
+    const hasAdminRole = (sessionResponse.data.user.adminRoles ?? []).some(
+      (adminRole) => isOrganizationTrainingRuntimeAdminRole(adminRole),
+    );
+
+    if (
+      adminPublicId === null ||
+      organizationPublicId === null ||
+      !hasAdminRole
+    ) {
+      return null;
+    }
+
+    return {
+      adminPublicId,
+      visibleOrganizationPublicIds: [organizationPublicId],
+    };
+  };
 }
 
 function createDefaultPersistenceLineageResolver(
@@ -318,13 +375,17 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   options: OrganizationTrainingRuntimeRouteOptions = {},
 ) {
   const repository = createPostgresOrganizationTrainingRepository();
+  const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const resolveOrganizationAdminContext =
+    options.resolveOrganizationAdminContext ??
+    createSessionBackedOrganizationAdminContextResolver(sessionService);
 
   return createOrganizationTrainingRouteHandlers(
     createOrganizationTrainingService(
       createRuntimeOrganizationTrainingStore(repository),
     ),
     {
-      ...options,
+      resolveOrganizationAdminContext,
       lookupTrustedPersistenceLineage:
         repository.lookupTrustedPersistenceLineage,
     },

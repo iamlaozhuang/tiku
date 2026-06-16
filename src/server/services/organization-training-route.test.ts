@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST as publishRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/publish/route";
 
+import type { AuthContextDto } from "../contracts/auth-contract";
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
+import type { SessionService } from "./session-service";
 import {
   organizationTrainingPublishBlockedMessage,
   type OrganizationTrainingAdminContext,
@@ -66,6 +68,14 @@ const trustedAdminContext: OrganizationTrainingAdminContext = {
 };
 
 const publishPathPublicId = "organization_training_draft_route_401";
+type CurrentSessionRequest = Parameters<SessionService["getCurrentSession"]>[0];
+type CurrentSessionResult = Awaited<
+  ReturnType<SessionService["getCurrentSession"]>
+>;
+
+type CapturingSessionService = Pick<SessionService, "getCurrentSession"> & {
+  requests: CurrentSessionRequest[];
+};
 
 function createPublishInput(
   overrides: Partial<OrganizationTrainingPublishInput> = {},
@@ -135,10 +145,52 @@ function createPublishedVersion(
   };
 }
 
-function createPublishRequest(body: unknown): Request {
+function createAdminAuthContext(
+  overrides: Partial<AuthContextDto["user"]> = {},
+): AuthContextDto {
+  return {
+    user: {
+      publicId: "admin_user_route_public_401",
+      phone: "13900000001",
+      name: "Route Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: null,
+      adminPublicId: "organization_admin_route_public_401",
+      adminRoles: ["ops_admin"],
+      ...overrides,
+    },
+    session: {
+      expiresAt: "2026-06-16T11:00:00.000Z",
+    },
+  };
+}
+
+function createCurrentSessionService(
+  result: CurrentSessionResult,
+): CapturingSessionService {
+  const requests: CurrentSessionRequest[] = [];
+
+  return {
+    requests,
+    async getCurrentSession(input) {
+      requests.push(input);
+
+      return result;
+    },
+  };
+}
+
+function createPublishRequest(
+  body: unknown,
+  init: Omit<RequestInit, "body" | "method"> = {},
+): Request {
   return new Request(
     `http://localhost/api/v1/organization-trainings/${publishPathPublicId}/publish`,
     {
+      ...init,
       method: "POST",
       body: JSON.stringify(body),
     },
@@ -235,6 +287,46 @@ describe("organization training publish route handlers", () => {
         orgAuthId: trustedLineage.orgAuthId,
       }),
     );
+  });
+
+  it("derives organization-admin context from runtime session before trusted lineage lookup", async () => {
+    const sessionService = createCurrentSessionService({
+      code: 0,
+      message: "ok",
+      data: createAdminAuthContext(),
+    });
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      sessionService,
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput(), {
+        headers: {
+          authorization: "Bearer organization_training_route_session_401",
+        },
+      }),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        version: createPublishedVersion(),
+      },
+    });
+    expect(sessionService.requests).toEqual([
+      {
+        authorization: "Bearer organization_training_route_session_401",
+      },
+    ]);
+    expect(
+      runtimeRepositoryMock.lookupTrustedPersistenceLineage,
+    ).toHaveBeenCalledWith({
+      adminContext: trustedAdminContext,
+      authorizationPublicId: "org_auth_route_public_401",
+      organizationPublicId: "organization_route_public_401",
+    });
   });
 
   it("returns a success envelope from the service and uses trusted lineage instead of client lineage", async () => {

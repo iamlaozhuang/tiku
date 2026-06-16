@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
-updatedAt: "2026-06-16T02:31:26-07:00"
+currentPhase: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+updatedAt: "2026-06-16T02:45:09-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -323,13 +323,13 @@ repository:
   lastKnownMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
   lastKnownOriginMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
 currentTask:
-  id: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+  id: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
-  branch: codex/advanced-organization-training-runtime-wiring-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+  branch: codex/advanced-organization-training-org-admin-runtime-wiring-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -494,9 +494,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteTrustedLineageRuntimeWiringSeeding: pass_docs_only_seeded_runtime_wiring_tdd_task
     advancedOrganizationTrainingPublishVersionRouteTrustedLineageRuntimeWiring: pass_tdd_route_runtime_trusted_lineage_lookup_wiring
     advancedOrganizationTrainingPublishVersionRouteTrustedLineageRuntimeWiringReadonlyRecheck: pass_readonly_recheck_with_runtime_org_admin_context_wiring_needs_recheck
-    preCommitHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_runtime_wiring_readonly_recheck_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_route_trusted_lineage_runtime_wiring_readonly_recheck_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_runtime_wiring_readonly_recheck_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionRouteOrgAdminContextRuntimeWiring: pass_tdd_route_runtime_org_admin_actor_context_wiring
+    preCommitHook: pass_advanced_organization_training_publish_version_route_org_admin_context_runtime_wiring_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_route_org_admin_context_runtime_wiring_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_route_org_admin_context_runtime_wiring_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -512,9 +513,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Execute the pending narrow TDD task
-    advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd to wire the default
-    organization-training publish route runtime to a real organization-admin actor context resolver. Keep real DB
-    execution, schema/drizzle, provider, e2e/browser/dev-server, dependency, deploy, payment, external-service, PR,
-    force-push, and Cost Calibration Gate blocked unless a future queued task explicitly declares a narrower capability.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+    Prepare a readonly recheck for
+    advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd to verify the default
+    organization-training publish route runtime flow after session-backed actor context wiring. Keep real DB execution,
+    schema/drizzle, provider, e2e/browser/dev-server, dependency, deploy, payment, external-service, PR, force-push, and
+    Cost Calibration Gate blocked unless a future queued task explicitly declares a narrower capability.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
