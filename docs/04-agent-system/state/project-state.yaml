@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision
-updatedAt: "2026-06-16T04:01:15-07:00"
+currentPhase: module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope
+updatedAt: "2026-06-16T04:27:02-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
-  lastKnownOriginMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
+  lastKnownMasterSha: ddf9fcbed348128213bb429ec0b9f245de9807e9
+  lastKnownOriginMasterSha: ddf9fcbed348128213bb429ec0b9f245de9807e9
 currentTask:
-  id: advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision
+  id: module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
-  branch: codex/advanced-organization-training-visible-scope-source-decision
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope.md
+  branch: codex/schema-migration-capability-state-normalization
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -501,6 +501,7 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeResolverContractReadonlyRecheck: pass_readonly_recheck_no_blocking_findings_real_resolver_tdd_seeded
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeRepositoryResolver: pass_guarded_stop_source_insufficient_boundary_decision_seeded
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeSourceBoundaryDecision: pass_docs_only_decision_schema_backed_admin_organization_scope_required
+    moduleRunV2SchemaMigrationCapabilityStateNormalizationAdminOrganizationScope: pass_docs_state_capability_normalization
     preCommitHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_commit_hardening
     moduleCloseout: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_closeout_readiness
     prePushHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_push_readiness
@@ -519,11 +520,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Prepare the queued schema task
+    Retry the queued schema task
     advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration.
     The boundary decision requires a dedicated schema-backed `admin_organization` assignment source before
     repository-backed visible organization scope resolver implementation resumes. The next task must use the
     schemaMigration capability gate and keep `.env*`, real DB execution, row/private data, dependency, provider,
     e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration
     Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope.md
