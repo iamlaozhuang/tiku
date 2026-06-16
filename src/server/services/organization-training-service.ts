@@ -1,7 +1,13 @@
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  type ApiResponse,
+} from "../contracts/api-response";
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   EmployeeOrganizationTrainingScoreSummaryDto,
+  OrganizationTrainingAuditLogReferenceDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingScopeSnapshotDto,
@@ -10,6 +16,7 @@ import type {
 } from "../contracts/organization-training-contract";
 import { professionValues, type Profession } from "../models/auth";
 import {
+  type OrganizationTrainingAuditLogReferenceInput,
   type OrganizationTrainingCopyToNewDraftInput,
   organizationTrainingQuestionTypeValues,
   type OrganizationTrainingPublishInput,
@@ -19,6 +26,10 @@ import {
   type OrganizationTrainingTakedownInput,
 } from "../models/organization-training";
 import { subjectValues, type Subject } from "../models/paper";
+import {
+  invalidOrganizationTrainingAuditLogReferenceInputMessage,
+  normalizeOrganizationTrainingAuditLogReferenceInput,
+} from "../validators/organization-training";
 
 export const organizationTrainingManualDraftCreationBlockedMessage =
   "Organization training manual draft creation is blocked.";
@@ -37,6 +48,50 @@ export const organizationTrainingEmployeeAnswerBlockedMessage =
 
 export const organizationTrainingSourceContextBlockedMessage =
   "Organization training source context is blocked.";
+
+const INVALID_ORGANIZATION_TRAINING_AUDIT_LOG_REFERENCE_INPUT_CODE = 400184;
+
+function mapOrganizationTrainingAuditLogReferenceToDto(
+  input: OrganizationTrainingAuditLogReferenceInput,
+): OrganizationTrainingAuditLogReferenceDto {
+  return {
+    auditLogReference: {
+      publicId: input.auditLogPublicId,
+      redactionStatus: "redacted",
+    },
+    targetReference: {
+      targetResourceType: input.targetResourceType,
+      trainingDraftPublicId: input.trainingDraftPublicId,
+      trainingVersionPublicId: input.trainingVersionPublicId,
+      employeeAnswerPublicId: input.employeeAnswerPublicId,
+      organizationPublicId: input.organizationPublicId,
+    },
+    actorReference: {
+      actorPublicId: input.actorPublicId,
+      redactionStatus: "redacted",
+    },
+    actionType: input.actionType,
+    referenceStatus: "redacted_reference",
+  };
+}
+
+export function buildOrganizationTrainingAuditLogReferenceReadModel(
+  input: unknown,
+): ApiResponse<OrganizationTrainingAuditLogReferenceDto | null> {
+  const auditLogReferenceInput =
+    normalizeOrganizationTrainingAuditLogReferenceInput(input);
+
+  if (!auditLogReferenceInput.success) {
+    return createErrorResponse(
+      INVALID_ORGANIZATION_TRAINING_AUDIT_LOG_REFERENCE_INPUT_CODE,
+      invalidOrganizationTrainingAuditLogReferenceInputMessage,
+    );
+  }
+
+  return createSuccessResponse(
+    mapOrganizationTrainingAuditLogReferenceToDto(auditLogReferenceInput.value),
+  );
+}
 
 export type OrganizationTrainingManualDraftCreationBlockedReason =
   | "invalid_manual_draft_input"

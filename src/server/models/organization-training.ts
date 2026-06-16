@@ -54,6 +54,14 @@ export const organizationTrainingSensitiveAdminSummaryFieldValues = [
   "singleAiTaskDetail",
 ] as const;
 
+export const organizationTrainingAuditLogTargetResourceTypeValues = [
+  "organization_training_draft",
+  "organization_training_version",
+  "organization_training_answer",
+  "organization_training_source_context",
+  "organization_training_summary",
+] as const;
+
 export type OrganizationTrainingQuestionType =
   (typeof organizationTrainingQuestionTypeValues)[number];
 
@@ -77,6 +85,20 @@ export type OrganizationTrainingSourceContextType =
 
 export type OrganizationTrainingSensitiveAdminSummaryField =
   (typeof organizationTrainingSensitiveAdminSummaryFieldValues)[number];
+
+export type OrganizationTrainingAuditLogTargetResourceType =
+  (typeof organizationTrainingAuditLogTargetResourceTypeValues)[number];
+
+export type OrganizationTrainingAuditLogReferenceInput = {
+  auditLogPublicId: string;
+  actionType: string;
+  targetResourceType: OrganizationTrainingAuditLogTargetResourceType;
+  trainingDraftPublicId: string | null;
+  trainingVersionPublicId: string | null;
+  employeeAnswerPublicId: string | null;
+  organizationPublicId: string;
+  actorPublicId: string | null;
+};
 
 export type OrganizationTrainingQuestionTypeSummary = {
   singleChoice: number;

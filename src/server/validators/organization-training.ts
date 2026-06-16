@@ -1,6 +1,8 @@
 import { evidenceStatusValues } from "../models/ai-rag";
 import { professionValues } from "../models/auth";
 import {
+  type OrganizationTrainingAuditLogReferenceInput,
+  type OrganizationTrainingAuditLogTargetResourceType,
   type OrganizationTrainingCapabilityContext,
   type OrganizationTrainingCopyToNewDraftInput,
   type OrganizationTrainingPublishInput,
@@ -8,6 +10,7 @@ import {
   type OrganizationTrainingQuestionType,
   type OrganizationTrainingQuestionTypeSummary,
   type OrganizationTrainingTakedownInput,
+  organizationTrainingAuditLogTargetResourceTypeValues,
   organizationTrainingQuestionTypeValues,
 } from "../models/organization-training";
 import { subjectValues } from "../models/paper";
@@ -20,6 +23,9 @@ export const invalidOrganizationTrainingTakedownInputMessage =
 
 export const invalidOrganizationTrainingCopyToNewDraftInputMessage =
   "Invalid organization training copy-to-new-draft input.";
+
+export const invalidOrganizationTrainingAuditLogReferenceInputMessage =
+  "Invalid organization training audit_log reference input.";
 
 export type OrganizationTrainingPublishValidationResult =
   | {
@@ -49,6 +55,16 @@ export type OrganizationTrainingCopyToNewDraftValidationResult =
   | {
       success: false;
       message: typeof invalidOrganizationTrainingCopyToNewDraftInputMessage;
+    };
+
+export type OrganizationTrainingAuditLogReferenceValidationResult =
+  | {
+      success: true;
+      value: OrganizationTrainingAuditLogReferenceInput;
+    }
+  | {
+      success: false;
+      message: typeof invalidOrganizationTrainingAuditLogReferenceInputMessage;
     };
 
 type JsonRecord = Record<string, unknown>;
@@ -150,6 +166,45 @@ function isOrganizationTrainingQuestionType(
       value as OrganizationTrainingQuestionType,
     )
   );
+}
+
+function isOrganizationTrainingAuditLogTargetResourceType(
+  value: unknown,
+): value is OrganizationTrainingAuditLogTargetResourceType {
+  return (
+    typeof value === "string" &&
+    organizationTrainingAuditLogTargetResourceTypeValues.includes(
+      value as OrganizationTrainingAuditLogTargetResourceType,
+    )
+  );
+}
+
+function hasRequiredOrganizationTrainingAuditTargetReference(
+  targetResourceType: OrganizationTrainingAuditLogTargetResourceType,
+  referenceInput: Pick<
+    OrganizationTrainingAuditLogReferenceInput,
+    | "trainingDraftPublicId"
+    | "trainingVersionPublicId"
+    | "employeeAnswerPublicId"
+  >,
+): boolean {
+  if (targetResourceType === "organization_training_draft") {
+    return referenceInput.trainingDraftPublicId !== null;
+  }
+
+  if (targetResourceType === "organization_training_version") {
+    return referenceInput.trainingVersionPublicId !== null;
+  }
+
+  if (targetResourceType === "organization_training_answer") {
+    return referenceInput.employeeAnswerPublicId !== null;
+  }
+
+  if (targetResourceType === "organization_training_source_context") {
+    return referenceInput.trainingDraftPublicId !== null;
+  }
+
+  return true;
 }
 
 function normalizeCapabilityContext(
@@ -376,5 +431,66 @@ export function normalizeOrganizationTrainingCopyToNewDraftInput(
       sourceVersionPublicId,
       newDraftTitle,
     },
+  };
+}
+
+export function normalizeOrganizationTrainingAuditLogReferenceInput(
+  input: unknown,
+): OrganizationTrainingAuditLogReferenceValidationResult {
+  if (!isRecord(input)) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingAuditLogReferenceInputMessage,
+    };
+  }
+
+  const auditLogPublicId = normalizeRequiredText(input.auditLogPublicId);
+  const actionType = normalizeRequiredText(input.actionType);
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+
+  if (
+    auditLogPublicId === null ||
+    actionType === null ||
+    !isOrganizationTrainingAuditLogTargetResourceType(
+      input.targetResourceType,
+    ) ||
+    organizationPublicId === null
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingAuditLogReferenceInputMessage,
+    };
+  }
+
+  const referenceInput: OrganizationTrainingAuditLogReferenceInput = {
+    auditLogPublicId,
+    actionType,
+    targetResourceType: input.targetResourceType,
+    trainingDraftPublicId: normalizeOptionalText(input.trainingDraftPublicId),
+    trainingVersionPublicId: normalizeOptionalText(
+      input.trainingVersionPublicId,
+    ),
+    employeeAnswerPublicId: normalizeOptionalText(input.employeeAnswerPublicId),
+    organizationPublicId,
+    actorPublicId: normalizeOptionalText(input.actorPublicId),
+  };
+
+  if (
+    !hasRequiredOrganizationTrainingAuditTargetReference(
+      referenceInput.targetResourceType,
+      referenceInput,
+    )
+  ) {
+    return {
+      success: false,
+      message: invalidOrganizationTrainingAuditLogReferenceInputMessage,
+    };
+  }
+
+  return {
+    success: true,
+    value: referenceInput,
   };
 }

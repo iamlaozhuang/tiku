@@ -2,6 +2,7 @@ import type { EvidenceStatus } from "../models/ai-rag";
 import type { Profession } from "../models/auth";
 import type {
   OrganizationTrainingAnswerStatus,
+  OrganizationTrainingAuditLogTargetResourceType,
   OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingRetentionStatus,
   OrganizationTrainingSourceContextType,
@@ -101,6 +102,26 @@ export type OrganizationTrainingSourceContextDto = {
   totalScore: number;
   sourceStatus: string;
   redactionStatus: "metadata_only";
+};
+
+export type OrganizationTrainingAuditLogReferenceDto = {
+  auditLogReference: {
+    publicId: string;
+    redactionStatus: "redacted";
+  };
+  targetReference: {
+    targetResourceType: OrganizationTrainingAuditLogTargetResourceType;
+    trainingDraftPublicId: string | null;
+    trainingVersionPublicId: string | null;
+    employeeAnswerPublicId: string | null;
+    organizationPublicId: string;
+  };
+  actorReference: {
+    actorPublicId: string | null;
+    redactionStatus: "redacted";
+  };
+  actionType: string;
+  referenceStatus: "redacted_reference";
 };
 
 export type OrganizationTrainingSourceContextAttachmentDto = {

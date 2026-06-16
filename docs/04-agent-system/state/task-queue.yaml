@@ -26607,6 +26607,8 @@ tasks:
       - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-184-organization-training-audit-log-redacted-reference
       - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
+      - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
         command: npm.cmd run typecheck
@@ -26618,11 +26620,15 @@ tasks:
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-184-organization-training-audit-log-redacted-reference
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-72-advanced-organization-training-implementation-planning -CandidateTaskId batch-184-organization-training-audit-log-redacted-reference
+      - npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts src/server/validators/organization-training.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-184-organization-training-audit-log-redacted-reference
     evidencePath: docs/05-execution-logs/evidence/batch-184-organization-training-audit-log-redacted-reference.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-184-organization-training-audit-log-redacted-reference.md
-    status: pending
+    status: closed
+    claimedAt: "2026-06-16T07:24:00-07:00"
+    closedAt: "2026-06-16T07:30:24-07:00"
+    result: pass
     retryCount: 0

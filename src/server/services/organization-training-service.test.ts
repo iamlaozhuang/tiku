@@ -9,6 +9,7 @@ import type {
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
 import { normalizeOrganizationTrainingPublishInput } from "../validators/organization-training";
 import {
+  buildOrganizationTrainingAuditLogReferenceReadModel,
   createOrganizationTrainingService,
   type OrganizationTrainingStore,
   type OrganizationTrainingManualDraftWrite,
@@ -377,6 +378,80 @@ function createSubmittedEmployeeAnswer(
 }
 
 describe("organization training service", () => {
+  it("builds a redacted audit_log reference for organization training without raw content", () => {
+    const rawQuestionBody = ["RAW", "QUESTION", "BODY"].join("-");
+    const rawAnswerBody = ["RAW", "ANSWER", "BODY"].join("-");
+    const externalSnapshotBody = ["EXTERNAL", "SNAPSHOT", "BODY"].join("-");
+    const privateRowData = ["PRIVATE", "ROW", "DATA"].join("-");
+
+    const result = buildOrganizationTrainingAuditLogReferenceReadModel({
+      id: 901,
+      auditLogPublicId: " audit_log_public_184 ",
+      actionType: "organization_training.publish",
+      targetResourceType: "organization_training_version",
+      trainingDraftPublicId: " training_draft_public_184 ",
+      trainingVersionPublicId: " training_version_public_184 ",
+      employeeAnswerPublicId: null,
+      organizationPublicId: " organization_public_184 ",
+      actorPublicId: " admin_public_184 ",
+      rawQuestionBody,
+      rawAnswerBody,
+      externalSnapshotBody,
+      privateRowData,
+      authorizationHeader: "Bearer secret-token",
+    });
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        auditLogReference: {
+          publicId: "audit_log_public_184",
+          redactionStatus: "redacted",
+        },
+        targetReference: {
+          targetResourceType: "organization_training_version",
+          trainingDraftPublicId: "training_draft_public_184",
+          trainingVersionPublicId: "training_version_public_184",
+          employeeAnswerPublicId: null,
+          organizationPublicId: "organization_public_184",
+        },
+        actorReference: {
+          actorPublicId: "admin_public_184",
+          redactionStatus: "redacted",
+        },
+        actionType: "organization_training.publish",
+        referenceStatus: "redacted_reference",
+      },
+    });
+    expect(serializedResult).not.toMatch(/"id":/);
+    expect(serializedResult).not.toContain(rawQuestionBody);
+    expect(serializedResult).not.toContain(rawAnswerBody);
+    expect(serializedResult).not.toContain(externalSnapshotBody);
+    expect(serializedResult).not.toContain(privateRowData);
+    expect(serializedResult).not.toContain("secret-token");
+  });
+
+  it("rejects an organization training version audit_log reference without version public id", () => {
+    expect(
+      buildOrganizationTrainingAuditLogReferenceReadModel({
+        auditLogPublicId: "audit_log_public_184",
+        actionType: "organization_training.publish",
+        targetResourceType: "organization_training_version",
+        trainingDraftPublicId: "training_draft_public_184",
+        trainingVersionPublicId: null,
+        employeeAnswerPublicId: null,
+        organizationPublicId: "organization_public_184",
+        actorPublicId: "admin_public_184",
+      }),
+    ).toEqual({
+      code: 400184,
+      message: "Invalid organization training audit_log reference input.",
+      data: null,
+    });
+  });
+
   it("keeps effective authorization context source-backed without selected subject", () => {
     const subjectKeyAbsent: "subject" extends keyof EffectiveAuthorizationContextDto
       ? false
