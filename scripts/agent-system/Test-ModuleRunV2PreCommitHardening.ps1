@@ -18,6 +18,13 @@
     [string[]]$ChangedFiles = @(),
 
     [Parameter(Mandatory = $false)]
+    [string]$DocsOnlyBatchId = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("shadow", "hard_block")]
+    [string]$DocsOnlyBatchMode = "hard_block",
+
+    [Parameter(Mandatory = $false)]
     [switch]$SkipScopeScan
 )
 
@@ -485,6 +492,67 @@ function Test-BannedTerminology {
     }
 }
 
+function Invoke-DocsOnlyBatchReadiness {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$BatchId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Mode,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectStatePath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$QueuePath,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Files
+    )
+
+    $batchScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2DocsOnlyBatchReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $batchScriptPath)) {
+        Add-Finding "HARD_BLOCK_DOCS_ONLY_BATCH_READINESS_SCRIPT_MISSING $batchScriptPath"
+        return
+    }
+
+    $batchArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $batchScriptPath,
+        "-BatchId",
+        $BatchId,
+        "-Mode",
+        $Mode,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath
+    )
+
+    if ($Files.Count -gt 0) {
+        $batchArgs += "-ChangedFiles"
+        $batchArgs += $Files
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $batchOutput = @(& powershell.exe @batchArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    $batchOutput | ForEach-Object { Write-Output $_ }
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_DOCS_ONLY_BATCH_READINESS_FAILED $BatchId"
+    }
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 
 Write-Section -Title "Module Run v2 Pre-Commit Hardening"
@@ -508,8 +576,9 @@ $matrixContent = Get-Content -Path $MatrixPath -Raw
 $filesToScan = @(Get-ChangedFiles -ExplicitFiles $ChangedFiles)
 $isSeedTransactionScope = Test-SeedTransactionFileSet -Files $filesToScan
 $isMechanicRepairScope = (-not $isSeedTransactionScope) -and (Test-MechanicRepairFileSet -Files $filesToScan)
+$isDocsOnlyBatchScope = -not [string]::IsNullOrWhiteSpace($DocsOnlyBatchId)
 
-if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
+if (-not $isSeedTransactionScope -and -not $isMechanicRepairScope -and -not $isDocsOnlyBatchScope -and [string]::IsNullOrWhiteSpace($TaskId)) {
     $TaskId = Get-CurrentTaskId -Lines $projectStateLines
 }
 
@@ -564,6 +633,10 @@ if ($isSeedTransactionScope) {
         "paper_assets/**",
         "docs/01-requirements/stories/**"
     )
+} elseif ($isDocsOnlyBatchScope) {
+    $TaskId = "docs-only-batch:$DocsOnlyBatchId"
+    $allowedFiles = @()
+    $blockedFiles = @()
 } else {
     $taskBlock = @(Get-TaskBlock -Lines $queueLines -Id $TaskId)
     if ($taskBlock.Count -eq 0) {
@@ -575,7 +648,7 @@ if ($isSeedTransactionScope) {
 }
 
 Write-Output "taskId: $TaskId"
-Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } else { "task" })"
+Write-Output "preCommitScopeMode: $(if ($isSeedTransactionScope) { "seed_transaction" } elseif ($isMechanicRepairScope) { "mechanic_repair" } elseif ($isDocsOnlyBatchScope) { "docs_only_batch" } else { "task" })"
 Write-Output "filesToScan: $($filesToScan.Count)"
 
 Write-Section -Title "Module Run v2 Anchors"
@@ -591,9 +664,16 @@ if ($matrixContent -match "Cost Calibration Gate remains blocked") {
     Add-Finding "HARD_BLOCK_MISSING_ANCHOR Cost Calibration Gate remains blocked"
 }
 
+if ($isDocsOnlyBatchScope) {
+    Write-Section -Title "Docs-Only Batch Readiness"
+    Invoke-DocsOnlyBatchReadiness -BatchId $DocsOnlyBatchId -Mode $DocsOnlyBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -Files $filesToScan
+}
+
 Write-Section -Title "Scope Scan"
 if ($SkipScopeScan) {
     Write-Output "scopeScan: skipped"
+} elseif ($isDocsOnlyBatchScope) {
+    Write-Output "scopeScan: delegated_docs_only_batch"
 } elseif ($filesToScan.Count -eq 0) {
     Write-Output "scopeScan: no changed files"
 } else {

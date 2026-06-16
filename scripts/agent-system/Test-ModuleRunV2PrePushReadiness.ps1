@@ -21,7 +21,14 @@ param(
     [string]$AuditReviewPath = "",
 
     [Parameter(Mandatory = $false)]
-    [switch]$SkipRemoteAheadCheck
+    [switch]$SkipRemoteAheadCheck,
+
+    [Parameter(Mandatory = $false)]
+    [string]$DocsOnlyBatchId = "",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("shadow", "hard_block")]
+    [string]$DocsOnlyBatchMode = "hard_block"
 )
 
 $ErrorActionPreference = "Stop"
@@ -194,6 +201,57 @@ function Test-GitAncestor {
     }
 }
 
+function Invoke-DocsOnlyBatchReadiness {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$BatchId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Mode,
+
+        [Parameter(Mandatory = $true)]
+        [string]$ProjectStatePath,
+
+        [Parameter(Mandatory = $true)]
+        [string]$QueuePath
+    )
+
+    $batchScriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2DocsOnlyBatchReadiness.ps1"
+    if (-not (Test-Path -LiteralPath $batchScriptPath)) {
+        Add-Finding "HARD_BLOCK_DOCS_ONLY_BATCH_READINESS_SCRIPT_MISSING $batchScriptPath"
+        return
+    }
+
+    $batchArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $batchScriptPath,
+        "-BatchId",
+        $BatchId,
+        "-Mode",
+        $Mode,
+        "-ProjectStatePath",
+        $ProjectStatePath,
+        "-QueuePath",
+        $QueuePath
+    )
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $batchOutput = @(& powershell.exe @batchArgs 2>&1)
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    $batchOutput | ForEach-Object { Write-Output $_ }
+    if ($LASTEXITCODE -ne 0) {
+        Add-Finding "HARD_BLOCK_DOCS_ONLY_BATCH_READINESS_FAILED $BatchId"
+    }
+}
+
 $findings = New-Object System.Collections.Generic.List[string]
 
 Write-Section -Title "Module Run v2 Pre-Push Readiness"
@@ -321,6 +379,11 @@ if ($stateOriginMasterSha -ne $originMasterSha) {
 Write-Section -Title "Evidence And Audit"
 Test-RequiredPath -Path $EvidencePath -MissingCode "HARD_BLOCK_MISSING_EVIDENCE" -OkCode "OK_EVIDENCE_PATH"
 Test-RequiredPath -Path $AuditReviewPath -MissingCode "HARD_BLOCK_MISSING_AUDIT" -OkCode "OK_AUDIT_PATH"
+
+if (-not [string]::IsNullOrWhiteSpace($DocsOnlyBatchId)) {
+    Write-Section -Title "Docs-Only Batch Readiness"
+    Invoke-DocsOnlyBatchReadiness -BatchId $DocsOnlyBatchId -Mode $DocsOnlyBatchMode -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath
+}
 
 Write-Section -Title "Closeout Noise Policy"
 Write-Output "postMergeEvidenceOnlyCommitPolicy: not_required_by_default"

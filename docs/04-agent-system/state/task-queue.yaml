@@ -23428,3 +23428,132 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-15T23:18:19-07:00"
     closedAt: "2026-06-15T23:18:19-07:00"
+  - id: module-run-v2-docs-only-fast-lane-mechanism
+    title: Module Run v2 docs-only fast lane mechanism hardening
+    phase: module-run-v2-docs-only-fast-lane-mechanism
+    sourceStory: user-request-2026-06-15-module-run-v2-docs-only-fast-lane
+    dependencies:
+      - advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+    humanApprovalBoundary: >-
+      User explicitly approved implementing the reviewed Module Run v2 Docs-Only Fast Lane mechanism plan in this
+      thread. This mechanism task may add governance SOP/templates, smoke tests, and agent-system readiness scripts,
+      and may update its own state/queue/plan/evidence/audit records. It is not itself a fast lane task. Product source
+      code, schema/migration, DB access, provider/model calls, dependency/package/lockfile changes, browser/e2e/dev
+      server, deploy, payment, external-service, PR, force-push, and Cost Calibration Gate remain blocked.
+    validationProfile: module-run-v2-mechanism-hardening
+    localFullLoopGate: mechanism
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      localE2EValidation: blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: mechanism_hardening
+    moduleRunVersion: 2
+    redFirstRequired: true
+    allowedFiles:
+      - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/module-lifecycle-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/templates/module-run-v2-evidence-template.md
+      - docs/05-execution-logs/task-plans/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+      - docs/05-execution-logs/evidence/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+      - scripts/agent-system/Test-ModuleRunV2DocsOnlyBatchReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2DocsOnlyBatchReadiness.Smoke.ps1
+      - scripts/agent-system/New-TaskEvidence.ps1
+      - scripts/agent-system/New-TaskEvidence.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source implementation
+      - route/service/repository/mapper/contract/model/validator/UI runtime changes
+      - DB access or row/private data access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/drizzle edits, migration generation, or migration execution
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2DocsOnlyBatchReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-TaskEvidence.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+      - phase: post_edit
+        command: git diff --check
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-docs-only-fast-lane-mechanism
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-docs-only-fast-lane-mechanism
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-docs-only-fast-lane-mechanism -SkipRemoteAheadCheck
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2DocsOnlyBatchReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-TaskEvidence.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.Smoke.ps1
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-docs-only-fast-lane-mechanism
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-docs-only-fast-lane-mechanism
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-docs-only-fast-lane-mechanism -SkipRemoteAheadCheck
+    status: closed
+    result: pass_module_run_v2_docs_only_fast_lane_mechanism
+    retryCount: 0
+    claimedAt: "2026-06-15T23:41:42-07:00"
+    closedAt: "2026-06-15T23:41:42-07:00"

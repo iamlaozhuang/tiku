@@ -48,13 +48,23 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-commit hardening script: $scriptPath"
 }
 
-$taskId = "module-run-v2-pre-commit-scan-hardening"
+$taskId = "module-run-v2-docs-only-fast-lane-mechanism"
 
-$allowedOutput = @(& $scriptPath -TaskId $taskId -ChangedFiles ".husky/pre-commit")
+$allowedOutput = @(& $scriptPath -TaskId $taskId -ChangedFiles "scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1")
 Assert-Contains -Output $allowedOutput -Pattern "Module Run v2 Pre-Commit Hardening"
 Assert-Contains -Output $allowedOutput -Pattern "preCommitMode: hard_block"
-Assert-Contains -Output $allowedOutput -Pattern "OK_SCOPE .husky/pre-commit"
+Assert-Contains -Output $allowedOutput -Pattern "OK_SCOPE scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1"
 Assert-Contains -Output $allowedOutput -Pattern "Cost Calibration Gate remains blocked"
+
+$batchShadowOutput = @(
+    & $scriptPath `
+        -ChangedFiles "docs/05-execution-logs/evidence/missing-docs-only-batch-smoke.md" `
+        -DocsOnlyBatchId "missing-docs-only-batch-smoke" `
+        -DocsOnlyBatchMode shadow
+)
+Assert-Contains -Output $batchShadowOutput -Pattern "preCommitScopeMode: docs_only_batch"
+Assert-Contains -Output $batchShadowOutput -Pattern "docsOnlyBatchShadowDecision: would_block"
+Assert-Contains -Output $batchShadowOutput -Pattern "pre-commit hardening passed"
 
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_BLOCKED_FILE package.json" -Command {
     & $scriptPath -TaskId $taskId -ChangedFiles "package.json"

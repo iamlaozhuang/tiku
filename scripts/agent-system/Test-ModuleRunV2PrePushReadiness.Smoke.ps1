@@ -48,12 +48,47 @@ if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing pre-push readiness script: $scriptPath"
 }
 
-$taskId = "module-run-v2-hook-automation-hardening-sequence"
+$taskId = "module-run-v2-pre-push-readiness-smoke"
 
 $existingEvidencePath = "docs/05-execution-logs/evidence/2026-06-08-module-run-v2-pre-commit-scan-hardening.md"
 $existingAuditPath = "docs/05-execution-logs/audits-reviews/2026-06-08-module-run-v2-pre-commit-scan-hardening.md"
+$baselineFixtureRoot = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ("tiku-pre-push-baseline-" + [guid]::NewGuid().ToString("N"))
+$baselineProjectStatePath = Join-Path -Path $baselineFixtureRoot -ChildPath "project-state.yaml"
+$baselineQueuePath = Join-Path -Path $baselineFixtureRoot -ChildPath "task-queue.yaml"
+$currentMasterSha = ((& git rev-parse master) -join "").Trim()
+$currentOriginMasterSha = ((& git rev-parse origin/master) -join "").Trim()
+New-Item -ItemType Directory -Force -Path $baselineFixtureRoot | Out-Null
 
-$passOutput = @(& $scriptPath -TaskId $taskId -EvidencePath $existingEvidencePath -AuditReviewPath $existingAuditPath -SkipRemoteAheadCheck)
+@"
+schemaVersion: 1
+project:
+  name: tiku
+repository:
+  lastKnownMasterSha: $currentMasterSha
+  lastKnownOriginMasterSha: $currentOriginMasterSha
+currentTask:
+  id: $taskId
+  status: done
+"@ | Set-Content -LiteralPath $baselineProjectStatePath -Encoding UTF8
+
+@"
+schemaVersion: 1
+tasks:
+  - id: $taskId
+    evidencePath: $existingEvidencePath
+    auditReviewPath: $existingAuditPath
+    status: done
+"@ | Set-Content -LiteralPath $baselineQueuePath -Encoding UTF8
+
+$passOutput = @(
+    & $scriptPath `
+        -TaskId $taskId `
+        -ProjectStatePath $baselineProjectStatePath `
+        -QueuePath $baselineQueuePath `
+        -EvidencePath $existingEvidencePath `
+        -AuditReviewPath $existingAuditPath `
+        -SkipRemoteAheadCheck
+)
 Assert-Contains -Output $passOutput -Pattern "Module Run v2 Pre-Push Readiness"
 Assert-Contains -Output $passOutput -Pattern "prePushMode: hard_block"
 Assert-Contains -Output $passOutput -Pattern "OK_EVIDENCE_PATH"
@@ -62,12 +97,31 @@ Assert-Contains -Output $passOutput -Pattern "postMergeEvidenceOnlyCommitPolicy:
 Assert-Contains -Output $passOutput -Pattern "finalHandoffShaPolicy: final_handoff_or_project_state"
 Assert-Contains -Output $passOutput -Pattern "Cost Calibration Gate remains blocked"
 
+$batchShadowOutput = @(
+    & $scriptPath `
+        -TaskId $taskId `
+        -ProjectStatePath $baselineProjectStatePath `
+        -QueuePath $baselineQueuePath `
+        -EvidencePath $existingEvidencePath `
+        -AuditReviewPath $existingAuditPath `
+        -SkipRemoteAheadCheck `
+        -DocsOnlyBatchId "missing-docs-only-batch-smoke" `
+        -DocsOnlyBatchMode shadow
+)
+Assert-Contains -Output $batchShadowOutput -Pattern "Docs-Only Batch Readiness"
+Assert-Contains -Output $batchShadowOutput -Pattern "docsOnlyBatchShadowDecision: would_block"
+Assert-Contains -Output $batchShadowOutput -Pattern "pre-push readiness passed"
+
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_EVIDENCE" -Command {
-    & $scriptPath -TaskId $taskId -EvidencePath "docs/05-execution-logs/evidence/missing-pre-push-fixture.md" -SkipRemoteAheadCheck
+    & $scriptPath -TaskId $taskId -ProjectStatePath $baselineProjectStatePath -QueuePath $baselineQueuePath -EvidencePath "docs/05-execution-logs/evidence/missing-pre-push-fixture.md" -SkipRemoteAheadCheck
 }
 
 Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_MISSING_AUDIT" -Command {
-    & $scriptPath -TaskId $taskId -AuditReviewPath "docs/05-execution-logs/audits-reviews/missing-pre-push-fixture.md" -SkipRemoteAheadCheck
+    & $scriptPath -TaskId $taskId -ProjectStatePath $baselineProjectStatePath -QueuePath $baselineQueuePath -AuditReviewPath "docs/05-execution-logs/audits-reviews/missing-pre-push-fixture.md" -SkipRemoteAheadCheck
+}
+
+if (Test-Path -LiteralPath $baselineFixtureRoot) {
+    Remove-Item -LiteralPath $baselineFixtureRoot -Recurse -Force
 }
 
 $fixtureTaskId = "module-run-v2-pre-push-post-push-ancestor-smoke"
