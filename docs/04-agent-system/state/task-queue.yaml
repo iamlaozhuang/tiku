@@ -23860,3 +23860,95 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
     status: pending
     retryCount: 0
+  - id: module-run-v2-standing-autonomy-policy-governance
+    title: Module Run v2 standing autonomy policy governance
+    phase: module-run-v2-standing-autonomy-policy-governance
+    sourceStory: user-request-2026-06-16-standing-autonomy-policy
+    dependencies:
+      - module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+    humanApprovalBoundary: >-
+      User approved the recommended elevated authorization implementation on 2026-06-16. Scope is governance-only:
+      materialize standing autonomy into SOP, project state, task queue, task plan, evidence, and audit. The task may
+      define future standing authorization rules but must not execute runtime code, DB, provider, e2e, dependency,
+      schema, deploy, payment, external-service, PR, force-push, or secret/env actions.
+    autoDriveStandingAutonomyApproval: approved_by_user_prompt_2026_06_16
+    validationProfile: L0-docs-state-governance
+    localFullLoopGate: L0
+    taskKind: governance
+    moduleRunVersion: 2
+    capabilities:
+      standingAutonomyGovernance: approved_by_user_prompt_2026_06_16
+      schemaMigration: docs_only_policy_update_no_execution
+      localDockerDatabase: docs_only_policy_update_no_execution
+      destructiveLocalDockerDatabase: docs_only_policy_update_no_execution
+      localE2EValidation: docs_only_policy_update_no_execution
+      providerCall: docs_only_policy_update_no_execution
+      dependencyIntroduction: docs_only_policy_update_no_execution
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/sop/standing-autonomy-policy-governance.md
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+      - docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - real secret/env value read, output, or edit
+      - DB access or row/private data access during this governance task
+      - provider/model calls or provider configuration during this governance task
+      - quota/cost measurement or Cost Calibration Gate
+      - dev server, browser, Playwright, or e2e execution during this governance task
+      - staging/prod/cloud/deploy/payment/external-service
+      - schema/drizzle edit, migration generation, or migration execution during this governance task
+      - dependency, package, or lockfile change during this governance task
+      - product source or test change
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd exec -- prettier --write docs/04-agent-system/sop/standing-autonomy-policy-governance.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+      - npm.cmd exec -- prettier --check docs/04-agent-system/sop/standing-autonomy-policy-governance.md docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-standing-autonomy-policy-governance
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-standing-autonomy-policy-governance
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-standing-autonomy-policy-governance -SkipRemoteAheadCheck
+    status: closed
+    result: pass_docs_state_governance_policy
+    retryCount: 0
+    claimedAt: "2026-06-16T00:48:05-07:00"
+    closedAt: "2026-06-16T00:48:05-07:00"

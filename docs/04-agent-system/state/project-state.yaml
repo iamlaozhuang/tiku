@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
-updatedAt: "2026-06-16T00:13:09-07:00"
+currentPhase: module-run-v2-standing-autonomy-policy-governance
+updatedAt: "2026-06-16T00:48:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -21,6 +21,7 @@ automation:
   moduleLifecycleSopPath: docs/04-agent-system/sop/module-lifecycle-governance.md
   taskLifecycleSopPath: docs/04-agent-system/sop/task-lifecycle-governance.md
   localFirstValidationSopPath: docs/04-agent-system/sop/local-first-validation-governance.md
+  standingAutonomySopPath: docs/04-agent-system/sop/standing-autonomy-policy-governance.md
   codexAppReadinessSopPath: docs/04-agent-system/sop/codex-app-readiness-audit-governance.md
   skillThreadHandoffSopPath: docs/04-agent-system/sop/skill-dispatch-and-thread-handoff-governance.md
   parallelWorkSopPath: docs/04-agent-system/sop/parallel-work-governance.md
@@ -234,6 +235,59 @@ automation:
         - cost_calibration_gate
       statement: >-
         User enables a governed task-scoped destructive local Docker DB approval path. Destructive DB work is executable only for an explicitly scoped task against local Docker dev resources after capability gates pass and redacted evidence records the operation kind, target alias, backup/disposable rationale, and rollback/recovery boundary. It is not a global standing destructive DB approval.
+    standingAutonomyApproval:
+      status: approved
+      approvedAt: "2026-06-16T00:48:05-07:00"
+      sopPath: docs/04-agent-system/sop/standing-autonomy-policy-governance.md
+      scope: Module Run v2 queued local work with task-declared capabilities and redacted evidence
+      appliesTo:
+        - queued tasks with concrete allowedFiles and blockedFiles
+        - task-scoped capability declarations
+        - structured closeoutPolicy for commit, fast-forward merge, push, and cleanup
+        - local dev validation only unless a fresh approval package says otherwise
+      allowedActions:
+        - task_claim
+        - short_branch_or_approved_worktree_preparation
+        - task_plan_evidence_audit_creation
+        - scoped_docs_or_runtime_implementation
+        - declared_local_validation
+        - local_dev_database_read_write_when_task_declares_capability
+        - local_schema_migration_when_task_declares_capability
+        - local_dev_server_browser_e2e_when_task_declares_capability
+        - dependency_package_lockfile_change_when_task_declares_dependency_introduction
+        - local_provider_model_smoke_when_task_declares_provider_call
+        - local_commit
+        - fast_forward_merge_to_master
+        - push_origin_master
+        - merged_short_branch_cleanup
+      requiredGates:
+        - repository_readiness
+        - task_queue_scope
+        - allowedFiles_blockedFiles
+        - task_plan_before_edit
+        - validation_commands
+        - redacted_evidence
+        - audit_review_for_governance_scope_or_high_risk_changes
+        - local_capability_gate_when_applicable
+        - module_closeout_readiness
+        - pre_push_readiness
+        - remote_divergence
+      stillRequiresFreshApproval:
+        - env_secret_value_access_output_or_edit
+        - staging_prod_cloud_deploy_payment_external_service
+        - pr_create_or_update
+        - force_push_or_force_with_lease
+        - shared_or_production_like_destructive_data_operation
+        - cost_calibration_gate
+        - provider_cost_quota_pricing_measurement
+        - broad_authorization_permission_model_change_not_named_by_task
+        - delete_or_move_non_generated_project_file_outside_cleanup_task
+      statement: >-
+        User approves a standing autonomy model to reduce repeated approval stops after product or governance decisions.
+        The approval is executable only through queued Module Run v2 tasks that materialize the capability, scope,
+        validation, redaction, and closeout policy in repository state. It does not approve secret/env value access,
+        staging/prod/cloud/deploy/payment/external-service, PR work, force push, shared-data destructive operations, or
+        Cost Calibration Gate execution.
     codexAutomationId: tiku-module-run-v2-autopilot
     codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
@@ -266,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 67de8f6e2de597195a34f44a832da2827c05d921
-  lastKnownOriginMasterSha: 67de8f6e2de597195a34f44a832da2827c05d921
+  lastKnownMasterSha: 3ab652a947a8fbc28471ba82099ca587be4b7075
+  lastKnownOriginMasterSha: 3ab652a947a8fbc28471ba82099ca587be4b7075
 currentTask:
-  id: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+  id: module-run-v2-standing-autonomy-policy-governance
   status: closed
-  sourceStory: user-request-2026-06-16-docs-only-fast-lane-trial-batch
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
-  branch: codex/module-run-v2-docs-only-fast-lane-trial-batch
+  sourceStory: user-request-2026-06-16-standing-autonomy-policy
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+  branch: codex/module-run-v2-standing-autonomy-policy
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -434,6 +488,7 @@ qualityGates:
     docsOnlyFastLaneTrialBatchPreCommit: pass_hard_block_batch_pre_commit
     docsOnlyFastLaneTrialBatchModuleCloseout: pass_hard_block_batch_module_closeout
     docsOnlyFastLaneTrialBatchPrePush: pass_hard_block_batch_pre_push
+    standingAutonomyGovernance: pass_docs_state_governance_policy
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -450,6 +505,6 @@ skills:
 handoff:
   nextRecommendedAction: >-
     Execute the seeded readonly recheck for the organization-training publish-version route org-admin actor contract
-    before any TDD implementation. Runtime trusted-lineage resolver implementation remains blocked until that recheck
-    proves a narrow organization-admin actor and visible organization scope source.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+    under the standing autonomy policy if the task scope qualifies. Runtime trusted-lineage resolver implementation
+    remains blocked until that recheck proves a narrow organization-admin actor and visible organization scope source.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
