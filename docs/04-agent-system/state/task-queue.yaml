@@ -21565,3 +21565,262 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-15T19:33:10-07:00"
     closedAt: "2026-06-15T19:39:19-07:00"
+  - id: advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+    title: Seed organization training publish-version repository and mapper TDD task
+    phase: advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-persistence-schema-migration
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+    humanApproval: >-
+      Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to docs/state/log queue seeding,
+      validation, local commit, fast-forward merge to master, push origin/master, and short-branch cleanup. This approval
+      does not authorize repository, mapper, service, route, UI, schema, migration, DB access, provider/model work,
+      dependency changes, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push,
+      formal content write, or formal target write.
+    seededByTask: advanced-organization-training-publish-version-persistence-schema-migration
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version repository and mapper TDD task seed
+    behaviorBoundary: organization-training::docs-state-queue-seeding-only
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+    useCases:
+      - queue records the exact next repository/mapper TDD task after isolated publish-version schema exists
+      - future repository/mapper work remains blocked until fresh approval and RED-first evidence
+      - route/service/UI work remains blocked until repository/mapper persistence is verified
+    acceptanceScenarios:
+      - docs/state/log files record the seeding decision and high-risk blocked gates
+      - task queue contains the pending repository/mapper task with TDD and no-DB-execution boundaries
+      - closeout evidence names the next module run candidate and validation matrix
+    nonGoals:
+      - repository implementation, mapper implementation, service runtime wiring, route wiring, UI work, schema changes,
+        migration generation, migration execution, DB access, provider, dependency, e2e, deploy, payment, formal content
+        write, or formal target write
+    validationProfile: L1-docs-state-seeding
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - future repository/mapper task remains pending and requires fresh approval
+      - future repository/mapper task must start with failing tests before implementation
+      - DB access and migration execution remain blocked
+      - route/service/UI implementation remains separate
+      - Cost Calibration Gate remains blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - execution outside docs/state/log queue seeding
+      - product source implementation
+      - repository/mapper implementation
+      - route/service/API runtime/contract/model/validator/UI changes
+      - schema/migration changes
+      - migration generation or execution
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+    status: closed
+    result: pass_docs_only_seeded_repository_mapper_tdd_task
+    retryCount: 0
+    claimedAt: "2026-06-15T19:50:37-07:00"
+    closedAt: "2026-06-15T19:50:37-07:00"
+  - id: advanced-organization-training-publish-version-persistence-repository-mapper
+    title: Add organization training publish-version repository and mapper
+    phase: advanced-organization-training-publish-version-persistence-repository-mapper
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+    taskPlanPolicy: required_before_edit
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation of repository and mapper for
+      organization training publish-version persistence using the existing isolated `organization_training_version` schema.
+      It must not modify route, service runtime wiring, API adapter, UI, schema, drizzle migration, DB execution, provider,
+      package, lockfile, scripts, e2e, formal content write, or formal target write behavior.
+    seededByTask: advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+    seededImplementationTask: true
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version repository and mapper TDD
+    behaviorBoundary: organization-training::repository-mapper-only-no-db-execution
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+    useCases:
+      - repository can persist organization training publish-version metadata through the existing schema boundary
+      - mapper can return camelCase public DTO fields without internal authorization lineage exposure
+      - formal learning target writes remain absent from repository and mapper behavior
+    acceptanceScenarios:
+      - RED-first unit tests fail before repository/mapper implementation
+      - repository/mapper tests cover version creation, version number assignment, publish scope snapshot preservation, internal lineage storage, public DTO non-exposure, lifecycle/takedown metadata, and formal target non-write
+      - mapper output omits numeric ids, internal authorization lineage, row/private data, provider payload, raw prompt, raw answer, employee answer text, and public identifier value lists
+      - implementation consumes existing `organization_training_version` schema without schema/drizzle edits
+      - route/service/UI work remains outside this task
+    nonGoals:
+      - service runtime wiring, route adapter, UI work, schema changes, drizzle migration files, migration generation,
+        migration execution, DB access, provider execution, dependency changes, e2e, deploy, payment, formal content write,
+        and formal target write
+    validationProfile: L2-local-implementation-tdd-no-db-execution
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L2
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+    blockedRemainder:
+      - fresh approval required before repository/mapper implementation
+      - DB access and migration execution remain blocked
+      - service runtime wiring and route/UI implementation remain separate
+      - provider/model and Cost Calibration Gate remain blocked
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+      - src/db/schema/organization-training.ts
+      - src/db/schema/index.ts
+      - drizzle/20260615193737_add_organization_training_publish_version.sql
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/app/**
+      - src/features/**
+      - src/server/services/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - src/server/validators/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution without fresh user approval
+      - implementation before TDD RED evidence
+      - direct database access without separate approval
+      - migration generation or execution
+      - schema/drizzle edits
+      - route/service/API runtime/contract/model/validator/UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper
+    status: pending
