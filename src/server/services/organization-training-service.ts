@@ -1,11 +1,21 @@
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
-import type { OrganizationTrainingDraftDto } from "../contracts/organization-training-contract";
+import type {
+  OrganizationTrainingDraftDto,
+  OrganizationTrainingPublishedVersionDto,
+} from "../contracts/organization-training-contract";
 import type { Profession } from "../models/auth";
-import type { OrganizationTrainingQuestionTypeSummary } from "../models/organization-training";
+import {
+  organizationTrainingQuestionTypeValues,
+  type OrganizationTrainingPublishInput,
+  type OrganizationTrainingQuestionTypeSummary,
+} from "../models/organization-training";
 import { subjectValues, type Subject } from "../models/paper";
 
 export const organizationTrainingManualDraftCreationBlockedMessage =
   "Organization training manual draft creation is blocked.";
+
+export const organizationTrainingPublishBlockedMessage =
+  "Organization training publish is blocked.";
 
 export type OrganizationTrainingManualDraftCreationBlockedReason =
   | "invalid_manual_draft_input"
@@ -14,6 +24,13 @@ export type OrganizationTrainingManualDraftCreationBlockedReason =
   | "organization_training_capability_required"
   | "organization_scope_denied"
   | "authorization_scope_mismatch";
+
+export type OrganizationTrainingPublishBlockedReason =
+  | "invalid_publish_input"
+  | "advanced_edition_required"
+  | "org_auth_required"
+  | "organization_training_capability_required"
+  | "organization_scope_denied";
 
 export type OrganizationTrainingAdminContext = {
   adminPublicId: string;
@@ -52,6 +69,27 @@ export type OrganizationTrainingDraftStore = {
   ): Promise<OrganizationTrainingDraftDto>;
 };
 
+export type OrganizationTrainingPublishedVersionWrite = Omit<
+  OrganizationTrainingPublishedVersionDto,
+  "publicId" | "versionNumber"
+> & {
+  contentType: "organization_training_version";
+  ownerType: "organization";
+  ownerPublicId: string;
+  quotaOwnerType: "organization";
+  quotaOwnerPublicId: string;
+  questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+};
+
+export type OrganizationTrainingVersionStore = {
+  publishVersion(
+    versionWrite: OrganizationTrainingPublishedVersionWrite,
+  ): Promise<OrganizationTrainingPublishedVersionDto>;
+};
+
+export type OrganizationTrainingStore = OrganizationTrainingDraftStore &
+  OrganizationTrainingVersionStore;
+
 export type OrganizationTrainingClock = {
   now(): Date;
 };
@@ -67,10 +105,28 @@ export type OrganizationTrainingCreateManualDraftResult =
       message: typeof organizationTrainingManualDraftCreationBlockedMessage;
     };
 
+export type OrganizationTrainingPublishVersionCommand = {
+  publishInput: OrganizationTrainingPublishInput;
+};
+
+export type OrganizationTrainingPublishVersionResult =
+  | {
+      success: true;
+      version: OrganizationTrainingPublishedVersionDto;
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingPublishBlockedReason;
+      message: typeof organizationTrainingPublishBlockedMessage;
+    };
+
 export type OrganizationTrainingService = {
   createManualDraft(
     command: OrganizationTrainingCreateManualDraftCommand,
   ): Promise<OrganizationTrainingCreateManualDraftResult>;
+  publishVersion(
+    command: OrganizationTrainingPublishVersionCommand,
+  ): Promise<OrganizationTrainingPublishVersionResult>;
 };
 
 const systemClock: OrganizationTrainingClock = {
@@ -86,6 +142,16 @@ function createBlockedResult(
     success: false,
     reason,
     message: organizationTrainingManualDraftCreationBlockedMessage,
+  };
+}
+
+function createPublishBlockedResult(
+  reason: OrganizationTrainingPublishBlockedReason,
+): OrganizationTrainingPublishVersionResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingPublishBlockedMessage,
   };
 }
 
@@ -116,14 +182,42 @@ function createEmptyQuestionTypeSummary(): OrganizationTrainingQuestionTypeSumma
   };
 }
 
-function isValidLevel(value: number): boolean {
+function copyQuestionTypeSummary(
+  questionTypeSummary: OrganizationTrainingQuestionTypeSummary,
+): OrganizationTrainingQuestionTypeSummary {
+  return {
+    singleChoice: questionTypeSummary.singleChoice,
+    multiChoice: questionTypeSummary.multiChoice,
+    trueFalse: questionTypeSummary.trueFalse,
+    shortAnswer: questionTypeSummary.shortAnswer,
+  };
+}
+
+function isPositiveInteger(value: number): boolean {
   return Number.isInteger(value) && value > 0;
+}
+
+function isValidLevel(value: number): boolean {
+  return isPositiveInteger(value);
+}
+
+function isNonNegativeInteger(value: number): boolean {
+  return Number.isInteger(value) && value >= 0;
 }
 
 function isSubject(value: unknown): value is Subject {
   return (
     typeof value === "string" &&
     subjectValues.includes(value as (typeof subjectValues)[number])
+  );
+}
+
+function isOrganizationTrainingQuestionType(value: unknown): boolean {
+  return (
+    typeof value === "string" &&
+    organizationTrainingQuestionTypeValues.includes(
+      value as (typeof organizationTrainingQuestionTypeValues)[number],
+    )
   );
 }
 
@@ -136,6 +230,24 @@ function isAdvancedOrgAuthContext(
     authorizationContext.organizationPublicId !== null &&
     authorizationContext.quotaOwnerType === "organization"
   );
+}
+
+function getPublishCapabilityBlockedReason(
+  capabilityContext: OrganizationTrainingPublishInput["capabilityContext"],
+): OrganizationTrainingPublishBlockedReason | null {
+  if (capabilityContext.effectiveEdition !== "advanced") {
+    return "advanced_edition_required";
+  }
+
+  if (capabilityContext.authorizationSource !== "org_auth") {
+    return "org_auth_required";
+  }
+
+  if (capabilityContext.canCreateOrganizationTraining !== true) {
+    return "organization_training_capability_required";
+  }
+
+  return null;
 }
 
 function isOrganizationVisibleToAdmin(
@@ -160,6 +272,114 @@ function isOrganizationOwnedByAuthorization(
   );
 }
 
+function normalizePublicIdList(values: readonly string[]): string[] {
+  const normalizedValues = values
+    .map((value) => normalizeRequiredText(value))
+    .filter((value): value is string => value !== null);
+
+  return Array.from(new Set(normalizedValues));
+}
+
+function isPublishQuestionsValid(
+  publishInput: OrganizationTrainingPublishInput,
+): boolean {
+  if (
+    !Array.isArray(publishInput.questions) ||
+    publishInput.questions.length === 0 ||
+    publishInput.questionCount !== publishInput.questions.length
+  ) {
+    return false;
+  }
+
+  const totalScore = publishInput.questions.reduce(
+    (scoreTotal, question) => scoreTotal + question.score,
+    0,
+  );
+
+  if (publishInput.totalScore !== totalScore) {
+    return false;
+  }
+
+  return publishInput.questions.every(
+    (question) =>
+      normalizeRequiredText(question.publicId) !== null &&
+      isOrganizationTrainingQuestionType(question.questionType) &&
+      isPositiveInteger(question.score) &&
+      normalizeRequiredText(question.standardAnswer) !== null &&
+      normalizeRequiredText(question.analysisSummary) !== null &&
+      isNonNegativeInteger(question.citationCount),
+  );
+}
+
+function isQuestionTypeSummaryValid(
+  questionTypeSummary: OrganizationTrainingQuestionTypeSummary,
+  questionCount: number,
+): boolean {
+  const summaryValues = [
+    questionTypeSummary.singleChoice,
+    questionTypeSummary.multiChoice,
+    questionTypeSummary.trueFalse,
+    questionTypeSummary.shortAnswer,
+  ];
+
+  return (
+    summaryValues.every(isNonNegativeInteger) &&
+    summaryValues.reduce((summaryTotal, value) => summaryTotal + value, 0) ===
+      questionCount
+  );
+}
+
+type NormalizedPublishMetadata = {
+  draftPublicId: string;
+  organizationPublicId: string;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  title: string;
+  description: string | null;
+  publishScopeOrganizationPublicIds: string[];
+};
+
+function normalizePublishMetadata(
+  publishInput: OrganizationTrainingPublishInput,
+): NormalizedPublishMetadata | null {
+  const draftPublicId = normalizeRequiredText(publishInput.draftPublicId);
+  const organizationPublicId = normalizeRequiredText(
+    publishInput.organizationPublicId,
+  );
+  const title = normalizeRequiredText(publishInput.title);
+  const publishScopeOrganizationPublicIds = normalizePublicIdList(
+    publishInput.publishScopeOrganizationPublicIds,
+  );
+
+  if (
+    draftPublicId === null ||
+    organizationPublicId === null ||
+    title === null ||
+    !isValidLevel(publishInput.level) ||
+    !isSubject(publishInput.subject) ||
+    publishScopeOrganizationPublicIds.length === 0 ||
+    !isPublishQuestionsValid(publishInput) ||
+    !isQuestionTypeSummaryValid(
+      publishInput.questionTypeSummary,
+      publishInput.questionCount,
+    )
+  ) {
+    return null;
+  }
+
+  return {
+    draftPublicId,
+    organizationPublicId,
+    profession: publishInput.profession,
+    level: publishInput.level,
+    subject: publishInput.subject,
+    title,
+    description: normalizeOptionalText(publishInput.description),
+    publishScopeOrganizationPublicIds,
+  };
+}
+
 function isAuthorizationContentScopeMatched(
   draftInput: OrganizationTrainingManualDraftInput,
   authorizationContext: EffectiveAuthorizationContextDto,
@@ -171,7 +391,7 @@ function isAuthorizationContentScopeMatched(
 }
 
 export function createOrganizationTrainingService(
-  draftStore: OrganizationTrainingDraftStore,
+  trainingStore: OrganizationTrainingStore,
   clock: OrganizationTrainingClock = systemClock,
 ): OrganizationTrainingService {
   return {
@@ -256,7 +476,68 @@ export function createOrganizationTrainingService(
 
       return {
         success: true,
-        draft: await draftStore.createManualDraft(draftWrite),
+        draft: await trainingStore.createManualDraft(draftWrite),
+      };
+    },
+
+    async publishVersion(command) {
+      const publishInput = command.publishInput;
+      const normalizedMetadata = normalizePublishMetadata(publishInput);
+
+      if (normalizedMetadata === null) {
+        return createPublishBlockedResult("invalid_publish_input");
+      }
+
+      const capabilityBlockedReason = getPublishCapabilityBlockedReason(
+        publishInput.capabilityContext,
+      );
+
+      if (capabilityBlockedReason !== null) {
+        return createPublishBlockedResult(capabilityBlockedReason);
+      }
+
+      if (
+        !normalizedMetadata.publishScopeOrganizationPublicIds.includes(
+          normalizedMetadata.organizationPublicId,
+        )
+      ) {
+        return createPublishBlockedResult("organization_scope_denied");
+      }
+
+      const publishedAt = clock.now().toISOString();
+      const versionWrite: OrganizationTrainingPublishedVersionWrite = {
+        contentType: "organization_training_version",
+        ownerType: "organization",
+        ownerPublicId: normalizedMetadata.organizationPublicId,
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: normalizedMetadata.organizationPublicId,
+        draftPublicId: normalizedMetadata.draftPublicId,
+        organizationPublicId: normalizedMetadata.organizationPublicId,
+        publishScopeSnapshot: {
+          organizationPublicIds: [
+            ...normalizedMetadata.publishScopeOrganizationPublicIds,
+          ],
+          capturedAt: publishedAt,
+        },
+        profession: normalizedMetadata.profession,
+        level: normalizedMetadata.level,
+        subject: normalizedMetadata.subject,
+        title: normalizedMetadata.title,
+        description: normalizedMetadata.description,
+        questionCount: publishInput.questionCount,
+        totalScore: publishInput.totalScore,
+        questionTypeSummary: copyQuestionTypeSummary(
+          publishInput.questionTypeSummary,
+        ),
+        status: "published",
+        publishedAt,
+        takenDownAt: null,
+        takedownReason: null,
+      };
+
+      return {
+        success: true,
+        version: await trainingStore.publishVersion(versionWrite),
       };
     },
   };

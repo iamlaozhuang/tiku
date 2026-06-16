@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
+import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
+import type { OrganizationTrainingPublishInput } from "../models/organization-training";
+import { normalizeOrganizationTrainingPublishInput } from "../validators/organization-training";
 import {
   createOrganizationTrainingService,
-  type OrganizationTrainingDraftStore,
+  type OrganizationTrainingStore,
   type OrganizationTrainingManualDraftWrite,
+  type OrganizationTrainingPublishedVersionWrite,
 } from "./organization-training-service";
 
 const fixedNow = new Date("2026-06-15T19:20:13.000Z");
@@ -39,8 +43,9 @@ function createAdvancedOrgAuthContext(
 
 function createDraftStore() {
   let createdDrafts: OrganizationTrainingManualDraftWrite[] = [];
+  let publishedVersions: OrganizationTrainingPublishedVersionWrite[] = [];
 
-  const draftStore: OrganizationTrainingDraftStore = {
+  const draftStore: OrganizationTrainingStore = {
     async createManualDraft(draftWrite) {
       createdDrafts = [...createdDrafts, draftWrite];
 
@@ -65,16 +70,45 @@ function createDraftStore() {
         expiresAt: draftWrite.expiresAt,
       };
     },
+    async publishVersion(versionWrite) {
+      publishedVersions = [...publishedVersions, versionWrite];
+
+      return {
+        publicId: "training_version_public_123",
+        draftPublicId: versionWrite.draftPublicId,
+        versionNumber: 1,
+        organizationPublicId: versionWrite.organizationPublicId,
+        publishScopeSnapshot: {
+          organizationPublicIds: [
+            ...versionWrite.publishScopeSnapshot.organizationPublicIds,
+          ],
+          capturedAt: versionWrite.publishScopeSnapshot.capturedAt,
+        },
+        profession: versionWrite.profession,
+        level: versionWrite.level,
+        subject: versionWrite.subject,
+        title: versionWrite.title,
+        description: versionWrite.description,
+        questionCount: versionWrite.questionCount,
+        totalScore: versionWrite.totalScore,
+        status: versionWrite.status,
+        publishedAt: versionWrite.publishedAt,
+        takenDownAt: versionWrite.takenDownAt,
+        takedownReason: versionWrite.takedownReason,
+      };
+    },
   };
 
   return {
     draftStore,
     getCreatedDrafts: () => createdDrafts,
+    getPublishedVersions: () => publishedVersions,
   };
 }
 
 function createServiceFixture() {
-  const { draftStore, getCreatedDrafts } = createDraftStore();
+  const { draftStore, getCreatedDrafts, getPublishedVersions } =
+    createDraftStore();
   const service = createOrganizationTrainingService(draftStore, {
     now: () => fixedNow,
   });
@@ -82,6 +116,60 @@ function createServiceFixture() {
   return {
     service,
     getCreatedDrafts,
+    getPublishedVersions,
+  };
+}
+
+function createPublishInput(
+  overrides: Partial<OrganizationTrainingPublishInput> = {},
+): OrganizationTrainingPublishInput {
+  const normalizedInput = normalizeOrganizationTrainingPublishInput({
+    draftPublicId: " training_draft_public_123 ",
+    organizationPublicId: " organization_public_123 ",
+    authorizationPublicId: " org_auth_public_123 ",
+    profession: "monopoly",
+    level: 3,
+    subject: "theory",
+    title: " Safety training ",
+    description: "",
+    questions: [
+      {
+        publicId: " training_question_public_123 ",
+        questionType: "single_choice",
+        score: 2,
+        standardAnswer: " A ",
+        analysisSummary: " choice rationale ",
+        evidenceStatus: "sufficient",
+        citationCount: 1,
+      },
+      {
+        publicId: " training_question_public_456 ",
+        questionType: "short_answer",
+        score: 3,
+        standardAnswer: " expected answer ",
+        analysisSummary: " scoring rationale ",
+        evidenceStatus: "weak",
+        citationCount: 0,
+      },
+    ],
+    publishScopeOrganizationPublicIds: [
+      " organization_public_123 ",
+      "organization_branch_public_456",
+    ],
+    capabilityContext: {
+      effectiveEdition: "advanced",
+      authorizationSource: "org_auth",
+      canCreateOrganizationTraining: true,
+    },
+  });
+
+  if (!normalizedInput.success) {
+    throw new Error("Expected normalized organization training publish input.");
+  }
+
+  return {
+    ...normalizedInput.value,
+    ...overrides,
   };
 }
 
@@ -386,6 +474,176 @@ describe("organization training service", () => {
     expect(getCreatedDrafts()[0]?.contentType).toBe(
       "organization_training_draft",
     );
+    expect(serializedResult).not.toContain("formalQuestionPublicId");
+    expect(serializedResult).not.toContain("formalPaperPublicId");
+    expect(serializedResult).not.toContain("practicePublicId");
+    expect(serializedResult).not.toContain("mockExamPublicId");
+    expect(serializedResult).not.toContain("examReportPublicId");
+    expect(serializedResult).not.toContain("mistakeBookPublicId");
+    expect(serializedResult).not.toContain("answerRecordPublicId");
+    expect(serializedResult).not.toContain("providerPayload");
+    expect(serializedResult).not.toContain("rawPrompt");
+    expect(serializedResult).not.toContain("rawAnswer");
+  });
+
+  it("publishes validated draft metadata as an immutable organization training version snapshot", async () => {
+    const { service, getPublishedVersions } = createServiceFixture();
+    const publishInput = createPublishInput();
+
+    const result = await service.publishVersion({
+      publishInput,
+    });
+
+    publishInput.publishScopeOrganizationPublicIds.push(
+      "organization_other_public_999",
+    );
+
+    const expectedVersion: OrganizationTrainingPublishedVersionDto = {
+      publicId: "training_version_public_123",
+      draftPublicId: "training_draft_public_123",
+      versionNumber: 1,
+      organizationPublicId: "organization_public_123",
+      publishScopeSnapshot: {
+        organizationPublicIds: [
+          "organization_public_123",
+          "organization_branch_public_456",
+        ],
+        capturedAt: fixedNow.toISOString(),
+      },
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: "Safety training",
+      description: null,
+      questionCount: 2,
+      totalScore: 5,
+      status: "published",
+      publishedAt: fixedNow.toISOString(),
+      takenDownAt: null,
+      takedownReason: null,
+    };
+
+    expect(result).toEqual({
+      success: true,
+      version: expectedVersion,
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      throw new Error("Expected organization training publish to succeed.");
+    }
+    expect(getPublishedVersions()).toEqual([
+      {
+        contentType: "organization_training_version",
+        ownerType: "organization",
+        ownerPublicId: "organization_public_123",
+        quotaOwnerType: "organization",
+        quotaOwnerPublicId: "organization_public_123",
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        publishScopeSnapshot: {
+          organizationPublicIds: [
+            "organization_public_123",
+            "organization_branch_public_456",
+          ],
+          capturedAt: fixedNow.toISOString(),
+        },
+        profession: "monopoly",
+        level: 3,
+        subject: "theory",
+        title: "Safety training",
+        description: null,
+        questionCount: 2,
+        totalScore: 5,
+        questionTypeSummary: {
+          singleChoice: 1,
+          multiChoice: 0,
+          trueFalse: 0,
+          shortAnswer: 1,
+        },
+        status: "published",
+        publishedAt: fixedNow.toISOString(),
+        takenDownAt: null,
+        takedownReason: null,
+      },
+    ]);
+    expect(
+      result.version.publishScopeSnapshot.organizationPublicIds,
+    ).not.toContain("organization_other_public_999");
+  });
+
+  it("blocks publish version when capability or organization scope is invalid", async () => {
+    const blockedCases = [
+      {
+        name: "standard edition",
+        publishInput: createPublishInput({
+          capabilityContext: {
+            effectiveEdition: "standard",
+            authorizationSource: "org_auth",
+            canCreateOrganizationTraining: true,
+          } as never,
+        }),
+        expectedReason: "advanced_edition_required",
+      },
+      {
+        name: "personal authorization",
+        publishInput: createPublishInput({
+          capabilityContext: {
+            effectiveEdition: "advanced",
+            authorizationSource: "personal_auth",
+            canCreateOrganizationTraining: true,
+          } as never,
+        }),
+        expectedReason: "org_auth_required",
+      },
+      {
+        name: "missing training capability",
+        publishInput: createPublishInput({
+          capabilityContext: {
+            effectiveEdition: "advanced",
+            authorizationSource: "org_auth",
+            canCreateOrganizationTraining: false,
+          } as never,
+        }),
+        expectedReason: "organization_training_capability_required",
+      },
+      {
+        name: "scope without owner organization",
+        publishInput: createPublishInput({
+          publishScopeOrganizationPublicIds: ["organization_branch_public_456"],
+        }),
+        expectedReason: "organization_scope_denied",
+      },
+    ] as const;
+
+    for (const blockedCase of blockedCases) {
+      const { service, getPublishedVersions } = createServiceFixture();
+
+      const result = await service.publishVersion({
+        publishInput: blockedCase.publishInput,
+      });
+
+      expect(result).toEqual({
+        success: false,
+        reason: blockedCase.expectedReason,
+        message: "Organization training publish is blocked.",
+      });
+      expect(getPublishedVersions()).toEqual([]);
+    }
+  });
+
+  it("keeps publish version output isolated from formal content targets and provider raw fields", async () => {
+    const { service, getPublishedVersions } = createServiceFixture();
+
+    const result = await service.publishVersion({
+      publishInput: createPublishInput(),
+    });
+
+    const serializedResult = JSON.stringify({
+      result,
+      publishedVersions: getPublishedVersions(),
+    });
+
+    expect(serializedResult).toContain("organization_training_version");
     expect(serializedResult).not.toContain("formalQuestionPublicId");
     expect(serializedResult).not.toContain("formalPaperPublicId");
     expect(serializedResult).not.toContain("practicePublicId");
