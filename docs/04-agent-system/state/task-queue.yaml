@@ -23144,6 +23144,7 @@ tasks:
       organization training publish route may obtain trusted admin/auth persistence lineage. It must not implement
       runtime code, route/service/repository/mapper changes, schema, UI, dependencies, provider/model, DB execution,
       formal content write, or formal target write paths.
+    autoDriveLocalDocsOnlyApproval: approved_by_user_prompt_2026_06_15
     seededByTask: advanced-organization-training-publish-version-route-flow-readonly-recheck
     seededImplementationTask: false
     seededExecutionModule: organization-training
@@ -23186,12 +23187,14 @@ tasks:
       - e2e/browser/dev-server remain blocked
       - formal target write remains blocked
     closeoutPolicy:
-      localCommit: pending_fresh_user_approval
+      localCommit: approved_by_user_prompt_2026_06_15
       fastForwardMerge:
-        approved: false
+        approved: true
+        approvedBy: user_prompt_2026_06_15
         targetBranch: master
       push:
-        approved: false
+        approved: true
+        approvedBy: user_prompt_2026_06_15
         target: origin/master
       cleanup:
         deleteShortBranch: true
@@ -23257,6 +23260,8 @@ tasks:
       - PR
       - force push
     validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-route.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
@@ -23264,6 +23269,159 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+    status: closed
+    result: pass_docs_only_boundary_decision_with_org_admin_actor_needs_recheck
+    retryCount: 0
+    claimedAt: "2026-06-15T23:06:05-07:00"
+    closedAt: "2026-06-15T23:06:05-07:00"
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+    title: Audit organization-admin actor boundary for organization training publish route
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is docs-only readonly audit of current
+      session/admin/auth contracts to decide whether organization training publish has a trustworthy
+      organization-admin actor and visible organization scope source. It must not implement runtime code,
+      route/service/repository/mapper changes, schema, UI, dependencies, provider/model, DB execution,
+      formal content write, or formal target write paths.
+    seededByTask: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+    seededImplementationTask: false
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version route organization-admin actor boundary
+    behaviorBoundary: organization-training::docs-only-org-admin-actor-boundary-readonly-audit
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    useCases:
+      - verify the organization-admin actor source before enabling publish route trusted lineage
+      - preserve ADR-002 layering and route thinness
+      - prevent employee-only org_auth capability from silently becoming organization-admin publish authority
+      - keep formal target write blocked
+    acceptanceScenarios:
+      - readiness gate starts from clean `master == origin/master`
+      - audit identifies all current runtime session/admin/user context sources relevant to organization training publish
+      - audit decides whether an existing source can prove organization-admin actor plus visible organization scope
+      - audit explains how the future trusted lineage resolver may use that source without exposing row/private data
+      - audit names a follow-up TDD implementation task only if the actor boundary is sufficiently narrow
+    nonGoals:
+      - source implementation, route runtime changes, service/repository/mapper/contract/model/validator/UI changes,
+        schema/drizzle changes, migration generation or execution, DB access, provider/model calls, dependency changes,
+        e2e/browser/dev-server, deploy, payment, formal content write, and formal target write
+    validationProfile: L1-docs-only-readonly-audit
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      localE2EValidation: blocked
+    blockedRemainder:
+      - runtime route trusted lineage implementation remains blocked
+      - organization-admin actor contract implementation remains blocked
+      - DB access and migration execution remain blocked
+      - provider/model and Cost Calibration Gate remain blocked
+      - e2e/browser/dev-server remain blocked
+      - formal target write remains blocked
+    closeoutPolicy:
+      localCommit: pending_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    redFirstRequired: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/01-requirements/use-cases/use-case-catalog.md
+      - docs/01-requirements/advanced-edition/modules/04-organization-training.md
+      - docs/01-requirements/advanced-edition/stories/epic-02-organization-training.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/contracts/effective-authorization-contract.ts
+      - src/server/services/effective-authorization-service.ts
+      - src/server/services/student-authorization-redeem-runtime.ts
+      - src/server/repositories/student-authorization-redeem-runtime-repository.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/services/session-service.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/models/auth.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution without fresh user approval
+      - direct database access
+      - migration generation or execution
+      - schema/drizzle edits
+      - product source implementation
+      - route/runtime implementation changes
+      - service/repository/mapper/contract/model/validator changes
+      - UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - public identifier value list exposure
+      - PR
+      - force push
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
     status: pending
     result: null
     retryCount: 0
