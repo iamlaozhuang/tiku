@@ -22,6 +22,7 @@ import {
   type OrganizationAnalyticsExportReadinessInput,
   type OrganizationTrainingAggregateMetricsInput,
 } from "../models/organization-analytics";
+import type { OrganizationAnalyticsRepository } from "../repositories/organization-analytics-repository";
 
 const ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE = 403185;
 const ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE =
@@ -38,6 +39,18 @@ type OrganizationAnalyticsSummaryAccessCommand = {
   adminContext: OrganizationAnalyticsAdminContext;
   organizationPublicId: string;
   scopeOrganizationPublicIds: readonly string[];
+};
+
+export type OrganizationAnalyticsServiceRepository =
+  OrganizationAnalyticsRepository;
+
+type BuildOrganizationAnalyticsRepositoryBackedSummaryCommand = {
+  adminContext: OrganizationAnalyticsAdminContext;
+  adminPublicId: string;
+  organizationPublicId: string;
+  dateRange: OrganizationAnalyticsDateRangeDto;
+  updatedAt: string;
+  repository: OrganizationAnalyticsServiceRepository;
 };
 
 export type BuildOrganizationAnalyticsDashboardSummaryCommand =
@@ -79,16 +92,68 @@ export type BuildOrganizationAnalyticsAuditLogReferenceCommand =
     recordedAt: string;
   };
 
-function canViewOrganizationAnalyticsSummary(
-  command: OrganizationAnalyticsSummaryAccessCommand,
+export type BuildOrganizationAnalyticsDashboardSummaryFromRepositoryCommand =
+  BuildOrganizationAnalyticsRepositoryBackedSummaryCommand;
+
+export type BuildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepositoryCommand =
+  BuildOrganizationAnalyticsRepositoryBackedSummaryCommand;
+
+export type BuildOrganizationAnalyticsExportReadinessSummaryFromRepositoryCommand =
+  BuildOrganizationAnalyticsRepositoryBackedSummaryCommand & {
+    exportScope: OrganizationAnalyticsExportScope;
+    objectStorageAvailable: boolean;
+    externalDeliveryAvailable: boolean;
+  };
+
+function hasOrganizationAnalyticsSummaryBaseAccess(
+  command: Omit<
+    OrganizationAnalyticsSummaryAccessCommand,
+    "scopeOrganizationPublicIds"
+  >,
 ) {
   return (
     command.adminContext.effectiveEdition === "advanced" &&
     command.adminContext.authorizationSource === "org_auth" &&
     command.adminContext.canViewOrganizationTrainingSummary === true &&
-    command.adminContext.organizationPublicId ===
-      command.organizationPublicId &&
+    command.adminContext.organizationPublicId === command.organizationPublicId
+  );
+}
+
+function canViewOrganizationAnalyticsSummary(
+  command: OrganizationAnalyticsSummaryAccessCommand,
+) {
+  return (
+    hasOrganizationAnalyticsSummaryBaseAccess(command) &&
     command.scopeOrganizationPublicIds.includes(command.organizationPublicId)
+  );
+}
+
+async function resolveVisibleOrganizationAnalyticsScope(
+  command: BuildOrganizationAnalyticsRepositoryBackedSummaryCommand,
+) {
+  if (!hasOrganizationAnalyticsSummaryBaseAccess(command)) {
+    return null;
+  }
+
+  const scopeOrganizationPublicIds =
+    await command.repository.lookupVisibleOrganizationScope({
+      adminPublicId: command.adminPublicId,
+    });
+
+  if (
+    scopeOrganizationPublicIds === null ||
+    !scopeOrganizationPublicIds.includes(command.organizationPublicId)
+  ) {
+    return null;
+  }
+
+  return scopeOrganizationPublicIds;
+}
+
+function createOrganizationAnalyticsAccessDeniedResponse() {
+  return createErrorResponse(
+    ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
+    ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
   );
 }
 
@@ -96,10 +161,7 @@ export function buildOrganizationAnalyticsDashboardSummary(
   command: BuildOrganizationAnalyticsDashboardSummaryCommand,
 ): ApiResponse<OrganizationAnalyticsDashboardSummaryDto | null> {
   if (!canViewOrganizationAnalyticsSummary(command)) {
-    return createErrorResponse(
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
-    );
+    return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
   return createSuccessResponse({
@@ -115,14 +177,42 @@ export function buildOrganizationAnalyticsDashboardSummary(
   });
 }
 
+export async function buildOrganizationAnalyticsDashboardSummaryFromRepository(
+  command: BuildOrganizationAnalyticsDashboardSummaryFromRepositoryCommand,
+): Promise<ApiResponse<OrganizationAnalyticsDashboardSummaryDto | null>> {
+  const scopeOrganizationPublicIds =
+    await resolveVisibleOrganizationAnalyticsScope(command);
+
+  if (scopeOrganizationPublicIds === null) {
+    return createOrganizationAnalyticsAccessDeniedResponse();
+  }
+
+  const trainingMetricsInput =
+    await command.repository.readTrainingAggregateMetricsInput({
+      organizationPublicId: command.organizationPublicId,
+      scopeOrganizationPublicIds,
+      dateRange: command.dateRange,
+    });
+
+  if (trainingMetricsInput === null) {
+    return createOrganizationAnalyticsAccessDeniedResponse();
+  }
+
+  return buildOrganizationAnalyticsDashboardSummary({
+    adminContext: command.adminContext,
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds,
+    dateRange: command.dateRange,
+    trainingMetricsInput,
+    updatedAt: command.updatedAt,
+  });
+}
+
 export function buildOrganizationAnalyticsExportReadinessSummary(
   command: BuildOrganizationAnalyticsExportReadinessSummaryCommand,
 ): ApiResponse<OrganizationAnalyticsExportReadinessSummaryDto | null> {
   if (!canViewOrganizationAnalyticsSummary(command)) {
-    return createErrorResponse(
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
-    );
+    return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
   const readinessAssessment =
@@ -142,14 +232,40 @@ export function buildOrganizationAnalyticsExportReadinessSummary(
   });
 }
 
+export async function buildOrganizationAnalyticsExportReadinessSummaryFromRepository(
+  command: BuildOrganizationAnalyticsExportReadinessSummaryFromRepositoryCommand,
+): Promise<ApiResponse<OrganizationAnalyticsExportReadinessSummaryDto | null>> {
+  const scopeOrganizationPublicIds =
+    await resolveVisibleOrganizationAnalyticsScope(command);
+
+  if (scopeOrganizationPublicIds === null) {
+    return createOrganizationAnalyticsAccessDeniedResponse();
+  }
+
+  const summaryRows = await command.repository.readExportReadinessRows({
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds,
+    dateRange: command.dateRange,
+  });
+
+  return buildOrganizationAnalyticsExportReadinessSummary({
+    adminContext: command.adminContext,
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds,
+    dateRange: command.dateRange,
+    exportScope: command.exportScope,
+    summaryRows,
+    objectStorageAvailable: command.objectStorageAvailable,
+    externalDeliveryAvailable: command.externalDeliveryAvailable,
+    updatedAt: command.updatedAt,
+  });
+}
+
 export function buildOrganizationAnalyticsAuditLogRedactedReference(
   command: BuildOrganizationAnalyticsAuditLogReferenceCommand,
 ): ApiResponse<OrganizationAnalyticsAuditLogReferenceDto | null> {
   if (!canViewOrganizationAnalyticsSummary(command)) {
-    return createErrorResponse(
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
-    );
+    return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
   const auditLogReferenceInput: OrganizationAnalyticsAuditLogReferenceInput = {
@@ -173,10 +289,7 @@ export function buildOrganizationAnalyticsEmployeeStatisticsSummary(
   command: BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand,
 ): ApiResponse<OrganizationAnalyticsEmployeeStatisticsSummaryDto | null> {
   if (!canViewOrganizationAnalyticsSummary(command)) {
-    return createErrorResponse(
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
-      ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
-    );
+    return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
   const employees = command.employeeTrainingSummaryInputs.map((employeeInput) =>
@@ -193,6 +306,35 @@ export function buildOrganizationAnalyticsEmployeeStatisticsSummary(
     employeeCount: employees.length,
     employees,
     redactionStatus: "summary_only",
+    updatedAt: command.updatedAt,
+  });
+}
+
+export async function buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository(
+  command: BuildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepositoryCommand,
+): Promise<
+  ApiResponse<OrganizationAnalyticsEmployeeStatisticsSummaryDto | null>
+> {
+  const scopeOrganizationPublicIds =
+    await resolveVisibleOrganizationAnalyticsScope(command);
+
+  if (scopeOrganizationPublicIds === null) {
+    return createOrganizationAnalyticsAccessDeniedResponse();
+  }
+
+  const employeeTrainingSummaryInputs =
+    await command.repository.readEmployeeTrainingSummaryInputs({
+      organizationPublicId: command.organizationPublicId,
+      scopeOrganizationPublicIds,
+      dateRange: command.dateRange,
+    });
+
+  return buildOrganizationAnalyticsEmployeeStatisticsSummary({
+    adminContext: command.adminContext,
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds,
+    dateRange: command.dateRange,
+    employeeTrainingSummaryInputs,
     updatedAt: command.updatedAt,
   });
 }

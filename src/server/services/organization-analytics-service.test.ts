@@ -1,14 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   buildOrganizationAnalyticsAuditLogRedactedReference,
   buildOrganizationAnalyticsDashboardSummary,
+  buildOrganizationAnalyticsDashboardSummaryFromRepository,
   buildOrganizationAnalyticsEmployeeStatisticsSummary,
+  buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository,
   buildOrganizationAnalyticsExportReadinessSummary,
+  buildOrganizationAnalyticsExportReadinessSummaryFromRepository,
   type BuildOrganizationAnalyticsAuditLogReferenceCommand,
   type BuildOrganizationAnalyticsDashboardSummaryCommand,
   type BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand,
   type BuildOrganizationAnalyticsExportReadinessSummaryCommand,
+  type OrganizationAnalyticsServiceRepository,
 } from "./organization-analytics-service";
 
 type GuardedFixtureFields = {
@@ -200,6 +204,52 @@ function createValidAuditLogReferenceCommand(): BuildOrganizationAnalyticsAuditL
   };
 }
 
+function createOrganizationAnalyticsServiceRepositoryFake(
+  overrides: Partial<OrganizationAnalyticsServiceRepository> = {},
+): OrganizationAnalyticsServiceRepository {
+  return {
+    lookupVisibleOrganizationScope: vi.fn(async () => [
+      "org_city_public_123",
+      "org_district_public_456",
+    ]),
+    readTrainingAggregateMetricsInput: vi.fn(
+      async () => createValidCommand().trainingMetricsInput,
+    ),
+    readEmployeeTrainingSummaryInputs: vi.fn(
+      async () =>
+        createValidEmployeeStatisticsCommand().employeeTrainingSummaryInputs,
+    ),
+    readFormalLearningSummary: vi.fn(async () => null),
+    readQuotaSummary: vi.fn(async () => null),
+    readExportReadinessRows: vi.fn(async () => [
+      {
+        rowPublicId: "employee_public_a",
+        redactionStatus: "summary_only" as const,
+      },
+      {
+        rowPublicId: "employee_public_b",
+        redactionStatus: "summary_only" as const,
+      },
+    ]),
+    ...overrides,
+  };
+}
+
+function createRepositoryBackedSummaryCommand(
+  repository: OrganizationAnalyticsServiceRepository,
+) {
+  const command = createValidCommand();
+
+  return {
+    adminContext: command.adminContext,
+    adminPublicId: "admin_public_123",
+    organizationPublicId: command.organizationPublicId,
+    dateRange: command.dateRange,
+    updatedAt: command.updatedAt,
+    repository,
+  };
+}
+
 describe("organization analytics dashboard service", () => {
   it("builds an aggregate-only dashboard summary without sensitive payloads", () => {
     const command = createValidCommand();
@@ -284,6 +334,101 @@ describe("organization analytics dashboard service", () => {
         },
       }).code,
     ).toBe(403185);
+  });
+});
+
+describe("organization analytics repository-backed service", () => {
+  it("builds dashboard summary from injected repository read models", async () => {
+    const repository = createOrganizationAnalyticsServiceRepositoryFake();
+    const command = createRepositoryBackedSummaryCommand(repository);
+    const result =
+      await buildOrganizationAnalyticsDashboardSummaryFromRepository(command);
+
+    expect(repository.lookupVisibleOrganizationScope).toHaveBeenCalledWith({
+      adminPublicId: "admin_public_123",
+    });
+    expect(repository.readTrainingAggregateMetricsInput).toHaveBeenCalledWith({
+      organizationPublicId: "org_city_public_123",
+      scopeOrganizationPublicIds: [
+        "org_city_public_123",
+        "org_district_public_456",
+      ],
+      dateRange: command.dateRange,
+    });
+    expect(result).toEqual(
+      buildOrganizationAnalyticsDashboardSummary(createValidCommand()),
+    );
+  });
+
+  it("stops repository reads when visible organization scope excludes the target", async () => {
+    const repository = createOrganizationAnalyticsServiceRepositoryFake({
+      lookupVisibleOrganizationScope: vi.fn(async () => [
+        "org_other_public_999",
+      ]),
+    });
+    const result =
+      await buildOrganizationAnalyticsDashboardSummaryFromRepository(
+        createRepositoryBackedSummaryCommand(repository),
+      );
+
+    expect(result).toEqual({
+      code: 403185,
+      message: "Organization analytics summary access denied.",
+      data: null,
+    });
+    expect(repository.readTrainingAggregateMetricsInput).not.toHaveBeenCalled();
+  });
+
+  it("builds employee statistics summary from injected repository read models", async () => {
+    const repository = createOrganizationAnalyticsServiceRepositoryFake();
+    const command = createRepositoryBackedSummaryCommand(repository);
+    const result =
+      await buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository(
+        command,
+      );
+
+    expect(repository.readEmployeeTrainingSummaryInputs).toHaveBeenCalledWith({
+      organizationPublicId: "org_city_public_123",
+      scopeOrganizationPublicIds: [
+        "org_city_public_123",
+        "org_district_public_456",
+      ],
+      dateRange: command.dateRange,
+    });
+    expect(result).toEqual(
+      buildOrganizationAnalyticsEmployeeStatisticsSummary(
+        createValidEmployeeStatisticsCommand(),
+      ),
+    );
+  });
+
+  it("builds export readiness summary from injected repository read models", async () => {
+    const repository = createOrganizationAnalyticsServiceRepositoryFake();
+    const command = createRepositoryBackedSummaryCommand(repository);
+    const result =
+      await buildOrganizationAnalyticsExportReadinessSummaryFromRepository({
+        ...command,
+        exportScope: "employee_statistics_summary",
+        objectStorageAvailable: false,
+        externalDeliveryAvailable: false,
+      });
+    const serializedResult = JSON.stringify(result);
+
+    expect(repository.readExportReadinessRows).toHaveBeenCalledWith({
+      organizationPublicId: "org_city_public_123",
+      scopeOrganizationPublicIds: [
+        "org_city_public_123",
+        "org_district_public_456",
+      ],
+      dateRange: command.dateRange,
+    });
+    expect(result).toEqual(
+      buildOrganizationAnalyticsExportReadinessSummary(
+        createValidExportReadinessCommand(),
+      ),
+    );
+    expect(serializedResult).not.toContain("employee_public_a");
+    expect(serializedResult).not.toContain("employee_public_b");
   });
 });
 
