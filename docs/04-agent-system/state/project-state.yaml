@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd
-updatedAt: "2026-06-16T03:22:28-07:00"
+currentPhase: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck
+updatedAt: "2026-06-16T03:31:03-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -323,13 +323,13 @@ repository:
   lastKnownMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
   lastKnownOriginMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
 currentTask:
-  id: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd
+  id: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd.md
-  branch: codex/advanced-organization-training-visible-scope-resolver-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
+  branch: codex/advanced-organization-training-visible-scope-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -498,10 +498,11 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteOrgAdminContextRuntimeWiringReadonlyRecheck: pass_readonly_recheck_with_visible_organization_scope_source_needs_recheck
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeRuntimeBoundaryDecision: pass_docs_only_boundary_decision_real_visible_scope_resolver_required
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeResolverContract: pass_tdd_route_visible_organization_scope_resolver_contract
-    advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeResolverContractReadonlyRecheck: seeded_pending_readonly_recheck
-    preCommitHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_tdd_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_tdd_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_tdd_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeResolverContractReadonlyRecheck: pass_readonly_recheck_no_blocking_findings_real_resolver_tdd_seeded
+    advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeRepositoryResolver: seeded_pending_tdd_repository_resolver
+    preCommitHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -517,10 +518,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Prepare the queued readonly recheck task
-    advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.
-    The recheck should verify that the publish route no longer synthesizes visible organization scope from request-body
-    organizationPublicId, that missing trusted visible scope fails closed before lineage lookup or publish execution, and
-    that the real DB-backed visible scope resolver remains blocked until a future scoped task explicitly declares that
-    capability.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd.md
+    Prepare the queued red-first TDD task
+    advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd. The task
+    should add repository-backed visible organization scope resolver wiring for the organization-training publish route
+    using local unit tests and mocks only. Keep real DB execution, row/private data, schema/drizzle, dependency,
+    provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost
+    Calibration Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
