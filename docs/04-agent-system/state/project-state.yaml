@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck
-updatedAt: "2026-06-16T03:31:03-07:00"
+currentPhase: advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd
+updatedAt: "2026-06-16T03:48:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -323,13 +323,13 @@ repository:
   lastKnownMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
   lastKnownOriginMasterSha: 89b624fa73ce289fff88da7ea54071211fc7396a
 currentTask:
-  id: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck
+  id: advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
-  branch: codex/advanced-organization-training-visible-scope-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
+  branch: codex/advanced-organization-training-visible-scope-repository-resolver
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -499,7 +499,7 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeRuntimeBoundaryDecision: pass_docs_only_boundary_decision_real_visible_scope_resolver_required
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeResolverContract: pass_tdd_route_visible_organization_scope_resolver_contract
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeResolverContractReadonlyRecheck: pass_readonly_recheck_no_blocking_findings_real_resolver_tdd_seeded
-    advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeRepositoryResolver: seeded_pending_tdd_repository_resolver
+    advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeRepositoryResolver: pass_guarded_stop_source_insufficient_boundary_decision_seeded
     preCommitHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_commit_hardening
     moduleCloseout: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_closeout_readiness
     prePushHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_push_readiness
@@ -518,10 +518,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Prepare the queued red-first TDD task
-    advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd. The task
-    should add repository-backed visible organization scope resolver wiring for the organization-training publish route
-    using local unit tests and mocks only. Keep real DB execution, row/private data, schema/drizzle, dependency,
-    provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost
-    Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
+    Prepare the queued docs-only boundary decision
+    advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision. Current
+    source does not provide a safe adminPublicId-to-visible-organization-scope mapping for repository-backed publish
+    resolver implementation. Decide the trusted visible organization scope source before resuming TDD implementation.
+    Keep product source, real DB execution, row/private data, schema/drizzle, dependency, provider,
+    e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration
+    Gate blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
