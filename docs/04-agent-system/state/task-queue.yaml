@@ -20975,3 +20975,202 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
+  - id: advanced-organization-training-publish-version-persistence-boundary-seeding
+    title: Advanced organization training publish version persistence boundary seeding
+    phase: advanced-organization-training-publish-version-persistence-boundary-seeding
+    sourceStory: advanced-edition-organization-training
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_only_seeded_persistence_boundary_planning
+    retryCount: 0
+    claimedAt: "2026-06-15T18:38:11-07:00"
+    closedAt: "2026-06-15T18:38:11-07:00"
+    dependencies:
+      - advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
+    humanApprovalBoundary: >-
+      User-approved docs/state-only seeding task. Scope is limited to converting the publish-version authorization-lineage
+      readonly recheck persistence needs_recheck into a pending docs-only persistence-boundary planning task. It must not
+      modify product source, route, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts, e2e, formal
+      content write, or formal target write behavior.
+    humanApproval: >-
+      User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行" after the
+      next-step recommendation. Approval is limited to task claim, task plan/evidence/audit creation, durable state
+      updates, docs/state-only queue seeding, declared local validation, local commit, fast-forward merge to master, push
+      origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked gates
+      remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+    readonlyFiles:
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/service/repository/API runtime/contract/model/validator/UI changes
+      - schema/migration
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - takedown implementation
+      - copy-to-new-draft implementation
+      - employee answer implementation
+      - analytics implementation
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-boundary-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-boundary-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-boundary-seeding
+  - id: advanced-organization-training-publish-version-persistence-boundary-planning
+    title: Advanced organization training publish version persistence boundary planning
+    phase: advanced-organization-training-publish-version-persistence-boundary-planning
+    sourceStory: advanced-edition-organization-training
+    taskKind: implementation_planning
+    moduleRunVersion: 2
+    status: pending
+    result: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-training-publish-version-persistence-boundary-seeding
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is docs-only planning to define the exact
+      repository/schema/route persistence boundary for organization training publish-version storage and authorization
+      lineage. The task may inspect current service, contract, model, validator, and prior evidence as readonly context,
+      but must not modify product source, schema, migrations, routes, repositories, mappers, UI, DB, provider, package,
+      lockfile, scripts, e2e, formal content write, or formal target write behavior.
+    expectedOutput:
+      - exact persistence boundary decomposition for repository, mapper, route, schema, and service integration tasks
+      - explicit schema/migration approval requirement if storage changes are required
+      - non-exposure decision for authorization lineage in public DTOs unless separately approved
+      - blocked gate register for DB, provider, dependency, e2e/browser/dev-server, staging/prod/cloud/deploy, payment, external-service, PR, and force push
+      - validation command matrix for the first implementable persistence task
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+    readonlyFiles:
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/app/api/v1/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - execution without fresh user approval
+      - product source implementation
+      - route/service/repository/API runtime/contract/model/validator/UI changes
+      - schema/migration
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - takedown implementation
+      - copy-to-new-draft implementation
+      - employee answer implementation
+      - analytics implementation
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_user_approval_before_claim
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-boundary-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-boundary-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-boundary-planning
