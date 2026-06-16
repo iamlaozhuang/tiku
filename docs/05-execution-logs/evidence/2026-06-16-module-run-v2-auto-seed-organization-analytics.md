@@ -23,6 +23,24 @@
 - standingCloseoutApproval: `recorded`
 - approvalStatement: autoDriveLocalImplementationApproval approved by current 2026-06-16 user prompt; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked.
 
+## Auto-Seed Readiness Normalization
+
+- implementationAutoSeedGate: pass. This seed evidence is the normalized source evidence for `batch-185` through
+  `batch-188` auto-seed readiness after the archived `phase-73` planning evidence was found to predate the current
+  Module Run v2 auto-seed anchor requirements.
+- localExperienceClosureGate: planned for the seeded implementation tasks; this queue-seeding evidence only unlocks
+  pre-edit readiness and does not claim implementation closure.
+- seededImplementationTask: `batch-185-organization-analytics-aggregate-only-organization-metrics`,
+  `batch-186-organization-analytics-privacy-preserving-employee-statistics`,
+  `batch-187-organization-analytics-export-readiness-contracts-without-object-st`, and
+  `batch-188-organization-analytics-audit-log-redacted-reference`.
+- candidateImplementationTask: each seeded task remains pending and must run its own task plan, focused test, evidence,
+  audit review, local validation, module closeout, and pre-push gates before closeout.
+- focused test plan: implementation tasks must replace the advisory focused placeholder with task-scoped unit coverage
+  where the implementation touches runtime behavior; this normalization performs no runtime implementation.
+- localFullLoopGate: L5 planned for the seeded organization-analytics implementation tasks; docs-only normalization
+  remains outside the product runtime loop.
+
 ## Seeded Tasks
 
 - `batch-185-organization-analytics-aggregate-only-organization-metrics`: aggregate-only organization metrics
