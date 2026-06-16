@@ -1,5 +1,7 @@
 import type {
+  OrganizationAnalyticsAnswerOrganizationSnapshotDto,
   OrganizationAnalyticsDateRangeDto,
+  OrganizationAnalyticsEmployeeTrainingSummaryDto,
   OrganizationAnalyticsSubmittedTrendPointDto,
   OrganizationTrainingAggregateMetricsDto,
 } from "../contracts/organization-analytics-contract";
@@ -35,6 +37,22 @@ export type OrganizationTrainingEmployeeRankingSummary = {
   trainingAverageScore: number | null;
   trainingCompletionRate: number;
   latestTrainingSubmittedAt: string | null;
+};
+
+export type OrganizationAnalyticsEmployeeTrainingSubmission =
+  OrganizationTrainingOfficialSubmission & {
+    trainingVersionPublicId: string;
+    answerOrganizationSnapshot: OrganizationAnalyticsAnswerOrganizationSnapshotDto;
+  };
+
+export type OrganizationAnalyticsEmployeeTrainingSummaryInput = {
+  employeePublicId: string;
+  employeeDisplayName: string;
+  organizationPublicId: string;
+  organizationName: string;
+  visibleTrainingVersionPublicIds: readonly string[];
+  officialSubmissions: readonly OrganizationAnalyticsEmployeeTrainingSubmission[];
+  dateRange: OrganizationAnalyticsDateRangeDto;
 };
 
 function isWithinDateRange(
@@ -85,6 +103,24 @@ function calculateAverageScore(
   return totalScore / officialSubmissions.length;
 }
 
+function selectLatestEmployeeTrainingSubmission(
+  officialSubmissions: readonly OrganizationAnalyticsEmployeeTrainingSubmission[],
+) {
+  return officialSubmissions.reduce<OrganizationAnalyticsEmployeeTrainingSubmission | null>(
+    (latestSubmission, currentSubmission) => {
+      if (latestSubmission === null) {
+        return currentSubmission;
+      }
+
+      return Date.parse(currentSubmission.submittedAt) >
+        Date.parse(latestSubmission.submittedAt)
+        ? currentSubmission
+        : latestSubmission;
+    },
+    null,
+  );
+}
+
 export function createOrganizationTrainingAggregateMetrics(
   input: OrganizationTrainingAggregateMetricsInput,
 ): OrganizationTrainingAggregateMetricsDto {
@@ -117,6 +153,64 @@ export function createOrganizationTrainingAggregateMetrics(
     maxScore: scores.length === 0 ? null : Math.max(...scores),
     minScore: scores.length === 0 ? null : Math.min(...scores),
     submittedTrend: createSubmittedTrend(officialSubmissionsInRange),
+  };
+}
+
+export function createOrganizationAnalyticsEmployeeTrainingSummary(
+  input: OrganizationAnalyticsEmployeeTrainingSummaryInput,
+): OrganizationAnalyticsEmployeeTrainingSummaryDto {
+  const visibleTrainingVersionPublicIds = [
+    ...new Set(input.visibleTrainingVersionPublicIds),
+  ];
+  const visibleTrainingVersionPublicIdSet = new Set(
+    visibleTrainingVersionPublicIds,
+  );
+  const officialSubmissionsInRange = input.officialSubmissions.filter(
+    (submission) =>
+      submission.employeePublicId === input.employeePublicId &&
+      visibleTrainingVersionPublicIdSet.has(
+        submission.trainingVersionPublicId,
+      ) &&
+      isWithinDateRange(submission.submittedAt, input.dateRange),
+  );
+  const latestSubmission = selectLatestEmployeeTrainingSubmission(
+    officialSubmissionsInRange,
+  );
+  const submittedTrainingCount = new Set(
+    officialSubmissionsInRange.map(
+      (submission) => submission.trainingVersionPublicId,
+    ),
+  ).size;
+  const visibleTrainingCount = visibleTrainingVersionPublicIds.length;
+
+  return {
+    employeePublicId: input.employeePublicId,
+    employeeDisplayName: input.employeeDisplayName,
+    organizationPublicId: input.organizationPublicId,
+    organizationName: input.organizationName,
+    answerOrganizationSnapshot:
+      latestSubmission === null
+        ? null
+        : {
+            organizationPublicId:
+              latestSubmission.answerOrganizationSnapshot.organizationPublicId,
+            organizationName:
+              latestSubmission.answerOrganizationSnapshot.organizationName,
+            capturedAt: latestSubmission.answerOrganizationSnapshot.capturedAt,
+          },
+    visibleTrainingCount,
+    submittedTrainingCount,
+    unfinishedTrainingCount: Math.max(
+      visibleTrainingCount - submittedTrainingCount,
+      0,
+    ),
+    trainingCompletionRate:
+      visibleTrainingCount === 0
+        ? 0
+        : submittedTrainingCount / visibleTrainingCount,
+    trainingAverageScore: calculateAverageScore(officialSubmissionsInRange),
+    latestTrainingSubmittedAt: latestSubmission?.submittedAt ?? null,
+    redactionStatus: "summary_only",
   };
 }
 

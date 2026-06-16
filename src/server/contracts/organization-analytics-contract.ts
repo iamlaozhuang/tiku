@@ -19,6 +19,37 @@ export type OrganizationTrainingAggregateMetricsDto = {
   submittedTrend: OrganizationAnalyticsSubmittedTrendPointDto[];
 };
 
+export type OrganizationAnalyticsAnswerOrganizationSnapshotDto = {
+  organizationPublicId: string;
+  organizationName: string;
+  capturedAt: string;
+};
+
+export type OrganizationAnalyticsEmployeeTrainingSummaryDto = {
+  employeePublicId: string;
+  employeeDisplayName: string;
+  organizationPublicId: string;
+  organizationName: string;
+  answerOrganizationSnapshot: OrganizationAnalyticsAnswerOrganizationSnapshotDto | null;
+  visibleTrainingCount: number;
+  submittedTrainingCount: number;
+  unfinishedTrainingCount: number;
+  trainingCompletionRate: number;
+  trainingAverageScore: number | null;
+  latestTrainingSubmittedAt: string | null;
+  redactionStatus: "summary_only";
+};
+
+export type OrganizationAnalyticsEmployeeStatisticsSummaryDto = {
+  organizationPublicId: string;
+  scopeOrganizationPublicIds: string[];
+  dateRange: OrganizationAnalyticsDateRangeDto;
+  employeeCount: number;
+  employees: OrganizationAnalyticsEmployeeTrainingSummaryDto[];
+  redactionStatus: "summary_only";
+  updatedAt: string;
+};
+
 export type OrganizationAnalyticsDashboardSummaryDto = {
   organizationPublicId: string;
   scopeOrganizationPublicIds: string[];

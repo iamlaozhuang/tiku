@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-185-organization-analytics-aggregate-only-organization-metrics
-updatedAt: "2026-06-16T08:17:23-07:00"
+currentPhase: batch-186-organization-analytics-privacy-preserving-employee-statistics
+updatedAt: "2026-06-16T08:33:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: bceea4997ce715202eab78c32ce8883e8258e4ca
-  lastKnownOriginMasterSha: bceea4997ce715202eab78c32ce8883e8258e4ca
+  lastKnownMasterSha: 9072e915c431f21ef40b8537ed487a5bec44f57b
+  lastKnownOriginMasterSha: 9072e915c431f21ef40b8537ed487a5bec44f57b
 currentTask:
-  id: batch-185-organization-analytics-aggregate-only-organization-metrics
+  id: batch-186-organization-analytics-privacy-preserving-employee-statistics
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-185-organization-analytics-aggregate-only-organization-metrics.md
-  evidencePath: docs/05-execution-logs/evidence/batch-185-organization-analytics-aggregate-only-organization-metrics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-185-organization-analytics-aggregate-only-organization-metrics.md
-  branch: codex/organization-analytics-batch-185-aggregate-metrics
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-186-organization-analytics-privacy-preserving-employee-statistics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-186-organization-analytics-privacy-preserving-employee-statistics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-186-organization-analytics-privacy-preserving-employee-statistics.md
+  branch: codex/organization-analytics-batch-186-employee-statistics
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -514,6 +514,7 @@ qualityGates:
     advancedOrganizationAnalyticsNextImplementationQueueSeeding: pass_auto_seed_transaction_self_review
     advancedOrganizationAnalyticsAutoSeedReadinessEvidenceNormalization: pass_docs_only_auto_seed_readiness_normalization
     batch185OrganizationAnalyticsAggregateOnlyOrganizationMetrics: pass_tdd_aggregate_only_organization_metrics
+    batch186OrganizationAnalyticsPrivacyPreservingEmployeeStatistics: pass_tdd_privacy_preserving_employee_statistics
     preCommitHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_commit_hardening
     moduleCloseout: pass_organization_analytics_auto_seed_readiness_normalization_closeout_readiness
     prePushHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_push_readiness
@@ -532,11 +533,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 185 organization analytics aggregate-only organization metrics passes scoped TDD implementation, focused unit,
-    lint, typecheck, diff-check, PreCommit hardening, ModuleCloseout readiness, and PrePush readiness. Continue with
-    `batch-186-organization-analytics-privacy-preserving-employee-statistics` only after repository readiness confirms
+    Batch 186 organization analytics privacy-preserving employee statistics passes scoped TDD implementation, focused
+    unit, lint, typecheck, diff-check, ModuleCloseout readiness, PreCommit hardening, and PrePush readiness. After
+    commit/merge/push cleanup, continue with
+    `batch-187-organization-analytics-export-readiness-contracts-without-object-st` only after repository readiness confirms
     master and origin/master are aligned and no codex/* residue remains.
     `.env*`, real DB execution, row/private data, dependency, provider, e2e/browser/dev-server,
     staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked unless a
     future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/batch-185-organization-analytics-aggregate-only-organization-metrics.md
+  lastSummaryPath: docs/05-execution-logs/evidence/batch-186-organization-analytics-privacy-preserving-employee-statistics.md

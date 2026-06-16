@@ -6,9 +6,12 @@ import {
 import type {
   OrganizationAnalyticsDashboardSummaryDto,
   OrganizationAnalyticsDateRangeDto,
+  OrganizationAnalyticsEmployeeStatisticsSummaryDto,
 } from "../contracts/organization-analytics-contract";
 import {
+  createOrganizationAnalyticsEmployeeTrainingSummary,
   createOrganizationTrainingAggregateMetrics,
+  type OrganizationAnalyticsEmployeeTrainingSummaryInput,
   type OrganizationTrainingAggregateMetricsInput,
 } from "../models/organization-analytics";
 
@@ -23,20 +26,34 @@ export type OrganizationAnalyticsAdminContext = {
   organizationPublicId: string;
 };
 
-export type BuildOrganizationAnalyticsDashboardSummaryCommand = {
+type OrganizationAnalyticsSummaryAccessCommand = {
   adminContext: OrganizationAnalyticsAdminContext;
   organizationPublicId: string;
   scopeOrganizationPublicIds: readonly string[];
-  dateRange: OrganizationAnalyticsDateRangeDto;
-  trainingMetricsInput: Omit<
-    OrganizationTrainingAggregateMetricsInput,
-    "dateRange"
-  >;
-  updatedAt: string;
 };
 
+export type BuildOrganizationAnalyticsDashboardSummaryCommand =
+  OrganizationAnalyticsSummaryAccessCommand & {
+    dateRange: OrganizationAnalyticsDateRangeDto;
+    trainingMetricsInput: Omit<
+      OrganizationTrainingAggregateMetricsInput,
+      "dateRange"
+    >;
+    updatedAt: string;
+  };
+
+export type BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand =
+  OrganizationAnalyticsSummaryAccessCommand & {
+    dateRange: OrganizationAnalyticsDateRangeDto;
+    employeeTrainingSummaryInputs: readonly Omit<
+      OrganizationAnalyticsEmployeeTrainingSummaryInput,
+      "dateRange"
+    >[];
+    updatedAt: string;
+  };
+
 function canViewOrganizationAnalyticsSummary(
-  command: BuildOrganizationAnalyticsDashboardSummaryCommand,
+  command: OrganizationAnalyticsSummaryAccessCommand,
 ) {
   return (
     command.adminContext.effectiveEdition === "advanced" &&
@@ -67,6 +84,34 @@ export function buildOrganizationAnalyticsDashboardSummary(
       dateRange: command.dateRange,
     }),
     redactionStatus: "aggregate_only",
+    updatedAt: command.updatedAt,
+  });
+}
+
+export function buildOrganizationAnalyticsEmployeeStatisticsSummary(
+  command: BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand,
+): ApiResponse<OrganizationAnalyticsEmployeeStatisticsSummaryDto | null> {
+  if (!canViewOrganizationAnalyticsSummary(command)) {
+    return createErrorResponse(
+      ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
+      ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
+    );
+  }
+
+  const employees = command.employeeTrainingSummaryInputs.map((employeeInput) =>
+    createOrganizationAnalyticsEmployeeTrainingSummary({
+      ...employeeInput,
+      dateRange: command.dateRange,
+    }),
+  );
+
+  return createSuccessResponse({
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds: [...command.scopeOrganizationPublicIds],
+    dateRange: command.dateRange,
+    employeeCount: employees.length,
+    employees,
+    redactionStatus: "summary_only",
     updatedAt: command.updatedAt,
   });
 }

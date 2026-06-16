@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createOrganizationAnalyticsEmployeeTrainingSummary,
   createOrganizationTrainingAggregateMetrics,
   rankOrganizationTrainingEmployeeSummaries,
   selectHistoricalOrganizationTrainingVersionPublicIds,
@@ -126,5 +127,102 @@ describe("organization analytics aggregate metrics", () => {
       "employee_public_lower_completion",
       "employee_public_null_score",
     ]);
+  });
+
+  it("calculates privacy-preserving employee training statistics", () => {
+    const guardedMarkerOne = ["guarded", "employee", "marker", "one"].join("-");
+    const guardedMarkerTwo = ["guarded", "employee", "marker", "two"].join("-");
+    const officialSubmission = {
+      id: 501,
+      employeePublicId: "employee_public_a",
+      trainingVersionPublicId: "training_version_public_alpha",
+      score: 92,
+      totalScore: 100,
+      submittedAt: "2026-06-11T09:30:00Z",
+      answerOrganizationSnapshot: {
+        organizationPublicId: "org_district_public_456",
+        organizationName: "District One",
+        capturedAt: "2026-06-11T09:30:00Z",
+      },
+      guardedMarkerOne,
+      guardedMarkerTwo,
+    };
+
+    const summary = createOrganizationAnalyticsEmployeeTrainingSummary({
+      employeePublicId: "employee_public_a",
+      employeeDisplayName: "Employee A",
+      organizationPublicId: "org_city_public_123",
+      organizationName: "City Org",
+      visibleTrainingVersionPublicIds: [
+        "training_version_public_alpha",
+        "training_version_public_beta",
+      ],
+      officialSubmissions: [
+        officialSubmission,
+        {
+          ...officialSubmission,
+          trainingVersionPublicId: "training_version_public_out_of_range",
+          score: 75,
+          submittedAt: "2026-06-14T09:30:00Z",
+        },
+      ],
+      dateRange: {
+        startAt: "2026-06-10T00:00:00Z",
+        endAt: "2026-06-12T23:59:59Z",
+      },
+    });
+    const serializedSummary = JSON.stringify(summary);
+
+    expect(summary).toEqual({
+      employeePublicId: "employee_public_a",
+      employeeDisplayName: "Employee A",
+      organizationPublicId: "org_city_public_123",
+      organizationName: "City Org",
+      answerOrganizationSnapshot: {
+        organizationPublicId: "org_district_public_456",
+        organizationName: "District One",
+        capturedAt: "2026-06-11T09:30:00Z",
+      },
+      visibleTrainingCount: 2,
+      submittedTrainingCount: 1,
+      unfinishedTrainingCount: 1,
+      trainingCompletionRate: 0.5,
+      trainingAverageScore: 92,
+      latestTrainingSubmittedAt: "2026-06-11T09:30:00Z",
+      redactionStatus: "summary_only",
+    });
+    expect(serializedSummary).not.toMatch(/"id":/);
+    expect(serializedSummary).not.toContain(guardedMarkerOne);
+    expect(serializedSummary).not.toContain(guardedMarkerTwo);
+  });
+
+  it("returns zero employee completion and null score summaries when no training is visible", () => {
+    expect(
+      createOrganizationAnalyticsEmployeeTrainingSummary({
+        employeePublicId: "employee_public_empty",
+        employeeDisplayName: "Employee Empty",
+        organizationPublicId: "org_city_public_123",
+        organizationName: "City Org",
+        visibleTrainingVersionPublicIds: [],
+        officialSubmissions: [],
+        dateRange: {
+          startAt: "2026-06-10T00:00:00Z",
+          endAt: "2026-06-12T23:59:59Z",
+        },
+      }),
+    ).toEqual({
+      employeePublicId: "employee_public_empty",
+      employeeDisplayName: "Employee Empty",
+      organizationPublicId: "org_city_public_123",
+      organizationName: "City Org",
+      answerOrganizationSnapshot: null,
+      visibleTrainingCount: 0,
+      submittedTrainingCount: 0,
+      unfinishedTrainingCount: 0,
+      trainingCompletionRate: 0,
+      trainingAverageScore: null,
+      latestTrainingSubmittedAt: null,
+      redactionStatus: "summary_only",
+    });
   });
 });
