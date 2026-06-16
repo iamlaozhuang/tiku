@@ -24800,3 +24800,210 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-16T02:41:56-07:00"
     closedAt: "2026-06-16T02:45:09-07:00"
+  - id: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+    title: Recheck organization-admin actor context runtime wiring
+    phase: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+    humanApprovalBoundary: >-
+      User-approved readonly recheck after organization-admin actor context runtime wiring. Scope is limited to docs and
+      state tracking plus readonly review of the default publish route runtime flow after session-backed actor context
+      wiring. The task must not modify product source, tests, scripts, schema/drizzle, package/lockfile, dependencies,
+      env/secrets, DB, provider/model, dev server, Browser/Playwright/e2e, staging/prod/cloud/deploy/payment/
+      external-service, PR, force push, or Cost Calibration Gate.
+    humanApproval: >-
+      User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "批准执行".
+      Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly review,
+      declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
+      cleanup, and fetch prune. Product source, test, script, schema/drizzle, package/lockfile/dependency, env/secret,
+      DB/provider/e2e/browser/dev-server/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate
+      work remain blocked.
+    validationProfile: L2-readonly-route-runtime-actor-context-recheck-no-real-db
+    localFullLoopGate: L2
+    taskKind: readonly_recheck
+    moduleRunVersion: 2
+    capabilities:
+      localUnitTest: approved_by_user_prompt_2026_06_16
+      projectResourceRead: approved_read_only_redacted
+      localDockerDatabase: blocked_this_task
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/services/session-service.ts
+      - src/server/services/auth-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/auth/session-cookie.ts
+      - src/server/contracts/auth-contract.ts
+      - src/server/mappers/auth-mapper.ts
+      - src/server/repositories/organization-training-repository.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - implementation
+      - real DB command execution or row/private data access
+      - schema/drizzle edits, migration generation, or migration execution
+      - product source, test, script, package, lockfile, or dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - broad authorization or permission model changes outside a queued boundary decision
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-training-route.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck -SkipRemoteAheadCheck
+    status: closed
+    result: pass_readonly_recheck_with_visible_organization_scope_source_needs_recheck
+    retryCount: 0
+    claimedAt: "2026-06-16T02:54:48-07:00"
+    closedAt: "2026-06-16T02:54:48-07:00"
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision
+    title: Decide publish route visible organization scope runtime boundary
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+    humanApprovalBoundary: >-
+      Pending docs-only boundary decision seeded by the runtime wiring readonly recheck. Scope is limited to deciding
+      whether the current platform-admin session plus requested organization public id is an acceptable
+      organization-training publish boundary, or whether a real admin-visible organization scope resolver must be
+      introduced before further runtime implementation. It may read existing source and evidence, but must not modify
+      product source, tests, scripts, schema/drizzle, package/lockfile, dependencies, env/secrets, DB, provider/model,
+      dev server, Browser/Playwright/e2e, staging/prod/cloud/deploy/payment/external-service, PR, force push, or Cost
+      Calibration Gate.
+    autoDriveStandingAutonomyApproval: approved_by_project_state_2026_06_16
+    seededByTask: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+    validationProfile: docs-only-boundary-decision-no-real-db
+    localFullLoopGate: docs_only
+    taskKind: boundary_decision
+    moduleRunVersion: 2
+    capabilities:
+      projectResourceRead: approved_read_only_redacted
+      localDockerDatabase: blocked_this_task
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_standing_autonomy_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+      - src/server/services/organization-training-route.ts
+      - src/server/services/session-service.ts
+      - src/server/services/auth-service.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/auth-repository.ts
+      - src/server/models/auth.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - implementation
+      - real DB command execution or row/private data access
+      - schema/drizzle edits, migration generation, or migration execution
+      - product source, test, script, package, lockfile, or dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - broad authorization or permission model change without a follow-up queued implementation task
+      - PR
+      - force push
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision
+    status: pending
+    result: null
+    retryCount: 0
