@@ -22830,3 +22830,299 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-15T22:25:26-07:00"
     closedAt: "2026-06-15T22:31:21-07:00"
+  - id: advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+    title: Seed organization training publish-version route flow readonly recheck
+    phase: advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-tdd
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+    humanApprovalBoundary: >-
+      Approved by current user prompt on 2026-06-15 to execute the recommended next task after route TDD closeout.
+      Scope is docs-only seeding of a pending readonly recheck task. It must not modify product source, route runtime,
+      service, repository, mapper, contract, model, validator, UI, schema, drizzle, scripts, package, lockfile, dependencies,
+      DB, provider/model, formal content, or formal target write paths.
+    seededByTask: advanced-organization-training-publish-version-route-tdd
+    seededImplementationTask: false
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version route flow readonly recheck seeding
+    behaviorBoundary: organization-training::docs-only-route-flow-readonly-recheck-seeding
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    useCases:
+      - seed a pending readonly recheck task after the route TDD task is durable on master
+      - preserve route/service/repository flow review as a separate evidence-producing closeout
+    acceptanceScenarios:
+      - task queue contains one pending `advanced-organization-training-publish-version-route-flow-readonly-recheck` task
+      - pending recheck requires fresh approval before claim
+      - pending recheck is readonly and restricts allowed edits to docs/state/log files
+      - pending recheck carries ADR-002 layering, public-id route semantics, metadata-only DTO, trusted lineage, non-leakage, and formal target write blocked assertions
+    nonGoals:
+      - product source implementation, route runtime changes, service/repository/mapper/contract/model/validator/UI changes,
+        schema/drizzle changes, migration generation or execution, DB access, provider/model calls, dependency changes,
+        e2e/browser/dev-server, deploy, payment, formal content write, and formal target write
+    validationProfile: L1-docs-only-seeding-with-scoped-route-tests
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      localE2EValidation: blocked
+    blockedRemainder:
+      - DB access and migration execution remain blocked
+      - implementation remains separate from this seed task
+      - provider/model and Cost Calibration Gate remain blocked
+      - e2e/browser/dev-server remain blocked
+      - formal target write remains blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: readonly_recheck_queue_seeding
+    moduleRunVersion: 2
+    redFirstRequired: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - direct database access
+      - migration generation or execution
+      - schema/drizzle edits
+      - product source implementation
+      - route/runtime implementation changes
+      - service/repository/mapper/contract/model/validator changes
+      - UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - public identifier value list exposure
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-route.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+    status: closed
+    result: pass_docs_only_seeded_route_flow_readonly_recheck_task
+    retryCount: 0
+    claimedAt: "2026-06-15T22:43:18-07:00"
+    closedAt: "2026-06-15T22:43:18-07:00"
+  - id: advanced-organization-training-publish-version-route-flow-readonly-recheck
+    title: Readonly recheck organization training publish-version route flow
+    phase: advanced-organization-training-publish-version-route-flow-readonly-recheck
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is readonly recheck of the organization training
+      publish-version route flow from durable master. It must not modify runtime code, route/service/repository/mapper,
+      schema, UI, dependencies, provider/model, DB, formal content, or formal target write paths.
+    seededByTask: advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+    seededImplementationTask: false
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version route flow readonly recheck
+    behaviorBoundary: organization-training::readonly-route-flow-recheck-no-implementation
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    useCases:
+      - organization admin route flow can publish an organization training draft through the existing service boundary
+      - route output remains a standard response envelope with metadata-only published version data
+      - route blocked/error outcomes remain standard redacted envelopes
+      - organization training route flow stays isolated from formal content targets
+    acceptanceScenarios:
+      - readiness gate starts from clean `master == origin/master`
+      - review confirms ADR-002 layering from route entrypoint to helper to service to repository
+      - review confirms path public id cannot be overridden by body `draftPublicId`
+      - review confirms client-supplied numeric/internal lineage is not accepted as authoritative input
+      - review confirms trusted lineage resolver boundary and default lineage-unavailable blocking behavior
+      - review confirms success envelope contains `{ version }` with metadata-only published version DTO
+      - review confirms invalid/blocked/runtime error envelopes return `data: null` and redact internals
+      - review confirms formal content write and formal target write remain blocked
+      - review confirms evidence and tests do not expose public identifier value lists, provider/raw fields, row/private data, or employee answer text
+    nonGoals:
+      - source implementation, route runtime changes, service/repository/mapper/contract/model/validator/UI changes,
+        schema/drizzle changes, migration generation or execution, DB access, provider/model calls, dependency changes,
+        e2e/browser/dev-server, deploy, payment, formal content write, and formal target write
+    validationProfile: L1-readonly-route-flow-recheck-with-scoped-unit-tests
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      localE2EValidation: blocked
+    blockedRemainder:
+      - DB access and migration execution remain blocked
+      - implementation remains separate
+      - provider/model and Cost Calibration Gate remain blocked
+      - e2e/browser/dev-server remain blocked
+      - formal target write remains blocked
+    closeoutPolicy:
+      localCommit: pending_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: readonly_recheck
+    moduleRunVersion: 2
+    redFirstRequired: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+      - src/server/mappers/organization-training-mapper.ts
+      - src/server/mappers/organization-training-mapper.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+      - src/server/contracts/api-response.ts
+      - src/server/services/route-error-response.ts
+      - src/server/services/route-error-response.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution without fresh user approval
+      - direct database access
+      - migration generation or execution
+      - schema/drizzle edits
+      - product source implementation
+      - route/runtime implementation changes
+      - service/repository/mapper/contract/model/validator changes
+      - UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - public identifier value list exposure
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-route.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck
+    status: pending
+    result: null
+    retryCount: 0
