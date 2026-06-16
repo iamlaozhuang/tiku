@@ -2,6 +2,9 @@ import type {
   OrganizationAnalyticsAnswerOrganizationSnapshotDto,
   OrganizationAnalyticsDateRangeDto,
   OrganizationAnalyticsEmployeeTrainingSummaryDto,
+  OrganizationAnalyticsExportReadinessAssessmentDto,
+  OrganizationAnalyticsExportReadinessBlockedReason,
+  OrganizationAnalyticsExportScope,
   OrganizationAnalyticsSubmittedTrendPointDto,
   OrganizationTrainingAggregateMetricsDto,
 } from "../contracts/organization-analytics-contract";
@@ -53,6 +56,24 @@ export type OrganizationAnalyticsEmployeeTrainingSummaryInput = {
   visibleTrainingVersionPublicIds: readonly string[];
   officialSubmissions: readonly OrganizationAnalyticsEmployeeTrainingSubmission[];
   dateRange: OrganizationAnalyticsDateRangeDto;
+};
+
+export type OrganizationAnalyticsExportReadinessRowRedactionStatus =
+  | "aggregate_only"
+  | "summary_only"
+  | "detail_only";
+
+export type OrganizationAnalyticsExportReadinessRow = {
+  rowPublicId?: string;
+  sourceRowId?: number;
+  redactionStatus: OrganizationAnalyticsExportReadinessRowRedactionStatus;
+};
+
+export type OrganizationAnalyticsExportReadinessInput = {
+  exportScope: OrganizationAnalyticsExportScope;
+  summaryRows: readonly OrganizationAnalyticsExportReadinessRow[];
+  objectStorageAvailable: boolean;
+  externalDeliveryAvailable: boolean;
 };
 
 function isWithinDateRange(
@@ -210,6 +231,66 @@ export function createOrganizationAnalyticsEmployeeTrainingSummary(
         : submittedTrainingCount / visibleTrainingCount,
     trainingAverageScore: calculateAverageScore(officialSubmissionsInRange),
     latestTrainingSubmittedAt: latestSubmission?.submittedAt ?? null,
+    redactionStatus: "summary_only",
+  };
+}
+
+function selectOrganizationAnalyticsExportReadinessBlockedReasons(
+  input: OrganizationAnalyticsExportReadinessInput,
+): OrganizationAnalyticsExportReadinessBlockedReason[] {
+  const dependencyBlockedReasons: OrganizationAnalyticsExportReadinessBlockedReason[] =
+    [
+      ...(input.objectStorageAvailable
+        ? []
+        : ([
+            "object_storage_not_configured",
+          ] satisfies OrganizationAnalyticsExportReadinessBlockedReason[])),
+      ...(input.externalDeliveryAvailable
+        ? []
+        : ([
+            "external_delivery_not_configured",
+          ] satisfies OrganizationAnalyticsExportReadinessBlockedReason[])),
+    ];
+  const hasDetailRow = input.summaryRows.some(
+    (row) => row.redactionStatus === "detail_only",
+  );
+  const contentBlockedReasons: OrganizationAnalyticsExportReadinessBlockedReason[] =
+    [
+      ...(input.summaryRows.length === 0
+        ? ([
+            "no_summary_rows",
+          ] satisfies OrganizationAnalyticsExportReadinessBlockedReason[])
+        : []),
+      ...(hasDetailRow
+        ? ([
+            "non_summary_detail_detected",
+          ] satisfies OrganizationAnalyticsExportReadinessBlockedReason[])
+        : []),
+    ];
+
+  return [...dependencyBlockedReasons, ...contentBlockedReasons];
+}
+
+export function createOrganizationAnalyticsExportReadinessAssessment(
+  input: OrganizationAnalyticsExportReadinessInput,
+): OrganizationAnalyticsExportReadinessAssessmentDto {
+  const blockedReasons =
+    selectOrganizationAnalyticsExportReadinessBlockedReasons(input);
+
+  return {
+    exportScope: input.exportScope,
+    readinessStatus: blockedReasons.length === 0 ? "ready" : "blocked",
+    summaryRowCount: input.summaryRows.length,
+    blockedReasons,
+    objectStorageStatus: input.objectStorageAvailable
+      ? "configured"
+      : "not_configured",
+    externalDeliveryStatus: input.externalDeliveryAvailable
+      ? "configured"
+      : "not_configured",
+    generatedFile: null,
+    downloadUrl: null,
+    externalDelivery: null,
     redactionStatus: "summary_only",
   };
 }

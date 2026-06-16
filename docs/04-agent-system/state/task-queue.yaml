@@ -27068,6 +27068,7 @@ tasks:
     dependencies:
       - phase-73-advanced-organization-analytics-implementation-planning
     taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-187-organization-analytics-export-readiness-contracts-without-object-storage.md
     humanApproval: >-
       autoDriveLocalImplementationApproval approved by current 2026-06-16 user prompt; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked.
     autoDriveLocalImplementationApproval: >-
@@ -27169,24 +27170,31 @@ tasks:
       - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-187-organization-analytics-export-readiness-contracts-without-object-st -EvidencePath docs\05-execution-logs\evidence\2026-06-16-module-run-v2-auto-seed-organization-analytics.md
       - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/models/organization-analytics.test.ts src/server/services/organization-analytics-service.test.ts
+      - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
         command: npm.cmd run typecheck
       - phase: post_edit
         command: git diff --check
       - phase: advisory_baseline
-        command: npm.cmd run test -- --run focused # focused test anchor
+        command: npm.cmd run test:unit -- src/server/models/organization-analytics.test.ts src/server/services/organization-analytics-service.test.ts
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-187-organization-analytics-export-readiness-contracts-without-object-st
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-187-organization-analytics-export-readiness-contracts-without-object-st -EvidencePath docs\05-execution-logs\evidence\2026-06-16-module-run-v2-auto-seed-organization-analytics.md
+      - npm.cmd run test:unit -- src/server/models/organization-analytics.test.ts src/server/services/organization-analytics-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-187-organization-analytics-export-readiness-contracts-without-object-st
     evidencePath: docs/05-execution-logs/evidence/batch-187-organization-analytics-export-readiness-contracts-without-object-st.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-187-organization-analytics-export-readiness-contracts-without-object-st.md
-    status: pending
+    status: closed
+    claimedAt: "2026-06-16T08:42:11-07:00"
+    branch: codex/organization-analytics-batch-187-export-readiness
+    closedAt: "2026-06-16T08:47:07-07:00"
+    result: pass
     retryCount: 0
   - id: batch-188-organization-analytics-audit-log-redacted-reference
     title: Module Run v2 organization-analytics implementation seed

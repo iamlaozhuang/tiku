@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   buildOrganizationAnalyticsDashboardSummary,
   buildOrganizationAnalyticsEmployeeStatisticsSummary,
+  buildOrganizationAnalyticsExportReadinessSummary,
   type BuildOrganizationAnalyticsDashboardSummaryCommand,
   type BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand,
+  type BuildOrganizationAnalyticsExportReadinessSummaryCommand,
 } from "./organization-analytics-service";
 
 type GuardedFixtureFields = {
@@ -116,6 +118,47 @@ function createValidEmployeeStatisticsCommand(): BuildOrganizationAnalyticsEmplo
         officialSubmissions: [officialSubmission],
       },
     ],
+    updatedAt: dashboardCommand.updatedAt,
+    guardedMarkerOne,
+    guardedMarkerTwo,
+    guardedMarkerThree: dashboardCommand.guardedMarkerThree,
+    guardedMarkerFour: dashboardCommand.guardedMarkerFour,
+    guardedMarkerFive: dashboardCommand.guardedMarkerFive,
+    guardedMarkerSix: dashboardCommand.guardedMarkerSix,
+    guardedMarkerSeven: dashboardCommand.guardedMarkerSeven,
+    guardedMarkerEight: dashboardCommand.guardedMarkerEight,
+  };
+}
+
+function createValidExportReadinessCommand(): BuildOrganizationAnalyticsExportReadinessSummaryCommand &
+  GuardedFixtureFields {
+  const dashboardCommand = createValidCommand();
+  const guardedMarkerOne = ["guarded", "export", "service", "one"].join("-");
+  const guardedMarkerTwo = ["guarded", "export", "service", "two"].join("-");
+  const summaryRows = [
+    {
+      sourceRowId: 801,
+      rowPublicId: "employee_public_a",
+      redactionStatus: "summary_only" as const,
+      guardedMarkerOne,
+    },
+    {
+      sourceRowId: 802,
+      rowPublicId: "employee_public_b",
+      redactionStatus: "summary_only" as const,
+      guardedMarkerTwo,
+    },
+  ];
+
+  return {
+    adminContext: dashboardCommand.adminContext,
+    organizationPublicId: dashboardCommand.organizationPublicId,
+    scopeOrganizationPublicIds: dashboardCommand.scopeOrganizationPublicIds,
+    dateRange: dashboardCommand.dateRange,
+    exportScope: "employee_statistics_summary",
+    summaryRows,
+    objectStorageAvailable: false,
+    externalDeliveryAvailable: false,
     updatedAt: dashboardCommand.updatedAt,
     guardedMarkerOne,
     guardedMarkerTwo,
@@ -284,6 +327,80 @@ describe("organization analytics employee statistics service", () => {
     expect(
       buildOrganizationAnalyticsEmployeeStatisticsSummary({
         ...createValidEmployeeStatisticsCommand(),
+        adminContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canViewOrganizationTrainingSummary: false,
+          organizationPublicId: "org_city_public_123",
+        },
+      }).code,
+    ).toBe(403185);
+  });
+});
+
+describe("organization analytics export readiness service", () => {
+  it("builds readiness-only export metadata without artifacts or row identifiers", () => {
+    const command = createValidExportReadinessCommand();
+    const result = buildOrganizationAnalyticsExportReadinessSummary(command);
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        organizationPublicId: "org_city_public_123",
+        scopeOrganizationPublicIds: [
+          "org_city_public_123",
+          "org_district_public_456",
+        ],
+        dateRange: {
+          startAt: "2026-06-10T00:00:00Z",
+          endAt: "2026-06-12T23:59:59Z",
+        },
+        exportScope: "employee_statistics_summary",
+        readinessStatus: "blocked",
+        summaryRowCount: 2,
+        blockedReasons: [
+          "object_storage_not_configured",
+          "external_delivery_not_configured",
+        ],
+        objectStorageStatus: "not_configured",
+        externalDeliveryStatus: "not_configured",
+        generatedFile: null,
+        downloadUrl: null,
+        externalDelivery: null,
+        redactionStatus: "summary_only",
+        updatedAt: "2026-06-16T08:15:00Z",
+      },
+    });
+    expect(serializedResult).not.toMatch(/"id":/);
+    expect(serializedResult).not.toContain("sourceRowId");
+    expect(serializedResult).not.toContain("employee_public_a");
+    expect(serializedResult).not.toContain("employee_public_b");
+    expect(serializedResult).not.toContain(command.guardedMarkerOne);
+    expect(serializedResult).not.toContain(command.guardedMarkerTwo);
+  });
+
+  it("rejects export readiness when organization analytics access is not available", () => {
+    expect(
+      buildOrganizationAnalyticsExportReadinessSummary({
+        ...createValidExportReadinessCommand(),
+        adminContext: {
+          effectiveEdition: "standard",
+          authorizationSource: "org_auth",
+          canViewOrganizationTrainingSummary: true,
+          organizationPublicId: "org_city_public_123",
+        },
+      }),
+    ).toEqual({
+      code: 403185,
+      message: "Organization analytics summary access denied.",
+      data: null,
+    });
+
+    expect(
+      buildOrganizationAnalyticsExportReadinessSummary({
+        ...createValidExportReadinessCommand(),
         adminContext: {
           effectiveEdition: "advanced",
           authorizationSource: "org_auth",

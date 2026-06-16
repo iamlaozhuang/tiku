@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createOrganizationAnalyticsEmployeeTrainingSummary,
+  createOrganizationAnalyticsExportReadinessAssessment,
   createOrganizationTrainingAggregateMetrics,
   rankOrganizationTrainingEmployeeSummaries,
   selectHistoricalOrganizationTrainingVersionPublicIds,
@@ -223,6 +224,78 @@ describe("organization analytics aggregate metrics", () => {
       trainingAverageScore: null,
       latestTrainingSubmittedAt: null,
       redactionStatus: "summary_only",
+    });
+  });
+
+  it("marks export readiness as blocked without object storage or external delivery", () => {
+    const guardedMarkerOne = ["guarded", "export", "marker", "one"].join("-");
+    const guardedMarkerTwo = ["guarded", "export", "marker", "two"].join("-");
+    const summaryRows = [
+      {
+        sourceRowId: 701,
+        rowPublicId: "employee_public_a",
+        redactionStatus: "summary_only" as const,
+        guardedMarkerOne,
+      },
+      {
+        sourceRowId: 702,
+        rowPublicId: "org_city_public_123",
+        redactionStatus: "aggregate_only" as const,
+        guardedMarkerTwo,
+      },
+    ];
+
+    const assessment = createOrganizationAnalyticsExportReadinessAssessment({
+      exportScope: "employee_statistics_summary",
+      summaryRows,
+      objectStorageAvailable: false,
+      externalDeliveryAvailable: false,
+    });
+    const serializedAssessment = JSON.stringify(assessment);
+
+    expect(assessment).toEqual({
+      exportScope: "employee_statistics_summary",
+      readinessStatus: "blocked",
+      summaryRowCount: 2,
+      blockedReasons: [
+        "object_storage_not_configured",
+        "external_delivery_not_configured",
+      ],
+      objectStorageStatus: "not_configured",
+      externalDeliveryStatus: "not_configured",
+      generatedFile: null,
+      downloadUrl: null,
+      externalDelivery: null,
+      redactionStatus: "summary_only",
+    });
+    expect(serializedAssessment).not.toMatch(/"id":/);
+    expect(serializedAssessment).not.toContain("sourceRowId");
+    expect(serializedAssessment).not.toContain("employee_public_a");
+    expect(serializedAssessment).not.toContain("org_city_public_123");
+    expect(serializedAssessment).not.toContain(guardedMarkerOne);
+    expect(serializedAssessment).not.toContain(guardedMarkerTwo);
+  });
+
+  it("blocks export readiness for non-summary detail rows", () => {
+    expect(
+      createOrganizationAnalyticsExportReadinessAssessment({
+        exportScope: "dashboard_summary",
+        summaryRows: [
+          {
+            rowPublicId: "detail_row_public_a",
+            redactionStatus: "detail_only",
+          },
+        ],
+        objectStorageAvailable: true,
+        externalDeliveryAvailable: true,
+      }),
+    ).toMatchObject({
+      readinessStatus: "blocked",
+      summaryRowCount: 1,
+      blockedReasons: ["non_summary_detail_detected"],
+      generatedFile: null,
+      downloadUrl: null,
+      externalDelivery: null,
     });
   });
 });

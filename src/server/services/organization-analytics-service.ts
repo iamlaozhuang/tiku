@@ -7,11 +7,15 @@ import type {
   OrganizationAnalyticsDashboardSummaryDto,
   OrganizationAnalyticsDateRangeDto,
   OrganizationAnalyticsEmployeeStatisticsSummaryDto,
+  OrganizationAnalyticsExportReadinessSummaryDto,
+  OrganizationAnalyticsExportScope,
 } from "../contracts/organization-analytics-contract";
 import {
   createOrganizationAnalyticsEmployeeTrainingSummary,
+  createOrganizationAnalyticsExportReadinessAssessment,
   createOrganizationTrainingAggregateMetrics,
   type OrganizationAnalyticsEmployeeTrainingSummaryInput,
+  type OrganizationAnalyticsExportReadinessInput,
   type OrganizationTrainingAggregateMetricsInput,
 } from "../models/organization-analytics";
 
@@ -52,6 +56,16 @@ export type BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand =
     updatedAt: string;
   };
 
+export type BuildOrganizationAnalyticsExportReadinessSummaryCommand =
+  OrganizationAnalyticsSummaryAccessCommand & {
+    dateRange: OrganizationAnalyticsDateRangeDto;
+    exportScope: OrganizationAnalyticsExportScope;
+    summaryRows: OrganizationAnalyticsExportReadinessInput["summaryRows"];
+    objectStorageAvailable: boolean;
+    externalDeliveryAvailable: boolean;
+    updatedAt: string;
+  };
+
 function canViewOrganizationAnalyticsSummary(
   command: OrganizationAnalyticsSummaryAccessCommand,
 ) {
@@ -84,6 +98,33 @@ export function buildOrganizationAnalyticsDashboardSummary(
       dateRange: command.dateRange,
     }),
     redactionStatus: "aggregate_only",
+    updatedAt: command.updatedAt,
+  });
+}
+
+export function buildOrganizationAnalyticsExportReadinessSummary(
+  command: BuildOrganizationAnalyticsExportReadinessSummaryCommand,
+): ApiResponse<OrganizationAnalyticsExportReadinessSummaryDto | null> {
+  if (!canViewOrganizationAnalyticsSummary(command)) {
+    return createErrorResponse(
+      ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
+      ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
+    );
+  }
+
+  const readinessAssessment =
+    createOrganizationAnalyticsExportReadinessAssessment({
+      exportScope: command.exportScope,
+      summaryRows: command.summaryRows,
+      objectStorageAvailable: command.objectStorageAvailable,
+      externalDeliveryAvailable: command.externalDeliveryAvailable,
+    });
+
+  return createSuccessResponse({
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds: [...command.scopeOrganizationPublicIds],
+    dateRange: command.dateRange,
+    ...readinessAssessment,
     updatedAt: command.updatedAt,
   });
 }

@@ -50,6 +50,43 @@ export type OrganizationAnalyticsEmployeeStatisticsSummaryDto = {
   updatedAt: string;
 };
 
+export type OrganizationAnalyticsExportScope =
+  | "dashboard_summary"
+  | "employee_statistics_summary";
+
+export type OrganizationAnalyticsExportReadinessStatus = "ready" | "blocked";
+
+export type OrganizationAnalyticsExportReadinessBlockedReason =
+  | "object_storage_not_configured"
+  | "external_delivery_not_configured"
+  | "non_summary_detail_detected"
+  | "no_summary_rows";
+
+export type OrganizationAnalyticsExportDependencyStatus =
+  | "configured"
+  | "not_configured";
+
+export type OrganizationAnalyticsExportReadinessAssessmentDto = {
+  exportScope: OrganizationAnalyticsExportScope;
+  readinessStatus: OrganizationAnalyticsExportReadinessStatus;
+  summaryRowCount: number;
+  blockedReasons: OrganizationAnalyticsExportReadinessBlockedReason[];
+  objectStorageStatus: OrganizationAnalyticsExportDependencyStatus;
+  externalDeliveryStatus: OrganizationAnalyticsExportDependencyStatus;
+  generatedFile: null;
+  downloadUrl: null;
+  externalDelivery: null;
+  redactionStatus: "summary_only";
+};
+
+export type OrganizationAnalyticsExportReadinessSummaryDto =
+  OrganizationAnalyticsExportReadinessAssessmentDto & {
+    organizationPublicId: string;
+    scopeOrganizationPublicIds: string[];
+    dateRange: OrganizationAnalyticsDateRangeDto;
+    updatedAt: string;
+  };
+
 export type OrganizationAnalyticsDashboardSummaryDto = {
   organizationPublicId: string;
   scopeOrganizationPublicIds: string[];
