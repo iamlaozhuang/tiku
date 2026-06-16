@@ -59,6 +59,17 @@ export type OrganizationTrainingAdminContextResolver = (
   input: OrganizationTrainingAdminContextResolverInput,
 ) => Promise<OrganizationTrainingAdminContext | null>;
 
+export type OrganizationTrainingVisibleOrganizationScopeResolverInput = {
+  request: Request;
+  pathPublicId: string;
+  publishInput: OrganizationTrainingPublishInput;
+  adminPublicId: string;
+};
+
+export type OrganizationTrainingVisibleOrganizationScopeResolver = (
+  input: OrganizationTrainingVisibleOrganizationScopeResolverInput,
+) => Promise<readonly string[] | null>;
+
 export type OrganizationTrainingRouteOptions = {
   lookupTrustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineageLookup;
   resolveOrganizationAdminContext?: OrganizationTrainingAdminContextResolver;
@@ -69,6 +80,7 @@ export type OrganizationTrainingRuntimeRouteOptions = Pick<
   OrganizationTrainingRouteOptions,
   "resolveOrganizationAdminContext"
 > & {
+  resolveVisibleOrganizationScope?: OrganizationTrainingVisibleOrganizationScopeResolver;
   sessionService?: Pick<SessionService, "getCurrentSession">;
 };
 
@@ -126,6 +138,10 @@ async function defaultResolveOrganizationAdminContext(): Promise<null> {
   return null;
 }
 
+async function defaultResolveVisibleOrganizationScope(): Promise<null> {
+  return null;
+}
+
 function isOrganizationTrainingRuntimeAdminRole(
   role: string,
 ): role is OrganizationTrainingRuntimeAdminRole {
@@ -134,10 +150,28 @@ function isOrganizationTrainingRuntimeAdminRole(
   );
 }
 
+function normalizeVisibleOrganizationPublicIds(
+  visibleOrganizationPublicIds: readonly string[] | null,
+): string[] {
+  if (visibleOrganizationPublicIds === null) {
+    return [];
+  }
+
+  return visibleOrganizationPublicIds
+    .map((visibleOrganizationPublicId) =>
+      normalizeRequiredText(visibleOrganizationPublicId),
+    )
+    .filter(
+      (visibleOrganizationPublicId): visibleOrganizationPublicId is string =>
+        visibleOrganizationPublicId !== null,
+    );
+}
+
 function createSessionBackedOrganizationAdminContextResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
+  resolveVisibleOrganizationScope: OrganizationTrainingVisibleOrganizationScopeResolver,
 ): OrganizationTrainingAdminContextResolver {
-  return async ({ request, publishInput }) => {
+  return async ({ request, pathPublicId, publishInput }) => {
     const sessionResponse = await sessionService.getCurrentSession({
       authorization: getRequestAuthorization(request),
     });
@@ -151,24 +185,26 @@ function createSessionBackedOrganizationAdminContextResolver(
       typeof rawAdminPublicId === "string"
         ? normalizeRequiredText(rawAdminPublicId)
         : null;
-    const organizationPublicId = normalizeRequiredText(
-      publishInput.organizationPublicId,
-    );
     const hasAdminRole = (sessionResponse.data.user.adminRoles ?? []).some(
       (adminRole) => isOrganizationTrainingRuntimeAdminRole(adminRole),
     );
 
-    if (
-      adminPublicId === null ||
-      organizationPublicId === null ||
-      !hasAdminRole
-    ) {
+    if (adminPublicId === null || !hasAdminRole) {
       return null;
     }
 
+    const visibleOrganizationPublicIds = normalizeVisibleOrganizationPublicIds(
+      await resolveVisibleOrganizationScope({
+        request,
+        pathPublicId,
+        publishInput,
+        adminPublicId,
+      }),
+    );
+
     return {
       adminPublicId,
-      visibleOrganizationPublicIds: [organizationPublicId],
+      visibleOrganizationPublicIds,
     };
   };
 }
@@ -378,7 +414,11 @@ export function createOrganizationTrainingRuntimeRouteHandlers(
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
   const resolveOrganizationAdminContext =
     options.resolveOrganizationAdminContext ??
-    createSessionBackedOrganizationAdminContextResolver(sessionService);
+    createSessionBackedOrganizationAdminContextResolver(
+      sessionService,
+      options.resolveVisibleOrganizationScope ??
+        defaultResolveVisibleOrganizationScope,
+    );
 
   return createOrganizationTrainingRouteHandlers(
     createOrganizationTrainingService(
