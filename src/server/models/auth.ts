@@ -2,6 +2,7 @@ import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 import {
   admin,
+  adminOrganization,
   adminRoleValues,
   authAccount,
   authScopeTypeValues,
@@ -64,6 +65,11 @@ export type NewStudentRow = InferInsertModel<typeof student>;
 
 export type AdminRow = InferSelectModel<typeof admin>;
 export type NewAdminRow = InferInsertModel<typeof admin>;
+
+export type AdminOrganizationRow = InferSelectModel<typeof adminOrganization>;
+export type NewAdminOrganizationRow = InferInsertModel<
+  typeof adminOrganization
+>;
 
 export type OrganizationRow = InferSelectModel<typeof organization>;
 export type NewOrganizationRow = InferInsertModel<typeof organization>;

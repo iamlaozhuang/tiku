@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   admin,
+  adminOrganization,
   authAccount,
   authSession,
   authUser,
@@ -118,6 +119,26 @@ describe("auth schema baseline", () => {
     );
     expect(getIndexNames(orgAuthOrganization)).toContain(
       "udx_org_auth_organization_org_auth_id_organization_id",
+    );
+  });
+
+  it("defines admin organization assignments for visible organization scope", () => {
+    expect(getTableName(adminOrganization)).toBe("admin_organization");
+
+    expect(getColumnNames(adminOrganization)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "admin_id",
+        "organization_id",
+        "created_at",
+      ]),
+    );
+    expect(getIndexNames(adminOrganization)).toEqual(
+      expect.arrayContaining([
+        "udx_admin_organization_admin_id_organization_id",
+        "idx_admin_organization_admin_id",
+        "idx_admin_organization_organization_id",
+      ]),
     );
   });
 });

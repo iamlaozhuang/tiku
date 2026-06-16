@@ -236,6 +236,28 @@ export const organization = pgTable(
   ],
 );
 
+export const adminOrganization = pgTable(
+  "admin_organization",
+  {
+    id: idColumn(),
+    admin_id: bigint("admin_id", { mode: "number" })
+      .notNull()
+      .references(() => admin.id, { onDelete: "cascade" }),
+    organization_id: bigint("organization_id", { mode: "number" })
+      .notNull()
+      .references(() => organization.id, { onDelete: "restrict" }),
+    created_at: createdAtColumn(),
+  },
+  (table) => [
+    uniqueIndex("udx_admin_organization_admin_id_organization_id").on(
+      table.admin_id,
+      table.organization_id,
+    ),
+    index("idx_admin_organization_admin_id").on(table.admin_id),
+    index("idx_admin_organization_organization_id").on(table.organization_id),
+  ],
+);
+
 export const employee = pgTable(
   "employee",
   {
@@ -416,7 +438,8 @@ export const studentRelations = relations(student, ({ one }) => ({
   }),
 }));
 
-export const adminRelations = relations(admin, ({ one }) => ({
+export const adminRelations = relations(admin, ({ many, one }) => ({
+  adminOrganizations: many(adminOrganization),
   authUser: one(authUser, {
     fields: [admin.auth_user_id],
     references: [authUser.id],
@@ -427,6 +450,7 @@ export const organizationRelations = relations(
   organization,
   ({ many, one }) => ({
     children: many(organization),
+    adminOrganizations: many(adminOrganization),
     employee: many(employee),
     orgAuthOrganizations: many(orgAuthOrganization),
     parent: one(organization, {
@@ -434,6 +458,20 @@ export const organizationRelations = relations(
       references: [organization.id],
     }),
     purchasedOrgAuths: many(orgAuth),
+  }),
+);
+
+export const adminOrganizationRelations = relations(
+  adminOrganization,
+  ({ one }) => ({
+    admin: one(admin, {
+      fields: [adminOrganization.admin_id],
+      references: [admin.id],
+    }),
+    organization: one(organization, {
+      fields: [adminOrganization.organization_id],
+      references: [organization.id],
+    }),
   }),
 );
 

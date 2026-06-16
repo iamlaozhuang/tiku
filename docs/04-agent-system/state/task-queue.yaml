@@ -25531,9 +25531,11 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration
-    status: pending
-    result: null
+    status: closed
+    result: pass_schema_migration_no_db_execution
     retryCount: 0
+    claimedAt: "2026-06-16T04:37:18-07:00"
+    closedAt: "2026-06-16T04:44:38-07:00"
   - id: module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope
     title: Normalize schema migration capability state for admin organization scope task
     phase: module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope
