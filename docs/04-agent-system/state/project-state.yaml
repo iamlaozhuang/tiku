@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
-updatedAt: "2026-06-15T21:46:57-07:00"
+currentPhase: advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding
+updatedAt: "2026-06-15T21:56:03-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 311ccb74e2c3de1c1c1d4cf36587dc0e01e8e39f
-  lastKnownOriginMasterSha: 311ccb74e2c3de1c1c1d4cf36587dc0e01e8e39f
+  lastKnownMasterSha: bbf7d2051ef321a9c2a9f7a7830602512bfeaa2f
+  lastKnownOriginMasterSha: bbf7d2051ef321a9c2a9f7a7830602512bfeaa2f
 currentTask:
-  id: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
+  id: advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
-  branch: codex/advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding.md
+  branch: codex/advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -417,9 +417,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiring: pass_tdd_service_runtime_wiring_no_db_execution
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiringReadonlyRecheckSeeding: pass_docs_only_seeded_service_runtime_wiring_readonly_recheck_task
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiringReadonlyRecheck: pass_readonly_recheck_no_findings
-    preCommitHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionRouteBoundaryReadonlyAuditSeeding: pass_docs_only_seeded_route_boundary_readonly_audit_task
+    preCommitHook: pass_advanced_organization_training_publish_version_route_boundary_readonly_audit_seeding_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_route_boundary_readonly_audit_seeding_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_route_boundary_readonly_audit_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -435,8 +436,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Approve a docs/state/log-only seed task for
-    `advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding` if ready. DB access, migration
+    Approve `advanced-organization-training-publish-version-route-boundary-readonly-audit` if ready. DB access, migration
     execution, route/API/UI implementation, provider/model work, dependency changes, staging/prod, PR, force push, formal
     target write, and Cost Calibration Gate remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding.md
