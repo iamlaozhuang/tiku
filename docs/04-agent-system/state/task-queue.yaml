@@ -27930,3 +27930,163 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-tdd
+  - id: advanced-organization-analytics-post-service-wiring-recheck-seeding
+    title: Advanced organization analytics post service wiring recheck seeding
+    phase: advanced-organization-analytics-post-service-wiring-recheck-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T10:51:29-07:00"
+    closedAt: "2026-06-16T10:51:29-07:00"
+    dependencies:
+      - advanced-organization-analytics-repository-service-wiring-tdd
+    humanApproval: >-
+      User approved executing this docs/state-only queue refresh and readonly recheck seeding task in the current
+      2026-06-16 Codex thread by saying "批准执行". Approval is limited to updating durable state and task queue,
+      creating task plan/evidence/audit logs, seeding a pending readonly recheck task, declared local validation, local
+      commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
+      source implementation, repository/mapper/validator/route/UI/runtime/schema/DB/data-source work, provider/model
+      calls, dependency changes, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, and
+      force push remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-service-wiring-recheck-seeding.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - repository/mapper/validator/route/UI/runtime wiring
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-post-service-wiring-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-post-service-wiring-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-post-service-wiring-recheck-seeding
+  - id: advanced-organization-analytics-repository-service-wiring-readonly-recheck
+    title: Advanced organization analytics repository service wiring readonly recheck
+    phase: advanced-organization-analytics-repository-service-wiring-readonly-recheck
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: readonly_recheck
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-post-service-wiring-recheck-seeding
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is limited to readonly review of the
+      repository-backed organization analytics service wiring after TDD closeout. The task should confirm ADR-002
+      layering, service-only repository injection, summary-only/aggregate-only redaction, export-readiness metadata
+      boundaries, and preservation of blocked gates before any route, runtime, mapper, validator, schema, DB, UI, or
+      data-source task is seeded.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    readonlyFiles:
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/organization-analytics-service.test.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - repository/mapper/validator/route/UI/runtime wiring
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_fresh_user_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-service.test.ts"
+      - npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-readonly-recheck
