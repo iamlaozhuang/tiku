@@ -4,6 +4,8 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type {
+  OrganizationAnalyticsAuditLogReferenceAction,
+  OrganizationAnalyticsAuditLogReferenceDto,
   OrganizationAnalyticsDashboardSummaryDto,
   OrganizationAnalyticsDateRangeDto,
   OrganizationAnalyticsEmployeeStatisticsSummaryDto,
@@ -11,9 +13,11 @@ import type {
   OrganizationAnalyticsExportScope,
 } from "../contracts/organization-analytics-contract";
 import {
+  createOrganizationAnalyticsAuditLogRedactedReference,
   createOrganizationAnalyticsEmployeeTrainingSummary,
   createOrganizationAnalyticsExportReadinessAssessment,
   createOrganizationTrainingAggregateMetrics,
+  type OrganizationAnalyticsAuditLogReferenceInput,
   type OrganizationAnalyticsEmployeeTrainingSummaryInput,
   type OrganizationAnalyticsExportReadinessInput,
   type OrganizationTrainingAggregateMetricsInput,
@@ -64,6 +68,15 @@ export type BuildOrganizationAnalyticsExportReadinessSummaryCommand =
     objectStorageAvailable: boolean;
     externalDeliveryAvailable: boolean;
     updatedAt: string;
+  };
+
+export type BuildOrganizationAnalyticsAuditLogReferenceCommand =
+  OrganizationAnalyticsSummaryAccessCommand & {
+    dateRange: OrganizationAnalyticsDateRangeDto;
+    action: OrganizationAnalyticsAuditLogReferenceAction;
+    referencePublicId: string;
+    summaryRowCount: number;
+    recordedAt: string;
   };
 
 function canViewOrganizationAnalyticsSummary(
@@ -127,6 +140,33 @@ export function buildOrganizationAnalyticsExportReadinessSummary(
     ...readinessAssessment,
     updatedAt: command.updatedAt,
   });
+}
+
+export function buildOrganizationAnalyticsAuditLogRedactedReference(
+  command: BuildOrganizationAnalyticsAuditLogReferenceCommand,
+): ApiResponse<OrganizationAnalyticsAuditLogReferenceDto | null> {
+  if (!canViewOrganizationAnalyticsSummary(command)) {
+    return createErrorResponse(
+      ORGANIZATION_ANALYTICS_ACCESS_DENIED_CODE,
+      ORGANIZATION_ANALYTICS_ACCESS_DENIED_MESSAGE,
+    );
+  }
+
+  const auditLogReferenceInput: OrganizationAnalyticsAuditLogReferenceInput = {
+    action: command.action,
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds: command.scopeOrganizationPublicIds,
+    dateRange: command.dateRange,
+    referencePublicId: command.referencePublicId,
+    summaryRowCount: command.summaryRowCount,
+    recordedAt: command.recordedAt,
+  };
+
+  return createSuccessResponse(
+    createOrganizationAnalyticsAuditLogRedactedReference(
+      auditLogReferenceInput,
+    ),
+  );
 }
 
 export function buildOrganizationAnalyticsEmployeeStatisticsSummary(

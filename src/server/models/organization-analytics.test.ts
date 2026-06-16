@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createOrganizationAnalyticsAuditLogRedactedReference,
   createOrganizationAnalyticsEmployeeTrainingSummary,
   createOrganizationAnalyticsExportReadinessAssessment,
   createOrganizationTrainingAggregateMetrics,
@@ -297,5 +298,54 @@ describe("organization analytics aggregate metrics", () => {
       downloadUrl: null,
       externalDelivery: null,
     });
+  });
+
+  it("creates an audit log redacted reference without scope lists or source rows", () => {
+    const guardedMarkerOne = ["guarded", "audit", "marker", "one"].join("-");
+    const guardedMarkerTwo = ["guarded", "audit", "marker", "two"].join("-");
+    const rawAuditLogReferenceInput = {
+      action: "export_readiness_checked" as const,
+      organizationPublicId: "org_city_public_123",
+      scopeOrganizationPublicIds: [
+        "org_city_public_123",
+        "org_district_public_456",
+      ],
+      dateRange: {
+        startAt: "2026-06-10T00:00:00Z",
+        endAt: "2026-06-12T23:59:59Z",
+      },
+      referencePublicId: "audit_reference_public_123",
+      summaryRowCount: 2,
+      recordedAt: "2026-06-16T09:05:00Z",
+      sourceRowId: 901,
+      guardedMarkerOne,
+      guardedMarkerTwo,
+    };
+
+    const reference = createOrganizationAnalyticsAuditLogRedactedReference(
+      rawAuditLogReferenceInput,
+    );
+    const serializedReference = JSON.stringify(reference);
+
+    expect(reference).toEqual({
+      action: "export_readiness_checked",
+      organizationPublicId: "org_city_public_123",
+      scopeOrganizationCount: 2,
+      dateRange: {
+        startAt: "2026-06-10T00:00:00Z",
+        endAt: "2026-06-12T23:59:59Z",
+      },
+      referencePublicId: "audit_reference_public_123",
+      summaryRowCount: 2,
+      redactionStatus: "redacted_reference",
+      persistenceStatus: "not_written",
+      recordedAt: "2026-06-16T09:05:00Z",
+    });
+    expect(serializedReference).not.toMatch(/"id":/);
+    expect(serializedReference).not.toContain("scopeOrganizationPublicIds");
+    expect(serializedReference).not.toContain("sourceRowId");
+    expect(serializedReference).not.toContain("org_district_public_456");
+    expect(serializedReference).not.toContain(guardedMarkerOne);
+    expect(serializedReference).not.toContain(guardedMarkerTwo);
   });
 });

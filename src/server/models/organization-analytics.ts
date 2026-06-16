@@ -1,5 +1,7 @@
 import type {
   OrganizationAnalyticsAnswerOrganizationSnapshotDto,
+  OrganizationAnalyticsAuditLogReferenceAction,
+  OrganizationAnalyticsAuditLogReferenceDto,
   OrganizationAnalyticsDateRangeDto,
   OrganizationAnalyticsEmployeeTrainingSummaryDto,
   OrganizationAnalyticsExportReadinessAssessmentDto,
@@ -74,6 +76,16 @@ export type OrganizationAnalyticsExportReadinessInput = {
   summaryRows: readonly OrganizationAnalyticsExportReadinessRow[];
   objectStorageAvailable: boolean;
   externalDeliveryAvailable: boolean;
+};
+
+export type OrganizationAnalyticsAuditLogReferenceInput = {
+  action: OrganizationAnalyticsAuditLogReferenceAction;
+  organizationPublicId: string;
+  scopeOrganizationPublicIds: readonly string[];
+  dateRange: OrganizationAnalyticsDateRangeDto;
+  referencePublicId: string;
+  summaryRowCount: number;
+  recordedAt: string;
 };
 
 function isWithinDateRange(
@@ -292,6 +304,25 @@ export function createOrganizationAnalyticsExportReadinessAssessment(
     downloadUrl: null,
     externalDelivery: null,
     redactionStatus: "summary_only",
+  };
+}
+
+export function createOrganizationAnalyticsAuditLogRedactedReference(
+  input: OrganizationAnalyticsAuditLogReferenceInput,
+): OrganizationAnalyticsAuditLogReferenceDto {
+  return {
+    action: input.action,
+    organizationPublicId: input.organizationPublicId,
+    scopeOrganizationCount: new Set(input.scopeOrganizationPublicIds).size,
+    dateRange: {
+      startAt: input.dateRange.startAt,
+      endAt: input.dateRange.endAt,
+    },
+    referencePublicId: input.referencePublicId,
+    summaryRowCount: input.summaryRowCount,
+    redactionStatus: "redacted_reference",
+    persistenceStatus: "not_written",
+    recordedAt: input.recordedAt,
   };
 }
 

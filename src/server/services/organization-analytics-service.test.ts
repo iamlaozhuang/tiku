@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildOrganizationAnalyticsAuditLogRedactedReference,
   buildOrganizationAnalyticsDashboardSummary,
   buildOrganizationAnalyticsEmployeeStatisticsSummary,
   buildOrganizationAnalyticsExportReadinessSummary,
+  type BuildOrganizationAnalyticsAuditLogReferenceCommand,
   type BuildOrganizationAnalyticsDashboardSummaryCommand,
   type BuildOrganizationAnalyticsEmployeeStatisticsSummaryCommand,
   type BuildOrganizationAnalyticsExportReadinessSummaryCommand,
@@ -168,6 +170,33 @@ function createValidExportReadinessCommand(): BuildOrganizationAnalyticsExportRe
     guardedMarkerSix: dashboardCommand.guardedMarkerSix,
     guardedMarkerSeven: dashboardCommand.guardedMarkerSeven,
     guardedMarkerEight: dashboardCommand.guardedMarkerEight,
+  };
+}
+
+function createValidAuditLogReferenceCommand(): BuildOrganizationAnalyticsAuditLogReferenceCommand &
+  GuardedFixtureFields {
+  const exportReadinessCommand = createValidExportReadinessCommand();
+  const guardedMarkerOne = ["guarded", "audit", "service", "one"].join("-");
+  const guardedMarkerTwo = ["guarded", "audit", "service", "two"].join("-");
+
+  return {
+    adminContext: exportReadinessCommand.adminContext,
+    organizationPublicId: exportReadinessCommand.organizationPublicId,
+    scopeOrganizationPublicIds:
+      exportReadinessCommand.scopeOrganizationPublicIds,
+    dateRange: exportReadinessCommand.dateRange,
+    action: "export_readiness_checked",
+    referencePublicId: "audit_reference_public_123",
+    summaryRowCount: exportReadinessCommand.summaryRows.length,
+    recordedAt: "2026-06-16T09:05:00Z",
+    guardedMarkerOne,
+    guardedMarkerTwo,
+    guardedMarkerThree: exportReadinessCommand.guardedMarkerThree,
+    guardedMarkerFour: exportReadinessCommand.guardedMarkerFour,
+    guardedMarkerFive: exportReadinessCommand.guardedMarkerFive,
+    guardedMarkerSix: exportReadinessCommand.guardedMarkerSix,
+    guardedMarkerSeven: exportReadinessCommand.guardedMarkerSeven,
+    guardedMarkerEight: exportReadinessCommand.guardedMarkerEight,
   };
 }
 
@@ -401,6 +430,74 @@ describe("organization analytics export readiness service", () => {
     expect(
       buildOrganizationAnalyticsExportReadinessSummary({
         ...createValidExportReadinessCommand(),
+        adminContext: {
+          effectiveEdition: "advanced",
+          authorizationSource: "org_auth",
+          canViewOrganizationTrainingSummary: false,
+          organizationPublicId: "org_city_public_123",
+        },
+      }).code,
+    ).toBe(403185);
+  });
+});
+
+describe("organization analytics audit log reference service", () => {
+  it("builds a redacted audit log reference without writing source details", () => {
+    const command = createValidAuditLogReferenceCommand();
+    const result = buildOrganizationAnalyticsAuditLogRedactedReference(command);
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        action: "export_readiness_checked",
+        organizationPublicId: "org_city_public_123",
+        scopeOrganizationCount: 2,
+        dateRange: {
+          startAt: "2026-06-10T00:00:00Z",
+          endAt: "2026-06-12T23:59:59Z",
+        },
+        referencePublicId: "audit_reference_public_123",
+        summaryRowCount: 2,
+        redactionStatus: "redacted_reference",
+        persistenceStatus: "not_written",
+        recordedAt: "2026-06-16T09:05:00Z",
+      },
+    });
+    expect(serializedResult).not.toMatch(/"id":/);
+    expect(serializedResult).not.toContain("scopeOrganizationPublicIds");
+    expect(serializedResult).not.toContain("org_district_public_456");
+    expect(serializedResult).not.toContain(command.guardedMarkerOne);
+    expect(serializedResult).not.toContain(command.guardedMarkerTwo);
+    expect(serializedResult).not.toContain(command.guardedMarkerThree);
+    expect(serializedResult).not.toContain(command.guardedMarkerFour);
+    expect(serializedResult).not.toContain(command.guardedMarkerFive);
+    expect(serializedResult).not.toContain(command.guardedMarkerSix);
+    expect(serializedResult).not.toContain(command.guardedMarkerSeven);
+    expect(serializedResult).not.toContain(command.guardedMarkerEight);
+  });
+
+  it("rejects audit log references when organization analytics access is not available", () => {
+    expect(
+      buildOrganizationAnalyticsAuditLogRedactedReference({
+        ...createValidAuditLogReferenceCommand(),
+        adminContext: {
+          effectiveEdition: "standard",
+          authorizationSource: "org_auth",
+          canViewOrganizationTrainingSummary: true,
+          organizationPublicId: "org_city_public_123",
+        },
+      }),
+    ).toEqual({
+      code: 403185,
+      message: "Organization analytics summary access denied.",
+      data: null,
+    });
+
+    expect(
+      buildOrganizationAnalyticsAuditLogRedactedReference({
+        ...createValidAuditLogReferenceCommand(),
         adminContext: {
           effectiveEdition: "advanced",
           authorizationSource: "org_auth",

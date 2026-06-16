@@ -87,6 +87,23 @@ export type OrganizationAnalyticsExportReadinessSummaryDto =
     updatedAt: string;
   };
 
+export type OrganizationAnalyticsAuditLogReferenceAction =
+  | "dashboard_summary_viewed"
+  | "employee_statistics_summary_viewed"
+  | "export_readiness_checked";
+
+export type OrganizationAnalyticsAuditLogReferenceDto = {
+  action: OrganizationAnalyticsAuditLogReferenceAction;
+  organizationPublicId: string;
+  scopeOrganizationCount: number;
+  dateRange: OrganizationAnalyticsDateRangeDto;
+  referencePublicId: string;
+  summaryRowCount: number;
+  redactionStatus: "redacted_reference";
+  persistenceStatus: "not_written";
+  recordedAt: string;
+};
+
 export type OrganizationAnalyticsDashboardSummaryDto = {
   organizationPublicId: string;
   scopeOrganizationPublicIds: string[];
