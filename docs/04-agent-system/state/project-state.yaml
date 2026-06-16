@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck
-updatedAt: "2026-06-16T05:32:44-07:00"
+currentPhase: advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver
+updatedAt: "2026-06-16T05:56:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -323,13 +323,13 @@ repository:
   lastKnownMasterSha: 3fe4eee04cbb9cd08288f64b629cdeb0eed5271b
   lastKnownOriginMasterSha: 3fe4eee04cbb9cd08288f64b629cdeb0eed5271b
 currentTask:
-  id: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck
+  id: advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck.md
-  branch: codex/admin-organization-visible-scope-resolver-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
+  branch: codex/organization-training-next-implementation-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -506,9 +506,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeAdminOrganizationRepositoryResolverSeeding: pass_docs_only_seeded_admin_organization_repository_resolver_tdd
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeAdminOrganizationRepositoryResolver: pass_tdd_admin_organization_visible_scope_repository_resolver
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeAdminOrganizationRepositoryResolverReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
-    preCommitHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_route_visible_organization_scope_resolver_contract_readonly_recheck_pre_push_readiness
+    advancedOrganizationTrainingNextImplementationQueueSeedingPostVisibleScopeResolver: pass_auto_seed_transaction_self_review
+    preCommitHook: pass_advanced_organization_training_next_implementation_queue_seeding_post_visible_scope_resolver_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_next_implementation_queue_seeding_post_visible_scope_resolver_closeout_readiness
+    prePushHook: pass_advanced_organization_training_next_implementation_queue_seeding_post_visible_scope_resolver_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -524,9 +525,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    The admin_organization-backed visible organization scope repository resolver readonly recheck found no blocking
-    findings. After closeout, scan the pending queue and resume the next organization-training publish-route
-    implementation candidate. `.env*`, real DB execution, row/private data, dependency, provider,
-    e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration
-    Gate remain blocked unless a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck.md
+    The post-visible-scope-resolver auto-seed transaction queued four pending organization-training implementation tasks.
+    Start with `batch-181-organization-training-organization-admin-training-draft-publish-ta` after closeout, creating a
+    required task plan before edits and preserving the task-declared blocked gates. `.env*`, real DB execution,
+    row/private data, dependency, provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
+    PR, force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
