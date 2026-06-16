@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-repository-read-model-boundary-readonly-audit
-updatedAt: "2026-06-16T09:28:51-07:00"
+currentPhase: advanced-organization-analytics-repository-read-model-contract-tdd
+updatedAt: "2026-06-16T09:38:37-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1a3b650d0b373efddcab4f63c81539c5d050fb51
-  lastKnownOriginMasterSha: 1a3b650d0b373efddcab4f63c81539c5d050fb51
+  lastKnownMasterSha: 4e248ec94afbf3a93fb827b0c36a5a195c306283
+  lastKnownOriginMasterSha: 4e248ec94afbf3a93fb827b0c36a5a195c306283
 currentTask:
-  id: advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+  id: advanced-organization-analytics-repository-read-model-contract-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
-  branch: codex/organization-analytics-repository-boundary-audit
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+  branch: codex/organization-analytics-repository-contract-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -519,6 +519,7 @@ qualityGates:
     batch188OrganizationAnalyticsAuditLogRedactedReference: pass_tdd_redacted_audit_log_reference
     advancedOrganizationAnalyticsPostBatchReadonlyRollupSeeding: pass_docs_only_seeded_repository_read_model_boundary_audit
     advancedOrganizationAnalyticsRepositoryReadModelBoundaryReadonlyAudit: pass_readonly_audit_seeded_repository_contract_tdd
+    advancedOrganizationAnalyticsRepositoryReadModelContractTdd: pass_repository_contract_tdd_no_db_execution
     preCommitHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_commit_hardening
     moduleCloseout: pass_organization_analytics_auto_seed_readiness_normalization_closeout_readiness
     prePushHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_push_readiness
@@ -537,9 +538,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Advanced organization analytics repository read-model boundary audit is closed. Continue with
-    `advanced-organization-analytics-repository-read-model-contract-tdd`: a narrow injected-gateway repository contract
-    TDD task limited to `src/server/repositories/organization-analytics-repository.ts` and its colocated unit test. Do
-    not import schema, execute DB commands, add a Postgres adapter, wire services/routes/UI, or expose row/private data.
-    A later schema/data-source boundary task remains required before any real DB-backed read model.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+    Advanced organization analytics repository read-model contract TDD is closed. Continue with
+    `advanced-organization-analytics-repository-read-model-contract-readonly-recheck` to verify the new repository
+    contract and tests preserve the no-DB/no-schema/no-runtime-adapter boundary before any service wiring or
+    schema/data-source decision. `.env*`, DB execution, row/private data, schema/migration, provider, dependency,
+    e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration
+    Gate remain blocked unless a future scoped task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md

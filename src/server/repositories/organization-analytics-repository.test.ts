@@ -1,0 +1,317 @@
+import { describe, expect, it, vi } from "vitest";
+
+import {
+  createOrganizationAnalyticsRepository,
+  type OrganizationAnalyticsRepositoryGateway,
+} from "./organization-analytics-repository";
+
+function createGateway(
+  overrides: Partial<OrganizationAnalyticsRepositoryGateway> = {},
+) {
+  const findVisibleOrganizationScopeByAdminPublicId = vi.fn(async () => [
+    "organization_root_public",
+    "organization_child_public",
+  ]);
+  const readTrainingAggregateMetricsInput = vi.fn(async () => ({
+    eligibleEmployeePublicIds: [
+      "employee_public_001",
+      "employee_public_002",
+      "employee_public_001",
+    ],
+    officialSubmissions: [
+      {
+        employeePublicId: "employee_public_001",
+        score: 86,
+        totalScore: 100,
+        submittedAt: "2026-06-16T02:00:00.000Z",
+        detailFieldA: "hidden detail A",
+        detailFieldB: "hidden detail B",
+        detailFieldC: "hidden detail C",
+        detailFieldD: "hidden detail D",
+        hiddenFieldA: "hidden marker A",
+        hiddenFieldB: "hidden marker B",
+        hiddenFieldC: "hidden marker C",
+        hiddenFieldD: "hidden marker D",
+        hiddenFieldE: "hidden marker E",
+        hiddenFieldF: "hidden marker F",
+        hiddenFieldG: "hidden marker G",
+        internalRowNumber: 901,
+      },
+    ],
+  }));
+  const readEmployeeTrainingSummaryInputs = vi.fn(async () => [
+    {
+      employeePublicId: "employee_public_001",
+      employeeDisplayName: "Employee One",
+      organizationPublicId: "organization_child_public",
+      organizationName: "Child Organization",
+      visibleTrainingVersionPublicIds: [
+        "training_version_public_001",
+        "training_version_public_002",
+      ],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_001",
+          trainingVersionPublicId: "training_version_public_001",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-16T02:00:00.000Z",
+          answerOrganizationSnapshot: {
+            organizationPublicId: "organization_child_public",
+            organizationName: "Child Organization",
+            capturedAt: "2026-06-16T01:59:00.000Z",
+            detailFieldA: "hidden nested detail",
+          },
+          hiddenFieldA: "hidden marker A",
+          hiddenFieldB: "hidden marker B",
+          internalRowNumber: 902,
+        },
+      ],
+      sourceRowNumber: 903,
+    },
+  ]);
+  const readFormalLearningSummary = vi.fn(async () => ({
+    formalPracticeCount: 3,
+    formalMockExamCount: 2,
+    formalExamReportCount: 1,
+    formalMistakeBookCount: 4,
+    detailFieldA: "hidden formal detail",
+    detailFieldB: "hidden formal question",
+    internalRowNumber: 904,
+  }));
+  const readQuotaSummary = vi.fn(async () => ({
+    employeeAiTaskCount: 5,
+    employeeAiSucceededTaskCount: 4,
+    employeeAiFailedTaskCount: 1,
+    employeeAiQuotaConsumedPoint: 120,
+    organizationTrainingGenerationConsumedPoint: 80,
+    quotaRemainingPoint: 300,
+    hiddenFieldA: "hidden quota marker A",
+    hiddenFieldB: "hidden quota marker B",
+    hiddenFieldC: "hidden quota marker C",
+    internalRowNumber: 905,
+  }));
+  const readExportReadinessRows = vi.fn(async () => [
+    {
+      rowPublicId: "organization_analytics_summary_row_public_001",
+      redactionStatus: "summary_only" as const,
+      sourceRowNumber: 906,
+      downloadArtifact: "hidden download artifact",
+      generatedArtifact: "hidden generated artifact",
+    },
+  ]);
+  const gateway: OrganizationAnalyticsRepositoryGateway = {
+    findVisibleOrganizationScopeByAdminPublicId,
+    readTrainingAggregateMetricsInput,
+    readEmployeeTrainingSummaryInputs,
+    readFormalLearningSummary,
+    readQuotaSummary,
+    readExportReadinessRows,
+    ...overrides,
+  };
+
+  return {
+    gateway,
+    findVisibleOrganizationScopeByAdminPublicId,
+    readTrainingAggregateMetricsInput,
+    readEmployeeTrainingSummaryInputs,
+    readFormalLearningSummary,
+    readQuotaSummary,
+    readExportReadinessRows,
+  };
+}
+
+function createScopeInput() {
+  return {
+    organizationPublicId: " organization_root_public ",
+    scopeOrganizationPublicIds: [
+      " organization_root_public ",
+      "organization_child_public",
+      "organization_root_public",
+    ],
+    dateRange: {
+      startAt: "2026-06-16T00:00:00.000Z",
+      endAt: "2026-06-16T23:59:59.000Z",
+    },
+  };
+}
+
+describe("organization analytics repository", () => {
+  it("looks up visible organization scope only for a nonblank admin public id", async () => {
+    const { gateway, findVisibleOrganizationScopeByAdminPublicId } =
+      createGateway();
+    const repository = createOrganizationAnalyticsRepository(gateway);
+
+    const result = await repository.lookupVisibleOrganizationScope({
+      adminPublicId: " organization_admin_public_001 ",
+    });
+    const blankResult = await repository.lookupVisibleOrganizationScope({
+      adminPublicId: " ",
+    });
+
+    expect(findVisibleOrganizationScopeByAdminPublicId).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(findVisibleOrganizationScopeByAdminPublicId).toHaveBeenCalledWith(
+      "organization_admin_public_001",
+    );
+    expect(result).toEqual([
+      "organization_root_public",
+      "organization_child_public",
+    ]);
+    expect(blankResult).toBeNull();
+  });
+
+  it("returns cloned training aggregate inputs without gateway sensitive fields", async () => {
+    const { gateway, readTrainingAggregateMetricsInput } = createGateway();
+    const repository = createOrganizationAnalyticsRepository(gateway);
+
+    const result =
+      await repository.readTrainingAggregateMetricsInput(createScopeInput());
+
+    expect(readTrainingAggregateMetricsInput).toHaveBeenCalledWith({
+      organizationPublicId: "organization_root_public",
+      scopeOrganizationPublicIds: [
+        "organization_root_public",
+        "organization_child_public",
+      ],
+      dateRange: {
+        startAt: "2026-06-16T00:00:00.000Z",
+        endAt: "2026-06-16T23:59:59.000Z",
+      },
+    });
+    expect(result).toEqual({
+      eligibleEmployeePublicIds: [
+        "employee_public_001",
+        "employee_public_002",
+        "employee_public_001",
+      ],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_001",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-16T02:00:00.000Z",
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toMatch(
+      /hidden|detailField|hiddenField|internalRowNumber/u,
+    );
+  });
+
+  it("returns employee summary inputs with answer organization snapshots only", async () => {
+    const { gateway } = createGateway();
+    const repository = createOrganizationAnalyticsRepository(gateway);
+
+    const result =
+      await repository.readEmployeeTrainingSummaryInputs(createScopeInput());
+
+    expect(result).toEqual([
+      {
+        employeePublicId: "employee_public_001",
+        employeeDisplayName: "Employee One",
+        organizationPublicId: "organization_child_public",
+        organizationName: "Child Organization",
+        visibleTrainingVersionPublicIds: [
+          "training_version_public_001",
+          "training_version_public_002",
+        ],
+        officialSubmissions: [
+          {
+            employeePublicId: "employee_public_001",
+            trainingVersionPublicId: "training_version_public_001",
+            score: 86,
+            totalScore: 100,
+            submittedAt: "2026-06-16T02:00:00.000Z",
+            answerOrganizationSnapshot: {
+              organizationPublicId: "organization_child_public",
+              organizationName: "Child Organization",
+              capturedAt: "2026-06-16T01:59:00.000Z",
+            },
+          },
+        ],
+      },
+    ]);
+    expect(JSON.stringify(result)).not.toMatch(
+      /hidden|detailField|hiddenField|internalRowNumber|sourceRowNumber/u,
+    );
+  });
+
+  it("returns formal learning, quota, and export readiness summaries without detail payloads", async () => {
+    const { gateway } = createGateway();
+    const repository = createOrganizationAnalyticsRepository(gateway);
+
+    const formalLearningSummary =
+      await repository.readFormalLearningSummary(createScopeInput());
+    const quotaSummary = await repository.readQuotaSummary(createScopeInput());
+    const exportRows =
+      await repository.readExportReadinessRows(createScopeInput());
+
+    expect(formalLearningSummary).toEqual({
+      formalPracticeCount: 3,
+      formalMockExamCount: 2,
+      formalExamReportCount: 1,
+      formalMistakeBookCount: 4,
+      redactionStatus: "summary_only",
+    });
+    expect(quotaSummary).toEqual({
+      employeeAiTaskCount: 5,
+      employeeAiSucceededTaskCount: 4,
+      employeeAiFailedTaskCount: 1,
+      employeeAiQuotaConsumedPoint: 120,
+      organizationTrainingGenerationConsumedPoint: 80,
+      quotaRemainingPoint: 300,
+      redactionStatus: "summary_only",
+    });
+    expect(exportRows).toEqual([
+      {
+        rowPublicId: "organization_analytics_summary_row_public_001",
+        redactionStatus: "summary_only",
+      },
+    ]);
+    expect(
+      JSON.stringify({ formalLearningSummary, quotaSummary, exportRows }),
+    ).not.toMatch(
+      /hidden|detailField|hiddenField|internalRowNumber|sourceRowNumber|downloadArtifact|generatedArtifact/u,
+    );
+  });
+
+  it("does not query the gateway when scope input is blank", async () => {
+    const {
+      gateway,
+      readTrainingAggregateMetricsInput,
+      readEmployeeTrainingSummaryInputs,
+      readFormalLearningSummary,
+      readQuotaSummary,
+      readExportReadinessRows,
+    } = createGateway();
+    const repository = createOrganizationAnalyticsRepository(gateway);
+    const blankScopeInput = {
+      ...createScopeInput(),
+      organizationPublicId: " ",
+    };
+
+    await expect(
+      repository.readTrainingAggregateMetricsInput(blankScopeInput),
+    ).resolves.toBeNull();
+    await expect(
+      repository.readEmployeeTrainingSummaryInputs(blankScopeInput),
+    ).resolves.toEqual([]);
+    await expect(
+      repository.readFormalLearningSummary(blankScopeInput),
+    ).resolves.toBeNull();
+    await expect(
+      repository.readQuotaSummary(blankScopeInput),
+    ).resolves.toBeNull();
+    await expect(
+      repository.readExportReadinessRows(blankScopeInput),
+    ).resolves.toEqual([]);
+
+    expect(readTrainingAggregateMetricsInput).not.toHaveBeenCalled();
+    expect(readEmployeeTrainingSummaryInputs).not.toHaveBeenCalled();
+    expect(readFormalLearningSummary).not.toHaveBeenCalled();
+    expect(readQuotaSummary).not.toHaveBeenCalled();
+    expect(readExportReadinessRows).not.toHaveBeenCalled();
+  });
+});
