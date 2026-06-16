@@ -37,6 +37,11 @@ export const organizationTrainingAnswerStatusValues = [
   "read_only",
 ] as const;
 
+export const organizationTrainingSourceContextTypeValues = [
+  "paper",
+  "mock_exam",
+] as const;
+
 export const organizationTrainingSensitiveAdminSummaryFieldValues = [
   "questionAnswerBody",
   "itemCorrectness",
@@ -66,6 +71,9 @@ export type OrganizationTrainingVersionStatus =
 
 export type OrganizationTrainingAnswerStatus =
   (typeof organizationTrainingAnswerStatusValues)[number];
+
+export type OrganizationTrainingSourceContextType =
+  (typeof organizationTrainingSourceContextTypeValues)[number];
 
 export type OrganizationTrainingSensitiveAdminSummaryField =
   (typeof organizationTrainingSensitiveAdminSummaryFieldValues)[number];

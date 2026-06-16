@@ -17,6 +17,7 @@ import {
   type OrganizationTrainingEmployeeAnswerSubmissionWrite,
   type OrganizationTrainingVersionCopyToNewDraftWrite,
   type OrganizationTrainingPublishedVersionPersistenceWrite,
+  type OrganizationTrainingSourceContextWrite,
   type OrganizationTrainingVersionTakedownWrite,
 } from "./organization-training-service";
 
@@ -56,6 +57,7 @@ function createDraftStore() {
     [];
   let takenDownVersions: OrganizationTrainingVersionTakedownWrite[] = [];
   let copiedDrafts: OrganizationTrainingVersionCopyToNewDraftWrite[] = [];
+  let attachedSourceContexts: OrganizationTrainingSourceContextWrite[] = [];
   let savedAnswerDrafts: OrganizationTrainingEmployeeAnswerDraftWrite[] = [];
   let submittedAnswers: OrganizationTrainingEmployeeAnswerSubmissionWrite[] =
     [];
@@ -161,6 +163,16 @@ function createDraftStore() {
         expiresAt: null,
       };
     },
+    async attachSourceContext(sourceContextWrite) {
+      attachedSourceContexts = [...attachedSourceContexts, sourceContextWrite];
+
+      return {
+        draftPublicId: sourceContextWrite.draftPublicId,
+        organizationPublicId: sourceContextWrite.organizationPublicId,
+        sourceContexts: sourceContextWrite.sourceContexts,
+        redactionStatus: sourceContextWrite.redactionStatus,
+      };
+    },
     async saveEmployeeAnswerDraft(answerDraftWrite) {
       savedAnswerDrafts = [...savedAnswerDrafts, answerDraftWrite];
 
@@ -212,6 +224,7 @@ function createDraftStore() {
     getPublishedVersions: () => publishedVersions,
     getTakenDownVersions: () => takenDownVersions,
     getCopiedDrafts: () => copiedDrafts,
+    getAttachedSourceContexts: () => attachedSourceContexts,
     getSavedAnswerDrafts: () => savedAnswerDrafts,
     getSubmittedAnswers: () => submittedAnswers,
   };
@@ -224,6 +237,7 @@ function createServiceFixture() {
     getPublishedVersions,
     getTakenDownVersions,
     getCopiedDrafts,
+    getAttachedSourceContexts,
     getSavedAnswerDrafts,
     getSubmittedAnswers,
   } = createDraftStore();
@@ -237,6 +251,7 @@ function createServiceFixture() {
     getPublishedVersions,
     getTakenDownVersions,
     getCopiedDrafts,
+    getAttachedSourceContexts,
     getSavedAnswerDrafts,
     getSubmittedAnswers,
   };
@@ -891,6 +906,235 @@ describe("organization training service", () => {
     expect(serializedResult).not.toContain("providerPayload");
     expect(serializedResult).not.toContain("rawPrompt");
     expect(serializedResult).not.toContain("rawAnswer");
+  });
+
+  it("attaches paper and mock_exam context as redacted metadata only", async () => {
+    const { service, getAttachedSourceContexts } = createServiceFixture();
+
+    const result = await service.attachSourceContext({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      authorizationContext: createAdvancedOrgAuthContext(),
+      draftPublicId: " training_draft_public_123 ",
+      organizationPublicId: " organization_public_123 ",
+      sourceContexts: [
+        {
+          sourceType: "paper",
+          sourcePublicId: " paper_public_123 ",
+          title: " Formal paper reference ",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 20,
+          totalScore: 100,
+          sourceStatus: "published",
+          questionBody: "LEAK_FULL_PAPER_QUESTION_BODY",
+          standardAnswer: "LEAK_STANDARD_ANSWER",
+          analysis: "LEAK_ANALYSIS",
+          privateRowId: 99001,
+        } as never,
+        {
+          sourceType: "mock_exam",
+          sourcePublicId: " mock_exam_public_456 ",
+          title: " Mock exam reference ",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 10,
+          totalScore: 50,
+          sourceStatus: "published",
+          extraSourceText: "SENTINEL_SOURCE_CONTEXT_EXTRA_TEXT",
+          extraPayloadText: "SENTINEL_SOURCE_CONTEXT_EXTRA_PAYLOAD",
+          extraAnswerText: "SENTINEL_SOURCE_CONTEXT_EXTRA_ANSWER",
+        } as never,
+      ],
+    });
+
+    expect(result).toEqual({
+      success: true,
+      context: {
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_public_123",
+            title: "Formal paper reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+            redactionStatus: "metadata_only",
+          },
+          {
+            sourceType: "mock_exam",
+            sourcePublicId: "mock_exam_public_456",
+            title: "Mock exam reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 50,
+            sourceStatus: "published",
+            redactionStatus: "metadata_only",
+          },
+        ],
+        redactionStatus: "metadata_only",
+      },
+    });
+    expect(getAttachedSourceContexts()).toEqual([
+      {
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
+        contentType: "organization_training_source_context",
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_public_123",
+            title: "Formal paper reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+            redactionStatus: "metadata_only",
+          },
+          {
+            sourceType: "mock_exam",
+            sourcePublicId: "mock_exam_public_456",
+            title: "Mock exam reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 50,
+            sourceStatus: "published",
+            redactionStatus: "metadata_only",
+          },
+        ],
+        formalUsagePolicy: {
+          createFormalPaper: false,
+          createMockExam: false,
+          exposeQuestionBody: false,
+          exposeStandardAnswer: false,
+          exposeAnalysis: false,
+          exposeProviderPayload: false,
+        },
+        redactionStatus: "metadata_only",
+      },
+    ]);
+
+    const serializedResult = JSON.stringify({
+      result,
+      attachedSourceContexts: getAttachedSourceContexts(),
+    });
+
+    expect(serializedResult).not.toContain("LEAK_FULL_PAPER_QUESTION_BODY");
+    expect(serializedResult).not.toContain("LEAK_STANDARD_ANSWER");
+    expect(serializedResult).not.toContain("LEAK_ANALYSIS");
+    expect(serializedResult).not.toContain(
+      "SENTINEL_SOURCE_CONTEXT_EXTRA_TEXT",
+    );
+    expect(serializedResult).not.toContain(
+      "SENTINEL_SOURCE_CONTEXT_EXTRA_PAYLOAD",
+    );
+    expect(serializedResult).not.toContain(
+      "SENTINEL_SOURCE_CONTEXT_EXTRA_ANSWER",
+    );
+    expect(serializedResult).not.toContain("privateRowId");
+  });
+
+  it("blocks source context attachment outside org_auth scope or content scope", async () => {
+    const blockedCases = [
+      {
+        name: "standard edition",
+        authorizationContext: createAdvancedOrgAuthContext({
+          effectiveEdition: "standard",
+        }),
+        organizationPublicId: "organization_public_123",
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_public_123",
+            title: "Formal paper reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+          },
+        ],
+        expectedReason: "advanced_edition_required",
+      },
+      {
+        name: "outside visible organization scope",
+        authorizationContext: createAdvancedOrgAuthContext(),
+        organizationPublicId: "organization_other_public_999",
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_public_123",
+            title: "Formal paper reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+          },
+        ],
+        expectedReason: "organization_scope_denied",
+      },
+      {
+        name: "content scope mismatch",
+        authorizationContext: createAdvancedOrgAuthContext(),
+        organizationPublicId: "organization_public_123",
+        sourceContexts: [
+          {
+            sourceType: "mock_exam",
+            sourcePublicId: "mock_exam_public_456",
+            title: "Mock exam reference",
+            profession: "marketing",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 50,
+            sourceStatus: "published",
+          },
+        ],
+        expectedReason: "source_context_scope_mismatch",
+      },
+    ] as const;
+
+    for (const blockedCase of blockedCases) {
+      const { service, getAttachedSourceContexts } = createServiceFixture();
+
+      const result = await service.attachSourceContext({
+        adminContext: {
+          adminPublicId: "admin_public_123",
+          visibleOrganizationPublicIds: ["organization_public_123"],
+        },
+        authorizationContext: blockedCase.authorizationContext,
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: blockedCase.organizationPublicId,
+        sourceContexts: blockedCase.sourceContexts,
+      });
+
+      expect(result).toEqual({
+        success: false,
+        reason: blockedCase.expectedReason,
+        message: "Organization training source context is blocked.",
+      });
+      expect(getAttachedSourceContexts()).toEqual([]);
+    }
   });
 
   it("takes down a published version while preserving historical visibility policy", async () => {

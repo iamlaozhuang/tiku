@@ -5,13 +5,17 @@ import type {
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
   OrganizationTrainingScopeSnapshotDto,
+  OrganizationTrainingSourceContextAttachmentDto,
+  OrganizationTrainingSourceContextDto,
 } from "../contracts/organization-training-contract";
-import type { Profession } from "../models/auth";
+import { professionValues, type Profession } from "../models/auth";
 import {
   type OrganizationTrainingCopyToNewDraftInput,
   organizationTrainingQuestionTypeValues,
   type OrganizationTrainingPublishInput,
   type OrganizationTrainingQuestionTypeSummary,
+  type OrganizationTrainingSourceContextType,
+  organizationTrainingSourceContextTypeValues,
   type OrganizationTrainingTakedownInput,
 } from "../models/organization-training";
 import { subjectValues, type Subject } from "../models/paper";
@@ -30,6 +34,9 @@ export const organizationTrainingCopyToNewDraftBlockedMessage =
 
 export const organizationTrainingEmployeeAnswerBlockedMessage =
   "Organization training employee answer is blocked.";
+
+export const organizationTrainingSourceContextBlockedMessage =
+  "Organization training source context is blocked.";
 
 export type OrganizationTrainingManualDraftCreationBlockedReason =
   | "invalid_manual_draft_input"
@@ -64,6 +71,14 @@ export type OrganizationTrainingEmployeeAnswerBlockedReason =
   | "invalid_answer_input"
   | "already_submitted"
   | "history_not_visible";
+
+export type OrganizationTrainingSourceContextBlockedReason =
+  | "invalid_source_context_input"
+  | "advanced_edition_required"
+  | "org_auth_required"
+  | "organization_training_capability_required"
+  | "organization_scope_denied"
+  | "source_context_scope_mismatch";
 
 export type OrganizationTrainingAdminContext = {
   adminPublicId: string;
@@ -215,6 +230,29 @@ export type OrganizationTrainingEmployeeAnswerStore = {
   ): Promise<EmployeeOrganizationTrainingAnswerDto>;
 };
 
+export type OrganizationTrainingSourceContextFormalUsagePolicy = {
+  createFormalPaper: false;
+  createMockExam: false;
+  exposeQuestionBody: false;
+  exposeStandardAnswer: false;
+  exposeAnalysis: false;
+  exposeProviderPayload: false;
+};
+
+export type OrganizationTrainingSourceContextWrite =
+  OrganizationTrainingSourceContextAttachmentDto & {
+    contentType: "organization_training_source_context";
+    authorizationSource: "org_auth";
+    authorizationPublicId: string;
+    formalUsagePolicy: OrganizationTrainingSourceContextFormalUsagePolicy;
+  };
+
+export type OrganizationTrainingSourceContextStore = {
+  attachSourceContext(
+    sourceContextWrite: OrganizationTrainingSourceContextWrite,
+  ): Promise<OrganizationTrainingSourceContextAttachmentDto>;
+};
+
 export type OrganizationTrainingVersionStore = {
   publishVersion(
     versionWrite: OrganizationTrainingPublishedVersionPersistenceWrite,
@@ -229,6 +267,7 @@ export type OrganizationTrainingVersionStore = {
 
 export type OrganizationTrainingStore = OrganizationTrainingDraftStore &
   OrganizationTrainingVersionStore &
+  OrganizationTrainingSourceContextStore &
   OrganizationTrainingEmployeeAnswerStore;
 
 export type OrganizationTrainingClock = {
@@ -263,6 +302,19 @@ export type OrganizationTrainingCopyVersionToNewDraftCommand = {
   copyInput: OrganizationTrainingCopyToNewDraftInput;
   sourceVersion: OrganizationTrainingPublishedVersionDto;
   sourceQuestionTypeSummary: OrganizationTrainingQuestionTypeSummary;
+};
+
+export type OrganizationTrainingSourceContextInput = Omit<
+  OrganizationTrainingSourceContextDto,
+  "redactionStatus"
+>;
+
+export type OrganizationTrainingAttachSourceContextCommand = {
+  adminContext: OrganizationTrainingAdminContext;
+  authorizationContext: EffectiveAuthorizationContextDto;
+  draftPublicId: string;
+  organizationPublicId: string;
+  sourceContexts: readonly OrganizationTrainingSourceContextInput[];
 };
 
 export type OrganizationTrainingListEmployeeVisibleVersionsCommand = {
@@ -355,6 +407,17 @@ export type OrganizationTrainingEmployeeAnswerResult =
       message: typeof organizationTrainingEmployeeAnswerBlockedMessage;
     };
 
+export type OrganizationTrainingSourceContextResult =
+  | {
+      success: true;
+      context: OrganizationTrainingSourceContextAttachmentDto;
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingSourceContextBlockedReason;
+      message: typeof organizationTrainingSourceContextBlockedMessage;
+    };
+
 export type OrganizationTrainingService = {
   createManualDraft(
     command: OrganizationTrainingCreateManualDraftCommand,
@@ -368,6 +431,9 @@ export type OrganizationTrainingService = {
   copyVersionToNewDraft(
     command: OrganizationTrainingCopyVersionToNewDraftCommand,
   ): Promise<OrganizationTrainingCopyVersionToNewDraftResult>;
+  attachSourceContext(
+    command: OrganizationTrainingAttachSourceContextCommand,
+  ): Promise<OrganizationTrainingSourceContextResult>;
   listEmployeeVisibleVersions(
     command: OrganizationTrainingListEmployeeVisibleVersionsCommand,
   ): Promise<OrganizationTrainingListEmployeeVisibleVersionsResult>;
@@ -448,6 +514,22 @@ function createEmployeeListBlockedResult(
   };
 }
 
+function createSourceContextBlockedResult(
+  reason: OrganizationTrainingSourceContextBlockedReason,
+): OrganizationTrainingSourceContextResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingSourceContextBlockedMessage,
+  };
+}
+
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function normalizeRequiredText(value: string): string | null {
   if (typeof value !== "string") {
     return null;
@@ -505,11 +587,29 @@ function isSubject(value: unknown): value is Subject {
   );
 }
 
+function isProfession(value: unknown): value is Profession {
+  return (
+    typeof value === "string" &&
+    professionValues.includes(value as (typeof professionValues)[number])
+  );
+}
+
 function isOrganizationTrainingQuestionType(value: unknown): boolean {
   return (
     typeof value === "string" &&
     organizationTrainingQuestionTypeValues.includes(
       value as (typeof organizationTrainingQuestionTypeValues)[number],
+    )
+  );
+}
+
+function isOrganizationTrainingSourceContextType(
+  value: unknown,
+): value is OrganizationTrainingSourceContextType {
+  return (
+    typeof value === "string" &&
+    organizationTrainingSourceContextTypeValues.includes(
+      value as OrganizationTrainingSourceContextType,
     )
   );
 }
@@ -562,6 +662,26 @@ function getPublishCapabilityBlockedReason(
   }
 
   if (capabilityContext.canCreateOrganizationTraining !== true) {
+    return "organization_training_capability_required";
+  }
+
+  return null;
+}
+
+function getSourceContextBlockedReason(
+  authorizationContext: EffectiveAuthorizationContextDto,
+): OrganizationTrainingSourceContextBlockedReason | null {
+  if (authorizationContext.effectiveEdition !== "advanced") {
+    return "advanced_edition_required";
+  }
+
+  if (!isAdvancedOrgAuthContext(authorizationContext)) {
+    return "org_auth_required";
+  }
+
+  if (
+    authorizationContext.capabilities.canCreateOrganizationTraining !== true
+  ) {
     return "organization_training_capability_required";
   }
 
@@ -670,6 +790,17 @@ function createFormalWritePolicy(): OrganizationTrainingFormalWritePolicy {
     createFormalAnswerRecord: false,
     createExamReport: false,
     createMistakeBook: false,
+  };
+}
+
+function createSourceContextFormalUsagePolicy(): OrganizationTrainingSourceContextFormalUsagePolicy {
+  return {
+    createFormalPaper: false,
+    createMockExam: false,
+    exposeQuestionBody: false,
+    exposeStandardAnswer: false,
+    exposeAnalysis: false,
+    exposeProviderPayload: false,
   };
 }
 
@@ -956,6 +1087,91 @@ function normalizeCopyToNewDraftMetadata(
   };
 }
 
+function normalizeSourceContext(
+  sourceContext: unknown,
+): OrganizationTrainingSourceContextDto | null {
+  if (!isRecord(sourceContext)) {
+    return null;
+  }
+
+  const sourcePublicId = normalizeRequiredText(
+    sourceContext.sourcePublicId as string,
+  );
+  const title = normalizeRequiredText(sourceContext.title as string);
+  const sourceStatus = normalizeRequiredText(
+    sourceContext.sourceStatus as string,
+  );
+  const level =
+    typeof sourceContext.level === "number" ? sourceContext.level : null;
+  const questionCount =
+    typeof sourceContext.questionCount === "number"
+      ? sourceContext.questionCount
+      : null;
+  const totalScore =
+    typeof sourceContext.totalScore === "number"
+      ? sourceContext.totalScore
+      : null;
+
+  if (
+    !isOrganizationTrainingSourceContextType(sourceContext.sourceType) ||
+    sourcePublicId === null ||
+    title === null ||
+    !isProfession(sourceContext.profession) ||
+    level === null ||
+    !isValidLevel(level) ||
+    !isSubject(sourceContext.subject) ||
+    questionCount === null ||
+    !isPositiveInteger(questionCount) ||
+    totalScore === null ||
+    !isNonNegativeInteger(totalScore) ||
+    sourceStatus === null
+  ) {
+    return null;
+  }
+
+  return {
+    sourceType: sourceContext.sourceType,
+    sourcePublicId,
+    title,
+    profession: sourceContext.profession,
+    level,
+    subject: sourceContext.subject,
+    questionCount,
+    totalScore,
+    sourceStatus,
+    redactionStatus: "metadata_only",
+  };
+}
+
+function normalizeSourceContexts(
+  sourceContexts: readonly OrganizationTrainingSourceContextInput[],
+): OrganizationTrainingSourceContextDto[] | null {
+  if (!Array.isArray(sourceContexts) || sourceContexts.length === 0) {
+    return null;
+  }
+
+  const normalizedSourceContexts = sourceContexts.map(normalizeSourceContext);
+
+  if (
+    normalizedSourceContexts.some((sourceContext) => sourceContext === null)
+  ) {
+    return null;
+  }
+
+  return normalizedSourceContexts as OrganizationTrainingSourceContextDto[];
+}
+
+function areSourceContextsMatchedToAuthorization(
+  sourceContexts: readonly OrganizationTrainingSourceContextDto[],
+  authorizationContext: EffectiveAuthorizationContextDto,
+): boolean {
+  return sourceContexts.every(
+    (sourceContext) =>
+      sourceContext.profession === authorizationContext.profession &&
+      sourceContext.level === authorizationContext.level,
+  );
+}
+
 function normalizePersistenceLineage(
   persistenceLineage: OrganizationTrainingPersistenceLineage | undefined,
 ): OrganizationTrainingPersistenceLineage | null {
@@ -1225,6 +1441,69 @@ export function createOrganizationTrainingService(
             preservePublishScopeSnapshot: true,
             createFreshDraftPublicId: true,
           },
+        }),
+      };
+    },
+
+    async attachSourceContext(command) {
+      const draftPublicId = normalizeRequiredText(command.draftPublicId);
+      const organizationPublicId = normalizeRequiredText(
+        command.organizationPublicId,
+      );
+      const sourceContexts = normalizeSourceContexts(command.sourceContexts);
+
+      if (
+        draftPublicId === null ||
+        organizationPublicId === null ||
+        sourceContexts === null
+      ) {
+        return createSourceContextBlockedResult("invalid_source_context_input");
+      }
+
+      const contextBlockedReason = getSourceContextBlockedReason(
+        command.authorizationContext,
+      );
+
+      if (contextBlockedReason !== null) {
+        return createSourceContextBlockedResult(contextBlockedReason);
+      }
+
+      if (
+        !isOrganizationVisibleToAdmin(
+          organizationPublicId,
+          command.adminContext,
+        ) ||
+        !isOrganizationOwnedByAuthorization(
+          organizationPublicId,
+          command.authorizationContext,
+        )
+      ) {
+        return createSourceContextBlockedResult("organization_scope_denied");
+      }
+
+      if (
+        !areSourceContextsMatchedToAuthorization(
+          sourceContexts,
+          command.authorizationContext,
+        )
+      ) {
+        return createSourceContextBlockedResult(
+          "source_context_scope_mismatch",
+        );
+      }
+
+      return {
+        success: true,
+        context: await trainingStore.attachSourceContext({
+          draftPublicId,
+          organizationPublicId,
+          authorizationSource: "org_auth",
+          authorizationPublicId:
+            command.authorizationContext.authorizationPublicId,
+          contentType: "organization_training_source_context",
+          sourceContexts,
+          formalUsagePolicy: createSourceContextFormalUsagePolicy(),
+          redactionStatus: "metadata_only",
         }),
       };
     },

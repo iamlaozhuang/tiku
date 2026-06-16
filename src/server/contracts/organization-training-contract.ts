@@ -4,6 +4,7 @@ import type {
   OrganizationTrainingAnswerStatus,
   OrganizationTrainingQuestionTypeSummary,
   OrganizationTrainingRetentionStatus,
+  OrganizationTrainingSourceContextType,
   OrganizationTrainingValidationStatus,
   OrganizationTrainingVersionStatus,
 } from "../models/organization-training";
@@ -87,4 +88,24 @@ export type OrganizationTrainingAdminSummaryDto = {
   averageScore: number | null;
   employeeSummaries: OrganizationTrainingAdminEmployeeSummaryDto[];
   redactionStatus: "redacted";
+};
+
+export type OrganizationTrainingSourceContextDto = {
+  sourceType: OrganizationTrainingSourceContextType;
+  sourcePublicId: string;
+  title: string;
+  profession: Profession;
+  level: number;
+  subject: Subject;
+  questionCount: number;
+  totalScore: number;
+  sourceStatus: string;
+  redactionStatus: "metadata_only";
+};
+
+export type OrganizationTrainingSourceContextAttachmentDto = {
+  draftPublicId: string;
+  organizationPublicId: string;
+  sourceContexts: OrganizationTrainingSourceContextDto[];
+  redactionStatus: "metadata_only";
 };

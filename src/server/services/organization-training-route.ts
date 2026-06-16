@@ -238,6 +238,11 @@ function createRuntimeOrganizationTrainingStore(
     async copyVersionToNewDraft() {
       throw new Error("Organization training copy route is not configured.");
     },
+    async attachSourceContext() {
+      throw new Error(
+        "Organization training source context route is not configured.",
+      );
+    },
     async saveEmployeeAnswerDraft() {
       throw new Error(
         "Organization training employee answer draft route is not configured.",
