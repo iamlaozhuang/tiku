@@ -6,6 +6,7 @@ import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organ
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
 import {
   organizationTrainingPublishBlockedMessage,
+  type OrganizationTrainingAdminContext,
   type OrganizationTrainingPersistenceLineage,
   type OrganizationTrainingPublishVersionCommand,
   type OrganizationTrainingService,
@@ -15,6 +16,11 @@ import { createOrganizationTrainingRouteHandlers } from "./organization-training
 const trustedLineage: OrganizationTrainingPersistenceLineage = {
   organizationId: 501,
   orgAuthId: 601,
+};
+
+const trustedAdminContext: OrganizationTrainingAdminContext = {
+  adminPublicId: "organization_admin_route_public_401",
+  visibleOrganizationPublicIds: ["organization_route_public_401"],
 };
 
 const publishPathPublicId = "organization_training_draft_route_401";
@@ -159,10 +165,19 @@ describe("organization training publish route handlers", () => {
       ],
     };
     const publishService = createPublishService();
-    const resolverInputs: OrganizationTrainingPublishInput[] = [];
+    const resolverInputs: {
+      adminContext: OrganizationTrainingAdminContext;
+      publishInput: OrganizationTrainingPublishInput;
+    }[] = [];
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
-      async resolvePersistenceLineage({ publishInput }) {
-        resolverInputs.push(publishInput);
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+      async resolvePersistenceLineage({ adminContext, publishInput }) {
+        resolverInputs.push({
+          adminContext,
+          publishInput,
+        });
 
         return trustedLineage;
       },
@@ -192,6 +207,14 @@ describe("organization training publish route handlers", () => {
           draftPublicId: publishPathPublicId,
         }),
         persistenceLineage: trustedLineage,
+      },
+    ]);
+    expect(resolverInputs).toEqual([
+      {
+        adminContext: trustedAdminContext,
+        publishInput: expect.objectContaining({
+          draftPublicId: publishPathPublicId,
+        }),
       },
     ]);
     expect(serializedResolverInputs).not.toMatch(
@@ -251,6 +274,9 @@ describe("organization training publish route handlers", () => {
   it("blocks client-supplied lineage when trusted lineage is unavailable", async () => {
     const publishService = createPublishService();
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
       async resolvePersistenceLineage() {
         return null;
       },
@@ -273,9 +299,38 @@ describe("organization training publish route handlers", () => {
     expect(publishService.commands).toEqual([]);
   });
 
+  it("blocks lineage resolution when organization-admin actor context is unavailable", async () => {
+    const publishService = createPublishService();
+    const lineageCalls: OrganizationTrainingPublishInput[] = [];
+    const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolvePersistenceLineage({ publishInput }) {
+        lineageCalls.push(publishInput);
+
+        return trustedLineage;
+      },
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput()),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403063,
+      message:
+        "Organization training publish organization-admin actor context is unavailable.",
+      data: null,
+    });
+    expect(lineageCalls).toEqual([]);
+    expect(publishService.commands).toEqual([]);
+  });
+
   it("returns an invalid input envelope for malformed publish payloads", async () => {
     const publishService = createPublishService();
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
       async resolvePersistenceLineage() {
         return trustedLineage;
       },
@@ -303,6 +358,9 @@ describe("organization training publish route handlers", () => {
       message: organizationTrainingPublishBlockedMessage,
     });
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
       async resolvePersistenceLineage() {
         return trustedLineage;
       },
@@ -328,6 +386,9 @@ describe("organization training publish route handlers", () => {
         },
       };
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
       async resolvePersistenceLineage() {
         return trustedLineage;
       },

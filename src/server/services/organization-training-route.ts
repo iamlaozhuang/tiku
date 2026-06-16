@@ -12,6 +12,7 @@ import {
 import {
   createOrganizationTrainingService,
   organizationTrainingPublishBlockedMessage,
+  type OrganizationTrainingAdminContext,
   type OrganizationTrainingPersistenceLineage,
   type OrganizationTrainingService,
   type OrganizationTrainingStore,
@@ -28,23 +29,39 @@ export type OrganizationTrainingPersistenceLineageResolverInput = {
   request: Request;
   pathPublicId: string;
   publishInput: OrganizationTrainingPublishInput;
+  adminContext: OrganizationTrainingAdminContext;
 };
 
 export type OrganizationTrainingPersistenceLineageResolver = (
   input: OrganizationTrainingPersistenceLineageResolverInput,
 ) => Promise<OrganizationTrainingPersistenceLineage | null>;
 
+export type OrganizationTrainingAdminContextResolverInput = {
+  request: Request;
+  pathPublicId: string;
+  publishInput: OrganizationTrainingPublishInput;
+};
+
+export type OrganizationTrainingAdminContextResolver = (
+  input: OrganizationTrainingAdminContextResolverInput,
+) => Promise<OrganizationTrainingAdminContext | null>;
+
 export type OrganizationTrainingRouteOptions = {
+  resolveOrganizationAdminContext?: OrganizationTrainingAdminContextResolver;
   resolvePersistenceLineage?: OrganizationTrainingPersistenceLineageResolver;
 };
 
 const invalidPublishInputCode = 400061;
 const draftPublicIdMismatchCode = 400062;
+const publishAdminContextUnavailableCode = 403063;
 const publishLineageUnavailableCode = 403064;
 const publishBlockedCode = 409065;
 
 const draftPublicIdMismatchMessage =
   "Organization training publish path public id must match request body.";
+
+const publishAdminContextUnavailableMessage =
+  "Organization training publish organization-admin actor context is unavailable.";
 
 const publishLineageUnavailableMessage =
   "Organization training publish lineage is unavailable.";
@@ -70,6 +87,10 @@ async function resolvePathPublicId(
 }
 
 async function defaultResolvePersistenceLineage(): Promise<null> {
+  return null;
+}
+
+async function defaultResolveOrganizationAdminContext(): Promise<null> {
   return null;
 }
 
@@ -105,6 +126,13 @@ function createPublishLineageUnavailableResponse(): ApiResponse<null> {
   );
 }
 
+function createPublishAdminContextUnavailableResponse(): ApiResponse<null> {
+  return createErrorResponse(
+    publishAdminContextUnavailableCode,
+    publishAdminContextUnavailableMessage,
+  );
+}
+
 function createPublishBlockedResponse(): ApiResponse<null> {
   return createErrorResponse(
     publishBlockedCode,
@@ -119,6 +147,9 @@ export function createOrganizationTrainingRouteHandlers(
   >,
   options: OrganizationTrainingRouteOptions = {},
 ) {
+  const resolveOrganizationAdminContext =
+    options.resolveOrganizationAdminContext ??
+    defaultResolveOrganizationAdminContext;
   const resolvePersistenceLineage =
     options.resolvePersistenceLineage ?? defaultResolvePersistenceLineage;
 
@@ -142,10 +173,23 @@ export function createOrganizationTrainingRouteHandlers(
           return createJsonResponse(createDraftPublicIdMismatchResponse());
         }
 
+        const adminContext = await resolveOrganizationAdminContext({
+          request,
+          pathPublicId,
+          publishInput: input.value,
+        });
+
+        if (adminContext === null) {
+          return createJsonResponse(
+            createPublishAdminContextUnavailableResponse(),
+          );
+        }
+
         const persistenceLineage = await resolvePersistenceLineage({
           request,
           pathPublicId,
           publishInput: input.value,
+          adminContext,
         });
 
         if (persistenceLineage === null) {
