@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-persistence-boundary-seeding
-updatedAt: "2026-06-15T18:38:11-07:00"
+currentPhase: advanced-organization-training-publish-version-persistence-boundary-planning
+updatedAt: "2026-06-15T18:50:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: f584b35b2cf16321f49308811838ac9572208ac6
-  lastKnownOriginMasterSha: f584b35b2cf16321f49308811838ac9572208ac6
+  lastKnownMasterSha: e80753c58b31874057c57e94ab40bc2a7405b70b
+  lastKnownOriginMasterSha: e80753c58b31874057c57e94ab40bc2a7405b70b
 currentTask:
-  id: advanced-organization-training-publish-version-persistence-boundary-seeding
+  id: advanced-organization-training-publish-version-persistence-boundary-planning
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
-  branch: codex/advanced-organization-training-publish-version-persistence-boundary-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+  branch: codex/advanced-organization-training-publish-version-persistence-boundary-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -407,9 +407,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionAuthorizationLineageCoverage: pass_tdd_service_authorization_lineage_coverage
     advancedOrganizationTrainingPublishVersionAuthorizationLineageReadonlyRecheck: pass_readonly_recheck_with_persistence_needs_recheck
     advancedOrganizationTrainingPublishVersionPersistenceBoundarySeeding: pass_docs_only_seeded_persistence_boundary_planning
-    preCommitHook: pass_advanced_organization_training_publish_version_persistence_boundary_seeding_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_persistence_boundary_seeding_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_persistence_boundary_seeding_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionPersistenceBoundaryPlanning: pass_docs_only_persistence_boundary_plan
+    preCommitHook: pass_advanced_organization_training_publish_version_persistence_boundary_planning_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_persistence_boundary_planning_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_persistence_boundary_planning_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -425,8 +426,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-publish-version-persistence-boundary-seeding converted the publish-version persistence
-    needs_recheck into a pending docs-only planning task. Recommended next action is
-    advanced-organization-training-publish-version-persistence-boundary-planning before any repository/schema/route
-    implementation or durable publish-version persistence claim.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+    advanced-organization-training-publish-version-persistence-boundary-planning defined the persistence implementation
+    sequence and preserved schema/repository/route implementation gates. Recommended next action is
+    advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit before any durable
+    publish-version persistence implementation or schema/migration claim.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
