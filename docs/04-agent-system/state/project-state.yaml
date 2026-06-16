@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-auto-seed-readiness-evidence-normalization
-updatedAt: "2026-06-16T07:54:55-07:00"
+currentPhase: batch-185-organization-analytics-aggregate-only-organization-metrics
+updatedAt: "2026-06-16T08:17:23-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6596c071a2d6cf2717da061f05b603744aa5c089
-  lastKnownOriginMasterSha: 6596c071a2d6cf2717da061f05b603744aa5c089
+  lastKnownMasterSha: bceea4997ce715202eab78c32ce8883e8258e4ca
+  lastKnownOriginMasterSha: bceea4997ce715202eab78c32ce8883e8258e4ca
 currentTask:
-  id: advanced-organization-analytics-auto-seed-readiness-evidence-normalization
+  id: batch-185-organization-analytics-aggregate-only-organization-metrics
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-auto-seed-readiness-evidence-normalization.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-auto-seed-readiness-evidence-normalization.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-auto-seed-readiness-evidence-normalization.md
-  branch: codex/organization-analytics-auto-seed-readiness-normalization
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-185-organization-analytics-aggregate-only-organization-metrics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-185-organization-analytics-aggregate-only-organization-metrics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-185-organization-analytics-aggregate-only-organization-metrics.md
+  branch: codex/organization-analytics-batch-185-aggregate-metrics
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -513,6 +513,7 @@ qualityGates:
     batch184OrganizationTrainingAuditLogRedactedReference: pass_tdd_redacted_audit_log_reference
     advancedOrganizationAnalyticsNextImplementationQueueSeeding: pass_auto_seed_transaction_self_review
     advancedOrganizationAnalyticsAutoSeedReadinessEvidenceNormalization: pass_docs_only_auto_seed_readiness_normalization
+    batch185OrganizationAnalyticsAggregateOnlyOrganizationMetrics: pass_tdd_aggregate_only_organization_metrics
     preCommitHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_commit_hardening
     moduleCloseout: pass_organization_analytics_auto_seed_readiness_normalization_closeout_readiness
     prePushHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_push_readiness
@@ -531,10 +532,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Organization-analytics auto-seed readiness normalization passes all four seeded implementation pre-edit readiness
-    checks using the normalized seed evidence. Continue with `batch-185-organization-analytics-aggregate-only-organization-metrics`
-    only after repository readiness confirms master and origin/master are aligned and no codex/* residue remains.
+    Batch 185 organization analytics aggregate-only organization metrics passes scoped TDD implementation, focused unit,
+    lint, typecheck, diff-check, PreCommit hardening, ModuleCloseout readiness, and PrePush readiness. Continue with
+    `batch-186-organization-analytics-privacy-preserving-employee-statistics` only after repository readiness confirms
+    master and origin/master are aligned and no codex/* residue remains.
     `.env*`, real DB execution, row/private data, dependency, provider, e2e/browser/dev-server,
     staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked unless a
     future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-auto-seed-readiness-evidence-normalization.md
+  lastSummaryPath: docs/05-execution-logs/evidence/batch-185-organization-analytics-aggregate-only-organization-metrics.md
