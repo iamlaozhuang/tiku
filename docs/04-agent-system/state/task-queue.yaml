@@ -27418,17 +27418,34 @@ tasks:
     sourceStory: advanced-edition-organization-analytics
     taskKind: readonly_audit
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
+    claimedAt: "2026-06-16T09:23:56-07:00"
+    closedAt: "2026-06-16T09:28:51-07:00"
+    branch: codex/organization-analytics-repository-boundary-audit
     dependencies:
       - advanced-organization-analytics-post-batch-readonly-rollup-seeding
     humanApprovalBoundary: >-
       Seeded by the post-batch organization analytics rollup. This is a docs-only readonly audit to decide whether the
       organization analytics repository read-model can proceed as TDD without schema/DB execution, or whether a
       separate schema/data-source boundary decision is required first. Current seeding does not approve source changes.
+    humanApproval: >-
+      User approved executing the next recommended docs-only readonly audit task in the current 2026-06-16 Codex thread
+      by saying "批准执行". Approval is limited to task plan/evidence/audit creation, durable state updates, readonly
+      review, seeding one pending narrow repository contract TDD task, declared local validation, local commit,
+      fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product source
+      implementation for this audit task, DB access, schema/migration, provider/model calls, dependency changes,
+      e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration
+      Gate remain blocked.
     planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+    seededTasks:
+      - advanced-organization-analytics-repository-read-model-contract-tdd
+    nextModuleRunCandidate: advanced-organization-analytics-repository-read-model-contract-tdd
+    fastLaneEligible: true
+    fastLaneLane: docs_only
     allowedFiles:
       - docs/04-agent-system/state/project-state.yaml
       - docs/04-agent-system/state/task-queue.yaml
@@ -27480,6 +27497,17 @@ tasks:
       - staging/prod/cloud/deploy/payment/external-service
       - PR
       - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     validationCommands:
       - git diff --check
       - npm.cmd run lint
@@ -27488,3 +27516,99 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-read-model-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-read-model-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+
+  - id: advanced-organization-analytics-repository-read-model-contract-tdd
+    title: Advanced organization analytics repository read model contract TDD
+    phase: advanced-organization-analytics-repository-read-model-contract-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_repository_contract_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: approved_by_standing_autonomy_policy_2026_06_16
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    humanApprovalBoundary: >-
+      Seeded by the repository read-model boundary readonly audit. Scope is limited to TDD implementation of the
+      organization analytics repository read-model contract through repository-owned types, an injected gateway, and
+      synthetic public-id-shaped unit fixtures. This task must not import `@/db/schema`, use `runtime-database`, create
+      a Postgres adapter, execute DB commands, inspect row/private data, or change services, contracts, models, mappers,
+      validators, routes, UI, schema, migrations, scripts, dependencies, package files, lockfiles, env files, e2e,
+      provider, deploy, payment, or external-service surfaces.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-contract-tdd.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - src/server/services/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/db/schema/**
+      - drizzle/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - Postgres runtime adapter or `runtime-database` use
+      - service/route/UI/mapper/validator/runtime wiring
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_standing_autonomy_policy_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-read-model-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-read-model-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-read-model-contract-tdd
