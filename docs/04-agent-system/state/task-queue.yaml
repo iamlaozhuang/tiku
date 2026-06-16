@@ -28282,3 +28282,190 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit
+  - id: advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+    title: Advanced organization analytics mapper validator route contract TDD seeding
+    phase: advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T15:52:54-07:00"
+    closedAt: "2026-06-16T15:52:54-07:00"
+    branch: codex/organization-analytics-mapper-validator-route-contract-seeding
+    dependencies:
+      - advanced-organization-analytics-route-runtime-boundary-readonly-audit
+    humanApproval: >-
+      User requested creating this docs/state-only queue seeding task in the current 2026-06-16 Codex thread. Approval
+      is limited to task plan/evidence/audit creation, durable state updates, and seeding one pending narrow TDD task
+      for organization analytics mapper, validator, route contract, and corresponding unit tests. Product source
+      implementation in this seeding task, route runtime wiring, App Router route files, service/repository runtime
+      changes, schema/migration, direct DB access, row/private data exposure, provider/model calls or configuration,
+      dependencies, package/lockfile changes, dev server, Browser/Playwright/e2e, staging/prod/cloud/deploy/payment/
+      external-service, PR, force push, merge, push, and Cost Calibration Gate remain blocked.
+    closeoutApproval: >-
+      User requested executing mechanism closeout in the current 2026-06-16 Codex thread. Approval is limited to local
+      validation and one local commit for this docs/state-only seeding task. Merge, push, PR, and force push remain
+      blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - product source implementation in this seeding task
+      - route runtime wiring or App Router route files
+      - service/repository runtime changes
+      - UI changes
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16_closeout
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: false
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+  - id: advanced-organization-analytics-mapper-validator-route-contract-tdd
+    title: Advanced organization analytics mapper validator route contract TDD
+    phase: advanced-organization-analytics-mapper-validator-route-contract-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_contract_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is limited to TDD implementation of organization
+      analytics mapper, validator, and route-contract boundaries before any REST route runtime wiring. The task must
+      prove that API/UI-facing DTOs do not expose internal technical scoped organization identifier arrays, preserve
+      aggregate-only dashboard summary, summary-only employee statistics, metadata-only export readiness, standard API
+      response envelope expectations, ISO 8601/null/empty-list behavior, and typed request parsing for future route
+      inputs. If a route handler, service/repository runtime change, schema/migration, DB execution, UI work, provider
+      call, dependency change, object storage/export artifact, download URL, or external delivery behavior is required,
+      stop and report instead of expanding scope.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd.md
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/contracts/organization-analytics-contract.test.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/mappers/organization-analytics-mapper.test.ts
+      - src/server/validators/organization-analytics.ts
+      - src/server/validators/organization-analytics.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/contracts/api-response.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/api/v1/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/server/services/**
+      - src/server/repositories/**
+      - src/server/models/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - route runtime wiring or App Router route files
+      - service/repository runtime changes
+      - UI changes
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - export generation, object storage, download URL, or external delivery
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: false
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/contracts/organization-analytics-contract.test.ts"
+      - npm.cmd run test:unit -- "src/server/mappers/organization-analytics-mapper.test.ts"
+      - npm.cmd run test:unit -- "src/server/validators/organization-analytics.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-mapper-validator-route-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-mapper-validator-route-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-mapper-validator-route-contract-tdd
