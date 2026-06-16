@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type {
+  EmployeeOrganizationTrainingAnswerDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
 } from "../contracts/organization-training-contract";
@@ -12,6 +13,8 @@ import {
   type OrganizationTrainingStore,
   type OrganizationTrainingManualDraftWrite,
   type OrganizationTrainingPersistenceLineage,
+  type OrganizationTrainingEmployeeAnswerDraftWrite,
+  type OrganizationTrainingEmployeeAnswerSubmissionWrite,
   type OrganizationTrainingVersionCopyToNewDraftWrite,
   type OrganizationTrainingPublishedVersionPersistenceWrite,
   type OrganizationTrainingVersionTakedownWrite,
@@ -53,6 +56,9 @@ function createDraftStore() {
     [];
   let takenDownVersions: OrganizationTrainingVersionTakedownWrite[] = [];
   let copiedDrafts: OrganizationTrainingVersionCopyToNewDraftWrite[] = [];
+  let savedAnswerDrafts: OrganizationTrainingEmployeeAnswerDraftWrite[] = [];
+  let submittedAnswers: OrganizationTrainingEmployeeAnswerSubmissionWrite[] =
+    [];
 
   const draftStore: OrganizationTrainingStore = {
     async createManualDraft(draftWrite) {
@@ -155,6 +161,49 @@ function createDraftStore() {
         expiresAt: null,
       };
     },
+    async saveEmployeeAnswerDraft(answerDraftWrite) {
+      savedAnswerDrafts = [...savedAnswerDrafts, answerDraftWrite];
+
+      return {
+        publicId: "training_answer_draft_public_123",
+        trainingVersionPublicId: answerDraftWrite.trainingVersionPublicId,
+        employeePublicId: answerDraftWrite.employeePublicId,
+        organizationPublicId: answerDraftWrite.organizationPublicId,
+        answerOrganizationSnapshot: {
+          organizationPublicIds: [
+            ...answerDraftWrite.answerOrganizationSnapshot
+              .organizationPublicIds,
+          ],
+          capturedAt: answerDraftWrite.answerOrganizationSnapshot.capturedAt,
+        },
+        answerStatus: answerDraftWrite.answerStatus,
+        scoreSummary: null,
+        submittedAt: null,
+        resultSummaryVisible: false,
+      };
+    },
+    async submitEmployeeAnswer(answerSubmissionWrite) {
+      submittedAnswers = [...submittedAnswers, answerSubmissionWrite];
+
+      return {
+        publicId: "training_answer_record_public_123",
+        trainingVersionPublicId: answerSubmissionWrite.trainingVersionPublicId,
+        employeePublicId: answerSubmissionWrite.employeePublicId,
+        organizationPublicId: answerSubmissionWrite.organizationPublicId,
+        answerOrganizationSnapshot: {
+          organizationPublicIds: [
+            ...answerSubmissionWrite.answerOrganizationSnapshot
+              .organizationPublicIds,
+          ],
+          capturedAt:
+            answerSubmissionWrite.answerOrganizationSnapshot.capturedAt,
+        },
+        answerStatus: answerSubmissionWrite.answerStatus,
+        scoreSummary: answerSubmissionWrite.scoreSummary,
+        submittedAt: answerSubmissionWrite.submittedAt,
+        resultSummaryVisible: false,
+      };
+    },
   };
 
   return {
@@ -163,6 +212,8 @@ function createDraftStore() {
     getPublishedVersions: () => publishedVersions,
     getTakenDownVersions: () => takenDownVersions,
     getCopiedDrafts: () => copiedDrafts,
+    getSavedAnswerDrafts: () => savedAnswerDrafts,
+    getSubmittedAnswers: () => submittedAnswers,
   };
 }
 
@@ -173,6 +224,8 @@ function createServiceFixture() {
     getPublishedVersions,
     getTakenDownVersions,
     getCopiedDrafts,
+    getSavedAnswerDrafts,
+    getSubmittedAnswers,
   } = createDraftStore();
   const service = createOrganizationTrainingService(draftStore, {
     now: () => fixedNow,
@@ -184,6 +237,8 @@ function createServiceFixture() {
     getPublishedVersions,
     getTakenDownVersions,
     getCopiedDrafts,
+    getSavedAnswerDrafts,
+    getSubmittedAnswers,
   };
 }
 
@@ -276,6 +331,32 @@ function createPublishedVersion(
     publishedAt: fixedNow.toISOString(),
     takenDownAt: null,
     takedownReason: null,
+    ...overrides,
+  };
+}
+
+function createSubmittedEmployeeAnswer(
+  overrides: Partial<EmployeeOrganizationTrainingAnswerDto> = {},
+): EmployeeOrganizationTrainingAnswerDto {
+  return {
+    publicId: "training_answer_record_public_123",
+    trainingVersionPublicId: "training_version_public_123",
+    employeePublicId: "employee_public_123",
+    organizationPublicId: "organization_branch_public_456",
+    answerOrganizationSnapshot: {
+      organizationPublicIds: [
+        "organization_branch_public_456",
+        "organization_public_123",
+      ],
+      capturedAt: fixedNow.toISOString(),
+    },
+    answerStatus: "submitted",
+    scoreSummary: {
+      score: 4,
+      totalScore: 5,
+    },
+    submittedAt: fixedNow.toISOString(),
+    resultSummaryVisible: false,
     ...overrides,
   };
 }
@@ -1038,5 +1119,282 @@ describe("organization training service", () => {
       takenDownAt: fixedNow.toISOString(),
       takedownReason: "outdated training",
     });
+  });
+
+  it("lists only published training versions visible to the employee organization context", async () => {
+    const { service } = createServiceFixture();
+
+    const result = await service.listEmployeeVisibleVersions({
+      employeeContext: {
+        employeePublicId: " employee_public_123 ",
+        currentOrganizationPublicId: " organization_branch_public_456 ",
+        visibleOrganizationPublicIds: [
+          " organization_branch_public_456 ",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+      },
+      sourceVersions: [
+        createPublishedVersion(),
+        createPublishedVersion({
+          publicId: "training_version_other_scope_public_456",
+          publishScopeSnapshot: {
+            organizationPublicIds: ["organization_other_public_999"],
+            capturedAt: fixedNow.toISOString(),
+          },
+        }),
+        createPublishedVersion({
+          publicId: "training_version_taken_down_public_789",
+          status: "taken_down",
+          takenDownAt: fixedNow.toISOString(),
+          takedownReason: "outdated training",
+        }),
+      ],
+    });
+
+    expect(result).toEqual({
+      success: true,
+      versions: [createPublishedVersion()],
+    });
+  });
+
+  it("saves an employee answer draft with answer-time organization snapshot and no formal writes", async () => {
+    const { service, getSavedAnswerDrafts } = createServiceFixture();
+
+    const result = await service.saveEmployeeAnswerDraft({
+      employeeContext: {
+        employeePublicId: " employee_public_123 ",
+        currentOrganizationPublicId: " organization_branch_public_456 ",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+      },
+      version: createPublishedVersion(),
+      answerInput: {
+        trainingVersionPublicId: " training_version_public_123 ",
+        answeredQuestionCount: 1,
+      },
+      existingAnswer: null,
+    });
+
+    expect(result).toEqual({
+      success: true,
+      answer: {
+        publicId: "training_answer_draft_public_123",
+        trainingVersionPublicId: "training_version_public_123",
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_branch_public_456",
+        answerOrganizationSnapshot: {
+          organizationPublicIds: [
+            "organization_branch_public_456",
+            "organization_public_123",
+          ],
+          capturedAt: fixedNow.toISOString(),
+        },
+        answerStatus: "in_progress",
+        scoreSummary: null,
+        submittedAt: null,
+        resultSummaryVisible: false,
+      },
+    });
+    expect(getSavedAnswerDrafts()).toEqual([
+      {
+        contentType: "organization_training_answer_draft",
+        trainingVersionPublicId: "training_version_public_123",
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_branch_public_456",
+        answerOrganizationSnapshot: {
+          organizationPublicIds: [
+            "organization_branch_public_456",
+            "organization_public_123",
+          ],
+          capturedAt: fixedNow.toISOString(),
+        },
+        answerStatus: "in_progress",
+        answeredQuestionCount: 1,
+        scoreSummary: null,
+        savedAt: fixedNow.toISOString(),
+        submittedAt: null,
+        formalWritePolicy: {
+          createPractice: false,
+          createMockExam: false,
+          createFormalAnswerRecord: false,
+          createExamReport: false,
+          createMistakeBook: false,
+        },
+      },
+    ]);
+  });
+
+  it("submits an employee answer once and blocks duplicate official submission", async () => {
+    const { service, getSubmittedAnswers } = createServiceFixture();
+
+    const result = await service.submitEmployeeAnswer({
+      employeeContext: {
+        employeePublicId: "employee_public_123",
+        currentOrganizationPublicId: "organization_branch_public_456",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+      },
+      version: createPublishedVersion(),
+      answerInput: {
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+      },
+      existingAnswer: null,
+    });
+
+    expect(result).toEqual({
+      success: true,
+      answer: {
+        publicId: "training_answer_record_public_123",
+        trainingVersionPublicId: "training_version_public_123",
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_branch_public_456",
+        answerOrganizationSnapshot: {
+          organizationPublicIds: [
+            "organization_branch_public_456",
+            "organization_public_123",
+          ],
+          capturedAt: fixedNow.toISOString(),
+        },
+        answerStatus: "submitted",
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+        submittedAt: fixedNow.toISOString(),
+        resultSummaryVisible: false,
+      },
+    });
+    expect(getSubmittedAnswers()).toEqual([
+      {
+        contentType: "organization_training_answer_record",
+        trainingVersionPublicId: "training_version_public_123",
+        employeePublicId: "employee_public_123",
+        organizationPublicId: "organization_branch_public_456",
+        answerOrganizationSnapshot: {
+          organizationPublicIds: [
+            "organization_branch_public_456",
+            "organization_public_123",
+          ],
+          capturedAt: fixedNow.toISOString(),
+        },
+        answerStatus: "submitted",
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+        submittedAt: fixedNow.toISOString(),
+        formalWritePolicy: {
+          createPractice: false,
+          createMockExam: false,
+          createFormalAnswerRecord: false,
+          createExamReport: false,
+          createMistakeBook: false,
+        },
+      },
+    ]);
+
+    const duplicateResult = await service.submitEmployeeAnswer({
+      employeeContext: {
+        employeePublicId: "employee_public_123",
+        currentOrganizationPublicId: "organization_branch_public_456",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+      },
+      version: createPublishedVersion(),
+      answerInput: {
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 2,
+        scoreSummary: {
+          score: 4,
+          totalScore: 5,
+        },
+      },
+      existingAnswer: createSubmittedEmployeeAnswer(),
+    });
+
+    expect(duplicateResult).toEqual({
+      success: false,
+      reason: "already_submitted",
+      message: "Organization training employee answer is blocked.",
+    });
+  });
+
+  it("keeps taken-down training limited to own read-only historical summary", async () => {
+    const { service, getSavedAnswerDrafts } = createServiceFixture();
+    const takenDownVersion = createPublishedVersion({
+      status: "taken_down",
+      takenDownAt: fixedNow.toISOString(),
+      takedownReason: "outdated training",
+    });
+
+    const draftResult = await service.saveEmployeeAnswerDraft({
+      employeeContext: {
+        employeePublicId: "employee_public_123",
+        currentOrganizationPublicId: "organization_branch_public_456",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+      },
+      version: takenDownVersion,
+      answerInput: {
+        trainingVersionPublicId: "training_version_public_123",
+        answeredQuestionCount: 1,
+      },
+      existingAnswer: null,
+    });
+
+    expect(draftResult).toEqual({
+      success: false,
+      reason: "version_not_answerable",
+      message: "Organization training employee answer is blocked.",
+    });
+    expect(getSavedAnswerDrafts()).toEqual([]);
+
+    const summaryResult = await service.getEmployeeAnswerReadonlySummary({
+      employeeContext: {
+        employeePublicId: "employee_public_123",
+        currentOrganizationPublicId: "organization_branch_public_456",
+        visibleOrganizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        authorizationContext: createAdvancedOrgAuthContext(),
+      },
+      version: takenDownVersion,
+      existingAnswer: createSubmittedEmployeeAnswer(),
+    });
+
+    expect(summaryResult).toEqual({
+      success: true,
+      answer: createSubmittedEmployeeAnswer({
+        answerStatus: "read_only",
+        resultSummaryVisible: true,
+      }),
+    });
+    expect(JSON.stringify(summaryResult)).not.toContain("standardAnswer");
+    expect(JSON.stringify(summaryResult)).not.toContain("analysis");
+    expect(JSON.stringify(summaryResult)).not.toContain("practicePublicId");
+    expect(JSON.stringify(summaryResult)).not.toContain("mockExamPublicId");
+    expect(JSON.stringify(summaryResult)).not.toContain("answerRecordPublicId");
+    expect(JSON.stringify(summaryResult)).not.toContain("examReportPublicId");
+    expect(JSON.stringify(summaryResult)).not.toContain("mistakeBookPublicId");
   });
 });

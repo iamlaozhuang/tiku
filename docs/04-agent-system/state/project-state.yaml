@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-181-organization-training-organization-admin-training-draft-publish-ta
-updatedAt: "2026-06-16T06:19:00-07:00"
+currentPhase: batch-182-organization-training-employee-answer-lifecycle-local-role-flow
+updatedAt: "2026-06-16T06:45:50-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3fe4eee04cbb9cd08288f64b629cdeb0eed5271b
-  lastKnownOriginMasterSha: 3fe4eee04cbb9cd08288f64b629cdeb0eed5271b
+  lastKnownMasterSha: bda4154ed2a49d5002b8e06027d4bc9a98eb1198
+  lastKnownOriginMasterSha: bda4154ed2a49d5002b8e06027d4bc9a98eb1198
 currentTask:
-  id: batch-181-organization-training-organization-admin-training-draft-publish-ta
+  id: batch-182-organization-training-employee-answer-lifecycle-local-role-flow
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-181-organization-training-organization-admin-training-draft-publish-ta.md
-  evidencePath: docs/05-execution-logs/evidence/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
-  branch: codex/organization-training-batch-181-draft-publish-flow
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-182-organization-training-employee-answer-lifecycle-local-role-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-182-organization-training-employee-answer-lifecycle-local-role-flow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-182-organization-training-employee-answer-lifecycle-local-role-flow.md
+  branch: codex/organization-training-batch-182-employee-answer-flow
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -508,9 +508,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteVisibleOrganizationScopeAdminOrganizationRepositoryResolverReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
     advancedOrganizationTrainingNextImplementationQueueSeedingPostVisibleScopeResolver: pass_auto_seed_transaction_self_review
     batch181OrganizationTrainingDraftPublishTakedownCopyFlow: pass_tdd_service_lifecycle
-    preCommitHook: pass_batch_181_organization_training_draft_publish_takedown_copy_pre_commit_hardening
-    moduleCloseout: pass_batch_181_organization_training_draft_publish_takedown_copy_closeout_readiness
-    prePushHook: pass_batch_181_organization_training_draft_publish_takedown_copy_pre_push_readiness
+    batch182OrganizationTrainingEmployeeAnswerLifecycle: pass_tdd_service_lifecycle
+    preCommitHook: pass_batch_182_organization_training_employee_answer_lifecycle_pre_commit_hardening
+    moduleCloseout: pass_batch_182_organization_training_employee_answer_lifecycle_closeout_readiness
+    prePushHook: pass_batch_182_organization_training_employee_answer_lifecycle_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -526,9 +527,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 181 closes the organization admin draft, publish, takedown, and copy-to-new-draft service lifecycle boundary.
-    After closeout, continue with `batch-182-organization-training-employee-answer-lifecycle-local-role-flow`, creating
+    Batch 182 closes the employee answer lifecycle service boundary for organization training. After closeout, continue
+    with `batch-183-organization-training-paper-and-mock-exam-context-usage-without-ex`, creating
     the required task plan before edits and preserving the task-declared blocked gates. `.env*`, real DB execution,
     row/private data, dependency, provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
     PR, force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
+  lastSummaryPath: docs/05-execution-logs/evidence/batch-182-organization-training-employee-answer-lifecycle-local-role-flow.md

@@ -1,7 +1,10 @@
 import type { EffectiveAuthorizationContextDto } from "../contracts/effective-authorization-contract";
 import type {
+  EmployeeOrganizationTrainingAnswerDto,
+  EmployeeOrganizationTrainingScoreSummaryDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
+  OrganizationTrainingScopeSnapshotDto,
 } from "../contracts/organization-training-contract";
 import type { Profession } from "../models/auth";
 import {
@@ -24,6 +27,9 @@ export const organizationTrainingTakedownBlockedMessage =
 
 export const organizationTrainingCopyToNewDraftBlockedMessage =
   "Organization training copy-to-new-draft is blocked.";
+
+export const organizationTrainingEmployeeAnswerBlockedMessage =
+  "Organization training employee answer is blocked.";
 
 export type OrganizationTrainingManualDraftCreationBlockedReason =
   | "invalid_manual_draft_input"
@@ -48,9 +54,27 @@ export type OrganizationTrainingCopyToNewDraftBlockedReason =
   | "invalid_copy_to_new_draft_input"
   | "organization_scope_denied";
 
+export type OrganizationTrainingEmployeeAnswerBlockedReason =
+  | "invalid_employee_context"
+  | "advanced_edition_required"
+  | "org_auth_required"
+  | "organization_training_answer_capability_required"
+  | "version_not_visible"
+  | "version_not_answerable"
+  | "invalid_answer_input"
+  | "already_submitted"
+  | "history_not_visible";
+
 export type OrganizationTrainingAdminContext = {
   adminPublicId: string;
   visibleOrganizationPublicIds: readonly string[];
+};
+
+export type OrganizationTrainingEmployeeContext = {
+  employeePublicId: string;
+  currentOrganizationPublicId: string;
+  visibleOrganizationPublicIds: readonly string[];
+  authorizationContext: EffectiveAuthorizationContextDto;
 };
 
 export type OrganizationTrainingManualDraftInput = {
@@ -147,6 +171,50 @@ export type OrganizationTrainingVersionCopyToNewDraftWrite = {
   copyPolicy: OrganizationTrainingVersionCopyPolicy;
 };
 
+export type OrganizationTrainingFormalWritePolicy = {
+  createPractice: false;
+  createMockExam: false;
+  createFormalAnswerRecord: false;
+  createExamReport: false;
+  createMistakeBook: false;
+};
+
+export type OrganizationTrainingEmployeeAnswerDraftWrite = {
+  contentType: "organization_training_answer_draft";
+  trainingVersionPublicId: string;
+  employeePublicId: string;
+  organizationPublicId: string;
+  answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
+  answerStatus: "in_progress";
+  answeredQuestionCount: number;
+  scoreSummary: null;
+  savedAt: string;
+  submittedAt: null;
+  formalWritePolicy: OrganizationTrainingFormalWritePolicy;
+};
+
+export type OrganizationTrainingEmployeeAnswerSubmissionWrite = {
+  contentType: "organization_training_answer_record";
+  trainingVersionPublicId: string;
+  employeePublicId: string;
+  organizationPublicId: string;
+  answerOrganizationSnapshot: OrganizationTrainingScopeSnapshotDto;
+  answerStatus: "submitted";
+  answeredQuestionCount: number;
+  scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
+  submittedAt: string;
+  formalWritePolicy: OrganizationTrainingFormalWritePolicy;
+};
+
+export type OrganizationTrainingEmployeeAnswerStore = {
+  saveEmployeeAnswerDraft(
+    answerDraftWrite: OrganizationTrainingEmployeeAnswerDraftWrite,
+  ): Promise<EmployeeOrganizationTrainingAnswerDto>;
+  submitEmployeeAnswer(
+    answerSubmissionWrite: OrganizationTrainingEmployeeAnswerSubmissionWrite,
+  ): Promise<EmployeeOrganizationTrainingAnswerDto>;
+};
+
 export type OrganizationTrainingVersionStore = {
   publishVersion(
     versionWrite: OrganizationTrainingPublishedVersionPersistenceWrite,
@@ -160,7 +228,8 @@ export type OrganizationTrainingVersionStore = {
 };
 
 export type OrganizationTrainingStore = OrganizationTrainingDraftStore &
-  OrganizationTrainingVersionStore;
+  OrganizationTrainingVersionStore &
+  OrganizationTrainingEmployeeAnswerStore;
 
 export type OrganizationTrainingClock = {
   now(): Date;
@@ -196,6 +265,41 @@ export type OrganizationTrainingCopyVersionToNewDraftCommand = {
   sourceQuestionTypeSummary: OrganizationTrainingQuestionTypeSummary;
 };
 
+export type OrganizationTrainingListEmployeeVisibleVersionsCommand = {
+  employeeContext: OrganizationTrainingEmployeeContext;
+  sourceVersions: readonly OrganizationTrainingPublishedVersionDto[];
+};
+
+export type OrganizationTrainingEmployeeAnswerDraftInput = {
+  trainingVersionPublicId: string;
+  answeredQuestionCount: number;
+};
+
+export type OrganizationTrainingEmployeeAnswerSubmitInput =
+  OrganizationTrainingEmployeeAnswerDraftInput & {
+    scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto;
+  };
+
+export type OrganizationTrainingSaveEmployeeAnswerDraftCommand = {
+  employeeContext: OrganizationTrainingEmployeeContext;
+  version: OrganizationTrainingPublishedVersionDto;
+  answerInput: OrganizationTrainingEmployeeAnswerDraftInput;
+  existingAnswer: EmployeeOrganizationTrainingAnswerDto | null;
+};
+
+export type OrganizationTrainingSubmitEmployeeAnswerCommand = {
+  employeeContext: OrganizationTrainingEmployeeContext;
+  version: OrganizationTrainingPublishedVersionDto;
+  answerInput: OrganizationTrainingEmployeeAnswerSubmitInput;
+  existingAnswer: EmployeeOrganizationTrainingAnswerDto | null;
+};
+
+export type OrganizationTrainingGetEmployeeAnswerReadonlySummaryCommand = {
+  employeeContext: OrganizationTrainingEmployeeContext;
+  version: OrganizationTrainingPublishedVersionDto;
+  existingAnswer: EmployeeOrganizationTrainingAnswerDto | null;
+};
+
 export type OrganizationTrainingPublishVersionResult =
   | {
       success: true;
@@ -229,6 +333,28 @@ export type OrganizationTrainingCopyVersionToNewDraftResult =
       message: typeof organizationTrainingCopyToNewDraftBlockedMessage;
     };
 
+export type OrganizationTrainingListEmployeeVisibleVersionsResult =
+  | {
+      success: true;
+      versions: OrganizationTrainingPublishedVersionDto[];
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingEmployeeAnswerBlockedReason;
+      message: typeof organizationTrainingEmployeeAnswerBlockedMessage;
+    };
+
+export type OrganizationTrainingEmployeeAnswerResult =
+  | {
+      success: true;
+      answer: EmployeeOrganizationTrainingAnswerDto;
+    }
+  | {
+      success: false;
+      reason: OrganizationTrainingEmployeeAnswerBlockedReason;
+      message: typeof organizationTrainingEmployeeAnswerBlockedMessage;
+    };
+
 export type OrganizationTrainingService = {
   createManualDraft(
     command: OrganizationTrainingCreateManualDraftCommand,
@@ -242,6 +368,18 @@ export type OrganizationTrainingService = {
   copyVersionToNewDraft(
     command: OrganizationTrainingCopyVersionToNewDraftCommand,
   ): Promise<OrganizationTrainingCopyVersionToNewDraftResult>;
+  listEmployeeVisibleVersions(
+    command: OrganizationTrainingListEmployeeVisibleVersionsCommand,
+  ): Promise<OrganizationTrainingListEmployeeVisibleVersionsResult>;
+  saveEmployeeAnswerDraft(
+    command: OrganizationTrainingSaveEmployeeAnswerDraftCommand,
+  ): Promise<OrganizationTrainingEmployeeAnswerResult>;
+  submitEmployeeAnswer(
+    command: OrganizationTrainingSubmitEmployeeAnswerCommand,
+  ): Promise<OrganizationTrainingEmployeeAnswerResult>;
+  getEmployeeAnswerReadonlySummary(
+    command: OrganizationTrainingGetEmployeeAnswerReadonlySummaryCommand,
+  ): Promise<OrganizationTrainingEmployeeAnswerResult>;
 };
 
 const systemClock: OrganizationTrainingClock = {
@@ -287,6 +425,26 @@ function createCopyToNewDraftBlockedResult(
     success: false,
     reason,
     message: organizationTrainingCopyToNewDraftBlockedMessage,
+  };
+}
+
+function createEmployeeAnswerBlockedResult(
+  reason: OrganizationTrainingEmployeeAnswerBlockedReason,
+): OrganizationTrainingEmployeeAnswerResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingEmployeeAnswerBlockedMessage,
+  };
+}
+
+function createEmployeeListBlockedResult(
+  reason: OrganizationTrainingEmployeeAnswerBlockedReason,
+): OrganizationTrainingListEmployeeVisibleVersionsResult {
+  return {
+    success: false,
+    reason,
+    message: organizationTrainingEmployeeAnswerBlockedMessage,
   };
 }
 
@@ -367,6 +525,31 @@ function isAdvancedOrgAuthContext(
   );
 }
 
+function getEmployeeContextBlockedReason(
+  authorizationContext: EffectiveAuthorizationContextDto,
+): OrganizationTrainingEmployeeAnswerBlockedReason | null {
+  if (authorizationContext.effectiveEdition !== "advanced") {
+    return "advanced_edition_required";
+  }
+
+  if (
+    authorizationContext.authorizationSource !== "org_auth" ||
+    authorizationContext.ownerType !== "organization" ||
+    authorizationContext.organizationPublicId === null ||
+    authorizationContext.quotaOwnerType !== "organization"
+  ) {
+    return "org_auth_required";
+  }
+
+  if (
+    authorizationContext.capabilities.canAnswerOrganizationTraining !== true
+  ) {
+    return "organization_training_answer_capability_required";
+  }
+
+  return null;
+}
+
 function getPublishCapabilityBlockedReason(
   capabilityContext: OrganizationTrainingPublishInput["capabilityContext"],
 ): OrganizationTrainingPublishBlockedReason | null {
@@ -413,6 +596,156 @@ function normalizePublicIdList(values: readonly string[]): string[] {
     .filter((value): value is string => value !== null);
 
   return Array.from(new Set(normalizedValues));
+}
+
+type NormalizedEmployeeContext = {
+  employeePublicId: string;
+  currentOrganizationPublicId: string;
+  visibleOrganizationPublicIds: string[];
+  authorizationContext: EffectiveAuthorizationContextDto;
+};
+
+function normalizeEmployeeContext(
+  employeeContext: OrganizationTrainingEmployeeContext,
+): NormalizedEmployeeContext | null {
+  const employeePublicId = normalizeRequiredText(
+    employeeContext.employeePublicId,
+  );
+  const currentOrganizationPublicId = normalizeRequiredText(
+    employeeContext.currentOrganizationPublicId,
+  );
+  const visibleOrganizationPublicIds = normalizePublicIdList(
+    employeeContext.visibleOrganizationPublicIds,
+  );
+
+  if (
+    employeePublicId === null ||
+    currentOrganizationPublicId === null ||
+    visibleOrganizationPublicIds.length === 0 ||
+    !visibleOrganizationPublicIds.includes(currentOrganizationPublicId)
+  ) {
+    return null;
+  }
+
+  return {
+    employeePublicId,
+    currentOrganizationPublicId,
+    visibleOrganizationPublicIds,
+    authorizationContext: employeeContext.authorizationContext,
+  };
+}
+
+function isVersionVisibleToEmployee(
+  version: OrganizationTrainingPublishedVersionDto,
+  employeeContext: NormalizedEmployeeContext,
+): boolean {
+  const publishScopeOrganizationPublicIds = normalizePublicIdList(
+    version.publishScopeSnapshot.organizationPublicIds,
+  );
+
+  return employeeContext.visibleOrganizationPublicIds.some(
+    (visibleOrganizationPublicId) =>
+      publishScopeOrganizationPublicIds.includes(visibleOrganizationPublicId),
+  );
+}
+
+function isVersionAnswerable(version: OrganizationTrainingPublishedVersionDto) {
+  return version.status === "published";
+}
+
+function createAnswerOrganizationSnapshot(
+  employeeContext: NormalizedEmployeeContext,
+  capturedAt: string,
+): OrganizationTrainingScopeSnapshotDto {
+  return {
+    organizationPublicIds: [...employeeContext.visibleOrganizationPublicIds],
+    capturedAt,
+  };
+}
+
+function createFormalWritePolicy(): OrganizationTrainingFormalWritePolicy {
+  return {
+    createPractice: false,
+    createMockExam: false,
+    createFormalAnswerRecord: false,
+    createExamReport: false,
+    createMistakeBook: false,
+  };
+}
+
+function isScoreSummaryValid(
+  scoreSummary: EmployeeOrganizationTrainingScoreSummaryDto,
+  version: OrganizationTrainingPublishedVersionDto,
+): boolean {
+  return (
+    isNonNegativeInteger(scoreSummary.score) &&
+    isNonNegativeInteger(scoreSummary.totalScore) &&
+    scoreSummary.totalScore === version.totalScore &&
+    scoreSummary.score <= scoreSummary.totalScore
+  );
+}
+
+function normalizeAnsweredQuestionCount(
+  answeredQuestionCount: number,
+  version: OrganizationTrainingPublishedVersionDto,
+): number | null {
+  if (
+    !isPositiveInteger(answeredQuestionCount) ||
+    answeredQuestionCount > version.questionCount
+  ) {
+    return null;
+  }
+
+  return answeredQuestionCount;
+}
+
+function normalizeAnswerTrainingVersionPublicId(
+  answerTrainingVersionPublicId: string,
+  version: OrganizationTrainingPublishedVersionDto,
+): string | null {
+  const normalizedTrainingVersionPublicId = normalizeRequiredText(
+    answerTrainingVersionPublicId,
+  );
+
+  return normalizedTrainingVersionPublicId === version.publicId
+    ? normalizedTrainingVersionPublicId
+    : null;
+}
+
+function isSubmittedAnswer(
+  answer: EmployeeOrganizationTrainingAnswerDto | null,
+): boolean {
+  return (
+    answer !== null &&
+    (answer.answerStatus === "submitted" || answer.answerStatus === "read_only")
+  );
+}
+
+function isOwnAnswer(
+  answer: EmployeeOrganizationTrainingAnswerDto,
+  employeeContext: NormalizedEmployeeContext,
+  version: OrganizationTrainingPublishedVersionDto,
+): boolean {
+  return (
+    answer.employeePublicId === employeeContext.employeePublicId &&
+    answer.trainingVersionPublicId === version.publicId
+  );
+}
+
+function createReadonlyAnswerSummary(
+  answer: EmployeeOrganizationTrainingAnswerDto,
+): EmployeeOrganizationTrainingAnswerDto {
+  return {
+    ...answer,
+    answerOrganizationSnapshot: {
+      organizationPublicIds: [
+        ...answer.answerOrganizationSnapshot.organizationPublicIds,
+      ],
+      capturedAt: answer.answerOrganizationSnapshot.capturedAt,
+    },
+    answerStatus: "read_only",
+    resultSummaryVisible: true,
+  };
 }
 
 function isPublishQuestionsValid(
@@ -893,6 +1226,211 @@ export function createOrganizationTrainingService(
             createFreshDraftPublicId: true,
           },
         }),
+      };
+    },
+
+    async listEmployeeVisibleVersions(command) {
+      const normalizedEmployeeContext = normalizeEmployeeContext(
+        command.employeeContext,
+      );
+      if (normalizedEmployeeContext === null) {
+        return createEmployeeListBlockedResult("invalid_employee_context");
+      }
+
+      const contextBlockedReason = getEmployeeContextBlockedReason(
+        normalizedEmployeeContext.authorizationContext,
+      );
+      if (contextBlockedReason !== null) {
+        return createEmployeeListBlockedResult(contextBlockedReason);
+      }
+
+      return {
+        success: true,
+        versions: command.sourceVersions
+          .filter(
+            (version) =>
+              isVersionAnswerable(version) &&
+              isVersionVisibleToEmployee(version, normalizedEmployeeContext),
+          )
+          .map(copyPublishedVersion),
+      };
+    },
+
+    async saveEmployeeAnswerDraft(command) {
+      const normalizedEmployeeContext = normalizeEmployeeContext(
+        command.employeeContext,
+      );
+      if (normalizedEmployeeContext === null) {
+        return createEmployeeAnswerBlockedResult("invalid_employee_context");
+      }
+
+      const contextBlockedReason = getEmployeeContextBlockedReason(
+        normalizedEmployeeContext.authorizationContext,
+      );
+      if (contextBlockedReason !== null) {
+        return createEmployeeAnswerBlockedResult(contextBlockedReason);
+      }
+
+      if (
+        !isVersionVisibleToEmployee(command.version, normalizedEmployeeContext)
+      ) {
+        return createEmployeeAnswerBlockedResult("version_not_visible");
+      }
+
+      if (!isVersionAnswerable(command.version)) {
+        return createEmployeeAnswerBlockedResult("version_not_answerable");
+      }
+
+      if (isSubmittedAnswer(command.existingAnswer)) {
+        return createEmployeeAnswerBlockedResult("already_submitted");
+      }
+
+      const trainingVersionPublicId = normalizeAnswerTrainingVersionPublicId(
+        command.answerInput.trainingVersionPublicId,
+        command.version,
+      );
+      const answeredQuestionCount = normalizeAnsweredQuestionCount(
+        command.answerInput.answeredQuestionCount,
+        command.version,
+      );
+
+      if (trainingVersionPublicId === null || answeredQuestionCount === null) {
+        return createEmployeeAnswerBlockedResult("invalid_answer_input");
+      }
+
+      const savedAt = clock.now().toISOString();
+
+      return {
+        success: true,
+        answer: await trainingStore.saveEmployeeAnswerDraft({
+          contentType: "organization_training_answer_draft",
+          trainingVersionPublicId,
+          employeePublicId: normalizedEmployeeContext.employeePublicId,
+          organizationPublicId:
+            normalizedEmployeeContext.currentOrganizationPublicId,
+          answerOrganizationSnapshot: createAnswerOrganizationSnapshot(
+            normalizedEmployeeContext,
+            savedAt,
+          ),
+          answerStatus: "in_progress",
+          answeredQuestionCount,
+          scoreSummary: null,
+          savedAt,
+          submittedAt: null,
+          formalWritePolicy: createFormalWritePolicy(),
+        }),
+      };
+    },
+
+    async submitEmployeeAnswer(command) {
+      const normalizedEmployeeContext = normalizeEmployeeContext(
+        command.employeeContext,
+      );
+      if (normalizedEmployeeContext === null) {
+        return createEmployeeAnswerBlockedResult("invalid_employee_context");
+      }
+
+      const contextBlockedReason = getEmployeeContextBlockedReason(
+        normalizedEmployeeContext.authorizationContext,
+      );
+      if (contextBlockedReason !== null) {
+        return createEmployeeAnswerBlockedResult(contextBlockedReason);
+      }
+
+      if (
+        !isVersionVisibleToEmployee(command.version, normalizedEmployeeContext)
+      ) {
+        return createEmployeeAnswerBlockedResult("version_not_visible");
+      }
+
+      if (!isVersionAnswerable(command.version)) {
+        return createEmployeeAnswerBlockedResult("version_not_answerable");
+      }
+
+      if (isSubmittedAnswer(command.existingAnswer)) {
+        return createEmployeeAnswerBlockedResult("already_submitted");
+      }
+
+      const trainingVersionPublicId = normalizeAnswerTrainingVersionPublicId(
+        command.answerInput.trainingVersionPublicId,
+        command.version,
+      );
+      const answeredQuestionCount = normalizeAnsweredQuestionCount(
+        command.answerInput.answeredQuestionCount,
+        command.version,
+      );
+
+      if (
+        trainingVersionPublicId === null ||
+        answeredQuestionCount === null ||
+        !isScoreSummaryValid(command.answerInput.scoreSummary, command.version)
+      ) {
+        return createEmployeeAnswerBlockedResult("invalid_answer_input");
+      }
+
+      const submittedAt = clock.now().toISOString();
+
+      return {
+        success: true,
+        answer: await trainingStore.submitEmployeeAnswer({
+          contentType: "organization_training_answer_record",
+          trainingVersionPublicId,
+          employeePublicId: normalizedEmployeeContext.employeePublicId,
+          organizationPublicId:
+            normalizedEmployeeContext.currentOrganizationPublicId,
+          answerOrganizationSnapshot: createAnswerOrganizationSnapshot(
+            normalizedEmployeeContext,
+            submittedAt,
+          ),
+          answerStatus: "submitted",
+          answeredQuestionCount,
+          scoreSummary: {
+            score: command.answerInput.scoreSummary.score,
+            totalScore: command.answerInput.scoreSummary.totalScore,
+          },
+          submittedAt,
+          formalWritePolicy: createFormalWritePolicy(),
+        }),
+      };
+    },
+
+    async getEmployeeAnswerReadonlySummary(command) {
+      const normalizedEmployeeContext = normalizeEmployeeContext(
+        command.employeeContext,
+      );
+      if (normalizedEmployeeContext === null) {
+        return createEmployeeAnswerBlockedResult("invalid_employee_context");
+      }
+
+      const contextBlockedReason = getEmployeeContextBlockedReason(
+        normalizedEmployeeContext.authorizationContext,
+      );
+      if (contextBlockedReason !== null) {
+        return createEmployeeAnswerBlockedResult(contextBlockedReason);
+      }
+
+      if (
+        !isVersionVisibleToEmployee(command.version, normalizedEmployeeContext)
+      ) {
+        return createEmployeeAnswerBlockedResult("version_not_visible");
+      }
+
+      if (
+        command.existingAnswer === null ||
+        !isOwnAnswer(
+          command.existingAnswer,
+          normalizedEmployeeContext,
+          command.version,
+        ) ||
+        command.existingAnswer.scoreSummary === null ||
+        command.existingAnswer.submittedAt === null
+      ) {
+        return createEmployeeAnswerBlockedResult("history_not_visible");
+      }
+
+      return {
+        success: true,
+        answer: createReadonlyAnswerSummary(command.existingAnswer),
       };
     },
   };
