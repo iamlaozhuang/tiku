@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-repository-service-wiring-readonly-recheck
-updatedAt: "2026-06-16T11:05:51-07:00"
+currentPhase: advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+updatedAt: "2026-06-16T11:19:15-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6bd24043ede1134bee2b0d532f0f8d30c5ebf203
-  lastKnownOriginMasterSha: 6bd24043ede1134bee2b0d532f0f8d30c5ebf203
+  lastKnownMasterSha: 922c1cafc37a21b48e2efede63c1793fd3b722cb
+  lastKnownOriginMasterSha: 922c1cafc37a21b48e2efede63c1793fd3b722cb
 currentTask:
-  id: advanced-organization-analytics-repository-service-wiring-readonly-recheck
+  id: advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
-  branch: codex/organization-analytics-service-wiring-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+  branch: codex/organization-analytics-route-runtime-boundary-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -525,6 +525,7 @@ qualityGates:
     moduleCloseout: pass_organization_analytics_auto_seed_readiness_normalization_closeout_readiness
     prePushHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_push_readiness
     advancedOrganizationAnalyticsRepositoryServiceWiringReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
+    advancedOrganizationAnalyticsRouteRuntimeBoundaryReadonlyAuditSeeding: pass_docs_state_seeded_route_runtime_boundary_readonly_audit
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -540,10 +541,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Advanced organization analytics repository service wiring readonly recheck found no blocking issue on the
-    service-only repository injection, ADR-002 layering, summary/aggregate redaction, export-readiness metadata boundary,
-    and blocked gates. Next work requires a fresh queue decision before route/runtime, mapper, validator, schema, DB, UI,
-    or data-source implementation is seeded. `.env*`, DB execution, row/private data, schema/migration, provider,
-    dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, merge, push,
-    and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    Continue with `advanced-organization-analytics-route-runtime-boundary-readonly-audit` before any route/runtime,
+    mapper, validator, schema, DB, UI, or data-source implementation. The audit should confirm whether an organization
+    analytics REST route/runtime wiring task is ready, whether an intermediate mapper/validator boundary is needed, and
+    whether current service/repository contracts remain sufficient without exposing row/private data or technical
+    identifier lists in UI-facing surfaces. `.env*`, DB execution, row/private data, schema/migration, provider,
+    dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost
+    Calibration Gate remain blocked unless a future scoped task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md

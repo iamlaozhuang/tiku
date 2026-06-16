@@ -28102,3 +28102,172 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-readonly-recheck
+  - id: advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+    title: Advanced organization analytics route runtime boundary readonly audit seeding
+    phase: advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T11:19:15-07:00"
+    closedAt: "2026-06-16T11:19:15-07:00"
+    branch: codex/organization-analytics-route-runtime-boundary-seeding
+    dependencies:
+      - advanced-organization-analytics-repository-service-wiring-readonly-recheck
+    humanApproval: >-
+      User approved executing this docs/state-only queue seeding task in the current 2026-06-16 Codex thread by saying
+      "批准执行". Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one pending
+      readonly route/runtime boundary audit, declared local validation, local commit, fast-forward merge to master, push
+      origin/master, and merged short-branch cleanup. Product source implementation, route/runtime/mapper/validator/UI
+      changes, direct DB access, row/private data exposure, schema/migration, provider/model calls or configuration,
+      dependencies, package/lockfile changes, dev server, Browser/Playwright/e2e, staging/prod/cloud/deploy/payment/
+      external-service, PR, force push, and Cost Calibration Gate remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/runtime/mapper/validator/UI changes
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+  - id: advanced-organization-analytics-route-runtime-boundary-readonly-audit
+    title: Advanced organization analytics route runtime boundary readonly audit
+    phase: advanced-organization-analytics-route-runtime-boundary-readonly-audit
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-route-runtime-boundary-readonly-audit-seeding
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is limited to readonly review of organization
+      analytics route/runtime boundary readiness after repository/service wiring recheck. The task should confirm
+      whether REST route/runtime wiring is ready, whether mapper/validator boundaries must be introduced first, whether
+      no current organization analytics route exists, and whether UI-facing surfaces can avoid technical identifier
+      lists while preserving summary/aggregate/export-readiness redaction.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-route-runtime-boundary-readonly-audit.md
+    readonlyFiles:
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/app/api/v1/organizations/route.ts
+      - src/app/api/v1/organizations/[publicId]/route.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/organization-analytics-service.test.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-readonly-recheck.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/runtime/mapper/validator/UI changes
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_fresh_user_approval_required
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-service.test.ts"
+      - npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-route-runtime-boundary-readonly-audit
