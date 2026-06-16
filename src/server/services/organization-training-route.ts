@@ -36,6 +36,16 @@ export type OrganizationTrainingPersistenceLineageResolver = (
   input: OrganizationTrainingPersistenceLineageResolverInput,
 ) => Promise<OrganizationTrainingPersistenceLineage | null>;
 
+export type OrganizationTrainingTrustedPersistenceLineageLookupInput = {
+  adminContext: OrganizationTrainingAdminContext;
+  organizationPublicId: string;
+  authorizationPublicId: string;
+};
+
+export type OrganizationTrainingTrustedPersistenceLineageLookup = (
+  input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
+) => Promise<OrganizationTrainingPersistenceLineage | null>;
+
 export type OrganizationTrainingAdminContextResolverInput = {
   request: Request;
   pathPublicId: string;
@@ -47,6 +57,7 @@ export type OrganizationTrainingAdminContextResolver = (
 ) => Promise<OrganizationTrainingAdminContext | null>;
 
 export type OrganizationTrainingRouteOptions = {
+  lookupTrustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineageLookup;
   resolveOrganizationAdminContext?: OrganizationTrainingAdminContextResolver;
   resolvePersistenceLineage?: OrganizationTrainingPersistenceLineageResolver;
 };
@@ -78,6 +89,12 @@ function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
 }
 
+function normalizeRequiredText(value: string): string | null {
+  const trimmedValue = value.trim();
+
+  return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
 async function resolvePathPublicId(
   context: OrganizationTrainingPublishRouteContext,
 ): Promise<string> {
@@ -92,6 +109,20 @@ async function defaultResolvePersistenceLineage(): Promise<null> {
 
 async function defaultResolveOrganizationAdminContext(): Promise<null> {
   return null;
+}
+
+function createDefaultPersistenceLineageResolver(
+  lookupTrustedPersistenceLineage:
+    | OrganizationTrainingTrustedPersistenceLineageLookup
+    | undefined,
+): OrganizationTrainingPersistenceLineageResolver {
+  if (lookupTrustedPersistenceLineage === undefined) {
+    return defaultResolvePersistenceLineage;
+  }
+
+  return createOrganizationTrainingPersistenceLineageResolver(
+    lookupTrustedPersistenceLineage,
+  );
 }
 
 function createRuntimeOrganizationTrainingStore(): OrganizationTrainingStore {
@@ -140,6 +171,66 @@ function createPublishBlockedResponse(): ApiResponse<null> {
   );
 }
 
+function isOrganizationVisibleToAdmin(
+  organizationPublicId: string,
+  adminContext: OrganizationTrainingAdminContext,
+): boolean {
+  return adminContext.visibleOrganizationPublicIds
+    .map((visibleOrganizationPublicId) =>
+      normalizeRequiredText(visibleOrganizationPublicId),
+    )
+    .includes(organizationPublicId);
+}
+
+function normalizePersistenceLineage(
+  persistenceLineage: OrganizationTrainingPersistenceLineage,
+): OrganizationTrainingPersistenceLineage | null {
+  if (
+    !Number.isInteger(persistenceLineage.organizationId) ||
+    persistenceLineage.organizationId < 1 ||
+    !Number.isInteger(persistenceLineage.orgAuthId) ||
+    persistenceLineage.orgAuthId < 1
+  ) {
+    return null;
+  }
+
+  return {
+    organizationId: persistenceLineage.organizationId,
+    orgAuthId: persistenceLineage.orgAuthId,
+  };
+}
+
+export function createOrganizationTrainingPersistenceLineageResolver(
+  lookupTrustedPersistenceLineage: OrganizationTrainingTrustedPersistenceLineageLookup,
+): OrganizationTrainingPersistenceLineageResolver {
+  return async ({ adminContext, publishInput }) => {
+    const organizationPublicId = normalizeRequiredText(
+      publishInput.organizationPublicId,
+    );
+    const authorizationPublicId = normalizeRequiredText(
+      publishInput.authorizationPublicId,
+    );
+
+    if (organizationPublicId === null || authorizationPublicId === null) {
+      return null;
+    }
+
+    if (!isOrganizationVisibleToAdmin(organizationPublicId, adminContext)) {
+      return null;
+    }
+
+    const persistenceLineage = await lookupTrustedPersistenceLineage({
+      adminContext,
+      organizationPublicId,
+      authorizationPublicId,
+    });
+
+    return persistenceLineage === null
+      ? null
+      : normalizePersistenceLineage(persistenceLineage);
+  };
+}
+
 export function createOrganizationTrainingRouteHandlers(
   organizationTrainingService: Pick<
     OrganizationTrainingService,
@@ -151,7 +242,10 @@ export function createOrganizationTrainingRouteHandlers(
     options.resolveOrganizationAdminContext ??
     defaultResolveOrganizationAdminContext;
   const resolvePersistenceLineage =
-    options.resolvePersistenceLineage ?? defaultResolvePersistenceLineage;
+    options.resolvePersistenceLineage ??
+    createDefaultPersistenceLineageResolver(
+      options.lookupTrustedPersistenceLineage,
+    );
 
   return createRouteHandlersWithErrorEnvelope({
     publish: {

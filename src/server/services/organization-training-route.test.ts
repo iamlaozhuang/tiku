@@ -325,6 +325,118 @@ describe("organization training publish route handlers", () => {
     expect(publishService.commands).toEqual([]);
   });
 
+  it("resolves trusted lineage from actor-scoped public identifiers before publishing", async () => {
+    const publishService = createPublishService();
+    const lookupInputs: unknown[] = [];
+    const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+      async lookupTrustedPersistenceLineage(input: unknown) {
+        lookupInputs.push(input);
+
+        return trustedLineage;
+      },
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest({
+        ...createPublishInput(),
+        organizationId: 9002,
+        orgAuthId: 9003,
+      }),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        version: createPublishedVersion(),
+      },
+    });
+    expect(lookupInputs).toEqual([
+      {
+        adminContext: trustedAdminContext,
+        authorizationPublicId: "org_auth_route_public_401",
+        organizationPublicId: "organization_route_public_401",
+      },
+    ]);
+    expect(publishService.commands).toEqual([
+      {
+        publishInput: expect.objectContaining({
+          draftPublicId: publishPathPublicId,
+        }),
+        persistenceLineage: trustedLineage,
+      },
+    ]);
+  });
+
+  it("blocks trusted lineage lookup when actor scope cannot see the publish organization", async () => {
+    const publishService = createPublishService();
+    const lookupInputs: unknown[] = [];
+    const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolveOrganizationAdminContext() {
+        return {
+          ...trustedAdminContext,
+          visibleOrganizationPublicIds: ["organization_route_public_other"],
+        };
+      },
+      async lookupTrustedPersistenceLineage(input) {
+        lookupInputs.push(input);
+
+        return trustedLineage;
+      },
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput()),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403064,
+      message: "Organization training publish lineage is unavailable.",
+      data: null,
+    });
+    expect(lookupInputs).toEqual([]);
+    expect(publishService.commands).toEqual([]);
+  });
+
+  it("blocks publishing when trusted lineage lookup cannot resolve the public organization authorization pair", async () => {
+    const publishService = createPublishService();
+    const lookupInputs: unknown[] = [];
+    const handlers = createOrganizationTrainingRouteHandlers(publishService, {
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+      async lookupTrustedPersistenceLineage(input) {
+        lookupInputs.push(input);
+
+        return null;
+      },
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput()),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 403064,
+      message: "Organization training publish lineage is unavailable.",
+      data: null,
+    });
+    expect(lookupInputs).toEqual([
+      {
+        adminContext: trustedAdminContext,
+        authorizationPublicId: "org_auth_route_public_401",
+        organizationPublicId: "organization_route_public_401",
+      },
+    ]);
+    expect(publishService.commands).toEqual([]);
+  });
+
   it("returns an invalid input envelope for malformed publish payloads", async () => {
     const publishService = createPublishService();
     const handlers = createOrganizationTrainingRouteHandlers(publishService, {

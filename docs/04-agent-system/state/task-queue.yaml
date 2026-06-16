@@ -23988,6 +23988,107 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-16T01:20:16-07:00"
     closedAt: "2026-06-16T01:20:16-07:00"
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
+    title: Add trusted lineage resolver contract for publish route
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+    humanApprovalBoundary: >-
+      User approved execution on 2026-06-16, and standing autonomy is materialized in project state for queued Module
+      Run v2 tasks with concrete scope. Scope is a narrow route-level TDD implementation of a trusted lineage resolver
+      contract using the already verified organization-admin actor context. The task must not perform DB access,
+      implement real database-backed lookup, change repository mapper, change schema/drizzle, change
+      dependency/package/lockfile, call provider/model, start dev server, run Browser or Playwright/e2e, touch
+      staging/prod/cloud/deploy/payment/external-service, write formal target data, create or update PR, force push, or
+      broaden authorization models outside the named route resolver contract.
+    autoDriveStandingAutonomyApproval: approved_by_user_prompt_2026_06_16
+    seededByTask: advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd
+    validationProfile: L2-tdd-route-resolver-no-db
+    localFullLoopGate: L2
+    taskKind: implementation
+    moduleRunVersion: 2
+    redFirstRequired: true
+    capabilities:
+      localUnitTest: approved_by_standing_autonomy_2026_06_16
+      routeTrustedLineageResolverContract: approved_by_standing_autonomy_2026_06_16
+      schemaMigration: blocked
+      localDockerDatabase: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd.md
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/services/organization-training-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - tests/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - real DB access or row/private data access
+      - database-backed lineage lookup implementation
+      - repository mapper changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/drizzle edits, migration generation, or migration execution
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - broad authorization or permission model changes outside the named route resolver contract
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-training-route.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd -SkipRemoteAheadCheck
+    status: closed
+    result: pass_tdd_route_trusted_lineage_resolver_contract
+    retryCount: 0
+    claimedAt: "2026-06-16T01:30:33-07:00"
+    closedAt: "2026-06-16T01:30:33-07:00"
   - id: module-run-v2-standing-autonomy-policy-governance
     title: Module Run v2 standing autonomy policy governance
     phase: module-run-v2-standing-autonomy-policy-governance
