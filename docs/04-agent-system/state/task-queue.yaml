@@ -22983,6 +22983,7 @@ tasks:
       Pending only. Requires fresh user approval before claim. Scope is readonly recheck of the organization training
       publish-version route flow from durable master. It must not modify runtime code, route/service/repository/mapper,
       schema, UI, dependencies, provider/model, DB, formal content, or formal target write paths.
+    autoDriveLocalReadonlyApproval: approved_by_user_prompt_2026_06_15
     seededByTask: advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
     seededImplementationTask: false
     seededExecutionModule: organization-training
@@ -23031,12 +23032,12 @@ tasks:
       - e2e/browser/dev-server remain blocked
       - formal target write remains blocked
     closeoutPolicy:
-      localCommit: pending_fresh_user_approval
+      localCommit: approved_by_user_prompt_2026_06_15
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
         deleteShortBranch: true
@@ -23123,6 +23124,146 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-flow-readonly-recheck
+    status: closed
+    result: pass_readonly_recheck_with_runtime_lineage_resolver_needs_recheck
+    retryCount: 0
+    claimedAt: "2026-06-15T22:55:28-07:00"
+    closedAt: "2026-06-15T22:55:28-07:00"
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+    title: Decide trusted lineage boundary for organization training publish route
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-flow-readonly-recheck
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is docs-only boundary decision for how the
+      organization training publish route may obtain trusted admin/auth persistence lineage. It must not implement
+      runtime code, route/service/repository/mapper changes, schema, UI, dependencies, provider/model, DB execution,
+      formal content write, or formal target write paths.
+    seededByTask: advanced-organization-training-publish-version-route-flow-readonly-recheck
+    seededImplementationTask: false
+    seededExecutionModule: organization-training
+    targetClosureItem: organization training publish-version route trusted lineage boundary decision
+    behaviorBoundary: organization-training::docs-only-route-trusted-lineage-boundary-decision
+    requirementRefs:
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+    useCases:
+      - define the trusted route lineage source before making the runtime publish endpoint usable
+      - preserve ADR-002 thin route and service/repository ownership
+      - prevent client-supplied internal ids from becoming authoritative
+      - keep formal target write blocked
+    acceptanceScenarios:
+      - readiness gate starts from clean `master == origin/master`
+      - decision records whether trusted lineage belongs in a route helper, service collaborator, or dedicated auth boundary
+      - decision records how admin/session/auth context is verified without direct row/private data exposure in evidence
+      - decision records how default lineage-unavailable blocking remains safe until implementation
+      - decision names the follow-up TDD implementation task only if the boundary is sufficiently narrow
+    nonGoals:
+      - source implementation, route runtime changes, service/repository/mapper/contract/model/validator/UI changes,
+        schema/drizzle changes, migration generation or execution, DB access, provider/model calls, dependency changes,
+        e2e/browser/dev-server, deploy, payment, formal content write, and formal target write
+    validationProfile: L1-docs-only-boundary-decision
+    localExperienceClosureGate: advanced-edition-organization-training
+    localFullLoopGate: L1
+    capabilities:
+      schemaMigration: blocked_without_task_approval
+      localDockerDatabase: blocked_without_task_approval
+      providerCall: blocked_without_task_approval
+      costCalibrationGate: blocked
+      localE2EValidation: blocked
+    blockedRemainder:
+      - runtime route trusted lineage implementation remains blocked
+      - DB access and migration execution remain blocked
+      - provider/model and Cost Calibration Gate remain blocked
+      - e2e/browser/dev-server remain blocked
+      - formal target write remains blocked
+    closeoutPolicy:
+      localCommit: pending_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    taskKind: boundary_decision
+    moduleRunVersion: 2
+    redFirstRequired: false
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-service.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/contracts/effective-authorization-contract.ts
+      - src/server/services/effective-authorization-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - execution without fresh user approval
+      - direct database access
+      - migration generation or execution
+      - schema/drizzle edits
+      - product source implementation
+      - route/runtime implementation changes
+      - service/repository/mapper/contract/model/validator changes
+      - UI changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - formal content write
+      - formal target write
+      - public identifier value list exposure
+      - PR
+      - force push
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
     status: pending
     result: null
     retryCount: 0
