@@ -391,6 +391,8 @@ closeoutPolicy:
     requiredFields:
       - deleteShortBranch
       - parkWorktree
+    optionalFields:
+      - fetchPruneAfterPush
   noisePolicy:
     postMergeEvidenceOnlyCommitPolicy: not_required_by_default
     finalHandoffShaPolicy: final_handoff_or_project_state
@@ -449,6 +451,63 @@ standingUnattendedLocalCloseoutApproval:
     - force_push
     - cost_calibration_gate
   executionRule: The standing approval may be materialized only into auto-seeded low-risk implementation task closeoutPolicy during the seed transaction. It is not a general approval for mechanism repairs, manual tasks, PRs, force pushes, high-risk capabilities, or protected-branch editing outside approved closeout scripts.
+standingDocsStateFastLaneCloseoutApproval:
+  statePath: docs/04-agent-system/state/project-state.yaml
+  durableKey: automation.unattendedControl.standingDocsStateFastLaneCloseoutApproval
+  purpose: Standing approval for docs/state-only fast lane closeout after hard-block readiness, plus the explicitly named current organization analytics TDD task closeout upgrade.
+  requiredStatus: approved
+  eligibleTaskFields:
+    docsFastLane:
+      fastLaneEligible: true
+      fastLaneLane: docs_only
+      requiredApprovalAnchors:
+        - standingDocsStateFastLaneCloseoutApproval
+        - docsOnlyBatchMode hard_block
+    explicitCurrentTask:
+      id: advanced-organization-analytics-mapper-validator-route-contract-tdd
+      requiredApprovalAnchors:
+        - user_prompt_2026_06_16_1c_2c
+        - standingDocsStateFastLaneCloseoutApproval
+  generatedCloseoutPolicy:
+    localCommit: approved
+    fastForwardMerge:
+      approved: true
+      targetBranch: master
+    push:
+      approved: true
+      target: origin/master
+    cleanup:
+      deleteShortBranch: true
+      parkWorktree: true
+      fetchPruneAfterPush: true
+  requiredGates:
+    - repository_readiness
+    - docs_only_fast_lane_hard_block_readiness
+    - task_queue_scope
+    - allowedFiles_blockedFiles
+    - task_plan_before_edit
+    - redacted_evidence
+    - audit_review
+    - module_closeout_readiness
+    - pre_push_readiness
+    - remote_divergence
+  blockedWithoutFreshTaskApproval:
+    - env_secret
+    - product_source_or_runtime_scope_expansion
+    - route_runtime_wiring_unless_task_allows
+    - provider_call
+    - provider_configuration
+    - dependency_package_lockfile_change
+    - schema_migration
+    - destructive_database_operation
+    - e2e
+    - external_service
+    - deploy
+    - payment
+    - pr
+    - force_push
+    - cost_calibration_gate
+  executionRule: This approval may be materialized only into docs/state-only fast lane closeoutPolicy after hard-block readiness passes, or into the explicitly named current TDD task closeoutPolicy from the 2026-06-16 1C + 2C prompt. It does not approve product source scope expansion, route runtime wiring, PRs, force pushes, deployments, provider calls, env/secret access, dependency changes, schema/migration, e2e/browser/dev-server, or Cost Calibration Gate execution.
 standingLocalSchemaMigrationApproval:
   statePath: docs/04-agent-system/state/project-state.yaml
   durableKey: automation.unattendedControl.standingLocalSchemaMigrationApproval
@@ -682,4 +741,4 @@ forbiddenClaims:
   - This schema approves local e2e validation only through standingLocalE2EValidationApproval plus task-scoped approved_local_only_existing_specs and local-only command gates.
   - This schema approves destructive local Docker DB only through taskScopedDestructiveLocalDockerDbApproval plus task-scoped approved_destructive_local_dev_only and capability gates.
   - This schema does not approve dependency, deploy, PR, force push, staging/prod/cloud DB, env/secret, provider, or Cost Calibration Gate execution.
-  - This schema approves push only through task-scoped closeoutPolicy materialized from standingUnattendedLocalCloseoutApproval or fresh task-specific approval, after all readiness and pre-push gates pass.
+  - This schema approves push only through task-scoped closeoutPolicy materialized from standingUnattendedLocalCloseoutApproval, standingDocsStateFastLaneCloseoutApproval, or fresh task-specific approval, after all readiness and pre-push gates pass.

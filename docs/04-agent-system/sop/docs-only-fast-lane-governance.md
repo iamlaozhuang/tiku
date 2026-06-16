@@ -2,13 +2,15 @@
 
 ## Status
 
-Active after Module Run v2 docs-only fast lane readiness scripts pass in hard-block mode. Shadow mode may be used before activation, but shadow mode alone never authorizes merge or push.
+Active after Module Run v2 docs-only fast lane readiness scripts pass in hard-block mode and the task carries a materialized closeout policy. Shadow mode may be used before activation, but shadow mode alone never authorizes merge or push.
 
 ## Purpose
 
 Reduce repeated closeout friction for low-risk docs-only work while preserving all high-risk blocked gates.
 
 The fast lane is a batch closeout mechanism. It does not approve product implementation, dependency changes, schema work, DB access, provider/model calls, e2e/browser/dev-server, deploy, payment, external-service, PR creation, force-push, or Cost Calibration Gate execution.
+
+When `project-state.yaml` records `standingDocsStateFastLaneCloseoutApproval: approved`, a hard-block passing docs-only fast lane task may use a structured task-level `closeoutPolicy` for local commit, fast-forward merge to `master`, push to `origin/master`, and cleanup. The approval is not implied by this SOP alone; it must be materialized in both project state and the active queue task.
 
 ## Eligible Task Kinds
 
@@ -69,7 +71,7 @@ If an evidence or audit file declares `needs_recheck`, it must also declare one 
 - `-Mode shadow`: always exits 0 and reports `docsOnlyBatchShadowDecision: would_pass|would_block`.
 - `-Mode hard_block`: exits non-zero on any blocker and reports `docsOnlyBatchDecision: pass` only when all checks pass.
 
-Shadow mode is for rollout confidence and historical replay only. It cannot replace hard-block closeout.
+Shadow mode is for rollout confidence and historical replay only. It cannot replace hard-block closeout and cannot authorize commit, merge, push, or cleanup.
 
 ## Integration Policy
 
@@ -80,9 +82,18 @@ Existing PreCommit, ModuleCloseout, and PrePush scripts keep their legacy behavi
 
 When batch parameters are supplied, the scripts delegate to docs-only batch readiness in addition to their existing gates.
 
+Hard-block closeout may proceed only when all legacy gates still pass and the active task records:
+
+- `closeoutPolicy.localCommit` approved by a current prompt or standing state fact;
+- `closeoutPolicy.fastForwardMerge.approved: true` with `targetBranch: master`;
+- `closeoutPolicy.push.approved: true` with `target: origin/master`;
+- `closeoutPolicy.cleanup.deleteShortBranch: true`;
+- `closeoutPolicy.cleanup.parkWorktree: true` or an equivalent cleanup field accepted by the closeout executor.
+
 ## Rollout
 
 1. Add SOP, template, shadow readiness, and smoke coverage.
 2. Replay shadow readiness against at least two historical docs-only tasks and one intentionally failing fixture.
 3. After shadow passes, enable explicit hard-block batch mode in PreCommit, ModuleCloseout, and PrePush.
 4. First real batch trial is limited to two or three docs-only child tasks and must keep all high-risk gates blocked.
+5. Merge and push are allowed only after a task-level closeout policy is materialized from `standingDocsStateFastLaneCloseoutApproval` or a fresh task-specific approval.

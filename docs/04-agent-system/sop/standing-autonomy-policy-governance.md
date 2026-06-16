@@ -37,6 +37,19 @@ When repository readiness, task scope, validation, evidence, audit, remote-diver
 
 Commit, merge, push, and cleanup require the task to carry a complete structured `closeoutPolicy`. The policy does not authorize PR creation, force push, deployment, or scope expansion.
 
+## Docs/State Fast Lane Closeout
+
+The `standingDocsStateFastLaneCloseoutApproval` state fact authorizes docs/state-only fast lane tasks to perform local commit, fast-forward merge to `master`, push to `origin/master`, and cleanup only when all of the following are true:
+
+- the task is a docs/state-only fast lane task or an explicitly named task covered by a fresh user approval;
+- hard-block docs-only readiness, module closeout readiness, pre-push readiness, repository readiness, and remote-divergence gates pass;
+- `task-queue.yaml` materializes the authorization into the task's structured `closeoutPolicy`;
+- the task plan, evidence, and audit review record the approval source, changed-file boundary, blocked gates, validation commands, and redaction checks.
+
+This fast lane does not approve product source edits, tests, scripts, schema/migration, package or lockfile changes, e2e/browser/dev-server, provider/model calls, staging/prod/cloud/deploy/payment/external-service work, PR creation or update, force push, or Cost Calibration Gate execution.
+
+The 2026-06-16 `1C + 2C` prompt also approves full closeout for `advanced-organization-analytics-mapper-validator-route-contract-tdd` only. That approval does not expand the task beyond mapper, validator, route contract, and corresponding unit tests.
+
 ## Task-Scoped Local Capabilities
 
 The following capabilities may be used without stopping for another chat approval only when the active queued task explicitly declares the capability, the local capability/readiness gates pass, and evidence stays redacted.

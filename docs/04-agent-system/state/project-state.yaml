@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
-updatedAt: "2026-06-16T15:52:54-07:00"
+currentPhase: standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
+updatedAt: "2026-06-16T16:14:31-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -288,6 +288,55 @@ automation:
         validation, redaction, and closeout policy in repository state. It does not approve secret/env value access,
         staging/prod/cloud/deploy/payment/external-service, PR work, force push, shared-data destructive operations, or
         Cost Calibration Gate execution.
+    standingDocsStateFastLaneCloseoutApproval:
+      status: approved
+      approvedAt: "2026-06-16T16:14:31-07:00"
+      sopPath: docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      scope: docs/state-only fast lane closeout plus the explicitly named current TDD task closeout upgrade
+      appliesTo:
+        - docs/state-only fast lane tasks with hard-block readiness pass
+        - task-scoped closeoutPolicy for local commit, fast-forward merge, push, and cleanup
+        - advanced-organization-analytics-mapper-validator-route-contract-tdd closeoutPolicy only
+      allowedActions:
+        - task_claim
+        - task_plan_evidence_audit_creation
+        - scoped_docs_state_edit
+        - declared_local_validation
+        - local_commit
+        - fast_forward_merge_to_master
+        - push_origin_master
+        - merged_short_branch_cleanup
+        - fetch_prune_after_push
+      requiredGates:
+        - repository_readiness
+        - docs_only_fast_lane_hard_block_readiness
+        - task_queue_scope
+        - allowedFiles_blockedFiles
+        - task_plan_before_edit
+        - redacted_evidence
+        - audit_review
+        - module_closeout_readiness
+        - pre_push_readiness
+        - remote_divergence
+      stillRequiresFreshApproval:
+        - env_secret_value_access_output_or_edit
+        - product_source_or_runtime_scope_expansion
+        - route_runtime_wiring_unless_a_future_task_explicitly_allows_it
+        - schema_migration
+        - dependency_package_lockfile_change
+        - e2e_browser_dev_server_unless_a_future_task_explicitly_allows_it
+        - provider_model_call_or_configuration
+        - staging_prod_cloud_deploy_payment_external_service
+        - pr_create_or_update
+        - force_push_or_force_with_lease
+        - cost_calibration_gate
+      statement: >-
+        User selected 1C + 2C in the 2026-06-16 Codex thread and approves docs/state-only fast lane tasks to perform
+        local commit, fast-forward merge to master, push origin/master, and cleanup only when hard-block readiness,
+        task-scoped closeoutPolicy, redacted evidence, audit review, module closeout, pre-push, and remote-divergence
+        gates pass. The same prompt also approves the explicitly named
+        advanced-organization-analytics-mapper-validator-route-contract-tdd task closeoutPolicy, without expanding its
+        mapper, validator, route-contract, and unit-test scope.
     codexAutomationId: tiku-module-run-v2-autopilot
     codexAutomationStatus: ACTIVE
     codexAutomationSchedule: hourly
@@ -323,12 +372,12 @@ repository:
   lastKnownMasterSha: c465db3d69c6828484ca94489bfe8df615390597
   lastKnownOriginMasterSha: c465db3d69c6828484ca94489bfe8df615390597
 currentTask:
-  id: advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding
+  id: standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
   status: closed
-  sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+  sourceStory: agent-system-authorization-governance
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
   branch: codex/organization-analytics-mapper-validator-route-contract-seeding
   commitSha: null
   prUrl: null
@@ -528,6 +577,7 @@ qualityGates:
     advancedOrganizationAnalyticsRouteRuntimeBoundaryReadonlyAuditSeeding: pass_docs_state_seeded_route_runtime_boundary_readonly_audit
     advancedOrganizationAnalyticsRouteRuntimeBoundaryReadonlyAudit: pass_readonly_audit_mapper_validator_boundary_recommended
     advancedOrganizationAnalyticsMapperValidatorRouteContractTddSeeding: pass_docs_state_seeded_mapper_validator_route_contract_tdd
+    standingDocsStateFastLaneCloseoutUpgrade: pass_docs_state_authorization_upgrade
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -543,13 +593,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Continue with `advanced-organization-analytics-mapper-validator-route-contract-tdd` after fresh user approval. The
-    seeded pending task should add a narrow mapper/validator/route-contract boundary and unit tests proving that
-    organization analytics API/UI-facing DTOs do not expose internal technical scoped organization identifier arrays.
-    It must preserve aggregate-only dashboard summary, summary-only employee statistics, metadata-only export readiness,
-    standard API response envelope expectations, ISO 8601/null/empty-list behavior, and typed request parsing for future
-    route inputs. Route runtime wiring, App Router route files, service/repository runtime changes, schema/migration,
-    DB execution, UI, provider/model calls, dependencies, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/
-    external-service, PR, force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly
-    permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-mapper-validator-route-contract-tdd-seeding.md
+    Continue with `advanced-organization-analytics-mapper-validator-route-contract-tdd` under the current 1C + 2C
+    approval. The pending task now has a complete closeoutPolicy for local commit, fast-forward merge to master, push
+    origin/master, and cleanup after all task gates pass. Implementation remains narrow: mapper, validator, route
+    contract, and corresponding unit tests only. Route runtime wiring, App Router route files, service/repository
+    runtime changes, schema/migration, DB execution, UI, provider/model calls, dependencies, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked unless
+    a future scoped task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
