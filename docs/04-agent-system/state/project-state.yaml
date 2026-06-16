@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-184-organization-training-audit-log-redacted-reference
-updatedAt: "2026-06-16T07:30:24-07:00"
+currentPhase: advanced-organization-analytics-next-implementation-queue-seeding-post-organization-training-closeout
+updatedAt: "2026-06-16T07:41:05-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -323,13 +323,13 @@ repository:
   lastKnownMasterSha: 6596c071a2d6cf2717da061f05b603744aa5c089
   lastKnownOriginMasterSha: 6596c071a2d6cf2717da061f05b603744aa5c089
 currentTask:
-  id: batch-184-organization-training-audit-log-redacted-reference
+  id: advanced-organization-analytics-next-implementation-queue-seeding-post-organization-training-closeout
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-184-organization-training-audit-log-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-184-organization-training-audit-log-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-184-organization-training-audit-log-redacted-reference.md
-  branch: codex/organization-training-batch-184-audit-log-redacted-reference
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-module-run-v2-auto-seed-organization-analytics.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-auto-seed-organization-analytics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-auto-seed-organization-analytics.md
+  branch: codex/organization-analytics-seeding-batch-185-188
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -511,9 +511,10 @@ qualityGates:
     batch182OrganizationTrainingEmployeeAnswerLifecycle: pass_tdd_service_lifecycle
     batch183OrganizationTrainingPaperMockContextUsage: pass_tdd_metadata_only_context_boundary
     batch184OrganizationTrainingAuditLogRedactedReference: pass_tdd_redacted_audit_log_reference
-    preCommitHook: pass_batch_184_organization_training_audit_log_redacted_reference_pre_commit_hardening
-    moduleCloseout: pass_batch_184_organization_training_audit_log_redacted_reference_closeout_readiness
-    prePushHook: pass_batch_184_organization_training_audit_log_redacted_reference_pre_push_readiness
+    advancedOrganizationAnalyticsNextImplementationQueueSeeding: pass_auto_seed_transaction_self_review
+    preCommitHook: pass_organization_analytics_queue_seeding_pre_commit_hardening
+    moduleCloseout: pass_organization_analytics_queue_seeding_closeout_readiness
+    prePushHook: pass_organization_analytics_queue_seeding_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -529,9 +530,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 184 closes the organization-training audit_log redacted reference read-model boundary. After closeout, continue
-    with the next pending Module Run v2 task from task-queue only after repository readiness confirms master and
-    origin/master are aligned and no codex/* residue remains. `.env*`, real DB execution, row/private data, dependency,
-    provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost
-    Calibration Gate remain blocked unless a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/batch-184-organization-training-audit-log-redacted-reference.md
+    Organization-analytics implementation queue seeding appended `batch-185` through `batch-188`. After closeout,
+    continue with `batch-185-organization-analytics-aggregate-only-organization-metrics` only after repository readiness
+    confirms master and origin/master are aligned and no codex/* residue remains. `.env*`, real DB execution,
+    row/private data, dependency, provider, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
+    PR, force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-auto-seed-organization-analytics.md
