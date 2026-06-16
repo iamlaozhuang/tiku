@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: batch-188-organization-analytics-audit-log-redacted-reference
-updatedAt: "2026-06-16T09:04:36-07:00"
+currentPhase: advanced-organization-analytics-post-batch-readonly-rollup-seeding
+updatedAt: "2026-06-16T09:12:49-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -320,16 +320,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 12b3749b587aa2dcfaa997950871f79959401732
-  lastKnownOriginMasterSha: 12b3749b587aa2dcfaa997950871f79959401732
+  lastKnownMasterSha: a79f0aeb364da0b87e3991d91e396920252c9ff2
+  lastKnownOriginMasterSha: a79f0aeb364da0b87e3991d91e396920252c9ff2
 currentTask:
-  id: batch-188-organization-analytics-audit-log-redacted-reference
+  id: advanced-organization-analytics-post-batch-readonly-rollup-seeding
   status: closed
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-batch-188-organization-analytics-audit-log-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-188-organization-analytics-audit-log-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-188-organization-analytics-audit-log-redacted-reference.md
-  branch: codex/organization-analytics-batch-188-audit-log-reference
+  sourceStory: advanced-edition-organization-analytics
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+  branch: codex/organization-analytics-post-batch-rollup-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -517,6 +517,7 @@ qualityGates:
     batch186OrganizationAnalyticsPrivacyPreservingEmployeeStatistics: pass_tdd_privacy_preserving_employee_statistics
     batch187OrganizationAnalyticsExportReadinessContracts: pass_tdd_export_readiness_contracts_without_object_storage
     batch188OrganizationAnalyticsAuditLogRedactedReference: pass_tdd_redacted_audit_log_reference
+    advancedOrganizationAnalyticsPostBatchReadonlyRollupSeeding: pass_docs_only_seeded_repository_read_model_boundary_audit
     preCommitHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_commit_hardening
     moduleCloseout: pass_organization_analytics_auto_seed_readiness_normalization_closeout_readiness
     prePushHook: pass_organization_analytics_auto_seed_readiness_normalization_pre_push_readiness
@@ -535,11 +536,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Batch 188 organization analytics audit log redacted reference passes scoped TDD implementation, focused unit, lint,
-    typecheck, and diff-check. After ModuleCloseout, PreCommit, PrePush, commit/merge/push cleanup, do not continue
-    directly into another organization analytics implementation task. Run a readonly post-batch rollup/seeding pass to
-    decide the next queued Module Run v2 candidate.
+    Advanced organization analytics post-batch readonly rollup confirms batch 185 through batch 188 closed the
+    contracts/models/services foundation only. Continue with
+    `advanced-organization-analytics-repository-read-model-boundary-readonly-audit` after repository readiness confirms
+    master and origin/master are aligned and no codex/* residue remains. Do not start repository implementation until
+    that readonly audit decides the data-source/schema/DB boundary.
     `.env*`, real DB execution, row/private data, dependency, provider, e2e/browser/dev-server,
     staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked unless a
     future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/batch-188-organization-analytics-audit-log-redacted-reference.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md

@@ -27331,3 +27331,160 @@ tasks:
     result: pass
     branch: codex/organization-analytics-batch-188-audit-log-reference
     retryCount: 0
+
+  - id: advanced-organization-analytics-post-batch-readonly-rollup-seeding
+    title: Advanced organization analytics post-batch readonly rollup seeding
+    phase: advanced-organization-analytics-post-batch-readonly-rollup-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T09:12:49-07:00"
+    closedAt: "2026-06-16T09:12:49-07:00"
+    dependencies:
+      - batch-188-organization-analytics-audit-log-redacted-reference
+    humanApproval: >-
+      User approved executing the next recommended docs-only post-batch rollup/seeding task in the current 2026-06-16
+      Codex thread by saying "批准执行". Approval is limited to task plan/evidence/audit creation, durable state updates,
+      seeding one pending readonly audit, declared local validation, local commit, fast-forward merge to master, push
+      origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked
+      gates remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-batch-readonly-rollup-seeding.md
+    seededTasks:
+      - advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    nextModuleRunCandidate: advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - src/**
+      - tests/**
+      - scripts/**
+      - e2e/**
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    blockedGates:
+      - implementation
+      - route/service/repository/API runtime/contract/model/validator/UI changes
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-post-batch-readonly-rollup-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-post-batch-readonly-rollup-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-post-batch-readonly-rollup-seeding
+
+  - id: advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    title: Advanced organization analytics repository read model boundary readonly audit
+    phase: advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-post-batch-readonly-rollup-seeding
+    humanApprovalBoundary: >-
+      Seeded by the post-batch organization analytics rollup. This is a docs-only readonly audit to decide whether the
+      organization analytics repository read-model can proceed as TDD without schema/DB execution, or whether a
+      separate schema/data-source boundary decision is required first. Current seeding does not approve source changes.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-read-model-boundary-readonly-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/01-requirements/traceability/unified-use-case-technical-matrix.md
+      - docs/05-execution-logs/evidence/batch-185-organization-analytics-aggregate-only-organization-metrics.md
+      - docs/05-execution-logs/evidence/batch-186-organization-analytics-privacy-preserving-employee-statistics.md
+      - docs/05-execution-logs/evidence/batch-187-organization-analytics-export-readiness-contracts-without-object-st.md
+      - docs/05-execution-logs/evidence/batch-188-organization-analytics-audit-log-redacted-reference.md
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/validators/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - src/**
+      - tests/**
+      - scripts/**
+      - e2e/**
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    blockedGates:
+      - implementation
+      - product source/test source changes
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-read-model-boundary-readonly-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-read-model-boundary-readonly-audit
