@@ -4,7 +4,7 @@ import { organizationTrainingVersion } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
-import type { OrganizationTrainingPublishedVersionWrite } from "../services/organization-training-service";
+import type { OrganizationTrainingPublishedVersionPersistenceWrite } from "../services/organization-training-service";
 import {
   mapOrganizationTrainingVersionRowToDto,
   type OrganizationTrainingVersionRow,
@@ -18,10 +18,7 @@ import {
 export type { OrganizationTrainingVersionRow };
 
 export type OrganizationTrainingPublishedVersionPersistenceInput =
-  OrganizationTrainingPublishedVersionWrite & {
-    organizationId: number;
-    orgAuthId: number;
-  };
+  OrganizationTrainingPublishedVersionPersistenceWrite;
 
 export type OrganizationTrainingVersionInsertInput =
   OrganizationTrainingPublishedVersionPersistenceInput & {

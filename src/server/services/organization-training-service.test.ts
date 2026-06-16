@@ -8,7 +8,8 @@ import {
   createOrganizationTrainingService,
   type OrganizationTrainingStore,
   type OrganizationTrainingManualDraftWrite,
-  type OrganizationTrainingPublishedVersionWrite,
+  type OrganizationTrainingPersistenceLineage,
+  type OrganizationTrainingPublishedVersionPersistenceWrite,
 } from "./organization-training-service";
 
 const fixedNow = new Date("2026-06-15T19:20:13.000Z");
@@ -43,7 +44,8 @@ function createAdvancedOrgAuthContext(
 
 function createDraftStore() {
   let createdDrafts: OrganizationTrainingManualDraftWrite[] = [];
-  let publishedVersions: OrganizationTrainingPublishedVersionWrite[] = [];
+  let publishedVersions: OrganizationTrainingPublishedVersionPersistenceWrite[] =
+    [];
 
   const draftStore: OrganizationTrainingStore = {
     async createManualDraft(draftWrite) {
@@ -169,6 +171,16 @@ function createPublishInput(
 
   return {
     ...normalizedInput.value,
+    ...overrides,
+  };
+}
+
+function createPersistenceLineage(
+  overrides: Partial<OrganizationTrainingPersistenceLineage> = {},
+): OrganizationTrainingPersistenceLineage {
+  return {
+    organizationId: 501,
+    orgAuthId: 601,
     ...overrides,
   };
 }
@@ -492,6 +504,7 @@ describe("organization training service", () => {
 
     const result = await service.publishVersion({
       publishInput,
+      persistenceLineage: createPersistenceLineage(),
     });
 
     publishInput.publishScopeOrganizationPublicIds.push(
@@ -566,6 +579,8 @@ describe("organization training service", () => {
         publishedAt: fixedNow.toISOString(),
         takenDownAt: null,
         takedownReason: null,
+        organizationId: 501,
+        orgAuthId: 601,
       },
     ]);
     expect(
@@ -575,6 +590,28 @@ describe("organization training service", () => {
     expect("authorizationPublicId" in result.version).toBe(false);
   });
 
+  it("passes internal organization and org_auth lineage to the publish store without exposing it in the DTO", async () => {
+    const { service, getPublishedVersions } = createServiceFixture();
+
+    const result = await service.publishVersion({
+      publishInput: createPublishInput(),
+      persistenceLineage: createPersistenceLineage(),
+    });
+
+    expect(getPublishedVersions()).toEqual([
+      expect.objectContaining({
+        organizationId: 501,
+        orgAuthId: 601,
+      }),
+    ]);
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      throw new Error("Expected organization training publish to succeed.");
+    }
+    expect("organizationId" in result.version).toBe(false);
+    expect("orgAuthId" in result.version).toBe(false);
+  });
+
   it("blocks publish version when authorization lineage is missing", async () => {
     const { service, getPublishedVersions } = createServiceFixture();
 
@@ -582,6 +619,7 @@ describe("organization training service", () => {
       publishInput: createPublishInput({
         authorizationPublicId: " ",
       }),
+      persistenceLineage: createPersistenceLineage(),
     });
 
     expect(result).toEqual({
@@ -641,6 +679,7 @@ describe("organization training service", () => {
 
       const result = await service.publishVersion({
         publishInput: blockedCase.publishInput,
+        persistenceLineage: createPersistenceLineage(),
       });
 
       expect(result).toEqual({
@@ -657,6 +696,7 @@ describe("organization training service", () => {
 
     const result = await service.publishVersion({
       publishInput: createPublishInput(),
+      persistenceLineage: createPersistenceLineage(),
     });
 
     const serializedResult = JSON.stringify({

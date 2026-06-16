@@ -83,9 +83,18 @@ export type OrganizationTrainingPublishedVersionWrite = Omit<
   questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
 };
 
+export type OrganizationTrainingPersistenceLineage = {
+  organizationId: number;
+  orgAuthId: number;
+};
+
+export type OrganizationTrainingPublishedVersionPersistenceWrite =
+  OrganizationTrainingPublishedVersionWrite &
+    OrganizationTrainingPersistenceLineage;
+
 export type OrganizationTrainingVersionStore = {
   publishVersion(
-    versionWrite: OrganizationTrainingPublishedVersionWrite,
+    versionWrite: OrganizationTrainingPublishedVersionPersistenceWrite,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
 };
 
@@ -109,6 +118,7 @@ export type OrganizationTrainingCreateManualDraftResult =
 
 export type OrganizationTrainingPublishVersionCommand = {
   publishInput: OrganizationTrainingPublishInput;
+  persistenceLineage: OrganizationTrainingPersistenceLineage;
 };
 
 export type OrganizationTrainingPublishVersionResult =
@@ -388,6 +398,26 @@ function normalizePublishMetadata(
   };
 }
 
+function normalizePersistenceLineage(
+  persistenceLineage: OrganizationTrainingPersistenceLineage | undefined,
+): OrganizationTrainingPersistenceLineage | null {
+  if (persistenceLineage === undefined) {
+    return null;
+  }
+
+  if (
+    !isPositiveInteger(persistenceLineage.organizationId) ||
+    !isPositiveInteger(persistenceLineage.orgAuthId)
+  ) {
+    return null;
+  }
+
+  return {
+    organizationId: persistenceLineage.organizationId,
+    orgAuthId: persistenceLineage.orgAuthId,
+  };
+}
+
 function isAuthorizationContentScopeMatched(
   draftInput: OrganizationTrainingManualDraftInput,
   authorizationContext: EffectiveAuthorizationContextDto,
@@ -491,8 +521,14 @@ export function createOrganizationTrainingService(
     async publishVersion(command) {
       const publishInput = command.publishInput;
       const normalizedMetadata = normalizePublishMetadata(publishInput);
+      const normalizedPersistenceLineage = normalizePersistenceLineage(
+        command.persistenceLineage,
+      );
 
-      if (normalizedMetadata === null) {
+      if (
+        normalizedMetadata === null ||
+        normalizedPersistenceLineage === null
+      ) {
         return createPublishBlockedResult("invalid_publish_input");
       }
 
@@ -513,37 +549,40 @@ export function createOrganizationTrainingService(
       }
 
       const publishedAt = clock.now().toISOString();
-      const versionWrite: OrganizationTrainingPublishedVersionWrite = {
-        contentType: "organization_training_version",
-        ownerType: "organization",
-        ownerPublicId: normalizedMetadata.organizationPublicId,
-        quotaOwnerType: "organization",
-        quotaOwnerPublicId: normalizedMetadata.organizationPublicId,
-        authorizationSource: "org_auth",
-        authorizationPublicId: normalizedMetadata.authorizationPublicId,
-        draftPublicId: normalizedMetadata.draftPublicId,
-        organizationPublicId: normalizedMetadata.organizationPublicId,
-        publishScopeSnapshot: {
-          organizationPublicIds: [
-            ...normalizedMetadata.publishScopeOrganizationPublicIds,
-          ],
-          capturedAt: publishedAt,
-        },
-        profession: normalizedMetadata.profession,
-        level: normalizedMetadata.level,
-        subject: normalizedMetadata.subject,
-        title: normalizedMetadata.title,
-        description: normalizedMetadata.description,
-        questionCount: publishInput.questionCount,
-        totalScore: publishInput.totalScore,
-        questionTypeSummary: copyQuestionTypeSummary(
-          publishInput.questionTypeSummary,
-        ),
-        status: "published",
-        publishedAt,
-        takenDownAt: null,
-        takedownReason: null,
-      };
+      const versionWrite: OrganizationTrainingPublishedVersionPersistenceWrite =
+        {
+          contentType: "organization_training_version",
+          ownerType: "organization",
+          ownerPublicId: normalizedMetadata.organizationPublicId,
+          quotaOwnerType: "organization",
+          quotaOwnerPublicId: normalizedMetadata.organizationPublicId,
+          authorizationSource: "org_auth",
+          authorizationPublicId: normalizedMetadata.authorizationPublicId,
+          draftPublicId: normalizedMetadata.draftPublicId,
+          organizationPublicId: normalizedMetadata.organizationPublicId,
+          publishScopeSnapshot: {
+            organizationPublicIds: [
+              ...normalizedMetadata.publishScopeOrganizationPublicIds,
+            ],
+            capturedAt: publishedAt,
+          },
+          profession: normalizedMetadata.profession,
+          level: normalizedMetadata.level,
+          subject: normalizedMetadata.subject,
+          title: normalizedMetadata.title,
+          description: normalizedMetadata.description,
+          questionCount: publishInput.questionCount,
+          totalScore: publishInput.totalScore,
+          questionTypeSummary: copyQuestionTypeSummary(
+            publishInput.questionTypeSummary,
+          ),
+          status: "published",
+          publishedAt,
+          takenDownAt: null,
+          takedownReason: null,
+          organizationId: normalizedPersistenceLineage.organizationId,
+          orgAuthId: normalizedPersistenceLineage.orgAuthId,
+        };
 
       return {
         success: true,

@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: advanced-organization-training-publish-version-service-runtime-wiring
-updatedAt: "2026-06-15T21:09:07-07:00"
+updatedAt: "2026-06-15T21:20:06-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: c38be7139fd1a5bb2776b1ba0253b39d8cd83f82
   lastKnownOriginMasterSha: c38be7139fd1a5bb2776b1ba0253b39d8cd83f82
 currentTask:
-  id: advanced-organization-training-publish-version-service-runtime-wiring-seeding
+  id: advanced-organization-training-publish-version-service-runtime-wiring
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
-  branch: codex/advanced-organization-training-publish-version-service-runtime-wiring-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+  branch: codex/advanced-organization-training-publish-version-service-runtime-wiring
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -414,6 +414,7 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionPersistenceRepositoryMapperTddSeeding: pass_docs_only_seeded_repository_mapper_tdd_task
     advancedOrganizationTrainingPublishVersionPersistenceRepositoryMapper: pass_repository_mapper_tdd_no_db_execution
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiringSeeding: pass_docs_only_seeded_service_runtime_wiring_task
+    advancedOrganizationTrainingPublishVersionServiceRuntimeWiring: pass_tdd_service_runtime_wiring_no_db_execution
     preCommitHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_seeding_pre_commit_hardening
     moduleCloseout: pass_advanced_organization_training_publish_version_service_runtime_wiring_seeding_closeout_readiness
     prePushHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_seeding_pre_push_readiness
@@ -432,8 +433,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Approve the pending `advanced-organization-training-publish-version-service-runtime-wiring` implementation task if
-    ready. It must start with RED-first unit tests and remain limited to service runtime wiring through the existing
-    repository/mapper boundary. DB access, migration execution, route/UI work, provider/model work, dependency changes,
-    staging/prod, PR, force push, formal target write, and Cost Calibration Gate remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+    Approve a narrow readonly recheck/seed follow-up for
+    `advanced-organization-training-publish-version-service-runtime-wiring` if ready. DB access, migration execution,
+    route/UI work, provider/model work, dependency changes, staging/prod, PR, force push, formal target write, and Cost
+    Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
