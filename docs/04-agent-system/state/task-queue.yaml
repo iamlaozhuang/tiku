@@ -25638,3 +25638,227 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-16T04:21:19-07:00"
     closedAt: "2026-06-16T04:27:02-07:00"
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+    title: Seed admin organization visible scope repository resolver TDD
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+    humanApprovalBoundary: >-
+      User approved execution in the current thread by saying "批准执行" after the agent recommended docs-only queue
+      seeding for the next repository resolver task. Scope is docs/state/task-plan/evidence/audit only: seed a new
+      pending red-first TDD implementation task that uses the landed `admin_organization` schema source for
+      organization-admin visible organization scope. This task must not modify product source, tests, scripts,
+      schema/drizzle, package/lockfiles, `.env*`, DB data, provider, e2e/browser/dev-server,
+      staging/prod/cloud/deploy/payment/external-service, PR, force-push, or Cost Calibration Gate surfaces.
+    autoDriveStandingAutonomyApproval: approved_by_project_state_2026_06_16
+    seededByTask: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration
+    seededImplementationTask: false
+    validationProfile: L1-docs-only-admin-organization-repository-resolver-seeding
+    localFullLoopGate: L1
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    capabilities:
+      projectResourceRead: approved_read_only_redacted
+      localDockerDatabase: blocked
+      destructiveLocalDockerDatabase: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16_and_standing_autonomy_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/*.md
+      - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      - docs/05-execution-logs/evidence/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration.md
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/services/organization-training-route.ts
+      - src/db/schema/auth.ts
+      - src/server/models/auth.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - drizzle/**
+      - scripts/**
+      - e2e/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source or test implementation
+      - script or mechanism code changes
+      - schema/drizzle edits, migration generation, or migration execution
+      - real DB command execution or row/private data access
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+    status: closed
+    result: pass_docs_only_seeded_admin_organization_repository_resolver_tdd
+    retryCount: 0
+    claimedAt: "2026-06-16T04:52:38-07:00"
+    closedAt: "2026-06-16T04:52:38-07:00"
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd
+    title: Add admin organization backed visible scope repository resolver
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+    humanApprovalBoundary: >-
+      Pending only. Standing autonomy may be used if repository readiness passes and the task remains inside this queue
+      scope. Scope is a narrow red-first TDD task to implement the repository-backed
+      `adminPublicId -> visibleOrganizationPublicIds` resolver for the organization-training publish route using the
+      landed `admin_organization` assignment source and active organization hierarchy. The task may wire runtime publish
+      route visible scope to that repository resolver. It may change only the route runtime wiring, organization-training
+      repository contract/implementation, and focused unit tests listed in allowedFiles. It must not execute real DB
+      commands or access row/private data, change schema/drizzle, change package/lockfile or dependencies, call
+      provider/model, start dev server, run Browser/Playwright/e2e, touch staging/prod/cloud/deploy/payment/
+      external-service, create or update PR, force push, or execute Cost Calibration Gate. If active organization
+      hierarchy expansion cannot be implemented with existing schema facts and unit-testable repository code, stop and
+      seed a docs-only boundary decision instead of guessing.
+    autoDriveStandingAutonomyApproval: approved_by_project_state_2026_06_16
+    seededByTask: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+    seededImplementationTask: true
+    validationProfile: L2-tdd-admin-organization-visible-scope-repository-resolver-no-real-db
+    localFullLoopGate: L2
+    taskKind: implementation
+    moduleRunVersion: 2
+    redFirstRequired: true
+    capabilities:
+      localUnitTest: approved_by_standing_autonomy_2026_06_16
+      routeRuntimeVisibleOrganizationScopeResolverContract: approved_by_standing_autonomy_2026_06_16
+      repositoryVisibleOrganizationScopeResolverContract: approved_by_standing_autonomy_2026_06_16
+      localDockerDatabase: blocked_no_db_execution
+      destructiveLocalDockerDatabase: blocked
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_standing_autonomy_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/repositories/organization-training-repository.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration.md
+      - src/db/schema/auth.ts
+      - src/server/models/auth.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/session-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/app/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - real DB command execution or row/private data access
+      - schema/drizzle edits, migration generation, or migration execution
+      - model, mapper, validator, contract, or app route implementation changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - broad authorization or permission model changes outside this resolver contract
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-training-route.test.ts src/server/repositories/organization-training-repository.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd
+    status: pending
+    retryCount: 0
