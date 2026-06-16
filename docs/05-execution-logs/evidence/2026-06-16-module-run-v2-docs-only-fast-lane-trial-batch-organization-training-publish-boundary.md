@@ -86,6 +86,25 @@ Notes:
 - No public identifier value list exposure.
 - No PR or force push.
 
+## Post-Merge Local Closeout
+
+- Fresh user approval: 2026-06-16 prompt approved local merge closeout only.
+- Local merge command: `git merge --ff-only codex/module-run-v2-docs-only-fast-lane-trial-batch`.
+- Local merge result: PASS. `master` fast-forwarded from `67de8f6e2de597195a34f44a832da2827c05d921` to `db6ee20a7d73e56509693075afd9a1a7fc265191`.
+- Push result: intentionally not run. This approval did not authorize `git push`, and the task queue still records push as not approved for this trial batch.
+- Branch cleanup: pending until post-merge evidence-only commit and final local gates pass.
+
+Post-merge validation on `master`:
+
+- `Test-ModuleRunV2DocsOnlyBatchReadiness -Mode hard_block`: PASS.
+- `git diff --check`: PASS.
+- `npm.cmd run lint`: PASS.
+- `npm.cmd run typecheck`: PASS.
+- `Test-GitCompletionReadiness.ps1 -BaseBranch master`: PASS. `master` was ahead of `origin/master` by one local commit after the fast-forward merge.
+- `Test-ModuleRunV2PreCommitHardening.ps1 -DocsOnlyBatchId ... -DocsOnlyBatchMode hard_block`: PASS.
+- `Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -DocsOnlyBatchId ... -DocsOnlyBatchMode hard_block`: PASS.
+- `Test-ModuleRunV2PrePushReadiness.ps1 -DocsOnlyBatchId ... -DocsOnlyBatchMode hard_block -SkipRemoteAheadCheck`: PASS.
+
 ## Taste Compliance Self-Check
 
 - Standard API response: not applicable; no API code changed.
