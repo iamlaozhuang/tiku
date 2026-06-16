@@ -21700,6 +21700,16 @@ tasks:
     dependencies:
       - advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
     taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    humanApproval: >-
+      Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行下一步建议的任务`, scoped to
+      repository/mapper TDD implementation, validation, local commit, fast-forward merge to master, push origin/master,
+      and short-branch cleanup. This approval does not authorize route/service/API runtime/contract/model/validator/UI
+      changes, schema/drizzle/scripts/package/lockfile/dependency changes, DB access, migration execution, provider/model
+      work, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, formal content
+      write, formal target write, or Cost Calibration Gate work.
     humanApprovalBoundary: >-
       Pending only. Requires fresh user approval before claim. Scope is TDD implementation of repository and mapper for
       organization training publish-version persistence using the existing isolated `organization_training_version` schema.
@@ -21740,10 +21750,21 @@ tasks:
       providerCall: blocked_without_task_approval
       costCalibrationGate: blocked
     blockedRemainder:
-      - fresh approval required before repository/mapper implementation
+      - fresh approval for this repository/mapper implementation task is satisfied by the current 2026-06-15 Codex thread
       - DB access and migration execution remain blocked
       - service runtime wiring and route/UI implementation remain separate
       - provider/model and Cost Calibration Gate remain blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     taskKind: implementation
     moduleRunVersion: 2
     allowedFiles:
@@ -21823,4 +21844,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-repository-mapper
-    status: pending
+    status: closed
+    result: pass_repository_mapper_tdd_no_db_execution
+    retryCount: 0
+    claimedAt: "2026-06-15T20:19:16-07:00"
+    closedAt: "2026-06-15T20:25:44-07:00"

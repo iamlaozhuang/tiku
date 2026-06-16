@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
-updatedAt: "2026-06-15T19:50:37-07:00"
+currentPhase: advanced-organization-training-publish-version-persistence-repository-mapper
+updatedAt: "2026-06-15T20:25:44-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -269,13 +269,13 @@ repository:
   lastKnownMasterSha: c38be7139fd1a5bb2776b1ba0253b39d8cd83f82
   lastKnownOriginMasterSha: c38be7139fd1a5bb2776b1ba0253b39d8cd83f82
 currentTask:
-  id: advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+  id: advanced-organization-training-publish-version-persistence-repository-mapper
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
-  branch: codex/advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+  branch: codex/advanced-organization-training-publish-version-persistence-repository-mapper
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -412,6 +412,7 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionPersistenceSchemaMigrationSeeding: pass_docs_only_seeded_schema_migration_task
     advancedOrganizationTrainingPublishVersionPersistenceSchemaMigration: pass_gated_schema_migration_generated_no_db_execution
     advancedOrganizationTrainingPublishVersionPersistenceRepositoryMapperTddSeeding: pass_docs_only_seeded_repository_mapper_tdd_task
+    advancedOrganizationTrainingPublishVersionPersistenceRepositoryMapper: pass_repository_mapper_tdd_no_db_execution
     preCommitHook: pass_advanced_organization_training_publish_version_persistence_repository_mapper_tdd_seeding_pre_commit_hardening
     moduleCloseout: pass_advanced_organization_training_publish_version_persistence_repository_mapper_tdd_seeding_closeout_readiness
     prePushHook: pass_advanced_organization_training_publish_version_persistence_repository_mapper_tdd_seeding_pre_push_readiness
@@ -430,7 +431,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Approve the pending repository/mapper TDD task for organization training publish-version persistence. The task must
-    start with failing tests and keep DB access, migration execution, route/service/UI work, provider/model work,
-    dependency changes, staging/prod, PR, force push, formal target write, and Cost Calibration Gate blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+    Seed the next organization training publish-version service runtime wiring task, if approved. Repository/mapper
+    persistence now exists behind a no-DB-execution gateway boundary, but service wiring, route/UI work, DB access,
+    migration execution, provider/model work, dependency changes, staging/prod, PR, force push, formal target write,
+    and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
