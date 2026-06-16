@@ -334,6 +334,26 @@ capabilities:
         - env_secret_access
         - staging_prod_connection
         - provider_call
+    localE2ESmokeTier:
+      default: not_allowlisted
+      approvedValue: safe_smoke
+      allowedSpecs:
+        - e2e/home.spec.ts
+        - e2e/admin-role-denial-browser.spec.ts
+        - e2e/local-auth-route-guard.spec.ts
+      blockedTiers:
+        - credentialed_local
+        - data_write_or_seed
+        - provider_or_cost_sensitive
+        - staging_named
+      blockedActions:
+        - npm_test_default_full_suite
+        - full_e2e_suite_by_default
+        - e2e_ui_or_debug_mode
+        - headed_browser_mode
+        - new_e2e_spec_execution
+        - non_allowlisted_spec_execution
+        - generated_artifact_commit
         - committed_e2e_artifacts
     costCalibrationGate:
       default: blocked
@@ -572,6 +592,60 @@ standingLocalE2EValidationApproval:
     - payment
     - cost_calibration_gate
   executionRule: Standing local E2E validation approval may be consumed only by a scoped task that explicitly records localE2EValidation approved_local_only_existing_specs and uses the local-only command whitelist. It does not remove e2e from the default high-risk blocked gates and does not approve full-suite default runs, headed/debug/UI mode, env/secret access, provider calls, staging/prod/cloud/deploy work, dependency changes, schema/migration work, generated artifact commits, payment, external-service actions, or Cost Calibration Gate execution.
+standingLocalE2ESmokeAllowlistApproval:
+  statePath: docs/04-agent-system/state/project-state.yaml
+  durableKey: automation.unattendedControl.standingLocalE2ESmokeAllowlistApproval
+  requiredStatus: approved
+  approvedTaskCapabilityValue: safe_smoke
+  requiredTaskFields:
+    - localE2EValidation: approved_local_only_existing_specs
+    - localE2ESmokeTier: safe_smoke
+    - validationProfile: L5-local-e2e
+    - localFullLoopGate: L5
+  allowedLocalActions:
+    - run_e2e_list
+    - run_allowlisted_safe_smoke_spec
+    - write_redacted_e2e_smoke_evidence
+  allowedSpecs:
+    - e2e/home.spec.ts
+    - e2e/admin-role-denial-browser.spec.ts
+    - e2e/local-auth-route-guard.spec.ts
+  allowedCommands:
+    - npm.cmd run test:e2e -- --list
+    - npm.cmd run test:e2e -- e2e/home.spec.ts
+    - npm.cmd run test:e2e -- e2e/admin-role-denial-browser.spec.ts
+    - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts
+  requiredGates:
+    - task validationCommands explicitly names npm.cmd run test:e2e -- --list
+    - task validationCommands explicitly names exactly one allowlisted safe smoke spec command
+    - existing spec under e2e/**
+    - localhost or 127.0.0.1 only
+    - scoped allowedFiles and blockedFiles
+    - redacted evidence summary only
+    - e2e_artifact_hygiene
+  blockedSpecTiers:
+    - credentialed_local
+    - data_write_or_seed
+    - provider_or_cost_sensitive
+    - staging_named
+  blockedWithoutFreshTaskApproval:
+    - npm_test_default_full_suite
+    - full_e2e_suite
+    - e2e_ui_or_debug_mode
+    - headed_browser_mode
+    - new_e2e_spec_execution
+    - non_allowlisted_spec_execution
+    - env_secret
+    - provider_call
+    - provider_configuration
+    - dependency_package_lockfile_change
+    - schema_migration
+    - destructive_database_operation
+    - staging_prod_cloud_deploy
+    - external_service
+    - payment
+    - cost_calibration_gate
+  executionRule: Standing local E2E smoke allowlist approval may be consumed only by scoped UI/navigation/route-guard validation tasks that explicitly record localE2EValidation approved_local_only_existing_specs and localE2ESmokeTier safe_smoke, use the local-only command whitelist, and target one of the allowlisted existing specs. It does not approve npm test, full-suite e2e, headed/debug/UI mode, new specs, non-allowlisted specs, env/secret access, provider calls, dependency changes, schema/migration work, destructive DB work, generated artifact commits, staging/prod/cloud/deploy work, payment, external-service actions, PR creation, force push, or Cost Calibration Gate execution.
 taskScopedDestructiveLocalDockerDbApproval:
   statePath: docs/04-agent-system/state/project-state.yaml
   durableKey: automation.unattendedControl.taskScopedDestructiveLocalDockerDbApproval
@@ -739,6 +813,7 @@ forbiddenClaims:
   - This schema does not approve provider calls.
   - This schema approves schema/migration only through standingLocalSchemaMigrationApproval plus task-scoped approved_migration_plan and capability gates.
   - This schema approves local e2e validation only through standingLocalE2EValidationApproval plus task-scoped approved_local_only_existing_specs and local-only command gates.
+  - This schema approves local e2e smoke automation only through standingLocalE2ESmokeAllowlistApproval plus task-scoped localE2ESmokeTier safe_smoke and an allowlisted existing spec.
   - This schema approves destructive local Docker DB only through taskScopedDestructiveLocalDockerDbApproval plus task-scoped approved_destructive_local_dev_only and capability gates.
   - This schema does not approve dependency, deploy, PR, force push, staging/prod/cloud DB, env/secret, provider, or Cost Calibration Gate execution.
   - This schema approves push only through task-scoped closeoutPolicy materialized from standingUnattendedLocalCloseoutApproval, standingDocsStateFastLaneCloseoutApproval, or fresh task-specific approval, after all readiness and pre-push gates pass.

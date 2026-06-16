@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
-updatedAt: "2026-06-16T16:14:31-07:00"
+currentPhase: standing-local-e2e-smoke-allowlist-authorization-upgrade
+updatedAt: "2026-06-16T16:27:53-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -184,6 +184,70 @@ automation:
         - cost_calibration_gate
       statement: >-
         User approves local-only existing Playwright e2e validation for scoped queued tasks only. The approval may be consumed only when the task records capabilities.localE2EValidation: approved_local_only_existing_specs, uses the whitelisted npm.cmd run test:e2e commands, keeps evidence redacted, and preserves env/secret, provider, dependency, schema/migration, staging/prod/cloud/deploy, payment, external-service, destructive DB, full-suite default e2e, debug/headed e2e, and Cost Calibration Gate blocks.
+    standingLocalE2ESmokeAllowlistApproval:
+      status: approved
+      approvedAt: "2026-06-16T16:27:53-07:00"
+      scope: low-risk local-only existing Playwright smoke specs for queued UI/navigation/route-guard validation tasks
+      safeSmokeAllowlist:
+        - e2e/home.spec.ts
+        - e2e/admin-role-denial-browser.spec.ts
+        - e2e/local-auth-route-guard.spec.ts
+      blockedSpecTiers:
+        - credentialed_local
+        - data_write_or_seed
+        - provider_or_cost_sensitive
+        - staging_named
+      allowedActions:
+        - run_e2e_list
+        - run_allowlisted_safe_smoke_spec
+        - write_redacted_e2e_smoke_evidence
+      allowedCommands:
+        - npm.cmd run test:e2e -- --list
+        - npm.cmd run test:e2e -- e2e/home.spec.ts
+        - npm.cmd run test:e2e -- e2e/admin-role-denial-browser.spec.ts
+        - npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts
+      requiredTaskFields:
+        - localE2EValidation: approved_local_only_existing_specs
+        - localE2ESmokeTier: safe_smoke
+        - validationCommands includes npm.cmd run test:e2e -- --list
+        - validationCommands includes exactly one allowlisted safe smoke spec command
+      requiredGates:
+        - task_queue_scope
+        - allowedFiles_blockedFiles
+        - task_plan_before_edit
+        - local_only_playwright_config
+        - existing_spec_under_e2e
+        - redacted_evidence
+        - e2e_artifact_hygiene
+      blockedWithoutFreshTaskApproval:
+        - npm_test_default_full_suite
+        - full_e2e_suite
+        - e2e_ui_or_debug_mode
+        - headed_browser_mode
+        - non_existing_or_non_allowlisted_spec
+        - new_e2e_spec_execution
+        - env_secret
+        - provider_call
+        - provider_configuration
+        - dependency_package_lockfile_change
+        - schema_migration
+        - destructive_database_operation
+        - staging_prod_cloud_deploy
+        - external_service
+        - payment
+        - cost_calibration_gate
+      evidenceRule: >-
+        Evidence may record only command, allowlisted spec name, pass/fail status, and test count. It must not include
+        screenshots, traces, HTML report content, page text dumps, raw prompts, raw answers, provider payloads, DB rows,
+        credentials, tokens, database URLs, Authorization headers, publicId lists, cleartext redeem_code values, or full
+        paper/material content.
+      statement: >-
+        User approves a narrower local E2E smoke allowlist path for automation throughput. This approval only allows
+        queued tasks to run existing local safe smoke Playwright specs after the task records localE2EValidation:
+        approved_local_only_existing_specs and localE2ESmokeTier: safe_smoke. It does not approve default npm test,
+        full e2e suites, UI/headed/debug mode, new specs, env/secret access, provider calls, schema/migration,
+        dependency changes, staging/prod/cloud/deploy/payment/external-service work, PR work, force push, or Cost
+        Calibration Gate execution.
     standingValidationCommandNormalizationApproval:
       status: approved
       approvedAt: "2026-06-11T10:25:00-07:00"
@@ -372,13 +436,13 @@ repository:
   lastKnownMasterSha: c465db3d69c6828484ca94489bfe8df615390597
   lastKnownOriginMasterSha: c465db3d69c6828484ca94489bfe8df615390597
 currentTask:
-  id: standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
+  id: standing-local-e2e-smoke-allowlist-authorization-upgrade
   status: closed
   sourceStory: agent-system-authorization-governance
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
-  branch: codex/organization-analytics-mapper-validator-route-contract-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+  branch: codex/standing-local-e2e-smoke-allowlist-authorization-upgrade
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -578,6 +642,7 @@ qualityGates:
     advancedOrganizationAnalyticsRouteRuntimeBoundaryReadonlyAudit: pass_readonly_audit_mapper_validator_boundary_recommended
     advancedOrganizationAnalyticsMapperValidatorRouteContractTddSeeding: pass_docs_state_seeded_mapper_validator_route_contract_tdd
     standingDocsStateFastLaneCloseoutUpgrade: pass_docs_state_authorization_upgrade
+    standingLocalE2ESmokeAllowlistAuthorizationUpgrade: pass_docs_state_smoke_allowlist_authorization_upgrade
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -593,11 +658,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Continue with `advanced-organization-analytics-mapper-validator-route-contract-tdd` under the current 1C + 2C
-    approval. The pending task now has a complete closeoutPolicy for local commit, fast-forward merge to master, push
-    origin/master, and cleanup after all task gates pass. Implementation remains narrow: mapper, validator, route
-    contract, and corresponding unit tests only. Route runtime wiring, App Router route files, service/repository
-    runtime changes, schema/migration, DB execution, UI, provider/model calls, dependencies, e2e/browser/dev-server,
-    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked unless
-    a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade.md
+    Continue with `advanced-organization-analytics-mapper-validator-route-contract-tdd` under the current closeout
+    approval. The pending task remains mapper, validator, route contract, and corresponding unit tests only; it does not
+    receive e2e/browser/dev-server scope. Future UI/navigation/route-guard tasks may consume
+    `standingLocalE2ESmokeAllowlistApproval` only when they declare `localE2EValidation:
+    approved_local_only_existing_specs`, `localE2ESmokeTier: safe_smoke`, and a command targeting one of the allowlisted
+    safe smoke specs. Route runtime wiring, service/repository runtime changes, schema/migration, DB execution,
+    provider/model calls, dependencies, full e2e suites, staging/prod/cloud/deploy/payment/external-service, PR,
+    force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md

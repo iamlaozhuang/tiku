@@ -149,6 +149,43 @@ approval:
 
 Cost Calibration Gate remains blocked.
 
+## Local E2E Smoke Allowlist
+
+`standingLocalE2ESmokeAllowlistApproval` is a narrower automation path for low-risk local UI/navigation/route-guard smoke checks. It does not replace `standingLocalE2EValidationApproval`; it further restricts how automation may consume that approval.
+
+Eligible tasks must explicitly declare:
+
+```yaml
+localE2EValidation: approved_local_only_existing_specs
+localE2ESmokeTier: safe_smoke
+validationProfile: L5-local-e2e
+localFullLoopGate: L5
+```
+
+The initial `safe_smoke` allowlist is:
+
+- `e2e/home.spec.ts`
+- `e2e/admin-role-denial-browser.spec.ts`
+- `e2e/local-auth-route-guard.spec.ts`
+
+Allowed commands remain limited to:
+
+- `npm.cmd run test:e2e -- --list`
+- `npm.cmd run test:e2e -- e2e/home.spec.ts`
+- `npm.cmd run test:e2e -- e2e/admin-role-denial-browser.spec.ts`
+- `npm.cmd run test:e2e -- e2e/local-auth-route-guard.spec.ts`
+
+The task may run exactly one allowlisted safe smoke spec command unless a later task-specific approval expands it. Evidence may record only command, spec name, pass/fail status, and test count. Before closeout, the task must confirm generated Playwright artifacts such as `playwright-report/`, `test-results/`, traces, screenshots, and HTML report content were not added to Git.
+
+These spec tiers remain blocked without fresh task approval:
+
+- `credentialed_local`
+- `data_write_or_seed`
+- `provider_or_cost_sensitive`
+- `staging_named`
+
+This allowlist does not approve `npm test`, full-suite `npm.cmd run test:e2e`, `npm.cmd run test:e2e:ui`, headed/debug mode, non-allowlisted specs, newly created specs, env/secret access, provider calls, dependency changes, schema/migration work, destructive DB work, staging/prod/cloud/deploy, payment, external-service work, PR, force push, or Cost Calibration Gate execution.
+
 ## Mock, Fixture, And Local Labels
 
 Evidence must label incomplete or non-real behavior precisely:

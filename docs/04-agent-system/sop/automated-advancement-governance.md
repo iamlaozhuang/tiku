@@ -998,6 +998,27 @@ paths outside `e2e/**`, env/secret access, provider calls, staging/prod/cloud/de
 schema/migration work, destructive DB work, payment, external-service actions, PR creation, force push, or Cost
 Calibration Gate execution.
 
+## Standing Local E2E Smoke Allowlist Approval
+
+`automation.unattendedControl.standingLocalE2ESmokeAllowlistApproval` may reduce friction for low-risk local browser smoke checks only. It is narrower than the standing local E2E validation approval and can be consumed only when a queued task records:
+
+```yaml
+localE2EValidation: approved_local_only_existing_specs
+localE2ESmokeTier: safe_smoke
+validationProfile: L5-local-e2e
+localFullLoopGate: L5
+```
+
+The task validation commands must include `npm.cmd run test:e2e -- --list` and exactly one safe-smoke command from the state allowlist. Initial allowlisted specs are:
+
+- `e2e/home.spec.ts`
+- `e2e/admin-role-denial-browser.spec.ts`
+- `e2e/local-auth-route-guard.spec.ts`
+
+Automation must stop instead of running E2E when a task wants `npm test`, full-suite `npm.cmd run test:e2e`, `test:e2e:ui`, headed/debug mode, a newly created spec, a non-allowlisted spec, or a credentialed/data-write/provider/staging tier spec without fresh task approval.
+
+Evidence for allowlisted smoke runs may contain only command, spec name, pass/fail status, and test count. Closeout must confirm Playwright-generated artifacts such as `playwright-report/`, `test-results/`, traces, screenshots, and HTML report content were not added to Git.
+
 ## Blocked Gate Enforcement
 
 The following remain blocked unless a task records fresh explicit approval:

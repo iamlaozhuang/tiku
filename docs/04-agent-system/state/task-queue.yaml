@@ -28464,6 +28464,104 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
+  - id: standing-local-e2e-smoke-allowlist-authorization-upgrade
+    title: Standing local E2E smoke allowlist authorization upgrade
+    phase: standing-local-e2e-smoke-allowlist-authorization-upgrade
+    sourceStory: agent-system-authorization-governance
+    taskKind: mechanism_governance
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T16:27:53-07:00"
+    closedAt: "2026-06-16T16:27:53-07:00"
+    branch: codex/standing-local-e2e-smoke-allowlist-authorization-upgrade
+    dependencies:
+      - standing-autonomy-docs-fast-lane-and-current-tdd-closeout-upgrade
+    humanApproval: >-
+      User requested implementing the approved local E2E smoke allowlist authorization plan in the current 2026-06-16
+      Codex thread. Approval is limited to docs/state/SOP/schema/task-plan/evidence/audit changes that add
+      standingLocalE2ESmokeAllowlistApproval and a safe_smoke allowlist for existing local Playwright smoke specs.
+      This task does not run E2E, does not start a dev server, does not change product source, tests, scripts, schema,
+      package, lockfile, dependency, or env files, and does not approve npm test, full e2e suites, test:e2e:ui,
+      headed/debug mode, new specs, env/secret access, provider calls, staging/prod/cloud/deploy/payment/
+      external-service, PR, force push, or Cost Calibration Gate execution.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - docs/04-agent-system/sop/local-first-validation-governance.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/05-execution-logs/task-plans/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+      - docs/05-execution-logs/evidence/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - package.json
+      - playwright.config.ts
+      - .gitignore
+      - e2e/home.spec.ts
+      - e2e/admin-role-denial-browser.spec.ts
+      - e2e/local-auth-route-guard.spec.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+    blockedGates:
+      - E2E execution in this governance task
+      - dev server startup
+      - npm test
+      - full npm.cmd run test:e2e suite
+      - npm.cmd run test:e2e:ui
+      - headed/debug browser mode
+      - new or non-allowlisted E2E spec execution
+      - product source implementation
+      - schema/migration
+      - provider/model calls or provider configuration
+      - dependency changes
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16_e2e_smoke_allowlist
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - Select-String -Path docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/sop/local-first-validation-governance.md,docs/04-agent-system/sop/automated-advancement-governance.md -Pattern standingLocalE2ESmokeAllowlistApproval,localE2ESmokeTier,safe_smoke,e2e/home.spec.ts,e2e/admin-role-denial-browser.spec.ts,e2e/local-auth-route-guard.spec.ts
+      - Select-String -Path docs/04-agent-system/state/project-state.yaml,docs/04-agent-system/state/autodrive-control-schema.yaml,docs/04-agent-system/sop/local-first-validation-governance.md,docs/04-agent-system/sop/automated-advancement-governance.md -Pattern "npm test","full e2e","test:e2e:ui","headed/debug","Cost Calibration Gate"
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId standing-local-e2e-smoke-allowlist-authorization-upgrade
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId standing-local-e2e-smoke-allowlist-authorization-upgrade
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId standing-local-e2e-smoke-allowlist-authorization-upgrade
   - id: advanced-organization-analytics-mapper-validator-route-contract-tdd
     title: Advanced organization analytics mapper validator route contract TDD
     phase: advanced-organization-analytics-mapper-validator-route-contract-tdd
