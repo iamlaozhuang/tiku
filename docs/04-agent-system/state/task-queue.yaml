@@ -20672,3 +20672,188 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-service-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-service-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-service-readonly-recheck
+  - id: advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+    title: Advanced organization training publish version authorization lineage coverage seeding
+    phase: advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+    sourceStory: advanced-edition-organization-training
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-15T18:03:54-07:00"
+    closedAt: "2026-06-15T18:03:54-07:00"
+    dependencies:
+      - advanced-organization-training-publish-version-service-readonly-recheck
+    humanApprovalBoundary: >-
+      User-approved docs/state-only seeding task. Scope is limited to converting the publish-version readonly recheck
+      authorization lineage needs_recheck into a pending narrow RED-first TDD implementation task. It must not modify
+      product source, route, repository, mapper, schema, DB, provider, UI, package, lockfile, scripts, e2e, or formal
+      content write behavior.
+    humanApproval: >-
+      User approved executing this seeding task in the current 2026-06-15 Codex thread by saying "批准执行" after the
+      next-step recommendation. Approval is limited to task claim, task plan/evidence/audit creation, durable state
+      updates, docs/state-only queue seeding, declared local validation, local commit, fast-forward merge to master, push
+      origin/master, merged short-branch cleanup, and fetch prune. Product implementation and all high-risk blocked
+      gates remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service.md
+      - docs/01-requirements/traceability/capability-catalog.md
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/service/repository/API runtime/contract/model/validator/UI changes
+      - takedown implementation
+      - copy-to-new-draft implementation
+      - employee answer implementation
+      - analytics implementation
+      - formal content write
+      - formal target write
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+  - id: advanced-organization-training-publish-version-authorization-lineage-coverage
+    title: Advanced organization training publish version authorization lineage coverage
+    phase: advanced-organization-training-publish-version-authorization-lineage-coverage
+    sourceStory: advanced-edition-organization-training
+    taskKind: local_implementation_tdd
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is a narrow RED-first TDD task to decide and cover
+      whether publish-version write/DTO must carry `authorizationPublicId` lineage before repository/schema/route
+      persistence work. Expected first surface is `src/server/services/organization-training-service.test.ts` and
+      `src/server/services/organization-training-service.ts`; contract/model/validator files may be touched only if the
+      RED test proves the lineage must be part of the public or validated contract. Repository, schema, route, UI, DB,
+      provider, e2e, dependency, formal content write, and formal target write remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+      - src/server/services/organization-training-service.ts
+      - src/server/services/organization-training-service.test.ts
+      - src/server/contracts/organization-training-contract.ts
+      - src/server/models/organization-training.ts
+      - src/server/validators/organization-training.ts
+      - src/server/validators/organization-training.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service.md
+      - src/server/contracts/effective-authorization-contract.ts
+      - docs/superpowers/specs/2026-06-06-advanced-edition-mvp-requirements.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-training-implementation-plan.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/api/v1/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - execution without fresh user approval
+      - route/repository/API runtime/UI changes
+      - schema/migration
+      - direct database access
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - takedown implementation
+      - copy-to-new-draft implementation
+      - employee answer implementation
+      - analytics implementation
+      - formal content write
+      - formal target write
+      - PR
+      - force push
+    redFirstRequired: true
+    expectedRedCoverage:
+      - service publish-version write should preserve or explicitly reject authorization lineage
+      - DTO/contract decision for `authorizationPublicId` is covered if public lineage is required
+      - validator/model behavior remains consistent if lineage remains input-only
+      - non-leakage of row/private data, provider payloads, raw prompts, raw answers, and formal target identifiers remains covered
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-coverage
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-coverage
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-authorization-lineage-coverage
