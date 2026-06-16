@@ -22222,8 +22222,11 @@ tasks:
     sourceStory: advanced-edition-organization-training
     taskKind: readonly_audit
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass_readonly_recheck_no_findings
     retryCount: 0
+    claimedAt: "2026-06-15T21:43:11-07:00"
+    closedAt: "2026-06-15T21:46:57-07:00"
     dependencies:
       - advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding
     humanApprovalBoundary: >-
@@ -22232,6 +22235,11 @@ tasks:
       repository, mapper, contract/model/validator, schema inventory, ADR-002 layering, internal organization/org_auth
       lineage persistence boundary, public DTO non-exposure, metadata-only semantics, formal target write blocking, and
       route/API/UI non-expansion. It must not implement product behavior or modify product source.
+    humanApproval: >-
+      User approved executing this readonly recheck task in the current 2026-06-15 Codex thread by saying "批准执行".
+      Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, declared local
+      validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch
+      prune. Product implementation and all high-risk blocked gates remain blocked.
     planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
@@ -22297,6 +22305,17 @@ tasks:
       - staging/prod/cloud/deploy/payment/external-service
       - PR
       - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     validationCommands:
       - npm.cmd run test:unit -- "src/server/services/organization-training-service.test.ts" "src/server/repositories/organization-training-repository.test.ts" "src/server/mappers/organization-training-mapper.test.ts"
       - npm.cmd run test:unit -- "src/server/validators/organization-training.test.ts" "src/server/services/effective-authorization-service.test.ts" "src/db/schema/organization-training.test.ts"

@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding
-updatedAt: "2026-06-15T21:37:35-07:00"
+currentPhase: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
+updatedAt: "2026-06-15T21:46:57-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d3343acd8b5a4a083f67fc56e83c3abd5addb4d2
-  lastKnownOriginMasterSha: d3343acd8b5a4a083f67fc56e83c3abd5addb4d2
+  lastKnownMasterSha: 311ccb74e2c3de1c1c1d4cf36587dc0e01e8e39f
+  lastKnownOriginMasterSha: 311ccb74e2c3de1c1c1d4cf36587dc0e01e8e39f
 currentTask:
-  id: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding
+  id: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding.md
-  branch: codex/advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
+  branch: codex/advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -416,9 +416,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiringSeeding: pass_docs_only_seeded_service_runtime_wiring_task
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiring: pass_tdd_service_runtime_wiring_no_db_execution
     advancedOrganizationTrainingPublishVersionServiceRuntimeWiringReadonlyRecheckSeeding: pass_docs_only_seeded_service_runtime_wiring_readonly_recheck_task
-    preCommitHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_seeding_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_seeding_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_seeding_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionServiceRuntimeWiringReadonlyRecheck: pass_readonly_recheck_no_findings
+    preCommitHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_service_runtime_wiring_readonly_recheck_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -434,9 +435,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Complete the approved docs/state/log-only seed task
-    `advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding`; after closeout,
-    approve `advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck` if ready. DB access,
-    migration execution, route/API/UI implementation, provider/model work, dependency changes, staging/prod, PR, force
-    push, formal target write, and Cost Calibration Gate remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding.md
+    Approve a docs/state/log-only seed task for
+    `advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding` if ready. DB access, migration
+    execution, route/API/UI implementation, provider/model work, dependency changes, staging/prod, PR, force push, formal
+    target write, and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
