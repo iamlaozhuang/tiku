@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-service
-updatedAt: "2026-06-15T17:46:02-07:00"
+currentPhase: advanced-organization-training-publish-version-service-readonly-recheck
+updatedAt: "2026-06-15T17:53:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 5f9aafbfcae8cb4c6875cc9aeacf77100d222d5d
-  lastKnownOriginMasterSha: 5f9aafbfcae8cb4c6875cc9aeacf77100d222d5d
+  lastKnownMasterSha: b94c254efe40640825f015ed7bf2a37a8fee3248
+  lastKnownOriginMasterSha: b94c254efe40640825f015ed7bf2a37a8fee3248
 currentTask:
-  id: advanced-organization-training-publish-version-service
+  id: advanced-organization-training-publish-version-service-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service.md
-  branch: codex/advanced-organization-training-publish-version-service
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+  branch: codex/advanced-organization-training-publish-version-service-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -402,9 +402,10 @@ qualityGates:
     advancedOrganizationTrainingContentSubjectScopeReadonlyRecheck: pass_readonly_recheck_no_findings
     advancedOrganizationTrainingNextImplementationQueueSeeding: pass_docs_only_seeded_publish_version_service_task
     advancedOrganizationTrainingPublishVersionService: pass_tdd_publish_version_service
-    preCommitHook: pass_advanced_organization_training_publish_version_service_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_service_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_service_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionServiceReadonlyRecheck: pass_readonly_recheck_with_authorization_lineage_needs_recheck
+    preCommitHook: pass_advanced_organization_training_publish_version_service_readonly_recheck_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_service_readonly_recheck_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_service_readonly_recheck_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -420,7 +421,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-publish-version-service closed with a narrow service-layer publish-version
-    implementation. Recommended next action is a readonly publish-version service recheck or queue seeding for that
-    recheck after user review.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service.md
+    advanced-organization-training-publish-version-service-readonly-recheck closed with no blocking issue, but recorded
+    authorization lineage needs_recheck before repository/schema/route persistence work. Recommended next action is a
+    docs-only queue seeding task for a narrow authorization lineage coverage repair, or user review before downstream
+    publish repository planning.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
