@@ -538,6 +538,8 @@ describe("organization training service", () => {
         ownerPublicId: "organization_public_123",
         quotaOwnerType: "organization",
         quotaOwnerPublicId: "organization_public_123",
+        authorizationSource: "org_auth",
+        authorizationPublicId: "org_auth_public_123",
         draftPublicId: "training_draft_public_123",
         organizationPublicId: "organization_public_123",
         publishScopeSnapshot: {
@@ -569,6 +571,25 @@ describe("organization training service", () => {
     expect(
       result.version.publishScopeSnapshot.organizationPublicIds,
     ).not.toContain("organization_other_public_999");
+    expect("authorizationSource" in result.version).toBe(false);
+    expect("authorizationPublicId" in result.version).toBe(false);
+  });
+
+  it("blocks publish version when authorization lineage is missing", async () => {
+    const { service, getPublishedVersions } = createServiceFixture();
+
+    const result = await service.publishVersion({
+      publishInput: createPublishInput({
+        authorizationPublicId: " ",
+      }),
+    });
+
+    expect(result).toEqual({
+      success: false,
+      reason: "invalid_publish_input",
+      message: "Organization training publish is blocked.",
+    });
+    expect(getPublishedVersions()).toEqual([]);
   });
 
   it("blocks publish version when capability or organization scope is invalid", async () => {

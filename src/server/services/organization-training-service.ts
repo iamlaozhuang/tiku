@@ -78,6 +78,8 @@ export type OrganizationTrainingPublishedVersionWrite = Omit<
   ownerPublicId: string;
   quotaOwnerType: "organization";
   quotaOwnerPublicId: string;
+  authorizationSource: "org_auth";
+  authorizationPublicId: string;
   questionTypeSummary: OrganizationTrainingQuestionTypeSummary;
 };
 
@@ -332,6 +334,7 @@ function isQuestionTypeSummaryValid(
 type NormalizedPublishMetadata = {
   draftPublicId: string;
   organizationPublicId: string;
+  authorizationPublicId: string;
   profession: Profession;
   level: number;
   subject: Subject;
@@ -347,6 +350,9 @@ function normalizePublishMetadata(
   const organizationPublicId = normalizeRequiredText(
     publishInput.organizationPublicId,
   );
+  const authorizationPublicId = normalizeRequiredText(
+    publishInput.authorizationPublicId,
+  );
   const title = normalizeRequiredText(publishInput.title);
   const publishScopeOrganizationPublicIds = normalizePublicIdList(
     publishInput.publishScopeOrganizationPublicIds,
@@ -355,6 +361,7 @@ function normalizePublishMetadata(
   if (
     draftPublicId === null ||
     organizationPublicId === null ||
+    authorizationPublicId === null ||
     title === null ||
     !isValidLevel(publishInput.level) ||
     !isSubject(publishInput.subject) ||
@@ -371,6 +378,7 @@ function normalizePublishMetadata(
   return {
     draftPublicId,
     organizationPublicId,
+    authorizationPublicId,
     profession: publishInput.profession,
     level: publishInput.level,
     subject: publishInput.subject,
@@ -511,6 +519,8 @@ export function createOrganizationTrainingService(
         ownerPublicId: normalizedMetadata.organizationPublicId,
         quotaOwnerType: "organization",
         quotaOwnerPublicId: normalizedMetadata.organizationPublicId,
+        authorizationSource: "org_auth",
+        authorizationPublicId: normalizedMetadata.authorizationPublicId,
         draftPublicId: normalizedMetadata.draftPublicId,
         organizationPublicId: normalizedMetadata.organizationPublicId,
         publishScopeSnapshot: {
