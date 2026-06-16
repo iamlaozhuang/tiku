@@ -23285,11 +23285,12 @@ tasks:
     evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
     humanApprovalBoundary: >-
-      Pending only. Requires fresh user approval before claim. Scope is docs-only readonly audit of current
-      session/admin/auth contracts to decide whether organization training publish has a trustworthy
-      organization-admin actor and visible organization scope source. It must not implement runtime code,
-      route/service/repository/mapper changes, schema, UI, dependencies, provider/model, DB execution,
-      formal content write, or formal target write paths.
+      Approved by fresh user prompt on 2026-06-15 for docs-only readonly audit of current session/admin/auth
+      contracts to decide whether organization training publish has a trustworthy organization-admin actor and
+      visible organization scope source. Runtime code, route/service/repository/mapper changes, schema, UI,
+      dependencies, provider/model, DB execution, formal content write, and formal target write paths remained
+      blocked.
+    autoDriveLocalDocsOnlyApproval: approved_by_user_prompt_2026_06_15
     seededByTask: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
     seededImplementationTask: false
     seededExecutionModule: organization-training
@@ -23335,12 +23336,12 @@ tasks:
       - e2e/browser/dev-server remain blocked
       - formal target write remains blocked
     closeoutPolicy:
-      localCommit: pending_fresh_user_approval
+      localCommit: approved_by_user_prompt_2026_06_15
       fastForwardMerge:
-        approved: false
+        approved: true
         targetBranch: master
       push:
-        approved: false
+        approved: true
         target: origin/master
       cleanup:
         deleteShortBranch: true
@@ -23422,6 +23423,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
-    status: pending
-    result: null
+    status: closed
+    result: pass_readonly_audit_with_org_admin_actor_contract_needs_recheck
     retryCount: 0
+    claimedAt: "2026-06-15T23:18:19-07:00"
+    closedAt: "2026-06-15T23:18:19-07:00"

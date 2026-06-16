@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
-updatedAt: "2026-06-15T23:06:05-07:00"
+currentPhase: advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+updatedAt: "2026-06-15T23:18:19-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 9f55ea73a176bc13772e85c0a9dee5dbf2a094a7
-  lastKnownOriginMasterSha: 9f55ea73a176bc13772e85c0a9dee5dbf2a094a7
+  lastKnownMasterSha: a0b133db118afc93cf4d8afbe2a7f91e305a5b1f
+  lastKnownOriginMasterSha: a0b133db118afc93cf4d8afbe2a7f91e305a5b1f
 currentTask:
-  id: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+  id: advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
-  branch: codex/advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+  branch: codex/advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -423,9 +423,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionRouteFlowReadonlyRecheckSeeding: pass_docs_only_seeded_route_flow_readonly_recheck_task
     advancedOrganizationTrainingPublishVersionRouteFlowReadonlyRecheck: pass_readonly_recheck_with_runtime_lineage_resolver_needs_recheck
     advancedOrganizationTrainingPublishVersionRouteTrustedLineageBoundaryDecision: pass_docs_only_boundary_decision_with_org_admin_actor_needs_recheck
-    preCommitHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_boundary_decision_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_route_trusted_lineage_boundary_decision_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_route_trusted_lineage_boundary_decision_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionRouteOrgAdminActorBoundaryReadonlyAudit: pass_readonly_audit_with_org_admin_actor_contract_needs_recheck
+    preCommitHook: pass_advanced_organization_training_publish_version_route_org_admin_actor_boundary_readonly_audit_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_route_org_admin_actor_boundary_readonly_audit_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_route_org_admin_actor_boundary_readonly_audit_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -441,8 +442,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Execute advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit after fresh
-    readiness gate and fresh user approval. The trusted lineage boundary is clear, but implementation should stay
-    blocked until the organization-admin actor and visible organization scope source is verified from current runtime
-    contracts without weakening route/service/repository layering.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    Execute advanced-organization-training-publish-version-route-org-admin-actor-contract-decision as a docs-only
+    boundary decision before any route resolver TDD. The current readonly audit found no existing narrow source that
+    proves both organization-admin actor authority and visible organization scope for publish lineage.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
