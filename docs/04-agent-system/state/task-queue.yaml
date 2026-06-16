@@ -27737,8 +27737,11 @@ tasks:
     sourceStory: advanced-edition-organization-analytics
     taskKind: readonly_audit
     moduleRunVersion: 2
-    status: pending
+    status: closed
+    result: pass
     retryCount: 0
+    claimedAt: "2026-06-16T10:25:34-07:00"
+    closedAt: "2026-06-16T10:31:00-07:00"
     dependencies:
       - advanced-organization-analytics-repository-read-model-contract-readonly-recheck
     humanApprovalBoundary: >-
@@ -27746,6 +27749,15 @@ tasks:
       review of whether the existing organization analytics service can consume the injected-gateway repository
       contract without mapper/validator/schema/DB/runtime wiring, or whether a schema/data-source boundary task must
       come first.
+    humanApproval: >-
+      User approved executing this readonly boundary audit in the current 2026-06-16 Codex thread by saying
+      "批准执行". Approval is limited to task claim, task plan/evidence/audit creation, durable state updates,
+      readonly review of declared files using explicit file-scoped commands, declared local validation, local commit,
+      fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Implementation,
+      product source/test source changes, direct DB access, row/private data exposure, schema/migration, Postgres
+      runtime adapter or runtime-database use, service/route/UI/mapper/validator/runtime wiring, provider/model calls,
+      dependency changes, e2e/browser/dev-server, quota/cost measurement, staging/prod/cloud/deploy/payment/
+      external-service, PR, and force push remain blocked.
     planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit.md
@@ -27818,3 +27830,91 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit
+  - id: advanced-organization-analytics-repository-service-wiring-tdd
+    title: Advanced organization analytics repository service wiring TDD
+    phase: advanced-organization-analytics-repository-service-wiring-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_service_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: approved_by_standing_autonomy_policy_2026_06_16
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit
+    humanApprovalBoundary: >-
+      Seeded by the service wiring boundary readonly audit. Scope is limited to TDD service-layer orchestration that
+      consumes the injected `OrganizationAnalyticsRepository` contract for visible organization scope, training
+      aggregate metrics, employee statistics summary inputs, and export-readiness rows. The task may add or adjust
+      service tests and service-only code to introduce repository injection while preserving existing pure builder
+      behavior. It must stop if mapper/validator/route/UI/schema/DB/runtime adapter/data-source work, formal export
+      generation, object storage, external delivery, provider/model calls, or row/private data access is required.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-tdd.md
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/organization-analytics-service.test.ts
+    readonlyFiles:
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/models/organization-analytics.ts
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-service-wiring-boundary-readonly-audit.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/server/repositories/**
+      - src/db/schema/**
+      - drizzle/**
+      - tests/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - direct database access
+      - row/private data exposure
+      - schema/migration
+      - Postgres runtime adapter or `runtime-database` use
+      - mapper/validator/route/UI/runtime wiring
+      - formal export generation, object storage, download URL, or external delivery
+      - provider/model calls or provider configuration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_standing_autonomy_policy_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-service.test.ts"
+      - npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-service-wiring-tdd
