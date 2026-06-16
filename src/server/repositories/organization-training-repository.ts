@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 
-import { organizationTrainingVersion } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import {
+  orgAuth,
+  orgAuthOrganization,
+  organization,
+  organizationTrainingVersion,
+} from "@/db/schema";
+import { and, desc, eq } from "drizzle-orm";
 
 import type { OrganizationTrainingPublishedVersionDto } from "../contracts/organization-training-contract";
 import type { OrganizationTrainingPublishedVersionPersistenceWrite } from "../services/organization-training-service";
@@ -26,16 +31,32 @@ export type OrganizationTrainingVersionInsertInput =
     versionNumber: number;
   };
 
+export type OrganizationTrainingTrustedPersistenceLineage = {
+  organizationId: number;
+  orgAuthId: number;
+};
+
+export type OrganizationTrainingTrustedPersistenceLineageLookupInput = {
+  organizationPublicId: string;
+  authorizationPublicId: string;
+};
+
 export type OrganizationTrainingVersionGateway = {
   findLatestVersionNumberByDraftPublicId(
     draftPublicId: string,
   ): Promise<number | null>;
+  findTrustedPersistenceLineageByPublicIds(
+    input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
+  ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
   insertPublishedVersion(
     input: OrganizationTrainingVersionInsertInput,
   ): Promise<OrganizationTrainingVersionRow | null>;
 };
 
 export type OrganizationTrainingRepository = {
+  lookupTrustedPersistenceLineage(
+    input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
+  ): Promise<OrganizationTrainingTrustedPersistenceLineage | null>;
   publishVersion(
     input: OrganizationTrainingPublishedVersionPersistenceInput,
   ): Promise<OrganizationTrainingPublishedVersionDto>;
@@ -84,6 +105,21 @@ export function createOrganizationTrainingRepository(
     options.createVersionPublicId ?? createDefaultVersionPublicId;
 
   return {
+    async lookupTrustedPersistenceLineage(input) {
+      const lookupInput = normalizeTrustedPersistenceLineageLookupInput(input);
+
+      if (lookupInput === null) {
+        return null;
+      }
+
+      const persistenceLineage =
+        await gateway.findTrustedPersistenceLineageByPublicIds(lookupInput);
+
+      return persistenceLineage === null
+        ? null
+        : normalizeTrustedPersistenceLineage(persistenceLineage);
+    },
+
     async publishVersion(input) {
       const latestVersionNumber =
         await gateway.findLatestVersionNumberByDraftPublicId(
@@ -118,6 +154,9 @@ export function createPostgresOrganizationTrainingRepository(
         getDatabase(),
         draftPublicId,
       );
+    },
+    async findTrustedPersistenceLineageByPublicIds(input) {
+      return findTrustedPersistenceLineageByPublicIds(getDatabase(), input);
     },
     async insertPublishedVersion(input) {
       const [row] = await getDatabase()
@@ -157,6 +196,50 @@ export function createPostgresOrganizationTrainingRepository(
       return (row as OrganizationTrainingVersionRow | undefined) ?? null;
     },
   });
+}
+
+function normalizeRequiredText(value: string): string | null {
+  const trimmedValue = value.trim();
+
+  return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
+function normalizeTrustedPersistenceLineageLookupInput(
+  input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
+): OrganizationTrainingTrustedPersistenceLineageLookupInput | null {
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const authorizationPublicId = normalizeRequiredText(
+    input.authorizationPublicId,
+  );
+
+  if (organizationPublicId === null || authorizationPublicId === null) {
+    return null;
+  }
+
+  return {
+    organizationPublicId,
+    authorizationPublicId,
+  };
+}
+
+function normalizeTrustedPersistenceLineage(
+  persistenceLineage: OrganizationTrainingTrustedPersistenceLineage,
+): OrganizationTrainingTrustedPersistenceLineage | null {
+  if (
+    !Number.isInteger(persistenceLineage.organizationId) ||
+    persistenceLineage.organizationId < 1 ||
+    !Number.isInteger(persistenceLineage.orgAuthId) ||
+    persistenceLineage.orgAuthId < 1
+  ) {
+    return null;
+  }
+
+  return {
+    organizationId: persistenceLineage.organizationId,
+    orgAuthId: persistenceLineage.orgAuthId,
+  };
 }
 
 function createVersionInsertInput(
@@ -199,6 +282,39 @@ async function findLatestVersionNumberByDraftPublicId(
     .limit(1);
 
   return row?.version_number ?? null;
+}
+
+async function findTrustedPersistenceLineageByPublicIds(
+  database: RuntimeDatabase,
+  input: OrganizationTrainingTrustedPersistenceLineageLookupInput,
+): Promise<OrganizationTrainingTrustedPersistenceLineage | null> {
+  const [row] = await database
+    .select({
+      organization_id: organization.id,
+      org_auth_id: orgAuth.id,
+    })
+    .from(orgAuthOrganization)
+    .innerJoin(
+      organization,
+      eq(orgAuthOrganization.organization_id, organization.id),
+    )
+    .innerJoin(orgAuth, eq(orgAuthOrganization.org_auth_id, orgAuth.id))
+    .where(
+      and(
+        eq(organization.public_id, input.organizationPublicId),
+        eq(orgAuth.public_id, input.authorizationPublicId),
+      ),
+    )
+    .limit(1);
+
+  if (row === undefined) {
+    return null;
+  }
+
+  return {
+    organizationId: row.organization_id,
+    orgAuthId: row.org_auth_id,
+  };
 }
 
 function resolveNextVersionNumber(latestVersionNumber: number | null): number {

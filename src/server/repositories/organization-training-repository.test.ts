@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { OrganizationTrainingPublishedVersionWrite } from "../services/organization-training-service";
 import {
   createOrganizationTrainingRepository,
+  type OrganizationTrainingTrustedPersistenceLineage,
   type OrganizationTrainingVersionGateway,
   type OrganizationTrainingVersionInsertInput,
 } from "./organization-training-repository";
@@ -48,10 +49,18 @@ function createVersionWrite(
   };
 }
 
-function createGateway(options: { latestVersionNumber?: number | null } = {}) {
+function createGateway(
+  options: {
+    latestVersionNumber?: number | null;
+    trustedPersistenceLineage?: OrganizationTrainingTrustedPersistenceLineage | null;
+  } = {},
+) {
   let insertInputs: OrganizationTrainingVersionInsertInput[] = [];
   const findLatestVersionNumberByDraftPublicId = vi.fn(
     async () => options.latestVersionNumber ?? null,
+  );
+  const findTrustedPersistenceLineageByPublicIds = vi.fn(
+    async () => options.trustedPersistenceLineage ?? null,
   );
   const insertPublishedVersion = vi.fn(
     async (input: OrganizationTrainingVersionInsertInput) => {
@@ -92,12 +101,14 @@ function createGateway(options: { latestVersionNumber?: number | null } = {}) {
   );
   const gateway: OrganizationTrainingVersionGateway = {
     findLatestVersionNumberByDraftPublicId,
+    findTrustedPersistenceLineageByPublicIds,
     insertPublishedVersion,
   };
 
   return {
     gateway,
     findLatestVersionNumberByDraftPublicId,
+    findTrustedPersistenceLineageByPublicIds,
     insertPublishedVersion,
     getInsertInputs: () => insertInputs,
   };
@@ -230,5 +241,68 @@ describe("organization training repository", () => {
     expect(serializedInsert).not.toContain("rawPrompt");
     expect(serializedInsert).not.toContain("rawAnswer");
     expect(serializedInsert).not.toContain("employeeAnswer");
+  });
+
+  it("looks up trusted internal lineage from public organization and authorization identifiers", async () => {
+    const { gateway, findTrustedPersistenceLineageByPublicIds } = createGateway(
+      {
+        trustedPersistenceLineage: {
+          organizationId: 501,
+          orgAuthId: 601,
+        },
+      },
+    );
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.lookupTrustedPersistenceLineage({
+      organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_public_123",
+    });
+
+    expect(findTrustedPersistenceLineageByPublicIds).toHaveBeenCalledWith({
+      organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_public_123",
+    });
+    expect(result).toEqual({
+      organizationId: 501,
+      orgAuthId: 601,
+    });
+  });
+
+  it("does not query trusted lineage when public identifiers are blank", async () => {
+    const { gateway, findTrustedPersistenceLineageByPublicIds } = createGateway(
+      {
+        trustedPersistenceLineage: {
+          organizationId: 501,
+          orgAuthId: 601,
+        },
+      },
+    );
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.lookupTrustedPersistenceLineage({
+      organizationPublicId: " ",
+      authorizationPublicId: "org_auth_public_123",
+    });
+
+    expect(result).toBeNull();
+    expect(findTrustedPersistenceLineageByPublicIds).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid trusted internal lineage returned by the gateway", async () => {
+    const { gateway } = createGateway({
+      trustedPersistenceLineage: {
+        organizationId: 0,
+        orgAuthId: 601,
+      },
+    });
+    const repository = createOrganizationTrainingRepository(gateway);
+
+    const result = await repository.lookupTrustedPersistenceLineage({
+      organizationPublicId: "organization_public_123",
+      authorizationPublicId: "org_auth_public_123",
+    });
+
+    expect(result).toBeNull();
   });
 });
