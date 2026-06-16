@@ -24586,3 +24586,214 @@ tasks:
     retryCount: 0
     claimedAt: "2026-06-16T02:15:32-07:00"
     closedAt: "2026-06-16T02:21:27-07:00"
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+    title: Recheck trusted lineage runtime wiring for publish route
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-tdd
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+    humanApprovalBoundary: >-
+      User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "批准执行". Scope is
+      docs/state-only readonly verification of the trusted-lineage runtime wiring and, if needed, docs/state-only
+      seeding of the next narrow runtime organization-admin actor context wiring task. Product source edits, test source
+      edits, DB access, schema/drizzle, provider/model calls, dependency/package/lockfile changes, dev server,
+      Browser/Playwright/e2e, staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration
+      Gate remain blocked.
+    humanApproval: >-
+      User approved executing this readonly recheck in the current 2026-06-16 Codex thread by saying "批准执行". Approval
+      is limited to task plan/evidence/audit creation, durable state updates, readonly review, pending next-task seed,
+      declared local validation, local commit, fast-forward merge to master, push origin/master, merged short-branch
+      cleanup, and fetch prune. High-risk gates remain blocked.
+    validationProfile: L1-docs-state-readonly-recheck
+    localFullLoopGate: L1
+    taskKind: readonly_recheck
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    capabilities:
+      localUnitTest: blocked_this_task
+      schemaMigration: blocked
+      localDockerDatabase: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-tdd.md
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+      - src/server/repositories/organization-training-repository.ts
+      - src/server/services/organization-training-service.ts
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source implementation during this readonly recheck
+      - test source implementation during this readonly recheck
+      - real DB command execution or row/private data access
+      - schema/drizzle edits, migration generation, or migration execution
+      - repository, mapper, contract, model, validator, app route, or script edits
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd exec -- prettier --write docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+      - npm.cmd exec -- prettier --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck -SkipRemoteAheadCheck
+    status: closed
+    result: pass_readonly_recheck_with_runtime_org_admin_context_wiring_needs_recheck
+    retryCount: 0
+    claimedAt: "2026-06-16T02:31:26-07:00"
+    closedAt: "2026-06-16T02:31:26-07:00"
+  - id: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+    title: Wire organization-admin actor context into publish route runtime
+    phase: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+    sourceStory: advanced-edition-organization-training
+    dependencies:
+      - advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+    taskPlanPolicy: required_before_edit
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+    humanApprovalBoundary: >-
+      Pending only. Standing autonomy may be used if repository readiness passes and the task remains inside this queue
+      scope. Scope is a narrow red-first TDD task to wire the default organization-training publish route runtime to a
+      real organization-admin actor context resolver so the already-wired trusted-lineage lookup can be reached. The task
+      must not run real DB commands, expose row/private data, change schema/drizzle, change repository/mapper/model/
+      validator logic, change dependencies/package/lockfile, call provider/model, start dev server, run Browser or
+      Playwright/e2e, touch staging/prod/cloud/deploy/payment/external-service, create or update PR, force push, or
+      execute Cost Calibration Gate.
+    autoDriveStandingAutonomyApproval: approved_by_project_state_2026_06_16
+    seededByTask: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+    validationProfile: L2-tdd-route-runtime-actor-context-no-real-db
+    localFullLoopGate: L2
+    taskKind: implementation
+    moduleRunVersion: 2
+    redFirstRequired: true
+    capabilities:
+      localUnitTest: approved_by_standing_autonomy_2026_06_16
+      routeRuntimeOrgAdminActorContextWiring: approved_by_standing_autonomy_2026_06_16
+      localDockerDatabase: blocked_this_task
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_standing_autonomy_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+      - src/server/services/organization-training-route.ts
+      - src/server/services/organization-training-route.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+      - src/server/services/organization-training-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/contracts/auth-contract.ts
+      - src/app/api/v1/organization-trainings/[publicId]/publish/route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/contracts/**
+      - src/server/models/**
+      - src/server/validators/**
+      - src/app/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - real DB command execution or row/private data access
+      - schema/drizzle edits, migration generation, or migration execution
+      - repository, mapper, model, validator, or app route implementation changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - dependency, package, or lockfile changes
+      - dev server, browser, Playwright, or e2e
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - broad authorization or permission model changes outside the named route runtime wiring contract
+      - PR
+      - force push
+    validationCommands:
+      - npm.cmd run test:unit -- src/server/services/organization-training-route.test.ts
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd -SkipRemoteAheadCheck
+    status: pending
+    retryCount: 0
