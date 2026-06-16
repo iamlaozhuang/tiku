@@ -71,6 +71,13 @@
       "when": 1781363408851,
       "tag": "20260613081008_harden_personal_ai_generation_result_fk_name",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1781577457756,
+      "tag": "20260615193737_add_organization_training_publish_version",
+      "breakpoints": true
     }
   ]
 }

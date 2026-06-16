@@ -21429,12 +21429,13 @@ tasks:
     planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
-    humanApprovalBoundary: >-
-      Pending only. Must not be claimed or implemented without fresh user approval after this seeding task. Approval must
-      explicitly authorize local schema/drizzle work and preserve env/secret, provider/model, dependency/package/lockfile,
-      route/service/repository/mapper/UI, staging/prod/cloud/deploy/payment/external-service, destructive DB, row/private
-      data, PR, force push, formal content write, formal target write, and Cost Calibration Gate blocks. DB access and
-      migration execution remain blocked unless separately approved by the future task.
+    humanApproval: >-
+      Fresh user approval recorded in the 2026-06-15 Codex thread by `批准执行`, scoped to local schema/drizzle design,
+      migration file generation or hand-authoring without `.env*` reads, schema unit tests, validation, local commit,
+      fast-forward merge to master, push origin/master, and short-branch cleanup. DB access, migration execution,
+      drizzle-kit push, provider/model, dependency/package/lockfile, route/service/repository/mapper/UI, staging/prod/cloud,
+      deploy, payment, external-service, destructive DB, row/private data, PR, force push, formal content write, formal
+      target write, and Cost Calibration Gate remain blocked.
     seededByTask: advanced-organization-training-publish-version-persistence-schema-migration-seeding
     seededImplementationTask: true
     seededExecutionModule: organization-training
@@ -21462,7 +21463,7 @@ tasks:
     localExperienceClosureGate: advanced-edition-organization-training
     localFullLoopGate: L3
     capabilities:
-      schemaMigration: blocked_without_task_approval
+      schemaMigration: approved_migration_plan
       localDockerDatabase: blocked_without_task_approval
       providerCall: blocked_without_task_approval
       costCalibrationGate: blocked
@@ -21471,6 +21472,17 @@ tasks:
       - DB access and migration execution require separate explicit approval
       - repository/mapper/route/UI implementation remains separate
       - provider/model and Cost Calibration Gate remain blocked
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_15
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     taskKind: schema_migration
     moduleRunVersion: 2
     allowedFiles:
@@ -21548,6 +21560,8 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-training-publish-version-persistence-schema-migration
-    status: pending
-    result: pending
+    status: closed
+    result: pass_gated_schema_migration_generated_no_db_execution
     retryCount: 0
+    claimedAt: "2026-06-15T19:33:10-07:00"
+    closedAt: "2026-06-15T19:39:19-07:00"
