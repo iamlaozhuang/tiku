@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST as publishRoutePost } from "@/app/api/v1/organization-trainings/[publicId]/publish/route";
 
@@ -11,7 +11,49 @@ import {
   type OrganizationTrainingPublishVersionCommand,
   type OrganizationTrainingService,
 } from "./organization-training-service";
-import { createOrganizationTrainingRouteHandlers } from "./organization-training-route";
+import {
+  createOrganizationTrainingRouteHandlers,
+  createOrganizationTrainingRuntimeRouteHandlers,
+} from "./organization-training-route";
+
+const runtimeRepositoryMock = vi.hoisted(() => ({
+  lookupTrustedPersistenceLineage: vi.fn(async () => ({
+    organizationId: 501,
+    orgAuthId: 601,
+  })),
+  publishVersion: vi.fn(
+    async (): Promise<OrganizationTrainingPublishedVersionDto> => ({
+      publicId: "organization_training_version_route_401",
+      draftPublicId: "organization_training_draft_route_401",
+      versionNumber: 1,
+      organizationPublicId: "organization_route_public_401",
+      publishScopeSnapshot: {
+        organizationPublicIds: [] as string[],
+        capturedAt: "2026-06-15T10:00:00.000Z",
+      },
+      profession: "logistics",
+      level: 4,
+      subject: "theory",
+      title: "Route publish training",
+      description: "Route publish description",
+      questionCount: 1,
+      totalScore: 5,
+      status: "published",
+      publishedAt: "2026-06-15T10:00:00.000Z",
+      takenDownAt: null,
+      takedownReason: null,
+    }),
+  ),
+}));
+
+const postgresOrganizationTrainingRepositoryFactoryMock = vi.hoisted(() =>
+  vi.fn(() => runtimeRepositoryMock),
+);
+
+vi.mock("../repositories/organization-training-repository", () => ({
+  createPostgresOrganizationTrainingRepository:
+    postgresOrganizationTrainingRepositoryFactoryMock,
+}));
 
 const trustedLineage: OrganizationTrainingPersistenceLineage = {
   organizationId: 501,
@@ -142,8 +184,57 @@ async function resolveJsonPayload(response: Response): Promise<unknown> {
 }
 
 describe("organization training publish route handlers", () => {
+  beforeEach(() => {
+    postgresOrganizationTrainingRepositoryFactoryMock.mockClear();
+    postgresOrganizationTrainingRepositoryFactoryMock.mockReturnValue(
+      runtimeRepositoryMock,
+    );
+    runtimeRepositoryMock.lookupTrustedPersistenceLineage.mockClear();
+    runtimeRepositoryMock.lookupTrustedPersistenceLineage.mockResolvedValue(
+      trustedLineage,
+    );
+    runtimeRepositoryMock.publishVersion.mockClear();
+    runtimeRepositoryMock.publishVersion.mockResolvedValue(
+      createPublishedVersion(),
+    );
+  });
+
   it("exports a thin POST handler from the App Router publish entrypoint", () => {
     expect(publishRoutePost).toEqual(expect.any(Function));
+  });
+
+  it("wires trusted lineage repository lookup into the runtime publish route", async () => {
+    const handlers = createOrganizationTrainingRuntimeRouteHandlers({
+      async resolveOrganizationAdminContext() {
+        return trustedAdminContext;
+      },
+    });
+
+    const response = await handlers.publish.POST(
+      createPublishRequest(createPublishInput()),
+      createRouteContext(),
+    );
+
+    await expect(resolveJsonPayload(response)).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        version: createPublishedVersion(),
+      },
+    });
+    expect(
+      runtimeRepositoryMock.lookupTrustedPersistenceLineage,
+    ).toHaveBeenCalledWith({
+      adminContext: trustedAdminContext,
+      authorizationPublicId: "org_auth_route_public_401",
+      organizationPublicId: "organization_route_public_401",
+    });
+    expect(runtimeRepositoryMock.publishVersion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organizationId: trustedLineage.organizationId,
+        orgAuthId: trustedLineage.orgAuthId,
+      }),
+    );
   });
 
   it("returns a success envelope from the service and uses trusted lineage instead of client lineage", async () => {

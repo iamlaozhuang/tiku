@@ -62,6 +62,11 @@ export type OrganizationTrainingRouteOptions = {
   resolvePersistenceLineage?: OrganizationTrainingPersistenceLineageResolver;
 };
 
+export type OrganizationTrainingRuntimeRouteOptions = Pick<
+  OrganizationTrainingRouteOptions,
+  "resolveOrganizationAdminContext"
+>;
+
 const invalidPublishInputCode = 400061;
 const draftPublicIdMismatchCode = 400062;
 const publishAdminContextUnavailableCode = 403063;
@@ -125,9 +130,9 @@ function createDefaultPersistenceLineageResolver(
   );
 }
 
-function createRuntimeOrganizationTrainingStore(): OrganizationTrainingStore {
-  const repository = createPostgresOrganizationTrainingRepository();
-
+function createRuntimeOrganizationTrainingStore(
+  repository: Pick<OrganizationTrainingStore, "publishVersion">,
+): OrganizationTrainingStore {
   return {
     async createManualDraft() {
       throw new Error("Organization training draft route is not configured.");
@@ -309,8 +314,19 @@ export function createOrganizationTrainingRouteHandlers(
   });
 }
 
-export function createOrganizationTrainingRuntimeRouteHandlers() {
+export function createOrganizationTrainingRuntimeRouteHandlers(
+  options: OrganizationTrainingRuntimeRouteOptions = {},
+) {
+  const repository = createPostgresOrganizationTrainingRepository();
+
   return createOrganizationTrainingRouteHandlers(
-    createOrganizationTrainingService(createRuntimeOrganizationTrainingStore()),
+    createOrganizationTrainingService(
+      createRuntimeOrganizationTrainingStore(repository),
+    ),
+    {
+      ...options,
+      lookupTrustedPersistenceLineage:
+        repository.lookupTrustedPersistenceLineage,
+    },
   );
 }
