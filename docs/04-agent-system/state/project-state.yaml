@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-training-publish-version-authorization-lineage-coverage
-updatedAt: "2026-06-15T18:22:00-07:00"
+currentPhase: advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
+updatedAt: "2026-06-15T18:31:20-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -266,16 +266,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 22686782b79a20fe5bf39c926ab37a20bf0d136a
-  lastKnownOriginMasterSha: 22686782b79a20fe5bf39c926ab37a20bf0d136a
+  lastKnownMasterSha: cd8698aede1b94d8254ae35adf2042df8d548286
+  lastKnownOriginMasterSha: cd8698aede1b94d8254ae35adf2042df8d548286
 currentTask:
-  id: advanced-organization-training-publish-version-authorization-lineage-coverage
+  id: advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-training
-  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
-  branch: codex/advanced-organization-training-publish-version-authorization-lineage-coverage
+  planPath: docs/05-execution-logs/task-plans/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+  branch: codex/advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -405,9 +405,10 @@ qualityGates:
     advancedOrganizationTrainingPublishVersionServiceReadonlyRecheck: pass_readonly_recheck_with_authorization_lineage_needs_recheck
     advancedOrganizationTrainingPublishVersionAuthorizationLineageCoverageSeeding: pass_docs_only_seeded_authorization_lineage_coverage_task
     advancedOrganizationTrainingPublishVersionAuthorizationLineageCoverage: pass_tdd_service_authorization_lineage_coverage
-    preCommitHook: pass_advanced_organization_training_publish_version_authorization_lineage_coverage_pre_commit_hardening
-    moduleCloseout: pass_advanced_organization_training_publish_version_authorization_lineage_coverage_closeout_readiness
-    prePushHook: pass_advanced_organization_training_publish_version_authorization_lineage_coverage_pre_push_readiness
+    advancedOrganizationTrainingPublishVersionAuthorizationLineageReadonlyRecheck: pass_readonly_recheck_with_persistence_needs_recheck
+    preCommitHook: pass_advanced_organization_training_publish_version_authorization_lineage_readonly_recheck_pre_commit_hardening
+    moduleCloseout: pass_advanced_organization_training_publish_version_authorization_lineage_readonly_recheck_closeout_readiness
+    prePushHook: pass_advanced_organization_training_publish_version_authorization_lineage_readonly_recheck_pre_push_readiness
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -423,7 +424,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    advanced-organization-training-publish-version-authorization-lineage-coverage closed the service-local TDD coverage
-    for publish-version authorization lineage. Recommended next action is a readonly recheck or explicit repository/schema/route
-    persistence seeding task before any durable publish-version persistence claim.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+    advanced-organization-training-publish-version-authorization-lineage-readonly-recheck confirmed the service-local
+    authorization lineage decision and preserved public DTO non-exposure. Recommended next action is a repository/schema/route
+    persistence seeding or planning task before any durable publish-version persistence claim.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
