@@ -61,6 +61,18 @@ const emptyServerHistoryResponse = {
   data: [],
 };
 
+const emptyResultHistoryResponse = {
+  code: 0,
+  message: "ok",
+  data: {
+    runtimeStatus: "local_contract_only",
+    contentVisibility: "redacted_snapshot",
+    redactionStatus: "redacted",
+    formalAdoptionWriteStatus: "blocked_without_follow_up_task",
+    results: [],
+  },
+};
+
 const localExperienceResponse = {
   code: 0,
   message: "ok",
@@ -244,6 +256,19 @@ function createPersonalAiGenerationFetchMock(
       };
     }
 
+    if (path === "/api/v1/personal-ai-generation-results") {
+      expect(init?.method).toBe("GET");
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => emptyResultHistoryResponse,
+      };
+    }
+
     throw new Error(`Unexpected fetch path: ${path}`);
   });
 }
@@ -295,8 +320,34 @@ function createPersonalAiGenerationFetchMockWithHistorySequence(
       };
     }
 
+    if (path === "/api/v1/personal-ai-generation-results") {
+      expect(init?.method).toBe("GET");
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer unit-test-session-token",
+      });
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => emptyResultHistoryResponse,
+      };
+    }
+
     throw new Error(`Unexpected fetch path: ${path}`);
   });
+}
+
+function expectRenderedTextToHideValues(
+  values: Array<string | null | undefined>,
+) {
+  for (const value of values) {
+    if (value === null || value === undefined) {
+      continue;
+    }
+
+    expect(screen.queryByText(value)).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toContain(value);
+  }
 }
 
 afterEach(() => {
@@ -311,17 +362,33 @@ describe("StudentPersonalAiGenerationPage", () => {
     localStorage.setItem("tiku.localSessionToken", "unit-test-session-token");
     const fetchMock = vi.fn(
       async (url: RequestInfo | URL, init?: RequestInit) => {
-        expect(String(url)).toBe("/api/v1/personal-ai-generation-requests");
-        expect(init?.method).toBe("GET");
-        expect(init?.headers).toMatchObject({
-          authorization: "Bearer unit-test-session-token",
-        });
+        if (String(url) === "/api/v1/personal-ai-generation-requests") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
 
-        return {
-          ok: true,
-          status: 200,
-          json: async () => serverHistoryResponse,
-        };
+          return {
+            ok: true,
+            status: 200,
+            json: async () => serverHistoryResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-results") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
+        throw new Error(`Unexpected fetch path: ${String(url)}`);
       },
     );
     vi.stubGlobal("fetch", fetchMock);
@@ -329,22 +396,23 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
 
     expect(
-      await screen.findByText("personal-ai-request-public-initial-001"),
+      await screen.findByText("2026-06-12T10:00:00.000Z"),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("ai-generation-task-public-initial-001"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("2026-06-12T10:00:00.000Z")).toBeInTheDocument();
-    expect(
-      screen.getByText("ai-result-public-initial-001"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("ai-call-log-public-initial-001"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("status")).toBeInTheDocument();
+    expect(screen.getByText("succeeded")).toBeInTheDocument();
+    expect(screen.getByText("requestedAt")).toBeInTheDocument();
+    expect(screen.getByText("redactionStatus")).toBeInTheDocument();
+    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
     expect(screen.getByText("sufficient")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
+    expectRenderedTextToHideValues([
+      serverHistoryResponse.data[0].requestPublicId,
+      serverHistoryResponse.data[0].taskPublicId,
+      serverHistoryResponse.data[0].resultPublicId,
+      serverHistoryResponse.data[0].aiCallLogPublicId,
+    ]);
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("posts a session-aligned camelCase public-id payload to the local route contract without rendering the session token", async () => {
@@ -390,6 +458,19 @@ describe("StudentPersonalAiGenerationPage", () => {
           };
         }
 
+        if (String(url) === "/api/v1/personal-ai-generation-results") {
+          expect(init?.method).toBe("GET");
+          expect(init?.headers).toMatchObject({
+            authorization: "Bearer unit-test-session-token",
+          });
+
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
+          };
+        }
+
         throw new Error(`Unexpected fetch path: ${String(url)}`);
       },
     );
@@ -410,29 +491,38 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
     expect(screen.getByText("student_local_browser")).toBeInTheDocument();
     expect(screen.getByText("accepted")).toBeInTheDocument();
-    expect(screen.getByText("paper-public-001")).toBeInTheDocument();
+    expect(screen.getByText("contentVisibility")).toBeInTheDocument();
+    expect(screen.getByText("referenceRedactionStatus")).toBeInTheDocument();
     expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
     expect(screen.getByText("summary_only")).toBeInTheDocument();
     expect(screen.getByText("isFormalAdoptionBlocked")).toBeInTheDocument();
     expect(screen.getByText("true")).toBeInTheDocument();
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests",
     );
     expect(fetchMock.mock.calls[0]?.[1]?.method).toBe("GET");
-    expect(String(fetchMock.mock.calls[1]?.[0])).toBe("/api/v1/sessions");
-    expect(String(fetchMock.mock.calls[2]?.[0])).toBe(
-      "/api/v1/personal-ai-generation-requests",
+    expect(String(fetchMock.mock.calls[1]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-results",
     );
-    expect(fetchMock.mock.calls[2]?.[1]?.method).toBe("POST");
+    expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[2]?.[0])).toBe("/api/v1/sessions");
     expect(String(fetchMock.mock.calls[3]?.[0])).toBe(
       "/api/v1/personal-ai-generation-requests",
     );
-    expect(fetchMock.mock.calls[3]?.[1]?.method).toBe("GET");
+    expect(fetchMock.mock.calls[3]?.[1]?.method).toBe("POST");
+    expect(String(fetchMock.mock.calls[4]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-requests",
+    );
+    expect(fetchMock.mock.calls[4]?.[1]?.method).toBe("GET");
+    expect(String(fetchMock.mock.calls[5]?.[0])).toBe(
+      "/api/v1/personal-ai-generation-results",
+    );
+    expect(fetchMock.mock.calls[5]?.[1]?.method).toBe("GET");
 
     const requestBody = JSON.parse(
-      String(fetchMock.mock.calls[2]?.[1]?.body),
+      String(fetchMock.mock.calls[3]?.[1]?.body),
     ) as Record<string, unknown>;
 
     expect(requestBody).toEqual({
@@ -481,6 +571,15 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(requestBody.idempotencyKeyHash).not.toBe(
       "sha256:student-local-request",
     );
+    expectRenderedTextToHideValues([
+      String(requestBody.requestPublicId),
+      String(requestBody.taskPublicId),
+      String(requestBody.authorizationPublicId),
+      String(requestBody.questionPublicId),
+      String(requestBody.answerRecordPublicId),
+      String(requestBody.paperPublicId),
+      String(requestBody.userPublicId),
+    ]);
     expect(document.body.textContent).not.toContain("unit-test-session-token");
   });
 
@@ -516,6 +615,14 @@ describe("StudentPersonalAiGenerationPage", () => {
             ok: true,
             status: 200,
             json: async () => localExperienceResponse,
+          };
+        }
+
+        if (String(url) === "/api/v1/personal-ai-generation-results") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => emptyResultHistoryResponse,
           };
         }
 
@@ -571,31 +678,38 @@ describe("StudentPersonalAiGenerationPage", () => {
 
     expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
     expect(
-      await screen.findByText(
-        "personal-ai-request-public-server-after-submit-001",
-      ),
+      await screen.findByText("2026-06-12T12:30:00.000Z"),
     ).toBeInTheDocument();
-    expect(
-      screen.getAllByText("ai-generation-task-public-server-after-submit-001")
-        .length,
-    ).toBeGreaterThan(0);
-    expect(screen.getByText("2026-06-12T12:30:00.000Z")).toBeInTheDocument();
-    expect(screen.queryByText("personal-ai-request-public-001")).toBeNull();
+    expect(screen.getAllByText("pending").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("none").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("0").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
+    expectRenderedTextToHideValues([
+      serverHistoryAfterSubmitResponse.data[0].requestPublicId,
+      serverHistoryAfterSubmitResponse.data[0].taskPublicId,
+      serverHistoryAfterSubmitResponse.data[0].resultPublicId,
+      serverHistoryAfterSubmitResponse.data[0].aiCallLogPublicId,
+      "personal-ai-request-public-001",
+    ]);
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
     expect(fetchMock.mock.calls.map((call) => String(call[0]))).toEqual([
       "/api/v1/personal-ai-generation-requests",
+      "/api/v1/personal-ai-generation-results",
       "/api/v1/sessions",
       "/api/v1/personal-ai-generation-requests",
       "/api/v1/personal-ai-generation-requests",
+      "/api/v1/personal-ai-generation-results",
     ]);
     expect(fetchMock.mock.calls.map((call) => call[1]?.method)).toEqual([
       "GET",
       "GET",
+      "GET",
       "POST",
+      "GET",
       "GET",
     ]);
   });
@@ -626,7 +740,7 @@ describe("StudentPersonalAiGenerationPage", () => {
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("unit-test-session-token");
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5));
   });
 
   it("renders a permission blocked state when no student session token exists", () => {
@@ -746,18 +860,22 @@ describe("StudentPersonalAiGenerationPage", () => {
     render(createElement(StudentPersonalAiGenerationPage));
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
-    expect(await screen.findAllByText("aiCallLogPublicId")).not.toHaveLength(0);
-    expect(
-      screen.getAllByText("ai-call-log-public-001").length,
-    ).toBeGreaterThan(0);
-    expect(screen.getAllByText("resultPublicId").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("ai-result-public-001").length).toBeGreaterThan(
-      0,
-    );
+    expect(await screen.findByText("local_contract_only")).toBeInTheDocument();
+    expect(screen.getAllByText("contentVisibility").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("summary_only").length).toBeGreaterThan(0);
     expect(screen.getAllByText("evidenceStatus").length).toBeGreaterThan(0);
     expect(screen.getAllByText("sufficient").length).toBeGreaterThan(0);
     expect(screen.getAllByText("citationCount").length).toBeGreaterThan(0);
     expect(screen.getAllByText("2").length).toBeGreaterThan(0);
+    expect(screen.getByText("referenceRedactionStatus")).toBeInTheDocument();
+    expectRenderedTextToHideValues([
+      redactedReferenceResponse.data.resultState.taskPublicId,
+      redactedReferenceResponse.data.resultState.resultPublicId,
+      redactedReferenceResponse.data.requestFlow.resultReference.resultReference
+        .resultPublicId,
+      redactedReferenceResponse.data.requestFlow.resultReference
+        .aiCallLogReference.aiCallLogPublicId,
+    ]);
     expect(document.body.textContent).not.toContain("raw prompt");
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("generated content");
@@ -837,22 +955,29 @@ describe("StudentPersonalAiGenerationPage", () => {
     fireEvent.click(screen.getByRole("button", { name: requestButtonLabel }));
 
     expect(
-      await screen.findByText("personal-ai-request-public-server-history-001"),
+      await screen.findByText("2026-06-12T12:45:00.000Z"),
     ).toBeInTheDocument();
-    expect(screen.getByText("requestPublicId")).toBeInTheDocument();
+    expect(screen.queryByText("requestPublicId")).not.toBeInTheDocument();
+    expect(screen.queryByText("taskPublicId")).not.toBeInTheDocument();
+    expect(screen.queryByText("resultPublicId")).not.toBeInTheDocument();
+    expect(screen.queryByText("aiCallLogPublicId")).not.toBeInTheDocument();
     expect(screen.getByText("requestedAt")).toBeInTheDocument();
-    expect(screen.getByText("2026-06-12T12:45:00.000Z")).toBeInTheDocument();
-    expect(
-      screen.getAllByText("ai-generation-task-public-history-001").length,
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText("ai-result-public-history-001").length,
-    ).toBeGreaterThan(0);
     expect(screen.getAllByText("weak").length).toBeGreaterThan(0);
     expect(screen.getAllByText("3").length).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText("ai-call-log-public-history-001").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("redacted").length).toBeGreaterThan(0);
+    expectRenderedTextToHideValues([
+      redactedReferenceResponse.data.resultState.taskPublicId,
+      redactedReferenceResponse.data.resultState.resultPublicId,
+      redactedReferenceResponse.data.requestFlow.resultReference.taskPublicId,
+      redactedReferenceResponse.data.requestFlow.resultReference.resultReference
+        .resultPublicId,
+      redactedReferenceResponse.data.requestFlow.resultReference
+        .aiCallLogReference.aiCallLogPublicId,
+      "personal-ai-request-public-server-history-001",
+      "ai-generation-task-public-history-001",
+      "ai-result-public-history-001",
+      "ai-call-log-public-history-001",
+    ]);
     expect(document.body.textContent).not.toContain("provider payload");
     expect(document.body.textContent).not.toContain("generated content");
     expect(document.body.textContent).not.toContain("full paper content");

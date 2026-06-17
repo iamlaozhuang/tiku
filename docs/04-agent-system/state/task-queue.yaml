@@ -10244,3 +10244,133 @@ tasks:
     branch: codex/personal-ai-ui-browser-planning
     commitSha: 6763464aa36e5d12fc27ff44d6253c51e16e767c
     retryCount: 0
+
+  - id: module-run-v2-personal-ai-ui-redaction-unit-alignment
+    title: Personal AI legacy UI redaction unit alignment
+    phase: module-run-v2-personal-ai-ui-redaction-unit-alignment
+    sourceStory: user-approved-next-recommended-local-unit-task
+    dependencies:
+      - module-run-v2-personal-ai-local-ui-browser-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by current 2026-06-17 user prompt to execute the previously recommended next work under mechanism rules.
+      Scope is limited to local_unit_tdd alignment of the legacy personal AI UI unit test with the current redaction
+      policy. Provider/model calls, env/secret access, dependency/package/lockfile changes, schema/drizzle/migrations,
+      Browser/dev server/Playwright/e2e, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost
+      Calibration Gate remain blocked.
+    targetClosureItem: personal-learning-ai legacy UI redaction unit alignment
+    behaviorBoundary: personal-learning-ai::legacy_ui_redaction_unit_alignment
+    useCases:
+      - Align legacy personal AI UI unit assertions with the current redacted identifier display policy.
+      - Preserve current focused personal AI UI and local browser experience unit coverage without product source edits.
+      - Prepare the later localhost-only full-flow validation task without running Browser, dev server, Playwright, or e2e.
+    acceptanceScenarios:
+      - The legacy unit test fails first on the pre-existing redaction-policy mismatch.
+      - The legacy unit test passes after updating only test assertions/helpers to the current redaction policy.
+      - Focused current UI and local browser experience unit tests pass without provider/model calls, env/secret access, schema/migration, dependency changes, Browser, Playwright/e2e, or dev server execution.
+    nonGoals:
+      - product source edits, UI implementation, route implementation, Browser/dev-server/Playwright/e2e execution, schema/drizzle/migration, dependency/package/lockfile, provider/model calls, env/secret access, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
+    validationProfile: local_unit_tdd
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - tests/unit/student-personal-ai-generation-ui.test.ts
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
+      - src/app/(student)/ai-generation/page.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.tsx
+      - src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx
+      - src/server/services/personal-ai-generation-local-browser-experience-service.ts
+      - src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/**
+      - e2e/**
+      - scripts/**
+    riskTypes:
+      - local_unit_tdd
+      - test_coverage_alignment
+      - evidence_redaction
+      - local_experience_acceptance_bridge_followup
+    validationCommandLifecycle:
+      - phase: red
+        command: npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - phase: post_edit
+        command: npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown <module-run-v2-personal-ai-ui-redaction-unit-alignment changed files>
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-ui-redaction-unit-alignment
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-ui-redaction-unit-alignment
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-ui-redaction-unit-alignment
+    validationCommands:
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts
+      - npm.cmd run test:unit -- tests/unit/student-personal-ai-generation-ui.test.ts src/features/student/ai-generation/StudentPersonalAiGenerationPage.test.tsx src/server/services/personal-ai-generation-local-browser-experience-service.test.ts
+      - npx.cmd prettier --check --ignore-unknown <module-run-v2-personal-ai-ui-redaction-unit-alignment changed files>
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-ui-redaction-unit-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-ui-redaction-unit-alignment
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-ui-redaction-unit-alignment
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-personal-ai-ui-redaction-unit-alignment.md
+    status: closed
+    claimedAt: "2026-06-17T14:04:50-07:00"
+    closedAt: "2026-06-17T14:11:29-07:00"
+    result: pass
+    branch: codex/personal-ai-ui-redaction-unit-alignment
+    commitSha: pending-closeout-commit
+    retryCount: 0
