@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-local-full-flow-lifecycle-phase-hardening
-updatedAt: "2026-06-17T16:07:59-07:00"
+currentPhase: module-run-v2-next-experience-chain-readiness-audit
+updatedAt: "2026-06-17T16:20:03-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
   lastKnownOriginMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
 currentTask:
-  id: module-run-v2-local-full-flow-lifecycle-phase-hardening
+  id: module-run-v2-next-experience-chain-readiness-audit
   status: closed
-  sourceStory: mechanism.localFullFlowLifecyclePhaseHardening
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
-  branch: codex/local-full-flow-lifecycle-phase-hardening
+  sourceStory: localExperienceClosureGate.nextChainReadinessAudit
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
+  branch: codex/next-experience-chain-readiness-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -676,6 +676,7 @@ qualityGates:
     advancedOrganizationAnalyticsPostEmployeeRuntimeAlignmentReadonlyRecheckSeeding: pass_docs_state_seeded_post_employee_runtime_alignment_readonly_recheck
     advancedOrganizationAnalyticsPostEmployeeRuntimeAlignmentReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
     advancedOrganizationAnalyticsNextImplementationQueueSeedingPostEmployeeRuntimeRecheck: pass_docs_state_seeded_dashboard_formal_quota_summary_tdd
+    moduleRunV2NextExperienceChainReadinessAudit: pass_docs_state_next_chain_readiness_audit
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -714,9 +715,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Run the standard project status and next-action diagnostics after closeout. If they remain idle with no pending task
-    or seed candidate, ask for fresh approval before materializing the next product or governance task. Keep
-    schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
-    staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate blocked unless a future
-    task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
+    Recommended next task is `module-run-v2-organization-training-local-role-flow-planning`, a docs-state planning
+    task for the `organization-training-experience` L6 local role-flow chain. It should inventory existing local
+    organization-training role-flow and redaction validation surfaces by file path and focused command result only,
+    without editing product source, tests, e2e, scripts, schema/drizzle, package/lockfiles, or dependencies, and without
+    Browser/dev-server/Playwright, provider/model, staging/prod/cloud/deploy/payment/external-service, PR/force-push, or
+    Cost Calibration Gate work.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
