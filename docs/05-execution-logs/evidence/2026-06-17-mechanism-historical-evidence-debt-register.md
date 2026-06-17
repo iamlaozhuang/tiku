@@ -63,8 +63,8 @@ No historical evidence was fabricated.
 - `npm.cmd run lint`: pass
 - `npm.cmd run typecheck`: pass
 - `git diff --check`: pass
-- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-historical-evidence-debt-register`: pending
-- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId mechanism-historical-evidence-debt-register`: pending
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-historical-evidence-debt-register`: pass
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId mechanism-historical-evidence-debt-register`: pass
 
 ## Redaction Statement
 
@@ -73,9 +73,9 @@ This evidence records only command names, pass/fail status, and mechanism diagno
 ## Closeout Anchors
 
 - Batch range: single mechanism maintenance task `mechanism-historical-evidence-debt-register`
-- Commit: pending_pre_commit
+- Commit: `f12fb219a9d22c59c77eaf0850ba36c8c7e3b17f`
 - localFullLoopGate: not_applicable_docs_state_lite; no Browser, Playwright, dev server, provider, DB, staging, prod, cloud, deploy, payment, external-service, or Cost Calibration Gate work was run.
 - threadRolloverGate: no rollover required for this single local mechanism task.
-- nextModuleRunCandidate: pending final `Get-TikuNextAction.ps1 -VerboseHistory` after closeout.
+- nextModuleRunCandidate: none; final pre-merge diagnostic reported `idle_no_pending_task` and `no_seed_candidate`.
 
 Cost Calibration Gate remains blocked.
