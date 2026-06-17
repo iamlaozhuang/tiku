@@ -56,6 +56,11 @@ tasks:
     taskKind: implementation
     evidencePath: docs/05-execution-logs/evidence/closed-current.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/closed-current.md
+  - id: phase-69-advanced-authorization-context-implementation-planning
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/source-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/source-planning.md
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
     @"
@@ -92,7 +97,8 @@ Cost Calibration Gate remains blocked
 
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "New-ModuleRunV2ImplementationSeed.ps1"
 $selfReviewPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ImplementationSeedSelfReview.ps1"
-foreach ($requiredScript in @($scriptPath, $selfReviewPath)) {
+$readinessPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1"
+foreach ($requiredScript in @($scriptPath, $selfReviewPath, $readinessPath)) {
     if (-not (Test-Path -LiteralPath $requiredScript)) {
         throw "Missing seed transaction smoke dependency: $requiredScript"
     }
@@ -150,6 +156,9 @@ try {
     if ($queueAfterApply -notmatch "validationCommandLifecycle:" -or $queueAfterApply -notmatch "phase:\s*advisory_baseline") {
         throw "Applied seed transaction did not write lifecycle-aware advisory baseline validation."
     }
+    if ($queueAfterApply -notmatch [regex]::Escape("-EvidencePath ")) {
+        throw "Applied seed transaction did not wire seeded task readiness commands to seed evidence."
+    }
     if ($queueAfterApply -match "(?m)^\s{4}validationCommands:\r?\n(?:\s{6}- .*\r?\n)*\s{6}- npm\.cmd run test -- --run focused") {
         throw "Applied seed transaction wrote broad baseline into legacy validationCommands."
     }
@@ -166,6 +175,21 @@ try {
     if ($seedEvidenceContent -notmatch "authorization-and-access" -or $seedEvidenceContent -notmatch "batch-101-authorization-and-access") {
         throw "Seed evidence did not record concrete seeded task values."
     }
+    foreach ($requiredSeedEvidenceAnchor in @("implementationAutoSeedGate", "localExperienceClosureGate", "seededImplementationTask", "focused test", "localFullLoopGate", "Cost Calibration Gate remains blocked")) {
+        if ($seedEvidenceContent -notmatch [regex]::Escape($requiredSeedEvidenceAnchor)) {
+            throw "Seed evidence missing readiness anchor: $requiredSeedEvidenceAnchor"
+        }
+    }
+    $readinessOutput = @(
+        & $readinessPath `
+            -TaskId "phase-69-advanced-authorization-context-implementation-planning" `
+            -CandidateTaskId "batch-101-authorization-and-access-authorization-read-model-and-display-contrac" `
+            -ProjectStatePath $fixture.ProjectStatePath `
+            -QueuePath $fixture.QueuePath `
+            -MatrixPath $fixture.MatrixPath `
+            -EvidencePath (Join-Path -Path $fixtureRoot -ChildPath "seed-evidence.md")
+    )
+    Assert-Contains -Output $readinessOutput -Pattern "implementation auto-seed readiness passed"
     $seededTaskEvidenceTemplate = Join-Path -Path $fixtureRoot -ChildPath "docs\05-execution-logs\evidence\batch-101-authorization-and-access-authorization-read-model-and-display-contrac.md"
     if (-not (Test-Path -LiteralPath $seededTaskEvidenceTemplate)) {
         throw "Seeded task evidence template was not written: $seededTaskEvidenceTemplate"

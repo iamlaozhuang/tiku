@@ -144,6 +144,7 @@ function New-SeedTaskBlock {
         [Parameter(Mandatory = $true)][string]$SourcePlanningTask,
         [Parameter(Mandatory = $true)][string]$TargetClosure,
         [Parameter(Mandatory = $true)][string]$LocalFullLoopGate,
+        [Parameter(Mandatory = $true)][string]$ReadinessEvidencePath,
         [Parameter(Mandatory = $true)][string]$ApprovalText,
         [Parameter(Mandatory = $true)][string]$RequirementRef,
         [Parameter(Mandatory = $true)][string]$UseCase,
@@ -159,6 +160,7 @@ function New-SeedTaskBlock {
     $safeApprovalText = ConvertTo-YamlScalarText -Text $ApprovalText
     $safeTargetClosure = ConvertTo-YamlScalarText -Text $TargetClosure
     $safeLocalFullLoopGate = if ([string]::IsNullOrWhiteSpace($LocalFullLoopGate)) { "L2" } else { $LocalFullLoopGate }
+    $readinessEvidencePathArgument = if ([string]::IsNullOrWhiteSpace($ReadinessEvidencePath)) { "" } else { " -EvidencePath $ReadinessEvidencePath" }
     $safeBehaviorBoundary = ConvertTo-YamlScalarText -Text $BehaviorBoundary
     $safeValidationProfile = ConvertTo-YamlScalarText -Text $ValidationProfile
     $safeExecutionProfileCatalogPath = ConvertTo-YamlScalarText -Text ($ExecutionProfileCatalogPath.Replace("\", "/"))
@@ -277,7 +279,7 @@ $blockedRemainderBlock
       - automation_policy
     validationCommandLifecycle:
       - phase: pre_edit
-        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId $SourcePlanningTask -CandidateTaskId $TaskId
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId $SourcePlanningTask -CandidateTaskId $TaskId$readinessEvidencePathArgument
       - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
@@ -289,7 +291,7 @@ $blockedRemainderBlock
       - phase: closeout
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId $TaskId
     validationCommands:
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId $SourcePlanningTask -CandidateTaskId $TaskId
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId $SourcePlanningTask -CandidateTaskId $TaskId$readinessEvidencePathArgument
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
@@ -318,6 +320,7 @@ function Write-SeedExecutionLogs {
         [Parameter(Mandatory = $true)][string]$SourcePlanningTask,
         [Parameter(Mandatory = $true)][string[]]$CandidateTaskIds,
         [Parameter(Mandatory = $true)][string[]]$TargetClosureItems,
+        [Parameter(Mandatory = $true)][string]$LocalFullLoopGate,
         [Parameter(Mandatory = $true)][string]$ApprovalText
     )
 
@@ -353,6 +356,7 @@ function Write-SeedExecutionLogs {
     }
 
     $safeApprovalText = ConvertTo-YamlScalarText -Text $ApprovalText
+    $safeLocalFullLoopGate = if ([string]::IsNullOrWhiteSpace($LocalFullLoopGate)) { "L2" } else { $LocalFullLoopGate }
     $standingCloseoutApproved = $ApprovalText -match "standingUnattendedLocalCloseoutApproval" `
         -and $ApprovalText -match "low-risk local implementation tasks only" `
         -and $ApprovalText -match "High-risk capability gates remain blocked"
@@ -374,6 +378,14 @@ The auto-seed transaction appended guarded pending implementation tasks for ``$M
 ## Seeded Tasks
 
 $candidateText
+
+## Readiness Anchors
+
+- implementationAutoSeedGate: satisfied by this guarded seed transaction.
+- localExperienceClosureGate: planned for seeded local implementation tasks.
+- seededImplementationTask: true for every candidate task listed above.
+- focused test plan: each seeded task must replace the placeholder with scoped local unit validation before closeout.
+- localFullLoopGate: $safeLocalFullLoopGate
 
 ## Boundary
 
@@ -583,6 +595,11 @@ try {
     }
 
     $taskBlocks = New-Object System.Collections.Generic.List[string]
+    if ([string]::IsNullOrWhiteSpace($SeedEvidencePath)) {
+        $datePrefix = Get-Date -Format "yyyy-MM-dd"
+        $moduleSlug = ConvertTo-SafeSlug -Text $moduleId
+        $SeedEvidencePath = "docs\05-execution-logs\evidence\$datePrefix-module-run-v2-auto-seed-$moduleSlug.md"
+    }
     for ($index = 0; $index -lt $candidateTaskIds.Count; $index++) {
         $taskBlocks.Add((New-SeedTaskBlock `
                     -TaskId $candidateTaskIds[$index] `
@@ -590,6 +607,7 @@ try {
                     -SourcePlanningTask $sourcePlanningTask `
                     -TargetClosure $targetClosureItems[$index] `
                     -LocalFullLoopGate $localFullLoopGate `
+                    -ReadinessEvidencePath $SeedEvidencePath `
                     -ApprovalText $ApprovalStatement `
                     -RequirementRef $requirementRefs[$index] `
                     -UseCase $useCases[$index] `
@@ -609,6 +627,7 @@ try {
         -SourcePlanningTask $sourcePlanningTask `
         -CandidateTaskIds $candidateTaskIds `
         -TargetClosureItems $targetClosureItems `
+        -LocalFullLoopGate $localFullLoopGate `
         -ApprovalText $ApprovalStatement
     Write-SeededTaskExecutionLogTemplates `
         -ModuleId $moduleId `
