@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
-updatedAt: "2026-06-16T22:31:27-07:00"
+currentPhase: advanced-organization-analytics-post-runtime-handoff-seeding
+updatedAt: "2026-06-16T22:37:31-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
   lastKnownOriginMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+  id: advanced-organization-analytics-post-runtime-handoff-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
-  branch: codex/organization-analytics-postgres-runtime-wiring-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+  branch: codex/organization-analytics-post-runtime-handoff-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -660,6 +660,7 @@ qualityGates:
     advancedOrganizationAnalyticsPostgresGatewaySourceReadersTdd: pass_tdd_source_readers_no_db_execution
     advancedOrganizationAnalyticsDashboardSummaryPostgresRuntimeWiringTddSeeding: pass_docs_state_seeded_postgres_runtime_wiring_tdd
     advancedOrganizationAnalyticsDashboardSummaryPostgresRuntimeWiringTdd: pass_tdd_postgres_runtime_wiring_no_db_execution
+    advancedOrganizationAnalyticsPostRuntimeHandoffSeeding: pass_docs_state_seeded_post_runtime_readonly_recheck
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -675,9 +676,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd` is the next pending task after the
-    repository source readers landed. It should be claimed only with fresh approval, on a short-lived branch, using TDD
-    and injected/fake boundaries; real DB execution, `.env*`, schema/migration/drizzle, dependency changes,
-    provider/model calls, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push,
-    and Cost Calibration Gate remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+    `advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck` is the next pending
+    task after dashboard summary Postgres runtime wiring landed. It should be claimed only with fresh approval, on a
+    short-lived branch, as a readonly recheck of the runtime boundary and redaction posture; product implementation,
+    real DB execution, `.env*`, schema/migration/drizzle, dependency changes, provider/model calls, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md

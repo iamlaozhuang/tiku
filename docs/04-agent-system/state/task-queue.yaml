@@ -30968,3 +30968,191 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+
+  - id: advanced-organization-analytics-post-runtime-handoff-seeding
+    title: Advanced organization analytics post-runtime handoff seeding
+    phase: advanced-organization-analytics-post-runtime-handoff-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: queue_seeding
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    status: closed
+    result: pass_docs_state_seeded_post_runtime_readonly_recheck
+    retryCount: 0
+    claimedAt: "2026-06-16T22:37:31-07:00"
+    closedAt: "2026-06-16T22:37:31-07:00"
+    branch: codex/organization-analytics-post-runtime-handoff-seeding
+    dependencies:
+      - advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+    humanApproval: >-
+      User approved executing the recommended next work in the current Codex thread by saying "批准执行，完成后批准提交合入推送并清理，
+      然后再推荐下一步工作内容". Approval is limited to docs/state-only handoff refresh, task plan/evidence/audit creation,
+      seeding one pending readonly recheck task, declared local validation, local commit, fast-forward merge to `master`,
+      push `origin/master`, merged short-branch cleanup, and fetch prune. Product implementation, real database
+      execution, `.env*` access, row/private data exposure, public identifier inventories, schema/migration/drizzle,
+      dependency changes, provider/model calls, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
+      PR, force push, and Cost Calibration Gate remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/code-stage-task-seeding-governance.md
+      - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - product implementation
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16_current_thread
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - 'Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-post-runtime-handoff-seeding","status: closed","advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck","status: pending"'
+      - node_modules/.bin/prettier.cmd --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-runtime-handoff-seeding.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-post-runtime-handoff-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-post-runtime-handoff-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-post-runtime-handoff-seeding
+
+  - id: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
+    title: Advanced organization analytics dashboard summary Postgres runtime wiring readonly recheck
+    phase: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: readonly_recheck
+    moduleRunVersion: 2
+    seededByTask: advanced-organization-analytics-post-runtime-handoff-seeding
+    status: pending
+    result: null
+    retryCount: 0
+    claimedAt: null
+    closedAt: null
+    dependencies:
+      - advanced-organization-analytics-post-runtime-handoff-seeding
+      - advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is readonly recheck of the dashboard summary
+      Postgres runtime wiring, App Router entrypoint import-safety, aggregate-only response mapping, evidence redaction,
+      and blocked gate preservation after the runtime wiring task closed. It may read the declared source/test files and
+      prior evidence, but allowed writes are limited to this task's plan/evidence/audit and required state/queue status
+      fields. It must not modify product source, tests, repository, schema/migration/drizzle, package/lockfile,
+      dependencies, provider/model configuration, route/runtime implementation, UI, e2e/browser/dev-server, staging/prod/
+      cloud/deploy/payment/external-service, or any `.env*` file.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-route.test.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/validators/organization-analytics.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - route/runtime code changes
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_approval_after_validation
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
