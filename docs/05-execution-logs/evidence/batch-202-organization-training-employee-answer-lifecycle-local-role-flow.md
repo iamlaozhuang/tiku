@@ -14,7 +14,7 @@ result: pass
 - Batch range: batch-202 of organization-training auto-seeded batch range batch-201 through batch-204.
 - RED: `npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts` failed as expected before implementation because `buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel` was not implemented.
 - GREEN: `npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts` passed after adding the metadata-only employee answer lifecycle contract and service helper.
-- Commit: aba34e75b8541c2f803c85a83df50df0868f5a44
+- Commit: aba34e755516eca9d4a3688b3ad38413f16d216b
 - localFullLoopGate: L6 recorded as local-unit/read-model evidence only for this task; Browser, Playwright, provider/model, external service, and full-flow execution were not used.
 - threadRolloverGate: `continue_current_thread`.
 - nextModuleRunCandidate: `batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex` after this task closes cleanly.
