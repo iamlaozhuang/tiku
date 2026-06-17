@@ -21,7 +21,7 @@ function createBaseInput() {
     codeHash,
     auditLogPayload,
     aiCallLogPayload,
-    token: "secret-token",
+    privatePayloadMarker: "private-payload-marker",
   };
 }
 
@@ -50,6 +50,7 @@ describe("redeem_code reference service", () => {
           aiCallLogPublicId: "ai_call_log_public_123",
           redactionStatus: "redacted",
         },
+        redactedReferenceScopeStatus: "redeem_code_audit_ai_call_log_only",
         referenceStatus: "redacted_reference",
       },
     });
@@ -58,7 +59,7 @@ describe("redeem_code reference service", () => {
     expect(serializedResult).not.toContain(input.codeHash);
     expect(serializedResult).not.toContain(input.auditLogPayload);
     expect(serializedResult).not.toContain(input.aiCallLogPayload);
-    expect(serializedResult).not.toContain(input.token);
+    expect(serializedResult).not.toContain(input.privatePayloadMarker);
   });
 
   it("builds a redacted redeem_code reference with nullable scope and evidence", () => {
@@ -91,6 +92,7 @@ describe("redeem_code reference service", () => {
           aiCallLogPublicId: null,
           redactionStatus: "redacted",
         },
+        redactedReferenceScopeStatus: "redeem_code_audit_ai_call_log_only",
         referenceStatus: "redacted_reference",
       },
     });

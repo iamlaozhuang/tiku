@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T05:12:13-07:00"
+updatedAt: "2026-06-17T05:21:52-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c
+  id: batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
-  evidencePath: docs/05-execution-logs/evidence/batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
-  branch: codex/batch-191-auth-paper-mock-context
-  commitSha: 2806ca53d4b5816ccf4236b74d20a2da6a8fc82b
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+  evidencePath: docs/05-execution-logs/evidence/batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+  branch: codex/batch-192-auth-redacted-references
+  commitSha: 647e22e3ba696496f8769ea4ddb8ad7037579ad2
   prUrl: null
   retryCount: 0
   lastFailurePath: null

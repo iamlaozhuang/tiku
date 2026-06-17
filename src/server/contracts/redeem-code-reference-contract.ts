@@ -1,4 +1,5 @@
 import type {
+  RedeemCodeRedactedReferenceScopeStatus,
   RedeemCodeReferenceRedactionStatus,
   RedeemCodeReferenceStatus,
 } from "../models/redeem-code-reference";
@@ -19,5 +20,6 @@ export type RedeemCodeReferenceDto = {
     aiCallLogPublicId: string | null;
     redactionStatus: RedeemCodeReferenceRedactionStatus;
   };
+  redactedReferenceScopeStatus: RedeemCodeRedactedReferenceScopeStatus;
   referenceStatus: RedeemCodeReferenceStatus;
 };

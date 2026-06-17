@@ -28,6 +28,7 @@ function mapRedeemCodeReferenceToDto(
       aiCallLogPublicId: input.aiCallLogPublicId,
       redactionStatus: "redacted",
     },
+    redactedReferenceScopeStatus: "redeem_code_audit_ai_call_log_only",
     referenceStatus: "redacted_reference",
   };
 }
