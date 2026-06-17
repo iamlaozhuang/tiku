@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createSuccessResponse } from "../contracts/api-response";
 import type {
@@ -6,7 +6,9 @@ import type {
   OrganizationAnalyticsDateRangeDto,
 } from "../contracts/organization-analytics-contract";
 import type { OrganizationAnalyticsRepository } from "../repositories/organization-analytics-repository";
+import type { RuntimeDatabase } from "../repositories/runtime-database";
 import type { OrganizationAnalyticsAdminContext } from "./organization-analytics-service";
+import type { SessionService } from "./session-service";
 import { GET as dashboardSummaryGET } from "../../app/api/v1/organization-analytics/dashboard-summary/route";
 import {
   createOrganizationAnalyticsDashboardSummaryRouteHandlers,
@@ -14,10 +16,14 @@ import {
   type OrganizationAnalyticsDashboardSummaryRouteAdminContext,
 } from "./organization-analytics-route";
 
-function createDashboardSummaryRequest(query = ""): Request {
+function createDashboardSummaryRequest(
+  query = "",
+  init: Omit<RequestInit, "method"> = {},
+): Request {
   return new Request(
     `http://localhost/api/v1/organization-analytics/dashboard-summary${query}`,
     {
+      ...init,
       method: "GET",
     },
   );
@@ -124,6 +130,82 @@ function createRepositoryBackedDashboardSummaryRepository(
     async readExportReadinessRows() {
       return [];
     },
+  };
+}
+
+type CurrentSessionRequest = Parameters<SessionService["getCurrentSession"]>[0];
+type CurrentSessionResult = Awaited<
+  ReturnType<SessionService["getCurrentSession"]>
+>;
+type CapturingSessionService = Pick<SessionService, "getCurrentSession"> & {
+  requests: CurrentSessionRequest[];
+};
+type FakeSelectCall = {
+  selectionKeys: string[];
+  from: ReturnType<typeof vi.fn>;
+  innerJoin: ReturnType<typeof vi.fn>;
+  where: ReturnType<typeof vi.fn>;
+};
+
+function createAdminAuthContext(): NonNullable<CurrentSessionResult["data"]> {
+  return {
+    user: {
+      publicId: "organization_analytics_route_user_public_001",
+      phone: "13800000000",
+      name: "Organization Analytics Admin",
+      userType: null,
+      status: "active",
+      lockedUntilAt: null,
+      employeePublicId: null,
+      organizationPublicId: null,
+      adminPublicId: "organization_analytics_admin_public_001",
+      adminRoles: ["ops_admin"],
+    },
+    session: {
+      expiresAt: "2026-06-16T11:00:00.000Z",
+    },
+  };
+}
+
+function createCurrentSessionService(
+  result: CurrentSessionResult,
+): CapturingSessionService {
+  const requests: CurrentSessionRequest[] = [];
+
+  return {
+    requests,
+    async getCurrentSession(input) {
+      requests.push(input);
+
+      return result;
+    },
+  };
+}
+
+function createFakeRuntimeDatabase(selectRowsByCall: readonly unknown[][]) {
+  const selectCalls: FakeSelectCall[] = [];
+  const select = vi.fn((selection: Record<string, unknown>) => {
+    const rows = selectRowsByCall[selectCalls.length] ?? [];
+    const queryBuilder = {
+      from: vi.fn(() => queryBuilder),
+      innerJoin: vi.fn(() => queryBuilder),
+      where: vi.fn(async () => rows),
+    };
+
+    selectCalls.push({
+      selectionKeys: Object.keys(selection),
+      from: queryBuilder.from,
+      innerJoin: queryBuilder.innerJoin,
+      where: queryBuilder.where,
+    });
+
+    return queryBuilder;
+  });
+
+  return {
+    database: { select } as unknown as RuntimeDatabase,
+    select,
+    selectCalls,
   };
 }
 
@@ -341,18 +423,113 @@ describe("organization analytics dashboard summary route handlers", () => {
     ]);
   });
 
-  it("exports a fail-closed dashboard summary GET route until real runtime wiring is approved", async () => {
-    const response = await dashboardSummaryGET(
+  it("wires injected runtime database and session through Postgres source readers", async () => {
+    const { database, select, selectCalls } = createFakeRuntimeDatabase([
+      [{ organizationId: 101 }],
+      [
+        {
+          organizationId: 101,
+          organizationPublicId: "organization_analytics_route_org_public_001",
+          parentOrganizationId: null,
+        },
+        {
+          organizationId: 102,
+          organizationPublicId: "organization_analytics_route_child_public_002",
+          parentOrganizationId: 101,
+        },
+      ],
+      [
+        {
+          employeePublicId: "organization_analytics_employee_public_001",
+          organizationPublicId: "organization_analytics_route_org_public_001",
+          organizationTrainingVersionPublicId:
+            "organization_analytics_training_version_public_001",
+          score: "90.0",
+          totalScore: "100.0",
+          submittedAt: new Date("2026-06-02T08:00:00.000Z"),
+          hiddenSourceMarker: "hidden answer detail",
+        },
+        {
+          employeePublicId: "organization_analytics_employee_public_002",
+          organizationPublicId: "organization_analytics_route_child_public_002",
+          organizationTrainingVersionPublicId:
+            "organization_analytics_training_version_public_002",
+          score: "70.0",
+          totalScore: "100.0",
+          submittedAt: new Date("2026-06-03T08:00:00.000Z"),
+          hiddenSourceMarker: "hidden answer detail",
+        },
+      ],
+    ]);
+    const sessionService = createCurrentSessionService(
+      createSuccessResponse(createAdminAuthContext()),
+    );
+    const { dashboardSummary } =
+      createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers({
+        createDatabase: () => database,
+        sessionService,
+        readUpdatedAt: () => "2026-06-16T10:00:00.000Z",
+      });
+
+    const response = await dashboardSummary.GET(
       createDashboardSummaryRequest(
         "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
       ),
     );
+    const payload = await response.json();
 
-    await expect(response.json()).resolves.toEqual({
-      code: 503185,
-      message:
-        "Organization analytics dashboard summary runtime is not configured.",
-      data: null,
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+        trainingSummary: {
+          eligibleEmployeeCount: 2,
+          submittedEmployeeCount: 2,
+          unfinishedEmployeeCount: 0,
+          completionRate: 1,
+          averageScore: 80,
+          maxScore: 90,
+          minScore: 70,
+          submittedTrend: [
+            {
+              date: "2026-06-02",
+              submittedCount: 1,
+            },
+            {
+              date: "2026-06-03",
+              submittedCount: 1,
+            },
+          ],
+        },
+        redactionStatus: "aggregate_only",
+        updatedAt: "2026-06-16T10:00:00.000Z",
+      },
     });
+    expect(sessionService.requests).toHaveLength(1);
+    expect(select).toHaveBeenCalledTimes(3);
+    expect(selectCalls.map((selectCall) => selectCall.selectionKeys)).toEqual([
+      ["organizationId"],
+      ["organizationId", "organizationPublicId", "parentOrganizationId"],
+      [
+        "employeePublicId",
+        "organizationPublicId",
+        "organizationTrainingVersionPublicId",
+        "score",
+        "totalScore",
+        "submittedAt",
+      ],
+    ]);
+    expect(selectCalls[0]?.innerJoin).toHaveBeenCalledTimes(2);
+    expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
+    expect(JSON.stringify(payload)).not.toMatch(/hidden|SourceMarker/u);
+  });
+
+  it("exports a dashboard summary GET route from the App Router runtime entrypoint", () => {
+    expect(dashboardSummaryGET).toEqual(expect.any(Function));
   });
 });
