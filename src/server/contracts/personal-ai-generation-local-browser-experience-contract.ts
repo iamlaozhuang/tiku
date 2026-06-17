@@ -24,6 +24,7 @@ export type PersonalAiGenerationLocalBrowserExperienceDto = {
   requestState: {
     status: PersonalAiGenerationLocalBrowserRequestStateStatus;
     selectedContext: PersonalAiGenerationRequestContextSelection;
+    contextReferences: PersonalAiGenerationRequestFlowDto["contextSelection"]["contextReferences"];
     action: {
       actionType: PersonalAiGenerationLocalBrowserActionType;
       isEnabled: boolean;

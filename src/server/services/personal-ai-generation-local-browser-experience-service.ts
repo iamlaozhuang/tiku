@@ -27,6 +27,7 @@ function mapPersonalAiGenerationRequestFlowToLocalBrowserExperience(
         requestFlow.flowStatus,
       ),
       selectedContext: requestFlow.contextSelection.selectedContext,
+      contextReferences: requestFlow.contextSelection.contextReferences,
       action: {
         actionType: "submit_personal_ai_generation_request",
         isEnabled: resolvePersonalAiGenerationLocalBrowserActionEnabled(

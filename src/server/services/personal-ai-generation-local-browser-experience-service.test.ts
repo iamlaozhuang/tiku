@@ -70,6 +70,11 @@ describe("personal AI generation local browser experience service", () => {
             contextType: "paper",
             contextPublicId: "paper_public_121",
           },
+          contextReferences: {
+            paperPublicId: "paper_public_121",
+            mockExamPublicId: null,
+            redactionStatus: "redacted",
+          },
           action: {
             actionType: "submit_personal_ai_generation_request",
             isEnabled: true,
