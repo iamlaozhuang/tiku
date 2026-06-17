@@ -44,10 +44,22 @@ Seed `advanced-organization-analytics-post-employee-runtime-alignment-readonly-r
 - PASS: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck-seeding`
 - PASS: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck-seeding`
 
+## Post-Merge Master Validation
+
+- PASS: fast-forward merge to `master` completed locally.
+- PASS: pending count remains exactly one on `master`.
+- PASS: `node_modules/.bin/prettier.cmd --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck-seeding.md docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck-seeding.md docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck-seeding.md` on `master`
+- PASS: `npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"` on `master` (1 file, 12 tests)
+- PASS: `npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"` on `master` (1 file, 13 tests)
+- PASS: `git diff --check` on `master`
+- PASS: `npm.cmd run lint` on `master`
+- PASS: `npm.cmd run typecheck` on `master`
+
 ## Batch Commit Evidence
 
 - Commit approval: approved by fresh user prompt in the current thread on 2026-06-17.
 - Commit: `dd2a56efed4a3a2500a001989dbc19871ca369f0` is the branch baseline before the approved local task commit.
+- Task commit: `b6d20497` was fast-forward merged to `master`.
 - Fast-forward merge approval: approved to `master`.
 - Push approval: approved to `origin/master`.
 - Cleanup approval: approved for merged short-branch deletion and fetch prune.

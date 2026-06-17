@@ -19,6 +19,7 @@ APPROVE - docs/state-only seeding is ready for local commit, fast-forward merge,
 - Scope is limited to project state, task queue, task plan, evidence, and audit files.
 - The seeded pending task requires fresh user approval before claim.
 - Product source, tests, route/runtime/service/repository implementation, schema/migration/drizzle, package/lockfile/dependency, provider/model, browser/e2e/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, quota/cost, and Cost Calibration Gate work remain blocked.
+- Post-merge master pending count, Prettier, focused repository unit, focused route unit, diff hygiene, lint, and typecheck passed before cleanup.
 
 ## Validation Review
 
