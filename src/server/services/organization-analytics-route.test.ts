@@ -558,22 +558,35 @@ describe("organization analytics dashboard summary route handlers", () => {
       [
         {
           employeePublicId: "organization_analytics_employee_public_001",
+          employeeDisplayName: "Employee 001",
           organizationPublicId: "organization_analytics_route_org_public_001",
           organizationTrainingVersionPublicId:
             "organization_analytics_training_version_public_001",
           score: "90.0",
           totalScore: "100.0",
           submittedAt: new Date("2026-06-02T08:00:00.000Z"),
+          answerOrganizationSnapshot: {
+            organizationPublicId: "organization_analytics_route_org_public_001",
+            organizationName: "Organization Analytics Route Org",
+            capturedAt: "2026-06-02T07:59:00.000Z",
+          },
           hiddenSourceMarker: "hidden answer detail",
         },
         {
           employeePublicId: "organization_analytics_employee_public_002",
+          employeeDisplayName: "Employee 002",
           organizationPublicId: "organization_analytics_route_child_public_002",
           organizationTrainingVersionPublicId:
             "organization_analytics_training_version_public_002",
           score: "70.0",
           totalScore: "100.0",
           submittedAt: new Date("2026-06-03T08:00:00.000Z"),
+          answerOrganizationSnapshot: {
+            organizationPublicId:
+              "organization_analytics_route_child_public_002",
+            organizationName: "Organization Analytics Route Child",
+            capturedAt: "2026-06-03T07:59:00.000Z",
+          },
           hiddenSourceMarker: "hidden answer detail",
         },
       ],
@@ -634,11 +647,13 @@ describe("organization analytics dashboard summary route handlers", () => {
       ["organizationId", "organizationPublicId", "parentOrganizationId"],
       [
         "employeePublicId",
+        "employeeDisplayName",
         "organizationPublicId",
         "organizationTrainingVersionPublicId",
         "score",
         "totalScore",
         "submittedAt",
+        "answerOrganizationSnapshot",
       ],
     ]);
     expect(selectCalls[0]?.innerJoin).toHaveBeenCalledTimes(2);
@@ -909,6 +924,24 @@ describe("organization analytics employee statistics route handlers", () => {
           parentOrganizationId: 101,
         },
       ],
+      [
+        {
+          employeePublicId: "organization_analytics_employee_public_001",
+          employeeDisplayName: "Employee 001",
+          organizationPublicId: "organization_analytics_route_org_public_001",
+          organizationTrainingVersionPublicId:
+            "organization_analytics_training_version_public_001",
+          score: "86.0",
+          totalScore: "100.0",
+          submittedAt: new Date("2026-06-10T09:00:00.000Z"),
+          answerOrganizationSnapshot: {
+            organizationPublicId: "organization_analytics_route_org_public_001",
+            organizationName: "Organization Analytics Route Org",
+            capturedAt: "2026-06-10T08:59:00.000Z",
+          },
+          hiddenSourceMarker: "hidden answer detail",
+        },
+      ],
     ]);
     const sessionService = createCurrentSessionService(
       createSuccessResponse(createAdminAuthContext()),
@@ -936,19 +969,50 @@ describe("organization analytics employee statistics route handlers", () => {
           startAt: "2026-06-01T00:00:00.000Z",
           endAt: "2026-06-16T00:00:00.000Z",
         },
-        employeeCount: 0,
-        employees: [],
+        employeeCount: 1,
+        employees: [
+          {
+            employeePublicId: "organization_analytics_employee_public_001",
+            employeeDisplayName: "Employee 001",
+            organizationPublicId: "organization_analytics_route_org_public_001",
+            organizationName: "Organization Analytics Route Org",
+            answerOrganizationSnapshot: {
+              organizationPublicId:
+                "organization_analytics_route_org_public_001",
+              organizationName: "Organization Analytics Route Org",
+              capturedAt: "2026-06-10T08:59:00.000Z",
+            },
+            visibleTrainingCount: 1,
+            submittedTrainingCount: 1,
+            unfinishedTrainingCount: 0,
+            trainingCompletionRate: 1,
+            trainingAverageScore: 86,
+            latestTrainingSubmittedAt: "2026-06-10T09:00:00.000Z",
+            redactionStatus: "summary_only",
+          },
+        ],
         redactionStatus: "summary_only",
         updatedAt: "2026-06-16T10:45:00.000Z",
       },
     });
     expect(sessionService.requests).toHaveLength(1);
-    expect(select).toHaveBeenCalledTimes(2);
+    expect(select).toHaveBeenCalledTimes(3);
     expect(selectCalls.map((selectCall) => selectCall.selectionKeys)).toEqual([
       ["organizationId"],
       ["organizationId", "organizationPublicId", "parentOrganizationId"],
+      [
+        "employeePublicId",
+        "employeeDisplayName",
+        "organizationPublicId",
+        "organizationTrainingVersionPublicId",
+        "score",
+        "totalScore",
+        "submittedAt",
+        "answerOrganizationSnapshot",
+      ],
     ]);
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
+    expect(JSON.stringify(payload)).not.toMatch(/hidden|SourceMarker/u);
   });
 
   it("exports an employee statistics GET route from the App Router entrypoint", () => {
