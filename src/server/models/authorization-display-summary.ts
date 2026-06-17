@@ -4,6 +4,7 @@ import type { AuthorizationWindowSummaryInput } from "./authorization-window-sum
 import type { Profession } from "./auth";
 
 export type AuthorizationDisplayStatus = "display_only";
+export type AuthorizationReadModelStatus = "read_model_only";
 
 export type AuthorizationDisplayContextInput = {
   publicId: string;

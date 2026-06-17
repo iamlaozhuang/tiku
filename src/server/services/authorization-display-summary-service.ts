@@ -107,6 +107,7 @@ function mapAuthorizationDisplaySummaryToDto(
   return {
     userPublicId: input.userPublicId,
     authorizationPublicId: input.authorizationPublicId,
+    readModelStatus: "read_model_only",
     displayStatus: "display_only",
     window: mapAuthorizationDisplayWindowToDto(input.windowSummary),
     audienceSummary: mapAudienceSummary(input.audienceSummary),

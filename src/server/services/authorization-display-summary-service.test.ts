@@ -52,6 +52,7 @@ describe("authorization display summary service", () => {
       data: {
         userPublicId: "user_public_123",
         authorizationPublicId: "personal_auth_public_123",
+        readModelStatus: "read_model_only",
         displayStatus: "display_only",
         window: {
           startsAt: "2026-06-01T00:00:00.000Z",

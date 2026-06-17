@@ -1,6 +1,9 @@
 import type { AuthorizationAudienceSummaryCountDto } from "./authorization-audience-summary-contract";
 import type { AuthorizationEvidenceReferenceSummaryCountDto } from "./authorization-evidence-reference-summary-contract";
-import type { AuthorizationDisplayStatus } from "../models/authorization-display-summary";
+import type {
+  AuthorizationDisplayStatus,
+  AuthorizationReadModelStatus,
+} from "../models/authorization-display-summary";
 import type { AuthorizationWindowStatus } from "../models/authorization-window-summary";
 import type { Profession } from "../models/auth";
 
@@ -26,6 +29,7 @@ export type AuthorizationDisplayContextSummaryDto = {
 export type AuthorizationDisplaySummaryDto = {
   userPublicId: string;
   authorizationPublicId: string;
+  readModelStatus: AuthorizationReadModelStatus;
   displayStatus: AuthorizationDisplayStatus;
   window: AuthorizationDisplayWindowDto;
   audienceSummary: AuthorizationAudienceSummaryCountDto;
