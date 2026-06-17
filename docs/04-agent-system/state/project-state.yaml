@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-cross-role-local-flow-planning
-updatedAt: "2026-06-17T15:37:31-07:00"
+currentPhase: module-run-v2-cross-role-local-auth-route-guard-smoke-validation
+updatedAt: "2026-06-17T15:55:47-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 9597d592dd64f655147ea23726a7fe89b5de563d
-  lastKnownOriginMasterSha: 9597d592dd64f655147ea23726a7fe89b5de563d
+  lastKnownMasterSha: d8e27091ab2b20b491d4929937985e756128bd1d
+  lastKnownOriginMasterSha: d8e27091ab2b20b491d4929937985e756128bd1d
 currentTask:
-  id: module-run-v2-cross-role-local-flow-planning
+  id: module-run-v2-cross-role-local-auth-route-guard-smoke-validation
   status: closed
-  sourceStory: localExperienceClosureGate.acceptanceBridgePlan
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
-  branch: codex/cross-role-local-flow-planning
+  sourceStory: localExperienceClosureGate.crossRoleAuthRouteGuardSmoke
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+  branch: codex/cross-role-local-auth-route-guard-smoke-validation
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -459,13 +459,13 @@ qualityGates:
     - unit
     - build
   lastRun:
-    date: "2026-06-16"
+    date: "2026-06-17"
     readiness: pass_advanced_organization_analytics_training_answer_source_schema_migration
     lint: pass
     typecheck: pass
     unit: skipped_docs_state_only_no_product_unit_scope
     build: skipped_batch_175_no_env_secret_access
-    e2e: pass_batch_169_existing_spec_1_test
+    e2e: pass_cross_role_local_auth_route_guard_smoke_10_tests
     providerSmoke: pass_batch_174_deepseek_one_request_user_executed_redacted
     costCalibration: pass_batch_175_docs_only_existing_usage
     formalAdoptionReviewGate: pass_batch_177_admin_manual_review_gate_no_formal_write
@@ -719,4 +719,4 @@ handoff:
     schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
     staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate blocked unless a future
     task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
