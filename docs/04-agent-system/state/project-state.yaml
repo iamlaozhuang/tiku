@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T05:21:52-07:00"
+updatedAt: "2026-06-17T05:42:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+  id: batch-193-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
-  evidencePath: docs/05-execution-logs/evidence/batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-192-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
-  branch: codex/batch-192-auth-redacted-references
-  commitSha: 647e22e3ba696496f8769ea4ddb8ad7037579ad2
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-193-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  evidencePath: docs/05-execution-logs/evidence/batch-193-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-193-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+  branch: codex/ai-task-provider-batch-193-lifecycle-contract
+  commitSha: f0c1b9e1442468e65c5ce0fa1ff6cb4adfd2c7c0
   prUrl: null
   retryCount: 0
   lastFailurePath: null

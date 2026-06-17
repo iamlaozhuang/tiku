@@ -1,8 +1,12 @@
 import type {
   AiGenerationTaskFailureCategory,
+  AiGenerationTaskLifecycleContract,
   AiGenerationTaskStatus,
   AiGenerationTaskType,
 } from "../models/ai-generation-task";
+
+export type AiGenerationTaskLifecycleContractDto =
+  AiGenerationTaskLifecycleContract;
 
 export type AiGenerationTaskAuthorizationSource = "personal_auth" | "org_auth";
 

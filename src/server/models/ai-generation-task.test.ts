@@ -4,6 +4,7 @@ import {
   aiGenerationTaskFailureCategoryValues,
   aiGenerationTaskStatusValues,
   aiGenerationTaskTypeValues,
+  buildAiGenerationTaskLifecycleContract,
   isRetryableAiGenerationTaskFailureCategory,
   resolveAiGenerationTaskTransition,
 } from "./ai-generation-task";
@@ -85,5 +86,78 @@ describe("AI generation task lifecycle model", () => {
         "production_enablement_blocked",
       ),
     ).toBe(false);
+  });
+
+  it("builds a provider-agnostic lifecycle contract without provider execution requirements", () => {
+    expect(buildAiGenerationTaskLifecycleContract()).toEqual({
+      runtimeStatus: "provider_agnostic_lifecycle_contract",
+      statusValues: ["pending", "running", "succeeded", "failed", "cancelled"],
+      terminalStatuses: ["succeeded", "failed", "cancelled"],
+      retryableFailureCategories: [
+        "system_error",
+        "provider_temporary_error",
+        "network_error",
+        "rate_limited",
+        "rag_temporary_error",
+        "running_timeout",
+      ],
+      nonRetryableFailureCategories: [
+        "invalid_input",
+        "authorization_missing",
+        "authorization_invalid",
+        "edition_not_allowed",
+        "quota_insufficient",
+        "scope_forbidden",
+        "configuration_missing",
+        "production_enablement_blocked",
+      ],
+      allowedTransitions: [
+        {
+          action: "claim",
+          currentStatus: "pending",
+          effect: "start_execution",
+          executionRewindAllowed: false,
+          nextStatus: "running",
+        },
+        {
+          action: "succeed",
+          currentStatus: "running",
+          effect: "finish_success",
+          executionRewindAllowed: false,
+          nextStatus: "succeeded",
+        },
+        {
+          action: "fail",
+          currentStatus: "running",
+          effect: "finish_failure",
+          executionRewindAllowed: false,
+          nextStatus: "failed",
+        },
+        {
+          action: "cancel",
+          currentStatus: "pending",
+          effect: "release_reserved_quota",
+          executionRewindAllowed: true,
+          nextStatus: "cancelled",
+        },
+        {
+          action: "cancel",
+          currentStatus: "running",
+          effect: "record_cancellation_request",
+          executionRewindAllowed: false,
+          nextStatus: "running",
+        },
+      ],
+      blockedTransitionEffects: [
+        "terminal_status_immutable",
+        "transition_not_allowed",
+      ],
+      providerBoundary: {
+        providerCallRequired: false,
+        providerConfigurationRequired: false,
+        envSecretRequired: false,
+        providerPayloadRequired: false,
+      },
+    });
   });
 });

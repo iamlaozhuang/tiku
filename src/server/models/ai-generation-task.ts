@@ -17,6 +17,15 @@ export const aiGenerationTaskStatusValues = [
 export type AiGenerationTaskStatus =
   (typeof aiGenerationTaskStatusValues)[number];
 
+export const aiGenerationTaskTerminalStatusValues = [
+  "succeeded",
+  "failed",
+  "cancelled",
+] as const satisfies readonly AiGenerationTaskStatus[];
+
+export type AiGenerationTaskTerminalStatus =
+  (typeof aiGenerationTaskTerminalStatusValues)[number];
+
 export const aiGenerationTaskRetryableFailureCategoryValues = [
   "system_error",
   "provider_temporary_error",
@@ -51,6 +60,13 @@ export type AiGenerationTaskTransitionAction =
   | "fail"
   | "cancel";
 
+export const aiGenerationTaskTransitionActionValues = [
+  "claim",
+  "succeed",
+  "fail",
+  "cancel",
+] as const satisfies readonly AiGenerationTaskTransitionAction[];
+
 export type AiGenerationTaskTransitionEffect =
   | "start_execution"
   | "finish_success"
@@ -65,6 +81,43 @@ export type AiGenerationTaskTransition = {
   nextStatus: AiGenerationTaskStatus;
   effect: AiGenerationTaskTransitionEffect;
   executionRewindAllowed: boolean;
+};
+
+export const aiGenerationTaskBlockedTransitionEffectValues = [
+  "terminal_status_immutable",
+  "transition_not_allowed",
+] as const satisfies readonly AiGenerationTaskTransitionEffect[];
+
+export type AiGenerationTaskBlockedTransitionEffect =
+  (typeof aiGenerationTaskBlockedTransitionEffectValues)[number];
+
+export type AiGenerationTaskAllowedTransition = {
+  action: AiGenerationTaskTransitionAction;
+  currentStatus: AiGenerationTaskStatus;
+  effect: Exclude<
+    AiGenerationTaskTransitionEffect,
+    AiGenerationTaskBlockedTransitionEffect
+  >;
+  executionRewindAllowed: boolean;
+  nextStatus: AiGenerationTaskStatus;
+};
+
+export type AiGenerationTaskLifecycleProviderBoundary = {
+  providerCallRequired: false;
+  providerConfigurationRequired: false;
+  envSecretRequired: false;
+  providerPayloadRequired: false;
+};
+
+export type AiGenerationTaskLifecycleContract = {
+  runtimeStatus: "provider_agnostic_lifecycle_contract";
+  statusValues: AiGenerationTaskStatus[];
+  terminalStatuses: AiGenerationTaskTerminalStatus[];
+  retryableFailureCategories: AiGenerationTaskFailureCategory[];
+  nonRetryableFailureCategories: AiGenerationTaskFailureCategory[];
+  allowedTransitions: AiGenerationTaskAllowedTransition[];
+  blockedTransitionEffects: AiGenerationTaskBlockedTransitionEffect[];
+  providerBoundary: AiGenerationTaskLifecycleProviderBoundary;
 };
 
 export function isRetryableAiGenerationTaskFailureCategory(
@@ -142,5 +195,50 @@ export function resolveAiGenerationTaskTransition(
     nextStatus: currentStatus,
     effect: "transition_not_allowed",
     executionRewindAllowed: false,
+  };
+}
+
+function createAiGenerationTaskAllowedTransition(
+  currentStatus: AiGenerationTaskStatus,
+  action: AiGenerationTaskTransitionAction,
+): AiGenerationTaskAllowedTransition {
+  const transition = resolveAiGenerationTaskTransition(currentStatus, action);
+
+  return {
+    action,
+    currentStatus,
+    effect: transition.effect as AiGenerationTaskAllowedTransition["effect"],
+    executionRewindAllowed: transition.executionRewindAllowed,
+    nextStatus: transition.nextStatus,
+  };
+}
+
+export function buildAiGenerationTaskLifecycleContract(): AiGenerationTaskLifecycleContract {
+  return {
+    runtimeStatus: "provider_agnostic_lifecycle_contract",
+    statusValues: [...aiGenerationTaskStatusValues],
+    terminalStatuses: [...aiGenerationTaskTerminalStatusValues],
+    retryableFailureCategories: [
+      ...aiGenerationTaskRetryableFailureCategoryValues,
+    ],
+    nonRetryableFailureCategories: [
+      ...aiGenerationTaskNonRetryableFailureCategoryValues,
+    ],
+    allowedTransitions: [
+      createAiGenerationTaskAllowedTransition("pending", "claim"),
+      createAiGenerationTaskAllowedTransition("running", "succeed"),
+      createAiGenerationTaskAllowedTransition("running", "fail"),
+      createAiGenerationTaskAllowedTransition("pending", "cancel"),
+      createAiGenerationTaskAllowedTransition("running", "cancel"),
+    ],
+    blockedTransitionEffects: [
+      ...aiGenerationTaskBlockedTransitionEffectValues,
+    ],
+    providerBoundary: {
+      providerCallRequired: false,
+      providerConfigurationRequired: false,
+      envSecretRequired: false,
+      providerPayloadRequired: false,
+    },
   };
 }
