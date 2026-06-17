@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T05:47:30-07:00"
+updatedAt: "2026-06-17T05:52:34-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-194-ai-task-and-provider-local-task-request-policy-and-result-referen
+  id: batch-195-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-194-ai-task-and-provider-local-task-request-policy-and-result-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-194-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-194-ai-task-and-provider-local-task-request-policy-and-result-referen.md
-  branch: codex/ai-task-provider-batch-194-request-policy
-  commitSha: 270d14663c64e5b7f65309b14c3fac60e68a8421
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-195-ai-task-and-provider-redacted-audit-ai-call-log-evidence.md
+  evidencePath: docs/05-execution-logs/evidence/batch-195-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-195-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+  branch: codex/ai-task-provider-batch-195-log-evidence
+  commitSha: a5697705c8ce50671a177931d8837ef0b8427c96
   prUrl: null
   retryCount: 0
   lastFailurePath: null

@@ -15,6 +15,10 @@ export type AiGenerationTaskLogEvidenceVisibility = "summary_only";
 
 export type AiGenerationTaskLogEvidenceRedactionStatus = "redacted";
 
+export type AiGenerationTaskLogEvidenceReferenceStatus =
+  | "available"
+  | "missing";
+
 export type AiGenerationTaskLogEvidenceReferenceInput = {
   taskPublicId: string;
   taskType: AiGenerationTaskType;
@@ -31,6 +35,7 @@ export type AiGenerationTaskLogEvidenceReferenceInput = {
 export type AiGenerationTaskLogEvidenceReferenceItem = {
   kind: AiGenerationTaskLogEvidenceReferenceKind;
   publicId: string | null;
+  referenceStatus: AiGenerationTaskLogEvidenceReferenceStatus;
   visibility: AiGenerationTaskLogEvidenceVisibility;
   redactionStatus: AiGenerationTaskLogEvidenceRedactionStatus;
   retentionDay: number;
@@ -53,6 +58,7 @@ export function createAiGenerationTaskLogEvidenceReferenceItem(
   return {
     kind,
     publicId,
+    referenceStatus: publicId === null ? "missing" : "available",
     visibility: "summary_only",
     redactionStatus: "redacted",
     retentionDay,

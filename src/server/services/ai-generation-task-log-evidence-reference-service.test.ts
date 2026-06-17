@@ -52,6 +52,7 @@ describe("ai_generation_task log evidence reference service", () => {
           auditLog: {
             kind: "audit_log",
             publicId: "audit_log_public_107",
+            referenceStatus: "available",
             visibility: "summary_only",
             redactionStatus: "redacted",
             retentionDay: 1095,
@@ -59,6 +60,7 @@ describe("ai_generation_task log evidence reference service", () => {
           aiCallLog: {
             kind: "ai_call_log",
             publicId: "ai_call_log_public_107",
+            referenceStatus: "available",
             visibility: "summary_only",
             redactionStatus: "redacted",
             retentionDay: 180,
@@ -106,6 +108,7 @@ describe("ai_generation_task log evidence reference service", () => {
           auditLog: {
             kind: "audit_log",
             publicId: "audit_log_public_failed_107",
+            referenceStatus: "available",
             visibility: "summary_only",
             redactionStatus: "redacted",
             retentionDay: 1095,
@@ -113,9 +116,39 @@ describe("ai_generation_task log evidence reference service", () => {
           aiCallLog: {
             kind: "ai_call_log",
             publicId: null,
+            referenceStatus: "missing",
             visibility: "summary_only",
             redactionStatus: "redacted",
             retentionDay: 180,
+          },
+        },
+      },
+    });
+  });
+
+  it("marks missing and available log references explicitly", () => {
+    expect(
+      buildAiGenerationTaskLogEvidenceReferenceReadModel({
+        taskPublicId: "ai_task_public_partial_107",
+        taskType: "ai_paper_generation",
+        status: "running",
+        failureCategory: null,
+        resultPublicId: null,
+        evidenceStatus: "weak",
+        auditLogPublicId: "audit_log_public_partial_107",
+        aiCallLogPublicId: null,
+        auditLogRetentionDay: 1095,
+        aiCallLogRetentionDay: 180,
+      }),
+    ).toMatchObject({
+      code: 0,
+      data: {
+        evidenceReferences: {
+          auditLog: {
+            referenceStatus: "available",
+          },
+          aiCallLog: {
+            referenceStatus: "missing",
           },
         },
       },
