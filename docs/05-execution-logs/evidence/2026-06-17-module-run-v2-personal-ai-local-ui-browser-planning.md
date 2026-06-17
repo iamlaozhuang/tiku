@@ -8,7 +8,7 @@
 - Evidence mode: `lite`
 - Validation policy: `docs_state`
 - result: pass
-- Commit: `599d1bbfe54fc9701c600eb98303ec6d037bc19b`
+- Commit: `6763464aa36e5d12fc27ff44d6253c51e16e767c`
 - Redaction status: pass. This evidence records task metadata, source inventory file names, command outcomes, and planning decisions only.
 
 Cost Calibration Gate remains blocked.
@@ -71,13 +71,13 @@ GREEN:
 | `git diff --check`                                                                                                                                                                         | pass                      | whitespace check completed                                                                              |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning`        | pass                      | scope, sensitive evidence, and terminology scans passed                                                 |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning`   | pass                      | required module closeout anchors passed                                                                 |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning`          | pending post-commit rerun | required after local commit and before push                                                             |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-ui-browser-planning`          | pass                      | git completion readiness and accepted-ancestor state checks passed                                      |
 
 ## Closeout Anchors
 
 - Batch range: single docs-state planning reconciliation task.
-- Commit: `599d1bbfe54fc9701c600eb98303ec6d037bc19b`
-- Commit note: this is the verified pre-task base commit used to satisfy pre-commit closeout anchors; the final task commit SHA is reconciled after local commit.
+- Commit: `6763464aa36e5d12fc27ff44d6253c51e16e767c`
+- Commit note: this is the local task implementation/closeout commit. A follow-up docs-only closeout reconciliation commit records this exact SHA in state and evidence.
 - localFullLoopGate: not claimed in this planning task; target remains `L5`.
 - threadRolloverGate: no rollover required for this narrow docs-state reconciliation.
 - nextModuleRunCandidate: pending validation; expected next candidate is a redaction-alignment task for the legacy unit test before `module-run-v2-personal-ai-local-ui-browser-flow-validation`.
