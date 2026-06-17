@@ -570,10 +570,30 @@ try {
     $validationCommands = @(Get-TaskListValues -Block $taskBlock -Key "validationCommands")
     $validationLifecycleCommands = @(Get-TaskValidationLifecycleCommands -Block $taskBlock)
     $validationCommandNormalization = Get-TaskScalarValue -Block $taskBlock -Key "validationCommandNormalization"
+    $executionProfile = Get-TaskScalarValue -Block $taskBlock -Key "executionProfile"
+    $evidenceMode = Get-TaskScalarValue -Block $taskBlock -Key "evidenceMode"
+    $validationPolicy = Get-TaskScalarValue -Block $taskBlock -Key "validationPolicy"
+    $queueSelectionMode = Get-TaskScalarValue -Block $taskBlock -Key "queueSelectionMode"
+    if ([string]::IsNullOrWhiteSpace($executionProfile)) {
+        $executionProfile = "legacy_explicit"
+    }
+    if ([string]::IsNullOrWhiteSpace($evidenceMode)) {
+        $evidenceMode = "full"
+    }
+    if ([string]::IsNullOrWhiteSpace($validationPolicy)) {
+        $validationPolicy = "legacy_explicit"
+    }
+    if ([string]::IsNullOrWhiteSpace($queueSelectionMode)) {
+        $queueSelectionMode = "legacy_explicit"
+    }
 
     Write-Section -Title "Task"
     Write-Output "status: $status"
     Write-Output "taskKind: $taskKind"
+    Write-Output "executionProfile: $executionProfile"
+    Write-Output "evidenceMode: $evidenceMode"
+    Write-Output "validationPolicy: $validationPolicy"
+    Write-Output "queueSelectionMode: $queueSelectionMode"
     Write-Output "allowedFileCount: $($allowedFiles.Count)"
     Write-Output "blockedFileCount: $($blockedFiles.Count)"
     Write-Output "riskTypeCount: $($riskTypes.Count)"
@@ -586,7 +606,7 @@ try {
         Write-AutodriveSchemaResult -Decision "not_executable_closed_task" -Reason "task is terminal and should be treated as idle, not executable autodrive work" -ExitCode 0
     }
 
-    if ($status -notin @("pending", "in_progress")) {
+    if ($status -notin @("pending", "in_progress", "ready_for_closeout")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_TASK_STATUS $TaskId status=$status"
     }
     if ([string]::IsNullOrWhiteSpace($taskKind)) {
@@ -609,6 +629,18 @@ try {
     }
     if ($validationCommands.Count -eq 0) {
         Add-Finding "HARD_BLOCK_MISSING_VALIDATION_COMMANDS $TaskId"
+    }
+    if ($executionProfile -notin @("legacy_explicit", "docs_state_lite", "local_unit_tdd", "repository_runtime_tdd", "local_full_flow", "schema_isolated", "dependency_isolated", "provider_local_smoke")) {
+        Add-Finding "HARD_BLOCK_UNSUPPORTED_EXECUTION_PROFILE $TaskId profile=$executionProfile"
+    }
+    if ($evidenceMode -notin @("full", "lite")) {
+        Add-Finding "HARD_BLOCK_UNSUPPORTED_EVIDENCE_MODE $TaskId evidenceMode=$evidenceMode"
+    }
+    if ($validationPolicy -notin @("legacy_explicit", "docs_state", "local_unit", "runtime_unit", "local_full_flow", "high_risk_isolated")) {
+        Add-Finding "HARD_BLOCK_UNSUPPORTED_VALIDATION_POLICY $TaskId validationPolicy=$validationPolicy"
+    }
+    if ($queueSelectionMode -notin @("legacy_explicit", "ready_set")) {
+        Add-Finding "HARD_BLOCK_UNSUPPORTED_QUEUE_SELECTION_MODE $TaskId queueSelectionMode=$queueSelectionMode"
     }
     if ($validationLifecycleCommands.Count -gt 0) {
         $validLifecyclePhases = @("pre_edit", "post_edit", "closeout", "advisory_baseline")

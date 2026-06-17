@@ -3,7 +3,7 @@ param(
     [string]$TaskId = "",
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet("localDockerDatabase", "destructiveLocalDockerDatabase", "projectResourceRead", "providerKey", "providerCall", "schemaMigration", "costCalibrationGate")]
+    [ValidateSet("localDockerDatabase", "destructiveLocalDockerDatabase", "projectResourceRead", "providerKey", "providerCall", "schemaMigration", "localFullFlowGate", "costCalibrationGate")]
     [string]$Capability,
 
     [Parameter(Mandatory = $false)]
@@ -157,6 +157,14 @@ function Get-CapabilityPolicy {
             ApprovalAction = "schema_migration_gate_required"
             BlockedActions = @("drizzle_push", "destructive_data_operation", "staging_prod_connection")
             EvidenceRule = "migration plan, rollback/recovery boundary, scoped schema/drizzle files, local DB operation approval when needed, and redacted evidence are required"
+        }
+        localFullFlowGate = @{
+            DefaultState = "blocked_without_task_profile"
+            ApprovedState = "approved_localhost_only"
+            ReadyAction = "local_full_flow_localhost_adapter_ready_no_execution"
+            ApprovalAction = "local_full_flow_task_profile_required"
+            BlockedActions = @("staging_prod_connection", "cloud_external_service", "provider_call", "non_localhost_target", "private_data_fixture")
+            EvidenceRule = "local full-flow is localhost or 127.0.0.1 only, uses local disposable fixtures, and does not imply staging or production readiness"
         }
         costCalibrationGate = @{
             DefaultState = "blocked"

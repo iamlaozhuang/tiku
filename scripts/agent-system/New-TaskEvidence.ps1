@@ -5,7 +5,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$OutputDirectory = "docs\05-execution-logs\evidence"
+    [string]$OutputDirectory = "docs\05-execution-logs\evidence",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("full", "lite")]
+    [string]$EvidenceMode = "full"
 )
 
 $ErrorActionPreference = "Stop"
@@ -31,7 +35,49 @@ if ([string]::IsNullOrWhiteSpace($repositoryRoot)) {
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 
 $templatePath = Join-Path -Path $repositoryRoot -ChildPath "docs\05-execution-logs\templates\module-run-v2-evidence-template.md"
-if (Test-Path -LiteralPath $templatePath) {
+if ($EvidenceMode -eq "lite") {
+    $evidenceContent = @'
+# Evidence: @TASK_ID@
+
+## Module Run V2 Anchors
+
+- Task id: `@TASK_ID@`
+- Branch: `@BRANCH_NAME@`
+- Head at evidence creation: `@HEAD_SHA@`
+- Evidence created at: `@CREATED_AT@`
+- Evidence mode: lite
+- Result: pending
+
+## Scope
+
+- Allowed files: pending.
+- Blocked files: `package.json`, lockfiles, `src/**`, `src/db/schema/**`, `drizzle/**`, `e2e/**`, `.env*`.
+- Blocked gates: env/secret, provider/model, schema/migration, dependency, staging/prod/cloud/deploy, payment, external-service, Browser/dev-server/Playwright/e2e unless the current task explicitly allows it.
+
+## Validation
+
+- Commands: pending.
+- Results: pending.
+
+## Redaction And Safety
+
+- `.env*` access/output/edit: not performed.
+- Secret/token/cookie/Authorization header/database URL exposure: not performed.
+- Provider payload/raw prompt/raw answer exposure: not performed.
+- Public identifier inventory exposure: not performed.
+- Row/private data exposure: not performed.
+- Cost Calibration Gate: blocked.
+
+## Blocked Remainder
+
+- Pending closeout review.
+
+## Review
+
+- Residual risk: pending.
+- Audit review: pending.
+'@
+} elseif (Test-Path -LiteralPath $templatePath) {
     $evidenceContent = Get-Content -LiteralPath $templatePath -Raw
 } else {
     $evidenceContent = @'
@@ -43,6 +89,7 @@ if (Test-Path -LiteralPath $templatePath) {
 - Branch: `@BRANCH_NAME@`
 - Head at evidence creation: `@HEAD_SHA@`
 - Evidence created at: `@CREATED_AT@`
+- Evidence mode: full
 - Task kind: pending.
 - Batch range: @BATCH_RANGE@
 - localFullLoopGate: pending.
@@ -135,3 +182,4 @@ $evidenceContent = $evidenceContent.
 
 Set-Content -LiteralPath $evidencePath -Value $evidenceContent -Encoding UTF8
 Write-Output "Created task evidence: $evidencePath"
+Write-Output "evidenceMode: $EvidenceMode"

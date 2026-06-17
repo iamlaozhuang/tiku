@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-formal-quota-summary-tdd-complete
-updatedAt: "2026-06-17T02:39:30-07:00"
+currentPhase: mechanism-tuning-authorization-slimming-implementation
+updatedAt: "2026-06-17T03:48:31-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 44ddea518eb30d51bacde4e3e8929e9a2225b6a4
-  lastKnownOriginMasterSha: 44ddea518eb30d51bacde4e3e8929e9a2225b6a4
+  lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
+  lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: advanced-organization-analytics-dashboard-formal-quota-summary-tdd
+  id: mechanism-tuning-authorization-slimming-implementation
   status: closed
-  sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
-  branch: codex/organization-analytics-dashboard-formal-quota-summary
+  sourceStory: user-request-2026-06-17-mechanism-tuning-authorization-slimming
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-authorization-slimming-implementation.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-authorization-slimming-implementation.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-authorization-slimming-implementation.md
+  branch: codex/mechanism-tuning-authorization-slimming
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -684,6 +684,27 @@ riskGates:
     - delete_or_move_file
     - deploy
     - merge_pr
+mechanismTuning:
+  status: closed
+  currentTaskId: mechanism-tuning-authorization-slimming-implementation
+  planningDocumentPath: docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
+  latestTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-authorization-slimming-implementation.md
+  latestEvidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-authorization-slimming-implementation.md
+  latestAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-authorization-slimming-implementation.md
+  queueSlimmingAudit:
+    activeQueueBeforeTasks: 324
+    activeQueueAfterTasks: 60
+    archivedTasks: 264
+    retentionWindowTerminalTasks: 30
+    pendingCountAfter: 0
+  futureSplitCandidates:
+    - standing approvals and blocked gate registry
+    - automation script path registry
+    - long-running quality gate history
+    - mechanism tuning and queue archival status
+  conservativeCleanupBoundary: >-
+    This run records planning, audit, archival, and compatibility status only. It does not split project-state, delete
+    standing approvals, change automation active/paused semantics, relax blocked gates, or authorize high-risk work.
 skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:

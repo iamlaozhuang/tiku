@@ -186,6 +186,10 @@ $useCasesBlock
 $acceptanceScenariosBlock
 $nonGoalsBlock
     validationProfile: $safeValidationProfile
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: legacy_explicit
     localExperienceClosureGate: planned
     localFullLoopGate: $safeLocalFullLoopGate
 $blockedRemainderBlock

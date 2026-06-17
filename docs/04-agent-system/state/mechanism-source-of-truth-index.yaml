@@ -112,6 +112,8 @@ sopGroups:
       path: docs/04-agent-system/sop/task-queue-archival-and-index-governance.md
     - id: active-queue-slimming-plan
       path: docs/04-agent-system/sop/active-queue-slimming-plan.md
+    - id: mechanism-tuning-authorization-and-slimming-plan
+      path: docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
     - id: execution-log-archival-and-index-governance
       path: docs/04-agent-system/sop/execution-log-archival-and-index-governance.md
     - id: thread-rollover-and-handoff-governance

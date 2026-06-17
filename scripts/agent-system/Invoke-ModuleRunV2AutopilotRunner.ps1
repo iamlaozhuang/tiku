@@ -817,6 +817,11 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
     $nextActionResult = Invoke-NextActionDiagnostic
     $nextActionResult.Output | ForEach-Object { Write-Output $_ }
     $nextActionDecision = Get-DecisionValue -Output $nextActionResult.Output -Key "nextActionDecision"
+    $queueSelectionMode = Get-DecisionValue -Output $nextActionResult.Output -Key "queueSelectionMode"
+    if ([string]::IsNullOrWhiteSpace($queueSelectionMode)) {
+        $queueSelectionMode = "legacy_explicit"
+    }
+    Write-Output "runnerQueueSelectionMode: $queueSelectionMode"
 
     if ($nextActionResult.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($nextActionDecision)) {
         Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_next_action_diagnostic_failure" -Reason "next-action diagnostic failed or omitted nextActionDecision" -StepCount $stepIndex -ExitCode 1

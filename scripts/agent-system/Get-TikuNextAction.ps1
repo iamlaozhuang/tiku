@@ -56,7 +56,7 @@ function Get-TaskBlocks {
 
 function Get-TaskBlock {
     param(
-        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Blocks,
         [Parameter(Mandatory = $true)][string]$Id
     )
 
@@ -220,11 +220,14 @@ function Invoke-SeedProposalDiagnostic {
 
 function Test-DependencyTerminal {
     param(
-        [Parameter(Mandatory = $true)][object[]]$Blocks,
-        [Parameter(Mandatory = $false)][object[]]$HistoryBlocks = @(),
+        [Parameter(Mandatory = $false)][AllowNull()][object]$Blocks = @(),
+        [Parameter(Mandatory = $false)][AllowNull()][object]$HistoryBlocks = @(),
         [Parameter(Mandatory = $true)][string]$DependencyId,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.ArrayList]$BlockedReasons
     )
+
+    $Blocks = @($Blocks)
+    $HistoryBlocks = @($HistoryBlocks)
 
     $dependencyBlock = @(Get-TaskBlock -Blocks $Blocks -Id $DependencyId)
     if ($dependencyBlock.Count -eq 0) {
@@ -235,7 +238,7 @@ function Test-DependencyTerminal {
         }
 
         $historyStatus = Get-ScalarValue -Block $historyBlock -Key "status"
-        if ($historyStatus -notin @("done", "closed", "pushed", "merged")) {
+        if ($historyStatus -notin @("done", "closed", "pushed", "merged", "local_verified", "metadata_only")) {
             if ([string]::IsNullOrWhiteSpace($historyStatus)) {
                 $historyStatus = "missing_status"
             }
@@ -253,7 +256,7 @@ function Test-DependencyTerminal {
     }
 
     $status = Get-ScalarValue -Block $dependencyBlock -Key "status"
-    if ($status -in @("done", "closed", "pushed", "merged")) {
+    if ($status -in @("done", "closed", "pushed", "merged", "local_verified", "metadata_only")) {
         $evidencePath = Get-ScalarValue -Block $dependencyBlock -Key "evidencePath"
         if ([string]::IsNullOrWhiteSpace($evidencePath) -or -not (Test-Path -LiteralPath $evidencePath)) {
             [void]$BlockedReasons.Add("dependency_evidence_missing:$DependencyId")
@@ -288,7 +291,12 @@ function Get-NextExecutableTask {
         $blockedReasons = New-Object System.Collections.ArrayList
         $dependencies = @(Get-ListValues -Block $block.Lines -Key "dependencies")
         foreach ($dependency in $dependencies) {
-            [void](Test-DependencyTerminal -Blocks $Blocks -HistoryBlocks $HistoryBlocks -DependencyId $dependency -BlockedReasons $blockedReasons)
+            $activeBlocksForDependency = @($Blocks)
+            if ($activeBlocksForDependency.Count -eq 0) {
+                [void]$blockedReasons.Add("dependency_active_queue_empty:$dependency")
+                continue
+            }
+            [void](Test-DependencyTerminal -Blocks $activeBlocksForDependency -HistoryBlocks @($HistoryBlocks) -DependencyId $dependency -BlockedReasons $blockedReasons)
         }
 
         if ($blockedReasons.Count -eq 0) {
@@ -311,6 +319,38 @@ function Get-NextExecutableTask {
         BlockedPendingTask = $firstBlockedPending
         BlockedReasons = $firstBlockedReasons
     }
+}
+
+function Get-ReadyExecutableTasks {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $false)][object[]]$HistoryBlocks = @()
+    )
+
+    $readyTasks = New-Object System.Collections.ArrayList
+    foreach ($block in $Blocks) {
+        $status = Get-ScalarValue -Block $block.Lines -Key "status"
+        if ($status -ne "pending") {
+            continue
+        }
+
+        $blockedReasons = New-Object System.Collections.ArrayList
+        $dependencies = @(Get-ListValues -Block $block.Lines -Key "dependencies")
+        foreach ($dependency in $dependencies) {
+            $activeBlocksForDependency = @($Blocks)
+            if ($activeBlocksForDependency.Count -eq 0) {
+                [void]$blockedReasons.Add("dependency_active_queue_empty:$dependency")
+                continue
+            }
+            [void](Test-DependencyTerminal -Blocks $activeBlocksForDependency -HistoryBlocks @($HistoryBlocks) -DependencyId $dependency -BlockedReasons $blockedReasons)
+        }
+
+        if ($blockedReasons.Count -eq 0) {
+            [void]$readyTasks.Add($block.Id)
+        }
+    }
+
+    return @($readyTasks)
 }
 
 function Join-OrNone {
@@ -452,9 +492,36 @@ if ([string]::IsNullOrWhiteSpace($currentTaskStatus)) {
     $currentTaskStatus = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "status"
 }
 
+$currentExecutionProfile = ""
+$currentEvidenceMode = ""
+$currentValidationPolicy = ""
+$queueSelectionMode = ""
+if ($currentTaskBlock.Count -gt 0) {
+    $currentExecutionProfile = Get-ScalarValue -Block $currentTaskBlock -Key "executionProfile"
+    $currentEvidenceMode = Get-ScalarValue -Block $currentTaskBlock -Key "evidenceMode"
+    $currentValidationPolicy = Get-ScalarValue -Block $currentTaskBlock -Key "validationPolicy"
+    $queueSelectionMode = Get-ScalarValue -Block $currentTaskBlock -Key "queueSelectionMode"
+}
+if ([string]::IsNullOrWhiteSpace($currentExecutionProfile)) {
+    $currentExecutionProfile = "legacy_explicit"
+}
+if ([string]::IsNullOrWhiteSpace($currentEvidenceMode)) {
+    $currentEvidenceMode = "full"
+}
+if ([string]::IsNullOrWhiteSpace($currentValidationPolicy)) {
+    $currentValidationPolicy = "legacy_explicit"
+}
+if ([string]::IsNullOrWhiteSpace($queueSelectionMode)) {
+    $queueSelectionMode = "legacy_explicit"
+}
+
 $nextTask = Get-NextExecutableTask -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks
 $nextTaskId = $nextTask.Id
 $blockedReasons = @($nextTask.BlockedReasons)
+$readySetTaskIds = @()
+if ($queueSelectionMode -eq "ready_set") {
+    $readySetTaskIds = @(Get-ReadyExecutableTasks -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks)
+}
 $validationCommands = @()
 if (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
     $validationCommands = @(Get-ListValues -Block $nextTask.Block -Key "validationCommands")
@@ -537,6 +604,11 @@ $historyNotBlockingCurrentRun = $decision -notin @("hard_block_missing_inputs", 
 
 Write-Output "repository: branch=$branchName; head=$headSha; dirty=$($isDirty.ToString().ToLowerInvariant())"
 Write-Output "currentTask: $currentTaskId($currentTaskStatus)"
+Write-Output "executionProfile: $currentExecutionProfile"
+Write-Output "evidenceMode: $currentEvidenceMode"
+Write-Output "validationPolicy: $currentValidationPolicy"
+Write-Output "queueSelectionMode: $queueSelectionMode"
+Write-Output "readySetCount: $($readySetTaskIds.Count)"
 Write-Output "plannedPauseStatus: $(if ([string]::IsNullOrWhiteSpace($plannedPauseStatus)) { 'none' } else { $plannedPauseStatus })"
 if (-not [string]::IsNullOrWhiteSpace($plannedPauseReason)) {
     Write-Output "plannedPauseReason: $plannedPauseReason"

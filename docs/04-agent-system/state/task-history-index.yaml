@@ -3,6 +3,8 @@ generatedFrom:
   activeQueuePath: docs/04-agent-system/state/task-queue.yaml
   generatedByTask: active-queue-slimming-2026-06-11
   generatedAt: "2026-06-11T20:00:52-07:00"
+  updatedByTask: mechanism-tuning-authorization-slimming-implementation
+  updatedAt: "2026-06-17T03:16:46-07:00"
   archivePaths:
     - docs/04-agent-system/state/archive/task-queue-archive-2026-05.yaml
     - docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
@@ -5570,3 +5572,2643 @@ entries:
     commitSha: null
     completedAt: "2026-06-11"
     archivedByTask: active-queue-slimming-2026-06-11
+  - id: module-run-v2-activation-branch-posture-hardening
+    phase: module-run-v2-activation-branch-posture-hardening
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-activation-branch-posture-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-85-automation-activation-readiness-sync
+    phase: phase-85-automation-activation-readiness-sync
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/phase-85-automation-activation-readiness-sync.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-85-automation-activation-readiness-sync.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-84-module-run-v2-validation-command-normalization-required-path
+    phase: phase-84-module-run-v2-validation-command-normalization-required-path
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/phase-84-module-run-v2-validation-command-normalization-required-path.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-84-module-run-v2-validation-command-normalization-required-path.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-83-module-run-v2-validation-command-normalization
+    phase: phase-83-module-run-v2-validation-command-normalization
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/phase-83-module-run-v2-validation-command-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-83-module-run-v2-validation-command-normalization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    phase: batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-105-ai-task-and-provider-provider-agnostic-ai-task-lifecycle-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-106-ai-task-and-provider-local-task-request-policy-and-result-referen
+    phase: batch-106-ai-task-and-provider-local-task-request-policy-and-result-referen
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-106-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-106-ai-task-and-provider-local-task-request-policy-and-result-referen.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-107-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    phase: batch-107-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-107-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-107-ai-task-and-provider-redacted-audit-log-and-ai-call-log-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    phase: batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+    status: done
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-108-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-79-local-e2e-validation-approval-governance
+    phase: phase-79-local-e2e-validation-approval-governance
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/phase-79-local-e2e-validation-approval-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-79-local-e2e-validation-approval-governance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-80-module-run-v2-local-e2e-capability-gates
+    phase: phase-80-module-run-v2-local-e2e-capability-gates
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/phase-80-module-run-v2-local-e2e-capability-gates.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-80-module-run-v2-local-e2e-capability-gates.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-81-local-e2e-approval-smoke-verification
+    phase: phase-81-local-e2e-approval-smoke-verification
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/phase-81-local-e2e-approval-smoke-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-81-local-e2e-approval-smoke-verification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-82-personal-learning-ai-module-run-proposal
+    phase: phase-82-personal-learning-ai-module-run-proposal
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/phase-82-personal-learning-ai-module-run-proposal.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/phase-82-personal-learning-ai-module-run-proposal.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-109-personal-learning-ai-local-transport-contract-planning
+    phase: batch-109-personal-learning-ai-local-transport-contract-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/batch-109-personal-learning-ai-local-transport-contract-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-109-personal-learning-ai-local-transport-contract-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-110-personal-learning-ai-local-transport-contract
+    phase: batch-110-personal-learning-ai-local-transport-contract
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-110-personal-learning-ai-local-transport-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-110-personal-learning-ai-local-transport-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-111-personal-learning-ai-request-context-local-contract
+    phase: batch-111-personal-learning-ai-request-context-local-contract
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-111-personal-learning-ai-request-context-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-111-personal-learning-ai-request-context-local-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-112-personal-learning-ai-redacted-result-reference-local-contract
+    phase: batch-112-personal-learning-ai-redacted-result-reference-local-contract
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-112-personal-learning-ai-redacted-result-reference-local-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-113-personal-learning-ai-local-ui-browser-planning
+    phase: batch-113-personal-learning-ai-local-ui-browser-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/batch-113-personal-learning-ai-local-ui-browser-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-113-personal-learning-ai-local-ui-browser-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-mechanism-tuning-p0-p1
+    phase: module-run-v2-mechanism-tuning-p0-p1
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-mechanism-tuning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-mechanism-tuning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-bounded-queue-drain
+    phase: module-run-v2-bounded-queue-drain
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-module-run-v2-bounded-queue-drain.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-module-run-v2-bounded-queue-drain.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-low-risk-product-code-queue-drain
+    phase: module-run-v2-low-risk-product-code-queue-drain
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-low-risk-product-code-queue-drain.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-low-risk-product-code-queue-drain.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-114-personal-learning-ai-local-e2e-smoke-planning
+    phase: batch-114-personal-learning-ai-local-e2e-smoke-planning
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-114-personal-learning-ai-local-e2e-smoke-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: active-queue-slimming-2026-06-11
+    phase: active-queue-slimming-2026-06-11
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-active-queue-slimming.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-active-queue-slimming.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-auto-seed-authorization-and-access
+    phase: module-run-v2-auto-seed-authorization-and-access
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-auto-seed-authorization-and-access.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-115-authorization-and-access-authorization-read-model-and-display-contrac
+    phase: batch-115-authorization-and-access-authorization-read-model-and-display-contrac
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-115-authorization-and-access-authorization-read-model-and-display-contrac.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-115-authorization-and-access-authorization-read-model-and-display-contrac.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    phase: batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-116-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-117-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    phase: batch-117-authorization-and-access-paper-and-mock-exam-access-context-without-c
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-117-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-117-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    phase: batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-118-authorization-and-access-redeem-code-audit-log-and-ai-call-log-redact.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-automation-startup-archive-dependency-repair
+    phase: module-run-v2-automation-startup-archive-dependency-repair
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-11-module-run-v2-automation-startup-archive-dependency-repair.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-phase-71-personal-ai-generation-auto-seed-anchors
+    phase: fix-phase-71-personal-ai-generation-auto-seed-anchors
+    status: closed
+    taskKind: docs_state_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-phase-71-personal-ai-generation-auto-seed-anchors.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-119-personal-learning-ai-personal-generation-request-flow
+    phase: batch-119-personal-learning-ai-personal-generation-request-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-119-personal-learning-ai-personal-generation-request-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+    phase: batch-120-personal-learning-ai-paper-and-mock-exam-context-selection
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-120-personal-learning-ai-paper-and-mock-exam-context-selection.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+    phase: batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-121-personal-learning-ai-local-ui-browser-experience-for-request-and.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-131-personal-learning-ai-session-public-id-request-alignment
+    phase: batch-131-personal-learning-ai-session-public-id-request-alignment
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-131-personal-learning-ai-session-public-id-request-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-122-personal-learning-ai-redacted-ai-call-log-reference
+    phase: batch-122-personal-learning-ai-redacted-ai-call-log-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-122-personal-learning-ai-redacted-ai-call-log-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-api-error-envelope-consistency
+    phase: health-audit-followup
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-api-error-envelope-consistency.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-api-error-envelope-consistency.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-client-server-type-boundary
+    phase: health-audit-followup
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-client-server-type-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-client-server-type-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-playwright-stale-server-risk
+    phase: health-audit-followup
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-playwright-stale-server-risk.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-playwright-stale-server-risk.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-admin-ai-audit-log-sample-encoding
+    phase: health-audit-followup
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-admin-ai-audit-log-sample-encoding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: docs-adr-runtime-dependency-alignment
+    phase: health-audit-followup
+    status: closed
+    taskKind: docs_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-docs-adr-runtime-dependency-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-adr-runtime-dependency-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: docs-project-quality-gate-refresh
+    phase: health-audit-followup
+    status: closed
+    taskKind: docs_state_closeout
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-docs-project-quality-gate-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-docs-project-quality-gate-refresh.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-unit-gate-student-authorization-context-contract
+    phase: unit-gate-student-authorization-context-contract
+    status: closed
+    taskKind: test_contract_fix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-unit-gate-student-authorization-context-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: validation-l5-fresh-playwright-existing-specs
+    phase: validation-l5-fresh-playwright-existing-specs
+    status: closed
+    taskKind: validation_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-validation-l5-fresh-playwright-existing-specs.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-local-business-flow-mock-exam-isolation
+    phase: e2e-hardening
+    status: closed
+    taskKind: e2e_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-local-business-flow-mock-exam-isolation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-project-state-sha-sync-after-batch-122
+    phase: governance-detail-repair
+    status: closed
+    taskKind: docs_state_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-project-state-sha-sync-after-batch-122.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: seed-next-personal-learning-ai-product-tasks
+    phase: seed-next-personal-learning-ai-product-tasks
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-seed-next-personal-learning-ai-product-tasks.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-123-personal-learning-ai-api-route-local-contract-bridge
+    phase: batch-123-personal-learning-ai-api-route-local-contract-bridge
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-123-personal-learning-ai-api-route-local-contract-bridge.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-124-personal-learning-ai-student-local-request-entry-ui
+    phase: batch-124-personal-learning-ai-student-local-request-entry-ui
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-124-personal-learning-ai-student-local-request-entry-ui.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-125-personal-learning-ai-redacted-reference-display-integration
+    phase: batch-125-personal-learning-ai-redacted-reference-display-integration
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-125-personal-learning-ai-redacted-reference-display-integration.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+    phase: batch-126-personal-learning-ai-local-browser-flow-e2e-validation
+    status: closed
+    taskKind: validation_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-126-personal-learning-ai-local-browser-flow-e2e-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-agent-state-hygiene-after-batch-126
+    phase: fix-agent-state-hygiene-after-batch-126
+    status: closed
+    taskKind: docs_state_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-fix-agent-state-hygiene-after-batch-126.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: seed-next-personal-learning-ai-auth-flow-tasks
+    phase: seed-next-personal-learning-ai-auth-flow-tasks
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-seed-next-personal-learning-ai-auth-flow-tasks.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-seed-next-personal-learning-ai-auth-flow-tasks.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-127-personal-learning-ai-student-session-auth-bridge
+    phase: batch-127-personal-learning-ai-student-session-auth-bridge
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-127-personal-learning-ai-student-session-auth-bridge.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-127-personal-learning-ai-student-session-auth-bridge.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-128-personal-learning-ai-request-history-read-model
+    phase: batch-128-personal-learning-ai-request-history-read-model
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-128-personal-learning-ai-request-history-read-model.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-129-personal-learning-ai-redacted-request-history-display
+    phase: batch-129-personal-learning-ai-redacted-request-history-display
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-129-personal-learning-ai-redacted-request-history-display.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-129-personal-learning-ai-redacted-request-history-display.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-130-personal-learning-ai-dedicated-local-e2e-spec
+    phase: batch-130-personal-learning-ai-dedicated-local-e2e-spec
+    status: closed
+    taskKind: e2e_spec_authoring
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-130-personal-learning-ai-dedicated-local-e2e-spec.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-132-personal-learning-ai-server-session-ownership-normalization
+    phase: batch-132-personal-learning-ai-server-session-ownership-normalization
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-132-personal-learning-ai-server-session-ownership-normalization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-133-personal-learning-ai-request-history-route-session-boundary
+    phase: batch-133-personal-learning-ai-request-history-route-session-boundary
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-133-personal-learning-ai-request-history-route-session-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-134-personal-learning-ai-ui-initial-history-fetch
+    phase: batch-134-personal-learning-ai-ui-initial-history-fetch
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-134-personal-learning-ai-ui-initial-history-fetch.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-135-personal-learning-ai-next-persistence-seeding
+    phase: batch-135-personal-learning-ai-next-persistence-seeding
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-135-personal-learning-ai-next-persistence-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-136-personal-learning-ai-persistence-schema-approval-gate
+    phase: batch-136-personal-learning-ai-persistence-schema-approval-gate
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-136-personal-learning-ai-persistence-schema-approval-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-137-personal-learning-ai-task-persistence-schema-migration
+    phase: batch-137-personal-learning-ai-task-persistence-schema-migration
+    status: closed
+    taskKind: schema_migration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-137-personal-learning-ai-task-persistence-schema-migration.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-138-personal-learning-ai-request-history-repository
+    phase: batch-138-personal-learning-ai-request-history-repository
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-138-personal-learning-ai-request-history-repository.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-139-personal-learning-ai-route-get-persistent-history
+    phase: batch-139-personal-learning-ai-route-get-persistent-history
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-139-personal-learning-ai-route-get-persistent-history.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-140-personal-learning-ai-route-post-persistent-request
+    phase: batch-140-personal-learning-ai-route-post-persistent-request
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-140-personal-learning-ai-route-post-persistent-request.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+    phase: batch-141-personal-learning-ai-ui-server-backed-history-after-submit
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-141-personal-learning-ai-ui-server-backed-history-after-submit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-142-personal-learning-ai-persistent-history-security-review
+    phase: batch-142-personal-learning-ai-persistent-history-security-review
+    status: closed
+    taskKind: security_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-142-personal-learning-ai-persistent-history-security-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+    phase: batch-143-personal-learning-ai-local-role-flow-persistent-history-validation
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-143-personal-learning-ai-local-role-flow-persistent-history-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+    phase: batch-144-personal-learning-ai-generated-content-domain-blocked-gate
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-144-personal-learning-ai-generated-content-domain-blocked-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+    phase: batch-145-personal-learning-ai-provider-env-cost-blocked-gate
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-12-batch-145-personal-learning-ai-provider-env-cost-blocked-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-146-personal-learning-ai-next-seeding-planning
+    phase: batch-146-personal-learning-ai-next-seeding-planning
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-146-personal-learning-ai-next-seeding-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-147-personal-learning-ai-server-owned-metadata-hardening
+    phase: batch-147-personal-learning-ai-server-owned-metadata-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-147-personal-learning-ai-server-owned-metadata-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-148-personal-learning-ai-server-owned-metadata-security-review
+    phase: batch-148-personal-learning-ai-server-owned-metadata-security-review
+    status: closed
+    taskKind: security_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-148-personal-learning-ai-server-owned-metadata-security-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+    phase: batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-149-personal-learning-ai-local-role-flow-server-owned-metadata-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
+    phase: batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-150-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refinement.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-151-personal-learning-ai-repository-service-defense-in-depth-seeding-planning
+    phase: batch-151-personal-learning-ai-repository-service-defense-in-depth-seeding-planning
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-151-personal-learning-ai-repository-service-defense-in-depth-seeding-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-151-personal-learning-ai-repository-service-defense-in-depth-seeding-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-152-personal-learning-ai-repository-service-defense-in-depth
+    phase: batch-152-personal-learning-ai-repository-service-defense-in-depth
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-152-personal-learning-ai-repository-service-defense-in-depth.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-152-personal-learning-ai-repository-service-defense-in-depth.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-153-personal-learning-ai-route-service-repository-metadata-security-review
+    phase: batch-153-personal-learning-ai-route-service-repository-metadata-security-review
+    status: closed
+    taskKind: security_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-153-personal-learning-ai-route-service-repository-metadata-security-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation
+    phase: batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation
+    status: closed
+    taskKind: local_verification
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-154-personal-learning-ai-existing-local-e2e-defense-in-depth-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh
+    phase: batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-155-personal-learning-ai-provider-env-dependency-cost-blocked-gate-refresh.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    phase: batch-156-personal-learning-ai-approval-boundary-seeding-planning
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-156-personal-learning-ai-approval-boundary-seeding-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-157-personal-learning-ai-dependency-introduction-gate-docs
+    phase: batch-157-personal-learning-ai-dependency-introduction-gate-docs
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-157-personal-learning-ai-dependency-introduction-gate-docs.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-158-personal-learning-ai-provider-env-secret-gate-docs
+    phase: batch-158-personal-learning-ai-provider-env-secret-gate-docs
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-158-personal-learning-ai-provider-env-secret-gate-docs.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+    phase: batch-159-personal-learning-ai-generated-content-adoption-boundary-review
+    status: closed
+    taskKind: security_review
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-159-personal-learning-ai-generated-content-adoption-boundary-review.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+    phase: batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-160-personal-learning-ai-local-provider-sandbox-plan-blocked-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+    phase: batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-161-personal-learning-ai-staging-provider-deploy-blocked-gate-docs.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-162-personal-learning-ai-implementation-queue-seeding
+    phase: batch-162-personal-learning-ai-implementation-queue-seeding
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-162-personal-learning-ai-implementation-queue-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-163-personal-learning-ai-dependency-implementation
+    phase: batch-163-personal-learning-ai-dependency-implementation
+    status: closed
+    taskKind: dependency_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-163-personal-learning-ai-dependency-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-164-personal-learning-ai-provider-env-secret-destination
+    phase: batch-164-personal-learning-ai-provider-env-secret-destination
+    status: closed
+    taskKind: env_secret_destination
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-164-personal-learning-ai-provider-env-secret-destination.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-165-personal-learning-ai-provider-adapter-implementation
+    phase: batch-165-personal-learning-ai-provider-adapter-implementation
+    status: closed
+    taskKind: provider_adapter_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-165-personal-learning-ai-provider-adapter-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-166-personal-learning-ai-local-provider-sandbox-execution
+    phase: batch-166-personal-learning-ai-local-provider-sandbox-execution
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-166-personal-learning-ai-local-provider-sandbox-execution.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-167-personal-learning-ai-generated-content-persistence
+    phase: batch-167-personal-learning-ai-generated-content-persistence
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-167-personal-learning-ai-generated-content-persistence.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-170-personal-learning-ai-generated-content-persistence-implementation
+    phase: batch-170-personal-learning-ai-generated-content-persistence-implementation
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-170-personal-learning-ai-generated-content-persistence-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-171-personal-learning-ai-result-fk-name-hardening
+    phase: batch-171-personal-learning-ai-result-fk-name-hardening
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-171-personal-learning-ai-result-fk-name-hardening.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-168-personal-learning-ai-api-ui-wiring
+    phase: batch-168-personal-learning-ai-api-ui-wiring
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-168-personal-learning-ai-api-ui-wiring.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-169-personal-learning-ai-local-e2e-validation
+    phase: batch-169-personal-learning-ai-local-e2e-validation
+    status: closed
+    taskKind: validation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-169-personal-learning-ai-local-e2e-validation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-172-personal-learning-ai-next-stage-closure-and-seeding
+    phase: batch-172-personal-learning-ai-next-stage-closure-and-seeding
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-172-personal-learning-ai-next-stage-closure-and-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-172-personal-learning-ai-next-stage-closure-and-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-173-personal-learning-ai-provider-secret-runtime-readiness
+    phase: batch-173-personal-learning-ai-provider-secret-runtime-readiness
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-173-personal-learning-ai-provider-secret-runtime-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-173-personal-learning-ai-provider-secret-runtime-readiness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-179-personal-learning-ai-provider-sandbox-command
+    phase: batch-179-personal-learning-ai-provider-sandbox-command
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-179-personal-learning-ai-provider-sandbox-command.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-174-personal-learning-ai-local-provider-sandbox-smoke
+    phase: batch-174-personal-learning-ai-local-provider-sandbox-smoke
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-174-personal-learning-ai-local-provider-sandbox-smoke.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-175-personal-learning-ai-cost-calibration-gate
+    phase: batch-175-personal-learning-ai-cost-calibration-gate
+    status: closed
+    taskKind: blocked_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-175-personal-learning-ai-cost-calibration-gate.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-175-personal-learning-ai-cost-calibration-gate.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-176-personal-learning-ai-formal-adoption-design
+    phase: batch-176-personal-learning-ai-formal-adoption-design
+    status: closed
+    taskKind: design_gate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-176-personal-learning-ai-formal-adoption-design.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-176-personal-learning-ai-formal-adoption-design.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-177-personal-learning-ai-formal-adoption-implementation
+    phase: batch-177-personal-learning-ai-formal-adoption-implementation
+    status: closed
+    taskKind: blocked_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-177-personal-learning-ai-formal-adoption-implementation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-178-personal-learning-ai-staging-provider-deploy-readiness
+    phase: batch-178-personal-learning-ai-staging-provider-deploy-readiness
+    status: closed
+    taskKind: blocked_design
+    evidencePath: docs/05-execution-logs/evidence/2026-06-13-batch-178-personal-learning-ai-staging-provider-deploy-readiness.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-13-batch-178-personal-learning-ai-staging-provider-deploy-readiness.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-180-personal-learning-ai-staging-execution-approval-package
+    phase: batch-180-personal-learning-ai-staging-execution-approval-package
+    status: closed
+    taskKind: blocked_design
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-batch-180-personal-learning-ai-staging-execution-approval-package.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: current-state-checkpoint-and-implementation-audit
+    phase: current-state-checkpoint-and-implementation-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-current-state-checkpoint-and-implementation-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-use-case-audit-planning
+    phase: unified-standard-advanced-use-case-audit-planning
+    status: closed
+    taskKind: docs_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-use-case-audit-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-use-case-audit-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-audit-campaign-seeding
+    phase: unified-standard-advanced-audit-campaign-seeding
+    status: closed
+    taskKind: docs_campaign_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-audit-campaign-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-audit-campaign-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-planning-closeout-baseline
+    phase: unified-standard-advanced-planning-closeout-baseline
+    status: closed
+    taskKind: docs_closeout_baseline
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-planning-closeout-baseline.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-planning-closeout-baseline.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-input-freeze-and-source-index
+    phase: unified-standard-advanced-input-freeze-and-source-index
+    status: closed
+    taskKind: docs_source_freeze
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-input-freeze-and-source-index.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-capability-catalog
+    phase: unified-standard-advanced-capability-catalog
+    status: closed
+    taskKind: docs_capability_catalog
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-capability-catalog.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-capability-catalog.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-use-case-catalog-and-edition-delta
+    phase: unified-standard-advanced-use-case-catalog-and-edition-delta
+    status: closed
+    taskKind: docs_use_case_catalog
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-use-case-catalog-and-edition-delta.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-use-case-catalog-and-edition-delta.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-technical-landing-matrix
+    phase: unified-standard-advanced-technical-landing-matrix
+    status: closed
+    taskKind: readonly_technical_matrix
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-technical-landing-matrix.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-technical-landing-matrix.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-consistency-and-risk-audit
+    phase: unified-standard-advanced-consistency-and-risk-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-consistency-and-risk-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-consistency-and-risk-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-advanced-implementation-queue-seeding
+    phase: unified-standard-advanced-implementation-queue-seeding
+    status: closed
+    taskKind: docs_implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-advanced-implementation-queue-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-mvp-auth-scope-code-audit
+    phase: unified-standard-mvp-auth-scope-code-audit
+    status: closed
+    taskKind: readonly_code_audit_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-auth-scope-code-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-mvp-organization-auth-code-audit
+    phase: unified-standard-mvp-organization-auth-code-audit
+    status: closed
+    taskKind: readonly_code_audit_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-organization-auth-code-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-mvp-question-paper-code-audit
+    phase: unified-standard-mvp-question-paper-code-audit
+    status: closed
+    taskKind: readonly_code_audit_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-question-paper-code-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-question-paper-code-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-mvp-student-experience-code-audit
+    phase: unified-standard-mvp-student-experience-code-audit
+    status: closed
+    taskKind: readonly_code_audit_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-student-experience-code-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-student-experience-code-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-mvp-ai-rag-governed-code-audit
+    phase: unified-standard-mvp-ai-rag-governed-code-audit
+    status: closed
+    taskKind: readonly_code_audit_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-ai-rag-governed-code-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-ai-rag-governed-code-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-standard-mvp-admin-ops-logs-code-audit
+    phase: unified-standard-mvp-admin-ops-logs-code-audit
+    status: closed
+    taskKind: readonly_code_audit_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-standard-mvp-admin-ops-logs-code-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-advanced-auth-org-training-blocked-planning
+    phase: unified-advanced-auth-org-training-blocked-planning
+    status: closed
+    taskKind: blocked_gate_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-auth-org-training-blocked-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-advanced-ai-rag-quota-blocked-planning
+    phase: unified-advanced-ai-rag-quota-blocked-planning
+    status: closed
+    taskKind: blocked_gate_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-advanced-ai-rag-quota-blocked-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-future-non-goal-and-audit-only-guard
+    phase: unified-future-non-goal-and-audit-only-guard
+    status: closed
+    taskKind: non_goal_guard
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-future-non-goal-and-audit-only-guard.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-blocked-gate-provider-checkpoint-guard
+    phase: unified-blocked-gate-provider-checkpoint-guard
+    status: closed
+    taskKind: blocked_gate_guard
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-blocked-gate-provider-checkpoint-guard.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-code-audit-findings-rollup-and-repair-queue-seeding-entry-creation
+    phase: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    status: closed
+    taskKind: docs_only_pending_task_seed
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: audit-student-experience-unit-suite-timeout
+    phase: audit-student-experience-unit-suite-timeout
+    status: closed
+    taskKind: audit_only
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-audit-student-experience-unit-suite-timeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-audit-student-experience-unit-suite-timeout.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-ai-mock-provider-secret-like-payload-shape
+    phase: fix-ai-mock-provider-secret-like-payload-shape
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-ai-mock-provider-secret-like-payload-shape.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-personal-ai-generation-persistence-failure-semantics
+    phase: fix-personal-ai-generation-persistence-failure-semantics
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-persistence-failure-semantics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-personal-ai-generation-persistence-failure-semantics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-personal-ai-generation-unique-request-identifiers
+    phase: fix-personal-ai-generation-unique-request-identifiers
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-unique-request-identifiers.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-personal-ai-generation-unique-request-identifiers.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-personal-ai-generation-user-type-boundary
+    phase: fix-personal-ai-generation-user-type-boundary
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-personal-ai-generation-user-type-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: audit-student-experience-unit-suite-timeout-unblock
+    phase: audit-student-experience-unit-suite-timeout-unblock
+    status: closed
+    taskKind: test_stability_unblock
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-audit-student-experience-unit-suite-timeout-unblock.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-audit-student-experience-unit-suite-timeout-unblock.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-student-login-session-policy-consistency
+    phase: fix-student-login-session-policy-consistency
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-fix-student-login-session-policy-consistency.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-fix-student-login-session-policy-consistency.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    phase: unified-code-audit-findings-rollup-and-repair-queue-seeding
+    status: closed
+    taskKind: docs_only_audit_findings_rollup_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-code-audit-findings-rollup-and-repair-queue-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-auth-session-personal-auth-boundary
+    phase: unified-repair-auth-session-personal-auth-boundary
+    status: closed
+    taskKind: implementation_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-auth-session-personal-auth-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-organization-auth-layering-lifecycle
+    phase: unified-repair-organization-auth-layering-lifecycle
+    status: closed
+    taskKind: implementation_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-organization-auth-layering-lifecycle.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-organization-auth-layering-lifecycle.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-question-paper-rest-layering
+    phase: unified-repair-question-paper-rest-layering
+    status: closed
+    taskKind: implementation_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-question-paper-rest-layering.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-question-paper-rest-layering.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-student-experience-layering-mistake-book
+    phase: unified-repair-student-experience-layering-mistake-book
+    status: closed
+    taskKind: implementation_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-student-experience-layering-mistake-book.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-student-experience-layering-mistake-book.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-ai-provider-redaction-function-contract
+    phase: unified-repair-ai-provider-redaction-function-contract
+    status: closed
+    taskKind: implementation_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-ai-provider-redaction-function-contract.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-ai-provider-redaction-function-contract.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-rag-knowledge-layering-retrieval-governance
+    phase: unified-repair-rag-knowledge-layering-retrieval-governance
+    status: closed
+    taskKind: implementation_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-rag-knowledge-layering-retrieval-governance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-admin-log-retention-redaction-layering
+    phase: unified-repair-admin-log-retention-redaction-layering
+    status: closed
+    taskKind: implementation_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-admin-log-retention-redaction-layering.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-admin-log-retention-redaction-layering.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-quota-ledger-blocked-gate-planning
+    phase: unified-repair-quota-ledger-blocked-gate-planning
+    status: closed
+    taskKind: docs_only_blocked_gate_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-quota-ledger-blocked-gate-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-quota-ledger-blocked-gate-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-repair-standard-advanced-ai-generation-boundary-guard
+    phase: unified-repair-standard-advanced-ai-generation-boundary-guard
+    status: closed
+    taskKind: docs_only_edition_boundary_repair_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-14-unified-repair-standard-advanced-ai-generation-boundary-guard.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-post-repair-next-queue-seeding
+    phase: unified-post-repair-next-queue-seeding
+    status: closed
+    taskKind: docs_only_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-next-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-next-queue-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: unified-post-repair-master-health-gap-audit
+    phase: unified-post-repair-master-health-gap-audit
+    status: closed
+    taskKind: docs_only_readonly_gap_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-unified-post-repair-master-health-gap-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-unified-post-repair-master-health-gap-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-student-login-session-policy-decision
+    phase: fix-student-login-session-policy-decision
+    status: closed
+    taskKind: docs_only_session_policy_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-fix-student-login-session-policy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-fix-student-login-session-policy-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-post-repair-local-acceptance-reaudit-planning
+    phase: phase-22-post-repair-local-acceptance-reaudit-planning
+    status: closed
+    taskKind: docs_only_local_acceptance_reaudit_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-post-repair-local-acceptance-reaudit-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-verification-seeding
+    phase: phase-22-local-acceptance-verification-seeding
+    status: closed
+    taskKind: docs_only_local_acceptance_verification_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-account-auth-verification
+    phase: phase-22-local-acceptance-account-auth-verification
+    status: closed
+    taskKind: local_acceptance_verification_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-account-auth-verification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T00:30:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-content-production-verification
+    phase: phase-22-local-acceptance-content-production-verification
+    status: closed
+    taskKind: local_acceptance_verification_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-content-production-verification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T02:50:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-student-answering-verification
+    phase: phase-22-local-acceptance-student-answering-verification
+    status: closed
+    taskKind: local_acceptance_verification_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-student-answering-verification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T03:05:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-mistake-learning-verification
+    phase: phase-22-local-acceptance-mistake-learning-verification
+    status: closed
+    taskKind: local_acceptance_verification_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-mistake-learning-verification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T02:38:43-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-admin-operations-verification
+    phase: phase-22-local-acceptance-admin-operations-verification
+    status: closed
+    taskKind: local_acceptance_verification_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-admin-operations-verification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T03:14:07-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-security-evidence-verification
+    phase: phase-22-local-acceptance-security-evidence-verification
+    status: closed
+    taskKind: local_acceptance_verification_candidate
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-security-evidence-verification.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: null
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: phase-22-local-acceptance-verification-rollup-closeout
+    phase: phase-22-local-acceptance-verification-rollup-closeout
+    status: closed
+    taskKind: docs_only_rollup_closeout
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-phase-22-local-acceptance-verification-rollup-closeout.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T03:40:30-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-readiness-state-queue-reconciliation
+    phase: advanced-readiness-state-queue-reconciliation
+    status: closed
+    taskKind: docs_state_evidence_reconciliation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-readiness-state-queue-reconciliation.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T04:18:15-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-current-master-state-handoff-refresh
+    phase: advanced-current-master-state-handoff-refresh
+    status: closed
+    taskKind: docs_state_handoff_refresh
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-current-master-state-handoff-refresh.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-current-master-state-handoff-refresh.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T05:02:42-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-redacted-read-model-service
+    phase: advanced-personal-ai-generation-result-redacted-read-model-service
+    status: closed
+    taskKind: local_service_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-read-model-service.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-redacted-read-model-service.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T05:10:48-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-readonly-route
+    phase: advanced-personal-ai-generation-result-readonly-route
+    status: closed
+    taskKind: local_route_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-readonly-route.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-readonly-route.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T05:19:35-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-student-ai-generation-result-history-ui
+    phase: advanced-student-ai-generation-result-history-ui
+    status: closed
+    taskKind: local_ui_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-history-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-history-ui.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T05:29:30-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-redacted-detail-read-model-service
+    phase: advanced-personal-ai-generation-result-redacted-detail-read-model-service
+    status: closed
+    taskKind: local_service_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-read-model-service.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-read-model-service.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T06:06:08-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-redacted-detail-readonly-route
+    phase: advanced-personal-ai-generation-result-redacted-detail-readonly-route
+    status: closed
+    taskKind: local_route_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-redacted-detail-readonly-route.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T06:19:17-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-student-ai-generation-result-detail-ui
+    phase: advanced-student-ai-generation-result-detail-ui
+    status: closed
+    taskKind: local_ui_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-detail-ui.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-detail-ui.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T06:40:47-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-detail-flow-readonly-audit
+    phase: advanced-personal-ai-generation-result-detail-flow-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T06:51:31-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: fix-student-ai-generation-result-detail-not-found-state
+    phase: fix-student-ai-generation-result-detail-not-found-state
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-fix-student-ai-generation-result-detail-not-found-state.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T07:08:20-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-detail-flow-readonly-recheck
+    phase: advanced-personal-ai-generation-result-detail-flow-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-detail-flow-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T07:17:31-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
+    phase: advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T07:34:20-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-next-implementation-queue-seeding
+    phase: advanced-next-implementation-queue-seeding
+    status: closed
+    taskKind: docs_only_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T07:41:23-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-result-public-id-display-policy-decision
+    phase: advanced-personal-ai-generation-result-public-id-display-policy-decision
+    status: closed
+    taskKind: docs_only_policy_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-result-public-id-display-policy-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T07:51:27-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-student-ai-generation-result-public-id-display-ux-redaction
+    phase: advanced-student-ai-generation-result-public-id-display-ux-redaction
+    status: closed
+    taskKind: local_ui_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T08:04:59-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+    phase: advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-result-public-id-display-ux-redaction-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T08:18:46-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-next-implementation-queue-seeding-post-public-id-redaction
+    phase: advanced-next-implementation-queue-seeding-post-public-id-redaction
+    status: closed
+    taskKind: docs_only_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-public-id-redaction.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T08:25:40-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+    phase: advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T08:33:21-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-student-ai-generation-request-history-public-id-redaction-test-coverage
+    phase: advanced-student-ai-generation-request-history-public-id-redaction-test-coverage
+    status: closed
+    taskKind: local_ui_test_coverage
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-test-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-student-ai-generation-request-history-public-id-redaction-test-coverage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T08:44:48-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+    phase: advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T08:51:48-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+    phase: advanced-next-implementation-queue-seeding-post-formal-adoption-boundary
+    status: closed
+    taskKind: docs_only_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-formal-adoption-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T08:59:14-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+    phase: advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T09:13:40-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+    phase: advanced-admin-ai-generation-formal-adoption-review-ui-affordance
+    status: closed
+    taskKind: local_ui_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-formal-adoption-review-ui-affordance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T09:24:51-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+    phase: advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-personal-ai-generation-formal-adoption-review-flow-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T09:28:21-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-generation-public-identifier-display-policy-recheck
+    phase: advanced-admin-ai-generation-public-identifier-display-policy-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-generation-public-identifier-display-policy-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-generation-public-identifier-display-policy-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T09:41:47-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-audit-log-public-identifier-redaction-affordance
+    phase: advanced-admin-ai-audit-log-public-identifier-redaction-affordance
+    status: closed
+    taskKind: local_ui_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-audit-log-public-identifier-redaction-affordance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-audit-log-public-identifier-redaction-affordance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T09:54:03-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck
+    phase: advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-audit-log-public-identifier-redaction-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T10:09:30-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+    phase: advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-display-policy-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T10:22:38-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance
+    phase: advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance
+    status: closed
+    taskKind: local_ui_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-affordance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T10:31:43-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck
+    phase: advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-admin-ai-ops-model-config-public-identifier-redaction-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T10:42:21-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-next-implementation-queue-seeding-post-model-config-redaction
+    phase: advanced-next-implementation-queue-seeding-post-model-config-redaction
+    status: closed
+    taskKind: docs_only_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-next-implementation-queue-seeding-post-model-config-redaction.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T10:54:15-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-boundary-readonly-audit
+    phase: advanced-organization-training-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T11:04:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-contract-validation-scaffold
+    phase: advanced-organization-training-contract-validation-scaffold
+    status: closed
+    taskKind: local_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-scaffold.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T11:22:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-contract-validation-readonly-recheck
+    phase: advanced-organization-training-contract-validation-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-contract-validation-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T11:37:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-answer-status-alignment-seeding
+    phase: advanced-organization-training-answer-status-alignment-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T11:39:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-answer-status-alignment
+    phase: advanced-organization-training-answer-status-alignment
+    status: closed
+    taskKind: local_contract_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T11:54:09-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-answer-status-alignment-readonly-recheck
+    phase: advanced-organization-training-answer-status-alignment-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-answer-status-alignment-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T12:03:43-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-draft-lifecycle-service-seeding
+    phase: advanced-organization-training-draft-lifecycle-service-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T12:11:16-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-draft-lifecycle-service
+    phase: advanced-organization-training-draft-lifecycle-service
+    status: closed
+    taskKind: local_service_implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T12:24:27-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+    phase: advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding
+    status: closed
+    taskKind: readonly_recheck_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T12:33:24-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-draft-lifecycle-service-readonly-recheck
+    phase: advanced-organization-training-draft-lifecycle-service-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T12:43:56-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding
+    phase: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T12:51:48-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage
+    phase: advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage
+    status: closed
+    taskKind: local_test_coverage_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-draft-lifecycle-service-level-mismatch-test-coverage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T13:02:55-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-subject-authorization-context-boundary-readonly-audit
+    phase: advanced-organization-training-subject-authorization-context-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-subject-authorization-context-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T13:12:59-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-subject-authorization-context-contract-decision
+    phase: advanced-organization-training-subject-authorization-context-contract-decision
+    status: closed
+    taskKind: docs_only_contract_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-subject-authorization-context-contract-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T13:25:59-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-content-subject-scope-contract-seeding
+    phase: advanced-organization-training-content-subject-scope-contract-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-contract-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-contract-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T16:30:02-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-content-subject-scope-guard
+    phase: advanced-organization-training-content-subject-scope-guard
+    status: closed
+    taskKind: local_implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-guard.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T16:46:36-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-content-subject-scope-readonly-recheck-seeding
+    phase: advanced-organization-training-content-subject-scope-readonly-recheck-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T16:57:58-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-content-subject-scope-readonly-recheck
+    phase: advanced-organization-training-content-subject-scope-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-content-subject-scope-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T17:13:38-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-next-implementation-queue-seeding
+    phase: advanced-organization-training-next-implementation-queue-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-next-implementation-queue-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-next-implementation-queue-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T17:24:45-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-service
+    phase: advanced-organization-training-publish-version-service
+    status: closed
+    taskKind: local_implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T17:44:01-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-service-readonly-recheck
+    phase: advanced-organization-training-publish-version-service-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T17:53:16-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+    phase: advanced-organization-training-publish-version-authorization-lineage-coverage-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T18:03:54-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-authorization-lineage-coverage
+    phase: advanced-organization-training-publish-version-authorization-lineage-coverage
+    status: closed
+    taskKind: local_implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-coverage.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T18:17:25-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
+    phase: advanced-organization-training-publish-version-authorization-lineage-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-authorization-lineage-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T18:27:04-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-persistence-boundary-seeding
+    phase: advanced-organization-training-publish-version-persistence-boundary-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T18:38:11-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-persistence-boundary-planning
+    phase: advanced-organization-training-publish-version-persistence-boundary-planning
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-boundary-planning.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T18:50:59-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
+    phase: advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-inventory-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T19:06:56-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-persistence-schema-migration-seeding
+    phase: advanced-organization-training-publish-version-persistence-schema-migration-seeding
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T19:20:21-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-persistence-schema-migration
+    phase: advanced-organization-training-publish-version-persistence-schema-migration
+    status: closed
+    taskKind: schema_migration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-schema-migration.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T19:39:19-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+    phase: advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper-tdd-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T19:50:37-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-persistence-repository-mapper
+    phase: advanced-organization-training-publish-version-persistence-repository-mapper
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-persistence-repository-mapper.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T20:25:44-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-service-runtime-wiring-seeding
+    phase: advanced-organization-training-publish-version-service-runtime-wiring-seeding
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T21:09:07-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-service-runtime-wiring
+    phase: advanced-organization-training-publish-version-service-runtime-wiring
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T21:25:30-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding
+    phase: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding
+    status: closed
+    taskKind: readonly_recheck_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T21:37:35-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
+    phase: advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-service-runtime-wiring-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T21:46:57-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding
+    phase: advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding
+    status: closed
+    taskKind: readonly_audit_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T21:56:03-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-boundary-readonly-audit
+    phase: advanced-organization-training-publish-version-route-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T22:04:20-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-tdd-seeding
+    phase: advanced-organization-training-publish-version-route-tdd-seeding
+    status: closed
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T22:14:49-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-tdd
+    phase: advanced-organization-training-publish-version-route-tdd
+    status: closed
+    taskKind: local_implementation_tdd
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T22:31:21-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+    phase: advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding
+    status: closed
+    taskKind: readonly_recheck_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T22:43:18-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-flow-readonly-recheck
+    phase: advanced-organization-training-publish-version-route-flow-readonly-recheck
+    status: closed
+    taskKind: readonly_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-flow-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T22:55:28-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision
+    status: closed
+    taskKind: boundary_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-trusted-lineage-boundary-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T23:06:05-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit
+    status: closed
+    taskKind: readonly_audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-advanced-organization-training-publish-version-route-org-admin-actor-boundary-readonly-audit.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T23:18:19-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-docs-only-fast-lane-mechanism
+    phase: module-run-v2-docs-only-fast-lane-mechanism
+    status: closed
+    taskKind: mechanism_hardening
+    evidencePath: docs/05-execution-logs/evidence/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-15-module-run-v2-docs-only-fast-lane-mechanism.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-15T23:41:42-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    phase: module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary
+    status: closed
+    taskKind: docs_only_batch_closeout
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-docs-only-fast-lane-trial-batch-organization-training-publish-boundary.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T00:13:09-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-contract-decision
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-contract-decision
+    status: closed
+    taskKind: boundary_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T00:13:09-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-followup-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T00:13:09-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck
+    status: closed
+    taskKind: readonly_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-contract-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T01:08:45-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd
+    phase: advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-actor-context-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T01:20:16-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-resolver-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T01:30:33-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-standing-autonomy-policy-governance
+    phase: module-run-v2-standing-autonomy-policy-governance
+    status: closed
+    taskKind: governance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-standing-autonomy-policy-governance.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T00:48:05-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T01:39:33-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-tdd
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-repository-lookup-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T01:53:52-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-seeding
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-seeding
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T02:04:35-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-tdd
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T02:21:27-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+    phase: advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck
+    status: closed
+    taskKind: readonly_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-trusted-lineage-runtime-wiring-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T02:31:26-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+    phase: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T02:45:09-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+    phase: advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck
+    status: closed
+    taskKind: readonly_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-org-admin-context-runtime-wiring-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T02:54:48-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision
+    status: closed
+    taskKind: boundary_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-runtime-boundary-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T03:06:26-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T03:22:28-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck
+    status: closed
+    taskKind: "readonly recheck"
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-resolver-contract-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T03:31:03-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-repository-resolver-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T03:48:06-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision
+    status: closed
+    taskKind: boundary_decision
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-source-boundary-decision.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T04:01:15-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration
+    status: closed
+    taskKind: schema_migration
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-schema-migration.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T04:44:38-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope
+    phase: module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope
+    status: closed
+    taskKind: docs_state_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-schema-migration-capability-state-normalization-admin-organization-scope.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T04:27:02-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-seeding.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T04:52:38-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-tdd.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T05:11:53-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck
+    phase: advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck
+    status: closed
+    taskKind: readonly_recheck
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-publish-version-route-visible-organization-scope-admin-organization-repository-resolver-readonly-recheck.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T05:32:44-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver
+    phase: advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver
+    status: closed
+    taskKind: implementation_queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-training-next-implementation-queue-seeding-post-visible-scope-resolver.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T05:56:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-181-organization-training-organization-admin-training-draft-publish-ta
+    phase: batch-181-organization-training-organization-admin-training-draft-publish-ta
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-181-organization-training-organization-admin-training-draft-publish-ta.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T06:19:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-182-organization-training-employee-answer-lifecycle-local-role-flow
+    phase: batch-182-organization-training-employee-answer-lifecycle-local-role-flow
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-182-organization-training-employee-answer-lifecycle-local-role-flow.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-182-organization-training-employee-answer-lifecycle-local-role-flow.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T06:54:11-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-183-organization-training-paper-and-mock-exam-context-usage-without-ex
+    phase: batch-183-organization-training-paper-and-mock-exam-context-usage-without-ex
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-183-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-183-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T07:18:00-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-184-organization-training-audit-log-redacted-reference
+    phase: batch-184-organization-training-audit-log-redacted-reference
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-184-organization-training-audit-log-redacted-reference.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-184-organization-training-audit-log-redacted-reference.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T07:30:24-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-analytics-next-implementation-queue-seeding-post-organization-training-closeout
+    phase: advanced-organization-analytics-next-implementation-queue-seeding-post-organization-training-closeout
+    status: closed
+    taskKind: queue_seeding
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-module-run-v2-auto-seed-organization-analytics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-module-run-v2-auto-seed-organization-analytics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T07:41:05-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: advanced-organization-analytics-auto-seed-readiness-evidence-normalization
+    phase: advanced-organization-analytics-auto-seed-readiness-evidence-normalization
+    status: closed
+    taskKind: state_evidence_repair
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-auto-seed-readiness-evidence-normalization.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-auto-seed-readiness-evidence-normalization.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T07:54:55-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-185-organization-analytics-aggregate-only-organization-metrics
+    phase: batch-185-organization-analytics-aggregate-only-organization-metrics
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-185-organization-analytics-aggregate-only-organization-metrics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-185-organization-analytics-aggregate-only-organization-metrics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T08:17:23-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-186-organization-analytics-privacy-preserving-employee-statistics
+    phase: batch-186-organization-analytics-privacy-preserving-employee-statistics
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-186-organization-analytics-privacy-preserving-employee-statistics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-186-organization-analytics-privacy-preserving-employee-statistics.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T08:31:56-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: batch-187-organization-analytics-export-readiness-contracts-without-object-st
+    phase: batch-187-organization-analytics-export-readiness-contracts-without-object-st
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/batch-187-organization-analytics-export-readiness-contracts-without-object-st.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-187-organization-analytics-export-readiness-contracts-without-object-st.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T08:47:07-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
+  - id: standing-local-e2e-smoke-allowlist-authorization-upgrade
+    phase: standing-local-e2e-smoke-allowlist-authorization-upgrade
+    status: closed
+    taskKind: mechanism_governance
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-standing-local-e2e-smoke-allowlist-authorization-upgrade.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-2026-06.yaml
+    commitSha: null
+    completedAt: "2026-06-16T16:27:53-07:00"
+    archivedByTask: mechanism-tuning-authorization-slimming-implementation
