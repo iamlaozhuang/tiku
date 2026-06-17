@@ -9,6 +9,7 @@ import type {
 import type { OrganizationTrainingPublishInput } from "../models/organization-training";
 import { normalizeOrganizationTrainingPublishInput } from "../validators/organization-training";
 import {
+  buildOrganizationTrainingAdminLifecycleFlowReadModel,
   buildOrganizationTrainingAuditLogReferenceReadModel,
   createOrganizationTrainingService,
   type OrganizationTrainingStore,
@@ -541,6 +542,114 @@ describe("organization training service", () => {
         expiresAt: null,
       },
     ]);
+  });
+
+  it("builds a metadata-only admin lifecycle flow for draft, published, and taken-down training", () => {
+    const rawQuestionBody = ["RAW", "QUESTION", "BODY"].join("-");
+    const standardAnswer = ["STANDARD", "ANSWER", "BODY"].join("-");
+    const analysis = ["TEACHER", "ANALYSIS", "BODY"].join("-");
+    const protectedPayloadKey = ["provider", "Payload"].join("");
+    const protectedPayloadMarker = ["PROVIDER", "PAY", "LOAD", "BODY"].join(
+      "-",
+    );
+    const privateRowData = ["PRIVATE", "ROW", "DATA"].join("-");
+    const draft: OrganizationTrainingDraftDto = {
+      publicId: "training_draft_public_123",
+      sourceTaskPublicId: null,
+      organizationPublicId: "organization_public_123",
+      authorizationSource: "org_auth",
+      authorizationPublicId: "org_auth_public_123",
+      profession: "monopoly",
+      level: 3,
+      subject: "theory",
+      title: "Safety training",
+      description: null,
+      questionCount: 0,
+      totalScore: 0,
+      questionTypeSummary: {
+        singleChoice: 0,
+        multiChoice: 0,
+        trueFalse: 0,
+        shortAnswer: 0,
+      },
+      evidenceStatus: "none",
+      validationStatus: "needs_review",
+      retentionStatus: "active",
+      createdAt: fixedNow.toISOString(),
+      expiresAt: null,
+    };
+    const publishedVersion = {
+      ...createPublishedVersion(),
+      rawQuestionBody,
+      standardAnswer,
+      analysis,
+      [protectedPayloadKey]: protectedPayloadMarker,
+      privateRowData,
+    };
+    const takenDownVersion = createPublishedVersion({
+      publicId: "training_version_taken_down_public_123",
+      status: "taken_down",
+      takenDownAt: fixedNow.toISOString(),
+      takedownReason: "outdated training",
+    });
+    const invisibleVersion = createPublishedVersion({
+      publicId: "training_version_invisible_public_123",
+      organizationPublicId: "organization_other_public_999",
+      publishScopeSnapshot: {
+        organizationPublicIds: ["organization_other_public_999"],
+        capturedAt: fixedNow.toISOString(),
+      },
+    });
+
+    const result = buildOrganizationTrainingAdminLifecycleFlowReadModel({
+      adminContext: {
+        adminPublicId: "admin_public_123",
+        visibleOrganizationPublicIds: ["organization_public_123"],
+      },
+      drafts: [draft],
+      versions: [publishedVersion, takenDownVersion, invisibleVersion],
+    });
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        items: [
+          {
+            publicId: "training_draft_public_123",
+            resourceType: "organization_training_draft",
+            organizationPublicId: "organization_public_123",
+            title: "Safety training",
+            status: "draft",
+            availableActions: ["publish"],
+          },
+          {
+            publicId: "training_version_public_123",
+            resourceType: "organization_training_version",
+            organizationPublicId: "organization_public_123",
+            title: "Safety training",
+            status: "published",
+            availableActions: ["take_down", "copy_to_new_draft"],
+          },
+          {
+            publicId: "training_version_taken_down_public_123",
+            resourceType: "organization_training_version",
+            organizationPublicId: "organization_public_123",
+            title: "Safety training",
+            status: "taken_down",
+            availableActions: ["copy_to_new_draft"],
+          },
+        ],
+        redactionStatus: "metadata_only",
+      },
+    });
+    expect(serializedResult).not.toContain("training_version_invisible");
+    expect(serializedResult).not.toContain(rawQuestionBody);
+    expect(serializedResult).not.toContain(standardAnswer);
+    expect(serializedResult).not.toContain(analysis);
+    expect(serializedResult).not.toContain(protectedPayloadMarker);
+    expect(serializedResult).not.toContain(privateRowData);
   });
 
   it("blocks manual draft creation when advanced org_auth capability gates fail", async () => {

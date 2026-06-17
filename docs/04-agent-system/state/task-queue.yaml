@@ -7904,7 +7904,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-201-organization-training-organization-admin-training-draft-publish-ta
     evidencePath: docs/05-execution-logs/evidence/batch-201-organization-training-organization-admin-training-draft-publish-ta.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-201-organization-training-organization-admin-training-draft-publish-ta.md
-    status: pending
+    status: in_progress
     retryCount: 0
   - id: batch-202-organization-training-employee-answer-lifecycle-local-role-flow
     title: Module Run v2 organization-training implementation seed

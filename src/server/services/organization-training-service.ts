@@ -7,6 +7,8 @@ import {
 import type {
   EmployeeOrganizationTrainingAnswerDto,
   EmployeeOrganizationTrainingScoreSummaryDto,
+  OrganizationTrainingAdminLifecycleFlowDto,
+  OrganizationTrainingAdminLifecycleItemDto,
   OrganizationTrainingAuditLogReferenceDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
@@ -160,6 +162,12 @@ export type OrganizationTrainingCreateManualDraftCommand = {
   adminContext: OrganizationTrainingAdminContext;
   authorizationContext: EffectiveAuthorizationContextDto;
   draftInput: OrganizationTrainingManualDraftInput;
+};
+
+export type OrganizationTrainingAdminLifecycleFlowReadModelInput = {
+  adminContext: OrganizationTrainingAdminContext;
+  drafts: readonly OrganizationTrainingDraftDto[];
+  versions: readonly OrganizationTrainingPublishedVersionDto[];
 };
 
 export type OrganizationTrainingManualDraftWrite = Omit<
@@ -577,6 +585,63 @@ function createSourceContextBlockedResult(
     reason,
     message: organizationTrainingSourceContextBlockedMessage,
   };
+}
+
+function buildDraftLifecycleItem(
+  draft: OrganizationTrainingDraftDto,
+): OrganizationTrainingAdminLifecycleItemDto {
+  return {
+    publicId: draft.publicId,
+    resourceType: "organization_training_draft",
+    organizationPublicId: draft.organizationPublicId,
+    title: draft.title,
+    status: "draft",
+    availableActions: ["publish"],
+  };
+}
+
+function buildVersionLifecycleItem(
+  version: OrganizationTrainingPublishedVersionDto,
+): OrganizationTrainingAdminLifecycleItemDto {
+  const availableActions =
+    version.status === "published"
+      ? (["take_down", "copy_to_new_draft"] as const)
+      : (["copy_to_new_draft"] as const);
+
+  return {
+    publicId: version.publicId,
+    resourceType: "organization_training_version",
+    organizationPublicId: version.organizationPublicId,
+    title: version.title,
+    status: version.status,
+    availableActions: [...availableActions],
+  };
+}
+
+export function buildOrganizationTrainingAdminLifecycleFlowReadModel(
+  input: OrganizationTrainingAdminLifecycleFlowReadModelInput,
+): ApiResponse<OrganizationTrainingAdminLifecycleFlowDto> {
+  const draftItems = input.drafts
+    .filter((draft) =>
+      isOrganizationVisibleToAdmin(
+        draft.organizationPublicId,
+        input.adminContext,
+      ),
+    )
+    .map(buildDraftLifecycleItem);
+  const versionItems = input.versions
+    .filter((version) =>
+      isOrganizationVisibleToAdmin(
+        version.organizationPublicId,
+        input.adminContext,
+      ),
+    )
+    .map(buildVersionLifecycleItem);
+
+  return createSuccessResponse({
+    items: [...draftItems, ...versionItems],
+    redactionStatus: "metadata_only",
+  });
 }
 
 type JsonRecord = Record<string, unknown>;

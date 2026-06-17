@@ -104,6 +104,25 @@ export type OrganizationTrainingSourceContextDto = {
   redactionStatus: "metadata_only";
 };
 
+export type OrganizationTrainingAdminLifecycleAction =
+  | "publish"
+  | "take_down"
+  | "copy_to_new_draft";
+
+export type OrganizationTrainingAdminLifecycleItemDto = {
+  publicId: string;
+  resourceType: "organization_training_draft" | "organization_training_version";
+  organizationPublicId: string;
+  title: string;
+  status: "draft" | OrganizationTrainingVersionStatus;
+  availableActions: OrganizationTrainingAdminLifecycleAction[];
+};
+
+export type OrganizationTrainingAdminLifecycleFlowDto = {
+  items: OrganizationTrainingAdminLifecycleItemDto[];
+  redactionStatus: "metadata_only";
+};
+
 export type OrganizationTrainingAuditLogReferenceDto = {
   auditLogReference: {
     publicId: string;
