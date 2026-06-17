@@ -52,10 +52,20 @@ result: pass_tdd_runtime_unit_alignment_no_db_execution
 - PASS: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-tdd`
 - PASS: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-tdd`
 
+## Post-Merge Master Validation
+
+- PASS: fast-forward merge to `master` completed locally.
+- PASS: `npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"` on `master` (1 file, 12 tests)
+- PASS: `npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"` on `master` (1 file, 13 tests)
+- PASS: `git diff --check` on `master`
+- PASS: `npm.cmd run lint` on `master`
+- PASS: `npm.cmd run typecheck` on `master`
+
 ## Batch Commit Evidence
 
 - Commit approval: approved by fresh user prompt in the current thread on 2026-06-17.
 - Commit: `529126f9559786f9d91b2b722d3d18592dad4f97` is the branch baseline before the approved local task commit.
+- Task commit: `58d2e563` was fast-forward merged to `master`.
 - Fast-forward merge approval: approved to `master`.
 - Push approval: approved to `origin/master`.
 - Cleanup approval: approved for merged short-branch deletion and fetch prune.
