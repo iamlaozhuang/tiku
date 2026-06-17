@@ -30747,3 +30747,214 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-readers-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-readers-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-readers-tdd
+
+  - id: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding
+    title: Advanced organization analytics dashboard summary Postgres runtime wiring TDD seeding
+    phase: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_seeded_postgres_runtime_wiring_tdd
+    retryCount: 0
+    claimedAt: "2026-06-16T22:13:33-07:00"
+    closedAt: "2026-06-16T22:13:33-07:00"
+    branch: codex/organization-analytics-runtime-wiring-seeding
+    dependencies:
+      - advanced-organization-analytics-postgres-gateway-source-readers-tdd
+      - advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+      - advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    humanApproval: >-
+      User approved executing the recommended next work in the current Codex thread by saying "批准执行，完成后批准提交合入推送并清理，
+      然后再推荐下一步工作内容". Approval is limited to this docs/state-only seeding task, task plan/evidence/audit creation,
+      durable state updates, seeding one pending App Router dashboard summary Postgres runtime wiring TDD task, declared
+      local validation, local commit, fast-forward merge to `master`, push `origin/master`, merged short-branch cleanup,
+      and fetch prune. Product source implementation, real database execution, `.env*` access, schema/migration/drizzle,
+      package/lockfile/dependency changes, provider/model calls, e2e/browser/dev-server,
+      staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration Gate remain blocked for
+      this seeding task.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-route.test.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/session-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/runtime-database.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - product source implementation
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16_current_thread
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - 'Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding","status: closed","advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd","status: pending","src/app/api/v1/organization-analytics/dashboard-summary/route.ts","src/server/services/organization-analytics-route.ts"'
+      - npx prettier --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding
+
+  - id: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+    title: Advanced organization analytics dashboard summary Postgres runtime wiring TDD
+    phase: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_route_runtime_wiring_tdd
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    status: pending
+    result: null
+    retryCount: 0
+    claimedAt: null
+    closedAt: null
+    dependencies:
+      - advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding
+      - advanced-organization-analytics-postgres-gateway-source-readers-tdd
+      - advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+      - advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation of App Router dashboard
+      summary Postgres runtime wiring after the repository source readers exist. The task may update the dashboard
+      summary route/service route test boundary so `src/app/api/v1/organization-analytics/dashboard-summary/route.ts`
+      wires `createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers` through existing typed repository gateway
+      source readers, a lazy/injected `RuntimeDatabase` boundary, an admin context resolver, and a timestamp source.
+      Tests must use injected/fake boundaries and must not execute a real database connection or read `.env*`. The task
+      must keep API response envelopes, aggregate-only redaction, and fail-closed behavior for missing runtime
+      dependencies. If schema/migration/drizzle changes, dependency changes, real DB execution, provider/model calls,
+      UI work, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service access, protected evidence, or
+      broader service business logic changes are required, stop and report instead of expanding scope.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd.md
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-route.test.ts
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/session-service.ts
+      - src/server/auth/local-session-runtime.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/validators/organization-analytics.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/models/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/server/contracts/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - UI changes
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_approval_after_validation
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-tdd
