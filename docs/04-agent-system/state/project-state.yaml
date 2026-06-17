@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
-updatedAt: "2026-06-16T18:24:08-07:00"
+currentPhase: advanced-organization-analytics-postgres-gateway-source-input-decision
+updatedAt: "2026-06-16T18:42:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: bb21512daa32a965aaa942ff615c3e2e89a60c68
   lastKnownOriginMasterSha: bb21512daa32a965aaa942ff615c3e2e89a60c68
 currentTask:
-  id: advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+  id: advanced-organization-analytics-postgres-gateway-source-input-decision
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
-  branch: codex/advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+  branch: codex/advanced-organization-analytics-postgres-gateway-source-input-decision
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -460,7 +460,7 @@ qualityGates:
     - build
   lastRun:
     date: "2026-06-16"
-    readiness: pass_advanced_organization_analytics_postgres_gateway_source_input_decision_seeding
+    readiness: pass_advanced_organization_analytics_postgres_gateway_source_input_decision
     lint: pass
     typecheck: pass
     unit: skipped_docs_state_only_no_product_unit_scope
@@ -648,6 +648,7 @@ qualityGates:
     advancedOrganizationAnalyticsRepositoryFactoryBoundaryTddSeeding: pass_docs_state_seeded_repository_factory_boundary_tdd
     advancedOrganizationAnalyticsPostgresRepositoryFactoryBoundaryTdd: pass_tdd_fail_closed_repository_factory_boundary_no_db_execution
     advancedOrganizationAnalyticsPostgresGatewaySourceInputDecisionSeeding: pass_docs_state_seeded_gateway_source_input_decision
+    advancedOrganizationAnalyticsPostgresGatewaySourceInputDecision: pass_readonly_decision_training_answer_source_gap_seeded
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -663,10 +664,13 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-postgres-gateway-source-input-decision-seeding` seeded the next pending
-    readonly/docs decision task: `advanced-organization-analytics-postgres-gateway-source-input-decision`. The next task
-    must decide the real organization analytics Postgres gateway source inputs before any App Router real runtime
-    wiring. Direct DB access, source implementation, service business logic, schema/migration, provider/model,
-    dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost
-    Calibration Gate remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+    `advanced-organization-analytics-postgres-gateway-source-input-decision` concluded that a real organization
+    analytics Postgres gateway needs an injected `RuntimeDatabase`, normalized repository read commands, and
+    aggregate-only projections over visible organization scope, employees, published organization training versions,
+    formal learning summaries, quota summaries, and export-readiness summary rows. The current schema does not expose a
+    persisted organization training employee answer/submission source that links an employee submission to
+    `organization_training_version.public_id`, so direct gateway query implementation remains blocked. The next pending
+    readonly/docs task is `advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision`.
+    Direct DB access, source implementation, schema/migration, provider/model, dependency, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
