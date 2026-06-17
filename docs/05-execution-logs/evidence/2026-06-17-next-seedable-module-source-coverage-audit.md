@@ -74,7 +74,7 @@ Audit interpretation:
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1`: pass; current task active and ready for closeout
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`: pass; current task active and historical diagnostics remain non-blocking
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1`: pass; `no_seed_candidate`
-- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.ps1 -PlanOnly -AllowProtectedBranch -CompletedTaskCount 0`: interim hard-block while dirty worktree was expected; final clean rerun pending
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.ps1 -PlanOnly -AllowProtectedBranch -CompletedTaskCount 0`: pre-merge guard behavior observed; dirty worktree and later unmerged `codex/*` branch both hard-block by design. Final clean master rerun is required after fast-forward merge.
 - `npx.cmd prettier --check --ignore-unknown docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-next-seedable-module-source-coverage-audit.md docs/05-execution-logs/evidence/2026-06-17-next-seedable-module-source-coverage-audit.md docs/05-execution-logs/audits-reviews/2026-06-17-next-seedable-module-source-coverage-audit.md`: pass
 - `npm.cmd run lint`: pass
 - `npm.cmd run typecheck`: pass
