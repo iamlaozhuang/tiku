@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: personal-ai-local-flow-blocked-evidence-closeout
-updatedAt: "2026-06-17T14:36:21-07:00"
+currentPhase: personal-ai-local-playwright-auth-strategy-alignment
+updatedAt: "2026-06-17T15:01:53-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: df880547241f0b83b46a6ce6236468584eef2742
-  lastKnownOriginMasterSha: df880547241f0b83b46a6ce6236468584eef2742
+  lastKnownMasterSha: 60c18a97fd8ccdded7aeb68708e725a9c7f429ed
+  lastKnownOriginMasterSha: 60c18a97fd8ccdded7aeb68708e725a9c7f429ed
 currentTask:
-  id: personal-ai-local-flow-blocked-evidence-closeout
+  id: personal-ai-local-playwright-auth-strategy-alignment
   status: closed
-  sourceStory: user-approved-dirty-worktree-recovery-closeout
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
-  branch: codex/personal-ai-local-flow-blocked-evidence-closeout
+  sourceStory: user-approved-personal-ai-local-flow-auth-strategy-followup
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
+  branch: codex/personal-ai-playwright-auth-strategy-alignment
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -714,10 +714,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Ask for fresh approval for a narrow localhost-only Playwright authentication strategy alignment task before retrying
-    personal AI full-flow validation. The task should decide how the existing personal AI e2e spec authenticates under
-    the current server-session-only login policy without reintroducing browser bearer-token persistence. Keep
+    Run the standard project status and next-action diagnostics after closeout. If they remain idle with no pending task
+    or seed candidate, ask for fresh approval before materializing the next product or governance task. Keep
     schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
     staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate blocked unless a future
     task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-flow-blocked-evidence-closeout.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md

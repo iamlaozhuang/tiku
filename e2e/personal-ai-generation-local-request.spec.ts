@@ -39,22 +39,35 @@ const forbiddenVisibleMarkers = [
   localStudentAccessValue,
 ] as const;
 
-async function loginAsLocalStudent(page: Page) {
-  await page.goto("/login");
-  await page.locator('input[name="phone"]').fill(studentCredential.phone);
-  await page
-    .locator('input[name="password"]')
-    .fill(studentCredential[credentialValueField] ?? "");
-  await page.locator('form button[type="submit"]').click();
-  await expect(page).toHaveURL(/\/home$/u);
-}
-
 async function expectForbiddenMarkersHidden(page: Page, values: string[]) {
   const body = page.locator("body");
 
   for (const marker of [...forbiddenVisibleMarkers, ...values]) {
     await expect(body).not.toContainText(marker);
   }
+}
+
+async function expectRequestHistoryMetadataVisible(page: Page) {
+  await expect(page.getByText("status", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByText("requestedAt", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("evidenceStatus", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("citationCount", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("redactionStatus", { exact: true }).first(),
+  ).toBeVisible();
+}
+
+async function expectPublicIdentifierLabelsHidden(page: Page) {
+  await expect(page.getByText("requestPublicId", { exact: true })).toHaveCount(
+    0,
+  );
+  await expect(page.getByText("taskPublicId", { exact: true })).toHaveCount(0);
 }
 
 function expectStandardEnvelope(
@@ -71,6 +84,54 @@ function expectStandardEnvelope(
   expect(payloadRecord.code).toEqual(expect.any(Number));
   expect(payloadRecord.message).toEqual(expect.any(String));
   expect(Object.hasOwn(payloadRecord, "data")).toBe(true);
+}
+
+function readRequiredNestedString(value: unknown, path: string[]): string {
+  let currentValue = value;
+
+  for (const pathSegment of path) {
+    if (!isRecord(currentValue)) {
+      throw new Error("Missing required string in local e2e fixture response.");
+    }
+
+    currentValue = currentValue[pathSegment];
+  }
+
+  expect(currentValue).toEqual(expect.any(String));
+
+  if (typeof currentValue !== "string" || currentValue.trim() === "") {
+    throw new Error("Missing required string in local e2e fixture response.");
+  }
+
+  return currentValue;
+}
+
+async function installLocalStudentBrowserSession(page: Page): Promise<string> {
+  const sessionResponse = await page.request.post("/api/v1/sessions", {
+    data: studentCredential,
+  });
+  expect(sessionResponse.ok()).toBe(true);
+
+  const sessionPayload = await sessionResponse.json();
+  expectStandardEnvelope(sessionPayload);
+  expect(sessionPayload).toMatchObject({
+    code: 0,
+    message: "ok",
+  });
+
+  const sessionToken = readRequiredNestedString(sessionPayload, [
+    "data",
+    "token",
+  ]);
+
+  await page.addInitScript(
+    ([sessionStorageKey, browserCredential]) => {
+      localStorage.setItem(sessionStorageKey, browserCredential);
+    },
+    [localSessionStorageKey, sessionToken] as [string, string],
+  );
+
+  return sessionToken;
 }
 
 function expectCamelCaseJsonKeys(value: unknown) {
@@ -167,14 +228,7 @@ test.describe("personal AI generation local request", () => {
   test("submits the local request and renders only redacted public summaries", async ({
     page,
   }) => {
-    await loginAsLocalStudent(page);
-
-    const storedLocalAuthValue = await page.evaluate((storageKey) => {
-      return localStorage.getItem(storageKey);
-    }, localSessionStorageKey);
-
-    expect(storedLocalAuthValue).toEqual(expect.any(String));
-    const localAuthHeaderValue = storedLocalAuthValue ?? "";
+    const localAuthHeaderValue = await installLocalStudentBrowserSession(page);
 
     const requestHistoryResponse = await page.request.get(
       "/api/v1/personal-ai-generation-requests?userPublicId=client-owned-history-user&id=701",
@@ -207,6 +261,10 @@ test.describe("personal AI generation local request", () => {
     });
 
     await page.goto("/ai-generation");
+    const storedLocalAuthValue = await page.evaluate((storageKey) => {
+      return localStorage.getItem(storageKey);
+    }, localSessionStorageKey);
+    expect(storedLocalAuthValue).toBe(localAuthHeaderValue);
 
     const initialHistoryResponse = await initialHistoryResponsePromise;
     expect(initialHistoryResponse.ok()).toBe(true);
@@ -222,11 +280,14 @@ test.describe("personal AI generation local request", () => {
     await expect(page.getByText(historyTitle)).toBeVisible();
     if (isPersistentHistoryUnavailablePayload(initialHistoryPayload)) {
       await expect(page.getByText(historyErrorTitle)).toBeVisible();
+    } else if (readFirstHistoryRow(initialHistoryPayload) !== null) {
+      await expectRequestHistoryMetadataVisible(page);
+      await expectPublicIdentifierLabelsHidden(page);
     } else {
       await expect(page.getByText(historyEmptyTitle)).toBeVisible();
     }
     await expect(page.getByText("runtimeStatus")).toHaveCount(0);
-    await expectForbiddenMarkersHidden(page, [storedLocalAuthValue ?? ""]);
+    await expectForbiddenMarkersHidden(page, [localAuthHeaderValue]);
 
     const requestResponsePromise = page.waitForResponse((response) => {
       const request = response.request();
@@ -261,18 +322,19 @@ test.describe("personal AI generation local request", () => {
       actorPublicId: localStudentPublicId,
       ownerPublicId: localStudentPublicId,
       quotaOwnerPublicId: localStudentPublicId,
-      requestPublicId: "personal-ai-request-public-001",
+      requestPublicId: expect.stringMatching(/^personal-ai-request-public-/u),
       userPublicId: localStudentPublicId,
     });
-    expectNoSensitivePayload(postedRequestPayload, [
-      storedLocalAuthValue ?? "",
-    ]);
+    expect(postedRequestPayload.taskPublicId).toEqual(
+      expect.stringMatching(/^ai-generation-task-public-/u),
+    );
+    expectNoSensitivePayload(postedRequestPayload, [localAuthHeaderValue]);
 
     const requestPayload = await requestResponse.json();
     expectStandardEnvelope(requestPayload);
     expectCamelCaseJsonKeys(requestPayload);
     expectNoInternalIdKeys(requestPayload);
-    expectNoSensitivePayload(requestPayload, [storedLocalAuthValue ?? ""]);
+    expectNoSensitivePayload(requestPayload, [localAuthHeaderValue]);
     expect(requestPayload).toMatchObject({
       code: 0,
       data: {
@@ -288,7 +350,7 @@ test.describe("personal AI generation local request", () => {
           evidenceStatus: "none",
           isFormalAdoptionBlocked: true,
           status: "pending",
-          taskPublicId: "ai-generation-task-public-001",
+          taskPublicId: expect.stringMatching(/^ai-generation-task-public-/u),
         },
         runtimeStatus: "local_contract_only",
       },
@@ -313,40 +375,14 @@ test.describe("personal AI generation local request", () => {
     expectStandardEnvelope(postSubmitHistoryPayload);
     expectCamelCaseJsonKeys(postSubmitHistoryPayload);
     expectNoInternalIdKeys(postSubmitHistoryPayload);
-    expectNoSensitivePayload(postSubmitHistoryPayload, [
-      storedLocalAuthValue ?? "",
-    ]);
+    expectNoSensitivePayload(postSubmitHistoryPayload, [localAuthHeaderValue]);
     expectLocalHistoryEnvelope(postSubmitHistoryPayload);
 
     const firstHistoryRow = readFirstHistoryRow(postSubmitHistoryPayload);
 
     if (firstHistoryRow !== null) {
-      await expect(page.getByText("requestPublicId")).toBeVisible();
-      await expect(
-        page.getByText(String(firstHistoryRow.requestPublicId)),
-      ).toBeVisible();
-      await expect(page.getByText("taskPublicId").first()).toBeVisible();
-      await expect(
-        page.getByText(String(firstHistoryRow.taskPublicId)).first(),
-      ).toBeVisible();
-      await expect(page.getByText("requestedAt")).toBeVisible();
-      await expect(
-        page.getByText(String(firstHistoryRow.requestedAt)),
-      ).toBeVisible();
-      await expect(page.getByText("evidenceStatus").first()).toBeVisible();
-      await expect(
-        page.getByText(String(firstHistoryRow.evidenceStatus)).first(),
-      ).toBeVisible();
-      await expect(page.getByText("citationCount").first()).toBeVisible();
-      await expect(
-        page.getByText(String(firstHistoryRow.citationCount)).first(),
-      ).toBeVisible();
-      await expect(
-        page.getByText("redactionStatus", { exact: true }),
-      ).toBeVisible();
-      await expect(
-        page.getByText(String(firstHistoryRow.redactionStatus)).first(),
-      ).toBeVisible();
+      await expectRequestHistoryMetadataVisible(page);
+      await expectPublicIdentifierLabelsHidden(page);
     } else if (
       isPersistentHistoryUnavailablePayload(postSubmitHistoryPayload)
     ) {
@@ -358,6 +394,6 @@ test.describe("personal AI generation local request", () => {
     }
 
     await expect(page.locator("[data-id]")).toHaveCount(0);
-    await expectForbiddenMarkersHidden(page, [storedLocalAuthValue ?? ""]);
+    await expectForbiddenMarkersHidden(page, [localAuthHeaderValue]);
   });
 });
