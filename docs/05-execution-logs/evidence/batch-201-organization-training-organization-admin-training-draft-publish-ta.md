@@ -16,7 +16,7 @@ result: pass
 - Batch range: batch-201 of organization-training auto-seeded batch range batch-201 through batch-204.
 - RED: `npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts` failed as expected before implementation because `buildOrganizationTrainingAdminLifecycleFlowReadModel` was not implemented.
 - GREEN: `npm.cmd run test:unit -- src/server/services/organization-training-service.test.ts` passed after adding the metadata-only lifecycle flow contract and service helper.
-- Commit: pending implementation commit; will be replaced before closeout readiness.
+- Commit: 8319c71d00eb69a6da6adc328cf7ead426e8e446
 - localFullLoopGate: L6 recorded as local-unit/read-model evidence only for this task; Browser, Playwright, provider/model, external service, and full-flow execution were not used.
 - threadRolloverGate: `continue_current_thread`.
 - nextModuleRunCandidate: `batch-202-organization-training-employee-answer-lifecycle-local-role-flow` after this task closes cleanly.
@@ -33,7 +33,7 @@ result: pass
 | `npm.cmd run lint`                                                                                                                                                                                                                                                                                         | pass            | ESLint passed.                                                                                   |
 | `npm.cmd run typecheck`                                                                                                                                                                                                                                                                                    | pass            | `tsc --noEmit` passed.                                                                           |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ThreadRolloverReadiness.ps1`                                                                                                                                                                               | pass            | `threadRolloverDecision: continue_current_thread`.                                               |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-201-organization-training-organization-admin-training-draft-publish-ta`                                                                                          | pending         | To run after the implementation commit hash is available and recorded.                           |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-201-organization-training-organization-admin-training-draft-publish-ta`                                                                                          | pass            | Module closeout readiness passed after implementation commit evidence was recorded.              |
 
 ## Redaction
 
