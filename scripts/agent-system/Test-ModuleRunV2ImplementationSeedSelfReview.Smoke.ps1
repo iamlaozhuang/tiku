@@ -272,6 +272,117 @@ Cost Calibration Gate remains blocked
     "Cost Calibration Gate remains blocked" | Set-Content -LiteralPath $auditPath -Encoding UTF8
 }
 
+function Write-PartialCompletedQueue {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: batch-100-authorization-and-access-completed-read-model
+    status: closed
+    taskKind: implementation
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: authorization read-model and display contracts
+    evidencePath: docs/05-execution-logs/evidence/batch-100-authorization-and-access-completed-read-model.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-100-authorization-and-access-completed-read-model.md
+  - id: batch-101-authorization-and-access-cache-invalidation-policy
+    status: pending
+    taskKind: implementation
+    humanApproval: autoDriveLocalImplementationApproval smoke approval
+    autoDriveLocalImplementationApproval: smoke approval
+    seededByTask: phase-69-advanced-authorization-context-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: authorization-and-access
+    targetClosureItem: authorization cache invalidation policy
+    behaviorBoundary: authorization-and-access::authorization cache invalidation policy
+    requirementRefs:
+      - phase-69-advanced-authorization-context-implementation-planning
+    useCases:
+      - authorization-and-access local implementation validates authorization cache invalidation policy
+    acceptanceScenarios:
+      - authorization cache invalidation policy passes L4-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L4-local-implementation
+    localExperienceClosureGate: planned
+    localFullLoopGate: L4
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: not_approved
+      fastForwardMerge:
+        approved: not_approved
+        targetBranch: master
+      push:
+        approved: not_approved
+        target: origin/master
+      cleanup:
+        deleteShortBranch: not_approved
+        parkWorktree: not_approved
+    allowedFiles:
+      - src/server/services/**
+      - docs/05-execution-logs/evidence/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-101-authorization-and-access-cache-invalidation-policy
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-101-authorization-and-access-cache-invalidation-policy
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-69-advanced-authorization-context-implementation-planning -CandidateTaskId batch-101-authorization-and-access-cache-invalidation-policy
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-101-authorization-and-access-cache-invalidation-policy
+    registryLifecycle:
+      redactionRequired: true
+    evidencePath: docs/05-execution-logs/evidence/batch-101-authorization-and-access-cache-invalidation-policy.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-101-authorization-and-access-cache-invalidation-policy.md
+"@ | Set-Content -LiteralPath $Path -Encoding UTF8
+}
+
+function Write-PartialCompletedSeedTemplates {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $evidencePath = Join-Path -Path $Root -ChildPath "docs\05-execution-logs\evidence\batch-101-authorization-and-access-cache-invalidation-policy.md"
+    $auditPath = Join-Path -Path $Root -ChildPath "docs\05-execution-logs\audits-reviews\batch-101-authorization-and-access-cache-invalidation-policy.md"
+    New-Item -ItemType Directory -Force -Path (Split-Path -Path $evidencePath -Parent) | Out-Null
+    New-Item -ItemType Directory -Force -Path (Split-Path -Path $auditPath -Parent) | Out-Null
+    @"
+result: pending
+Batch range: pending
+RED: pending
+GREEN: pending
+Commit: pending
+localFullLoopGate: L4 pending
+threadRolloverGate: pending
+nextModuleRunCandidate: pending
+blocked remainder: none
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
+    "Cost Calibration Gate remains blocked" | Set-Content -LiteralPath $auditPath -Encoding UTF8
+}
+
 $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Test-ModuleRunV2ImplementationSeedSelfReview.ps1"
 if (-not (Test-Path -LiteralPath $scriptPath)) {
     throw "Missing seed self-review script: $scriptPath"
@@ -376,6 +487,22 @@ try {
     Assert-Contains -Output $standingPassOutput -Pattern "meceCoverageStatus: complete"
     Assert-Contains -Output $standingPassOutput -Pattern "meceGapCount: 0"
     Assert-Contains -Output $standingPassOutput -Pattern "meceOverlapCount: 0"
+
+    Write-PartialCompletedQueue -Path $queuePath
+    Write-PartialCompletedSeedTemplates -Root $fixtureRoot
+    $partialCompletedPassOutput = @(
+        & $scriptPath `
+            -ExpectedModule "authorization-and-access" `
+            -SeedTaskIds @("batch-101-authorization-and-access-cache-invalidation-policy") `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    )
+    Assert-Contains -Output $partialCompletedPassOutput -Pattern "seedSelfReviewDecision: passed"
+    Assert-Contains -Output $partialCompletedPassOutput -Pattern "meceReviewDecision: passed"
+    Assert-Contains -Output $partialCompletedPassOutput -Pattern "meceCoverageStatus: complete"
+    Assert-Contains -Output $partialCompletedPassOutput -Pattern "completedTargetCount: 1"
+    Assert-Contains -Output $partialCompletedPassOutput -Pattern "meceGapCount: 0"
+    Assert-Contains -Output $partialCompletedPassOutput -Pattern "meceOverlapCount: 0"
 } finally {
     Pop-Location
     if (Test-Path -LiteralPath $fixtureRoot) {

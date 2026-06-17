@@ -251,6 +251,42 @@ function Get-TargetClosureItems {
     return $items.ToArray()
 }
 
+function Test-TerminalTaskStatus {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Status)
+
+    return $Status -in @("done", "closed", "pushed", "merged")
+}
+
+function Get-CompletedTargetClosureItems {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$TaskBlocks,
+        [Parameter(Mandatory = $true)][string]$ModuleId
+    )
+
+    $items = New-Object System.Collections.Generic.List[string]
+
+    foreach ($block in $TaskBlocks) {
+        $status = Get-TaskScalarValue -Block $block.Lines -Key "status"
+        if (-not (Test-TerminalTaskStatus -Status $status)) {
+            continue
+        }
+
+        $completedModuleId = Get-TaskScalarValue -Block $block.Lines -Key "seededExecutionModule"
+        if ($completedModuleId -ne $ModuleId) {
+            continue
+        }
+
+        $targetClosure = Get-TaskScalarValue -Block $block.Lines -Key "targetClosureItem"
+        if ([string]::IsNullOrWhiteSpace($targetClosure) -or $items.Contains($targetClosure)) {
+            continue
+        }
+
+        $items.Add($targetClosure)
+    }
+
+    return $items.ToArray()
+}
+
 function Test-PathPattern {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -310,6 +346,7 @@ try {
 
     $moduleTargets = @{}
     $moduleBlockedRemainders = @{}
+    $moduleCompletedTargets = @{}
     $highRiskAllowedPatterns = @(
         ".env.local",
         ".env.example",
@@ -519,8 +556,19 @@ try {
             if (-not $moduleTargets.ContainsKey($moduleId)) {
                 $moduleTargets[$moduleId] = New-Object System.Collections.Generic.List[string]
             }
+            if (-not $moduleCompletedTargets.ContainsKey($moduleId)) {
+                $completedTargets = @(Get-CompletedTargetClosureItems -TaskBlocks $taskBlocks -ModuleId $moduleId)
+                $moduleCompletedTargets[$moduleId] = New-Object System.Collections.Generic.List[string]
+                foreach ($completedTarget in $completedTargets) {
+                    $moduleCompletedTargets[$moduleId].Add($completedTarget)
+                }
+            }
             if ($moduleTargets[$moduleId].Contains($targetClosure)) {
                 Add-Finding "HARD_BLOCK_SEED_DUPLICATE_TARGET_CLOSURE $moduleId $targetClosure"
+                Add-MeceOverlap
+            }
+            if ($moduleCompletedTargets[$moduleId].Contains($targetClosure)) {
+                Add-Finding "HARD_BLOCK_SEED_TARGET_ALREADY_COMPLETED $moduleId $targetClosure"
                 Add-MeceOverlap
             }
             $moduleTargets[$moduleId].Add($targetClosure)
@@ -541,13 +589,17 @@ try {
         $expectedTargets = @(Get-TargetClosureItems -Lines $matrixLines -ModuleId $moduleId)
         $actualTargets = @($moduleTargets[$moduleId].ToArray())
         $blockedRemainderTargets = if ($moduleBlockedRemainders.ContainsKey($moduleId)) { @($moduleBlockedRemainders[$moduleId].ToArray()) } else { @() }
+        $completedTargets = if ($moduleCompletedTargets.ContainsKey($moduleId)) { @($moduleCompletedTargets[$moduleId].ToArray()) } else { @(Get-CompletedTargetClosureItems -TaskBlocks $taskBlocks -ModuleId $moduleId) }
         Write-Section -Title "Coverage $moduleId"
         Write-Output "expectedTargetCount: $($expectedTargets.Count)"
         Write-Output "actualTargetCount: $($actualTargets.Count)"
+        Write-Output "completedTargetCount: $($completedTargets.Count)"
         Write-Output "blockedRemainderTargetCount: $($blockedRemainderTargets.Count)"
 
         foreach ($expectedTarget in $expectedTargets) {
-            if ($actualTargets -notcontains $expectedTarget -and $blockedRemainderTargets -notcontains $expectedTarget) {
+            if ($actualTargets -notcontains $expectedTarget -and
+                $completedTargets -notcontains $expectedTarget -and
+                $blockedRemainderTargets -notcontains $expectedTarget) {
                 Add-Finding "HARD_BLOCK_SEED_COVERAGE_MISSING_TARGET $moduleId $expectedTarget"
                 Add-MeceCoverageGap
             }
