@@ -29868,9 +29868,12 @@ tasks:
     sourceStory: advanced-edition-organization-analytics
     taskKind: docs_schema_migration_planning
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: pass_docs_only_schema_migration_approval_package_seeded
     retryCount: 0
+    claimedAt: "2026-06-16T18:47:42-07:00"
+    closedAt: "2026-06-16T18:47:42-07:00"
+    branch: codex/advanced-organization-analytics-training-answer-source-schema-migration-planning
     dependencies:
       - advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
     humanApprovalBoundary: >-
@@ -29935,7 +29938,7 @@ tasks:
       - PR
       - force push
     closeoutPolicy:
-      localCommit: requires_fresh_approval_after_claim
+      localCommit: requires_fresh_approval_after_validation
       fastForwardMerge:
         approved: false
         targetBranch: master
@@ -29946,7 +29949,7 @@ tasks:
         deleteShortBranch: true
         fetchPruneAfterPush: true
     validationCommands:
-      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-training-answer-source-schema-migration-planning","status: pending","docs_schema_migration_planning"
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-training-answer-source-schema-migration-planning","status: closed","docs_schema_migration_planning"
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
@@ -29954,3 +29957,98 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration-planning
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration-planning
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration-planning
+
+  - id: advanced-organization-analytics-training-answer-source-schema-migration
+    title: Advanced organization analytics training answer source schema migration
+    phase: advanced-organization-analytics-training-answer-source-schema-migration
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_schema_migration
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-training-answer-source-schema-migration-planning
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim and a passing local schemaMigration capability gate before
+      any schema or generated migration file is modified. Scope is limited to adding a metadata-only official
+      organization training answer/submission source for aggregate organization analytics. The task may update the
+      declared schema file, focused schema tests, and generated Drizzle migration only after the gate passes. It must not
+      execute database connections or migrations unless separately approved by this task's evidence, and must not modify
+      runtime route/service/repository/UI code, package/lockfile/dependencies, provider/model configuration, e2e/browser/
+      dev-server, staging/prod/cloud/deploy/payment/external-service work, PR, force push, or Cost Calibration Gate.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - src/db/schema/organization-training.ts
+      - src/db/schema/organization-training.test.ts
+      - drizzle/**
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/db/schema/auth.ts
+      - src/db/schema/student-experience.ts
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/system.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/**
+      - src/components/**
+      - src/hooks/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - missing fresh user approval
+      - missing schemaMigration capability gate
+      - runtime route/service/repository/UI implementation
+      - real DB access or database connection execution unless separately approved by this task
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - publicId lists
+      - dependency changes
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_approval_after_validation
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.ps1 -Capability schemaMigration -Action use_capability
+      - npm.cmd run test:unit -- "src/db/schema/organization-training.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration
