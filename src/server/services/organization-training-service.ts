@@ -17,6 +17,7 @@ import type {
   OrganizationTrainingScopeSnapshotDto,
   OrganizationTrainingSourceContextAttachmentDto,
   OrganizationTrainingSourceContextDto,
+  OrganizationTrainingSourceContextUsageDto,
 } from "../contracts/organization-training-contract";
 import { professionValues, type Profession } from "../models/auth";
 import {
@@ -377,6 +378,12 @@ export type OrganizationTrainingSourceContextInput = Omit<
 export type OrganizationTrainingAttachSourceContextCommand = {
   adminContext: OrganizationTrainingAdminContext;
   authorizationContext: EffectiveAuthorizationContextDto;
+  draftPublicId: string;
+  organizationPublicId: string;
+  sourceContexts: readonly OrganizationTrainingSourceContextInput[];
+};
+
+export type OrganizationTrainingSourceContextUsageReadModelInput = {
   draftPublicId: string;
   organizationPublicId: string;
   sourceContexts: readonly OrganizationTrainingSourceContextInput[];
@@ -1405,6 +1412,32 @@ function normalizeSourceContexts(
   }
 
   return normalizedSourceContexts as OrganizationTrainingSourceContextDto[];
+}
+
+export function buildOrganizationTrainingSourceContextUsageReadModel(
+  input: OrganizationTrainingSourceContextUsageReadModelInput,
+): ApiResponse<OrganizationTrainingSourceContextUsageDto | null> {
+  const draftPublicId = normalizeRequiredText(input.draftPublicId);
+  const organizationPublicId = normalizeRequiredText(
+    input.organizationPublicId,
+  );
+  const sourceContexts = normalizeSourceContexts(input.sourceContexts);
+
+  if (
+    draftPublicId === null ||
+    organizationPublicId === null ||
+    sourceContexts === null
+  ) {
+    return createSuccessResponse(null);
+  }
+
+  return createSuccessResponse({
+    draftPublicId,
+    organizationPublicId,
+    sourceContexts,
+    formalUsagePolicy: createSourceContextFormalUsagePolicy(),
+    redactionStatus: "metadata_only",
+  });
 }
 
 function areSourceContextsMatchedToAuthorization(

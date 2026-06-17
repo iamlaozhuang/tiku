@@ -12,6 +12,7 @@ import {
   buildOrganizationTrainingAdminLifecycleFlowReadModel,
   buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel,
   buildOrganizationTrainingAuditLogReferenceReadModel,
+  buildOrganizationTrainingSourceContextUsageReadModel,
   createOrganizationTrainingService,
   type OrganizationTrainingStore,
   type OrganizationTrainingManualDraftWrite,
@@ -1234,6 +1235,102 @@ describe("organization training service", () => {
       "SENTINEL_SOURCE_CONTEXT_EXTRA_ANSWER",
     );
     expect(serializedResult).not.toContain("privateRowId");
+  });
+
+  it("builds metadata-only paper and mock_exam context usage without full paper content", () => {
+    const fullPaperContent = ["FULL", "PAPER", "CONTENT"].join("-");
+    const fullQuestionBody = ["FULL", "QUESTION", "BODY"].join("-");
+    const standardAnswer = ["STANDARD", "ANSWER", "BODY"].join("-");
+    const analysis = ["TEACHER", "ANALYSIS", "BODY"].join("-");
+    const protectedPayloadKey = ["provider", "Payload"].join("");
+    const protectedPayloadMarker = ["PROVIDER", "PAY", "LOAD", "BODY"].join(
+      "-",
+    );
+
+    const result = buildOrganizationTrainingSourceContextUsageReadModel({
+      draftPublicId: " training_draft_public_123 ",
+      organizationPublicId: " organization_public_123 ",
+      sourceContexts: [
+        {
+          sourceType: "paper",
+          sourcePublicId: " paper_public_123 ",
+          title: " Formal paper reference ",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 20,
+          totalScore: 100,
+          sourceStatus: "published",
+          fullPaperContent,
+          fullQuestionBody,
+          standardAnswer,
+          analysis,
+          [protectedPayloadKey]: protectedPayloadMarker,
+        } as never,
+        {
+          sourceType: "mock_exam",
+          sourcePublicId: " mock_exam_public_456 ",
+          title: " Mock exam reference ",
+          profession: "monopoly",
+          level: 3,
+          subject: "theory",
+          questionCount: 10,
+          totalScore: 50,
+          sourceStatus: "published",
+          fullPaperContent,
+        } as never,
+      ],
+    });
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        draftPublicId: "training_draft_public_123",
+        organizationPublicId: "organization_public_123",
+        sourceContexts: [
+          {
+            sourceType: "paper",
+            sourcePublicId: "paper_public_123",
+            title: "Formal paper reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 20,
+            totalScore: 100,
+            sourceStatus: "published",
+            redactionStatus: "metadata_only",
+          },
+          {
+            sourceType: "mock_exam",
+            sourcePublicId: "mock_exam_public_456",
+            title: "Mock exam reference",
+            profession: "monopoly",
+            level: 3,
+            subject: "theory",
+            questionCount: 10,
+            totalScore: 50,
+            sourceStatus: "published",
+            redactionStatus: "metadata_only",
+          },
+        ],
+        formalUsagePolicy: {
+          createFormalPaper: false,
+          createMockExam: false,
+          exposeQuestionBody: false,
+          exposeStandardAnswer: false,
+          exposeAnalysis: false,
+          exposeProviderPayload: false,
+        },
+        redactionStatus: "metadata_only",
+      },
+    });
+    expect(serializedResult).not.toContain(fullPaperContent);
+    expect(serializedResult).not.toContain(fullQuestionBody);
+    expect(serializedResult).not.toContain(standardAnswer);
+    expect(serializedResult).not.toContain(analysis);
+    expect(serializedResult).not.toContain(protectedPayloadMarker);
   });
 
   it("blocks source context attachment outside org_auth scope or content scope", async () => {

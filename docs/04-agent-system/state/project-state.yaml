@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T07:21:06-07:00"
+updatedAt: "2026-06-17T07:22:36-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-202-organization-training-employee-answer-lifecycle-local-role-flow
-  status: closed
+  id: batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex
+  status: in_progress
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: pending-task-plan
-  evidencePath: docs/05-execution-logs/evidence/batch-202-organization-training-employee-answer-lifecycle-local-role-flow.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-202-organization-training-employee-answer-lifecycle-local-role-flow.md
-  branch: codex/batch-202-organization-training-employee-flow
-  commitSha: aba34e755516eca9d4a3688b3ad38413f16d216b
+  evidencePath: docs/05-execution-logs/evidence/batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex.md
+  branch: codex/batch-203-organization-training-context-usage
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

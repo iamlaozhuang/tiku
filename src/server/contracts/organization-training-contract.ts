@@ -174,3 +174,20 @@ export type OrganizationTrainingSourceContextAttachmentDto = {
   sourceContexts: OrganizationTrainingSourceContextDto[];
   redactionStatus: "metadata_only";
 };
+
+export type OrganizationTrainingSourceContextUsagePolicyDto = {
+  createFormalPaper: false;
+  createMockExam: false;
+  exposeQuestionBody: false;
+  exposeStandardAnswer: false;
+  exposeAnalysis: false;
+  exposeProviderPayload: false;
+};
+
+export type OrganizationTrainingSourceContextUsageDto = {
+  draftPublicId: string;
+  organizationPublicId: string;
+  sourceContexts: OrganizationTrainingSourceContextDto[];
+  formalUsagePolicy: OrganizationTrainingSourceContextUsagePolicyDto;
+  redactionStatus: "metadata_only";
+};
