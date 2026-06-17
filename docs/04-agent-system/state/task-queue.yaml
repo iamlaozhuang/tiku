@@ -8302,3 +8302,400 @@ tasks:
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-204-organization-training-audit-log-redacted-reference.md
     status: closed
     retryCount: 0
+
+  - id: batch-205-organization-analytics-aggregate-only-organization-metrics
+    title: Module Run v2 organization-analytics implementation seed
+    phase: batch-205-organization-analytics-aggregate-only-organization-metrics
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-73-advanced-organization-analytics-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-17 user prompt for module organization-analytics; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. Scope remains limited to local_unit_tdd/local_service_contract/read-model/redacted evidence; provider/model calls, env credential access, dependency/package/lockfile, schema/drizzle/migration, cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate remain blocked.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-17 user prompt for module organization-analytics; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. Scope remains limited to local_unit_tdd/local_service_contract/read-model/redacted evidence; provider/model calls, env credential access, dependency/package/lockfile, schema/drizzle/migration, cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate remain blocked.
+    seededByTask: phase-73-advanced-organization-analytics-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: organization-analytics
+    targetClosureItem: aggregate-only organization metrics
+    behaviorBoundary: organization-analytics::aggregate-only organization metrics
+    requirementRefs:
+      - phase-73-advanced-organization-analytics-implementation-planning
+    useCases:
+      - organization-analytics local implementation validates aggregate-only organization metrics
+    acceptanceScenarios:
+      - aggregate-only organization metrics passes L5-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L5-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L5
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-205-organization-analytics-aggregate-only-organization-metrics
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-205-organization-analytics-aggregate-only-organization-metrics
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-205-organization-analytics-aggregate-only-organization-metrics
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-205-organization-analytics-aggregate-only-organization-metrics
+    evidencePath: docs/05-execution-logs/evidence/batch-205-organization-analytics-aggregate-only-organization-metrics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-205-organization-analytics-aggregate-only-organization-metrics.md
+    status: pending
+    retryCount: 0
+  - id: batch-206-organization-analytics-privacy-preserving-employee-statistics
+    title: Module Run v2 organization-analytics implementation seed
+    phase: batch-206-organization-analytics-privacy-preserving-employee-statistics
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-73-advanced-organization-analytics-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-17 user prompt for module organization-analytics; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. Scope remains limited to local_unit_tdd/local_service_contract/read-model/redacted evidence; provider/model calls, env credential access, dependency/package/lockfile, schema/drizzle/migration, cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate remain blocked.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-17 user prompt for module organization-analytics; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. Scope remains limited to local_unit_tdd/local_service_contract/read-model/redacted evidence; provider/model calls, env credential access, dependency/package/lockfile, schema/drizzle/migration, cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate remain blocked.
+    seededByTask: phase-73-advanced-organization-analytics-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: organization-analytics
+    targetClosureItem: privacy-preserving employee statistics
+    behaviorBoundary: organization-analytics::privacy-preserving employee statistics
+    requirementRefs:
+      - phase-73-advanced-organization-analytics-implementation-planning
+    useCases:
+      - organization-analytics local implementation validates privacy-preserving employee statistics
+    acceptanceScenarios:
+      - privacy-preserving employee statistics passes L5-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L5-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L5
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-206-organization-analytics-privacy-preserving-employee-statistics
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-206-organization-analytics-privacy-preserving-employee-statistics
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-206-organization-analytics-privacy-preserving-employee-statistics
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-206-organization-analytics-privacy-preserving-employee-statistics
+    evidencePath: docs/05-execution-logs/evidence/batch-206-organization-analytics-privacy-preserving-employee-statistics.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-206-organization-analytics-privacy-preserving-employee-statistics.md
+    status: pending
+    retryCount: 0
+  - id: batch-207-organization-analytics-export-readiness-contracts-without-object-st
+    title: Module Run v2 organization-analytics implementation seed
+    phase: batch-207-organization-analytics-export-readiness-contracts-without-object-st
+    sourceStory: module-run-v2-auto-seed-bridge
+    dependencies:
+      - phase-73-advanced-organization-analytics-implementation-planning
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-17 user prompt for module organization-analytics; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. Scope remains limited to local_unit_tdd/local_service_contract/read-model/redacted evidence; provider/model calls, env credential access, dependency/package/lockfile, schema/drizzle/migration, cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate remain blocked.
+    autoDriveLocalImplementationApproval: >-
+      autoDriveLocalImplementationApproval approved by current 2026-06-17 user prompt for module organization-analytics; standingUnattendedLocalCloseoutApproval applies to low-risk local implementation tasks only with local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and worktree parking. High-risk capability gates remain blocked. Scope remains limited to local_unit_tdd/local_service_contract/read-model/redacted evidence; provider/model calls, env credential access, dependency/package/lockfile, schema/drizzle/migration, cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate remain blocked.
+    seededByTask: phase-73-advanced-organization-analytics-implementation-planning
+    seededImplementationTask: true
+    seededExecutionModule: organization-analytics
+    targetClosureItem: export readiness contracts without object storage or external delivery
+    behaviorBoundary: organization-analytics::export readiness contracts without object storage or external delivery
+    requirementRefs:
+      - phase-73-advanced-organization-analytics-implementation-planning
+    useCases:
+      - organization-analytics local implementation validates export readiness contracts without object storage or external delivery
+    acceptanceScenarios:
+      - export readiness contracts without object storage or external delivery passes L5-local-implementation without provider/env/schema/deploy/dependency changes
+    nonGoals:
+      - provider/env/schema/deploy/dependency changes and Cost Calibration Gate execution
+    validationProfile: L5-local-implementation
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: local_unit_tdd
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    localExperienceClosureGate: planned
+    localFullLoopGate: L5
+    blockedRemainder:
+      - none
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    autodrivePolicy:
+      mode: guarded_serial
+      allowedAgentActions:
+        - claim_task
+        - continue_task
+        - scaffold_task_plan
+        - run_validation
+        - write_evidence
+      blockedAgentActions:
+        - merge
+        - push
+        - pr
+        - deploy
+        - dependency_change
+        - schema_migration
+        - env_secret
+        - provider_call
+        - cost_calibration_gate
+      maxAutonomousSteps: 5
+      stopOn:
+        - hard_block
+        - blocked_gate
+        - validation_failure
+        - out_of_scope_change
+        - dirty_unknown_worktree
+        - active_owner_present
+    capabilities:
+      localDockerDatabase: task_approval_required
+      destructiveLocalDockerDatabase: blocked_without_task_approval
+      projectResourceRead: task_approval_required
+      providerKey: env_destination_confirmation_required
+      providerCall: blocked_without_task_approval
+      schemaMigration: blocked_without_task_approval
+      costCalibrationGate: blocked
+    registryLifecycle:
+      runStatus: active
+      cleanupPolicy: none
+      redactionRequired: true
+    taskKind: implementation
+    moduleRunVersion: 2
+    allowedFiles:
+      - src/server/models/**
+      - src/server/contracts/**
+      - src/server/validators/**
+      - src/server/services/**
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - local_implementation
+      - local_validation
+      - evidence_redaction
+      - automation_policy
+    validationCommandLifecycle:
+      - phase: pre_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: advisory_baseline
+        command: npm.cmd run test -- --run focused # focused test anchor
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-73-advanced-organization-analytics-implementation-planning -CandidateTaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-207-organization-analytics-export-readiness-contracts-without-object-st
+    evidencePath: docs/05-execution-logs/evidence/batch-207-organization-analytics-export-readiness-contracts-without-object-st.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/batch-207-organization-analytics-export-readiness-contracts-without-object-st.md
+    status: pending
+    retryCount: 0
