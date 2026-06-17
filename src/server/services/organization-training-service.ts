@@ -9,6 +9,8 @@ import type {
   EmployeeOrganizationTrainingScoreSummaryDto,
   OrganizationTrainingAdminLifecycleFlowDto,
   OrganizationTrainingAdminLifecycleItemDto,
+  OrganizationTrainingEmployeeAnswerLifecycleFlowDto,
+  OrganizationTrainingEmployeeAnswerLifecycleItemDto,
   OrganizationTrainingAuditLogReferenceDto,
   OrganizationTrainingDraftDto,
   OrganizationTrainingPublishedVersionDto,
@@ -383,6 +385,12 @@ export type OrganizationTrainingAttachSourceContextCommand = {
 export type OrganizationTrainingListEmployeeVisibleVersionsCommand = {
   employeeContext: OrganizationTrainingEmployeeContext;
   sourceVersions: readonly OrganizationTrainingPublishedVersionDto[];
+};
+
+export type OrganizationTrainingEmployeeAnswerLifecycleFlowReadModelInput = {
+  employeeContext: OrganizationTrainingEmployeeContext;
+  versions: readonly OrganizationTrainingPublishedVersionDto[];
+  answers: readonly EmployeeOrganizationTrainingAnswerDto[];
 };
 
 export type OrganizationTrainingEmployeeAnswerDraftInput = {
@@ -997,6 +1005,124 @@ function createReadonlyAnswerSummary(
     answerStatus: "read_only",
     resultSummaryVisible: true,
   };
+}
+
+function findOwnEmployeeAnswerForVersion(
+  version: OrganizationTrainingPublishedVersionDto,
+  employeeContext: NormalizedEmployeeContext,
+  answers: readonly EmployeeOrganizationTrainingAnswerDto[],
+): EmployeeOrganizationTrainingAnswerDto | null {
+  return (
+    answers.find((answer) => isOwnAnswer(answer, employeeContext, version)) ??
+    null
+  );
+}
+
+function buildEmployeeAnswerLifecycleItem(
+  version: OrganizationTrainingPublishedVersionDto,
+  answer: EmployeeOrganizationTrainingAnswerDto | null,
+): OrganizationTrainingEmployeeAnswerLifecycleItemDto | null {
+  if (answer === null) {
+    if (!isVersionAnswerable(version)) {
+      return null;
+    }
+
+    return {
+      trainingVersionPublicId: version.publicId,
+      organizationPublicId: version.organizationPublicId,
+      title: version.title,
+      versionStatus: version.status,
+      answerStatus: "not_started",
+      availableActions: ["start_answer"],
+      resultSummaryVisible: false,
+    };
+  }
+
+  if (answer.answerStatus === "in_progress") {
+    if (!isVersionAnswerable(version)) {
+      return null;
+    }
+
+    return {
+      trainingVersionPublicId: version.publicId,
+      organizationPublicId: version.organizationPublicId,
+      title: version.title,
+      versionStatus: version.status,
+      answerStatus: "in_progress",
+      availableActions: ["continue_answer", "submit_answer"],
+      resultSummaryVisible: false,
+    };
+  }
+
+  if (answer.answerStatus === "submitted" && isVersionAnswerable(version)) {
+    return {
+      trainingVersionPublicId: version.publicId,
+      organizationPublicId: version.organizationPublicId,
+      title: version.title,
+      versionStatus: version.status,
+      answerStatus: "submitted",
+      availableActions: ["view_result"],
+      resultSummaryVisible: true,
+    };
+  }
+
+  if (isSubmittedAnswer(answer)) {
+    return {
+      trainingVersionPublicId: version.publicId,
+      organizationPublicId: version.organizationPublicId,
+      title: version.title,
+      versionStatus: version.status,
+      answerStatus: "read_only",
+      availableActions: ["view_result"],
+      resultSummaryVisible: true,
+    };
+  }
+
+  return null;
+}
+
+export function buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel(
+  input: OrganizationTrainingEmployeeAnswerLifecycleFlowReadModelInput,
+): ApiResponse<OrganizationTrainingEmployeeAnswerLifecycleFlowDto> {
+  const normalizedEmployeeContext = normalizeEmployeeContext(
+    input.employeeContext,
+  );
+
+  if (
+    normalizedEmployeeContext === null ||
+    getEmployeeContextBlockedReason(
+      normalizedEmployeeContext.authorizationContext,
+    ) !== null
+  ) {
+    return createSuccessResponse({
+      items: [],
+      redactionStatus: "metadata_only",
+    });
+  }
+
+  const items = input.versions
+    .filter((version) =>
+      isVersionVisibleToEmployee(version, normalizedEmployeeContext),
+    )
+    .map((version) =>
+      buildEmployeeAnswerLifecycleItem(
+        version,
+        findOwnEmployeeAnswerForVersion(
+          version,
+          normalizedEmployeeContext,
+          input.answers,
+        ),
+      ),
+    )
+    .filter(
+      (item): item is OrganizationTrainingEmployeeAnswerLifecycleItemDto =>
+        item !== null,
+    );
+
+  return createSuccessResponse({
+    items,
+    redactionStatus: "metadata_only",
+  });
 }
 
 function isPublishQuestionsValid(

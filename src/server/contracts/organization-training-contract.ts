@@ -123,6 +123,31 @@ export type OrganizationTrainingAdminLifecycleFlowDto = {
   redactionStatus: "metadata_only";
 };
 
+export type OrganizationTrainingEmployeeAnswerLifecycleAction =
+  | "start_answer"
+  | "continue_answer"
+  | "submit_answer"
+  | "view_result";
+
+export type OrganizationTrainingEmployeeAnswerLifecycleStatus =
+  | "not_started"
+  | OrganizationTrainingAnswerStatus;
+
+export type OrganizationTrainingEmployeeAnswerLifecycleItemDto = {
+  trainingVersionPublicId: string;
+  organizationPublicId: string;
+  title: string;
+  versionStatus: OrganizationTrainingVersionStatus;
+  answerStatus: OrganizationTrainingEmployeeAnswerLifecycleStatus;
+  availableActions: OrganizationTrainingEmployeeAnswerLifecycleAction[];
+  resultSummaryVisible: boolean;
+};
+
+export type OrganizationTrainingEmployeeAnswerLifecycleFlowDto = {
+  items: OrganizationTrainingEmployeeAnswerLifecycleItemDto[];
+  redactionStatus: "metadata_only";
+};
+
 export type OrganizationTrainingAuditLogReferenceDto = {
   auditLogReference: {
     publicId: string;

@@ -10,6 +10,7 @@ import type { OrganizationTrainingPublishInput } from "../models/organization-tr
 import { normalizeOrganizationTrainingPublishInput } from "../validators/organization-training";
 import {
   buildOrganizationTrainingAdminLifecycleFlowReadModel,
+  buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel,
   buildOrganizationTrainingAuditLogReferenceReadModel,
   createOrganizationTrainingService,
   type OrganizationTrainingStore,
@@ -1584,6 +1585,174 @@ describe("organization training service", () => {
       success: true,
       versions: [createPublishedVersion()],
     });
+  });
+
+  it("builds a metadata-only employee answer lifecycle flow for local role actions", () => {
+    const rawQuestionBody = ["RAW", "QUESTION", "BODY"].join("-");
+    const standardAnswer = ["STANDARD", "ANSWER", "BODY"].join("-");
+    const analysis = ["TEACHER", "ANALYSIS", "BODY"].join("-");
+    const protectedPayloadKey = ["provider", "Payload"].join("");
+    const protectedPayloadMarker = ["PROVIDER", "PAY", "LOAD", "BODY"].join(
+      "-",
+    );
+    const privateRowData = ["PRIVATE", "ROW", "DATA"].join("-");
+    const inProgressAnswer: EmployeeOrganizationTrainingAnswerDto = {
+      publicId: "training_answer_draft_public_456",
+      trainingVersionPublicId: "training_version_in_progress_public_456",
+      employeePublicId: "employee_public_123",
+      organizationPublicId: "organization_branch_public_456",
+      answerOrganizationSnapshot: {
+        organizationPublicIds: [
+          "organization_branch_public_456",
+          "organization_public_123",
+        ],
+        capturedAt: fixedNow.toISOString(),
+      },
+      answerStatus: "in_progress",
+      scoreSummary: null,
+      submittedAt: null,
+      resultSummaryVisible: false,
+    };
+    const submittedAnswer = createSubmittedEmployeeAnswer({
+      trainingVersionPublicId: "training_version_submitted_public_789",
+    });
+    const takenDownAnswer = createSubmittedEmployeeAnswer({
+      trainingVersionPublicId: "training_version_taken_down_public_999",
+    });
+    const otherEmployeeAnswer = createSubmittedEmployeeAnswer({
+      employeePublicId: "employee_public_other_999",
+      trainingVersionPublicId: "training_version_other_employee_public_888",
+    });
+    const versionWithProtectedContent = {
+      ...createPublishedVersion({
+        publicId: "training_version_not_started_public_123",
+        title: "Not started training",
+      }),
+      rawQuestionBody,
+      standardAnswer,
+      analysis,
+      [protectedPayloadKey]: protectedPayloadMarker,
+      privateRowData,
+    };
+    const result =
+      buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel({
+        employeeContext: {
+          employeePublicId: " employee_public_123 ",
+          currentOrganizationPublicId: " organization_branch_public_456 ",
+          visibleOrganizationPublicIds: [
+            "organization_branch_public_456",
+            "organization_public_123",
+          ],
+          authorizationContext: createAdvancedOrgAuthContext(),
+        },
+        versions: [
+          versionWithProtectedContent,
+          createPublishedVersion({
+            publicId: "training_version_in_progress_public_456",
+            title: "In-progress training",
+          }),
+          createPublishedVersion({
+            publicId: "training_version_submitted_public_789",
+            title: "Submitted training",
+          }),
+          createPublishedVersion({
+            publicId: "training_version_taken_down_public_999",
+            title: "Taken-down training",
+            status: "taken_down",
+            takenDownAt: fixedNow.toISOString(),
+            takedownReason: "outdated training",
+          }),
+          createPublishedVersion({
+            publicId: "training_version_other_scope_public_999",
+            publishScopeSnapshot: {
+              organizationPublicIds: ["organization_other_public_999"],
+              capturedAt: fixedNow.toISOString(),
+            },
+          }),
+          createPublishedVersion({
+            publicId: "training_version_other_employee_public_888",
+            title: "Other employee answer training",
+          }),
+        ],
+        answers: [
+          inProgressAnswer,
+          submittedAnswer,
+          takenDownAnswer,
+          otherEmployeeAnswer,
+        ],
+      });
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        items: [
+          {
+            trainingVersionPublicId: "training_version_not_started_public_123",
+            organizationPublicId: "organization_public_123",
+            title: "Not started training",
+            versionStatus: "published",
+            answerStatus: "not_started",
+            availableActions: ["start_answer"],
+            resultSummaryVisible: false,
+          },
+          {
+            trainingVersionPublicId: "training_version_in_progress_public_456",
+            organizationPublicId: "organization_public_123",
+            title: "In-progress training",
+            versionStatus: "published",
+            answerStatus: "in_progress",
+            availableActions: ["continue_answer", "submit_answer"],
+            resultSummaryVisible: false,
+          },
+          {
+            trainingVersionPublicId: "training_version_submitted_public_789",
+            organizationPublicId: "organization_public_123",
+            title: "Submitted training",
+            versionStatus: "published",
+            answerStatus: "submitted",
+            availableActions: ["view_result"],
+            resultSummaryVisible: true,
+          },
+          {
+            trainingVersionPublicId: "training_version_taken_down_public_999",
+            organizationPublicId: "organization_public_123",
+            title: "Taken-down training",
+            versionStatus: "taken_down",
+            answerStatus: "read_only",
+            availableActions: ["view_result"],
+            resultSummaryVisible: true,
+          },
+          {
+            trainingVersionPublicId:
+              "training_version_other_employee_public_888",
+            organizationPublicId: "organization_public_123",
+            title: "Other employee answer training",
+            versionStatus: "published",
+            answerStatus: "not_started",
+            availableActions: ["start_answer"],
+            resultSummaryVisible: false,
+          },
+        ],
+        redactionStatus: "metadata_only",
+      },
+    });
+    expect(serializedResult).not.toContain(rawQuestionBody);
+    expect(serializedResult).not.toContain(standardAnswer);
+    expect(serializedResult).not.toContain(analysis);
+    expect(serializedResult).not.toContain(protectedPayloadMarker);
+    expect(serializedResult).not.toContain(privateRowData);
+    expect(serializedResult).not.toContain("answerRecordPublicId");
+    expect(serializedResult).not.toContain("practicePublicId");
+    expect(serializedResult).not.toContain("mockExamPublicId");
+    expect(serializedResult).not.toContain("examReportPublicId");
+    expect(serializedResult).not.toContain("mistakeBookPublicId");
+    expect(serializedResult).not.toContain(
+      "training_version_other_scope_public_999",
+    );
+    expect(serializedResult).not.toContain("employee_public_other_999");
+    expect(serializedResult).not.toContain("training_answer_record_public_123");
   });
 
   it("saves an employee answer draft with answer-time organization snapshot and no formal writes", async () => {
