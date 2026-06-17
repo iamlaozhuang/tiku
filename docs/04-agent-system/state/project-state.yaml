@@ -433,8 +433,8 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1cf0fda270be4ff82251bc5f2ad65fa2e71e2a20
-  lastKnownOriginMasterSha: 1cf0fda270be4ff82251bc5f2ad65fa2e71e2a20
+  lastKnownMasterSha: cd95a1d5d6b4706e2534bc933a85f2da2cb98684
+  lastKnownOriginMasterSha: cd95a1d5d6b4706e2534bc933a85f2da2cb98684
 currentTask:
   id: batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
   status: closed
@@ -443,7 +443,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
   branch: codex/ops-governance-batch-211-recovery-boundary
-  commitSha: pending-closeout-commit
+  commitSha: cd95a1d5d6b4706e2534bc933a85f2da2cb98684
   prUrl: null
   retryCount: 0
   lastFailurePath: null

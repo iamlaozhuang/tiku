@@ -16,6 +16,7 @@ result: pass
 - RED: PASS. `npm.cmd run test:unit -- src/server/services/ops-governance-local-recovery-expired-hidden-boundary-contracts-service.test.ts` failed because `./ops-governance-local-recovery-expired-hidden-boundary-contracts-service` did not exist.
 - GREEN: PASS. `npm.cmd run test:unit -- src/server/services/ops-governance-local-recovery-expired-hidden-boundary-contracts-service.test.ts` passed with 1 file and 3 tests after implementation.
 - Commit: `1cf0fda270be4ff82251bc5f2ad65fa2e71e2a20` is the accepted pre-closeout baseline; the task closeout commit follows this evidence record.
+- Closeout implementation commit: `cd95a1d5d6b4706e2534bc933a85f2da2cb98684`.
 - localFullLoopGate: L6 local unit/read-model validation only.
 - threadRolloverGate: not required; current thread has enough context for local closeout.
 - automationHandoffPolicy: no handoff; continue guarded serial closeout in this thread.
@@ -33,6 +34,7 @@ result: pass
 - `git diff --check`: passed.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c`: passed after recording the required validation command.
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c`: passed.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2PostCloseoutStateReconcile.ps1 -TaskId batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c`: initially hard-blocked because `currentTask.commitSha` was the placeholder `pending-closeout-commit`; project-state was repaired to the actual closeout implementation commit before rerun.
 
 ## Implementation Notes
 
