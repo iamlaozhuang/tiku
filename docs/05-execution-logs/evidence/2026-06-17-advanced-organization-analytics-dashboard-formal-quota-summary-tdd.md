@@ -46,3 +46,13 @@
 - blocked remainder: schema/migration/drizzle/dependency/provider/model/e2e/browser/dev-server/external-service/deploy/payment/quota/cost/PR/force-push gates remain blocked.
 - threadRolloverGate: not needed.
 - nextModuleRunCandidate: recommend a readonly queue-selection or next scoped organization analytics task after this merged branch is clean; keep repository/source-reader, schema, provider, dependency, e2e/browser, and Cost Calibration gates blocked unless a future task explicitly approves them.
+
+## Post-Merge Master Validation
+
+- RecordedAt: `2026-06-17T02:42:30-07:00`
+- Master after fast-forward merge: `3996bc54f8a117a0d848da524e90e5a41a334adf`
+- PASS: `npm.cmd run test:unit -- "src/server/services/organization-analytics-service.test.ts"` (`1` file, `12` tests passed)
+- PASS: `npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"` (`1` file, `13` tests passed)
+- PASS: `git diff --check`
+- PASS: `npm.cmd run lint`
+- PASS: `npm.cmd run typecheck`
