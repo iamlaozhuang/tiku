@@ -9,7 +9,11 @@ import {
   type OrganizationAnalyticsSummaryRouteQuery,
 } from "../validators/organization-analytics";
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
-import type { OrganizationAnalyticsAdminContext } from "./organization-analytics-service";
+import {
+  buildOrganizationAnalyticsDashboardSummaryFromRepository,
+  type OrganizationAnalyticsAdminContext,
+  type OrganizationAnalyticsServiceRepository,
+} from "./organization-analytics-service";
 
 const ORGANIZATION_ANALYTICS_DASHBOARD_RUNTIME_NOT_CONFIGURED_CODE = 503185;
 const ORGANIZATION_ANALYTICS_DASHBOARD_RUNTIME_NOT_CONFIGURED_MESSAGE =
@@ -51,6 +55,12 @@ export type OrganizationAnalyticsDashboardSummaryRouteOptions = {
   resolveAdminContext?: OrganizationAnalyticsDashboardSummaryAdminContextResolver;
 };
 
+export type OrganizationAnalyticsDashboardSummaryRuntimeRouteOptions = {
+  readUpdatedAt?: () => string;
+  repository?: OrganizationAnalyticsServiceRepository;
+  resolveAdminContext?: OrganizationAnalyticsDashboardSummaryAdminContextResolver;
+};
+
 function createJsonResponse<TData>(response: ApiResponse<TData>): Response {
   return Response.json(response);
 }
@@ -73,6 +83,21 @@ function createAdminContextUnavailableResponse(): ApiResponse<null> {
     ORGANIZATION_ANALYTICS_DASHBOARD_ADMIN_CONTEXT_UNAVAILABLE_CODE,
     ORGANIZATION_ANALYTICS_DASHBOARD_ADMIN_CONTEXT_UNAVAILABLE_MESSAGE,
   );
+}
+
+function createRepositoryBackedDashboardSummaryReader(
+  repository: OrganizationAnalyticsServiceRepository,
+  readUpdatedAt: () => string,
+): OrganizationAnalyticsDashboardSummaryReader {
+  return (input) =>
+    buildOrganizationAnalyticsDashboardSummaryFromRepository({
+      adminContext: input.adminContext,
+      adminPublicId: input.adminContext.adminPublicId,
+      organizationPublicId: input.organizationPublicId,
+      dateRange: input.dateRange,
+      updatedAt: readUpdatedAt(),
+      repository,
+    });
 }
 
 export function createOrganizationAnalyticsDashboardSummaryRouteHandlers(
@@ -121,6 +146,22 @@ export function createOrganizationAnalyticsDashboardSummaryRouteHandlers(
   });
 }
 
-export function createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers() {
-  return createOrganizationAnalyticsDashboardSummaryRouteHandlers();
+export function createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers(
+  options: OrganizationAnalyticsDashboardSummaryRuntimeRouteOptions = {},
+) {
+  if (
+    options.repository === undefined ||
+    options.resolveAdminContext === undefined ||
+    options.readUpdatedAt === undefined
+  ) {
+    return createOrganizationAnalyticsDashboardSummaryRouteHandlers();
+  }
+
+  return createOrganizationAnalyticsDashboardSummaryRouteHandlers({
+    readDashboardSummary: createRepositoryBackedDashboardSummaryReader(
+      options.repository,
+      options.readUpdatedAt,
+    ),
+    resolveAdminContext: options.resolveAdminContext,
+  });
 }

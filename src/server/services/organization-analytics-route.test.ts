@@ -5,10 +5,12 @@ import type {
   OrganizationAnalyticsDashboardSummaryDto,
   OrganizationAnalyticsDateRangeDto,
 } from "../contracts/organization-analytics-contract";
+import type { OrganizationAnalyticsRepository } from "../repositories/organization-analytics-repository";
 import type { OrganizationAnalyticsAdminContext } from "./organization-analytics-service";
 import { GET as dashboardSummaryGET } from "../../app/api/v1/organization-analytics/dashboard-summary/route";
 import {
   createOrganizationAnalyticsDashboardSummaryRouteHandlers,
+  createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers,
   type OrganizationAnalyticsDashboardSummaryRouteAdminContext,
 } from "./organization-analytics-route";
 
@@ -61,6 +63,67 @@ function createAdminContext(
     canViewOrganizationTrainingSummary: true,
     organizationPublicId: "organization_analytics_route_org_public_001",
     ...overrides,
+  };
+}
+
+function createRepositoryBackedDashboardSummaryRepository(
+  observedReads: Array<{
+    adminPublicId?: string;
+    organizationPublicId?: string;
+    scopeOrganizationPublicIds?: readonly string[];
+    dateRange?: OrganizationAnalyticsDateRangeDto;
+  }>,
+): OrganizationAnalyticsRepository {
+  return {
+    async lookupVisibleOrganizationScope(input) {
+      observedReads.push({ adminPublicId: input.adminPublicId });
+
+      return [
+        "organization_analytics_route_org_public_001",
+        "organization_analytics_route_child_public_002",
+      ];
+    },
+    async readTrainingAggregateMetricsInput(input) {
+      observedReads.push({
+        organizationPublicId: input.organizationPublicId,
+        scopeOrganizationPublicIds: input.scopeOrganizationPublicIds,
+        dateRange: input.dateRange,
+      });
+
+      return {
+        eligibleEmployeePublicIds: [
+          "organization_analytics_employee_public_001",
+          "organization_analytics_employee_public_002",
+          "organization_analytics_employee_public_003",
+        ],
+        officialSubmissions: [
+          {
+            employeePublicId: "organization_analytics_employee_public_001",
+            score: 90,
+            totalScore: 100,
+            submittedAt: "2026-06-02T08:00:00.000Z",
+          },
+          {
+            employeePublicId: "organization_analytics_employee_public_002",
+            score: 70,
+            totalScore: 100,
+            submittedAt: "2026-06-03T08:00:00.000Z",
+          },
+        ],
+      };
+    },
+    async readEmployeeTrainingSummaryInputs() {
+      return [];
+    },
+    async readFormalLearningSummary() {
+      return null;
+    },
+    async readQuotaSummary() {
+      return null;
+    },
+    async readExportReadinessRows() {
+      return [];
+    },
   };
 }
 
@@ -204,6 +267,78 @@ describe("organization analytics dashboard summary route handlers", () => {
       data: null,
     });
     expect(observedQueries).toEqual([]);
+  });
+
+  it("composes injected runtime dependencies through repository-backed dashboard summary service", async () => {
+    const observedReads: Array<{
+      adminPublicId?: string;
+      organizationPublicId?: string;
+      scopeOrganizationPublicIds?: readonly string[];
+      dateRange?: OrganizationAnalyticsDateRangeDto;
+    }> = [];
+    const adminContext = createAdminContext();
+    const { dashboardSummary } =
+      createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers({
+        repository:
+          createRepositoryBackedDashboardSummaryRepository(observedReads),
+        resolveAdminContext: async () => adminContext,
+        readUpdatedAt: () => "2026-06-16T09:30:00.000Z",
+      });
+
+    const response = await dashboardSummary.GET(
+      createDashboardSummaryRequest(
+        "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+        trainingSummary: {
+          eligibleEmployeeCount: 3,
+          submittedEmployeeCount: 2,
+          unfinishedEmployeeCount: 1,
+          completionRate: 0.6666666666666666,
+          averageScore: 80,
+          maxScore: 90,
+          minScore: 70,
+          submittedTrend: [
+            {
+              date: "2026-06-02",
+              submittedCount: 1,
+            },
+            {
+              date: "2026-06-03",
+              submittedCount: 1,
+            },
+          ],
+        },
+        redactionStatus: "aggregate_only",
+        updatedAt: "2026-06-16T09:30:00.000Z",
+      },
+    });
+    expect(observedReads).toEqual([
+      {
+        adminPublicId: "organization_analytics_admin_public_001",
+      },
+      {
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        scopeOrganizationPublicIds: [
+          "organization_analytics_route_org_public_001",
+          "organization_analytics_route_child_public_002",
+        ],
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+      },
+    ]);
   });
 
   it("exports a fail-closed dashboard summary GET route until real runtime wiring is approved", async () => {

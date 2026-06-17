@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
-updatedAt: "2026-06-16T18:06:22-07:00"
+currentPhase: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+updatedAt: "2026-06-16T18:26:41-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 25430def6f2ca23de9da4dc513ce0b512ca083ba
-  lastKnownOriginMasterSha: 25430def6f2ca23de9da4dc513ce0b512ca083ba
+  lastKnownMasterSha: 6b96c14c9130a9127a01f7b4dba1767037a41430
+  lastKnownOriginMasterSha: 6b96c14c9130a9127a01f7b4dba1767037a41430
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+  id: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
-  branch: codex/advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+  branch: codex/advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -660,12 +660,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding` seeded
-    `advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd` as the next pending task. That
-    pending task should add only the dashboard summary route runtime composition contract through TDD in
-    `src/server/services/organization-analytics-route.ts` and its unit test, while keeping the App Router route
-    fail-closed by default. Postgres repository factory implementation, direct DB access, App Router real runtime
-    wiring, service business logic changes, schema/migration, provider/model, dependency, e2e/browser/dev-server,
-    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked until
-    a later task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+    `advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd` closed the injected runtime
+    composition contract while keeping the App Router dashboard summary route fail-closed by default. The next step
+    should be a separate scoped task for the organization analytics Postgres repository factory boundary or a readonly
+    audit that decides the repository factory source inputs. Direct DB access, App Router real runtime wiring,
+    schema/migration, provider/model, dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
+    PR, force-push, and Cost Calibration Gate remain blocked until a later task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
