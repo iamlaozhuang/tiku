@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
-updatedAt: "2026-06-16T18:35:00-07:00"
+currentPhase: advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+updatedAt: "2026-06-16T18:52:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e9d85f9b277f467c8f7e859a511808bef43b588b
-  lastKnownOriginMasterSha: e9d85f9b277f467c8f7e859a511808bef43b588b
+  lastKnownMasterSha: 7e48484d1b05da6d421859d81ee59145551b849d
+  lastKnownOriginMasterSha: 7e48484d1b05da6d421859d81ee59145551b849d
 currentTask:
-  id: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+  id: advanced-organization-analytics-postgres-repository-factory-boundary-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
-  branch: codex/advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+  branch: codex/advanced-organization-analytics-postgres-repository-factory-boundary-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -646,6 +646,7 @@ qualityGates:
     standingDocsStateFastLaneCloseoutUpgrade: pass_docs_state_authorization_upgrade
     standingLocalE2ESmokeAllowlistAuthorizationUpgrade: pass_docs_state_smoke_allowlist_authorization_upgrade
     advancedOrganizationAnalyticsRepositoryFactoryBoundaryTddSeeding: pass_docs_state_seeded_repository_factory_boundary_tdd
+    advancedOrganizationAnalyticsPostgresRepositoryFactoryBoundaryTdd: pass_tdd_fail_closed_repository_factory_boundary_no_db_execution
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -661,9 +662,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-repository-factory-boundary-tdd-seeding` seeded the next pending task:
-    `advanced-organization-analytics-postgres-repository-factory-boundary-tdd`. The next step is to execute that
-    pending task with TDD, limited to repository factory boundary contract and unit tests. Direct DB access, App Router
-    real runtime wiring, service business logic, schema/migration, provider/model, dependency, e2e/browser/dev-server,
-    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+    `advanced-organization-analytics-postgres-repository-factory-boundary-tdd` closed the fail-closed Postgres
+    repository factory boundary without executing a real database connection. The next step should be a separate
+    scoped task to decide or implement the real organization analytics Postgres gateway source inputs before any App
+    Router real runtime wiring. Direct DB access, service business logic, schema/migration, provider/model, dependency,
+    e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration
+    Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md

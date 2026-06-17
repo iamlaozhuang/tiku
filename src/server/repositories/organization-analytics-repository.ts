@@ -100,6 +100,10 @@ export type OrganizationAnalyticsRepository = {
   ): Promise<readonly OrganizationAnalyticsRepositoryExportReadinessRow[]>;
 };
 
+export type OrganizationAnalyticsPostgresRepositoryFactoryOptions = {
+  gateway?: OrganizationAnalyticsRepositoryGateway | null;
+};
+
 export function createOrganizationAnalyticsRepository(
   gateway: OrganizationAnalyticsRepositoryGateway,
 ): OrganizationAnalyticsRepository {
@@ -209,6 +213,37 @@ export function createOrganizationAnalyticsRepository(
         await gateway.readExportReadinessRows(readInput);
 
       return exportReadinessRows.flatMap(copyExportReadinessRow);
+    },
+  };
+}
+
+export function createPostgresOrganizationAnalyticsRepository(
+  options: OrganizationAnalyticsPostgresRepositoryFactoryOptions = {},
+): OrganizationAnalyticsRepository {
+  return options.gateway === undefined || options.gateway === null
+    ? createUnavailableOrganizationAnalyticsRepository()
+    : createOrganizationAnalyticsRepository(options.gateway);
+}
+
+function createUnavailableOrganizationAnalyticsRepository(): OrganizationAnalyticsRepository {
+  return {
+    async lookupVisibleOrganizationScope() {
+      return null;
+    },
+    async readTrainingAggregateMetricsInput() {
+      return null;
+    },
+    async readEmployeeTrainingSummaryInputs() {
+      return [];
+    },
+    async readFormalLearningSummary() {
+      return null;
+    },
+    async readQuotaSummary() {
+      return null;
+    },
+    async readExportReadinessRows() {
+      return [];
     },
   };
 }

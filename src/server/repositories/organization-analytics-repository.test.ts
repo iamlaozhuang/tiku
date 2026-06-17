@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   createOrganizationAnalyticsRepository,
+  createPostgresOrganizationAnalyticsRepository,
   type OrganizationAnalyticsRepositoryGateway,
 } from "./organization-analytics-repository";
 
@@ -313,5 +314,60 @@ describe("organization analytics repository", () => {
     expect(readFormalLearningSummary).not.toHaveBeenCalled();
     expect(readQuotaSummary).not.toHaveBeenCalled();
     expect(readExportReadinessRows).not.toHaveBeenCalled();
+  });
+
+  it("keeps the Postgres repository factory fail-closed without an injected gateway", async () => {
+    const repository = createPostgresOrganizationAnalyticsRepository();
+
+    await expect(
+      repository.lookupVisibleOrganizationScope({
+        adminPublicId: "organization_admin_public_001",
+      }),
+    ).resolves.toBeNull();
+    await expect(
+      repository.readTrainingAggregateMetricsInput(createScopeInput()),
+    ).resolves.toBeNull();
+    await expect(
+      repository.readEmployeeTrainingSummaryInputs(createScopeInput()),
+    ).resolves.toEqual([]);
+    await expect(
+      repository.readFormalLearningSummary(createScopeInput()),
+    ).resolves.toBeNull();
+    await expect(
+      repository.readQuotaSummary(createScopeInput()),
+    ).resolves.toBeNull();
+    await expect(
+      repository.readExportReadinessRows(createScopeInput()),
+    ).resolves.toEqual([]);
+  });
+
+  it("delegates the Postgres repository factory through an injected aggregate-only gateway", async () => {
+    const { gateway, readTrainingAggregateMetricsInput } = createGateway();
+    const repository = createPostgresOrganizationAnalyticsRepository({
+      gateway,
+    });
+
+    const trainingAggregateMetricsInput =
+      await repository.readTrainingAggregateMetricsInput(createScopeInput());
+
+    expect(readTrainingAggregateMetricsInput).toHaveBeenCalledTimes(1);
+    expect(trainingAggregateMetricsInput).toEqual({
+      eligibleEmployeePublicIds: [
+        "employee_public_001",
+        "employee_public_002",
+        "employee_public_001",
+      ],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_001",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-16T02:00:00.000Z",
+        },
+      ],
+    });
+    expect(JSON.stringify(trainingAggregateMetricsInput)).not.toMatch(
+      /hidden|detailField|hiddenField|internalRowNumber/u,
+    );
   });
 });
