@@ -48,6 +48,11 @@ describe("personal AI generation request context service", () => {
           contextType: "none",
           contextPublicId: null,
         },
+        contextReferences: {
+          paperPublicId: null,
+          mockExamPublicId: null,
+          redactionStatus: "redacted",
+        },
         redactionStatus: "redacted",
       },
     });
@@ -66,6 +71,11 @@ describe("personal AI generation request context service", () => {
           contextType: "paper",
           contextPublicId: "paper_public_123",
         },
+        contextReferences: {
+          paperPublicId: "paper_public_123",
+          mockExamPublicId: null,
+          redactionStatus: "redacted",
+        },
       },
     });
   });
@@ -82,6 +92,11 @@ describe("personal AI generation request context service", () => {
         selectedContext: {
           contextType: "mock_exam",
           contextPublicId: "mock_exam_public_123",
+        },
+        contextReferences: {
+          paperPublicId: null,
+          mockExamPublicId: "mock_exam_public_123",
+          redactionStatus: "redacted",
         },
       },
     });

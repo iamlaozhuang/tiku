@@ -101,6 +101,11 @@ describe("personal AI generation request flow service", () => {
             contextType: "paper",
             contextPublicId: "paper_public_119",
           },
+          contextReferences: {
+            paperPublicId: "paper_public_119",
+            mockExamPublicId: null,
+            redactionStatus: "redacted",
+          },
           redactionStatus: "redacted",
         },
         taskRequest: {

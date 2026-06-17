@@ -15,6 +15,11 @@ export type PersonalAiGenerationRequestContextDto = {
   aiFuncType: PersonalAiGenerationFuncType;
   runtimeStatus: PersonalAiGenerationRuntimeStatus;
   selectedContext: PersonalAiGenerationRequestContextSelection;
+  contextReferences: {
+    paperPublicId: string | null;
+    mockExamPublicId: string | null;
+    redactionStatus: "redacted";
+  };
   redactionStatus: "redacted";
 };
 

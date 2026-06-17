@@ -36,6 +36,11 @@ export function buildPersonalAiGenerationRequestContextReadModel(
     runtimeStatus: "local_contract_only",
     selectedContext:
       resolvePersonalAiGenerationRequestContextSelection(requestInput),
+    contextReferences: {
+      paperPublicId: requestInput.paperPublicId,
+      mockExamPublicId: requestInput.mockExamPublicId,
+      redactionStatus: "redacted",
+    },
     redactionStatus: "redacted",
   });
 }

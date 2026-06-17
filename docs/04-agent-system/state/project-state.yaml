@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T06:23:27-07:00"
+updatedAt: "2026-06-17T06:32:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-197-personal-learning-ai-personal-generation-request-flow
+  id: batch-198-personal-learning-ai-paper-and-mock-exam-context-selection
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-197-personal-learning-ai-personal-generation-request-flow.md
-  evidencePath: docs/05-execution-logs/evidence/batch-197-personal-learning-ai-personal-generation-request-flow.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-197-personal-learning-ai-personal-generation-request-flow.md
-  branch: codex/personal-learning-ai-batch-197-request-flow
-  commitSha: 57ca2a575fc28607e218eb55616fbc4ca54883e5
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-198-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  evidencePath: docs/05-execution-logs/evidence/batch-198-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-198-personal-learning-ai-paper-and-mock-exam-context-selection.md
+  branch: codex/personal-learning-ai-batch-198-context-selection
+  commitSha: e7f3417345bac651d93cdf0c469cda15abb36fce
   prUrl: null
   retryCount: 0
   lastFailurePath: null
