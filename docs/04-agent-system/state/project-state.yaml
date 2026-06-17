@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
   lastKnownOriginMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
 currentTask:
-  id: batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go
+  id: batch-209-ops-governance-and-retention-redeem-code-redacted-reference
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-208-ops-governance-auth-quota-summary.md
-  evidencePath: docs/05-execution-logs/evidence/batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
-  branch: codex/ops-governance-batch-208-auth-quota
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-209-ops-governance-redeem-code-redacted-reference.md
+  evidencePath: docs/05-execution-logs/evidence/batch-209-ops-governance-and-retention-redeem-code-redacted-reference.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-209-ops-governance-and-retention-redeem-code-redacted-reference.md
+  branch: codex/ops-governance-batch-209-redeem-reference
   commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
