@@ -29561,3 +29561,185 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-repository-factory-boundary-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-repository-factory-boundary-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+
+  - id: advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+    title: Advanced organization analytics Postgres gateway source input decision seeding
+    phase: advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T18:24:08-07:00"
+    closedAt: "2026-06-16T18:24:08-07:00"
+    branch: codex/advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+    dependencies:
+      - advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+    humanApproval: >-
+      User approved executing this docs/state-only seeding task in the current Codex thread by saying "批准执行".
+      Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one pending readonly/docs
+      decision task for real organization analytics Postgres gateway source inputs, declared local validation, local
+      commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product
+      source implementation, real DB access, App Router real runtime wiring, service business logic changes,
+      schema/migration, package/lockfile/dependency changes, provider/model calls, e2e/browser/dev-server,
+      staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration Gate remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/runtime-database.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - product source implementation
+      - real DB access or database connection execution
+      - App Router real runtime wiring
+      - service business logic changes
+      - schema/migration
+      - dependency changes
+      - UI changes
+      - e2e/browser/dev-server
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-postgres-gateway-source-input-decision","status: pending","readonly_audit","src/server/repositories/organization-analytics-repository.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+
+  - id: advanced-organization-analytics-postgres-gateway-source-input-decision
+    title: Advanced organization analytics Postgres gateway source input decision
+    phase: advanced-organization-analytics-postgres-gateway-source-input-decision
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: readonly_audit
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-postgres-gateway-source-input-decision-seeding
+      - advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is readonly/docs decision work to identify the real
+      organization analytics Postgres gateway source inputs needed before any App Router real runtime wiring. The task
+      may inspect existing repository/service/runtime database patterns and existing schema files as readonly reference,
+      plus prior redacted evidence and audit files, to decide the minimum next implementation boundary. It must not
+      implement queries, execute a database connection, access row/private data, modify source files, change
+      service/repository/route/UI/runtime behavior, modify schema/migration/drizzle/package/lockfile/dependencies, call
+      providers/models, run e2e/browser/dev-server, touch staging/prod/cloud/deploy/payment/external-service surfaces,
+      create/update PRs, force push, or execute Cost Calibration Gate.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-input-decision.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/runtime-database.ts
+      - src/db/schema/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - query implementation
+      - real DB access or database connection execution
+      - App Router real runtime wiring
+      - route/service/repository/UI runtime changes
+      - schema/migration changes
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - publicId lists
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_approval_after_claim
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-postgres-gateway-source-input-decision","status: pending","readonly_audit"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-input-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-input-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-input-decision
