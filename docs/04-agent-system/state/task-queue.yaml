@@ -28948,9 +28948,11 @@ tasks:
     sourceStory: advanced-edition-organization-analytics
     taskKind: readonly_audit
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: pass
     retryCount: 0
+    claimedAt: "2026-06-16T17:25:59-07:00"
+    closedAt: "2026-06-16T17:27:31-07:00"
     dependencies:
       - advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
       - advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
@@ -28962,6 +28964,14 @@ tasks:
       auth/session integration, repository factory wiring, direct DB access, service business logic, schema/migration,
       provider/model, dependency, UI, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR,
       force push, or Cost Calibration Gate work.
+    humanApproval: >-
+      User approved executing this readonly audit task in the current Codex thread by saying "批准执行". Approval is
+      limited to task claim, task plan/evidence/audit creation, durable state updates, readonly audit of the listed
+      files, declared local validation, local commit, fast-forward merge to master, push origin/master, merged
+      short-branch cleanup, and fetch prune. Source implementation, auth/session integration, repository factory wiring,
+      direct DB access, service business logic changes, UI, schema/migration, package/lockfile/dependency changes,
+      provider/model calls, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push,
+      and Cost Calibration Gate remain blocked.
     planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
@@ -29010,6 +29020,17 @@ tasks:
       - e2e/browser/dev-server
       - quota/cost measurement or Cost Calibration Gate
       - staging/prod/cloud/deploy/payment/external-service
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
     validationCommands:
       - git diff --check
       - npm.cmd run lint
@@ -29018,3 +29039,107 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
+
+  - id: advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    title: Advanced organization analytics dashboard summary admin context route contract TDD
+    phase: advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_route_contract_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: approved_by_user_prompt_2026_06_16
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation limited to the organization
+      analytics dashboard summary route adapter admin context contract. The task may evolve the route adapter and
+      corresponding unit test so a valid request resolves an injected organization analytics admin context before
+      calling an injected dashboard summary reader. It must keep the App Router dashboard summary route fail-closed and
+      must not instantiate real auth/session runtime, repository factories, DB clients, providers, external services,
+      or object storage. If real session integration, repository factory wiring, DB access, service business logic
+      changes, App Router real runtime wiring, UI work, schema/migration, dependency changes, provider/model calls,
+      e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, or Cost Calibration
+      Gate is required, stop and report instead of expanding scope.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-route.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/contracts/api-response.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/validators/organization-analytics.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-training-route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/repositories/**
+      - src/server/services/organization-analytics-service.ts
+      - src/server/models/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/server/contracts/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - real auth/session integration
+      - repository factory wiring
+      - direct database access
+      - service business logic changes
+      - App Router real runtime wiring
+      - UI changes
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_future_fresh_prompt_required
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd

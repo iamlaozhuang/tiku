@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
-updatedAt: "2026-06-16T17:20:00-07:00"
+currentPhase: advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
+updatedAt: "2026-06-16T17:25:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: e19b556f780ab94d8d8689a11f6322b3a8a8ab57
-  lastKnownOriginMasterSha: e19b556f780ab94d8d8689a11f6322b3a8a8ab57
+  lastKnownMasterSha: f2d3560b9c0dc0459b2e93a601f8d9fd24d8ead2
+  lastKnownOriginMasterSha: f2d3560b9c0dc0459b2e93a601f8d9fd24d8ead2
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
+  id: advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
-  branch: codex/advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+  branch: codex/advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -660,11 +660,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding` seeded
-    `advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit` as the next pending task.
-    The pending task is a readonly boundary audit only. It must inspect whether real dashboard summary route runtime
-    wiring can be safely specified after the current fail-closed App Router route, without changing source code or
-    entering auth/session integration, repository factory wiring, DB access, schema/migration, provider/model,
-    dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, or Cost
-    Calibration Gate work.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
+    `advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit` seeded
+    `advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd` as the next pending task. The
+    pending task is route adapter admin context contract TDD only and must keep the App Router dashboard summary route
+    fail-closed. Real auth/session integration, repository factory wiring, DB access, service business logic changes,
+    App Router real runtime wiring, schema/migration, provider/model, dependency, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
