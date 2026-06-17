@@ -27,6 +27,7 @@ import {
 import { createRouteHandlersWithErrorEnvelope } from "./route-error-response";
 import {
   buildOrganizationAnalyticsDashboardSummaryFromRepository,
+  buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository,
   type OrganizationAnalyticsAdminContext,
   type OrganizationAnalyticsServiceRepository,
 } from "./organization-analytics-service";
@@ -116,6 +117,14 @@ export type OrganizationAnalyticsDashboardSummaryRuntimeRouteOptions =
     sessionService?: Pick<SessionService, "getCurrentSession">;
   };
 
+export type OrganizationAnalyticsEmployeeStatisticsRuntimeRouteOptions =
+  RuntimeDatabaseOptions & {
+    readUpdatedAt?: () => string;
+    repository?: OrganizationAnalyticsServiceRepository;
+    resolveAdminContext?: OrganizationAnalyticsEmployeeStatisticsAdminContextResolver;
+    sessionService?: Pick<SessionService, "getCurrentSession">;
+  };
+
 type OrganizationAnalyticsDashboardSummaryRuntimeAdminRole =
   | "super_admin"
   | "ops_admin"
@@ -188,9 +197,26 @@ function createRepositoryBackedDashboardSummaryReader(
     });
 }
 
+function createRepositoryBackedEmployeeStatisticsReader(
+  repository: OrganizationAnalyticsServiceRepository,
+  readUpdatedAt: () => string,
+): OrganizationAnalyticsEmployeeStatisticsReader {
+  return (input) =>
+    buildOrganizationAnalyticsEmployeeStatisticsSummaryFromRepository({
+      adminContext: input.adminContext,
+      adminPublicId: input.adminContext.adminPublicId,
+      organizationPublicId: input.organizationPublicId,
+      dateRange: input.dateRange,
+      updatedAt: readUpdatedAt(),
+      repository,
+    });
+}
+
 function createSessionBackedOrganizationAnalyticsAdminContextResolver(
   sessionService: Pick<SessionService, "getCurrentSession">,
-): OrganizationAnalyticsDashboardSummaryAdminContextResolver {
+):
+  | OrganizationAnalyticsDashboardSummaryAdminContextResolver
+  | OrganizationAnalyticsEmployeeStatisticsAdminContextResolver {
   return async ({ request, routeQuery }) => {
     const sessionResponse = await sessionService.getCurrentSession({
       authorization: getRequestAuthorization(request),
@@ -226,10 +252,11 @@ function createSessionBackedOrganizationAnalyticsAdminContextResolver(
 
 function createRuntimePostgresOrganizationAnalyticsRepository(
   options: RuntimeDatabaseOptions,
+  databaseUrlErrorMessage: string,
 ): OrganizationAnalyticsServiceRepository {
   const getDatabase = createLazyRuntimeDatabaseGetter(
     options,
-    "DATABASE_URL is required for organization analytics dashboard summary runtime.",
+    databaseUrlErrorMessage,
   );
   const gateway = createOrganizationAnalyticsPostgresGateway({
     async findVisibleOrganizationScopeByAdminPublicId(input) {
@@ -346,9 +373,12 @@ export function createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers(
 ) {
   const repository =
     options.repository ??
-    createRuntimePostgresOrganizationAnalyticsRepository({
-      createDatabase: options.createDatabase,
-    });
+    createRuntimePostgresOrganizationAnalyticsRepository(
+      {
+        createDatabase: options.createDatabase,
+      },
+      "DATABASE_URL is required for organization analytics dashboard summary runtime.",
+    );
   const sessionService = options.sessionService ?? createLocalSessionRuntime();
   const resolveAdminContext =
     options.resolveAdminContext ??
@@ -360,6 +390,35 @@ export function createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers(
 
   return createOrganizationAnalyticsDashboardSummaryRouteHandlers({
     readDashboardSummary: createRepositoryBackedDashboardSummaryReader(
+      repository,
+      readUpdatedAt,
+    ),
+    resolveAdminContext,
+  });
+}
+
+export function createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers(
+  options: OrganizationAnalyticsEmployeeStatisticsRuntimeRouteOptions = {},
+) {
+  const repository =
+    options.repository ??
+    createRuntimePostgresOrganizationAnalyticsRepository(
+      {
+        createDatabase: options.createDatabase,
+      },
+      "DATABASE_URL is required for organization analytics employee statistics runtime.",
+    );
+  const sessionService = options.sessionService ?? createLocalSessionRuntime();
+  const resolveAdminContext =
+    options.resolveAdminContext ??
+    createSessionBackedOrganizationAnalyticsAdminContextResolver(
+      sessionService,
+    );
+  const readUpdatedAt =
+    options.readUpdatedAt ?? (() => new Date().toISOString());
+
+  return createOrganizationAnalyticsEmployeeStatisticsRouteHandlers({
+    readEmployeeStatistics: createRepositoryBackedEmployeeStatisticsReader(
       repository,
       readUpdatedAt,
     ),

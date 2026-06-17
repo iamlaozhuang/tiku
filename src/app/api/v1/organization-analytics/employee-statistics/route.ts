@@ -1,6 +1,6 @@
-import { createOrganizationAnalyticsEmployeeStatisticsRouteHandlers } from "../../../../../server/services/organization-analytics-route";
+import { createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers } from "../../../../../server/services/organization-analytics-route";
 
 const { employeeStatistics } =
-  createOrganizationAnalyticsEmployeeStatisticsRouteHandlers();
+  createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers();
 
 export const { GET } = employeeStatistics;

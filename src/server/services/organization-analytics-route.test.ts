@@ -16,6 +16,7 @@ import {
   createOrganizationAnalyticsDashboardSummaryRouteHandlers,
   createOrganizationAnalyticsDashboardSummaryRuntimeRouteHandlers,
   createOrganizationAnalyticsEmployeeStatisticsRouteHandlers,
+  createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers,
   type OrganizationAnalyticsDashboardSummaryRouteAdminContext,
   type OrganizationAnalyticsEmployeeStatisticsRouteAdminContext,
 } from "./organization-analytics-route";
@@ -168,6 +169,74 @@ function createRepositoryBackedDashboardSummaryRepository(
     },
     async readEmployeeTrainingSummaryInputs() {
       return [];
+    },
+    async readFormalLearningSummary() {
+      return null;
+    },
+    async readQuotaSummary() {
+      return null;
+    },
+    async readExportReadinessRows() {
+      return [];
+    },
+  };
+}
+
+function createRepositoryBackedEmployeeStatisticsRepository(
+  observedReads: Array<{
+    adminPublicId?: string;
+    organizationPublicId?: string;
+    scopeOrganizationPublicIds?: readonly string[];
+    dateRange?: OrganizationAnalyticsDateRangeDto;
+  }>,
+): OrganizationAnalyticsRepository {
+  return {
+    async lookupVisibleOrganizationScope(input) {
+      observedReads.push({ adminPublicId: input.adminPublicId });
+
+      return [
+        "organization_analytics_route_org_public_001",
+        "organization_analytics_route_child_public_002",
+      ];
+    },
+    async readTrainingAggregateMetricsInput() {
+      return null;
+    },
+    async readEmployeeTrainingSummaryInputs(input) {
+      observedReads.push({
+        organizationPublicId: input.organizationPublicId,
+        scopeOrganizationPublicIds: input.scopeOrganizationPublicIds,
+        dateRange: input.dateRange,
+      });
+
+      return [
+        {
+          employeePublicId: "organization_analytics_employee_public_001",
+          employeeDisplayName: "Employee 001",
+          organizationPublicId: "organization_analytics_route_org_public_001",
+          organizationName: "Organization Analytics Route Org",
+          visibleTrainingVersionPublicIds: [
+            "organization_analytics_training_version_public_001",
+            "organization_analytics_training_version_public_002",
+          ],
+          officialSubmissions: [
+            {
+              employeePublicId: "organization_analytics_employee_public_001",
+              trainingVersionPublicId:
+                "organization_analytics_training_version_public_001",
+              score: 86,
+              totalScore: 100,
+              submittedAt: "2026-06-10T09:00:00.000Z",
+              answerOrganizationSnapshot: {
+                organizationPublicId:
+                  "organization_analytics_route_org_public_001",
+                organizationName: "Organization Analytics Route Org",
+                capturedAt: "2026-06-02T08:00:00.000Z",
+              },
+            },
+          ],
+        },
+      ];
     },
     async readFormalLearningSummary() {
       return null;
@@ -745,7 +814,174 @@ describe("organization analytics employee statistics route handlers", () => {
     expect(observedQueries).toEqual([]);
   });
 
+  it("composes injected runtime dependencies through repository-backed employee statistics service", async () => {
+    const observedReads: Array<{
+      adminPublicId?: string;
+      organizationPublicId?: string;
+      scopeOrganizationPublicIds?: readonly string[];
+      dateRange?: OrganizationAnalyticsDateRangeDto;
+    }> = [];
+    const adminContext = createEmployeeStatisticsAdminContext();
+    const { employeeStatistics } =
+      createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers({
+        repository:
+          createRepositoryBackedEmployeeStatisticsRepository(observedReads),
+        resolveAdminContext: async () => adminContext,
+        readUpdatedAt: () => "2026-06-16T10:30:00.000Z",
+      });
+
+    const response = await employeeStatistics.GET(
+      createEmployeeStatisticsRequest(
+        "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+      ),
+    );
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+        employeeCount: 1,
+        employees: [
+          {
+            employeePublicId: "organization_analytics_employee_public_001",
+            employeeDisplayName: "Employee 001",
+            organizationPublicId: "organization_analytics_route_org_public_001",
+            organizationName: "Organization Analytics Route Org",
+            answerOrganizationSnapshot: {
+              organizationPublicId:
+                "organization_analytics_route_org_public_001",
+              organizationName: "Organization Analytics Route Org",
+              capturedAt: "2026-06-02T08:00:00.000Z",
+            },
+            visibleTrainingCount: 2,
+            submittedTrainingCount: 1,
+            unfinishedTrainingCount: 1,
+            trainingCompletionRate: 0.5,
+            trainingAverageScore: 86,
+            latestTrainingSubmittedAt: "2026-06-10T09:00:00.000Z",
+            redactionStatus: "summary_only",
+          },
+        ],
+        redactionStatus: "summary_only",
+        updatedAt: "2026-06-16T10:30:00.000Z",
+      },
+    });
+    expect(observedReads).toEqual([
+      {
+        adminPublicId: "organization_analytics_admin_public_001",
+      },
+      {
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        scopeOrganizationPublicIds: [
+          "organization_analytics_route_org_public_001",
+          "organization_analytics_route_child_public_002",
+        ],
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+      },
+    ]);
+    expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
+    expect(JSON.stringify(payload)).not.toMatch(
+      /question|standardAnswer|analysis|itemLevel|prompt|provider|rawModel/u,
+    );
+  });
+
+  it("wires injected runtime database and session through Postgres visible-scope source reader", async () => {
+    const { database, select, selectCalls } = createFakeRuntimeDatabase([
+      [{ organizationId: 101 }],
+      [
+        {
+          organizationId: 101,
+          organizationPublicId: "organization_analytics_route_org_public_001",
+          parentOrganizationId: null,
+        },
+        {
+          organizationId: 102,
+          organizationPublicId: "organization_analytics_route_child_public_002",
+          parentOrganizationId: 101,
+        },
+      ],
+    ]);
+    const sessionService = createCurrentSessionService(
+      createSuccessResponse(createAdminAuthContext()),
+    );
+    const { employeeStatistics } =
+      createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers({
+        createDatabase: () => database,
+        sessionService,
+        readUpdatedAt: () => "2026-06-16T10:45:00.000Z",
+      });
+
+    const response = await employeeStatistics.GET(
+      createEmployeeStatisticsRequest(
+        "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+      ),
+    );
+    const payload = await response.json();
+
+    expect(payload).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+        employeeCount: 0,
+        employees: [],
+        redactionStatus: "summary_only",
+        updatedAt: "2026-06-16T10:45:00.000Z",
+      },
+    });
+    expect(sessionService.requests).toHaveLength(1);
+    expect(select).toHaveBeenCalledTimes(2);
+    expect(selectCalls.map((selectCall) => selectCall.selectionKeys)).toEqual([
+      ["organizationId"],
+      ["organizationId", "organizationPublicId", "parentOrganizationId"],
+    ]);
+    expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
+  });
+
   it("exports an employee statistics GET route from the App Router entrypoint", () => {
     expect(employeeStatisticsGET).toEqual(expect.any(Function));
+  });
+
+  it("uses the employee statistics runtime factory at the App Router entrypoint", async () => {
+    vi.resetModules();
+    const runtimeGET = vi.fn();
+    const nonRuntimeGET = vi.fn();
+    const createRuntimeHandlers = vi.fn(() => ({
+      employeeStatistics: { GET: runtimeGET },
+    }));
+    const createNonRuntimeHandlers = vi.fn(() => ({
+      employeeStatistics: { GET: nonRuntimeGET },
+    }));
+
+    vi.doMock("./organization-analytics-route", () => ({
+      createOrganizationAnalyticsEmployeeStatisticsRuntimeRouteHandlers:
+        createRuntimeHandlers,
+      createOrganizationAnalyticsEmployeeStatisticsRouteHandlers:
+        createNonRuntimeHandlers,
+    }));
+
+    try {
+      const route =
+        await import("../../app/api/v1/organization-analytics/employee-statistics/route");
+
+      expect(route.GET).toBe(runtimeGET);
+      expect(createRuntimeHandlers).toHaveBeenCalledTimes(1);
+      expect(createNonRuntimeHandlers).not.toHaveBeenCalled();
+    } finally {
+      vi.doUnmock("./organization-analytics-route");
+    }
   });
 });
