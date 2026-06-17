@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd
-updatedAt: "2026-06-17T00:08:51-07:00"
+currentPhase: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding
+updatedAt: "2026-06-17T00:16:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 28ed791785363be8c412390db50f56f062e0bc69
-  lastKnownOriginMasterSha: 28ed791785363be8c412390db50f56f062e0bc69
+  lastKnownMasterSha: 1947276ee318465a16854e74e070ffe58b270e2b
+  lastKnownOriginMasterSha: 1947276ee318465a16854e74e070ffe58b270e2b
 currentTask:
-  id: advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd
+  id: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd.md
-  branch: codex/organization-analytics-employee-runtime-wiring-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
+  branch: codex/organization-analytics-employee-summary-input-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -682,7 +682,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd` has local validation closeout
-    evidence and should be merged/pushed/cleaned under the current fresh approval. After cleanup, inspect the queue from a
-    fresh master baseline before claiming any next task.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd.md
+    `advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd` is the next pending
+    organization analytics task. It should be claimed only with fresh approval, on a short-lived branch, using TDD, and
+    without real database execution or sensitive evidence.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
