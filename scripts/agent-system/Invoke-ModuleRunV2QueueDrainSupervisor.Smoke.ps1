@@ -26,6 +26,20 @@ function Invoke-ExpectFailure {
     return $output
 }
 
+function Assert-ManifestProperty {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][object]$ExpectedValue
+    )
+
+    $manifest = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    $actualValue = $manifest.$Name
+    if ($actualValue -ne $ExpectedValue) {
+        throw "Expected manifest property $Name to be '$ExpectedValue', got '$actualValue'."
+    }
+}
+
 function Write-ProjectState {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -143,6 +157,7 @@ try {
     $projectStatePath = Join-Path -Path $fixtureRoot -ChildPath "project-state.yaml"
     $queuePath = Join-Path -Path $fixtureRoot -ChildPath "task-queue.yaml"
     $manifestRoot = Join-Path -Path $fixtureRoot -ChildPath "drain-runs"
+    $handoffRoot = Join-Path -Path $fixtureRoot -ChildPath "handoffs"
     $runnerOutputPath = Join-Path -Path $fixtureRoot -ChildPath "runner-output.txt"
 
     Write-ProjectState -Path $projectStatePath -TaskId "closed-task"
@@ -156,6 +171,11 @@ try {
     Assert-Contains -Output $planOutput -Pattern "queueDrainNextTask: eligible-task"
     Assert-Contains -Output $planOutput -Pattern "queueDrainNextAction: agent_execute_task"
     Assert-Contains -Output $planOutput -Pattern "safeToContinueDrain: true"
+    Assert-Contains -Output $planOutput -Pattern "queueDrainDefaultEntry: true"
+    Assert-Contains -Output $planOutput -Pattern "queueDrainEntryContract: startup_guardian_then_runner_dispatcher_eligibility_closeout"
+    Assert-Contains -Output $planOutput -Pattern "moduleApprovalWindowDecision: approved"
+    Assert-Contains -Output $planOutput -Pattern "hardStopState: ready_task"
+    Assert-Contains -Output $planOutput -Pattern "recoveryPacketRequired: false"
 
     $manifestPath = ($planOutput | Where-Object { $_ -match "^queueDrainManifestPath:\s*(.+)\s*$" } | ForEach-Object { $Matches[1].Trim() } | Select-Object -First 1)
     if ([string]::IsNullOrWhiteSpace($manifestPath) -or -not (Test-Path -LiteralPath $manifestPath)) {
@@ -164,6 +184,10 @@ try {
     if ($manifestPath -like "$((Get-Location).Path)*") {
         throw "Supervisor manifest was written inside the repository: $manifestPath"
     }
+    Assert-ManifestProperty -Path $manifestPath -Name "queueDrainDefaultEntry" -ExpectedValue $true
+    Assert-ManifestProperty -Path $manifestPath -Name "moduleApprovalWindowDecision" -ExpectedValue "approved"
+    Assert-ManifestProperty -Path $manifestPath -Name "hardStopState" -ExpectedValue "ready_task"
+    Assert-ManifestProperty -Path $manifestPath -Name "recoveryPacketRequired" -ExpectedValue $false
 
     Write-RunnerOutput -Path $runnerOutputPath -Decision "prepare_next_task" -Action "agent_claim_next_task" -TaskId "eligible-task"
     $budgetOutput = @(& $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -CompletedTaskCount 2 -MaxTasksPerWake 2 -PlanOnly)
@@ -172,11 +196,20 @@ try {
     }
     Assert-Contains -Output $budgetOutput -Pattern "queueDrainDecision: budget_exhausted"
     Assert-Contains -Output $budgetOutput -Pattern "safeToContinueDrain: false"
+    Assert-Contains -Output $budgetOutput -Pattern "hardStopState: budget_stop"
+    Assert-Contains -Output $budgetOutput -Pattern "moduleApprovalWindowDecision: not_applicable"
 
     Write-RunnerOutput -Path $runnerOutputPath -Decision "stop_for_hard_block" -Action "report_validation_failure" -Fingerprint "validation:lint"
-    Invoke-ExpectFailure -ExpectedPattern "queueDrainDecision: hard_block" -Command {
-        & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -PlanOnly
-    } | Out-Null
+    $hardBlockOutput = Invoke-ExpectFailure -ExpectedPattern "queueDrainDecision: hard_block" -Command {
+        & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -RecoveryPacketHandoffRoot $handoffRoot -PlanOnly
+    }
+    Assert-Contains -Output $hardBlockOutput -Pattern "hardStopState: hard_block_recovery"
+    Assert-Contains -Output $hardBlockOutput -Pattern "recoveryPacketRequired: true"
+    Assert-Contains -Output $hardBlockOutput -Pattern "recoveryPacketRule: generate_or_reuse_redacted_packet_before_resume"
+    $recoveryPacketPath = ($hardBlockOutput | Where-Object { $_ -match "^recoveryPacketPath:\s*(.+)\s*$" } | ForEach-Object { $Matches[1].Trim() } | Select-Object -First 1)
+    if ([string]::IsNullOrWhiteSpace($recoveryPacketPath) -or -not (Test-Path -LiteralPath $recoveryPacketPath)) {
+        throw "Hard-block state did not generate or reuse a recovery packet.`n$($hardBlockOutput -join "`n")"
+    }
 
     Write-RunnerOutput -Path $runnerOutputPath -Decision "open_recovery_plan" -Action "agent_open_recovery_plan" -Fingerprint "same:blocker"
     $firstRecoveryOutput = @(& $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -PlanOnly)
@@ -184,9 +217,11 @@ try {
         throw "First recovery should be reported as approval_required/controlled recovery.`n$($firstRecoveryOutput -join "`n")"
     }
     Assert-Contains -Output $firstRecoveryOutput -Pattern "queueDrainDecision: approval_required"
+    Assert-Contains -Output $firstRecoveryOutput -Pattern "hardStopState: needs_human_approval"
+    Assert-Contains -Output $firstRecoveryOutput -Pattern "moduleApprovalWindowDecision: approval_required"
 
     Invoke-ExpectFailure -ExpectedPattern "queueDrainDecision: hard_block" -Command {
-        & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -PlanOnly
+        & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -RecoveryPacketHandoffRoot $handoffRoot -PlanOnly
     } | Out-Null
 
     Write-RunnerOutput -Path $runnerOutputPath -Decision "closeout_recovery" -Action "run_closeout_recovery_autopilot"
@@ -198,6 +233,8 @@ try {
     Assert-Contains -Output $closeoutOutput -Pattern "queueDrainDecision: ready_for_agent_task"
     Assert-Contains -Output $closeoutOutput -Pattern "queueDrainNextTask: closed-task"
     Assert-Contains -Output $closeoutOutput -Pattern "queueDrainNextAction: run_approved_closeout"
+    Assert-Contains -Output $closeoutOutput -Pattern "moduleApprovalWindowDecision: approved"
+    Assert-Contains -Output $closeoutOutput -Pattern "hardStopState: ready_task"
 
     $diffRepoRoot = Join-Path -Path $fixtureRoot -ChildPath "diff-budget-repo"
     New-Item -ItemType Directory -Path $diffRepoRoot -Force | Out-Null
@@ -212,7 +249,7 @@ try {
     Invoke-ExpectFailure -ExpectedPattern "changed line count exceeds queue drain budget" -Command {
         Push-Location $diffRepoRoot
         try {
-            & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -MaxChangedLines 5
+            & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -RecoveryPacketHandoffRoot $handoffRoot -MaxChangedLines 5
         } finally {
             Pop-Location
         }
@@ -223,7 +260,7 @@ try {
     Invoke-ExpectFailure -ExpectedPattern "changed line count exceeds queue drain budget" -Command {
         Push-Location $diffRepoRoot
         try {
-            & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -MaxChangedLines 5
+            & $scriptPath -RunnerOutputPath $runnerOutputPath -ProjectStatePath $projectStatePath -QueuePath $queuePath -RunManifestRoot $manifestRoot -RecoveryPacketHandoffRoot $handoffRoot -MaxChangedLines 5
         } finally {
             Pop-Location
         }

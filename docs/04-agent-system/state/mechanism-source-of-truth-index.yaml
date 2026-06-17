@@ -285,7 +285,7 @@ scriptControls:
     path: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
     smokePath: scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
     decisionOutput: queueDrainDecision
-    role: repo-external-manifest supervisor that consumes runner and dispatcher decisions, enforces wake budgets and repeated blocker fingerprints, and returns the next agent-layer action so each drained batch still passes serial execution, approved closeout, finalizer, and startup gates
+    role: default executable entry for bounded queue drain; emits queueDrainDefaultEntry, queueDrainEntryContract, moduleApprovalWindowDecision, hardStopState, recoveryPacketRequired, and repo-external recoveryPacketPath rules while consuming runner and dispatcher decisions, enforcing wake budgets and repeated blocker fingerprints, and returning the next agent-layer action so each drained batch still passes serial execution, approved closeout, finalizer, and startup gates
   - id: module-run-v2-stop-economics
     path: scripts/agent-system/Get-ModuleRunV2StopEconomics.ps1
     smokePath: scripts/agent-system/Get-ModuleRunV2StopEconomics.Smoke.ps1

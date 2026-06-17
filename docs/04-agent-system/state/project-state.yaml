@@ -433,17 +433,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
-  lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
+  lastKnownMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
+  lastKnownOriginMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
 currentTask:
-  id: batch-207-organization-analytics-export-readiness-contracts-without-object-st
+  id: queue-drain-default-entry-rules
   status: closed
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-207-organization-analytics-export-readiness-contracts-without-object-storage.md
-  evidencePath: docs/05-execution-logs/evidence/batch-207-organization-analytics-export-readiness-contracts-without-object-st.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-207-organization-analytics-export-readiness-contracts-without-object-st.md
-  branch: codex/organization-analytics-batch-207-export-readiness
-  commitSha: null
+  sourceStory: current-user-approved-mechanism-task
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-queue-drain-default-entry-rules.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-queue-drain-default-entry-rules.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-queue-drain-default-entry-rules.md
+  branch: codex/queue-drain-default-entry-rules
+  commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -689,13 +689,13 @@ riskGates:
     - merge_pr
 mechanismTuning:
   status: completed
-  currentTaskId: mechanism-tuning-final-completion-audit
+  currentTaskId: queue-drain-default-entry-rules
   planningDocumentPath: docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
   executionProfileCatalogPath: docs/04-agent-system/state/execution-profiles.yaml
-  latestTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-final-completion-audit.md
-  latestEvidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-final-completion-audit.md
-  latestAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
-  finalCompletionAuditPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
+  latestTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-17-queue-drain-default-entry-rules.md
+  latestEvidencePath: docs/05-execution-logs/evidence/2026-06-17-queue-drain-default-entry-rules.md
+  latestAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-queue-drain-default-entry-rules.md
+  finalCompletionAuditPath: docs/05-execution-logs/audits-reviews/2026-06-17-queue-drain-default-entry-rules.md
   queueSlimmingAudit:
     activeQueueBeforeTasks: 324
     activeQueueAfterTasks: 60
@@ -714,7 +714,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After this merged branch is pushed and cleaned, recommend selecting the next scoped organization analytics Module
-    Run v2 task from the queue or seeding a readonly queue-selection task. Keep schema/drizzle/provider/dependency/App
-    Router UI/e2e/browser/dev-server and Cost Calibration gates blocked unless the next task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+    After this mechanism task is merged, pushed, and cleaned, recommend approving or declining
+    autoDriveLocalImplementationApproval for module ops-governance-and-retention. Keep schema/drizzle/provider/model,
+    dependency/package/lockfile, env/secret, staging/prod/cloud/deploy/payment/external-service, PR/force-push, and
+    Cost Calibration Gate blocked unless a future task explicitly approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-queue-drain-default-entry-rules.md

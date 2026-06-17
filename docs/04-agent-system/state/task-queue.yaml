@@ -8723,3 +8723,80 @@ tasks:
     result: pass
     branch: codex/organization-analytics-batch-207-export-readiness
     retryCount: 0
+  - id: queue-drain-default-entry-rules
+    title: Queue drain supervisor default entry executable rules
+    phase: mechanism-automation-hardening
+    sourceStory: current-user-approved-mechanism-task
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      User approved the mechanism task on 2026-06-17: make queue drain supervisor the default entry and write module
+      approval windows, recovery packets, and hard-stop state machine as executable rules. Existing approval allows
+      validation, local commit, fast-forward merge to master, push origin/master, and short-lived branch cleanup after
+      gates pass. Product implementation and high-risk gates remain blocked.
+    dependencies: []
+    allowedFiles:
+      - docs/04-agent-system/operating-manual.md
+      - docs/04-agent-system/sop/automated-advancement-governance.md
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
+      - docs/05-execution-logs/task-plans/2026-06-17-queue-drain-default-entry-rules.md
+      - docs/05-execution-logs/evidence/2026-06-17-queue-drain-default-entry-rules.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-queue-drain-default-entry-rules.md
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - tests/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - materials/**
+      - paper_assets/**
+    riskTypes:
+      - mechanism_maintenance
+      - automation_policy
+      - evidence_redaction
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - git diff --check
+      - npx.cmd prettier --check --ignore-unknown docs/04-agent-system/operating-manual.md docs/04-agent-system/sop/automated-advancement-governance.md docs/04-agent-system/state/mechanism-source-of-truth-index.yaml scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.Smoke.ps1 scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1 docs/05-execution-logs/task-plans/2026-06-17-queue-drain-default-entry-rules.md docs/05-execution-logs/evidence/2026-06-17-queue-drain-default-entry-rules.md docs/05-execution-logs/audits-reviews/2026-06-17-queue-drain-default-entry-rules.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: false
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-queue-drain-default-entry-rules.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-queue-drain-default-entry-rules.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-queue-drain-default-entry-rules.md
+    status: closed
+    result: pass
+    claimedAt: "2026-06-17T09:50:00-07:00"
+    validatedAt: "2026-06-17T10:12:00-07:00"
+    closedAt: "2026-06-17T10:22:00-07:00"
+    branch: codex/queue-drain-default-entry-rules
+    commitSha: pending-closeout-commit
+    retryCount: 0

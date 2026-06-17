@@ -78,16 +78,31 @@ If no task qualifies, report `no-executable-task-seed-or-approve-next-task` inst
 
 ## Bounded Queue Drain Rule
 
-Use `Invoke-ModuleRunV2QueueDrainSupervisor.ps1` only as a supervisor over the existing runner, dispatcher, eligibility
-gate, and approved closeout flow. It may return:
+Use `Invoke-ModuleRunV2QueueDrainSupervisor.ps1` as the default executable entry for queue-drain automation. The
+supervisor remains an outer protocol over the existing runner, dispatcher, eligibility gate, and approved closeout flow;
+it does not replace those gates. Every default-entry result must emit:
 
 ```text
+queueDrainDefaultEntry: true
+queueDrainEntryContract: startup_guardian_then_runner_dispatcher_eligibility_closeout
 queueDrainDecision: ready_for_agent_task
 queueDrainNextAction: agent_execute_task
+moduleApprovalWindowDecision: approved|approval_required|not_applicable
+hardStopState: ready_task|idle|budget_stop|needs_human_approval|hard_block_recovery
+recoveryPacketRequired: true|false
 ```
 
 The agent layer may then execute only that task and must return to the supervisor after validation or closeout. The
 supervisor writes its run manifest outside the repository under `%USERPROFILE%\.codex\tiku\drain-runs`.
+
+Module approval windows are executable only when the supervisor reports `moduleApprovalWindowDecision: approved`.
+Seed proposals, missing approvals, owner handoff, and manual decisions must report `approval_required` and stop. Budget
+and idle states report `not_applicable`.
+
+Hard-stop handling is a state machine. `ready_task` is the only state that may continue into agent task execution or
+approved closeout. `idle` and `budget_stop` are controlled terminal states. `needs_human_approval` stops for an approval
+window. `hard_block_recovery` must set `recoveryPacketRequired: true`, generate or reuse a redacted recovery packet
+outside the repository, and stop before the next queue-drain wake resumes.
 
 Do not drain when a non-implementation task lacks `drainPolicy`, risk metadata is high or ambiguous, fresh approval is
 required, validation fails, evidence/audit is missing, blocked files are touched, a repeated `blockerFingerprint` is

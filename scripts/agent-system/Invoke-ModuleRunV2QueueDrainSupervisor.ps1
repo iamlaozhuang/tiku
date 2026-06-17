@@ -182,6 +182,11 @@ function New-DrainManifest {
         [Parameter(Mandatory = $false)][AllowEmptyString()][string]$NextTask = "",
         [Parameter(Mandatory = $false)][AllowEmptyString()][string]$RunnerDecision = "",
         [Parameter(Mandatory = $false)][AllowEmptyString()][string]$BlockerFingerprint = "",
+        [Parameter(Mandatory = $true)][string]$ModuleApprovalWindowDecision,
+        [Parameter(Mandatory = $true)][string]$HardStopState,
+        [Parameter(Mandatory = $true)][bool]$RecoveryPacketRequired,
+        [Parameter(Mandatory = $true)][string]$RecoveryPacketRule,
+        [Parameter(Mandatory = $true)][string]$RecoveryPacketPath,
         [Parameter(Mandatory = $true)][bool]$SafeToContinue,
         [Parameter(Mandatory = $true)][string]$Reason
     )
@@ -195,12 +200,19 @@ function New-DrainManifest {
     $manifestPath = Join-Path -Path $manifestRoot -ChildPath "$RunId.json"
     $manifest = [ordered]@{
         schemaVersion = 1
+        queueDrainDefaultEntry = $true
+        queueDrainEntryContract = "startup_guardian_then_runner_dispatcher_eligibility_closeout"
         queueDrainRunId = $RunId
         createdAtUtc = (Get-Date).ToUniversalTime().ToString("o")
         decision = $Decision
         nextAction = $NextAction
         nextTask = $NextTask
         runnerDecision = $RunnerDecision
+        moduleApprovalWindowDecision = $ModuleApprovalWindowDecision
+        hardStopState = $HardStopState
+        recoveryPacketRequired = $RecoveryPacketRequired
+        recoveryPacketRule = $RecoveryPacketRule
+        recoveryPacketPath = $RecoveryPacketPath
         completedTaskCount = $CompletedTaskCount
         maxTasksPerWake = $MaxTasksPerWake
         maxWallClockMinutes = $MaxWallClockMinutes
@@ -245,6 +257,117 @@ function Test-RepeatedBlockerFingerprint {
     })
 
     return $matches.Count -gt 0
+}
+
+function Get-ModuleApprovalWindowDecision {
+    param(
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][bool]$SafeToContinue
+    )
+
+    if ($Decision -eq "approval_required") {
+        return "approval_required"
+    }
+    if ($Decision -eq "ready_for_agent_task" -or $Decision -eq "closeout_executed_continue") {
+        return "approved"
+    }
+    if ($SafeToContinue) {
+        return "approved"
+    }
+
+    return "not_applicable"
+}
+
+function Get-HardStopState {
+    param([Parameter(Mandatory = $true)][string]$Decision)
+
+    switch ($Decision) {
+        "ready_for_agent_task" { return "ready_task" }
+        "closeout_executed_continue" { return "ready_task" }
+        "idle" { return "idle" }
+        "budget_exhausted" { return "budget_stop" }
+        "approval_required" { return "needs_human_approval" }
+        "hard_block" { return "hard_block_recovery" }
+        default { return "hard_block_recovery" }
+    }
+}
+
+function Resolve-RecoveryPacketTaskId {
+    param(
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$NextTask = ""
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($NextTask)) {
+        return $NextTask
+    }
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        return $TaskId
+    }
+    if (Test-Path -LiteralPath $ProjectStatePath) {
+        $currentTaskId = Get-CurrentTaskId -Lines @(Get-Content -LiteralPath $ProjectStatePath)
+        if (-not [string]::IsNullOrWhiteSpace($currentTaskId)) {
+            return $currentTaskId
+        }
+    }
+
+    return "queue-drain-supervisor"
+}
+
+function Invoke-RecoveryPacketForHardStop {
+    param(
+        [Parameter(Mandatory = $true)][bool]$RecoveryPacketRequired,
+        [Parameter(Mandatory = $true)][string]$HardStopState,
+        [Parameter(Mandatory = $true)][string]$Decision,
+        [Parameter(Mandatory = $true)][string]$NextAction,
+        [Parameter(Mandatory = $true)][string]$Reason,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$NextTask = "",
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$RunnerDecision = "",
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$BlockerFingerprint = ""
+    )
+
+    if (-not $RecoveryPacketRequired) {
+        return [pscustomobject]@{
+            Decision = "not_required"
+            Path = "not_required"
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($RecoveryPacketHandoffRoot) -and (Test-PathInsideRepository -Path $RecoveryPacketHandoffRoot)) {
+        return [pscustomobject]@{
+            Decision = "blocked"
+            Path = "blocked_repo_internal_handoff_root"
+        }
+    }
+
+    $packetScriptPath = Join-Path -Path $agentSystemRoot -ChildPath "New-ModuleRunV2RecoveryPacket.ps1"
+    $packetTaskId = Resolve-RecoveryPacketTaskId -NextTask $NextTask
+    $failedCommand = "queueDrainDecision=$Decision; nextAction=$NextAction; runnerDecision=$RunnerDecision; blockerFingerprint=$BlockerFingerprint; reason=$Reason"
+    $packetArguments = @(
+        "-TaskId", $packetTaskId,
+        "-FailureClass", "queue_drain_$HardStopState",
+        "-FailedCommand", $failedCommand,
+        "-LastPassedGate", "queue_drain_supervisor",
+        "-CloseoutTransactionState", "not_started",
+        "-NextCommand", "inspect recovery packet and resolve blocker before rerunning queue drain"
+    )
+    if (-not [string]::IsNullOrWhiteSpace($RecoveryPacketHandoffRoot)) {
+        $packetArguments += @("-HandoffRoot", $RecoveryPacketHandoffRoot)
+    }
+
+    $packetResult = Invoke-ExternalPowerShellScript -ScriptPath $packetScriptPath -Arguments $packetArguments
+    $packetPath = Get-DecisionValue -Output $packetResult.Output -Key "recoveryPacketPath"
+    $packetDecision = Get-DecisionValue -Output $packetResult.Output -Key "recoveryPacketDecision"
+    if ($packetResult.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($packetPath)) {
+        return [pscustomobject]@{
+            Decision = "not_written"
+            Path = "not_written"
+        }
+    }
+
+    return [pscustomobject]@{
+        Decision = $packetDecision
+        Path = $packetPath
+    }
 }
 
 function Test-WallClockBudgetExceeded {
@@ -441,19 +564,59 @@ function Write-QueueDrainResult {
         [Parameter(Mandatory = $false)][AllowEmptyString()][string]$BlockerFingerprint = ""
     )
 
+    $moduleApprovalWindowDecision = Get-ModuleApprovalWindowDecision -Decision $Decision -SafeToContinue $SafeToContinue
+    $hardStopState = Get-HardStopState -Decision $Decision
+    $recoveryPacketRequired = $hardStopState -eq "hard_block_recovery"
+    $recoveryPacketRule = if ($recoveryPacketRequired) { "generate_or_reuse_redacted_packet_before_resume" } else { "not_required" }
+    $recoveryPacket = Invoke-RecoveryPacketForHardStop `
+        -RecoveryPacketRequired $recoveryPacketRequired `
+        -HardStopState $hardStopState `
+        -Decision $Decision `
+        -NextAction $NextAction `
+        -Reason $Reason `
+        -NextTask $NextTask `
+        -RunnerDecision $RunnerDecision `
+        -BlockerFingerprint $BlockerFingerprint
     $manifestPath = "not_written"
     try {
-        $manifestPath = New-DrainManifest -Decision $Decision -NextAction $NextAction -NextTask $NextTask -RunnerDecision $RunnerDecision -BlockerFingerprint $BlockerFingerprint -SafeToContinue $SafeToContinue -Reason $Reason
+        $manifestPath = New-DrainManifest `
+            -Decision $Decision `
+            -NextAction $NextAction `
+            -NextTask $NextTask `
+            -RunnerDecision $RunnerDecision `
+            -BlockerFingerprint $BlockerFingerprint `
+            -ModuleApprovalWindowDecision $moduleApprovalWindowDecision `
+            -HardStopState $hardStopState `
+            -RecoveryPacketRequired $recoveryPacketRequired `
+            -RecoveryPacketRule $recoveryPacketRule `
+            -RecoveryPacketPath $recoveryPacket.Path `
+            -SafeToContinue $SafeToContinue `
+            -Reason $Reason
     } catch {
         $Decision = "hard_block"
         $NextAction = "stop_and_report"
         $Reason = "drain manifest write failed: $($_.Exception.Message)"
         $SafeToContinue = $false
         $ExitCode = 1
+        $moduleApprovalWindowDecision = "not_applicable"
+        $hardStopState = "hard_block_recovery"
+        $recoveryPacketRequired = $true
+        $recoveryPacketRule = "generate_or_reuse_redacted_packet_before_resume"
+        $recoveryPacket = Invoke-RecoveryPacketForHardStop `
+            -RecoveryPacketRequired $recoveryPacketRequired `
+            -HardStopState $hardStopState `
+            -Decision $Decision `
+            -NextAction $NextAction `
+            -Reason $Reason `
+            -NextTask $NextTask `
+            -RunnerDecision $RunnerDecision `
+            -BlockerFingerprint $BlockerFingerprint
     }
 
     Write-Section -Title "Module Run v2 Queue Drain Supervisor"
     Write-Output "queueDrainDecision: $Decision"
+    Write-Output "queueDrainDefaultEntry: true"
+    Write-Output "queueDrainEntryContract: startup_guardian_then_runner_dispatcher_eligibility_closeout"
     Write-Output "queueDrainRunId: $RunId"
     Write-Output "queueDrainCompletedTaskCount: $CompletedTaskCount"
     if (-not [string]::IsNullOrWhiteSpace($NextTask)) {
@@ -461,6 +624,14 @@ function Write-QueueDrainResult {
     }
     Write-Output "queueDrainNextAction: $NextAction"
     Write-Output "queueDrainManifestPath: $manifestPath"
+    Write-Output "moduleApprovalWindowDecision: $moduleApprovalWindowDecision"
+    Write-Output "hardStopState: $hardStopState"
+    Write-Output "recoveryPacketRequired: $($recoveryPacketRequired.ToString().ToLowerInvariant())"
+    if ($recoveryPacketRequired) {
+        Write-Output "recoveryPacketRule: $recoveryPacketRule"
+        Write-Output "recoveryPacketDecision: $($recoveryPacket.Decision)"
+        Write-Output "recoveryPacketPath: $($recoveryPacket.Path)"
+    }
     Write-Output "safeToContinueDrain: $($SafeToContinue.ToString().ToLowerInvariant())"
     if (-not [string]::IsNullOrWhiteSpace($BlockerFingerprint)) {
         Write-Output "blockerFingerprint: $BlockerFingerprint"

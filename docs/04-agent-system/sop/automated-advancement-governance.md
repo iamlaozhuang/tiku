@@ -217,8 +217,8 @@ should not be treated as failed development work.
 
 ## Bounded Queue Drain Supervisor
 
-The primary automation may use a bounded queue drain supervisor when the goal is to continue across several low-risk
-Module Run v2 batches in one wake without weakening existing gates:
+The primary automation default entry for queue-drain work is the bounded queue drain supervisor. Use it when the goal is
+to continue across several low-risk Module Run v2 batches in one wake without weakening existing gates:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.ps1
@@ -228,6 +228,36 @@ The supervisor is an outer protocol layer. It does not write product code, broad
 the existing runner, dispatcher, serial executor, finalizer, or approved closeout scripts. It consumes `runnerDecision`
 and `agentAction` outputs, checks explicit or synthesized drain policy, writes a redacted manifest under
 `%USERPROFILE%\.codex\tiku\drain-runs`, and returns the next agent-layer action.
+
+Every supervisor result and manifest must include the executable default-entry contract:
+
+```text
+queueDrainDefaultEntry: true
+queueDrainEntryContract: startup_guardian_then_runner_dispatcher_eligibility_closeout
+moduleApprovalWindowDecision: approved|approval_required|not_applicable
+hardStopState: ready_task|idle|budget_stop|needs_human_approval|hard_block_recovery
+recoveryPacketRequired: true|false
+```
+
+The agent layer may continue only from `hardStopState: ready_task` and only when the corresponding next action is
+already gated by dispatcher, eligibility, or approved closeout. `moduleApprovalWindowDecision: approved` means the
+current task or closeout policy already materializes the required approval window. `approval_required` means the
+supervisor must stop for a human decision; it must not apply a seed transaction, claim a task, merge, push, or clean up.
+`not_applicable` is reserved for quiet idle or budget stops.
+
+The hard-stop state machine is executable:
+
+| `hardStopState`        | Meaning                         | Agent action                                           |
+| ---------------------- | ------------------------------- | ------------------------------------------------------ |
+| `ready_task`           | Gated task or closeout is ready | Execute only the reported `queueDrainNextAction`.      |
+| `idle`                 | No executable work              | Stop quietly and report the next recommendation.       |
+| `budget_stop`          | Wake budget exhausted           | Stop without retrying inside the same wake.            |
+| `needs_human_approval` | Approval window is missing      | Stop and request the exact approval.                   |
+| `hard_block_recovery`  | Unsafe or repeated blocker      | Generate or reuse a redacted recovery packet and stop. |
+
+When `hardStopState: hard_block_recovery`, the result must also emit
+`recoveryPacketRule: generate_or_reuse_redacted_packet_before_resume` and a `recoveryPacketPath` outside the repository.
+The packet is a recovery handoff only; it does not approve scope expansion or blocked-gate execution.
 
 Task drain is enabled only when the task block explicitly records:
 
