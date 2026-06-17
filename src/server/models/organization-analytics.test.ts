@@ -233,6 +233,75 @@ describe("organization analytics aggregate metrics", () => {
     expect(serializedSummary).not.toContain(guardedMarkerTwo);
   });
 
+  it("uses the latest submission per visible training version for employee score summaries", () => {
+    const summary = createOrganizationAnalyticsEmployeeTrainingSummary({
+      employeePublicId: "employee_public_a",
+      employeeDisplayName: "Employee A",
+      organizationPublicId: "org_city_public_123",
+      organizationName: "City Org",
+      visibleTrainingVersionPublicIds: [
+        "training_version_public_alpha",
+        "training_version_public_beta",
+      ],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_a",
+          trainingVersionPublicId: "training_version_public_alpha",
+          score: 80,
+          totalScore: 100,
+          submittedAt: "2026-06-10T09:30:00Z",
+          answerOrganizationSnapshot: {
+            organizationPublicId: "org_city_public_123",
+            organizationName: "City Org",
+            capturedAt: "2026-06-10T09:30:00Z",
+          },
+        },
+        {
+          employeePublicId: "employee_public_a",
+          trainingVersionPublicId: "training_version_public_alpha",
+          score: 92,
+          totalScore: 100,
+          submittedAt: "2026-06-11T09:30:00Z",
+          answerOrganizationSnapshot: {
+            organizationPublicId: "org_district_public_456",
+            organizationName: "District One",
+            capturedAt: "2026-06-11T09:30:00Z",
+          },
+        },
+        {
+          employeePublicId: "employee_public_a",
+          trainingVersionPublicId: "training_version_public_beta",
+          score: 88,
+          totalScore: 100,
+          submittedAt: "2026-06-10T10:30:00Z",
+          answerOrganizationSnapshot: {
+            organizationPublicId: "org_city_public_123",
+            organizationName: "City Org",
+            capturedAt: "2026-06-10T10:30:00Z",
+          },
+        },
+      ],
+      dateRange: {
+        startAt: "2026-06-10T00:00:00Z",
+        endAt: "2026-06-12T23:59:59Z",
+      },
+    });
+
+    expect(summary).toMatchObject({
+      visibleTrainingCount: 2,
+      submittedTrainingCount: 2,
+      unfinishedTrainingCount: 0,
+      trainingCompletionRate: 1,
+      trainingAverageScore: 90,
+      latestTrainingSubmittedAt: "2026-06-11T09:30:00Z",
+      answerOrganizationSnapshot: {
+        organizationPublicId: "org_district_public_456",
+        organizationName: "District One",
+        capturedAt: "2026-06-11T09:30:00Z",
+      },
+    });
+  });
+
   it("returns zero employee completion and null score summaries when no training is visible", () => {
     expect(
       createOrganizationAnalyticsEmployeeTrainingSummary({

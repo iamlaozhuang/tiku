@@ -154,6 +154,32 @@ function selectLatestEmployeeTrainingSubmission(
   );
 }
 
+function selectLatestEmployeeTrainingSubmissionsByVersion(
+  officialSubmissions: readonly OrganizationAnalyticsEmployeeTrainingSubmission[],
+) {
+  const latestSubmissionByTrainingVersion = officialSubmissions.reduce<
+    Record<string, OrganizationAnalyticsEmployeeTrainingSubmission>
+  >((latestSubmissions, submission) => {
+    const existingSubmission =
+      latestSubmissions[submission.trainingVersionPublicId];
+
+    if (
+      existingSubmission === undefined ||
+      Date.parse(submission.submittedAt) >
+        Date.parse(existingSubmission.submittedAt)
+    ) {
+      return {
+        ...latestSubmissions,
+        [submission.trainingVersionPublicId]: submission,
+      };
+    }
+
+    return latestSubmissions;
+  }, {});
+
+  return Object.values(latestSubmissionByTrainingVersion);
+}
+
 export function createOrganizationTrainingAggregateMetrics(
   input: OrganizationTrainingAggregateMetricsInput,
 ): OrganizationTrainingAggregateMetricsDto {
@@ -209,11 +235,15 @@ export function createOrganizationAnalyticsEmployeeTrainingSummary(
       ) &&
       isWithinDateRange(submission.submittedAt, input.dateRange),
   );
+  const latestOfficialSubmissionsInRange =
+    selectLatestEmployeeTrainingSubmissionsByVersion(
+      officialSubmissionsInRange,
+    );
   const latestSubmission = selectLatestEmployeeTrainingSubmission(
-    officialSubmissionsInRange,
+    latestOfficialSubmissionsInRange,
   );
   const submittedTrainingCount = new Set(
-    officialSubmissionsInRange.map(
+    latestOfficialSubmissionsInRange.map(
       (submission) => submission.trainingVersionPublicId,
     ),
   ).size;
@@ -244,7 +274,9 @@ export function createOrganizationAnalyticsEmployeeTrainingSummary(
       visibleTrainingCount === 0
         ? 0
         : submittedTrainingCount / visibleTrainingCount,
-    trainingAverageScore: calculateAverageScore(officialSubmissionsInRange),
+    trainingAverageScore: calculateAverageScore(
+      latestOfficialSubmissionsInRange,
+    ),
     latestTrainingSubmittedAt: latestSubmission?.submittedAt ?? null,
     redactionStatus: "summary_only",
   };
