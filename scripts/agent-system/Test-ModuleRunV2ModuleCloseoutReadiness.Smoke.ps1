@@ -185,6 +185,44 @@ tasks:
 
     @"
 result: pass
+Batch range: unsupported phase fixture
+RED: recorded
+GREEN: recorded
+Commit: abcdef1
+localFullLoopGate: approved_localhost_only
+threadRolloverGate: not requested
+nextModuleRunCandidate: none
+blocked remainder: high-risk gates remain blocked
+Cost Calibration Gate remains blocked
+unsupported-validation-command
+closeout-validation
+"@ | Set-Content -LiteralPath $evidencePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: lifecycle-task
+    title: Lifecycle Task
+    moduleRunVersion: 2
+    validationCommandLifecycle:
+      - phase: validation
+        command: unsupported-validation-command
+      - phase: closeout
+        command: closeout-validation
+    evidencePath: $($evidencePath.Replace("\", "\\"))
+    auditReviewPath: $($auditPath.Replace("\", "\\"))
+"@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
+
+    Invoke-ExpectFailure -ExpectedPattern "HARD_BLOCK_INVALID_VALIDATION_LIFECYCLE_PHASE validation.*post_edit" -Command {
+        & $scriptPath `
+            -TaskId "lifecycle-task" `
+            -ProjectStatePath $statePath `
+            -QueuePath $queuePath `
+            -MatrixPath $matrixPath
+    }
+
+    @"
+result: pass
 Batch range: pending fixture
 RED: recorded
 GREEN: pending

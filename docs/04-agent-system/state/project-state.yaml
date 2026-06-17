@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-cross-role-local-auth-route-guard-smoke-validation
-updatedAt: "2026-06-17T15:55:47-07:00"
+currentPhase: module-run-v2-local-full-flow-lifecycle-phase-hardening
+updatedAt: "2026-06-17T16:07:59-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: d8e27091ab2b20b491d4929937985e756128bd1d
-  lastKnownOriginMasterSha: d8e27091ab2b20b491d4929937985e756128bd1d
+  lastKnownMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
+  lastKnownOriginMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
 currentTask:
-  id: module-run-v2-cross-role-local-auth-route-guard-smoke-validation
+  id: module-run-v2-local-full-flow-lifecycle-phase-hardening
   status: closed
-  sourceStory: localExperienceClosureGate.crossRoleAuthRouteGuardSmoke
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
-  branch: codex/cross-role-local-auth-route-guard-smoke-validation
+  sourceStory: mechanism.localFullFlowLifecyclePhaseHardening
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md
+  branch: codex/local-full-flow-lifecycle-phase-hardening
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -719,4 +719,4 @@ handoff:
     schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
     staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate blocked unless a future
     task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-auth-route-guard-smoke-validation.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-local-full-flow-lifecycle-phase-hardening.md

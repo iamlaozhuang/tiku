@@ -179,6 +179,37 @@ function Get-ValidationLifecycleCommands {
     return $commands.ToArray()
 }
 
+function Get-ValidationLifecyclePhases {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$Block
+    )
+
+    $phases = New-Object System.Collections.Generic.List[string]
+    $insideSection = $false
+
+    foreach ($line in $Block) {
+        if ($line -match "^\s+validationCommandLifecycle:\s*$") {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match "^\s{4}\S[^:]*:\s*") {
+            break
+        }
+
+        if (-not $insideSection) {
+            continue
+        }
+
+        if ($line -match "^\s+-\s+phase:\s*(.+)\s*$") {
+            $phases.Add($Matches[1].Trim())
+        }
+    }
+
+    return $phases.ToArray()
+}
+
 function Get-CurrentTaskId {
     param(
         [Parameter(Mandatory = $true)]
@@ -383,6 +414,16 @@ if ([string]::IsNullOrWhiteSpace($EvidencePath)) {
 
 if ([string]::IsNullOrWhiteSpace($AuditReviewPath)) {
     $AuditReviewPath = Get-ScalarValue -Block $taskBlock -Key "auditReviewPath"
+}
+
+$validationLifecyclePhases = @(Get-ValidationLifecyclePhases -Block $taskBlock)
+if ($validationLifecyclePhases.Count -gt 0) {
+    $validLifecyclePhases = @("pre_edit", "post_edit", "closeout", "advisory_baseline")
+    foreach ($validationLifecyclePhase in $validationLifecyclePhases) {
+        if ($validationLifecyclePhase -notin $validLifecyclePhases) {
+            Add-Finding "HARD_BLOCK_INVALID_VALIDATION_LIFECYCLE_PHASE $validationLifecyclePhase; use post_edit for runnable validation commands, closeout for closeout gates, pre_edit for diagnostics, or advisory_baseline for non-hard baseline commands"
+        }
+    }
 }
 
 $validationLifecycleCommands = @(Get-ValidationLifecycleCommands -Block $taskBlock -IncludedPhases @("post_edit", "closeout"))
