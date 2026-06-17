@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
-updatedAt: "2026-06-16T17:35:58-07:00"
+currentPhase: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+updatedAt: "2026-06-16T18:06:22-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 25430def6f2ca23de9da4dc513ce0b512ca083ba
   lastKnownOriginMasterSha: 25430def6f2ca23de9da4dc513ce0b512ca083ba
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+  id: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
-  branch: codex/advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+  branch: codex/advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -660,10 +660,12 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd` closed the route adapter admin
-    context contract while keeping the App Router dashboard summary route fail-closed. The next step should be a
-    separate scoped task that decides or seeds the repository factory and real runtime wiring path. Real auth/session
-    integration, repository factory wiring, DB access, service business logic changes, App Router real runtime wiring,
-    schema/migration, provider/model, dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
-    PR, force-push, and Cost Calibration Gate remain blocked until a future task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd.md
+    `advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding` seeded
+    `advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd` as the next pending task. That
+    pending task should add only the dashboard summary route runtime composition contract through TDD in
+    `src/server/services/organization-analytics-route.ts` and its unit test, while keeping the App Router route
+    fail-closed by default. Postgres repository factory implementation, direct DB access, App Router real runtime
+    wiring, service business logic changes, schema/migration, provider/model, dependency, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked until
+    a later task explicitly permits them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md

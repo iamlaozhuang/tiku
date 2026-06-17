@@ -29154,3 +29154,200 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+
+  - id: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+    title: Advanced organization analytics dashboard summary runtime wiring decision seeding
+    phase: advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T18:03:37-07:00"
+    closedAt: "2026-06-16T18:06:22-07:00"
+    branch: codex/advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+    dependencies:
+      - advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    humanApproval: >-
+      User approved executing the recommended next task in the current Codex thread by saying "批准执行". Scope is
+      docs/state-only runtime wiring decision and seeding of one pending dashboard summary runtime composition contract
+      TDD task. Product source implementation, App Router real runtime wiring, repository factory wiring, DB access,
+      service business logic changes, schema/migration, package/lockfile/dependency changes, provider/model calls,
+      e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration
+      Gate remain blocked for this seeding task.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit.md
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-training-route.ts
+      - src/server/services/admin-organization-org-auth-runtime.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - product source implementation
+      - real auth/session integration
+      - repository factory wiring
+      - direct database access
+      - service business logic changes
+      - App Router real runtime wiring
+      - UI changes
+      - row/private data exposure
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - quota/cost measurement or Cost Calibration Gate
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd","status: pending","src/server/services/organization-analytics-route.ts","src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+
+  - id: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+    title: Advanced organization analytics dashboard summary runtime composition contract TDD
+    phase: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_route_contract_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: approved_by_user_prompt_2026_06_16
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding
+      - advanced-organization-analytics-dashboard-summary-admin-context-route-contract-tdd
+    humanApprovalBoundary: >-
+      Pending only. Scope is TDD implementation of the dashboard summary route runtime composition contract after the
+      admin context route adapter contract exists. The task may evolve `src/server/services/organization-analytics-route.ts`
+      and `src/server/services/organization-analytics-route.test.ts` so the runtime route can compose an injected
+      session/admin context resolver, injected repository-like dashboard summary reader dependencies, and an injected
+      timestamp source into the existing `buildOrganizationAnalyticsDashboardSummaryFromRepository` service path. The
+      default App Router dashboard summary route must remain fail-closed unless explicit runtime dependencies are
+      injected. This task must not implement Postgres repository factories, access DB, modify App Router real wiring,
+      change service business logic, change schemas/migrations, change dependencies, or run e2e/browser/dev-server.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-route.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-wiring-decision-seeding.md
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/contracts/api-response.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/validators/organization-analytics.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-training-route.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/server/repositories/**
+      - src/server/services/organization-analytics-service.ts
+      - src/server/models/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/server/contracts/**
+      - src/app/(admin)/**
+      - src/app/(student)/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - App Router real runtime wiring
+      - Postgres repository factory implementation
+      - direct database access
+      - service business logic changes
+      - schema/migration
+      - dependency changes
+      - UI changes
+      - e2e/browser/dev-server
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
