@@ -527,10 +527,11 @@ function Get-QueueDiagnostics {
 function Get-MatrixDiagnostics {
     param(
         [Parameter(Mandatory = $true)][object[]]$Blocks,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$HistoryBlocks,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$MatrixLines
     )
 
-    $queueIds = @($Blocks | ForEach-Object { $_.Id })
+    $coveredTaskIds = @($Blocks + $HistoryBlocks | ForEach-Object { $_.Id } | Select-Object -Unique)
     $matrixBatchIds = New-Object System.Collections.ArrayList
     $sourcePlanningTaskIds = New-Object System.Collections.ArrayList
 
@@ -544,8 +545,8 @@ function Get-MatrixDiagnostics {
         }
     }
 
-    $missingBatches = @($matrixBatchIds | Where-Object { $_ -notin $queueIds } | Select-Object -Unique)
-    $missingPlanningTasks = @($sourcePlanningTaskIds | Where-Object { $_ -notin $queueIds } | Select-Object -Unique)
+    $missingBatches = @($matrixBatchIds | Where-Object { $_ -notin $coveredTaskIds } | Select-Object -Unique)
+    $missingPlanningTasks = @($sourcePlanningTaskIds | Where-Object { $_ -notin $coveredTaskIds } | Select-Object -Unique)
 
     return [pscustomobject]@{
         MissingBatches = $missingBatches
@@ -585,7 +586,7 @@ if ($profileCatalogPresent) {
     $profileCatalogContent = Get-Content -LiteralPath $ExecutionProfileCatalogPath -Raw
 }
 $queueDiagnostics = Get-QueueDiagnostics -Blocks $taskBlocks
-$matrixDiagnostics = Get-MatrixDiagnostics -Blocks $taskBlocks -MatrixLines $matrixLines
+$matrixDiagnostics = Get-MatrixDiagnostics -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks -MatrixLines $matrixLines
 $currentTaskId = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "id"
 if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
     $currentTaskId = $TaskId

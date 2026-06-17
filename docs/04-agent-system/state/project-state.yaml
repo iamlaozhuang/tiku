@@ -433,17 +433,17 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: cd95a1d5d6b4706e2534bc933a85f2da2cb98684
-  lastKnownOriginMasterSha: cd95a1d5d6b4706e2534bc933a85f2da2cb98684
+  lastKnownMasterSha: df880547241f0b83b46a6ce6236468584eef2742
+  lastKnownOriginMasterSha: df880547241f0b83b46a6ce6236468584eef2742
 currentTask:
-  id: batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
+  id: mechanism-queue-matrix-drift-history-coverage
   status: closed
-  sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-211-ops-governance-local-recovery-expired-hidden-boundary-contracts.md
-  evidencePath: docs/05-execution-logs/evidence/batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c.md
-  branch: codex/ops-governance-batch-211-recovery-boundary
-  commitSha: cd95a1d5d6b4706e2534bc933a85f2da2cb98684
+  sourceStory: user-approved-mechanism-maintenance
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-queue-matrix-drift-history-coverage.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-queue-matrix-drift-history-coverage.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-queue-matrix-drift-history-coverage.md
+  branch: codex/mechanism-queue-matrix-drift-history-coverage
+  commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

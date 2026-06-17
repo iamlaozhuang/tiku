@@ -138,6 +138,26 @@ tasks:
     commitSha: null
     completedAt: "2026-06-11"
     archivedByTask: active-queue-slimming-smoke
+  - id: missing-planning-task
+    phase: missing-planning-task
+    status: done
+    taskKind: implementation_planning
+    evidencePath: docs/05-execution-logs/evidence/archived-a.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/archived-a.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-smoke.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-smoke
+  - id: batch-999-missing-from-queue
+    phase: batch-999-missing-from-queue
+    status: closed
+    taskKind: implementation
+    evidencePath: docs/05-execution-logs/evidence/archived-a.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/archived-a.md
+    archivePath: docs/04-agent-system/state/archive/task-queue-archive-smoke.yaml
+    commitSha: null
+    completedAt: "2026-06-11"
+    archivedByTask: active-queue-slimming-smoke
 "@ | Set-Content -LiteralPath $taskHistoryIndexPath -Encoding UTF8
 
     @"
@@ -150,6 +170,12 @@ sourcePlanningModules:
     currentProgress:
       completedBatches:
         - batch-999-missing-from-queue
+        - batch-1000-really-missing
+  - module: smoke-module-b
+    sourcePlanningTask: missing-planning-task-b
+    v2ExecutionModule: smoke-execution
+    currentProgress:
+      completedBatches: []
 terminologyAnchors:
   - Cost Calibration Gate remains blocked
 Cost Calibration Gate remains blocked
@@ -211,7 +237,7 @@ Cost Calibration Gate remains blocked
 
     Assert-Contains -Output $verboseOutput -Pattern '^statusFindingsVerbose: .*legacy_status_missing_first=task-missing-status; legacy_done_first=task-legacy-done;'
     Assert-Contains -Output $verboseOutput -Pattern '^evidenceFindingsVerbose: evidenceMissingFirst=task-legacy-done$'
-    Assert-Contains -Output $verboseOutput -Pattern '^driftFindingsVerbose: queueMatrixDriftFirst=batch-999-missing-from-queue,missing-planning-task$'
+    Assert-Contains -Output $verboseOutput -Pattern '^driftFindingsVerbose: queueMatrixDriftFirst=batch-1000-really-missing,missing-planning-task-b$'
 
     $plannedPauseProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-planned-pause.yaml"
     @"
