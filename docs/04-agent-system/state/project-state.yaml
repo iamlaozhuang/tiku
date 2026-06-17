@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T13:24:58-07:00"
+updatedAt: "2026-06-17T13:36:23-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: df880547241f0b83b46a6ce6236468584eef2742
   lastKnownOriginMasterSha: df880547241f0b83b46a6ce6236468584eef2742
 currentTask:
-  id: local-experience-acceptance-bridge-readiness
+  id: module-run-v2-personal-ai-local-transport-contract-planning
   status: closed
   sourceStory: user-approved-mechanism-maintenance
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-local-experience-acceptance-bridge-readiness.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-local-experience-acceptance-bridge-readiness.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-acceptance-bridge-readiness.md
-  branch: codex/local-experience-acceptance-bridge-readiness
-  commitSha: 142f2f4770f739fc92409158e7e0efdbe5e9a317
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
+  branch: codex/personal-ai-transport-contract-planning
+  commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -714,9 +714,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After this readiness package is merged, pushed, and cleaned, recommend asking for a fresh
-    localExperienceAcceptanceBridgeApproved approval for `module-run-v2-personal-ai-local-transport-contract-planning`.
+    After this L4 transport contract planning reconciliation is merged, pushed, and cleaned, recommend asking for a
+    fresh localExperienceAcceptanceBridgeApproved approval for the next bridge step:
+    `module-run-v2-personal-ai-local-ui-browser-planning`.
     Keep schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
     staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate blocked unless a
     future task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-local-experience-acceptance-bridge-readiness.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
