@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
   lastKnownOriginMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
 currentTask:
-  id: queue-drain-default-entry-rules
+  id: batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go
   status: closed
-  sourceStory: current-user-approved-mechanism-task
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-queue-drain-default-entry-rules.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-queue-drain-default-entry-rules.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-queue-drain-default-entry-rules.md
-  branch: codex/queue-drain-default-entry-rules
+  sourceStory: module-run-v2-auto-seed-bridge
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-208-ops-governance-auth-quota-summary.md
+  evidencePath: docs/05-execution-logs/evidence/batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-208-ops-governance-and-retention-operations-facing-authorization-and-quota-go.md
+  branch: codex/ops-governance-batch-208-auth-quota
   commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
