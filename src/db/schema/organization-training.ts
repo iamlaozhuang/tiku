@@ -12,7 +12,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-import { orgAuth, organization, professionEnum } from "./auth";
+import { employee, orgAuth, organization, professionEnum } from "./auth";
 import { subjectEnum } from "./paper";
 
 const idColumn = () =>
@@ -40,6 +40,17 @@ export const organizationTrainingVersionStatusEnum = pgEnum(
   organizationTrainingVersionStatusValues,
 );
 
+export const organizationTrainingAnswerStatusValues = [
+  "in_progress",
+  "submitted",
+  "read_only",
+] as const;
+
+export const organizationTrainingAnswerStatusEnum = pgEnum(
+  "organization_training_answer_status",
+  organizationTrainingAnswerStatusValues,
+);
+
 export type OrganizationTrainingPublishScopeSnapshotValue = {
   organizationPublicIds: string[];
   capturedAt: string;
@@ -50,6 +61,12 @@ export type OrganizationTrainingQuestionTypeSummaryValue = {
   multiChoice: number;
   trueFalse: number;
   shortAnswer: number;
+};
+
+export type OrganizationTrainingAnswerOrganizationSnapshotValue = {
+  organizationPublicId: string;
+  organizationName: string;
+  capturedAt: string;
 };
 
 export const organizationTrainingVersion = pgTable(
@@ -129,6 +146,76 @@ export const organizationTrainingVersion = pgTable(
       table.profession,
       table.level,
       table.subject,
+    ),
+  ],
+);
+
+export const organizationTrainingAnswer = pgTable(
+  "organization_training_answer",
+  {
+    id: idColumn(),
+    public_id: text("public_id").notNull(),
+    organization_training_version_id: bigint(
+      "organization_training_version_id",
+      {
+        mode: "number",
+      },
+    ).notNull(),
+    organization_training_version_public_id: text(
+      "organization_training_version_public_id",
+    ).notNull(),
+    employee_id: bigint("employee_id", { mode: "number" }).notNull(),
+    employee_public_id: text("employee_public_id").notNull(),
+    organization_id: bigint("organization_id", { mode: "number" }).notNull(),
+    organization_public_id: text("organization_public_id").notNull(),
+    organization_training_answer_status: organizationTrainingAnswerStatusEnum(
+      "organization_training_answer_status",
+    )
+      .default("in_progress")
+      .notNull(),
+    score: scoreColumn("score"),
+    total_score: scoreColumn("total_score").notNull(),
+    submitted_at: nullableTimestampColumn("submitted_at"),
+    answer_organization_snapshot: jsonb("answer_organization_snapshot")
+      .$type<OrganizationTrainingAnswerOrganizationSnapshotValue>()
+      .notNull(),
+    created_at: createdAtColumn(),
+    updated_at: updatedAtColumn(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.organization_training_version_id],
+      foreignColumns: [organizationTrainingVersion.id],
+      name: "fk_organization_training_answer_version",
+    }).onDelete("restrict"),
+    foreignKey({
+      columns: [table.employee_id],
+      foreignColumns: [employee.id],
+      name: "fk_organization_training_answer_employee",
+    }).onDelete("restrict"),
+    foreignKey({
+      columns: [table.organization_id],
+      foreignColumns: [organization.id],
+      name: "fk_organization_training_answer_organization",
+    }).onDelete("restrict"),
+    uniqueIndex("udx_organization_training_answer_public_id").on(
+      table.public_id,
+    ),
+    uniqueIndex("udx_organization_training_answer_version_employee").on(
+      table.organization_training_version_id,
+      table.employee_id,
+    ),
+    index("idx_organization_training_answer_version_id").on(
+      table.organization_training_version_id,
+    ),
+    index("idx_organization_training_answer_employee_id").on(table.employee_id),
+    index("idx_organization_training_answer_org_submitted_at").on(
+      table.organization_id,
+      table.submitted_at,
+    ),
+    index("idx_organization_training_answer_status_submitted_at").on(
+      table.organization_training_answer_status,
+      table.submitted_at,
     ),
   ],
 );

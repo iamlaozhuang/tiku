@@ -28,11 +28,23 @@ describe("organization training publish-version persistence schema", () => {
     schemaExports.organizationTrainingVersion as
       | Parameters<typeof getTableConfig>[0]
       | undefined;
+  const organizationTrainingAnswer =
+    schemaExports.organizationTrainingAnswer as
+      | Parameters<typeof getTableConfig>[0]
+      | undefined;
 
   it("registers organization training version lifecycle status values", () => {
     expect(schemaExports.organizationTrainingVersionStatusValues).toEqual([
       "published",
       "taken_down",
+    ]);
+  });
+
+  it("registers organization training answer lifecycle status values", () => {
+    expect(schemaExports.organizationTrainingAnswerStatusValues).toEqual([
+      "in_progress",
+      "submitted",
+      "read_only",
     ]);
   });
 
@@ -137,6 +149,97 @@ describe("organization training publish-version persistence schema", () => {
       [
         ...getIndexNames(organizationTrainingVersion),
         ...getForeignKeyNames(organizationTrainingVersion),
+      ].every((identifierName) => identifierName.length <= 63),
+    ).toBe(true);
+  });
+
+  it("defines a metadata-only official answer source for organization training analytics", () => {
+    expect(organizationTrainingAnswer).toBeDefined();
+
+    if (organizationTrainingAnswer === undefined) {
+      return;
+    }
+
+    expect(getTableName(organizationTrainingAnswer)).toBe(
+      "organization_training_answer",
+    );
+    expect(getColumnNames(organizationTrainingAnswer)).toEqual(
+      expect.arrayContaining([
+        "id",
+        "public_id",
+        "organization_training_version_id",
+        "organization_training_version_public_id",
+        "employee_id",
+        "employee_public_id",
+        "organization_id",
+        "organization_public_id",
+        "organization_training_answer_status",
+        "score",
+        "total_score",
+        "submitted_at",
+        "answer_organization_snapshot",
+        "created_at",
+        "updated_at",
+      ]),
+    );
+  });
+
+  it("keeps organization training answer source free of raw content and provider payload columns", () => {
+    expect(organizationTrainingAnswer).toBeDefined();
+
+    if (organizationTrainingAnswer === undefined) {
+      return;
+    }
+
+    expect(getColumnNames(organizationTrainingAnswer)).not.toEqual(
+      expect.arrayContaining([
+        "question_id",
+        "paper_id",
+        "practice_id",
+        "mock_exam_id",
+        "answer_record_id",
+        "prompt",
+        "prompt_text",
+        "provider_payload",
+        "raw_answer",
+        "raw_generated_content",
+        "generated_content",
+        "standard_answer",
+        "analysis",
+        "answer_snapshot",
+        "employee_answer",
+      ]),
+    );
+  });
+
+  it("adds official-answer lookup indexes and named foreign keys", () => {
+    expect(organizationTrainingAnswer).toBeDefined();
+
+    if (organizationTrainingAnswer === undefined) {
+      return;
+    }
+
+    expect(getIndexNames(organizationTrainingAnswer)).toEqual(
+      expect.arrayContaining([
+        "udx_organization_training_answer_public_id",
+        "udx_organization_training_answer_version_employee",
+        "idx_organization_training_answer_version_id",
+        "idx_organization_training_answer_employee_id",
+        "idx_organization_training_answer_org_submitted_at",
+        "idx_organization_training_answer_status_submitted_at",
+      ]),
+    );
+    expect(getForeignKeyNames(organizationTrainingAnswer)).toEqual(
+      expect.arrayContaining([
+        "fk_organization_training_answer_version",
+        "fk_organization_training_answer_employee",
+        "fk_organization_training_answer_organization",
+      ]),
+    );
+    expect(
+      [
+        ...getIndexNames(organizationTrainingAnswer),
+        ...getForeignKeyNames(organizationTrainingAnswer),
       ].every((identifierName) => identifierName.length <= 63),
     ).toBe(true);
   });

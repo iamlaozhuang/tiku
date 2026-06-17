@@ -85,6 +85,13 @@
       "when": 1781609838000,
       "tag": "20260616113718_add_admin_organization",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1781663945213,
+      "tag": "20260616193905_add_organization_training_answer",
+      "breakpoints": true
     }
   ]
 }
