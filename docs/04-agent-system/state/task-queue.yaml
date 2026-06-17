@@ -9547,3 +9547,97 @@ tasks:
     result: pass
     branch: codex/mechanism-legacy-status-evidence-diagnostics
     retryCount: 0
+
+  - id: mechanism-historical-evidence-provenance-diagnostics
+    title: Mechanism maintenance for historical evidence provenance diagnostics
+    phase: mechanism-historical-evidence-provenance-diagnostics
+    sourceStory: user-approved-mechanism-maintenance
+    dependencies:
+      - mechanism-legacy-status-evidence-diagnostics
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by current 2026-06-17 user prompt to execute the recommended mechanism task and continue under project mechanism rules. Scope is limited to local docs/state/script diagnostics and redacted evidence. High-risk capability gates remain blocked.
+    targetClosureItem: historical evidence provenance categories for next-action diagnostics
+    behaviorBoundary: mechanism::historical evidence provenance diagnostics
+    useCases:
+      - Get-TikuNextAction distinguishes direct evidence, closure evidence, archived evidence, and legacy-unavailable historical evidence.
+    acceptanceScenarios:
+      - next-action smoke covers closure evidence and execution-log-index archived evidence as provenance-backed historical evidence.
+      - local Get-TikuNextAction reports the superseded Phase 18 task as closureEvidenceRecovered and keeps the five early legacy evidence gaps as legacyUnavailableEvidence.
+      - local Get-TikuNextAction remains idle with no pending task and reports no matrix drift.
+    nonGoals:
+      - product implementation, evidence fabrication, schema/drizzle/migration, dependency/package/lockfile, provider/model, cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
+    validationProfile: docs_state_lite
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+    riskTypes:
+      - mechanism_diagnostic
+      - docs_state
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: red
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown <mechanism-historical-evidence-provenance-diagnostics changed files>
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-historical-evidence-provenance-diagnostics
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - npx.cmd prettier --check --ignore-unknown <mechanism-historical-evidence-provenance-diagnostics changed files>
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-historical-evidence-provenance-diagnostics
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-historical-evidence-provenance.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-historical-evidence-provenance.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-historical-evidence-provenance.md
+    status: closed
+    claimedAt: "2026-06-17T12:35:35-07:00"
+    closedAt: "2026-06-17T12:40:01-07:00"
+    result: pass
+    branch: codex/mechanism-historical-evidence-provenance
+    retryCount: 0

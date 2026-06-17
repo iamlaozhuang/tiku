@@ -74,11 +74,18 @@ try {
     $queuePath = Join-Path -Path $stateRoot -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix.yaml"
     $taskHistoryIndexPath = Join-Path -Path $stateRoot -ChildPath "task-history-index.yaml"
+    $executionLogIndexPath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/execution-log-index.yaml"
     $completedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/completed-a.md"
     $archivedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/archived-a.md"
+    $closureEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/closure-evidence.md"
+    $archivedOriginalEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/archived-original.md"
+    $archivedEvidenceArchivePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/archive/2026-05/evidence/archived-original.md"
     New-Item -ItemType Directory -Path (Split-Path -Path $completedEvidencePath -Parent) -Force | Out-Null
+    New-Item -ItemType Directory -Path (Split-Path -Path $archivedEvidenceArchivePath -Parent) -Force | Out-Null
     Set-Content -LiteralPath $completedEvidencePath -Value "completed-a smoke evidence" -Encoding UTF8
     Set-Content -LiteralPath $archivedEvidencePath -Value "archived-a smoke evidence" -Encoding UTF8
+    Set-Content -LiteralPath $closureEvidencePath -Value "closure smoke evidence" -Encoding UTF8
+    Set-Content -LiteralPath $archivedEvidenceArchivePath -Value "archived original smoke evidence" -Encoding UTF8
 
     @"
 schemaVersion: 1
@@ -108,6 +115,17 @@ tasks:
     validationCommands:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/task-legacy-done.md
+  - id: task-closure-evidence
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/task-closure-evidence.md
+    closureEvidencePath: docs/05-execution-logs/evidence/closure-evidence.md
+  - id: task-archived-evidence
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/archived-original.md
   - id: task-a
     status: pending
     dependencies:
@@ -186,6 +204,16 @@ terminologyAnchors:
 Cost Calibration Gate remains blocked
 "@ | Set-Content -LiteralPath $matrixPath -Encoding UTF8
 
+    @"
+schemaVersion: 1
+entries:
+  - path: docs/05-execution-logs/evidence/archived-original.md
+    archivePath: docs/05-execution-logs/archive/2026-05/evidence/archived-original.md
+    kind: evidence
+    taskId: task-archived-evidence
+    status: archived
+"@ | Set-Content -LiteralPath $executionLogIndexPath -Encoding UTF8
+
     & git -C $repoPath add docs | Out-Null
     & git -C $repoPath commit -m "chore(smoke): add next-action state fixture" | Out-Null
     if ($LASTEXITCODE -ne 0) {
@@ -195,6 +223,7 @@ Cost Calibration Gate remains blocked
     $beforeProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $beforeQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash
     $beforeMatrixHash = (Get-FileHash -LiteralPath $matrixPath -Algorithm SHA256).Hash
+    $beforeExecutionLogIndexHash = (Get-FileHash -LiteralPath $executionLogIndexPath -Algorithm SHA256).Hash
 
     Push-Location -LiteralPath $repoPath
     try {
@@ -202,7 +231,8 @@ Cost Calibration Gate remains blocked
             & $scriptPath `
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $queuePath `
-                -MatrixPath $matrixPath
+                -MatrixPath $matrixPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
         Pop-Location
@@ -217,7 +247,7 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $output -Pattern '^blockedGates:'
     Assert-Contains -Output $output -Pattern '^validationNeeded: 2 command\(s\) for task-a$'
     Assert-Contains -Output $output -Pattern '^historicalQueueFindings: .*legacy_status_missing=1; legacy_terminal=1; knownBlockedValidation=1; unsupportedStatus=0; notBlockingCurrentRun=true$'
-    Assert-Contains -Output $output -Pattern '^historicalEvidenceFindings: missingHistoricalEvidence=1; notBlockingCurrentRun=true$'
+    Assert-Contains -Output $output -Pattern '^historicalEvidenceFindings: missingHistoricalEvidence=1; closureEvidenceRecovered=1; archivedEvidenceRecovered=1; legacyUnavailableEvidence=1; notBlockingCurrentRun=true$'
     Assert-Contains -Output $output -Pattern '^driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:1,sourcePlanningTaskMissingInQueue:1; notBlockingCurrentRun=true$'
     Assert-NotContains -Output $output -Pattern 'legacy_terminal_first='
     Assert-NotContains -Output $output -Pattern 'missingHistoricalEvidenceFirst='
@@ -234,6 +264,7 @@ Cost Calibration Gate remains blocked
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $queuePath `
                 -MatrixPath $matrixPath `
+                -ExecutionLogIndexPath $executionLogIndexPath `
                 -VerboseHistory
         )
     } finally {
@@ -241,7 +272,7 @@ Cost Calibration Gate remains blocked
     }
 
     Assert-Contains -Output $verboseOutput -Pattern '^historicalQueueFindingsVerbose: .*legacy_status_missing_first=task-missing-status; legacy_terminal_first=task-legacy-done; knownBlockedValidationFirst=task-known-blocked:blocked_validation_failure; unsupportedStatusFirst=none$'
-    Assert-Contains -Output $verboseOutput -Pattern '^historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=task-legacy-done$'
+    Assert-Contains -Output $verboseOutput -Pattern '^historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=task-legacy-done; closureEvidenceRecoveredFirst=task-closure-evidence; archivedEvidenceRecoveredFirst=task-archived-evidence; legacyUnavailableEvidenceFirst=task-legacy-done$'
     Assert-Contains -Output $verboseOutput -Pattern '^driftFindingsVerbose: queueMatrixDriftFirst=batch-1000-really-missing,missing-planning-task-b$'
 
     $plannedPauseProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-planned-pause.yaml"
@@ -267,7 +298,8 @@ currentTask:
             & $scriptPath `
                 -ProjectStatePath $plannedPauseProjectStatePath `
                 -QueuePath $queuePath `
-                -MatrixPath $matrixPath
+                -MatrixPath $matrixPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
         Pop-Location
@@ -310,7 +342,8 @@ tasks:
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $historyQueuePath `
                 -MatrixPath $matrixPath `
-                -TaskHistoryIndexPath $taskHistoryIndexPath
+                -TaskHistoryIndexPath $taskHistoryIndexPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
         Pop-Location
@@ -377,7 +410,8 @@ currentTask:
             & $scriptPath `
                 -ProjectStatePath $seedProjectStatePath `
                 -QueuePath $seedQueuePath `
-                -MatrixPath $seedMatrixPath
+                -MatrixPath $seedMatrixPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
         Pop-Location
@@ -393,7 +427,8 @@ currentTask:
     $afterProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $afterQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash
     $afterMatrixHash = (Get-FileHash -LiteralPath $matrixPath -Algorithm SHA256).Hash
-    if ($beforeProjectHash -ne $afterProjectHash -or $beforeQueueHash -ne $afterQueueHash -or $beforeMatrixHash -ne $afterMatrixHash) {
+    $afterExecutionLogIndexHash = (Get-FileHash -LiteralPath $executionLogIndexPath -Algorithm SHA256).Hash
+    if ($beforeProjectHash -ne $afterProjectHash -or $beforeQueueHash -ne $afterQueueHash -or $beforeMatrixHash -ne $afterMatrixHash -or $beforeExecutionLogIndexHash -ne $afterExecutionLogIndexHash) {
         throw "Get-TikuNextAction smoke expected read-only behavior, but one or more fixture files changed."
     }
 } finally {
