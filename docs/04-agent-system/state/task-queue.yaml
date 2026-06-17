@@ -30065,3 +30065,203 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration
+
+  - id: advanced-organization-analytics-gateway-query-task-seeding
+    title: Advanced organization analytics gateway query task seeding
+    phase: advanced-organization-analytics-gateway-query-task-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_seeded_gateway_query_tdd
+    retryCount: 0
+    claimedAt: "2026-06-16T19:56:13-07:00"
+    closedAt: "2026-06-16T19:56:13-07:00"
+    branch: codex/advanced-organization-analytics-gateway-query-task-seeding
+    dependencies:
+      - advanced-organization-analytics-training-answer-source-schema-migration
+    humanApproval: >-
+      User approved executing this docs/state-only queue seeding task in the current 2026-06-16 Codex thread by saying
+      "批准执行" after the assistant recommended seeding a new pending repository/query task because the queue had no
+      pending entries. Approval is limited to baseline confirmation, task plan/evidence/audit creation, durable
+      docs/state updates, one pending repository/query TDD task seed, declared local validation, local commit,
+      fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune. Product source
+      implementation, route runtime wiring, service/UI changes, DB execution, schema/migration, package/lockfile/
+      dependency changes, provider/model calls, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/
+      external-service, PR, force push, destructive data operations, drizzle-kit push, and Cost Calibration Gate remain
+      blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/code-stage-task-seeding-governance.md
+      - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+      - src/db/schema/organization-training.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+    blockedGates:
+      - product source implementation
+      - route runtime wiring
+      - service/UI changes
+      - direct database access or database connection execution
+      - row/private data exposure
+      - schema/migration
+      - dependency changes
+      - e2e/browser/dev-server
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - publicId lists
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - 'Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-gateway-query-task-seeding","status: closed","advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd","status: pending","src/server/repositories/organization-analytics-repository.ts","src/server/repositories/organization-analytics-repository.test.ts"'
+      - "npx prettier --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-gateway-query-task-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-gateway-query-task-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-gateway-query-task-seeding
+
+  - id: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+    title: Advanced organization analytics Postgres gateway training answer source query TDD
+    phase: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_repository_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: requires_fresh_user_approval_before_claim
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-gateway-query-task-seeding
+      - advanced-organization-analytics-training-answer-source-schema-migration
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation limited to the organization
+      analytics repository/query boundary that reads aggregate-only official organization training submissions from the
+      metadata-only `organization_training_answer` source added by the schema migration task. The task may update the
+      existing organization analytics repository and focused unit tests to map official submission summaries into the
+      existing repository gateway/read-model contracts. It must not wire the route runtime, change services/UI, execute
+      database connections, expose raw row data or public identifier lists, modify schema/migration/drizzle files, change
+      dependencies, call providers/models, run e2e/browser/dev-server, or touch staging/prod/cloud/deploy/payment/
+      external-service surfaces. If runtime route wiring, real DB execution, schema changes, service changes, UI work,
+      dependency changes, provider calls, or protected evidence would be required, stop and report instead of expanding
+      scope.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - src/db/schema/organization-training.ts
+      - src/db/schema/auth.ts
+      - src/server/models/organization-analytics.ts
+      - src/server/services/organization-analytics-service.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/services/**
+      - src/server/models/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/server/contracts/**
+      - src/components/**
+      - src/hooks/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - missing fresh user approval before claim
+      - route runtime wiring
+      - service/UI changes
+      - real database access or database connection execution
+      - row/private data exposure
+      - publicId lists
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_approval_after_validation
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd

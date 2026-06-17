@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-training-answer-source-schema-migration
-updatedAt: "2026-06-16T19:39:52-07:00"
+currentPhase: advanced-organization-analytics-gateway-query-task-seeding
+updatedAt: "2026-06-16T19:56:13-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 307aeb731939861e6955332a86a13915f81d357c
-  lastKnownOriginMasterSha: 307aeb731939861e6955332a86a13915f81d357c
+  lastKnownMasterSha: 016aa5ca3609cb4fb51c8b3d6f143e830ceb07de
+  lastKnownOriginMasterSha: 016aa5ca3609cb4fb51c8b3d6f143e830ceb07de
 currentTask:
-  id: advanced-organization-analytics-training-answer-source-schema-migration
+  id: advanced-organization-analytics-gateway-query-task-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
-  branch: codex/advanced-organization-analytics-training-answer-source-schema-migration
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+  branch: codex/advanced-organization-analytics-gateway-query-task-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -652,6 +652,7 @@ qualityGates:
     advancedOrganizationAnalyticsPostgresGatewayTrainingAnswerSourceGapDecision: pass_readonly_decision_schema_migration_planning_seeded
     advancedOrganizationAnalyticsTrainingAnswerSourceSchemaMigrationPlanning: pass_docs_only_schema_migration_approval_package_seeded
     advancedOrganizationAnalyticsTrainingAnswerSourceSchemaMigration: pass_schema_migration_generated_no_db_execution
+    advancedOrganizationAnalyticsGatewayQueryTaskSeeding: pass_docs_state_seeded_gateway_query_tdd
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -667,11 +668,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-training-answer-source-schema-migration` added a metadata-only
-    `organization_training_answer` schema source plus generated Drizzle migration files without executing database
-    connections or migrations. The real organization analytics Postgres gateway can now be unblocked by a future
-    repository/query implementation task that reads aggregate-only official submission summaries from this source.
-    Runtime route/service/repository/UI wiring, direct DB execution, provider/model, dependency, e2e/browser/dev-server,
-    staging/prod/cloud/deploy/payment/external-service, PR, force-push, destructive data operations, drizzle-kit push,
-    and Cost Calibration Gate remain blocked unless a future task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+    `advanced-organization-analytics-gateway-query-task-seeding` seeded
+    `advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd` as the next pending task. Claim
+    it only after a fresh baseline confirmation and fresh approval. Scope is repository/query TDD for aggregate-only
+    official organization training submissions from `organization_training_answer`, with no route runtime wiring,
+    service/UI changes, DB execution, schema/migration, dependency, provider/model, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force-push, destructive data operation, drizzle-kit push, or
+    Cost Calibration Gate work unless a later task explicitly approves it.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
