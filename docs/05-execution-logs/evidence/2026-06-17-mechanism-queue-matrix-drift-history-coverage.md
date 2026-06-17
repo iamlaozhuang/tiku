@@ -21,6 +21,7 @@ result: pass
   - `scripts/agent-system/Get-TikuNextAction.Smoke.ps1`
 - RED: PASS. After the smoke fixture added one history-covered matrix batch and one history-covered source planning task, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1` failed because current diagnostics reported `matrixBatchMissingInQueue:2,sourcePlanningTaskMissingInQueue:2` instead of the expected `1,1`.
 - GREEN: PASS. After script repair, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1` passed.
+- Closeout implementation commit: `0830cd075fb5d9e0ffd2d9ebaa9347ac553c3125`.
 - validation commands and results:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1`: passed.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`: passed; local diagnostic reported `queueMatrixDrift=matrixBatchMissingInQueue:0,sourcePlanningTaskMissingInQueue:0`.
