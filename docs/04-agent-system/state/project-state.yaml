@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
-updatedAt: "2026-06-16T22:49:48-07:00"
+currentPhase: advanced-organization-analytics-next-implementation-queue-seeding-post-runtime-readonly-recheck
+updatedAt: "2026-06-16T22:58:28-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
   lastKnownOriginMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck
+  id: advanced-organization-analytics-next-implementation-queue-seeding-post-runtime-readonly-recheck
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
-  branch: codex/organization-analytics-runtime-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-next-implementation-queue-seeding-post-runtime-readonly-recheck.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-next-implementation-queue-seeding-post-runtime-readonly-recheck.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-next-implementation-queue-seeding-post-runtime-readonly-recheck.md
+  branch: codex/organization-analytics-post-runtime-next-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -662,6 +662,7 @@ qualityGates:
     advancedOrganizationAnalyticsDashboardSummaryPostgresRuntimeWiringTdd: pass_tdd_postgres_runtime_wiring_no_db_execution
     advancedOrganizationAnalyticsPostRuntimeHandoffSeeding: pass_docs_state_seeded_post_runtime_readonly_recheck
     advancedOrganizationAnalyticsDashboardSummaryPostgresRuntimeWiringReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
+    advancedOrganizationAnalyticsNextImplementationQueueSeedingPostRuntimeReadonlyRecheck: pass_docs_state_seeded_employee_statistics_route_contract_tdd
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -677,10 +678,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck` closed with no blocking
-    findings. The queue should next receive a docs/state-only seeding task that selects the next organization analytics
-    implementation or readonly slice from the advanced MVP backlog. Product implementation, real DB execution, `.env*`,
-    schema/migration/drizzle, dependency changes, provider/model calls, e2e/browser/dev-server, staging/prod/cloud/deploy/
-    payment/external-service, PR, force push, and Cost Calibration Gate remain blocked until a fresh scoped task approves
-    them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-postgres-runtime-wiring-readonly-recheck.md
+    `advanced-organization-analytics-employee-statistics-route-contract-tdd` is the next pending organization analytics
+    task. It should be claimed only with fresh approval, on a short-lived branch, as a narrow TDD route-contract slice for
+    employee statistics summary without runtime Postgres wiring. Product work outside the declared files, real DB
+    execution, `.env*`, schema/migration/drizzle, dependency changes, provider/model calls, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force push, and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-next-implementation-queue-seeding-post-runtime-readonly-recheck.md
