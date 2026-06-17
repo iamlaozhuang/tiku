@@ -54,6 +54,7 @@ tasks:
       providerKey: env_destination_confirmation_required
       providerCall: blocked_without_task_approval
       schemaMigration: blocked_without_task_approval
+      localFullFlowGate: blocked_without_task_profile
       costCalibrationGate: blocked
   - id: approved-task
     capabilities:
@@ -63,7 +64,35 @@ tasks:
       providerKey: approved_confirmed_local_destination
       providerCall: approved_redacted_local_validation
       schemaMigration: approved_migration_plan
+      localFullFlowGate: blocked_without_task_profile
       costCalibrationGate: blocked
+  - id: local-full-flow-profile-missing
+    executionProfile: local_unit_tdd
+    validationPolicy: local_full_flow
+    localFullFlowGate: approved_localhost_only
+    capabilities:
+      localFullFlowGate: approved_localhost_only
+      costCalibrationGate: blocked
+    validationCommands:
+      - powershell.exe -NoProfile -Command "Invoke-WebRequest http://localhost:3000"
+  - id: local-full-flow-external-target
+    executionProfile: local_full_flow
+    validationPolicy: local_full_flow
+    localFullFlowGate: approved_localhost_only
+    capabilities:
+      localFullFlowGate: approved_localhost_only
+      costCalibrationGate: blocked
+    validationCommands:
+      - powershell.exe -NoProfile -Command "Invoke-WebRequest https://staging.example.invalid"
+  - id: local-full-flow-approved
+    executionProfile: local_full_flow
+    validationPolicy: local_full_flow
+    localFullFlowGate: approved_localhost_only
+    capabilities:
+      localFullFlowGate: approved_localhost_only
+      costCalibrationGate: blocked
+    validationCommands:
+      - powershell.exe -NoProfile -Command "Invoke-WebRequest http://localhost:3000"
   - id: unsafe-task
     capabilities:
       localDockerDatabase: unsafe
@@ -72,6 +101,7 @@ tasks:
       providerKey: env_destination_confirmation_required
       providerCall: blocked_without_task_approval
       schemaMigration: blocked_without_task_approval
+      localFullFlowGate: blocked_without_task_profile
       costCalibrationGate: blocked
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
@@ -164,6 +194,46 @@ tasks:
     Assert-Contains -Output $schemaMigrationReadyResult.Output -Pattern "localCapabilityDecision: capability_ready"
     Assert-Contains -Output $schemaMigrationReadyResult.Output -Pattern "adapterAction: schema_migration_plan_ready_no_execution"
     Assert-Contains -Output $schemaMigrationReadyResult.Output -Pattern "blockedAdapterAction: destructive_data_operation"
+
+    $localFullFlowProfileMissingResult = Invoke-Gate -ScriptArguments @(
+        "-TaskId", "local-full-flow-profile-missing",
+        "-QueuePath", $queuePath,
+        "-ProjectStatePath", $projectStatePath,
+        "-Capability", "localFullFlowGate",
+        "-Intent", "use_capability"
+    )
+    if ($localFullFlowProfileMissingResult.ExitCode -eq 0) {
+        throw "Expected local full-flow use without local_full_flow profile to fail"
+    }
+    Assert-Contains -Output $localFullFlowProfileMissingResult.Output -Pattern "localCapabilityDecision: stop_for_hard_block"
+    Assert-Contains -Output $localFullFlowProfileMissingResult.Output -Pattern "requires executionProfile local_full_flow"
+
+    $localFullFlowExternalTargetResult = Invoke-Gate -ScriptArguments @(
+        "-TaskId", "local-full-flow-external-target",
+        "-QueuePath", $queuePath,
+        "-ProjectStatePath", $projectStatePath,
+        "-Capability", "localFullFlowGate",
+        "-Intent", "use_capability"
+    )
+    if ($localFullFlowExternalTargetResult.ExitCode -eq 0) {
+        throw "Expected local full-flow use with non-localhost target to fail"
+    }
+    Assert-Contains -Output $localFullFlowExternalTargetResult.Output -Pattern "localCapabilityDecision: stop_for_hard_block"
+    Assert-Contains -Output $localFullFlowExternalTargetResult.Output -Pattern "blocked non-local target"
+
+    $localFullFlowReadyResult = Invoke-Gate -ScriptArguments @(
+        "-TaskId", "local-full-flow-approved",
+        "-QueuePath", $queuePath,
+        "-ProjectStatePath", $projectStatePath,
+        "-Capability", "localFullFlowGate",
+        "-Intent", "use_capability"
+    )
+    if ($localFullFlowReadyResult.ExitCode -ne 0) {
+        throw "Expected approved local full-flow capability to pass readiness`n$($localFullFlowReadyResult.Output -join "`n")"
+    }
+    Assert-Contains -Output $localFullFlowReadyResult.Output -Pattern "localCapabilityDecision: capability_ready"
+    Assert-Contains -Output $localFullFlowReadyResult.Output -Pattern "adapterAction: local_full_flow_localhost_adapter_ready_no_execution"
+    Assert-Contains -Output $localFullFlowReadyResult.Output -Pattern "allowedLocalFullFlowHost: localhost"
 
     $destructiveDbManualResult = Invoke-Gate -ScriptArguments @(
         "-TaskId", "default-task",

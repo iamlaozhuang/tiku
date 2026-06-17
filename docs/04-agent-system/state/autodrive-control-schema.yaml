@@ -95,6 +95,23 @@ executionProfiles:
   queueSelectionModes:
     - legacy_explicit
     - ready_set
+  runnerConsumption:
+    requiredOutputs:
+      - runnerQueueSelectionMode
+      - runnerWorkPacketId
+      - runnerCatalogMaxTasksPerPacket
+      - runnerEffectiveMaxSteps
+    maxStepRule: runner MaxSteps must be capped by workPacket.maxTasksPerPacket for the current executionProfile when the catalog provides a positive integer limit.
+  localFullFlowGate:
+    requiredTaskFields:
+      executionProfile: local_full_flow
+      validationPolicy: local_full_flow
+      localFullFlowGate: approved_localhost_only
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+      - ::1
+    executionRule: local full-flow capability readiness is a static gate only; it must not start dev server, Browser, Playwright, e2e, provider, staging, prod, cloud, deploy, payment, or external-service work.
   executionRule: profile catalog values classify task envelopes only; they do not approve blocked capabilities, product implementation, env/secret access, provider calls, schema/migration, dependency, deploy, PR, force push, Browser, Playwright, e2e, or Cost Calibration Gate work without task-scoped approval and capability gates.
 startupDiagnostics:
   stopTaxonomyValues:

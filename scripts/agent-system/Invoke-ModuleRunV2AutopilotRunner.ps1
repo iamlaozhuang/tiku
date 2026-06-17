@@ -74,6 +74,10 @@ param(
     [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
 
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ExecutionProfileCatalogPath = "docs\04-agent-system\state\execution-profiles.yaml",
+
+    [Parameter(Mandatory = $false)]
     [string]$LeasePath = "",
 
     [Parameter(Mandatory = $false)]
@@ -520,7 +524,9 @@ function Invoke-SeedTransaction {
         "-QueuePath",
         $QueuePath,
         "-MatrixPath",
-        $MatrixPath
+        $MatrixPath,
+        "-ExecutionProfileCatalogPath",
+        $ExecutionProfileCatalogPath
     )
 
     if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
@@ -821,7 +827,32 @@ for ($stepIndex = 1; $stepIndex -le $MaxSteps; $stepIndex++) {
     if ([string]::IsNullOrWhiteSpace($queueSelectionMode)) {
         $queueSelectionMode = "legacy_explicit"
     }
+    $workPacketId = Get-DecisionValue -Output $nextActionResult.Output -Key "workPacketId"
+    $workPacketScope = Get-DecisionValue -Output $nextActionResult.Output -Key "workPacketScope"
+    $catalogMaxTasksPerPacket = Get-DecisionValue -Output $nextActionResult.Output -Key "catalogMaxTasksPerPacket"
+    $parsedCatalogMaxTasksPerPacket = 0
+    $effectiveMaxSteps = $MaxSteps
+    if ([int]::TryParse($catalogMaxTasksPerPacket, [ref]$parsedCatalogMaxTasksPerPacket) -and $parsedCatalogMaxTasksPerPacket -gt 0) {
+        $effectiveMaxSteps = [Math]::Min($MaxSteps, $parsedCatalogMaxTasksPerPacket)
+    }
+    if ([string]::IsNullOrWhiteSpace($workPacketId)) {
+        $workPacketId = "none"
+    }
+    if ([string]::IsNullOrWhiteSpace($workPacketScope)) {
+        $workPacketScope = "none"
+    }
+    if ([string]::IsNullOrWhiteSpace($catalogMaxTasksPerPacket)) {
+        $catalogMaxTasksPerPacket = "none"
+    }
     Write-Output "runnerQueueSelectionMode: $queueSelectionMode"
+    Write-Output "runnerWorkPacketId: $workPacketId"
+    Write-Output "runnerWorkPacketScope: $workPacketScope"
+    Write-Output "runnerCatalogMaxTasksPerPacket: $catalogMaxTasksPerPacket"
+    Write-Output "runnerEffectiveMaxSteps: $effectiveMaxSteps"
+
+    if ($stepIndex -gt $effectiveMaxSteps) {
+        Write-RunnerResult -Decision "iteration_limit_reached" -NextAction "rerun_after_review" -Reason "runner reached catalog work packet max task budget" -StepCount ($stepIndex - 1) -ExitCode 1 -SeverityOverride "hard_block" -RiskIfAutoContinued "work packet profile budget would be exceeded" -NoWriteReason "catalog maxTasksPerPacket cap reached"
+    }
 
     if ($nextActionResult.ExitCode -ne 0 -or [string]::IsNullOrWhiteSpace($nextActionDecision)) {
         Write-RunnerResult -Decision "stop_for_hard_block" -NextAction "report_next_action_diagnostic_failure" -Reason "next-action diagnostic failed or omitted nextActionDecision" -StepCount $stepIndex -ExitCode 1

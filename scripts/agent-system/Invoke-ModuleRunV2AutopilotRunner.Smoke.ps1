@@ -112,6 +112,30 @@ Cost Calibration Gate remains blocked
 "@ | Set-Content -LiteralPath $Path -Encoding UTF8
 }
 
+function Write-SmokeProfileCatalog {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    @"
+schemaVersion: 1
+defaults:
+  executionProfile: legacy_explicit
+  evidenceMode: full
+  validationPolicy: legacy_explicit
+  queueSelectionMode: legacy_explicit
+profiles:
+  docs_state_lite:
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+workPacket:
+  maxTasksPerPacket:
+    docs_state_lite: 1
+"@ | Set-Content -LiteralPath $Path -Encoding UTF8
+}
+
 function Write-SmokeSeedMatrix {
     param(
         [Parameter(Mandatory = $true)]
@@ -226,7 +250,9 @@ try {
     $continueProjectStatePath = Join-Path -Path $continueRepo -ChildPath "docs/04-agent-system/state/project-state.yaml"
     $continueQueuePath = Join-Path -Path $continueRepo -ChildPath "docs/04-agent-system/state/task-queue.yaml"
     $continueMatrixPath = Join-Path -Path $continueRepo -ChildPath "docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml"
+    $continueProfileCatalogPath = Join-Path -Path $continueRepo -ChildPath "docs/04-agent-system/state/execution-profiles.yaml"
     Write-SmokeMatrix -Path $continueMatrixPath
+    Write-SmokeProfileCatalog -Path $continueProfileCatalogPath
     Write-SmokeProjectState -Path $continueProjectStatePath -TaskId "runner-current" -Sha $continueSha
     @"
 schemaVersion: 1
@@ -234,6 +260,13 @@ tasks:
   - id: runner-current
     status: in_progress
     taskKind: implementation
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    workPacket:
+      id: runner-smoke-work-packet
+      scope: runner_smoke_scope
     allowedFiles:
       - scripts/agent-system/Invoke-ModuleRunV2AutopilotRunner.ps1
     blockedFiles:
@@ -270,6 +303,10 @@ tasks:
     Assert-Contains -Output $continueOutput -Pattern "blockerClass: runnable"
     Assert-Contains -Output $continueOutput -Pattern "autopilotDecision: continue_current_thread"
     Assert-Contains -Output $continueOutput -Pattern "nextActionDecision:"
+    Assert-Contains -Output $continueOutput -Pattern "runnerQueueSelectionMode: ready_set"
+    Assert-Contains -Output $continueOutput -Pattern "runnerWorkPacketId: runner-smoke-work-packet"
+    Assert-Contains -Output $continueOutput -Pattern "runnerCatalogMaxTasksPerPacket: 1"
+    Assert-Contains -Output $continueOutput -Pattern "runnerEffectiveMaxSteps: 1"
     Assert-Contains -Output $continueOutput -Pattern "diagnosticOnly: true"
 
     $pendingRepo = Join-Path -Path $fixtureRoot -ChildPath "pending-repo"

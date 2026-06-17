@@ -416,6 +416,76 @@ function Get-CatalogNestedScalar {
     return ""
 }
 
+function Get-TaskNestedScalar {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Block,
+        [Parameter(Mandatory = $true)][string]$Section,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    $insideSection = $false
+    $baseIndent = 0
+    foreach ($line in $Block) {
+        if (-not $insideSection -and $line -match "^(\s+)$([regex]::Escape($Section)):\s*$") {
+            $insideSection = $true
+            $baseIndent = $Matches[1].Length
+            continue
+        }
+
+        if (-not $insideSection) {
+            continue
+        }
+
+        if ($line -match "^(\s*)\S") {
+            $indent = $Matches[1].Length
+            if ($indent -le $baseIndent) {
+                break
+            }
+        }
+
+        if ($line -match "^\s+$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            return $Matches[1].Trim().Trim('"')
+        }
+    }
+
+    return ""
+}
+
+function Get-CatalogWorkPacketMaxTasks {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Profile
+    )
+
+    $insideWorkPacket = $false
+    $insideMaxTasks = $false
+    foreach ($line in ($Content -split "\r?\n")) {
+        if (-not $insideWorkPacket -and $line -match "^workPacket:\s*$") {
+            $insideWorkPacket = $true
+            continue
+        }
+
+        if ($insideWorkPacket -and $line -match "^\S") {
+            break
+        }
+
+        if ($insideWorkPacket -and -not $insideMaxTasks -and $line -match "^\s{2}maxTasksPerPacket:\s*$") {
+            $insideMaxTasks = $true
+            continue
+        }
+
+        if ($insideMaxTasks -and $line -match "^\s{2}\S") {
+            break
+        }
+
+        if ($insideMaxTasks -and $line -match "^\s{4}$([regex]::Escape($Profile)):\s*(\d+)\s*$") {
+            return $Matches[1]
+        }
+    }
+
+    return "none"
+}
+
 function Get-QueueDiagnostics {
     param([Parameter(Mandatory = $true)][object[]]$Blocks)
 
@@ -564,10 +634,12 @@ if ([string]::IsNullOrWhiteSpace($queueSelectionMode)) {
 $catalogEvidenceMode = ""
 $catalogValidationPolicy = ""
 $catalogQueueSelectionMode = ""
+$catalogMaxTasksPerPacket = "none"
 if ($profileCatalogPresent) {
     $catalogEvidenceMode = Get-CatalogNestedScalar -Content $profileCatalogContent -Section "profiles" -Entry $currentExecutionProfile -Key "evidenceMode"
     $catalogValidationPolicy = Get-CatalogNestedScalar -Content $profileCatalogContent -Section "profiles" -Entry $currentExecutionProfile -Key "validationPolicy"
     $catalogQueueSelectionMode = Get-CatalogNestedScalar -Content $profileCatalogContent -Section "profiles" -Entry $currentExecutionProfile -Key "queueSelectionMode"
+    $catalogMaxTasksPerPacket = Get-CatalogWorkPacketMaxTasks -Content $profileCatalogContent -Profile $currentExecutionProfile
 }
 if ([string]::IsNullOrWhiteSpace($catalogEvidenceMode)) {
     $catalogEvidenceMode = "none"
@@ -577,6 +649,22 @@ if ([string]::IsNullOrWhiteSpace($catalogValidationPolicy)) {
 }
 if ([string]::IsNullOrWhiteSpace($catalogQueueSelectionMode)) {
     $catalogQueueSelectionMode = "none"
+}
+if ([string]::IsNullOrWhiteSpace($catalogMaxTasksPerPacket)) {
+    $catalogMaxTasksPerPacket = "none"
+}
+
+$workPacketId = "none"
+$workPacketScope = "none"
+if ($currentTaskBlock.Count -gt 0) {
+    $taskWorkPacketId = Get-TaskNestedScalar -Block $currentTaskBlock -Section "workPacket" -Key "id"
+    $taskWorkPacketScope = Get-TaskNestedScalar -Block $currentTaskBlock -Section "workPacket" -Key "scope"
+    if (-not [string]::IsNullOrWhiteSpace($taskWorkPacketId)) {
+        $workPacketId = $taskWorkPacketId
+    }
+    if (-not [string]::IsNullOrWhiteSpace($taskWorkPacketScope)) {
+        $workPacketScope = $taskWorkPacketScope
+    }
 }
 
 $nextTask = Get-NextExecutableTask -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks
@@ -677,6 +765,9 @@ Write-Output "executionProfileCatalog: $(if ($profileCatalogPresent) { "present"
 Write-Output "catalogEvidenceMode: $catalogEvidenceMode"
 Write-Output "catalogValidationPolicy: $catalogValidationPolicy"
 Write-Output "catalogQueueSelectionMode: $catalogQueueSelectionMode"
+Write-Output "catalogMaxTasksPerPacket: $catalogMaxTasksPerPacket"
+Write-Output "workPacketId: $workPacketId"
+Write-Output "workPacketScope: $workPacketScope"
 Write-Output "readySetCount: $($readySetTaskIds.Count)"
 Write-Output "readySetSelectionRule: $(if ($queueSelectionMode -eq "ready_set") { "first_ready_task_unless_work_packet_scope" } else { "legacy_explicit_first_pending" })"
 Write-Output "plannedPauseStatus: $(if ([string]::IsNullOrWhiteSpace($plannedPauseStatus)) { 'none' } else { $plannedPauseStatus })"

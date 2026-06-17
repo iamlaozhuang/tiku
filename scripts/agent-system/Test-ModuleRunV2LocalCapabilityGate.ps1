@@ -106,6 +106,128 @@ function Get-ScalarValue {
     return ""
 }
 
+function Get-ListValues {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Block,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Key
+    )
+
+    $values = New-Object System.Collections.ArrayList
+    $inList = $false
+    $baseIndent = 0
+
+    foreach ($line in $Block) {
+        if (-not $inList -and $line -match "^(\s+)$([regex]::Escape($Key)):\s*$") {
+            $inList = $true
+            $baseIndent = $Matches[1].Length
+            continue
+        }
+
+        if ($inList) {
+            if ($line -match "^(\s*)\S") {
+                $indent = $Matches[1].Length
+                if ($indent -le $baseIndent) {
+                    break
+                }
+            }
+
+            if ($line -match "^\s*-\s+(.+?)\s*$") {
+                [void]$values.Add($Matches[1].Trim())
+            }
+        }
+    }
+
+    return @($values)
+}
+
+function Test-LocalFullFlowCommandTargets {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$Commands
+    )
+
+    foreach ($command in $Commands) {
+        if ($command -match "(?i)\b(staging|prod|cloud|external-service)\b") {
+            return [pscustomobject]@{
+                Passed = $false
+                Reason = "local full-flow command mentions blocked non-local target"
+            }
+        }
+
+        $urlMatches = [regex]::Matches($command, "https?://([^/\s'`"]+)")
+        foreach ($urlMatch in $urlMatches) {
+            $targetHost = ""
+            try {
+                $targetHost = ([System.Uri]$urlMatch.Value).Host.ToLowerInvariant()
+            } catch {
+                $targetHost = $urlMatch.Groups[1].Value.Trim("[]").ToLowerInvariant()
+            }
+            if ($targetHost -notin @("localhost", "127.0.0.1", "::1")) {
+                return [pscustomobject]@{
+                    Passed = $false
+                    Reason = "local full-flow command targets non-localhost host: $targetHost"
+                }
+            }
+        }
+    }
+
+    return [pscustomobject]@{
+        Passed = $true
+        Reason = "local full-flow commands are localhost-only"
+    }
+}
+
+function Test-LocalFullFlowProfileGate {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [string[]]$TaskBlock
+    )
+
+    $executionProfile = Get-ScalarValue -Block $TaskBlock -Key "executionProfile"
+    $validationPolicy = Get-ScalarValue -Block $TaskBlock -Key "validationPolicy"
+    $localFullFlowGate = Get-ScalarValue -Block $TaskBlock -Key "localFullFlowGate"
+    $validationCommands = @(Get-ListValues -Block $TaskBlock -Key "validationCommands")
+
+    if ($executionProfile -ne "local_full_flow") {
+        return [pscustomobject]@{
+            Passed = $false
+            Reason = "localFullFlowGate use requires executionProfile local_full_flow"
+        }
+    }
+
+    if ($validationPolicy -ne "local_full_flow") {
+        return [pscustomobject]@{
+            Passed = $false
+            Reason = "localFullFlowGate use requires validationPolicy local_full_flow"
+        }
+    }
+
+    if ($localFullFlowGate -ne "approved_localhost_only") {
+        return [pscustomobject]@{
+            Passed = $false
+            Reason = "localFullFlowGate use requires approved_localhost_only"
+        }
+    }
+
+    if ($validationCommands.Count -eq 0) {
+        return [pscustomobject]@{
+            Passed = $false
+            Reason = "localFullFlowGate use requires explicit validationCommands"
+        }
+    }
+
+    return Test-LocalFullFlowCommandTargets -Commands $validationCommands
+}
+
 function Get-CapabilityPolicy {
     param([Parameter(Mandatory = $true)][string]$Name)
 
@@ -186,7 +308,8 @@ function Write-CapabilityResult {
         [Parameter(Mandatory = $true)][string]$Reason,
         [Parameter(Mandatory = $true)][int]$ExitCode,
         [Parameter(Mandatory = $true)][string]$CapabilityState,
-        [Parameter(Mandatory = $true)][hashtable]$Policy
+        [Parameter(Mandatory = $true)][hashtable]$Policy,
+        [Parameter(Mandatory = $false)][AllowEmptyCollection()][AllowEmptyString()][string[]]$ExtraOutput = @()
     )
 
     Write-Output ""
@@ -200,6 +323,11 @@ function Write-CapabilityResult {
     Write-Output "reason: $Reason"
     foreach ($blockedAction in @($Policy.BlockedActions)) {
         Write-Output "blockedAdapterAction: $blockedAction"
+    }
+    foreach ($extraLine in @($ExtraOutput)) {
+        if (-not [string]::IsNullOrWhiteSpace($extraLine)) {
+            Write-Output $extraLine
+        }
     }
     Write-Output "evidenceRule: $($Policy.EvidenceRule)"
     Write-Output "nextModuleRunCandidate: $NextModuleRunCandidate"
@@ -251,6 +379,26 @@ try {
         }
 
         Write-CapabilityResult -Decision "adapter_contract_ready" -AdapterAction $adapterAction -Reason "adapter contract can be declared without executing the capability" -ExitCode 0 -CapabilityState $capabilityState -Policy $policy
+    }
+
+    if ($Capability -eq "localFullFlowGate" -and $Intent -eq "use_capability" -and $capabilityState -eq $policy.ApprovedState) {
+        $localFullFlowProfileGate = Test-LocalFullFlowProfileGate -TaskBlock $taskBlock
+        if (-not $localFullFlowProfileGate.Passed) {
+            Write-CapabilityResult -Decision "stop_for_hard_block" -AdapterAction "none" -Reason $localFullFlowProfileGate.Reason -ExitCode 1 -CapabilityState $capabilityState -Policy $policy
+        }
+
+        Write-CapabilityResult `
+            -Decision "capability_ready" `
+            -AdapterAction $policy.ReadyAction `
+            -Reason "task-specific local full-flow profile approval is present; this script still performs no real local action" `
+            -ExitCode 0 `
+            -CapabilityState $capabilityState `
+            -Policy $policy `
+            -ExtraOutput @(
+                "allowedLocalFullFlowHost: localhost",
+                "allowedLocalFullFlowHost: 127.0.0.1",
+                "allowedLocalFullFlowHost: ::1"
+            )
     }
 
     if ($capabilityState -eq $policy.ApprovedState) {
