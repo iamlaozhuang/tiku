@@ -9745,3 +9745,114 @@ tasks:
     branch: codex/mechanism-historical-evidence-debt-register
     commitSha: f12fb219a9d22c59c77eaf0850ba36c8c7e3b17f
     retryCount: 0
+
+  - id: next-seedable-module-source-coverage-audit
+    title: Next seedable module source coverage audit
+    phase: next-seedable-module-source-coverage-audit
+    sourceStory: user-approved-mechanism-maintenance
+    dependencies:
+      - mechanism-historical-evidence-debt-register
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by current 2026-06-17 user prompt to execute the recommended next mechanism task and continue under
+      project mechanism rules. Scope is limited to local docs/state source coverage audit and redacted evidence.
+      High-risk capability gates remain blocked.
+    targetClosureItem: next seedable module source coverage audit
+    behaviorBoundary: mechanism::next seedable module source coverage
+    useCases:
+      - Explain why the current seed proposal returns no_seed_candidate from durable matrix, queue, and history state.
+    acceptanceScenarios:
+      - The audit records whether the current no_seed_candidate state is expected from the six execution modules.
+      - The audit recommends the next safe work item without seeding implementation tasks.
+    nonGoals:
+      - product implementation, seed transaction, matrix expansion, seed script logic change, schema/drizzle/migration, dependency/package/lockfile, provider/model, cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate work
+    validationProfile: docs_state_lite
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/**
+      - docs/05-execution-logs/evidence/**
+      - docs/05-execution-logs/audits-reviews/**
+    readOnlyAllowedFiles:
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/task-history-index.yaml
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Invoke-ModuleRunV2QueueDrainSupervisor.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/**
+      - e2e/**
+      - scripts/**
+    riskTypes:
+      - mechanism_diagnostic
+      - docs_state
+      - evidence_redaction
+      - source_coverage_audit
+    validationCommandLifecycle:
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.ps1 -PlanOnly -AllowProtectedBranch -CompletedTaskCount 0
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown <next-seedable-module-source-coverage-audit changed files>
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: post_edit
+        command: git diff --check
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId next-seedable-module-source-coverage-audit
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId next-seedable-module-source-coverage-audit
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2QueueDrainSupervisor.ps1 -PlanOnly -AllowProtectedBranch -CompletedTaskCount 0
+      - npx.cmd prettier --check --ignore-unknown <next-seedable-module-source-coverage-audit changed files>
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - git diff --check
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId next-seedable-module-source-coverage-audit
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId next-seedable-module-source-coverage-audit
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-next-seedable-module-source-coverage-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-next-seedable-module-source-coverage-audit.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-next-seedable-module-source-coverage-audit.md
+    status: implemented
+    claimedAt: "2026-06-17T13:02:43-07:00"
+    result: pending_validation
+    branch: codex/next-seedable-module-source-coverage-audit
+    retryCount: 0
