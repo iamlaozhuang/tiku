@@ -404,6 +404,33 @@ describe("organization analytics aggregate metrics", () => {
     });
   });
 
+  it("blocks export readiness when configured rows still carry internal source identifiers", () => {
+    expect(
+      createOrganizationAnalyticsExportReadinessAssessment({
+        exportScope: "employee_statistics_summary",
+        summaryRows: [
+          {
+            sourceRowId: 701,
+            redactionStatus: "summary_only",
+          },
+        ],
+        objectStorageAvailable: true,
+        externalDeliveryAvailable: true,
+      }),
+    ).toEqual({
+      exportScope: "employee_statistics_summary",
+      readinessStatus: "blocked",
+      summaryRowCount: 1,
+      blockedReasons: ["non_summary_detail_detected"],
+      objectStorageStatus: "configured",
+      externalDeliveryStatus: "configured",
+      generatedFile: null,
+      downloadUrl: null,
+      externalDelivery: null,
+      redactionStatus: "summary_only",
+    });
+  });
+
   it("creates an audit log redacted reference without scope lists or source rows", () => {
     const guardedMarkerOne = ["guarded", "audit", "marker", "one"].join("-");
     const guardedMarkerTwo = ["guarded", "audit", "marker", "two"].join("-");

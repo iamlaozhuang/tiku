@@ -299,7 +299,11 @@ function selectOrganizationAnalyticsExportReadinessBlockedReasons(
           ] satisfies OrganizationAnalyticsExportReadinessBlockedReason[])),
     ];
   const hasDetailRow = input.summaryRows.some(
-    (row) => row.redactionStatus === "detail_only",
+    (row) =>
+      row.redactionStatus === "detail_only" ||
+      (input.objectStorageAvailable &&
+        input.externalDeliveryAvailable &&
+        row.sourceRowId !== undefined),
   );
   const contentBlockedReasons: OrganizationAnalyticsExportReadinessBlockedReason[] =
     [

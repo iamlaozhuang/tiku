@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-206-organization-analytics-privacy-preserving-employee-statistics
+  id: batch-207-organization-analytics-export-readiness-contracts-without-object-st
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-206-organization-analytics-privacy-preserving-employee-statistics.md
-  evidencePath: docs/05-execution-logs/evidence/batch-206-organization-analytics-privacy-preserving-employee-statistics.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-206-organization-analytics-privacy-preserving-employee-statistics.md
-  branch: codex/organization-analytics-batch-206-employee-statistics
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-207-organization-analytics-export-readiness-contracts-without-object-storage.md
+  evidencePath: docs/05-execution-logs/evidence/batch-207-organization-analytics-export-readiness-contracts-without-object-st.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-207-organization-analytics-export-readiness-contracts-without-object-st.md
+  branch: codex/organization-analytics-batch-207-export-readiness
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -631,6 +631,7 @@ qualityGates:
     batch186OrganizationAnalyticsPrivacyPreservingEmployeeStatistics: pass_tdd_privacy_preserving_employee_statistics
     batch206OrganizationAnalyticsPrivacyPreservingEmployeeStatistics: pass_tdd_latest_submission_per_training_version
     batch187OrganizationAnalyticsExportReadinessContracts: pass_tdd_export_readiness_contracts_without_object_storage
+    batch207OrganizationAnalyticsExportReadinessContracts: pass_tdd_source_row_identifier_ready_block
     batch188OrganizationAnalyticsAuditLogRedactedReference: pass_tdd_redacted_audit_log_reference
     advancedOrganizationAnalyticsPostBatchReadonlyRollupSeeding: pass_docs_only_seeded_repository_read_model_boundary_audit
     advancedOrganizationAnalyticsRepositoryReadModelBoundaryReadonlyAudit: pass_readonly_audit_seeded_repository_contract_tdd
