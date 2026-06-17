@@ -2,7 +2,7 @@
 
 ## Verdict
 
-APPROVE, pending local validation and closeout SHA reconciliation.
+APPROVE.
 
 ## Scope Review
 
