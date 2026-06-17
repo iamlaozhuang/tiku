@@ -6,6 +6,7 @@ import {
 import type { AiGenerationTaskRequestPolicyDto } from "../contracts/ai-generation-task-request-contract";
 import {
   resolveAiGenerationTaskRequestPolicy,
+  resolveAiGenerationTaskResultReferencePublicId,
   resolveAiGenerationTaskResultKind,
   type AiGenerationTaskRequestPolicyInput,
 } from "../models/ai-generation-task-request";
@@ -39,7 +40,10 @@ function mapAiGenerationTaskRequestPolicyToDto(
     },
     resultReference: {
       resultKind: resolveAiGenerationTaskResultKind(input.taskType),
-      resultPublicId: input.resultPublicId,
+      resultPublicId: resolveAiGenerationTaskResultReferencePublicId(
+        input,
+        policy,
+      ),
       contentVisibility: "summary_only",
       redactionStatus: "redacted",
       evidenceStatus: input.evidenceStatus,

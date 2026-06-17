@@ -112,6 +112,17 @@ export function resolveAiGenerationTaskRequestPolicy(
   };
 }
 
+export function resolveAiGenerationTaskResultReferencePublicId(
+  input: AiGenerationTaskRequestPolicyInput,
+  policy: AiGenerationTaskRequestPolicy,
+): string | null {
+  if (policy.decision === "reuse_existing_task") {
+    return input.resultPublicId;
+  }
+
+  return null;
+}
+
 function resolveBlockedAiGenerationTaskRequestFailureCategory(
   input: AiGenerationTaskRequestPolicyInput,
 ): AiGenerationTaskFailureCategory | null {

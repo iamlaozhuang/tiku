@@ -155,6 +155,45 @@ describe("AI generation task request policy service", () => {
     });
   });
 
+  it("does not echo caller-supplied result references for new or rejected requests", () => {
+    const callerSuppliedResultPublicId =
+      "client_supplied_result_public_should_not_echo";
+
+    expect(
+      buildAiGenerationTaskRequestPolicyReadModel({
+        ...createBaseInput(),
+        resultPublicId: callerSuppliedResultPublicId,
+      }),
+    ).toMatchObject({
+      code: 0,
+      data: {
+        decision: "create_pending_task",
+        resultReference: {
+          resultPublicId: null,
+        },
+      },
+    });
+
+    const rejectedResponse = buildAiGenerationTaskRequestPolicyReadModel({
+      ...createBaseInput(),
+      effectiveEdition: "standard",
+      resultPublicId: callerSuppliedResultPublicId,
+    });
+
+    expect(rejectedResponse).toMatchObject({
+      code: 0,
+      data: {
+        decision: "reject_request",
+        resultReference: {
+          resultPublicId: null,
+        },
+      },
+    });
+    expect(JSON.stringify(rejectedResponse)).not.toContain(
+      callerSuppliedResultPublicId,
+    );
+  });
+
   it("requires org_auth and organization quota ownership for organization training generation", () => {
     expect(
       buildAiGenerationTaskRequestPolicyReadModel({
