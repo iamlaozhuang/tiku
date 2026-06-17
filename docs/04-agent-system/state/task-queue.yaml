@@ -6070,3 +6070,122 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-TaskEvidence.Smoke.ps1
+  - id: mechanism-tuning-final-completion-audit
+    title: Mechanism tuning final completion audit
+    phase: mechanism-tuning-final-completion-audit
+    sourceStory: user-request-2026-06-17-mechanism-tuning-authorization-slimming
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    status: closed
+    result: passed
+    retryCount: 0
+    claimedAt: "2026-06-17T04:20:23-07:00"
+    validatedAt: "2026-06-17T04:23:33-07:00"
+    closedAt: "2026-06-17T04:23:33-07:00"
+    branch: codex/mechanism-tuning-final-audit
+    dependencies:
+      - mechanism-tuning-authorization-slimming-implementation
+      - mechanism-profile-catalog-ready-set-foundation
+      - mechanism-runner-profile-workpacket-localfullflow-consumption
+    executionProfile: docs_state_lite
+    evidenceMode: full
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    workPacket:
+      id: mechanism-tuning-final-behavior-2026-06-17
+      scope: final_completion_audit
+      includes:
+        - implementation plan completion audit
+        - safety boundary verification
+        - smoke evidence verification
+        - final project-state mechanism tuning status update
+    riskTypes:
+      - mechanism_audit
+      - automation_state
+      - evidence_integrity
+    humanApprovalBoundary: >-
+      User approved continuing mechanism tuning tasks through local commit, fast-forward merge, push, and cleanup. This
+      task is limited to final docs/state/evidence audit and must not modify product code, read or edit .env files,
+      expose secrets/private data, access staging/prod/cloud/deploy/payment/external services, call providers/models,
+      perform quota/cost work, change schema/drizzle/package/lockfile/dependencies, create PRs, force push, or start dev
+      server, Browser, Playwright, or e2e.
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-final-completion-audit.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-final-completion-audit.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-final-completion-audit.md
+      - docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-final-completion-audit.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/state/autodrive-control-schema.yaml
+      - scripts/agent-system/*.ps1
+    blockedFiles:
+      - .env*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - drizzle/**
+      - e2e/**
+      - tests/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product implementation
+      - product task seeding
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - quota/cost measurement or Cost Calibration Gate
+      - env/secret access, output, summary, or edit
+      - row/private data exposure
+      - public identifier inventories
+      - staging/prod/cloud/deploy/payment/external-service
+      - dev-server/browser/playwright/e2e execution
+      - PR
+      - force push
+    capabilities:
+      docsStateOnlyQueueMaintenance: approved_by_fresh_user_goal_2026-06-17
+      localUnitTest: approved_for_mechanism_scripts_only
+      localDockerDatabase: blocked_no_db_execution
+      schemaMigration: blocked
+      providerCall: blocked
+      localFullFlowGate: audit_only_no_execution
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_by_fresh_user_goal_2026-06-17
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - git diff --check
+      - node_modules/.bin/prettier.cmd --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-final-completion-audit.md docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-final-completion-audit.md docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2AutodriveSchemaReadiness.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-ModuleRunV2ImplementationSeed.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\New-TaskEvidence.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2LocalCapabilityGate.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Invoke-ModuleRunV2AutopilotRunner.Smoke.ps1

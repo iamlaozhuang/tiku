@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: mechanism-runner-profile-workpacket-localfullflow-consumption
-updatedAt: "2026-06-17T04:16:46-07:00"
+currentPhase: mechanism-tuning-final-completion-audit
+updatedAt: "2026-06-17T04:23:33-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: mechanism-runner-profile-workpacket-localfullflow-consumption
+  id: mechanism-tuning-final-completion-audit
   status: closed
   sourceStory: user-request-2026-06-17-mechanism-tuning-authorization-slimming
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-runner-profile-workpacket-localfullflow-consumption.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-runner-profile-workpacket-localfullflow-consumption.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-runner-profile-workpacket-localfullflow-consumption.md
-  branch: codex/mechanism-runner-profile-consumption
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-final-completion-audit.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-final-completion-audit.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
+  branch: codex/mechanism-tuning-final-audit
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -685,13 +685,14 @@ riskGates:
     - deploy
     - merge_pr
 mechanismTuning:
-  status: runner_profile_consumption_closed
-  currentTaskId: mechanism-runner-profile-workpacket-localfullflow-consumption
+  status: completed
+  currentTaskId: mechanism-tuning-final-completion-audit
   planningDocumentPath: docs/04-agent-system/sop/mechanism-tuning-authorization-and-slimming-plan.md
   executionProfileCatalogPath: docs/04-agent-system/state/execution-profiles.yaml
-  latestTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-runner-profile-workpacket-localfullflow-consumption.md
-  latestEvidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-runner-profile-workpacket-localfullflow-consumption.md
-  latestAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-runner-profile-workpacket-localfullflow-consumption.md
+  latestTaskPlanPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-tuning-final-completion-audit.md
+  latestEvidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-tuning-final-completion-audit.md
+  latestAuditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
+  finalCompletionAuditPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-tuning-final-completion-audit.md
   queueSlimmingAudit:
     activeQueueBeforeTasks: 324
     activeQueueAfterTasks: 60
