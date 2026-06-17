@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
-updatedAt: "2026-06-16T20:43:58-07:00"
+currentPhase: advanced-organization-analytics-post-query-gateway-composition-task-seeding
+updatedAt: "2026-06-16T20:57:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 89f751c7fd44015b1f0402d31529d9e54845ace0
   lastKnownOriginMasterSha: 89f751c7fd44015b1f0402d31529d9e54845ace0
 currentTask:
-  id: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+  id: advanced-organization-analytics-post-query-gateway-composition-task-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
-  branch: codex/advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
+  branch: codex/advanced-organization-analytics-post-query-queue-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -653,6 +653,8 @@ qualityGates:
     advancedOrganizationAnalyticsTrainingAnswerSourceSchemaMigrationPlanning: pass_docs_only_schema_migration_approval_package_seeded
     advancedOrganizationAnalyticsTrainingAnswerSourceSchemaMigration: pass_schema_migration_generated_no_db_execution
     advancedOrganizationAnalyticsGatewayQueryTaskSeeding: pass_docs_state_seeded_gateway_query_tdd
+    advancedOrganizationAnalyticsPostgresGatewayTrainingAnswerSourceQueryTdd: pass_local_validation_fresh_closeout_approved
+    advancedOrganizationAnalyticsPostQueryGatewayCompositionTaskSeeding: pass_docs_state_seeded_visible_scope_composition_tdd
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -668,8 +670,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd` has fresh user closeout approval
-    after local validation. Complete local commit, fast-forward merge to master, master-local validation, push
-    origin/master, merged short-branch cleanup, fetch prune, and final repository hygiene checks. After closeout,
-    reread project-state/task-queue from local state before selecting any next task.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+    `advanced-organization-analytics-post-query-gateway-composition-task-seeding` seeded
+    `advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd` as the next pending task. Claim it
+    only after a fresh baseline confirmation and fresh approval. Scope is repository-boundary TDD to compose visible
+    organization scope lookup with the existing training answer source aggregate gateway. Route runtime wiring,
+    service/UI changes, real DB execution, schema/migration, dependency, provider/model, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force-push, destructive data operation, drizzle-kit push, and
+    Cost Calibration Gate remain blocked unless a later task explicitly approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
