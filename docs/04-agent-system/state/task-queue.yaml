@@ -10850,3 +10850,145 @@ tasks:
     branch: codex/personal-ai-playwright-auth-strategy-alignment
     commitSha: null
     retryCount: 0
+
+  - id: local-experience-bridge-proposal-diagnostic
+    title: Local experience bridge proposal diagnostic
+    phase: local-experience-bridge-proposal-diagnostic
+    sourceStory: user-approved-mechanism-maintenance
+    dependencies:
+      - personal-ai-local-playwright-auth-strategy-alignment
+    taskPlanPolicy: required_before_edit
+    humanApproval: >-
+      Approved by current 2026-06-17 user prompt to execute the recommended mechanism task under project mechanism
+      rules. Scope is limited to local read-only diagnostics that surface the next localExperienceClosureGate
+      acceptance bridge candidate after implementation seed exhaustion, plus governance state, task plan, evidence, and
+      audit updates. Product runtime, provider/model, env/secret, schema/drizzle/migration, dependency/package/lockfile,
+      staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate work remain blocked.
+    targetClosureItem: local experience bridge proposal diagnostic after no seed candidate
+    behaviorBoundary: mechanism::local_experience_bridge_proposal_diagnostic
+    useCases:
+      - Surface the next approvable local experience bridge candidate when the six implementation seed modules are exhausted.
+      - Keep the existing implementation seed proposal decision unchanged when no seed candidate exists.
+      - Preserve redacted evidence and local-only diagnostics.
+    acceptanceScenarios:
+      - The new smoke fixture fails before implementation and passes after a read-only bridge proposal diagnostic is wired.
+      - Get-TikuNextAction.ps1 reports a local experience bridge approval recommendation when implementation seed returns no candidate and a bridge candidate exists.
+      - Get-TikuProjectStatus.ps1 reports the same recommendation without mutating queue state or applying seed transactions.
+    nonGoals:
+      - product runtime edits, queue seed transaction, implementation task generation, Browser or Playwright execution, provider/model calls, env/secret access, schema/drizzle/migration, dependency/package/lockfile changes, staging/prod/cloud/deploy/payment/external-service work, PR, force-push, and Cost Calibration Gate execution
+    validationProfile: docs_state_lite
+    profileCatalogRef: docs/04-agent-system/state/execution-profiles.yaml
+    executionProfile: docs_state_lite
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    closeoutPolicy:
+      localCommit: approved
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        parkWorktree: true
+    taskKind: mechanism_maintenance
+    moduleRunVersion: 2
+    allowedFiles:
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+      - scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/Get-TikuNextAction.Smoke.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.ps1
+      - scripts/agent-system/Get-TikuProjectStatus.Smoke.ps1
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+      - docs/05-execution-logs/task-plans/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+      - docs/05-execution-logs/evidence/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+    readOnlyAllowedFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/state/execution-profiles.yaml
+      - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
+      - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.Smoke.ps1
+      - scripts/agent-system/Test-ModuleRunV2PreCommitHardening.ps1
+      - scripts/agent-system/Test-ModuleRunV2ModuleCloseoutReadiness.ps1
+      - scripts/agent-system/Test-ModuleRunV2PrePushReadiness.ps1
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/db/schema/**
+      - drizzle/**
+      - src/**
+      - e2e/**
+      - tests/**
+    riskTypes:
+      - mechanism_maintenance
+      - docs_state
+      - local_diagnostic
+      - evidence_redaction
+    validationCommandLifecycle:
+      - phase: red_expected_failure
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.Smoke.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - phase: post_edit
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - phase: post_edit
+        command: npx.cmd prettier --check --ignore-unknown scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1 scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1 scripts/agent-system/Get-TikuNextAction.ps1 scripts/agent-system/Get-TikuNextAction.Smoke.ps1 scripts/agent-system/Get-TikuProjectStatus.ps1 scripts/agent-system/Get-TikuProjectStatus.Smoke.ps1 docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/05-execution-logs/task-plans/2026-06-17-local-experience-bridge-proposal-diagnostic.md docs/05-execution-logs/evidence/2026-06-17-local-experience-bridge-proposal-diagnostic.md docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+      - phase: post_edit
+        command: git diff --check
+      - phase: post_edit
+        command: npm.cmd run lint
+      - phase: post_edit
+        command: npm.cmd run typecheck
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-experience-bridge-proposal-diagnostic
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-experience-bridge-proposal-diagnostic
+      - phase: closeout
+        command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-experience-bridge-proposal-diagnostic
+    validationCommands:
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.Smoke.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuProjectStatus.ps1
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-ModuleRunV2ImplementationSeedProposal.ps1
+      - npx.cmd prettier --check --ignore-unknown scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1 scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1 scripts/agent-system/Get-TikuNextAction.ps1 scripts/agent-system/Get-TikuNextAction.Smoke.ps1 scripts/agent-system/Get-TikuProjectStatus.ps1 scripts/agent-system/Get-TikuProjectStatus.Smoke.ps1 docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/04-agent-system/state/mechanism-source-of-truth-index.yaml docs/05-execution-logs/task-plans/2026-06-17-local-experience-bridge-proposal-diagnostic.md docs/05-execution-logs/evidence/2026-06-17-local-experience-bridge-proposal-diagnostic.md docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId local-experience-bridge-proposal-diagnostic
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId local-experience-bridge-proposal-diagnostic
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId local-experience-bridge-proposal-diagnostic
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+    status: closed
+    claimedAt: "2026-06-17T15:11:32-07:00"
+    validatedAt: "2026-06-17T15:21:12-07:00"
+    closedAt: "2026-06-17T15:21:12-07:00"
+    result: pass
+    branch: codex/local-experience-bridge-proposal-diagnostic
+    commitSha: null
+    retryCount: 0

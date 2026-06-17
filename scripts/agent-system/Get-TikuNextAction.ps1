@@ -230,6 +230,42 @@ function Invoke-SeedProposalDiagnostic {
     }
 }
 
+function Invoke-LocalExperienceBridgeDiagnostic {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectStatePath,
+        [Parameter(Mandatory = $true)][string]$QueuePath,
+        [Parameter(Mandatory = $true)][string]$MatrixPath
+    )
+
+    $scriptPath = Join-Path -Path $PSScriptRoot -ChildPath "Get-ModuleRunV2LocalExperienceBridgeProposal.ps1"
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        return [pscustomobject]@{
+            Output = @("bridgeProposalDecision: unavailable", "bridgeProposalReason: local experience bridge proposal script is missing")
+            ExitCode = 1
+        }
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = @(
+            & powershell.exe `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File $scriptPath `
+                -ProjectStatePath $ProjectStatePath `
+                -QueuePath $QueuePath `
+                -MatrixPath $MatrixPath 2>&1
+        )
+        return [pscustomobject]@{
+            Output = $output
+            ExitCode = $LASTEXITCODE
+        }
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 function Test-DependencyTerminal {
     param(
         [Parameter(Mandatory = $false)][AllowNull()][object]$Blocks = @(),
@@ -817,6 +853,10 @@ if (-not [string]::IsNullOrWhiteSpace($nextTaskId)) {
 $seedProposalDecision = "not_checked"
 $seedModule = "none"
 $seedRequiredApproval = "none"
+$bridgeProposalDecision = "not_checked"
+$bridgeExperienceChain = "none"
+$bridgeCandidateTask = "none"
+$bridgeRequiredApproval = "none"
 $recommendedHumanDecision = "none"
 $currentTaskTerminal = $currentTaskStatus -in @("done", "closed", "pushed", "merged")
 if ($findings.Count -eq 0 -and [string]::IsNullOrWhiteSpace($nextTaskId) -and $currentTaskTerminal) {
@@ -835,6 +875,27 @@ if ($findings.Count -eq 0 -and [string]::IsNullOrWhiteSpace($nextTaskId) -and $c
     }
     if ($seedProposalDecision -eq "proposal_available") {
         $recommendedHumanDecision = "approve_auto_seed_or_keep_paused_or_create_manual_task"
+    } elseif ($seedProposalDecision -eq "no_seed_candidate") {
+        $bridgeProposalResult = Invoke-LocalExperienceBridgeDiagnostic -ProjectStatePath $ProjectStatePath -QueuePath $QueuePath -MatrixPath $MatrixPath
+        $bridgeProposalDecision = Get-OutputValue -Output $bridgeProposalResult.Output -Key "bridgeProposalDecision"
+        if ([string]::IsNullOrWhiteSpace($bridgeProposalDecision)) {
+            $bridgeProposalDecision = if ($bridgeProposalResult.ExitCode -eq 0) { "unknown" } else { "unavailable" }
+        }
+        $bridgeExperienceChain = Get-OutputValue -Output $bridgeProposalResult.Output -Key "bridgeExperienceChain"
+        if ([string]::IsNullOrWhiteSpace($bridgeExperienceChain)) {
+            $bridgeExperienceChain = "none"
+        }
+        $bridgeCandidateTask = Get-OutputValue -Output $bridgeProposalResult.Output -Key "bridgeCandidateTask"
+        if ([string]::IsNullOrWhiteSpace($bridgeCandidateTask)) {
+            $bridgeCandidateTask = "none"
+        }
+        $bridgeRequiredApproval = Get-OutputValue -Output $bridgeProposalResult.Output -Key "bridgeRequiredApproval"
+        if ([string]::IsNullOrWhiteSpace($bridgeRequiredApproval)) {
+            $bridgeRequiredApproval = "none"
+        }
+        if ($bridgeProposalDecision -eq "proposal_available") {
+            $recommendedHumanDecision = "approve_local_experience_bridge_or_keep_paused_or_create_manual_task"
+        }
     }
 }
 
@@ -871,6 +932,10 @@ if ($plannedPauseActive) {
     $decision = "seed_proposal_available"
     $recommendedAction = "request_auto_seed_approval:$seedModule"
     $stopReason = "auto_seed_approval_required"
+} elseif ($bridgeProposalDecision -eq "proposal_available") {
+    $decision = "local_experience_bridge_proposal_available"
+    $recommendedAction = "request_local_experience_bridge_approval:$bridgeCandidateTask"
+    $stopReason = "local_experience_bridge_approval_required"
 } elseif ($blockedReasons.Count -gt 0) {
     $decision = "pending_task_blocked"
     $recommendedAction = "resolve_dependency_or_status_block"
@@ -915,6 +980,10 @@ Write-Output "nextExecutableTask: $(if ([string]::IsNullOrWhiteSpace($nextTaskId
 Write-Output "seedProposalDecision: $seedProposalDecision"
 Write-Output "seedModule: $seedModule"
 Write-Output "seedRequiredApproval: $seedRequiredApproval"
+Write-Output "bridgeProposalDecision: $bridgeProposalDecision"
+Write-Output "bridgeExperienceChain: $bridgeExperienceChain"
+Write-Output "bridgeCandidateTask: $bridgeCandidateTask"
+Write-Output "bridgeRequiredApproval: $bridgeRequiredApproval"
 Write-Output "recommendedHumanDecision: $recommendedHumanDecision"
 Write-Output "blockedGates: $(Join-OrNone -Values @($blockedGates))"
 Write-Output "validationNeeded: $(if ($validationCommands.Count -eq 0) { 'none' } else { "$($validationCommands.Count) command(s) for $nextTaskId" })"

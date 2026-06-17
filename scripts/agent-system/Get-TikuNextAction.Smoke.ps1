@@ -449,6 +449,114 @@ currentTask:
     Assert-Contains -Output $seedOutput -Pattern '^recommendedHumanDecision: approve_auto_seed_or_keep_paused_or_create_manual_task$'
     Assert-Contains -Output $seedOutput -Pattern '^recommendedAction: request_auto_seed_approval:authorization-and-access$'
 
+    $bridgeQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-bridge.yaml"
+    $bridgeMatrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix-bridge.yaml"
+    $bridgeProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-bridge.yaml"
+    @"
+schemaVersion: 1
+tasks:
+  - id: bridge-closed
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/bridge-closed.md
+  - id: batch-101-smoke-execution-target
+    status: closed
+    seededExecutionModule: smoke-execution
+    targetClosureItem: smoke target
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/bridge-closed.md
+  - id: module-run-v2-personal-ai-local-transport-contract-planning
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/bridge-closed.md
+  - id: module-run-v2-personal-ai-local-ui-browser-planning
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/bridge-closed.md
+"@ | Set-Content -LiteralPath $bridgeQueuePath -Encoding UTF8
+
+    @"
+schemaVersion: 2
+moduleRunVersion: 2
+sourcePlanningModules:
+  - module: smoke-source
+    sourcePlanningTask: phase-smoke-planning
+    v2ExecutionModule: smoke-execution
+executionModules:
+  - module: smoke-execution
+    sourceModules:
+      - smoke-source
+    localFullLoopMinimum: L2
+    targetLocalClosure:
+      - smoke target
+implementationAutoSeedGate:
+  enabled: true
+localExperienceClosureGate:
+  acceptanceBridgePlan:
+    status: proposal_only
+    currentPriorityChain: personal-learning-ai-experience
+    bridgeSequence:
+      - step: local_api_or_server_action_contract
+        targetLocalFullLoopGate: L4
+        candidateTask: module-run-v2-personal-ai-local-transport-contract-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - src/app/api/v1/**
+      - step: local_ui_browser_entry
+        targetLocalFullLoopGate: L5
+        candidateTask: module-run-v2-personal-ai-local-ui-browser-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - src/app/(student)/**
+      - step: local_role_flow_and_e2e_readiness
+        targetLocalFullLoopGate: L6
+        candidateTask: module-run-v2-cross-role-local-flow-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - role-flow verification
+          - e2e/**
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $bridgeMatrixPath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+repository:
+  lastKnownMasterSha: $sha
+  lastKnownOriginMasterSha: $sha
+currentTask:
+  id: bridge-closed
+  status: closed
+  commitSha: $sha
+"@ | Set-Content -LiteralPath $bridgeProjectStatePath -Encoding UTF8
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $bridgeOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $bridgeProjectStatePath `
+                -QueuePath $bridgeQueuePath `
+                -MatrixPath $bridgeMatrixPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
+                -ExecutionLogIndexPath $executionLogIndexPath
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $bridgeOutput -Pattern '^nextActionDecision: local_experience_bridge_proposal_available$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^seedProposalDecision: no_seed_candidate$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^bridgeProposalDecision: proposal_available$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^bridgeCandidateTask: module-run-v2-cross-role-local-flow-planning$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^bridgeRequiredApproval: localExperienceAcceptanceBridgeApproved$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^recommendedHumanDecision: approve_local_experience_bridge_or_keep_paused_or_create_manual_task$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^recommendedAction: request_local_experience_bridge_approval:module-run-v2-cross-role-local-flow-planning$'
+
     $afterProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $afterQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash
     $afterMatrixHash = (Get-FileHash -LiteralPath $matrixPath -Algorithm SHA256).Hash

@@ -160,6 +160,7 @@ Write-ToolSummary -Name "Seed Proposal" -Result $seedResult -Keys @("seedProposa
 
 $nextActionDecision = Get-OutputValue -Output $nextActionResult.Output -Key "nextActionDecision"
 $nextExecutableTask = Get-OutputValue -Output $nextActionResult.Output -Key "nextExecutableTask"
+$nextActionRecommendedAction = Get-OutputValue -Output $nextActionResult.Output -Key "recommendedAction"
 $registrationDecision = Get-OutputValue -Output $registrationResult.Output -Key "automationRegistrationDecision"
 $hygieneDecision = Get-OutputValue -Output $hygieneResult.Output -Key "stoppedAutomationHygieneDecision"
 $seedProposalDecision = Get-OutputValue -Output $seedResult.Output -Key "seedProposalDecision"
@@ -192,6 +193,10 @@ if ($nextActionDecision -eq "planned_pause_for_tuning" -or $registrationDecision
     $projectStatusAction = "claim_or_plan_next_task:$nextExecutableTask"
     $projectStatusReason = "a pending executable task is available"
     $safeToProceed = -not $isDirty
+} elseif ($nextActionDecision -eq "local_experience_bridge_proposal_available") {
+    $projectStatusDecision = "local_experience_bridge_proposal_available"
+    $projectStatusAction = if ([string]::IsNullOrWhiteSpace($nextActionRecommendedAction)) { "request_local_experience_bridge_approval" } else { $nextActionRecommendedAction }
+    $projectStatusReason = "no implementation seed candidate exists and a local experience bridge proposal is available"
 } elseif ($seedProposalDecision -eq "proposal_available") {
     $projectStatusDecision = "seed_proposal_available"
     $projectStatusAction = "request_auto_seed_approval:$seedModule"

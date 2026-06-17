@@ -134,6 +134,115 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $output -Pattern '^nextActionDecision: planned_pause_for_tuning$'
     Assert-Contains -Output $output -Pattern '^diagnosticOnly: true$'
     Assert-Contains -Output $output -Pattern 'Cost Calibration Gate remains blocked'
+
+    Write-AutomationToml -Path (Join-Path -Path $primaryRoot -ChildPath "automation.toml") -AutomationId "tiku-module-run-v2-autopilot" -Status "ACTIVE"
+    $bridgeProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-bridge.yaml"
+    $bridgeQueuePath = Join-Path -Path $stateRoot -ChildPath "task-queue-bridge.yaml"
+    $bridgeMatrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix-bridge.yaml"
+    @"
+schemaVersion: 1
+automation:
+  unattendedControl:
+    codexAutomationId: tiku-module-run-v2-autopilot
+    codexAutomationStatus: ACTIVE
+repository:
+  lastKnownMasterSha: $sha
+  lastKnownOriginMasterSha: $sha
+currentTask:
+  id: bridge-closed
+  status: closed
+  commitSha: $sha
+"@ | Set-Content -LiteralPath $bridgeProjectStatePath -Encoding UTF8
+
+    @"
+schemaVersion: 1
+tasks:
+  - id: bridge-closed
+    status: closed
+    evidencePath: docs/05-execution-logs/evidence/completed-a.md
+  - id: batch-101-smoke-execution-target
+    status: closed
+    seededExecutionModule: smoke-execution
+    targetClosureItem: smoke target
+    evidencePath: docs/05-execution-logs/evidence/completed-a.md
+  - id: module-run-v2-personal-ai-local-transport-contract-planning
+    status: closed
+    evidencePath: docs/05-execution-logs/evidence/completed-a.md
+  - id: module-run-v2-personal-ai-local-ui-browser-planning
+    status: closed
+    evidencePath: docs/05-execution-logs/evidence/completed-a.md
+"@ | Set-Content -LiteralPath $bridgeQueuePath -Encoding UTF8
+
+    @"
+schemaVersion: 2
+moduleRunVersion: 2
+sourcePlanningModules:
+  - module: smoke-source
+    sourcePlanningTask: phase-smoke-planning
+    v2ExecutionModule: smoke-execution
+executionModules:
+  - module: smoke-execution
+    sourceModules:
+      - smoke-source
+    localFullLoopMinimum: L2
+    targetLocalClosure:
+      - smoke target
+implementationAutoSeedGate:
+  enabled: true
+localExperienceClosureGate:
+  acceptanceBridgePlan:
+    status: proposal_only
+    currentPriorityChain: personal-learning-ai-experience
+    bridgeSequence:
+      - step: local_api_or_server_action_contract
+        targetLocalFullLoopGate: L4
+        candidateTask: module-run-v2-personal-ai-local-transport-contract-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - src/app/api/v1/**
+      - step: local_ui_browser_entry
+        targetLocalFullLoopGate: L5
+        candidateTask: module-run-v2-personal-ai-local-ui-browser-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - src/app/(student)/**
+      - step: local_role_flow_and_e2e_readiness
+        targetLocalFullLoopGate: L6
+        candidateTask: module-run-v2-cross-role-local-flow-planning
+        approvalRequired: localExperienceAcceptanceBridgeApproved
+        blockedUntilApproved:
+          - role-flow verification
+          - e2e/**
+terminologyAnchors:
+  - Cost Calibration Gate remains blocked
+Cost Calibration Gate remains blocked
+"@ | Set-Content -LiteralPath $bridgeMatrixPath -Encoding UTF8
+
+    New-Item -ItemType Directory -Path (Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence") -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/completed-a.md") -Value "completed smoke evidence" -Encoding UTF8
+
+    Push-Location -LiteralPath $repoPath
+    try {
+        $bridgeOutput = @(
+            & $scriptPath `
+                -ProjectStatePath $bridgeProjectStatePath `
+                -QueuePath $bridgeQueuePath `
+                -MatrixPath $bridgeMatrixPath `
+                -AutomationRoot $automationRoot `
+                -OnDemandAutomationRoot $onDemandRoot `
+                -AutomationWorktreeRoot (Join-Path -Path $fixtureRoot -ChildPath "no-worktrees") `
+                -RunRegistryRoot (Join-Path -Path $fixtureRoot -ChildPath "no-runs") `
+                -HandoffRoot (Join-Path -Path $fixtureRoot -ChildPath "handoffs")
+        )
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains -Output $bridgeOutput -Pattern '^nextActionDecision: local_experience_bridge_proposal_available$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^recommendedAction: request_local_experience_bridge_approval:module-run-v2-cross-role-local-flow-planning$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^projectStatusDecision: local_experience_bridge_proposal_available$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^projectStatusAction: request_local_experience_bridge_approval:module-run-v2-cross-role-local-flow-planning$'
+    Assert-Contains -Output $bridgeOutput -Pattern '^projectStatusRequiresHuman: true$'
 } finally {
     if (Test-Path -LiteralPath $fixtureRoot) {
         Remove-Item -LiteralPath $fixtureRoot -Recurse -Force

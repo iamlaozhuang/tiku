@@ -304,6 +304,11 @@ scriptControls:
     smokePath: scripts/agent-system/Get-ModuleRunV2ImplementationSeedProposal.Smoke.ps1
     decisionOutput: seedProposalDecision
     role: read-only bridge from no_executable_task to the next seedable Module Run v2 execution module proposal; terminal targetClosure tasks are treated as completed so proposals do not repeat already done/closed batches
+  - id: module-run-v2-local-experience-bridge-proposal
+    path: scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.ps1
+    smokePath: scripts/agent-system/Get-ModuleRunV2LocalExperienceBridgeProposal.Smoke.ps1
+    decisionOutput: bridgeProposalDecision
+    role: read-only proposal bridge used after implementation seed exhaustion; reads localExperienceClosureGate.acceptanceBridgePlan and reports the first non-terminal local experience bridge candidate without mutating queue state, applying seed transactions, running Browser or Playwright, or approving high-risk gates
   - id: module-run-v2-implementation-seed-transaction
     path: scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
     smokePath: scripts/agent-system/New-ModuleRunV2ImplementationSeed.Smoke.ps1

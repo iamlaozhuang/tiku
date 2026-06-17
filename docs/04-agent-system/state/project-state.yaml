@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: personal-ai-local-playwright-auth-strategy-alignment
-updatedAt: "2026-06-17T15:01:53-07:00"
+currentPhase: local-experience-bridge-proposal-diagnostic
+updatedAt: "2026-06-17T15:21:12-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 60c18a97fd8ccdded7aeb68708e725a9c7f429ed
-  lastKnownOriginMasterSha: 60c18a97fd8ccdded7aeb68708e725a9c7f429ed
+  lastKnownMasterSha: c48bfe279e3c9d537ab855e0c52bd92f09d3cb87
+  lastKnownOriginMasterSha: c48bfe279e3c9d537ab855e0c52bd92f09d3cb87
 currentTask:
-  id: personal-ai-local-playwright-auth-strategy-alignment
+  id: local-experience-bridge-proposal-diagnostic
   status: closed
-  sourceStory: user-approved-personal-ai-local-flow-auth-strategy-followup
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-personal-ai-local-playwright-auth-strategy-alignment.md
-  branch: codex/personal-ai-playwright-auth-strategy-alignment
+  sourceStory: user-approved-mechanism-maintenance
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-bridge-proposal-diagnostic.md
+  branch: codex/local-experience-bridge-proposal-diagnostic
   commitSha: null
   prUrl: null
   retryCount: 0
