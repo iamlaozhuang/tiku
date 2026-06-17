@@ -66,6 +66,36 @@ schemaReadiness:
     - merged
   idleCandidateValue: no-executable-task-seed-or-approve-next-task
   executionRule: terminal task diagnostics are zero-exit idle results and must not be treated as executable autodrive work.
+executionProfiles:
+  catalogPath: docs/04-agent-system/state/execution-profiles.yaml
+  defaults:
+    executionProfile: legacy_explicit
+    evidenceMode: full
+    validationPolicy: legacy_explicit
+    queueSelectionMode: legacy_explicit
+  profiles:
+    - legacy_explicit
+    - docs_state_lite
+    - local_unit_tdd
+    - repository_runtime_tdd
+    - local_full_flow
+    - schema_isolated
+    - dependency_isolated
+    - provider_local_smoke
+  evidenceModes:
+    - full
+    - lite
+  validationPolicies:
+    - legacy_explicit
+    - docs_state
+    - local_unit
+    - runtime_unit
+    - local_full_flow
+    - high_risk_isolated
+  queueSelectionModes:
+    - legacy_explicit
+    - ready_set
+  executionRule: profile catalog values classify task envelopes only; they do not approve blocked capabilities, product implementation, env/secret access, provider calls, schema/migration, dependency, deploy, PR, force push, Browser, Playwright, e2e, or Cost Calibration Gate work without task-scoped approval and capability gates.
 startupDiagnostics:
   stopTaxonomyValues:
     - runnable

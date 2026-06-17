@@ -28,6 +28,9 @@ canonicalStateFiles:
   - id: autodrive-control-schema
     path: docs/04-agent-system/state/autodrive-control-schema.yaml
     role: durable schema for Module Run v2 autodrive policy, local capabilities, local E2E validation approval, schema/migration approval, destructive local Docker DB task approval, standing local closeout approval, closeout, registry lifecycle, parallel batch, and evidence minimums
+  - id: execution-profiles
+    path: docs/04-agent-system/state/execution-profiles.yaml
+    role: durable catalog for executionProfile, evidenceMode, validationPolicy, queueSelectionMode, workPacket, and local full-flow guardrails
   - id: advanced-edition-code-stage-seeding-plan
     path: docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
     role: planned Phase 65 code-stage queue seeding boundary
@@ -64,6 +67,13 @@ factOwnership:
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/Get-TikuProjectStatus.ps1
     rule: proposal_available is not approval; pending_human_decision keeps automation paused and the runner must block seed transaction execution until fresh explicit approval is recorded.
+  - fact: execution profile defaults, evidence modes, validation policy bundles, queue selection modes, work packet limits, and local full-flow guardrails
+    sourcePath: docs/04-agent-system/state/execution-profiles.yaml
+    derivedSummaries:
+      - scripts/agent-system/Test-ModuleRunV2AutodriveSchemaReadiness.ps1
+      - scripts/agent-system/Get-TikuNextAction.ps1
+      - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
+    rule: profile catalog values classify task envelopes only; they do not authorize high-risk actions without task-scoped approval and capability gates.
   - fact: transient owner, active run, recoverable run, cleanup-ready run, no-write terminal envelope
     sourcePath: local run registry, lease, and redacted handoff files under the configured Codex automation roots
     derivedSummaries:
@@ -357,6 +367,7 @@ recoveryReadOrder:
   - docs/04-agent-system/state/project-state.yaml
   - docs/04-agent-system/state/task-queue.yaml
   - docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
+  - docs/04-agent-system/state/execution-profiles.yaml
   - docs/04-agent-system/state/advanced-edition-code-stage-seeding-plan.yaml
   - docs/04-agent-system/state/advanced-edition-domain-module-run-matrix.yaml
   - latest task plan from project-state

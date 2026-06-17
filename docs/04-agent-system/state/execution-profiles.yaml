@@ -1,0 +1,211 @@
+schemaVersion: 1
+generatedByTask: mechanism-profile-catalog-ready-set-foundation
+generatedAt: "2026-06-17T03:52:10-07:00"
+purpose: Durable catalog for Tiku agent execution profiles, evidence modes, validation policies, queue selection modes, work packet limits, and local full-flow guardrails. This catalog is a profile source-of-truth, not a direct approval for high-risk actions.
+defaults:
+  executionProfile: legacy_explicit
+  evidenceMode: full
+  validationPolicy: legacy_explicit
+  queueSelectionMode: legacy_explicit
+evidenceModes:
+  full:
+    requiredAnchors:
+      - task id
+      - branch
+      - validation commands and results
+      - redaction status
+      - blocked remainder
+      - residual risk
+      - Cost Calibration Gate remains blocked
+  lite:
+    allowedFor:
+      - docs_state_lite
+      - mechanism_low_risk
+    requiredAnchors:
+      - task id
+      - changed files
+      - validation commands and results
+      - redaction status
+      - blocked remainder
+      - residual risk
+      - Cost Calibration Gate remains blocked
+    forbiddenShortcuts:
+      - skipping validation command recording
+      - skipping redaction checks
+      - skipping blocked remainder
+      - claiming production readiness
+validationPolicies:
+  legacy_explicit:
+    meaning: Use task-declared validationCommands without inferred privileges.
+  docs_state:
+    requiredCommands:
+      - git diff --check
+      - scoped prettier check for changed docs/state/evidence/audit/task-plan files
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - relevant mechanism diagnostics or smoke scripts
+  local_unit:
+    requiredCommands:
+      - focused unit command
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+  runtime_unit:
+    requiredCommands:
+      - focused runtime unit command without real private data
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+  local_full_flow:
+    requiredCommands:
+      - explicit local-only startup or fixture command approved by task
+      - targeted localhost-only Browser or Playwright command approved by task
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+  high_risk_isolated:
+    requiredCommands:
+      - task-specific gate command
+      - isolated evidence and audit
+      - git diff --check
+queueSelectionModes:
+  legacy_explicit:
+    behavior: Select at most the first dependency-satisfied pending task.
+    default: true
+  ready_set:
+    behavior: Report all dependency-satisfied pending tasks as a ready set before selecting one.
+    selectionRule: agent may choose the first ready task unless a current workPacket explicitly narrows the module scope.
+    blockedWhen:
+      - dependency unresolved in active queue or task-history-index
+      - task blocked gates exceed profile
+      - dirty worktree exists
+      - active owner exists
+profiles:
+  legacy_explicit:
+    evidenceMode: full
+    validationPolicy: legacy_explicit
+    queueSelectionMode: legacy_explicit
+    riskProfile: legacy
+    defaultCloseout: task_declared_only
+  docs_state_lite:
+    evidenceMode: lite
+    validationPolicy: docs_state
+    queueSelectionMode: ready_set
+    riskProfile: mechanism_low_risk
+    allowedTaskKinds:
+      - docs_only
+      - mechanism_maintenance
+    allowedCapabilities:
+      - docsStateOnlyQueueMaintenance
+    blockedCapabilities:
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - localE2EValidation
+      - localFullFlowGate
+      - costCalibrationGate
+  local_unit_tdd:
+    evidenceMode: full
+    validationPolicy: local_unit
+    queueSelectionMode: ready_set
+    riskProfile: low_risk_local_code
+    allowedTaskKinds:
+      - implementation
+      - local_service_contract_implementation
+    blockedCapabilities:
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - localE2EValidation
+      - costCalibrationGate
+  repository_runtime_tdd:
+    evidenceMode: full
+    validationPolicy: runtime_unit
+    queueSelectionMode: ready_set
+    riskProfile: repository_runtime_local
+    blockedCapabilities:
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - costCalibrationGate
+    evidenceBoundary:
+      - no real row/private data
+      - no public identifier inventories
+  local_full_flow:
+    evidenceMode: full
+    validationPolicy: local_full_flow
+    queueSelectionMode: ready_set
+    riskProfile: local_full_flow_only
+    requiredCapability:
+      localFullFlowGate: approved_localhost_only
+    allowedHosts:
+      - localhost
+      - 127.0.0.1
+      - ::1
+    blockedCapabilities:
+      - providerCall
+      - schemaMigration
+      - dependencyIntroduction
+      - costCalibrationGate
+    forbiddenTargets:
+      - staging
+      - prod
+      - cloud
+      - external-service
+  schema_isolated:
+    evidenceMode: full
+    validationPolicy: high_risk_isolated
+    queueSelectionMode: legacy_explicit
+    riskProfile: high_risk_isolated
+    requiredFreshApproval: true
+    isolatedCommitRequired: true
+  dependency_isolated:
+    evidenceMode: full
+    validationPolicy: high_risk_isolated
+    queueSelectionMode: legacy_explicit
+    riskProfile: high_risk_isolated
+    requiredFreshApproval: true
+    isolatedCommitRequired: true
+  provider_local_smoke:
+    evidenceMode: full
+    validationPolicy: high_risk_isolated
+    queueSelectionMode: legacy_explicit
+    riskProfile: high_risk_isolated
+    requiredFreshApproval: true
+    rawPayloadEvidence: blocked
+    costCalibrationGate: blocked
+workPacket:
+  allowedRiskProfiles:
+    - mechanism_low_risk
+    - low_risk_local_code
+    - repository_runtime_local
+  maxTasksPerPacket:
+    docs_state_lite: 6
+    local_unit_tdd: 4
+    repository_runtime_tdd: 3
+    local_full_flow: 1
+  disallowMixedProfiles:
+    - schema_isolated
+    - dependency_isolated
+    - provider_local_smoke
+localFullFlowGate:
+  default: blocked_without_task_profile
+  approvedValue: approved_localhost_only
+  allowedHosts:
+    - localhost
+    - 127.0.0.1
+    - ::1
+  allowedData:
+    - local fixtures
+    - disposable local data
+  blockedActions:
+    - staging/prod/cloud/external-service target
+    - provider/model call
+    - private row data exposure
+    - public identifier inventories
+    - full e2e suite by default
+    - headed/debug/browser mode unless explicitly task-approved
+forbiddenClaims:
+  - This catalog does not approve product implementation.
+  - This catalog does not approve schema, dependency, provider, deploy, payment, external-service, PR, force-push, env/secret, or Cost Calibration Gate work.
+  - This catalog does not by itself approve Browser, Playwright, e2e, dev server, or local full-flow execution; a task must explicitly select the profile and pass local-only gates.

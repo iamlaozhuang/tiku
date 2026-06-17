@@ -31,7 +31,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml"
+    [string]$MatrixPath = "docs\04-agent-system\state\advanced-edition-domain-module-run-matrix.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ExecutionProfileCatalogPath = "docs\04-agent-system\state\execution-profiles.yaml"
 )
 
 $ErrorActionPreference = "Stop"
@@ -148,6 +152,7 @@ function New-SeedTaskBlock {
         [Parameter(Mandatory = $true)][string]$NonGoal,
         [Parameter(Mandatory = $true)][string]$ValidationProfile,
         [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$BlockedRemainderItems,
+        [Parameter(Mandatory = $true)][string]$ExecutionProfileCatalogPath,
         [Parameter(Mandatory = $false)][bool]$StandingCloseoutApproved = $false
     )
 
@@ -156,6 +161,7 @@ function New-SeedTaskBlock {
     $safeLocalFullLoopGate = if ([string]::IsNullOrWhiteSpace($LocalFullLoopGate)) { "L2" } else { $LocalFullLoopGate }
     $safeBehaviorBoundary = ConvertTo-YamlScalarText -Text $BehaviorBoundary
     $safeValidationProfile = ConvertTo-YamlScalarText -Text $ValidationProfile
+    $safeExecutionProfileCatalogPath = ConvertTo-YamlScalarText -Text ($ExecutionProfileCatalogPath.Replace("\", "/"))
     $localCommitApproval = if ($StandingCloseoutApproved) { "approved" } else { "not_approved" }
     $closeoutBooleanApproval = if ($StandingCloseoutApproved) { "true" } else { "not_approved" }
     $requirementRefsBlock = New-YamlListBlock -Key "requirementRefs" -Values @($RequirementRef)
@@ -186,10 +192,11 @@ $useCasesBlock
 $acceptanceScenariosBlock
 $nonGoalsBlock
     validationProfile: $safeValidationProfile
+    profileCatalogRef: $safeExecutionProfileCatalogPath
     executionProfile: local_unit_tdd
     evidenceMode: full
     validationPolicy: local_unit
-    queueSelectionMode: legacy_explicit
+    queueSelectionMode: ready_set
     localExperienceClosureGate: planned
     localFullLoopGate: $safeLocalFullLoopGate
 $blockedRemainderBlock
@@ -484,6 +491,8 @@ Pending implementation and closeout review.
 try {
     Write-Section -Title "Module Run v2 Implementation Seed Transaction"
     Write-Output "seedTransactionMode: $(if ($Apply) { "apply" } else { "plan_only" })"
+    Write-Output "executionProfileCatalogPath: $ExecutionProfileCatalogPath"
+    Write-Output "executionProfileCatalog: $(if (Test-Path -LiteralPath $ExecutionProfileCatalogPath -PathType Leaf) { "present" } else { "missing_legacy_defaults" })"
 
     $proposalScriptPath = Join-Path -Path $agentSystemRoot -ChildPath "Get-ModuleRunV2ImplementationSeedProposal.ps1"
     if (-not (Test-Path -LiteralPath $proposalScriptPath)) {
@@ -589,6 +598,7 @@ try {
                     -NonGoal $nonGoals[$index] `
                     -ValidationProfile $validationProfiles[$index] `
                     -BlockedRemainderItems $blockedRemainderItems `
+                    -ExecutionProfileCatalogPath $ExecutionProfileCatalogPath `
                     -StandingCloseoutApproved $standingCloseoutApproved))
     }
 

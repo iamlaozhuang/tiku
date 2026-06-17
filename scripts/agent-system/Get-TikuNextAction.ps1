@@ -19,6 +19,10 @@ param(
     [string]$TaskHistoryIndexPath = "docs\04-agent-system\state\task-history-index.yaml",
 
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ExecutionProfileCatalogPath = "docs\04-agent-system\state\execution-profiles.yaml",
+
+    [Parameter(Mandatory = $false)]
     [switch]$VerboseHistory
 )
 
@@ -375,6 +379,43 @@ function Join-FirstItems {
     return (($nonEmpty | Select-Object -First 5) -join ",")
 }
 
+function Get-CatalogNestedScalar {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content,
+        [Parameter(Mandatory = $true)][string]$Section,
+        [Parameter(Mandatory = $true)][string]$Entry,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    $insideSection = $false
+    $insideEntry = $false
+    foreach ($line in ($Content -split "\r?\n")) {
+        if (-not $insideSection -and $line -match "^$([regex]::Escape($Section)):\s*$") {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match "^\S") {
+            break
+        }
+
+        if ($insideSection -and -not $insideEntry -and $line -match "^\s{2}$([regex]::Escape($Entry)):\s*$") {
+            $insideEntry = $true
+            continue
+        }
+
+        if ($insideEntry -and $line -match "^\s{2}[A-Za-z0-9_]+:\s*$") {
+            break
+        }
+
+        if ($insideEntry -and $line -match "^\s{4}$([regex]::Escape($Key)):\s*(.+?)\s*$") {
+            return $Matches[1].Trim().Trim('"')
+        }
+    }
+
+    return ""
+}
+
 function Get-QueueDiagnostics {
     param([Parameter(Mandatory = $true)][object[]]$Blocks)
 
@@ -468,6 +509,11 @@ $taskHistoryBlocks = @()
 if (Test-Path -LiteralPath $TaskHistoryIndexPath) {
     $taskHistoryBlocks = @(Get-TaskBlocks -Lines @(Get-Content -LiteralPath $TaskHistoryIndexPath))
 }
+$profileCatalogPresent = Test-Path -LiteralPath $ExecutionProfileCatalogPath -PathType Leaf
+$profileCatalogContent = ""
+if ($profileCatalogPresent) {
+    $profileCatalogContent = Get-Content -LiteralPath $ExecutionProfileCatalogPath -Raw
+}
 $queueDiagnostics = Get-QueueDiagnostics -Blocks $taskBlocks
 $matrixDiagnostics = Get-MatrixDiagnostics -Blocks $taskBlocks -MatrixLines $matrixLines
 $currentTaskId = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "id"
@@ -513,6 +559,24 @@ if ([string]::IsNullOrWhiteSpace($currentValidationPolicy)) {
 }
 if ([string]::IsNullOrWhiteSpace($queueSelectionMode)) {
     $queueSelectionMode = "legacy_explicit"
+}
+
+$catalogEvidenceMode = ""
+$catalogValidationPolicy = ""
+$catalogQueueSelectionMode = ""
+if ($profileCatalogPresent) {
+    $catalogEvidenceMode = Get-CatalogNestedScalar -Content $profileCatalogContent -Section "profiles" -Entry $currentExecutionProfile -Key "evidenceMode"
+    $catalogValidationPolicy = Get-CatalogNestedScalar -Content $profileCatalogContent -Section "profiles" -Entry $currentExecutionProfile -Key "validationPolicy"
+    $catalogQueueSelectionMode = Get-CatalogNestedScalar -Content $profileCatalogContent -Section "profiles" -Entry $currentExecutionProfile -Key "queueSelectionMode"
+}
+if ([string]::IsNullOrWhiteSpace($catalogEvidenceMode)) {
+    $catalogEvidenceMode = "none"
+}
+if ([string]::IsNullOrWhiteSpace($catalogValidationPolicy)) {
+    $catalogValidationPolicy = "none"
+}
+if ([string]::IsNullOrWhiteSpace($catalogQueueSelectionMode)) {
+    $catalogQueueSelectionMode = "none"
 }
 
 $nextTask = Get-NextExecutableTask -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks
@@ -608,7 +672,13 @@ Write-Output "executionProfile: $currentExecutionProfile"
 Write-Output "evidenceMode: $currentEvidenceMode"
 Write-Output "validationPolicy: $currentValidationPolicy"
 Write-Output "queueSelectionMode: $queueSelectionMode"
+Write-Output "executionProfileCatalogPath: $ExecutionProfileCatalogPath"
+Write-Output "executionProfileCatalog: $(if ($profileCatalogPresent) { "present" } else { "missing_legacy_defaults" })"
+Write-Output "catalogEvidenceMode: $catalogEvidenceMode"
+Write-Output "catalogValidationPolicy: $catalogValidationPolicy"
+Write-Output "catalogQueueSelectionMode: $catalogQueueSelectionMode"
 Write-Output "readySetCount: $($readySetTaskIds.Count)"
+Write-Output "readySetSelectionRule: $(if ($queueSelectionMode -eq "ready_set") { "first_ready_task_unless_work_packet_scope" } else { "legacy_explicit_first_pending" })"
 Write-Output "plannedPauseStatus: $(if ([string]::IsNullOrWhiteSpace($plannedPauseStatus)) { 'none' } else { $plannedPauseStatus })"
 if (-not [string]::IsNullOrWhiteSpace($plannedPauseReason)) {
     Write-Output "plannedPauseReason: $plannedPauseReason"

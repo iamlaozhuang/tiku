@@ -12,7 +12,11 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string]$SchemaPath = "docs\04-agent-system\state\autodrive-control-schema.yaml"
+    [string]$SchemaPath = "docs\04-agent-system\state\autodrive-control-schema.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string]$ExecutionProfileCatalogPath = "docs\04-agent-system\state\execution-profiles.yaml"
 )
 
 $ErrorActionPreference = "Stop"
@@ -252,6 +256,41 @@ function Test-RequiredListValues {
             Add-Finding "HARD_BLOCK_AUTODRIVE_SCHEMA_MISSING_VALUE $Section $requiredValue"
         }
     }
+}
+
+function Get-CatalogSectionKeys {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Content,
+        [Parameter(Mandatory = $true)][string]$Section
+    )
+
+    $keys = New-Object System.Collections.Generic.List[string]
+    $insideSection = $false
+    foreach ($line in ($Content -split "\r?\n")) {
+        if (-not $insideSection -and $line -match "^$([regex]::Escape($Section)):\s*$") {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match "^\S") {
+            break
+        }
+
+        if ($insideSection -and $line -match "^\s{2}([A-Za-z0-9_]+):\s*") {
+            $keys.Add($Matches[1])
+        }
+    }
+
+    return @($keys.ToArray() | Sort-Object -Unique)
+}
+
+function Test-CatalogValuePresent {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Values,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$ExpectedValue
+    )
+
+    return $Values -contains $ExpectedValue
 }
 
 function Test-ListContainsPathPattern {
@@ -536,6 +575,11 @@ try {
     $projectStateLines = @(Get-Content -LiteralPath $ProjectStatePath)
     $queueLines = @(Get-Content -LiteralPath $QueuePath)
     $schemaContent = Get-Content -LiteralPath $SchemaPath -Raw
+    $profileCatalogPresent = Test-Path -LiteralPath $ExecutionProfileCatalogPath -PathType Leaf
+    $profileCatalogContent = ""
+    if ($profileCatalogPresent) {
+        $profileCatalogContent = Get-Content -LiteralPath $ExecutionProfileCatalogPath -Raw
+    }
     $taskBlocks = @(Get-TaskBlocks -Lines $queueLines)
 
     if ([string]::IsNullOrWhiteSpace($TaskId)) {
@@ -544,6 +588,8 @@ try {
 
     Write-Output "taskId: $TaskId"
     Write-Output "schemaPath: $SchemaPath"
+    Write-Output "executionProfileCatalogPath: $ExecutionProfileCatalogPath"
+    Write-Output "executionProfileCatalog: $(if ($profileCatalogPresent) { "present" } else { "missing_legacy_defaults" })"
 
     if ([string]::IsNullOrWhiteSpace($TaskId)) {
         Add-Finding "HARD_BLOCK_MISSING_TASK_ID"
@@ -552,6 +598,11 @@ try {
 
     if ($schemaContent -notmatch "taskAutodrivePolicy:" -or $schemaContent -notmatch "capabilities:" -or $schemaContent -notmatch "registryLifecycle:") {
         Add-Finding "HARD_BLOCK_SCHEMA_CONTRACT_INCOMPLETE $SchemaPath"
+    }
+    if ($schemaContent -match "executionProfiles:" -and $schemaContent -match [regex]::Escape("docs/04-agent-system/state/execution-profiles.yaml")) {
+        Write-Output "schemaProfileCatalogReference: present"
+    } else {
+        Write-Output "schemaProfileCatalogReference: missing_legacy_compatible"
     }
 
     $taskBlock = @(Get-TaskBlock -Blocks $taskBlocks -Id $TaskId)
@@ -587,6 +638,17 @@ try {
         $queueSelectionMode = "legacy_explicit"
     }
 
+    $catalogProfiles = @()
+    $catalogEvidenceModes = @()
+    $catalogValidationPolicies = @()
+    $catalogQueueSelectionModes = @()
+    if ($profileCatalogPresent) {
+        $catalogProfiles = @(Get-CatalogSectionKeys -Content $profileCatalogContent -Section "profiles")
+        $catalogEvidenceModes = @(Get-CatalogSectionKeys -Content $profileCatalogContent -Section "evidenceModes")
+        $catalogValidationPolicies = @(Get-CatalogSectionKeys -Content $profileCatalogContent -Section "validationPolicies")
+        $catalogQueueSelectionModes = @(Get-CatalogSectionKeys -Content $profileCatalogContent -Section "queueSelectionModes")
+    }
+
     Write-Section -Title "Task"
     Write-Output "status: $status"
     Write-Output "taskKind: $taskKind"
@@ -600,6 +662,12 @@ try {
     Write-Output "validationCommandCount: $($validationCommands.Count)"
     Write-Output "validationLifecycleCommandCount: $($validationLifecycleCommands.Count)"
     Write-Output "validationCommandNormalization: $validationCommandNormalization"
+    if ($profileCatalogPresent) {
+        Write-Output "catalogProfileCount: $($catalogProfiles.Count)"
+        Write-Output "catalogEvidenceModeCount: $($catalogEvidenceModes.Count)"
+        Write-Output "catalogValidationPolicyCount: $($catalogValidationPolicies.Count)"
+        Write-Output "catalogQueueSelectionModeCount: $($catalogQueueSelectionModes.Count)"
+    }
 
     if ($status -in @("done", "closed", "pushed", "merged")) {
         Write-Output "not_executable_closed_task: $TaskId status=$status"
@@ -641,6 +709,20 @@ try {
     }
     if ($queueSelectionMode -notin @("legacy_explicit", "ready_set")) {
         Add-Finding "HARD_BLOCK_UNSUPPORTED_QUEUE_SELECTION_MODE $TaskId queueSelectionMode=$queueSelectionMode"
+    }
+    if ($profileCatalogPresent) {
+        if (-not (Test-CatalogValuePresent -Values $catalogProfiles -ExpectedValue $executionProfile)) {
+            Add-Finding "HARD_BLOCK_EXECUTION_PROFILE_NOT_IN_CATALOG $TaskId profile=$executionProfile"
+        }
+        if (-not (Test-CatalogValuePresent -Values $catalogEvidenceModes -ExpectedValue $evidenceMode)) {
+            Add-Finding "HARD_BLOCK_EVIDENCE_MODE_NOT_IN_CATALOG $TaskId evidenceMode=$evidenceMode"
+        }
+        if (-not (Test-CatalogValuePresent -Values $catalogValidationPolicies -ExpectedValue $validationPolicy)) {
+            Add-Finding "HARD_BLOCK_VALIDATION_POLICY_NOT_IN_CATALOG $TaskId validationPolicy=$validationPolicy"
+        }
+        if (-not (Test-CatalogValuePresent -Values $catalogQueueSelectionModes -ExpectedValue $queueSelectionMode)) {
+            Add-Finding "HARD_BLOCK_QUEUE_SELECTION_MODE_NOT_IN_CATALOG $TaskId queueSelectionMode=$queueSelectionMode"
+        }
     }
     if ($validationLifecycleCommands.Count -gt 0) {
         $validLifecyclePhases = @("pre_edit", "post_edit", "closeout", "advisory_baseline")
