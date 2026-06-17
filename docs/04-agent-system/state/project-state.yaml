@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd
-updatedAt: "2026-06-17T00:43:18-07:00"
+currentPhase: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-seeding
+updatedAt: "2026-06-17T00:55:14-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 870bc1abb7b923981b63576e5c391ffcbdf3311c
-  lastKnownOriginMasterSha: 870bc1abb7b923981b63576e5c391ffcbdf3311c
+  lastKnownMasterSha: e58ee1282c0039396c485b43a37808c0e29e5dbf
+  lastKnownOriginMasterSha: e58ee1282c0039396c485b43a37808c0e29e5dbf
 currentTask:
-  id: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd
+  id: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md
-  branch: codex/organization-analytics-employee-summary-input-composition
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-seeding.md
+  branch: codex/organization-analytics-employee-summary-recheck-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -667,6 +667,8 @@ qualityGates:
     advancedOrganizationAnalyticsEmployeeStatisticsRouteContractReadonlyRecheckSeeding: pass_docs_state_seeded_employee_statistics_route_contract_readonly_recheck
     advancedOrganizationAnalyticsEmployeeStatisticsRouteContractReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
     advancedOrganizationAnalyticsEmployeeStatisticsPostgresRuntimeWiringTddSeeding: pass_docs_state_seeded_employee_statistics_postgres_runtime_wiring_tdd
+    advancedOrganizationAnalyticsEmployeeStatisticsPostgresSummaryInputCompositionTdd: pass_tdd_employee_statistics_postgres_summary_input_composition_no_db_execution
+    advancedOrganizationAnalyticsEmployeeStatisticsPostgresSummaryInputCompositionRuntimeUnitAlignmentSeeding: pass_docs_state_seeded_employee_statistics_postgres_summary_input_composition_runtime_unit_alignment
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -682,7 +684,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After `advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd` closes, review
-    the organization analytics queue for the next repository/runtime gap and seed exactly one scoped pending task if the
-    queue is empty.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md
+    Claim `advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-tdd`
+    only after fresh user approval. Keep the task focused on the route/runtime unit drift observed after repository
+    summary input composition closed: preserve summary-only redaction, avoid real database execution, and update only
+    the declared service/repository focused unit boundary if the RED diagnostic confirms it.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-runtime-unit-alignment-seeding.md
