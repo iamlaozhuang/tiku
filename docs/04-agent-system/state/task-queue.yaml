@@ -8036,7 +8036,7 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-202-organization-training-employee-answer-lifecycle-local-role-flow
     evidencePath: docs/05-execution-logs/evidence/batch-202-organization-training-employee-answer-lifecycle-local-role-flow.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-202-organization-training-employee-answer-lifecycle-local-role-flow.md
-    status: in_progress
+    status: closed
     retryCount: 0
   - id: batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex
     title: Module Run v2 organization-training implementation seed
