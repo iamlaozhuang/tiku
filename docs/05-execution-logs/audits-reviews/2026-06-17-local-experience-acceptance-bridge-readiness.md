@@ -19,7 +19,7 @@ The task scope is appropriate for a docs-state readiness package. It prepares th
 
 ## Findings
 
-No blocking findings. The actual post-commit SHA still needs to be reconciled into evidence and task state after the local commit exists.
+No blocking findings. The task commit SHA was reconciled as `142f2f4770f739fc92409158e7e0efdbe5e9a317`; any later commit in this branch is closeout metadata reconciliation only.
 
 ## Approval Boundary Review
 

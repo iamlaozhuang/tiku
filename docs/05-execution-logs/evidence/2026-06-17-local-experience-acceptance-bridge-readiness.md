@@ -9,7 +9,7 @@
 - Validation policy: `docs_state`
 - result: pass
 - Base Commit: `d6c436a53270925dd9e755a21e689fef7c923378`
-- Final Commit: `pending_post_commit_reconciliation`
+- Final Commit: `142f2f4770f739fc92409158e7e0efdbe5e9a317`
 - Redaction status: pass. This evidence records governance state and command outcomes only.
 
 Cost Calibration Gate remains blocked.
@@ -88,7 +88,7 @@ For a later actual L4 implementation task, the approval must explicitly name any
 ## Closeout Anchors
 
 - Batch range: single docs-state task.
-- Commit: `d6c436a53270925dd9e755a21e689fef7c923378` is the pre-task base commit; final task commit is reconciled after local commit.
+- Commit: `142f2f4770f739fc92409158e7e0efdbe5e9a317` is the task commit; a follow-up closeout reconciliation commit may update only SHA metadata.
 - `localFullLoopGate`: not applicable for this docs-state readiness task.
 - Thread rollover: not required.
 - nextModuleRunCandidate: request fresh `localExperienceAcceptanceBridgeApproved` approval for `module-run-v2-personal-ai-local-transport-contract-planning`.
