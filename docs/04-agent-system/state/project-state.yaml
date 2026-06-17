@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: module-run-v2-next-experience-chain-readiness-audit
-updatedAt: "2026-06-17T16:20:03-07:00"
+currentPhase: module-run-v2-organization-training-local-role-flow-planning
+updatedAt: "2026-06-17T16:30:46-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
   lastKnownOriginMasterSha: 1724520a1dad826fb67bcad797739c46bfcde790
 currentTask:
-  id: module-run-v2-next-experience-chain-readiness-audit
+  id: module-run-v2-organization-training-local-role-flow-planning
   status: closed
-  sourceStory: localExperienceClosureGate.nextChainReadinessAudit
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
-  branch: codex/next-experience-chain-readiness-audit
+  sourceStory: localExperienceClosureGate.organizationTrainingRoleFlowPlanning
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
+  branch: codex/organization-training-local-role-flow-planning
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -677,6 +677,7 @@ qualityGates:
     advancedOrganizationAnalyticsPostEmployeeRuntimeAlignmentReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
     advancedOrganizationAnalyticsNextImplementationQueueSeedingPostEmployeeRuntimeRecheck: pass_docs_state_seeded_dashboard_formal_quota_summary_tdd
     moduleRunV2NextExperienceChainReadinessAudit: pass_docs_state_next_chain_readiness_audit
+    moduleRunV2OrganizationTrainingLocalRoleFlowPlanning: pass_docs_state_l6_role_flow_planning
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -715,10 +716,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Recommended next task is `module-run-v2-organization-training-local-role-flow-planning`, a docs-state planning
-    task for the `organization-training-experience` L6 local role-flow chain. It should inventory existing local
-    organization-training role-flow and redaction validation surfaces by file path and focused command result only,
-    without editing product source, tests, e2e, scripts, schema/drizzle, package/lockfiles, or dependencies, and without
-    Browser/dev-server/Playwright, provider/model, staging/prod/cloud/deploy/payment/external-service, PR/force-push, or
-    Cost Calibration Gate work.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-next-experience-chain-readiness-audit.md
+    Recommended next task is `module-run-v2-organization-training-local-role-flow-smoke-validation`, a
+    `local_full_flow` validation task for the `organization-training-experience` L6 local role-flow chain. It requires
+    explicit future approval for `localFullFlowGate: approved_localhost_only`, should use localhost/127.0.0.1/::1 only,
+    and should target an existing narrow role-flow or route-guard validation surface without editing product source,
+    tests, e2e, scripts, schema/drizzle, package/lockfiles, or dependencies. Full e2e suite, headed/debug browser mode,
+    provider/model, staging/prod/cloud/deploy/payment/external-service, PR/force-push, raw data exposure, and Cost
+    Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-organization-training-local-role-flow-planning.md
