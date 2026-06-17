@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding
-updatedAt: "2026-06-17T00:16:59-07:00"
+currentPhase: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd
+updatedAt: "2026-06-17T00:43:18-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 1947276ee318465a16854e74e070ffe58b270e2b
-  lastKnownOriginMasterSha: 1947276ee318465a16854e74e070ffe58b270e2b
+  lastKnownMasterSha: 870bc1abb7b923981b63576e5c391ffcbdf3311c
+  lastKnownOriginMasterSha: 870bc1abb7b923981b63576e5c391ffcbdf3311c
 currentTask:
-  id: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding
+  id: advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
-  branch: codex/organization-analytics-employee-summary-input-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md
+  branch: codex/organization-analytics-employee-summary-input-composition
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -682,7 +682,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd` is the next pending
-    organization analytics task. It should be claimed only with fresh approval, on a short-lived branch, using TDD, and
-    without real database execution or sensitive evidence.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-seeding.md
+    After `advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd` closes, review
+    the organization analytics queue for the next repository/runtime gap and seed exactly one scoped pending task if the
+    queue is empty.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-employee-statistics-postgres-summary-input-composition-tdd.md

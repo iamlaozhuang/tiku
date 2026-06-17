@@ -485,6 +485,7 @@ describe("organization analytics repository", () => {
     const readTrainingAnswerSourceRows = vi.fn(async () => [
       {
         employeePublicId: " employee_public_001 ",
+        employeeDisplayName: " Employee One ",
         organizationPublicId: "organization_child_public",
         organizationTrainingVersionPublicId: "training_version_public_001",
         score: "86.0",
@@ -579,6 +580,177 @@ describe("organization analytics repository", () => {
     ).resolves.toEqual([]);
   });
 
+  it("maps organization training answer source rows into employee summary inputs", async () => {
+    const readTrainingAnswerSourceRows = vi.fn(async () => [
+      {
+        employeePublicId: " employee_public_001 ",
+        employeeDisplayName: " Employee One ",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_001",
+        score: "86.0",
+        totalScore: "100.0",
+        submittedAt: new Date("2026-06-16T02:00:00.000Z"),
+        answerOrganizationSnapshot: {
+          organizationPublicId: "organization_child_public",
+          organizationName: "Child Organization",
+          capturedAt: "2026-06-16T01:59:00.000Z",
+          hiddenSnapshotField: "hidden snapshot detail",
+        },
+        hiddenAnswerPublicId: "answer_public_hidden_001",
+      },
+      {
+        employeePublicId: "employee_public_001",
+        employeeDisplayName: "Employee One",
+        organizationPublicId: "organization_root_public",
+        organizationTrainingVersionPublicId: "training_version_public_002",
+        score: 91,
+        totalScore: 100,
+        submittedAt: "2026-06-16T05:00:00.000Z",
+        answerOrganizationSnapshot: {
+          organizationPublicId: "organization_root_public",
+          organizationName: "Root Organization",
+          capturedAt: "2026-06-16T04:59:00.000Z",
+        },
+      },
+      {
+        employeePublicId: "employee_public_002",
+        employeeDisplayName: "Employee Two",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_003",
+        score: "77.5",
+        totalScore: "100.0",
+        submittedAt: "2026-06-16T06:00:00.000Z",
+        answerOrganizationSnapshot: {
+          organizationPublicId: "organization_child_public",
+          organizationName: "Child Organization",
+          capturedAt: "2026-06-16T05:59:00.000Z",
+        },
+      },
+      {
+        employeePublicId: "employee_public_outside_scope",
+        employeeDisplayName: "Employee Outside Scope",
+        organizationPublicId: "organization_other_public",
+        organizationTrainingVersionPublicId: "training_version_public_004",
+        score: 99,
+        totalScore: 100,
+        submittedAt: "2026-06-16T07:00:00.000Z",
+        answerOrganizationSnapshot: {
+          organizationPublicId: "organization_other_public",
+          organizationName: "Other Organization",
+          capturedAt: "2026-06-16T06:59:00.000Z",
+        },
+      },
+      {
+        employeePublicId: "employee_public_invalid_score",
+        employeeDisplayName: "Employee Invalid Score",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_005",
+        score: null,
+        totalScore: 100,
+        submittedAt: "2026-06-16T08:00:00.000Z",
+        answerOrganizationSnapshot: {
+          organizationPublicId: "organization_child_public",
+          organizationName: "Child Organization",
+          capturedAt: "2026-06-16T07:59:00.000Z",
+        },
+      },
+      {
+        employeePublicId: "employee_public_invalid_snapshot",
+        employeeDisplayName: "Employee Invalid Snapshot",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_006",
+        score: 81,
+        totalScore: 100,
+        submittedAt: "2026-06-16T09:00:00.000Z",
+        answerOrganizationSnapshot: {
+          organizationPublicId: " ",
+          organizationName: "Child Organization",
+          capturedAt: "2026-06-16T08:59:00.000Z",
+        },
+      },
+    ]);
+    const gateway = createOrganizationAnalyticsTrainingAnswerSourceGateway({
+      readTrainingAnswerSourceRows,
+    });
+
+    const result =
+      await gateway.readEmployeeTrainingSummaryInputs(createScopeInput());
+
+    expect(readTrainingAnswerSourceRows).toHaveBeenCalledWith({
+      organizationPublicId: "organization_root_public",
+      scopeOrganizationPublicIds: [
+        "organization_root_public",
+        "organization_child_public",
+      ],
+      dateRange: {
+        startAt: "2026-06-16T00:00:00.000Z",
+        endAt: "2026-06-16T23:59:59.000Z",
+      },
+    });
+    expect(result).toEqual([
+      {
+        employeePublicId: "employee_public_001",
+        employeeDisplayName: "Employee One",
+        organizationPublicId: "organization_root_public",
+        organizationName: "Root Organization",
+        visibleTrainingVersionPublicIds: [
+          "training_version_public_001",
+          "training_version_public_002",
+        ],
+        officialSubmissions: [
+          {
+            employeePublicId: "employee_public_001",
+            trainingVersionPublicId: "training_version_public_001",
+            score: 86,
+            totalScore: 100,
+            submittedAt: "2026-06-16T02:00:00.000Z",
+            answerOrganizationSnapshot: {
+              organizationPublicId: "organization_child_public",
+              organizationName: "Child Organization",
+              capturedAt: "2026-06-16T01:59:00.000Z",
+            },
+          },
+          {
+            employeePublicId: "employee_public_001",
+            trainingVersionPublicId: "training_version_public_002",
+            score: 91,
+            totalScore: 100,
+            submittedAt: "2026-06-16T05:00:00.000Z",
+            answerOrganizationSnapshot: {
+              organizationPublicId: "organization_root_public",
+              organizationName: "Root Organization",
+              capturedAt: "2026-06-16T04:59:00.000Z",
+            },
+          },
+        ],
+      },
+      {
+        employeePublicId: "employee_public_002",
+        employeeDisplayName: "Employee Two",
+        organizationPublicId: "organization_child_public",
+        organizationName: "Child Organization",
+        visibleTrainingVersionPublicIds: ["training_version_public_003"],
+        officialSubmissions: [
+          {
+            employeePublicId: "employee_public_002",
+            trainingVersionPublicId: "training_version_public_003",
+            score: 77.5,
+            totalScore: 100,
+            submittedAt: "2026-06-16T06:00:00.000Z",
+            answerOrganizationSnapshot: {
+              organizationPublicId: "organization_child_public",
+              organizationName: "Child Organization",
+              capturedAt: "2026-06-16T05:59:00.000Z",
+            },
+          },
+        ],
+      },
+    ]);
+    expect(JSON.stringify(result)).not.toMatch(
+      /answer_public_hidden|hidden|detailField|sourceRowId/u,
+    );
+  });
+
   it("creates a RuntimeDatabase visible organization scope reader from active admin organization assignments", async () => {
     const { database, select, selectCalls } = createFakeRuntimeDatabase([
       [{ organizationId: 101 }],
@@ -639,11 +811,17 @@ describe("organization analytics repository", () => {
       [
         {
           employeePublicId: " employee_public_001 ",
+          employeeDisplayName: " Employee One ",
           organizationPublicId: "organization_child_public",
           organizationTrainingVersionPublicId: "training_version_public_001",
           score: "86.0",
           totalScore: "100.0",
           submittedAt: new Date("2026-06-16T02:00:00.000Z"),
+          answerOrganizationSnapshot: {
+            organizationPublicId: "organization_child_public",
+            organizationName: "Child Organization",
+            capturedAt: "2026-06-16T01:59:00.000Z",
+          },
           answerPublicId: "answer_public_hidden_001",
           detailField: "hidden answer detail",
           sourceRowId: 901,
@@ -664,20 +842,28 @@ describe("organization analytics repository", () => {
     expect(select).toHaveBeenCalledTimes(1);
     expect(selectCalls[0]?.selectionKeys).toEqual([
       "employeePublicId",
+      "employeeDisplayName",
       "organizationPublicId",
       "organizationTrainingVersionPublicId",
       "score",
       "totalScore",
       "submittedAt",
+      "answerOrganizationSnapshot",
     ]);
     expect(result).toEqual([
       {
         employeePublicId: "employee_public_001",
+        employeeDisplayName: "Employee One",
         organizationPublicId: "organization_child_public",
         organizationTrainingVersionPublicId: "training_version_public_001",
         score: "86.0",
         totalScore: "100.0",
         submittedAt: "2026-06-16T02:00:00.000Z",
+        answerOrganizationSnapshot: {
+          organizationPublicId: "organization_child_public",
+          organizationName: "Child Organization",
+          capturedAt: "2026-06-16T01:59:00.000Z",
+        },
       },
     ]);
     expect(blankScopeResult).toEqual([]);

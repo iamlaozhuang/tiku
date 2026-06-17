@@ -1,8 +1,10 @@
 import {
   admin,
   adminOrganization,
+  employee,
   organization,
   organizationTrainingAnswer,
+  user,
 } from "@/db/schema";
 import { and, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
 
@@ -116,11 +118,19 @@ export type OrganizationAnalyticsPostgresRepositoryFactoryOptions = {
 
 export type OrganizationAnalyticsTrainingAnswerSourceRow = {
   employeePublicId: string;
+  employeeDisplayName?: string | null;
   organizationPublicId: string;
   organizationTrainingVersionPublicId: string;
   score: number | string | null;
   totalScore: number | string | null;
   submittedAt: Date | string | null;
+  answerOrganizationSnapshot?: OrganizationAnalyticsAnswerOrganizationSnapshot | null;
+};
+
+export type OrganizationAnalyticsAnswerOrganizationSnapshot = {
+  organizationPublicId: string;
+  organizationName: string;
+  capturedAt: string;
 };
 
 export type OrganizationAnalyticsTrainingAnswerSourceReader = (
@@ -362,14 +372,22 @@ export function createOrganizationAnalyticsTrainingAnswerSourceReader(
     const trainingAnswerSourceRows = await database
       .select({
         employeePublicId: organizationTrainingAnswer.employee_public_id,
+        employeeDisplayName: user.name,
         organizationPublicId: organizationTrainingAnswer.organization_public_id,
         organizationTrainingVersionPublicId:
           organizationTrainingAnswer.organization_training_version_public_id,
         score: organizationTrainingAnswer.score,
         totalScore: organizationTrainingAnswer.total_score,
         submittedAt: organizationTrainingAnswer.submitted_at,
+        answerOrganizationSnapshot:
+          organizationTrainingAnswer.answer_organization_snapshot,
       })
       .from(organizationTrainingAnswer)
+      .innerJoin(
+        employee,
+        eq(organizationTrainingAnswer.employee_id, employee.id),
+      )
+      .innerJoin(user, eq(employee.user_id, user.id))
       .where(
         and(
           eq(
@@ -431,8 +449,20 @@ export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
       };
     },
 
-    async readEmployeeTrainingSummaryInputs() {
-      return [];
+    async readEmployeeTrainingSummaryInputs(input) {
+      const readInput = normalizeScopeReadInput(input);
+
+      if (readInput === null) {
+        return [];
+      }
+
+      const trainingAnswerSourceRows =
+        await options.readTrainingAnswerSourceRows(readInput);
+
+      return createEmployeeTrainingSummaryInputsFromSourceRows(
+        trainingAnswerSourceRows,
+        readInput,
+      );
     },
 
     async readFormalLearningSummary() {
@@ -511,6 +541,9 @@ function copyTrainingAnswerSourceRow(
   sourceRow: OrganizationAnalyticsTrainingAnswerSourceRow,
 ): OrganizationAnalyticsTrainingAnswerSourceRow[] {
   const employeePublicId = normalizeRequiredText(sourceRow.employeePublicId);
+  const employeeDisplayName = normalizeRequiredText(
+    sourceRow.employeeDisplayName ?? "",
+  );
   const organizationPublicId = normalizeRequiredText(
     sourceRow.organizationPublicId,
   );
@@ -518,12 +551,17 @@ function copyTrainingAnswerSourceRow(
     sourceRow.organizationTrainingVersionPublicId,
   );
   const submittedAt = normalizeSubmittedAt(sourceRow.submittedAt);
+  const answerOrganizationSnapshot = normalizeAnswerOrganizationSnapshot(
+    sourceRow.answerOrganizationSnapshot,
+  );
 
   if (
     employeePublicId === null ||
+    employeeDisplayName === null ||
     organizationPublicId === null ||
     organizationTrainingVersionPublicId === null ||
-    submittedAt === null
+    submittedAt === null ||
+    answerOrganizationSnapshot === null
   ) {
     return [];
   }
@@ -531,13 +569,137 @@ function copyTrainingAnswerSourceRow(
   return [
     {
       employeePublicId,
+      employeeDisplayName,
       organizationPublicId,
       organizationTrainingVersionPublicId,
       score: sourceRow.score,
       totalScore: sourceRow.totalScore,
       submittedAt,
+      answerOrganizationSnapshot,
     },
   ];
+}
+
+type OrganizationAnalyticsEmployeeSummarySourceSubmission =
+  OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput["officialSubmissions"][number] & {
+    employeeDisplayName: string;
+    organizationPublicId: string;
+    organizationName: string;
+  };
+
+function createEmployeeTrainingSummaryInputsFromSourceRows(
+  sourceRows: readonly OrganizationAnalyticsTrainingAnswerSourceRow[],
+  input: OrganizationAnalyticsScopeReadInput,
+): OrganizationAnalyticsEmployeeTrainingSummaryRepositoryInput[] {
+  const sourceSubmissions = sourceRows.flatMap((sourceRow) =>
+    copyTrainingAnswerSourceEmployeeSummarySubmission(sourceRow, input),
+  );
+
+  return normalizePublicIdList(
+    sourceSubmissions.map((submission) => submission.employeePublicId),
+  ).flatMap((employeePublicId) => {
+    const employeeSubmissions = sourceSubmissions.filter(
+      (submission) => submission.employeePublicId === employeePublicId,
+    );
+    const latestSubmission =
+      selectLatestEmployeeSummarySourceSubmission(employeeSubmissions);
+
+    if (latestSubmission === null) {
+      return [];
+    }
+
+    return [
+      {
+        employeePublicId,
+        employeeDisplayName: latestSubmission.employeeDisplayName,
+        organizationPublicId: latestSubmission.organizationPublicId,
+        organizationName: latestSubmission.organizationName,
+        visibleTrainingVersionPublicIds: normalizePublicIdList(
+          employeeSubmissions.map(
+            (submission) => submission.trainingVersionPublicId,
+          ),
+        ),
+        officialSubmissions: employeeSubmissions.map((submission) => ({
+          employeePublicId: submission.employeePublicId,
+          trainingVersionPublicId: submission.trainingVersionPublicId,
+          score: submission.score,
+          totalScore: submission.totalScore,
+          submittedAt: submission.submittedAt,
+          answerOrganizationSnapshot: {
+            organizationPublicId:
+              submission.answerOrganizationSnapshot.organizationPublicId,
+            organizationName:
+              submission.answerOrganizationSnapshot.organizationName,
+            capturedAt: submission.answerOrganizationSnapshot.capturedAt,
+          },
+        })),
+      },
+    ];
+  });
+}
+
+function copyTrainingAnswerSourceEmployeeSummarySubmission(
+  sourceRow: OrganizationAnalyticsTrainingAnswerSourceRow,
+  input: OrganizationAnalyticsScopeReadInput,
+): OrganizationAnalyticsEmployeeSummarySourceSubmission[] {
+  const employeePublicId = normalizeRequiredText(sourceRow.employeePublicId);
+  const employeeDisplayName = normalizeRequiredText(
+    sourceRow.employeeDisplayName ?? "",
+  );
+  const organizationPublicId = normalizeRequiredText(
+    sourceRow.organizationPublicId,
+  );
+  const trainingVersionPublicId = normalizeRequiredText(
+    sourceRow.organizationTrainingVersionPublicId,
+  );
+  const score = normalizeScoreValue(sourceRow.score);
+  const totalScore = normalizeScoreValue(sourceRow.totalScore);
+  const submittedAt = normalizeSubmittedAt(sourceRow.submittedAt);
+  const answerOrganizationSnapshot = normalizeAnswerOrganizationSnapshot(
+    sourceRow.answerOrganizationSnapshot,
+  );
+
+  if (
+    employeePublicId === null ||
+    employeeDisplayName === null ||
+    organizationPublicId === null ||
+    trainingVersionPublicId === null ||
+    score === null ||
+    totalScore === null ||
+    submittedAt === null ||
+    answerOrganizationSnapshot === null ||
+    totalScore <= 0 ||
+    !input.scopeOrganizationPublicIds.includes(organizationPublicId) ||
+    !isSubmittedAtWithinDateRange(submittedAt, input.dateRange)
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      employeePublicId,
+      employeeDisplayName,
+      organizationPublicId,
+      organizationName: answerOrganizationSnapshot.organizationName,
+      trainingVersionPublicId,
+      score,
+      totalScore,
+      submittedAt,
+      answerOrganizationSnapshot,
+    },
+  ];
+}
+
+function selectLatestEmployeeSummarySourceSubmission(
+  submissions: readonly OrganizationAnalyticsEmployeeSummarySourceSubmission[],
+): OrganizationAnalyticsEmployeeSummarySourceSubmission | null {
+  return (
+    [...submissions].sort(
+      (leftSubmission, rightSubmission) =>
+        Date.parse(rightSubmission.submittedAt) -
+        Date.parse(leftSubmission.submittedAt),
+    )[0] ?? null
+  );
 }
 
 function resolveVisibleOrganizationPublicIds(input: {
@@ -680,6 +842,34 @@ function normalizeSubmittedAt(value: Date | string | null): string | null {
   return Number.isFinite(submittedTime)
     ? new Date(submittedTime).toISOString()
     : null;
+}
+
+function normalizeAnswerOrganizationSnapshot(
+  value: OrganizationAnalyticsAnswerOrganizationSnapshot | null | undefined,
+): OrganizationAnalyticsAnswerOrganizationSnapshot | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  const organizationPublicId = normalizeRequiredText(
+    value.organizationPublicId,
+  );
+  const organizationName = normalizeRequiredText(value.organizationName);
+  const capturedAt = normalizeSubmittedAt(value.capturedAt);
+
+  if (
+    organizationPublicId === null ||
+    organizationName === null ||
+    capturedAt === null
+  ) {
+    return null;
+  }
+
+  return {
+    organizationPublicId,
+    organizationName,
+    capturedAt,
+  };
 }
 
 function isSubmittedAtWithinDateRange(
