@@ -228,6 +228,42 @@ describe("personal AI generation request flow service", () => {
     });
   });
 
+  it("fails closed for rejected local personal generation request result metadata", () => {
+    expect(
+      buildPersonalAiGenerationRequestFlowReadModel({
+        ...createBaseInput(),
+        isQuotaAvailable: false,
+        resultPublicId: "caller_supplied_result_public_119",
+        evidenceStatus: "weak",
+        citationCount: 7,
+      }),
+    ).toMatchObject({
+      code: 0,
+      data: {
+        flowStatus: "blocked",
+        taskRequest: {
+          decision: "reject_request",
+          initialStatus: null,
+          blockedFailureCategory: "quota_insufficient",
+          resultReference: {
+            resultPublicId: null,
+            evidenceStatus: "none",
+            citationCount: 0,
+          },
+        },
+        resultReference: {
+          status: "failed",
+          failureCategory: "quota_insufficient",
+          resultReference: {
+            resultPublicId: null,
+            evidenceStatus: "none",
+            citationCount: 0,
+          },
+        },
+      },
+    });
+  });
+
   it("rejects non-personal generation boundaries before provider execution", () => {
     expect(
       buildPersonalAiGenerationRequestFlowReadModel({

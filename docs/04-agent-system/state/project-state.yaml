@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T05:57:36-07:00"
+updatedAt: "2026-06-17T06:23:27-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-196-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence
+  id: batch-197-personal-learning-ai-personal-generation-request-flow
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-196-ai-task-and-provider-local-provider-sandbox-proposal-evidence.md
-  evidencePath: docs/05-execution-logs/evidence/batch-196-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-196-ai-task-and-provider-local-provider-sandbox-proposal-and-evidence.md
-  branch: codex/ai-task-provider-batch-196-provider-sandbox
-  commitSha: 242e09cc0aa6573a980be5bdda214fcc8bc067c2
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-197-personal-learning-ai-personal-generation-request-flow.md
+  evidencePath: docs/05-execution-logs/evidence/batch-197-personal-learning-ai-personal-generation-request-flow.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-197-personal-learning-ai-personal-generation-request-flow.md
+  branch: codex/personal-learning-ai-batch-197-request-flow
+  commitSha: 57ca2a575fc28607e218eb55616fbc4ca54883e5
   prUrl: null
   retryCount: 0
   lastFailurePath: null

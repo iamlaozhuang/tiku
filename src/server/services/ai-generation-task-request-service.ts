@@ -8,11 +8,35 @@ import {
   resolveAiGenerationTaskRequestPolicy,
   resolveAiGenerationTaskResultReferencePublicId,
   resolveAiGenerationTaskResultKind,
+  type AiGenerationTaskRequestPolicy,
   type AiGenerationTaskRequestPolicyInput,
 } from "../models/ai-generation-task-request";
+import type { EvidenceStatus } from "../models/ai-rag";
 import { normalizeAiGenerationTaskRequestPolicyInput } from "../validators/ai-generation-task-request";
 
 const INVALID_AI_GENERATION_TASK_REQUEST_INPUT_CODE = 400012;
+
+function resolveResultEvidenceStatus(
+  input: AiGenerationTaskRequestPolicyInput,
+  policy: AiGenerationTaskRequestPolicy,
+): EvidenceStatus {
+  if (policy.decision === "reuse_existing_task") {
+    return input.evidenceStatus;
+  }
+
+  return "none";
+}
+
+function resolveResultCitationCount(
+  input: AiGenerationTaskRequestPolicyInput,
+  policy: AiGenerationTaskRequestPolicy,
+): number {
+  if (policy.decision === "reuse_existing_task") {
+    return input.citationCount;
+  }
+
+  return 0;
+}
 
 function mapAiGenerationTaskRequestPolicyToDto(
   input: AiGenerationTaskRequestPolicyInput,
@@ -46,8 +70,8 @@ function mapAiGenerationTaskRequestPolicyToDto(
       ),
       contentVisibility: "summary_only",
       redactionStatus: "redacted",
-      evidenceStatus: input.evidenceStatus,
-      citationCount: input.citationCount,
+      evidenceStatus: resolveResultEvidenceStatus(input, policy),
+      citationCount: resolveResultCitationCount(input, policy),
     },
     evidenceReferences: {
       auditLogPublicId: input.auditLogPublicId,
