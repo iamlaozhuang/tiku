@@ -123,6 +123,11 @@ tasks:
     validationCommands:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/task-b.md
+  - id: task-known-blocked
+    status: blocked_validation_failure
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/task-known-blocked.md
 "@ | Set-Content -LiteralPath $queuePath -Encoding UTF8
 
     @"
@@ -211,11 +216,11 @@ Cost Calibration Gate remains blocked
     Assert-Contains -Output $output -Pattern '^seedProposalDecision: not_checked$'
     Assert-Contains -Output $output -Pattern '^blockedGates:'
     Assert-Contains -Output $output -Pattern '^validationNeeded: 2 command\(s\) for task-a$'
-    Assert-Contains -Output $output -Pattern '^statusFindings: .*legacy_status_missing=1; legacy_done=1; .*notBlockingCurrentRun=true$'
-    Assert-Contains -Output $output -Pattern '^evidenceFindings: evidenceMissing=1; notBlockingCurrentRun=true$'
+    Assert-Contains -Output $output -Pattern '^historicalQueueFindings: .*legacy_status_missing=1; legacy_terminal=1; knownBlockedValidation=1; unsupportedStatus=0; notBlockingCurrentRun=true$'
+    Assert-Contains -Output $output -Pattern '^historicalEvidenceFindings: missingHistoricalEvidence=1; notBlockingCurrentRun=true$'
     Assert-Contains -Output $output -Pattern '^driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:1,sourcePlanningTaskMissingInQueue:1; notBlockingCurrentRun=true$'
-    Assert-NotContains -Output $output -Pattern 'legacy_done_first='
-    Assert-NotContains -Output $output -Pattern 'evidenceMissingFirst='
+    Assert-NotContains -Output $output -Pattern 'legacy_terminal_first='
+    Assert-NotContains -Output $output -Pattern 'missingHistoricalEvidenceFirst='
     Assert-NotContains -Output $output -Pattern 'queueMatrixDriftFirst='
     Assert-Contains -Output $output -Pattern '^recommendedAction: claim_or_plan_next_task:task-a$'
     Assert-Contains -Output $output -Pattern '^stopReason: none$'
@@ -235,8 +240,8 @@ Cost Calibration Gate remains blocked
         Pop-Location
     }
 
-    Assert-Contains -Output $verboseOutput -Pattern '^statusFindingsVerbose: .*legacy_status_missing_first=task-missing-status; legacy_done_first=task-legacy-done;'
-    Assert-Contains -Output $verboseOutput -Pattern '^evidenceFindingsVerbose: evidenceMissingFirst=task-legacy-done$'
+    Assert-Contains -Output $verboseOutput -Pattern '^historicalQueueFindingsVerbose: .*legacy_status_missing_first=task-missing-status; legacy_terminal_first=task-legacy-done; knownBlockedValidationFirst=task-known-blocked:blocked_validation_failure; unsupportedStatusFirst=none$'
+    Assert-Contains -Output $verboseOutput -Pattern '^historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=task-legacy-done$'
     Assert-Contains -Output $verboseOutput -Pattern '^driftFindingsVerbose: queueMatrixDriftFirst=batch-1000-really-missing,missing-planning-task-b$'
 
     $plannedPauseProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-planned-pause.yaml"

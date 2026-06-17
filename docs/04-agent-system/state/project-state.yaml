@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: df880547241f0b83b46a6ce6236468584eef2742
   lastKnownOriginMasterSha: df880547241f0b83b46a6ce6236468584eef2742
 currentTask:
-  id: mechanism-queue-matrix-drift-history-coverage
+  id: mechanism-legacy-status-evidence-diagnostics
   status: closed
   sourceStory: user-approved-mechanism-maintenance
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-queue-matrix-drift-history-coverage.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-queue-matrix-drift-history-coverage.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-queue-matrix-drift-history-coverage.md
-  branch: codex/mechanism-queue-matrix-drift-history-coverage
-  commitSha: 0830cd075fb5d9e0ffd2d9ebaa9347ac553c3125
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-legacy-status-evidence-diagnostics.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-legacy-status-evidence-diagnostics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-legacy-status-evidence-diagnostics.md
+  branch: codex/mechanism-legacy-status-evidence-diagnostics
+  commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null

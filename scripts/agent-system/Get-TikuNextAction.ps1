@@ -491,8 +491,10 @@ function Get-QueueDiagnostics {
 
     $allowedStatuses = @("pending", "claimed", "planned", "implemented", "validated", "reviewed", "ready_for_closeout", "closed", "blocked")
     $legacyTerminalStatuses = @("done", "merged", "pushed")
+    $knownBlockedStatuses = @("blocked_validation_failure")
     $missingStatusIds = New-Object System.Collections.ArrayList
     $legacyDoneIds = New-Object System.Collections.ArrayList
+    $knownBlockedStatusIds = New-Object System.Collections.ArrayList
     $unsupportedStatusIds = New-Object System.Collections.ArrayList
     $evidenceMissingIds = New-Object System.Collections.ArrayList
 
@@ -507,6 +509,8 @@ function Get-QueueDiagnostics {
 
         if ($status -in $legacyTerminalStatuses) {
             [void]$legacyDoneIds.Add($block.Id)
+        } elseif ($status -in $knownBlockedStatuses) {
+            [void]$knownBlockedStatusIds.Add("$($block.Id):$status")
         } elseif ($status -notin $allowedStatuses -and $status -ne "in_progress") {
             [void]$unsupportedStatusIds.Add("$($block.Id):$status")
         }
@@ -519,6 +523,7 @@ function Get-QueueDiagnostics {
     return [pscustomobject]@{
         MissingStatusIds = @($missingStatusIds)
         LegacyDoneIds = @($legacyDoneIds)
+        KnownBlockedStatusIds = @($knownBlockedStatusIds)
         UnsupportedStatusIds = @($unsupportedStatusIds)
         EvidenceMissingIds = @($evidenceMissingIds)
     }
@@ -784,12 +789,12 @@ Write-Output "seedRequiredApproval: $seedRequiredApproval"
 Write-Output "recommendedHumanDecision: $recommendedHumanDecision"
 Write-Output "blockedGates: $(Join-OrNone -Values @($blockedGates))"
 Write-Output "validationNeeded: $(if ($validationCommands.Count -eq 0) { 'none' } else { "$($validationCommands.Count) command(s) for $nextTaskId" })"
-Write-Output "statusFindings: legacy_status_missing=$($queueDiagnostics.MissingStatusIds.Count); legacy_done=$($queueDiagnostics.LegacyDoneIds.Count); unsupportedStatus=$($queueDiagnostics.UnsupportedStatusIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
-Write-Output "evidenceFindings: evidenceMissing=$($queueDiagnostics.EvidenceMissingIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
+Write-Output "historicalQueueFindings: legacy_status_missing=$($queueDiagnostics.MissingStatusIds.Count); legacy_terminal=$($queueDiagnostics.LegacyDoneIds.Count); knownBlockedValidation=$($queueDiagnostics.KnownBlockedStatusIds.Count); unsupportedStatus=$($queueDiagnostics.UnsupportedStatusIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
+Write-Output "historicalEvidenceFindings: missingHistoricalEvidence=$($queueDiagnostics.EvidenceMissingIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
 Write-Output "driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:$($matrixDiagnostics.MissingBatches.Count),sourcePlanningTaskMissingInQueue:$($matrixDiagnostics.MissingPlanningTasks.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
 if ($VerboseHistory) {
-    Write-Output "statusFindingsVerbose: legacy_status_missing_first=$(Join-FirstItems -Values $queueDiagnostics.MissingStatusIds); legacy_done_first=$(Join-FirstItems -Values $queueDiagnostics.LegacyDoneIds); unsupportedStatusFirst=$(Join-FirstItems -Values $queueDiagnostics.UnsupportedStatusIds)"
-    Write-Output "evidenceFindingsVerbose: evidenceMissingFirst=$(Join-FirstItems -Values $queueDiagnostics.EvidenceMissingIds)"
+    Write-Output "historicalQueueFindingsVerbose: legacy_status_missing_first=$(Join-FirstItems -Values $queueDiagnostics.MissingStatusIds); legacy_terminal_first=$(Join-FirstItems -Values $queueDiagnostics.LegacyDoneIds); knownBlockedValidationFirst=$(Join-FirstItems -Values $queueDiagnostics.KnownBlockedStatusIds); unsupportedStatusFirst=$(Join-FirstItems -Values $queueDiagnostics.UnsupportedStatusIds)"
+    Write-Output "historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=$(Join-FirstItems -Values $queueDiagnostics.EvidenceMissingIds)"
     Write-Output "driftFindingsVerbose: queueMatrixDriftFirst=$(Join-FirstItems -Values @($matrixDiagnostics.MissingBatches + $matrixDiagnostics.MissingPlanningTasks))"
 }
 Write-Output "recommendedAction: $recommendedAction"
