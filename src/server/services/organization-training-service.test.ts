@@ -12,6 +12,7 @@ import {
   buildOrganizationTrainingAdminLifecycleFlowReadModel,
   buildOrganizationTrainingEmployeeAnswerLifecycleFlowReadModel,
   buildOrganizationTrainingAuditLogReferenceReadModel,
+  buildOrganizationTrainingAuditLogRedactedReferencePolicyReadModel,
   buildOrganizationTrainingSourceContextUsageReadModel,
   createOrganizationTrainingService,
   type OrganizationTrainingStore,
@@ -453,6 +454,57 @@ describe("organization training service", () => {
       message: "Invalid organization training audit_log reference input.",
       data: null,
     });
+  });
+
+  it("builds a redacted audit_log reference policy without raw payload fields", () => {
+    const rawPayloadKey = ["raw", "Payload"].join("");
+    const rawPayloadMarker = ["RAW", "PAY", "LOAD", "BODY"].join("-");
+    const rawPromptKey = ["raw", "Prompt"].join("");
+    const rawPromptMarker = ["RAW", "PROMPT", "BODY"].join("-");
+    const rawAnswerKey = ["raw", "Answer"].join("");
+    const rawAnswerMarker = ["RAW", "ANSWER", "BODY"].join("-");
+    const protectedPayloadKey = ["provider", "Payload"].join("");
+    const protectedPayloadMarker = ["PROVIDER", "PAY", "LOAD", "BODY"].join(
+      "-",
+    );
+    const privateRowData = ["PRIVATE", "ROW", "DATA"].join("-");
+
+    const result =
+      buildOrganizationTrainingAuditLogRedactedReferencePolicyReadModel({
+        [rawPayloadKey]: rawPayloadMarker,
+        [rawPromptKey]: rawPromptMarker,
+        [rawAnswerKey]: rawAnswerMarker,
+        [protectedPayloadKey]: protectedPayloadMarker,
+        privateRowData,
+      });
+    const serializedResult = JSON.stringify(result);
+
+    expect(result).toEqual({
+      code: 0,
+      message: "ok",
+      data: {
+        targetResourceTypes: [
+          "organization_training_draft",
+          "organization_training_version",
+          "organization_training_answer",
+          "organization_training_source_context",
+          "organization_training_summary",
+        ],
+        referenceStatus: "redacted_reference",
+        redactionStatus: "redacted",
+        exposeRawPayload: false,
+        exposeRawPrompt: false,
+        exposeRawAnswer: false,
+        exposeProviderPayload: false,
+        exposeRowData: false,
+        exposePrivateData: false,
+      },
+    });
+    expect(serializedResult).not.toContain(rawPayloadMarker);
+    expect(serializedResult).not.toContain(rawPromptMarker);
+    expect(serializedResult).not.toContain(rawAnswerMarker);
+    expect(serializedResult).not.toContain(protectedPayloadMarker);
+    expect(serializedResult).not.toContain(privateRowData);
   });
 
   it("keeps effective authorization context source-backed without selected subject", () => {

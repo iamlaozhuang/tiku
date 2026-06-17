@@ -9,6 +9,7 @@ import type {
   EmployeeOrganizationTrainingScoreSummaryDto,
   OrganizationTrainingAdminLifecycleFlowDto,
   OrganizationTrainingAdminLifecycleItemDto,
+  OrganizationTrainingAuditLogRedactedReferencePolicyDto,
   OrganizationTrainingEmployeeAnswerLifecycleFlowDto,
   OrganizationTrainingEmployeeAnswerLifecycleItemDto,
   OrganizationTrainingAuditLogReferenceDto,
@@ -21,6 +22,7 @@ import type {
 } from "../contracts/organization-training-contract";
 import { professionValues, type Profession } from "../models/auth";
 import {
+  organizationTrainingAuditLogTargetResourceTypeValues,
   type OrganizationTrainingAuditLogReferenceInput,
   type OrganizationTrainingCopyToNewDraftInput,
   organizationTrainingQuestionTypeValues,
@@ -96,6 +98,26 @@ export function buildOrganizationTrainingAuditLogReferenceReadModel(
   return createSuccessResponse(
     mapOrganizationTrainingAuditLogReferenceToDto(auditLogReferenceInput.value),
   );
+}
+
+export function buildOrganizationTrainingAuditLogRedactedReferencePolicyReadModel(
+  input?: unknown,
+): ApiResponse<OrganizationTrainingAuditLogRedactedReferencePolicyDto> {
+  void input;
+
+  return createSuccessResponse({
+    targetResourceTypes: [
+      ...organizationTrainingAuditLogTargetResourceTypeValues,
+    ],
+    referenceStatus: "redacted_reference",
+    redactionStatus: "redacted",
+    exposeRawPayload: false,
+    exposeRawPrompt: false,
+    exposeRawAnswer: false,
+    exposeProviderPayload: false,
+    exposeRowData: false,
+    exposePrivateData: false,
+  });
 }
 
 export type OrganizationTrainingManualDraftCreationBlockedReason =

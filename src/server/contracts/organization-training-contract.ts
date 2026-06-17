@@ -168,6 +168,18 @@ export type OrganizationTrainingAuditLogReferenceDto = {
   referenceStatus: "redacted_reference";
 };
 
+export type OrganizationTrainingAuditLogRedactedReferencePolicyDto = {
+  targetResourceTypes: OrganizationTrainingAuditLogTargetResourceType[];
+  referenceStatus: "redacted_reference";
+  redactionStatus: "redacted";
+  exposeRawPayload: false;
+  exposeRawPrompt: false;
+  exposeRawAnswer: false;
+  exposeProviderPayload: false;
+  exposeRowData: false;
+  exposePrivateData: false;
+};
+
 export type OrganizationTrainingSourceContextAttachmentDto = {
   draftPublicId: string;
   organizationPublicId: string;

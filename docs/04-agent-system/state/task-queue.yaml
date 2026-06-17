@@ -8300,5 +8300,5 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-204-organization-training-audit-log-redacted-reference
     evidencePath: docs/05-execution-logs/evidence/batch-204-organization-training-audit-log-redacted-reference.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-204-organization-training-audit-log-redacted-reference.md
-    status: pending
+    status: in_progress
     retryCount: 0

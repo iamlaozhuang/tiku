@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T07:27:28-07:00"
+updatedAt: "2026-06-17T07:29:02-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex
-  status: closed
+  id: batch-204-organization-training-audit-log-redacted-reference
+  status: in_progress
   sourceStory: module-run-v2-auto-seed-bridge
   planPath: pending-task-plan
-  evidencePath: docs/05-execution-logs/evidence/batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-203-organization-training-paper-and-mock-exam-context-usage-without-ex.md
-  branch: codex/batch-203-organization-training-context-usage
-  commitSha: d506c79b1e6a2fc9417670a28c2145921c505792
+  evidencePath: docs/05-execution-logs/evidence/batch-204-organization-training-audit-log-redacted-reference.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-204-organization-training-audit-log-redacted-reference.md
+  branch: codex/batch-204-organization-training-audit-log
+  commitSha: pending-local-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
