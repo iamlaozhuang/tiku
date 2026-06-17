@@ -32529,3 +32529,232 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck
+  - id: advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+    title: Advanced organization analytics next implementation queue seeding post employee runtime recheck
+    phase: advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_seeded_dashboard_formal_quota_summary_tdd
+    retryCount: 0
+    claimedAt: "2026-06-17T02:16:19-07:00"
+    closedAt: "2026-06-17T02:16:19-07:00"
+    branch: codex/organization-analytics-next-queue-seeding
+    dependencies:
+      - advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck
+    humanApproval: >-
+      User approved executing the next advanced organization analytics docs/state queue seeding task in the current
+      2026-06-17 Codex thread, including task plan/evidence/audit creation, durable state updates, local validation,
+      local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch prune.
+      Product source/test changes, schema/drizzle, dependency/package/lockfile changes, provider/model calls, real
+      database access, row/private data exposure, App Router/UI/e2e/browser/dev-server, staging/prod/cloud/deploy/
+      payment/external-service, PR, force push, and Cost Calibration Gate remain blocked.
+    sourceRequirement:
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck.md
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-analytics-route.test.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - tests/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - product source or test changes
+      - App Router entrypoint changes
+      - route/runtime/service/repository code changes
+      - mapper/contract/validator changes
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - employee answer detail, question text, standard answer, analysis, item-level correctness, mistake detail, prompt text, provider payload, or raw model output exposure
+      - sensitive configuration or credential file access, output, summary, or edit
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    capabilities:
+      docsStateOnlyQueueSeeding: approved_by_fresh_user_prompt_2026-06-17
+      localUnitTest: approved_by_fresh_user_prompt_2026-06-17
+      localDockerDatabase: blocked_no_db_execution
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: approved_after_validation_by_fresh_user_prompt_2026-06-17
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - 'Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck","status: closed","advanced-organization-analytics-dashboard-formal-quota-summary-tdd","status: pending"'
+      - 'powershell.exe -NoProfile -Command "if ((Select-String -Path ''docs/04-agent-system/state/task-queue.yaml'' -Pattern ''^    status: pending$'' | Measure-Object).Count -ne 1) { throw ''Expected exactly one pending task'' }"'
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+  - id: advanced-organization-analytics-dashboard-formal-quota-summary-tdd
+    title: Advanced organization analytics dashboard formal quota summary TDD
+    phase: advanced-organization-analytics-dashboard-formal-quota-summary-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_service_contract_implementation
+    moduleRunVersion: 2
+    seededByTask: advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+    seededImplementationTask: true
+    status: pending
+    result: null
+    retryCount: 0
+    claimedAt: null
+    closedAt: null
+    dependencies:
+      - advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+      - advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation limited to extending
+      organization analytics dashboard summary contract and service composition with formal learning summary and quota
+      summary values from existing repository methods. The task may update focused service/route unit tests and
+      contract/service code only as needed to preserve route DTO redaction. It must not add App Router entrypoints, UI,
+      repository source readers, schema/drizzle, real database execution, provider/model calls, dependency changes,
+      export generation, e2e/browser/dev-server, or Cost Calibration Gate work.
+    sourceRequirement:
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/services/organization-analytics-service.test.ts
+      - src/server/services/organization-analytics-route.test.ts
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-post-employee-runtime-alignment-readonly-recheck.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/repositories/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - tests/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - App Router entrypoint changes
+      - UI/page/component changes
+      - repository/source-reader changes
+      - mapper/validator changes
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - employee answer detail, question text, standard answer, analysis, item-level correctness, mistake detail, prompt text, provider payload, or raw model output exposure
+      - sensitive configuration or credential file access, output, summary, or edit
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - export file generation, download route, object storage, or external delivery
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    capabilities:
+      localUnitTest: approved_after_fresh_user_approval_before_claim
+      localDockerDatabase: blocked_no_db_execution
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
+    closeoutPolicy:
+      localCommit: requires_fresh_approval_after_validation
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: false
+        fetchPruneAfterPush: false
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-service.test.ts"
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-formal-quota-summary-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-formal-quota-summary-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-formal-quota-summary-tdd
