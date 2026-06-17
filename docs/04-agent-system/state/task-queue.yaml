@@ -9194,6 +9194,8 @@ tasks:
       - phase: pre_edit
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-ops-governance-and-retention.md
       - phase: post_edit
+        command: npm.cmd run test:unit -- src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts
+      - phase: post_edit
         command: npm.cmd run lint
       - phase: post_edit
         command: npm.cmd run typecheck
@@ -9205,13 +9207,19 @@ tasks:
         command: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
     validationCommands:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ImplementationAutoSeedReadiness.ps1 -TaskId phase-75-advanced-retention-log-governance-implementation-planning -CandidateTaskId batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda -EvidencePath docs\05-execution-logs\evidence\2026-06-17-module-run-v2-auto-seed-ops-governance-and-retention.md
+      - npm.cmd run test:unit -- src/server/services/ops-governance-log-retention-redaction-contracts-service.test.ts
       - npm.cmd run lint
       - npm.cmd run typecheck
       - git diff --check
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
     evidencePath: docs/05-execution-logs/evidence/batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
-    status: pending
+    planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-210-ops-governance-log-retention-redaction-contracts.md
+    status: closed
+    claimedAt: "2026-06-17T11:01:34-07:00"
+    closedAt: "2026-06-17T11:05:25-07:00"
+    result: pass
+    branch: codex/ops-governance-batch-210-retention-redaction
     retryCount: 0
   - id: batch-211-ops-governance-and-retention-local-recovery-and-expired-hidden-boundary-c
     title: Module Run v2 ops-governance-and-retention implementation seed

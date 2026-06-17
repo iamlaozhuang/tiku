@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
   lastKnownOriginMasterSha: c6f0e9fe8df51a1722c0f7cedb9312c14762bfb0
 currentTask:
-  id: batch-209-ops-governance-and-retention-redeem-code-redacted-reference
+  id: batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-209-ops-governance-redeem-code-redacted-reference.md
-  evidencePath: docs/05-execution-logs/evidence/batch-209-ops-governance-and-retention-redeem-code-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-209-ops-governance-and-retention-redeem-code-redacted-reference.md
-  branch: codex/ops-governance-batch-209-redeem-reference
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-210-ops-governance-log-retention-redaction-contracts.md
+  evidencePath: docs/05-execution-logs/evidence/batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-210-ops-governance-and-retention-audit-log-and-ai-call-log-retention-and-reda.md
+  branch: codex/ops-governance-batch-210-retention-redaction
   commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
