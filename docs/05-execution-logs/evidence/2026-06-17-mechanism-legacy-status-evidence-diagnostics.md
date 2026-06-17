@@ -21,6 +21,7 @@ result: pass
   - `scripts/agent-system/Get-TikuNextAction.Smoke.ps1`
 - RED: PASS. After the smoke fixture expected `historicalQueueFindings` / `historicalEvidenceFindings` and added a known `blocked_validation_failure` status, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1` failed because current output still used `statusFindings`, `evidenceFindings`, and reported `unsupportedStatus=1`.
 - GREEN: PASS. After script repair, `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1` passed.
+- Closeout implementation commit: `5abdd7c9c0a879bcc263c27198732ca104dcf653`.
 - validation commands and results:
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.Smoke.ps1`: passed.
   - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Get-TikuNextAction.ps1 -VerboseHistory`: passed; local diagnostic reported `historicalQueueFindings: legacy_status_missing=0; legacy_terminal=5; knownBlockedValidation=1; unsupportedStatus=0` and `historicalEvidenceFindings: missingHistoricalEvidence=6`.

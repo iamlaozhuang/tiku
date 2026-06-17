@@ -443,7 +443,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-legacy-status-evidence-diagnostics.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-legacy-status-evidence-diagnostics.md
   branch: codex/mechanism-legacy-status-evidence-diagnostics
-  commitSha: pending-closeout-commit
+  commitSha: 5abdd7c9c0a879bcc263c27198732ca104dcf653
   prUrl: null
   retryCount: 0
   lastFailurePath: null
