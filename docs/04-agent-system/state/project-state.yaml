@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck
-updatedAt: "2026-06-16T23:42:31-07:00"
+currentPhase: advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd-seeding
+updatedAt: "2026-06-16T23:49:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
   lastKnownOriginMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
 currentTask:
-  id: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck
+  id: advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
-  branch: codex/organization-analytics-employee-route-readonly-recheck
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd-seeding.md
+  branch: codex/organization-analytics-employee-runtime-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -666,6 +666,7 @@ qualityGates:
     advancedOrganizationAnalyticsEmployeeStatisticsRouteContractTdd: pass_tdd_employee_statistics_route_contract_no_runtime_wiring
     advancedOrganizationAnalyticsEmployeeStatisticsRouteContractReadonlyRecheckSeeding: pass_docs_state_seeded_employee_statistics_route_contract_readonly_recheck
     advancedOrganizationAnalyticsEmployeeStatisticsRouteContractReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
+    advancedOrganizationAnalyticsEmployeeStatisticsPostgresRuntimeWiringTddSeeding: pass_docs_state_seeded_employee_statistics_postgres_runtime_wiring_tdd
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -681,7 +682,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck` closed with no blocking
-    findings. The queue has no claimed implementation task; recommend a fresh-baseline docs/state-only seeding task to
-    choose the next organization analytics implementation or readonly slice before product work resumes.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
+    `advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd` is the next pending organization
+    analytics task. It should be claimed only with fresh approval, on a short-lived branch, using TDD, and without real
+    database execution or sensitive evidence.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-postgres-runtime-wiring-tdd-seeding.md
