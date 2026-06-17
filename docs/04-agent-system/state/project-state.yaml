@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding
-updatedAt: "2026-06-16T16:53:28-07:00"
+currentPhase: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
+updatedAt: "2026-06-16T17:04:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c465db3d69c6828484ca94489bfe8df615390597
-  lastKnownOriginMasterSha: c465db3d69c6828484ca94489bfe8df615390597
+  lastKnownMasterSha: a137d2a27736fce8a289dc79b030bc66d50337b1
+  lastKnownOriginMasterSha: a137d2a27736fce8a289dc79b030bc66d50337b1
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding
+  id: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
-  branch: codex/advanced-organization-analytics-route-runtime-wiring-tdd-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
+  branch: codex/advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
