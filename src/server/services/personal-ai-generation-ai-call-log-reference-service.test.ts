@@ -109,6 +109,31 @@ describe("personal AI generation ai_call_log reference service", () => {
     });
   });
 
+  it("fails closed for failed ai_call_log result metadata", () => {
+    expect(
+      buildPersonalAiGenerationAiCallLogReferenceReadModel({
+        ...createBaseInput(),
+        status: "failed",
+        failureCategory: "production_enablement_blocked",
+        resultPublicId: "caller_supplied_generated_result_public_122",
+        evidenceStatus: "sufficient",
+        citationCount: 9,
+      }),
+    ).toMatchObject({
+      code: 0,
+      data: {
+        status: "failed",
+        failureCategory: "production_enablement_blocked",
+        resultReference: {
+          resultPublicId: null,
+          evidenceStatus: "none",
+          citationCount: 0,
+          rawGeneratedContentStatus: "not_stored",
+        },
+      },
+    });
+  });
+
   it("rejects non-personal ai_generation_task types", () => {
     expect(
       buildPersonalAiGenerationAiCallLogReferenceReadModel({

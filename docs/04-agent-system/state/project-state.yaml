@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T06:39:20-07:00"
+updatedAt: "2026-06-17T06:46:16-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-199-personal-learning-ai-local-ui-browser-experience-for-request-and
+  id: batch-200-personal-learning-ai-redacted-ai-call-log-reference-without-stori
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-199-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  evidencePath: docs/05-execution-logs/evidence/batch-199-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-199-personal-learning-ai-local-ui-browser-experience-for-request-and.md
-  branch: codex/personal-learning-ai-batch-199-browser-contract
-  commitSha: 9b520dabe6c5a3e304df3e0fba2193e0357a8fbe
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-200-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  evidencePath: docs/05-execution-logs/evidence/batch-200-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-200-personal-learning-ai-redacted-ai-call-log-reference-without-stori.md
+  branch: codex/personal-learning-ai-batch-200-ai-call-log-reference
+  commitSha: b6c6d7c1db32744c743220b6ab36c6b26f41fc14
   prUrl: null
   retryCount: 0
   lastFailurePath: null

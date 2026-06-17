@@ -4,6 +4,7 @@ import {
   type ApiResponse,
 } from "../contracts/api-response";
 import type { PersonalAiGenerationAiCallLogReferenceDto } from "../contracts/personal-ai-generation-ai-call-log-reference-contract";
+import type { EvidenceStatus } from "../models/ai-rag";
 import {
   resolvePersonalAiGenerationAiCallLogRawContentStatus,
   type PersonalAiGenerationAiCallLogReferenceInput,
@@ -11,6 +12,24 @@ import {
 import { normalizePersonalAiGenerationAiCallLogReferenceInput } from "../validators/personal-ai-generation-ai-call-log-reference";
 
 const INVALID_PERSONAL_AI_GENERATION_AI_CALL_LOG_REFERENCE_INPUT_CODE = 400043;
+
+function resolveResultPublicId(
+  input: PersonalAiGenerationAiCallLogReferenceInput,
+): string | null {
+  return input.status === "succeeded" ? input.resultPublicId : null;
+}
+
+function resolveResultEvidenceStatus(
+  input: PersonalAiGenerationAiCallLogReferenceInput,
+): EvidenceStatus {
+  return input.status === "succeeded" ? input.evidenceStatus : "none";
+}
+
+function resolveResultCitationCount(
+  input: PersonalAiGenerationAiCallLogReferenceInput,
+): number {
+  return input.status === "succeeded" ? input.citationCount : 0;
+}
 
 function mapPersonalAiGenerationAiCallLogReferenceToDto(
   input: PersonalAiGenerationAiCallLogReferenceInput,
@@ -34,11 +53,11 @@ function mapPersonalAiGenerationAiCallLogReferenceToDto(
       providerPayloadStatus: rawContentStatus,
     },
     resultReference: {
-      resultPublicId: input.resultPublicId,
+      resultPublicId: resolveResultPublicId(input),
       contentVisibility: "summary_only",
       redactionStatus: "redacted",
-      evidenceStatus: input.evidenceStatus,
-      citationCount: input.citationCount,
+      evidenceStatus: resolveResultEvidenceStatus(input),
+      citationCount: resolveResultCitationCount(input),
       rawGeneratedContentStatus: rawContentStatus,
     },
   };
