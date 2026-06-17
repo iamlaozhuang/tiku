@@ -66,7 +66,7 @@ describe("ai_generation_task provider sandbox proposal service", () => {
             "local_validation_result",
             "failure_category",
             "duration_ms",
-            "redacted_log_public_ids",
+            "redacted_log_reference_status",
           ],
           forbiddenEvidence: [
             "api_key",
@@ -116,6 +116,27 @@ describe("ai_generation_task provider sandbox proposal service", () => {
         costCalibrationGateStatus: "blocked",
       },
     });
+  });
+
+  it("does not allow public identifier lists in sandbox evidence metadata", () => {
+    const result = buildAiGenerationTaskProviderSandboxProposalReadModel(
+      createSandboxProposalInput(),
+    );
+
+    expect(result).toMatchObject({
+      code: 0,
+      data: {
+        evidenceRules: {
+          allowedMetadata: [
+            "local_validation_result",
+            "failure_category",
+            "duration_ms",
+            "redacted_log_reference_status",
+          ],
+        },
+      },
+    });
+    expect(JSON.stringify(result)).not.toContain("redacted_log_public_ids");
   });
 
   it("blocks high-risk proposals before local provider execution", () => {

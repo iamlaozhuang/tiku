@@ -49,7 +49,7 @@ export const aiGenerationTaskProviderSandboxAllowedMetadataValues = [
   "local_validation_result",
   "failure_category",
   "duration_ms",
-  "redacted_log_public_ids",
+  "redacted_log_reference_status",
 ] as const;
 
 export type AiGenerationTaskProviderSandboxAllowedMetadata =
