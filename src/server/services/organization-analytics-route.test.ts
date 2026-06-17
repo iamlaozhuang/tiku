@@ -5,8 +5,12 @@ import type {
   OrganizationAnalyticsDashboardSummaryDto,
   OrganizationAnalyticsDateRangeDto,
 } from "../contracts/organization-analytics-contract";
+import type { OrganizationAnalyticsAdminContext } from "./organization-analytics-service";
 import { GET as dashboardSummaryGET } from "../../app/api/v1/organization-analytics/dashboard-summary/route";
-import { createOrganizationAnalyticsDashboardSummaryRouteHandlers } from "./organization-analytics-route";
+import {
+  createOrganizationAnalyticsDashboardSummaryRouteHandlers,
+  type OrganizationAnalyticsDashboardSummaryRouteAdminContext,
+} from "./organization-analytics-route";
 
 function createDashboardSummaryRequest(query = ""): Request {
   return new Request(
@@ -47,19 +51,47 @@ function createDashboardSummary(
   };
 }
 
+function createAdminContext(
+  overrides: Partial<OrganizationAnalyticsAdminContext> = {},
+): OrganizationAnalyticsDashboardSummaryRouteAdminContext {
+  return {
+    adminPublicId: "organization_analytics_admin_public_001",
+    effectiveEdition: "advanced",
+    authorizationSource: "org_auth",
+    canViewOrganizationTrainingSummary: true,
+    organizationPublicId: "organization_analytics_route_org_public_001",
+    ...overrides,
+  };
+}
+
 describe("organization analytics dashboard summary route handlers", () => {
-  it("parses dashboard summary query and returns mapped aggregate-only response", async () => {
+  it("resolves admin context before returning mapped aggregate-only response", async () => {
     const observedQueries: Array<{
       organizationPublicId: string;
       dateRange: OrganizationAnalyticsDateRangeDto;
     }> = [];
+    const observedAdminContextInputs: Array<{
+      organizationPublicId: string;
+      dateRange: OrganizationAnalyticsDateRangeDto;
+    }> = [];
+    const adminContext = createAdminContext();
     const { dashboardSummary } =
       createOrganizationAnalyticsDashboardSummaryRouteHandlers({
-        async readDashboardSummary(query) {
-          observedQueries.push(query);
+        async resolveAdminContext({ routeQuery }) {
+          observedAdminContextInputs.push(routeQuery);
+
+          return adminContext;
+        },
+        async readDashboardSummary(input) {
+          observedQueries.push({
+            organizationPublicId: input.organizationPublicId,
+            dateRange: input.dateRange,
+          });
+
+          expect(input.adminContext).toEqual(adminContext);
 
           return createSuccessResponse(
-            createDashboardSummary(query.dateRange),
+            createDashboardSummary(input.dateRange),
             "dashboard summary ready",
           );
         },
@@ -81,6 +113,7 @@ describe("organization analytics dashboard summary route handlers", () => {
         },
       },
     ]);
+    expect(observedAdminContextInputs).toEqual(observedQueries);
     expect(payload).toEqual({
       code: 0,
       message: "dashboard summary ready",
@@ -114,12 +147,18 @@ describe("organization analytics dashboard summary route handlers", () => {
 
   it("returns invalid input envelope before calling dashboard reader", async () => {
     const observedQueries: unknown[] = [];
+    const observedAdminContextInputs: unknown[] = [];
     const { dashboardSummary } =
       createOrganizationAnalyticsDashboardSummaryRouteHandlers({
-        async readDashboardSummary(query) {
-          observedQueries.push(query);
+        async resolveAdminContext(input) {
+          observedAdminContextInputs.push(input);
 
-          return createSuccessResponse(createDashboardSummary(query.dateRange));
+          return createAdminContext();
+        },
+        async readDashboardSummary(input) {
+          observedQueries.push(input);
+
+          return createSuccessResponse(createDashboardSummary(input.dateRange));
         },
       });
 
@@ -132,6 +171,36 @@ describe("organization analytics dashboard summary route handlers", () => {
     await expect(response.json()).resolves.toEqual({
       code: 400185,
       message: "Invalid organization analytics route input.",
+      data: null,
+    });
+    expect(observedAdminContextInputs).toEqual([]);
+    expect(observedQueries).toEqual([]);
+  });
+
+  it("returns admin context unavailable before calling dashboard reader", async () => {
+    const observedQueries: unknown[] = [];
+    const { dashboardSummary } =
+      createOrganizationAnalyticsDashboardSummaryRouteHandlers({
+        async resolveAdminContext() {
+          return null;
+        },
+        async readDashboardSummary(input) {
+          observedQueries.push(input);
+
+          return createSuccessResponse(createDashboardSummary(input.dateRange));
+        },
+      });
+
+    const response = await dashboardSummary.GET(
+      createDashboardSummaryRequest(
+        "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
+      ),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      code: 403186,
+      message:
+        "Organization analytics dashboard summary admin context is unavailable.",
       data: null,
     });
     expect(observedQueries).toEqual([]);
