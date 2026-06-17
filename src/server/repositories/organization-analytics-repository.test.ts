@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  createOrganizationAnalyticsPostgresGateway,
   createOrganizationAnalyticsTrainingAnswerSourceGateway,
   createOrganizationAnalyticsRepository,
   createPostgresOrganizationAnalyticsRepository,
@@ -370,6 +371,76 @@ describe("organization analytics repository", () => {
     expect(JSON.stringify(trainingAggregateMetricsInput)).not.toMatch(
       /hidden|detailField|hiddenField|internalRowNumber/u,
     );
+  });
+
+  it("composes visible organization scope and answer source readers for the Postgres repository factory", async () => {
+    const findVisibleOrganizationScopeByAdminPublicId = vi.fn(async () => [
+      " organization_root_public ",
+      "organization_child_public",
+      "organization_child_public",
+      " ",
+    ]);
+    const readTrainingAnswerSourceRows = vi.fn(async () => [
+      {
+        employeePublicId: "employee_public_001",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_001",
+        score: 86,
+        totalScore: 100,
+        submittedAt: "2026-06-16T02:00:00.000Z",
+      },
+    ]);
+    const gateway = createOrganizationAnalyticsPostgresGateway({
+      findVisibleOrganizationScopeByAdminPublicId,
+      readTrainingAnswerSourceRows,
+    });
+    const repository = createPostgresOrganizationAnalyticsRepository({
+      gateway,
+    });
+
+    const visibleOrganizationScope =
+      await repository.lookupVisibleOrganizationScope({
+        adminPublicId: " organization_admin_public_001 ",
+      });
+    const trainingAggregateMetricsInput =
+      await repository.readTrainingAggregateMetricsInput({
+        organizationPublicId: " organization_root_public ",
+        scopeOrganizationPublicIds: visibleOrganizationScope ?? [],
+        dateRange: {
+          startAt: "2026-06-16T00:00:00.000Z",
+          endAt: "2026-06-16T23:59:59.000Z",
+        },
+      });
+
+    expect(findVisibleOrganizationScopeByAdminPublicId).toHaveBeenCalledWith({
+      adminPublicId: "organization_admin_public_001",
+    });
+    expect(visibleOrganizationScope).toEqual([
+      "organization_root_public",
+      "organization_child_public",
+    ]);
+    expect(readTrainingAnswerSourceRows).toHaveBeenCalledWith({
+      organizationPublicId: "organization_root_public",
+      scopeOrganizationPublicIds: [
+        "organization_root_public",
+        "organization_child_public",
+      ],
+      dateRange: {
+        startAt: "2026-06-16T00:00:00.000Z",
+        endAt: "2026-06-16T23:59:59.000Z",
+      },
+    });
+    expect(trainingAggregateMetricsInput).toEqual({
+      eligibleEmployeePublicIds: ["employee_public_001"],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_001",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-16T02:00:00.000Z",
+        },
+      ],
+    });
   });
 
   it("maps organization training answer source rows into aggregate metrics input", async () => {

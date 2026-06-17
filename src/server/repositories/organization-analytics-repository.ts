@@ -118,9 +118,18 @@ export type OrganizationAnalyticsTrainingAnswerSourceReader = (
   input: OrganizationAnalyticsScopeReadInput,
 ) => Promise<readonly OrganizationAnalyticsTrainingAnswerSourceRow[]>;
 
+export type OrganizationAnalyticsVisibleOrganizationScopeReader = (
+  input: OrganizationAnalyticsVisibleOrganizationScopeLookupInput,
+) => Promise<readonly string[] | null>;
+
 export type OrganizationAnalyticsTrainingAnswerSourceGatewayOptions = {
   readTrainingAnswerSourceRows: OrganizationAnalyticsTrainingAnswerSourceReader;
 };
+
+export type OrganizationAnalyticsPostgresGatewayOptions =
+  OrganizationAnalyticsTrainingAnswerSourceGatewayOptions & {
+    findVisibleOrganizationScopeByAdminPublicId: OrganizationAnalyticsVisibleOrganizationScopeReader;
+  };
 
 export function createOrganizationAnalyticsRepository(
   gateway: OrganizationAnalyticsRepositoryGateway,
@@ -241,6 +250,36 @@ export function createPostgresOrganizationAnalyticsRepository(
   return options.gateway === undefined || options.gateway === null
     ? createUnavailableOrganizationAnalyticsRepository()
     : createOrganizationAnalyticsRepository(options.gateway);
+}
+
+export function createOrganizationAnalyticsPostgresGateway(
+  options: OrganizationAnalyticsPostgresGatewayOptions,
+): OrganizationAnalyticsRepositoryGateway {
+  const trainingAnswerSourceGateway =
+    createOrganizationAnalyticsTrainingAnswerSourceGateway({
+      readTrainingAnswerSourceRows: options.readTrainingAnswerSourceRows,
+    });
+
+  return {
+    ...trainingAnswerSourceGateway,
+
+    async findVisibleOrganizationScopeByAdminPublicId(adminPublicId) {
+      const normalizedAdminPublicId = normalizeRequiredText(adminPublicId);
+
+      if (normalizedAdminPublicId === null) {
+        return null;
+      }
+
+      const scopeOrganizationPublicIds =
+        await options.findVisibleOrganizationScopeByAdminPublicId({
+          adminPublicId: normalizedAdminPublicId,
+        });
+
+      return scopeOrganizationPublicIds === null
+        ? null
+        : normalizePublicIdList(scopeOrganizationPublicIds);
+    },
+  };
 }
 
 export function createOrganizationAnalyticsTrainingAnswerSourceGateway(

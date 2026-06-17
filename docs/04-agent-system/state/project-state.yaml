@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-post-query-gateway-composition-task-seeding
-updatedAt: "2026-06-16T20:57:00-07:00"
+currentPhase: advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+updatedAt: "2026-06-16T21:16:45-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 89f751c7fd44015b1f0402d31529d9e54845ace0
   lastKnownOriginMasterSha: 89f751c7fd44015b1f0402d31529d9e54845ace0
 currentTask:
-  id: advanced-organization-analytics-post-query-gateway-composition-task-seeding
+  id: advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
-  branch: codex/advanced-organization-analytics-post-query-queue-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+  branch: codex/advanced-organization-analytics-visible-scope-composition
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -655,6 +655,7 @@ qualityGates:
     advancedOrganizationAnalyticsGatewayQueryTaskSeeding: pass_docs_state_seeded_gateway_query_tdd
     advancedOrganizationAnalyticsPostgresGatewayTrainingAnswerSourceQueryTdd: pass_local_validation_fresh_closeout_approved
     advancedOrganizationAnalyticsPostQueryGatewayCompositionTaskSeeding: pass_docs_state_seeded_visible_scope_composition_tdd
+    advancedOrganizationAnalyticsPostgresGatewayVisibleScopeCompositionTdd: pass_local_validation_awaiting_fresh_closeout_approval
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -670,11 +671,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-post-query-gateway-composition-task-seeding` seeded
-    `advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd` as the next pending task. Claim it
-    only after a fresh baseline confirmation and fresh approval. Scope is repository-boundary TDD to compose visible
-    organization scope lookup with the existing training answer source aggregate gateway. Route runtime wiring,
+    `advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd` completed scoped local validation on
+    branch `codex/advanced-organization-analytics-visible-scope-composition`. The task closeout policy requires fresh
+    approval after validation before local commit, and does not approve fast-forward merge or push. Route runtime wiring,
     service/UI changes, real DB execution, schema/migration, dependency, provider/model, e2e/browser/dev-server,
     staging/prod/cloud/deploy/payment/external-service, PR, force-push, destructive data operation, drizzle-kit push, and
     Cost Calibration Gate remain blocked unless a later task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-query-gateway-composition-task-seeding.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
