@@ -64,3 +64,13 @@
 - threadRolloverGate: not needed.
 - nextModuleRunCandidate: docs/state queue seeding task to select exactly one next advanced organization analytics work item after fresh approval.
 - Cost Calibration Gate remains blocked.
+
+## Post-Merge Master Validation
+
+- RecordedAt: `2026-06-17T02:08:00-07:00`
+- Master after fast-forward merge: `10e29e5db0b266babf15b7704bd7254531bc5e35`
+- PASS: `npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"` (`1` file, `12` tests passed)
+- PASS: `npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"` (`1` file, `13` tests passed)
+- PASS: `git diff --check`
+- PASS: `npm.cmd run lint`
+- PASS: `npm.cmd run typecheck`
