@@ -67,9 +67,18 @@ No historical evidence was fabricated.
 - `npm.cmd run typecheck`: pass
 - `git diff --check`: pass
 - `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId mechanism-historical-evidence-provenance-diagnostics`: pass
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId mechanism-historical-evidence-provenance-diagnostics`: pass
 
 ## Redaction Statement
 
 This evidence records only command names, pass/fail status, and mechanism diagnostic counts. It does not include secrets, tokens, cookies, Authorization headers, DB URLs, provider payloads, raw prompts, raw answers, publicId inventories, row data, or private data.
+
+## Closeout Anchors
+
+- Batch range: single mechanism maintenance task `mechanism-historical-evidence-provenance-diagnostics`
+- Commit: `5c61cecd376b4d89dbc0acc0af063f28d3f62354`
+- localFullLoopGate: not_applicable_docs_state_lite; no Browser, Playwright, dev server, provider, DB, staging, prod, cloud, deploy, payment, external-service, or Cost Calibration Gate work was run.
+- threadRolloverGate: no rollover required for this single local mechanism task.
+- nextModuleRunCandidate: none from `Get-TikuNextAction.ps1 -VerboseHistory`; seed proposal also reported none.
 
 Cost Calibration Gate remains blocked.

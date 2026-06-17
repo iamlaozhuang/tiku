@@ -443,7 +443,7 @@ currentTask:
   evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-historical-evidence-provenance.md
   auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-historical-evidence-provenance.md
   branch: codex/mechanism-historical-evidence-provenance
-  commitSha: pending
+  commitSha: 5c61cecd376b4d89dbc0acc0af063f28d3f62354
   prUrl: null
   retryCount: 0
   lastFailurePath: null
