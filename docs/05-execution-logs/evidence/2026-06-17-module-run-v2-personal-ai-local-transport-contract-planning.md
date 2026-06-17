@@ -8,7 +8,7 @@
 - Evidence mode: `lite`
 - Validation policy: `docs_state`
 - result: pass
-- Commit: `0bbc00d66c6b25f2c72289557f77811b49d873e0`
+- Commit: `9160003b6c2356fe9c134987db415a443faabad7`
 - Redaction status: pass. This evidence records task metadata, command outcomes, and local contract status only.
 
 Cost Calibration Gate remains blocked.
@@ -67,15 +67,15 @@ GREEN:
 | `npm.cmd run lint`                                                                                                                                                                               | pass                      | eslint completed without findings                                                        |
 | `npm.cmd run typecheck`                                                                                                                                                                          | pass                      | `tsc --noEmit` completed                                                                 |
 | `git diff --check`                                                                                                                                                                               | pass                      | whitespace check completed                                                               |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning`      | pending final rerun       | required after this evidence/status update                                               |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning` | pending final rerun       | required after this evidence/status update                                               |
-| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning`        | pending post-commit rerun | required after local commit and before push                                              |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning`      | pass                      | scope, sensitive evidence, and terminology scans passed                                  |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning` | pass                      | required module closeout anchors passed                                                  |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId module-run-v2-personal-ai-local-transport-contract-planning`        | pass                      | git completion readiness and accepted-ancestor state checks passed                       |
 
 ## Closeout Anchors
 
 - Batch range: single docs-state planning reconciliation task.
-- Commit: `0bbc00d66c6b25f2c72289557f77811b49d873e0`
-- Commit note: this is the verified pre-task base commit used to satisfy pre-commit closeout anchors; the final task commit SHA is reconciled after local commit.
+- Commit: `9160003b6c2356fe9c134987db415a443faabad7`
+- Commit note: this is the local task implementation/closeout commit. A follow-up docs-only closeout reconciliation commit records this exact SHA in state and evidence.
 - localFullLoopGate: `L4` local API or Server Action contract planning reconciliation.
 - threadRolloverGate: no rollover required for this narrow docs-state reconciliation.
 - nextModuleRunCandidate: `module-run-v2-personal-ai-local-ui-browser-planning` pending fresh `localExperienceAcceptanceBridgeApproved` approval.

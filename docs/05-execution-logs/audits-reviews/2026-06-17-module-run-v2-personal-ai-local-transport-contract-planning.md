@@ -27,7 +27,7 @@ No blocking findings. Focused route-service validation passed, and no product ru
 
 ## Residual Risk
 
-Low. The task is docs-state plus read-only focused validation. The remaining residual is final local commit SHA reconciliation after the first closeout commit.
+Low. The task is docs-state plus read-only focused validation. The task implementation/closeout commit SHA is reconciled in state and evidence.
 
 ## Recommended Next Action
 
