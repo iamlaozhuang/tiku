@@ -30397,10 +30397,11 @@ tasks:
     seededImplementationTask: true
     autoDriveLocalImplementationApproval: approved_by_user_prompt_2026_06_16
     status: closed
-    result: pass
+    result: pass_local_validation_fresh_closeout_approved
     claimedAt: "2026-06-16T21:13:39-07:00"
     closedAt: "2026-06-16T21:16:45-07:00"
     retryCount: 0
+    commitSha: 4d35e9b75c4d59e75d39c9fcfb50f09cb80db486
     dependencies:
       - advanced-organization-analytics-post-query-gateway-composition-task-seeding
       - advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
@@ -30418,9 +30419,10 @@ tasks:
     humanApproval: >-
       User approved executing this scoped TDD implementation task in the current Codex thread by saying "批准执行" after
       fresh baseline confirmation. Approval is limited to task claim, task plan/evidence/audit creation, scoped
-      repository and unit test changes in the declared allowedFiles, and local validation. The task closeout policy still
-      requires fresh approval after validation before local commit, and does not approve fast-forward merge, push, PR, or
-      force push.
+      repository and unit test changes in the declared allowedFiles, and local validation. After validation passed, the
+      user provided fresh closeout approval by saying "批准执行"; that later approval allowed local commit, fast-forward
+      merge to master, push to origin/master, merged short-branch cleanup, and fetch prune. PR and force push remained
+      blocked.
     planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
@@ -30468,7 +30470,7 @@ tasks:
       - e2e/**
       - scripts/**
     blockedGates:
-      - missing fresh user approval before claim
+      - new unapproved follow-up work outside this closed task
       - route runtime wiring
       - service/UI changes
       - real database access or database connection execution
@@ -30484,6 +30486,232 @@ tasks:
       - quota/cost measurement or Cost Calibration Gate
       - PR
       - force push
+    closeoutPolicy:
+      localCommit: approved_by_fresh_user_prompt_2026_06_16_after_validation
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+
+  - id: advanced-organization-analytics-post-visible-scope-source-reader-seeding
+    title: Advanced organization analytics post visible scope source reader seeding
+    phase: advanced-organization-analytics-post-visible-scope-source-reader-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass_docs_state_seeded_postgres_gateway_source_readers_tdd
+    retryCount: 0
+    claimedAt: "2026-06-16T21:30:01-07:00"
+    closedAt: "2026-06-16T21:30:01-07:00"
+    branch: codex/advanced-organization-analytics-post-visible-scope-seeding
+    dependencies:
+      - advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+    humanApproval: >-
+      User approved executing this docs/state-only queue seeding task in the current 2026-06-16 Codex thread by saying
+      "批准执行" after the assistant recommended reconciling stale durable state and seeding the next repository-boundary
+      task because the queue had no pending entries. Approval is limited to baseline confirmation, task plan/evidence/
+      audit creation, durable docs/state updates, one pending repository source-reader TDD task seed, declared local
+      validation, local commit, fast-forward merge to master, push origin/master, merged short-branch cleanup, and fetch
+      prune. Product source implementation, App Router runtime wiring, service/UI changes, real DB execution, schema/
+      migration, package/lockfile/dependency changes, provider/model calls, e2e/browser/dev-server, staging/prod/cloud/
+      deploy/payment/external-service, PR, force push, destructive data operations, drizzle-kit push, and Cost Calibration
+      Gate remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/db/schema/auth.ts
+      - src/db/schema/organization-training.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - product source implementation
+      - App Router runtime wiring
+      - service/UI changes
+      - real database access or database connection execution
+      - row/private data exposure
+      - publicId lists
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - 'Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-post-visible-scope-source-reader-seeding","status: closed","4d35e9b75c4d59e75d39c9fcfb50f09cb80db486","advanced-organization-analytics-postgres-gateway-source-readers-tdd","status: pending","src/server/repositories/organization-analytics-repository.ts","src/server/repositories/organization-analytics-repository.test.ts"'
+      - npx prettier --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-post-visible-scope-source-reader-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-post-visible-scope-source-reader-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-post-visible-scope-source-reader-seeding
+
+  - id: advanced-organization-analytics-postgres-gateway-source-readers-tdd
+    title: Advanced organization analytics Postgres gateway source readers TDD
+    phase: advanced-organization-analytics-postgres-gateway-source-readers-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_repository_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: requires_fresh_user_approval_before_claim
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-post-visible-scope-source-reader-seeding
+      - advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+      - advanced-organization-analytics-training-answer-source-schema-migration
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation limited to typed repository
+      source readers for the organization analytics Postgres gateway after the schema-backed
+      `organization_training_answer` source and injected gateway composition exist. The task may update the existing
+      organization analytics repository and focused unit tests to add explicit `RuntimeDatabase`-injected source readers
+      for visible organization scope lookup and aggregate-only organization training answer rows. It must not instantiate
+      a local runtime database, read `.env*`, execute a database connection, expose raw rows or public identifier lists,
+      hand-write SQL strings, wire App Router runtime dependencies, change services/routes/UI, modify schema/migration/
+      drizzle files, change dependencies, call providers/models, run e2e/browser/dev-server, or touch staging/prod/cloud/
+      deploy/payment/external-service surfaces. If runtime route wiring, real DB execution, schema changes, service
+      changes, UI work, dependency changes, provider calls, or protected evidence would be required, stop and report
+      instead of expanding scope.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd.md
+      - src/server/repositories/runtime-database.ts
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/app/api/v1/organization-analytics/dashboard-summary/route.ts
+      - src/db/schema/auth.ts
+      - src/db/schema/organization-training.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/services/**
+      - src/server/models/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/server/contracts/**
+      - src/server/repositories/runtime-database.ts
+      - src/components/**
+      - src/hooks/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - missing fresh user approval before claim
+      - App Router runtime wiring
+      - service/UI changes
+      - real database access or database connection execution
+      - row/private data exposure
+      - publicId lists
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    capabilities:
+      localUnitTest: approved_after_fresh_user_approval_before_claim
+      repositorySourceReaderTdd: approved_after_fresh_user_approval_before_claim
+      localDockerDatabase: blocked_no_db_execution
+      schemaMigration: blocked
+      providerCall: blocked
+      localE2EValidation: blocked
+      dependencyIntroduction: blocked
+      costCalibrationGate: blocked
     closeoutPolicy:
       localCommit: requires_fresh_approval_after_validation
       fastForwardMerge:
@@ -30501,6 +30729,6 @@ tasks:
       - npm.cmd run lint
       - npm.cmd run typecheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-readers-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-readers-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-source-readers-tdd
