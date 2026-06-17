@@ -22,6 +22,9 @@ canonicalStateFiles:
   - id: blocked-gates
     path: docs/04-agent-system/state/blocked-gates.yaml
     role: long-lived blocked gate registry
+  - id: historical-evidence-debt
+    path: docs/04-agent-system/state/historical-evidence-debt.yaml
+    role: durable register for explicitly accepted legacy-unavailable evidence references; not a replacement for evidence and not a dependency evidence source
   - id: mechanism-source-of-truth-index
     path: docs/04-agent-system/state/mechanism-source-of-truth-index.yaml
     role: navigation index for mechanism facts
@@ -74,6 +77,11 @@ factOwnership:
       - scripts/agent-system/Get-TikuNextAction.ps1
       - scripts/agent-system/New-ModuleRunV2ImplementationSeed.ps1
     rule: profile catalog values classify task envelopes only; they do not authorize high-risk actions without task-scoped approval and capability gates.
+  - fact: registered legacy-unavailable evidence references and non-evidence boundary
+    sourcePath: docs/04-agent-system/state/historical-evidence-debt.yaml
+    derivedSummaries:
+      - scripts/agent-system/Get-TikuNextAction.ps1
+    rule: the register suppresses repeated missing-historical-evidence noise only; it does not prove task completion or satisfy dependency evidence checks.
   - fact: transient owner, active run, recoverable run, cleanup-ready run, no-write terminal envelope
     sourcePath: local run registry, lease, and redacted handoff files under the configured Codex automation roots
     derivedSummaries:

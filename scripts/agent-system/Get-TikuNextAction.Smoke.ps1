@@ -74,6 +74,7 @@ try {
     $queuePath = Join-Path -Path $stateRoot -ChildPath "task-queue.yaml"
     $matrixPath = Join-Path -Path $stateRoot -ChildPath "advanced-edition-domain-module-run-matrix.yaml"
     $taskHistoryIndexPath = Join-Path -Path $stateRoot -ChildPath "task-history-index.yaml"
+    $historicalEvidenceDebtPath = Join-Path -Path $stateRoot -ChildPath "historical-evidence-debt.yaml"
     $executionLogIndexPath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/execution-log-index.yaml"
     $completedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/completed-a.md"
     $archivedEvidencePath = Join-Path -Path $repoPath -ChildPath "docs/05-execution-logs/evidence/archived-a.md"
@@ -126,6 +127,11 @@ tasks:
     validationCommands:
       - git diff --check
     evidencePath: docs/05-execution-logs/evidence/archived-original.md
+  - id: task-unregistered-debt
+    status: closed
+    validationCommands:
+      - git diff --check
+    evidencePath: docs/05-execution-logs/evidence/task-unregistered-debt.md
   - id: task-a
     status: pending
     dependencies:
@@ -206,6 +212,19 @@ Cost Calibration Gate remains blocked
 
     @"
 schemaVersion: 1
+generatedByTask: smoke
+generatedAt: "2026-06-17T00:00:00-07:00"
+entries:
+  - id: task-legacy-done
+    originalEvidencePath: docs/05-execution-logs/evidence/task-legacy-done.md
+    decision: registered_legacy_unavailable
+    rationale: smoke fixture for registered historical evidence debt
+    replacementEvidencePath: null
+    notDependencyEvidence: true
+"@ | Set-Content -LiteralPath $historicalEvidenceDebtPath -Encoding UTF8
+
+    @"
+schemaVersion: 1
 entries:
   - path: docs/05-execution-logs/evidence/archived-original.md
     archivePath: docs/05-execution-logs/archive/2026-05/evidence/archived-original.md
@@ -223,6 +242,7 @@ entries:
     $beforeProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $beforeQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash
     $beforeMatrixHash = (Get-FileHash -LiteralPath $matrixPath -Algorithm SHA256).Hash
+    $beforeHistoricalEvidenceDebtHash = (Get-FileHash -LiteralPath $historicalEvidenceDebtPath -Algorithm SHA256).Hash
     $beforeExecutionLogIndexHash = (Get-FileHash -LiteralPath $executionLogIndexPath -Algorithm SHA256).Hash
 
     Push-Location -LiteralPath $repoPath
@@ -232,6 +252,7 @@ entries:
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $queuePath `
                 -MatrixPath $matrixPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
@@ -247,7 +268,7 @@ entries:
     Assert-Contains -Output $output -Pattern '^blockedGates:'
     Assert-Contains -Output $output -Pattern '^validationNeeded: 2 command\(s\) for task-a$'
     Assert-Contains -Output $output -Pattern '^historicalQueueFindings: .*legacy_status_missing=1; legacy_terminal=1; knownBlockedValidation=1; unsupportedStatus=0; notBlockingCurrentRun=true$'
-    Assert-Contains -Output $output -Pattern '^historicalEvidenceFindings: missingHistoricalEvidence=1; closureEvidenceRecovered=1; archivedEvidenceRecovered=1; legacyUnavailableEvidence=1; notBlockingCurrentRun=true$'
+    Assert-Contains -Output $output -Pattern '^historicalEvidenceFindings: missingHistoricalEvidence=1; closureEvidenceRecovered=1; archivedEvidenceRecovered=1; registeredLegacyUnavailableEvidence=1; unregisteredLegacyUnavailableEvidence=1; notBlockingCurrentRun=true$'
     Assert-Contains -Output $output -Pattern '^driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:1,sourcePlanningTaskMissingInQueue:1; notBlockingCurrentRun=true$'
     Assert-NotContains -Output $output -Pattern 'legacy_terminal_first='
     Assert-NotContains -Output $output -Pattern 'missingHistoricalEvidenceFirst='
@@ -264,6 +285,7 @@ entries:
                 -ProjectStatePath $projectStatePath `
                 -QueuePath $queuePath `
                 -MatrixPath $matrixPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath `
                 -VerboseHistory
         )
@@ -272,7 +294,7 @@ entries:
     }
 
     Assert-Contains -Output $verboseOutput -Pattern '^historicalQueueFindingsVerbose: .*legacy_status_missing_first=task-missing-status; legacy_terminal_first=task-legacy-done; knownBlockedValidationFirst=task-known-blocked:blocked_validation_failure; unsupportedStatusFirst=none$'
-    Assert-Contains -Output $verboseOutput -Pattern '^historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=task-legacy-done; closureEvidenceRecoveredFirst=task-closure-evidence; archivedEvidenceRecoveredFirst=task-archived-evidence; legacyUnavailableEvidenceFirst=task-legacy-done$'
+    Assert-Contains -Output $verboseOutput -Pattern '^historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=task-unregistered-debt; closureEvidenceRecoveredFirst=task-closure-evidence; archivedEvidenceRecoveredFirst=task-archived-evidence; registeredLegacyUnavailableEvidenceFirst=task-legacy-done; unregisteredLegacyUnavailableEvidenceFirst=task-unregistered-debt$'
     Assert-Contains -Output $verboseOutput -Pattern '^driftFindingsVerbose: queueMatrixDriftFirst=batch-1000-really-missing,missing-planning-task-b$'
 
     $plannedPauseProjectStatePath = Join-Path -Path $stateRoot -ChildPath "project-state-planned-pause.yaml"
@@ -299,6 +321,7 @@ currentTask:
                 -ProjectStatePath $plannedPauseProjectStatePath `
                 -QueuePath $queuePath `
                 -MatrixPath $matrixPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
@@ -343,6 +366,7 @@ tasks:
                 -QueuePath $historyQueuePath `
                 -MatrixPath $matrixPath `
                 -TaskHistoryIndexPath $taskHistoryIndexPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
@@ -411,6 +435,7 @@ currentTask:
                 -ProjectStatePath $seedProjectStatePath `
                 -QueuePath $seedQueuePath `
                 -MatrixPath $seedMatrixPath `
+                -HistoricalEvidenceDebtPath $historicalEvidenceDebtPath `
                 -ExecutionLogIndexPath $executionLogIndexPath
         )
     } finally {
@@ -427,8 +452,9 @@ currentTask:
     $afterProjectHash = (Get-FileHash -LiteralPath $projectStatePath -Algorithm SHA256).Hash
     $afterQueueHash = (Get-FileHash -LiteralPath $queuePath -Algorithm SHA256).Hash
     $afterMatrixHash = (Get-FileHash -LiteralPath $matrixPath -Algorithm SHA256).Hash
+    $afterHistoricalEvidenceDebtHash = (Get-FileHash -LiteralPath $historicalEvidenceDebtPath -Algorithm SHA256).Hash
     $afterExecutionLogIndexHash = (Get-FileHash -LiteralPath $executionLogIndexPath -Algorithm SHA256).Hash
-    if ($beforeProjectHash -ne $afterProjectHash -or $beforeQueueHash -ne $afterQueueHash -or $beforeMatrixHash -ne $afterMatrixHash -or $beforeExecutionLogIndexHash -ne $afterExecutionLogIndexHash) {
+    if ($beforeProjectHash -ne $afterProjectHash -or $beforeQueueHash -ne $afterQueueHash -or $beforeMatrixHash -ne $afterMatrixHash -or $beforeHistoricalEvidenceDebtHash -ne $afterHistoricalEvidenceDebtHash -or $beforeExecutionLogIndexHash -ne $afterExecutionLogIndexHash) {
         throw "Get-TikuNextAction smoke expected read-only behavior, but one or more fixture files changed."
     }
 } finally {

@@ -1,0 +1,47 @@
+schemaVersion: 1
+generatedByTask: mechanism-historical-evidence-debt-register
+generatedAt: "2026-06-17T12:51:44-07:00"
+purpose: >-
+  Durable register for explicitly accepted legacy-unavailable evidence references after historical queue and execution
+  log archival. This file is a provenance-debt register only. It does not replace evidence, prove task completion, or
+  satisfy dependency evidence gates by itself.
+entries:
+  - id: phase-1-api-contract-baseline
+    originalEvidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-api-contract-baseline.md
+    statusAtRegistration: done
+    decision: registered_legacy_unavailable
+    rationale: Early active-queue task references an evidence path that is not present in active execution logs or the execution-log archive index after historical archival.
+    replacementEvidencePath: null
+    notDependencyEvidence: true
+  - id: phase-1-design-token-baseline
+    originalEvidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-design-token-baseline.md
+    statusAtRegistration: done
+    decision: registered_legacy_unavailable
+    rationale: Early active-queue task references an evidence path that is not present in active execution logs or the execution-log archive index after historical archival.
+    replacementEvidencePath: null
+    notDependencyEvidence: true
+  - id: phase-1-env-logging-baseline
+    originalEvidencePath: docs/05-execution-logs/evidence/2026-05-16-phase-1-env-logging-baseline.md
+    statusAtRegistration: done
+    decision: registered_legacy_unavailable
+    rationale: Early active-queue task references an evidence path that is not present in active execution logs or the execution-log archive index after historical archival.
+    replacementEvidencePath: null
+    notDependencyEvidence: true
+  - id: phase-2-user-auth-planning
+    originalEvidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-user-auth-planning.md
+    statusAtRegistration: done
+    decision: registered_legacy_unavailable
+    rationale: Early active-queue task references an evidence path that is not present in active execution logs or the execution-log archive index after historical archival.
+    replacementEvidencePath: null
+    notDependencyEvidence: true
+  - id: phase-2-auth-schema-and-permission-model-approval
+    originalEvidencePath: docs/05-execution-logs/evidence/2026-05-17-phase-2-auth-schema-and-permission-model-approval.md
+    statusAtRegistration: done
+    decision: registered_legacy_unavailable
+    rationale: Early active-queue task references an evidence path that is not present in active execution logs or the execution-log archive index after historical archival.
+    replacementEvidencePath: null
+    notDependencyEvidence: true
+forbiddenClaims:
+  - This register does not fabricate missing historical evidence.
+  - This register is not task evidence and must not satisfy dependency evidence gates by itself.
+  - This register does not approve provider/model calls, env/secret access, dependency changes, schema/migration work, deployment, payment, external-service work, PR work, force push, or Cost Calibration Gate execution.

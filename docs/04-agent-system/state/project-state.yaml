@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T07:33:51-07:00"
+updatedAt: "2026-06-17T12:51:44-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: df880547241f0b83b46a6ce6236468584eef2742
   lastKnownOriginMasterSha: df880547241f0b83b46a6ce6236468584eef2742
 currentTask:
-  id: mechanism-historical-evidence-provenance-diagnostics
-  status: closed
+  id: mechanism-historical-evidence-debt-register
+  status: implemented
   sourceStory: user-approved-mechanism-maintenance
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-historical-evidence-provenance.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-historical-evidence-provenance.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-historical-evidence-provenance.md
-  branch: codex/mechanism-historical-evidence-provenance
-  commitSha: 5c61cecd376b4d89dbc0acc0af063f28d3f62354
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-mechanism-historical-evidence-debt-register.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-mechanism-historical-evidence-debt-register.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-mechanism-historical-evidence-debt-register.md
+  branch: codex/mechanism-historical-evidence-debt-register
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -714,10 +714,10 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After this mechanism task is merged, pushed, and cleaned, run Get-TikuProjectStatus and Get-TikuNextAction again.
-    If the system remains idle with no seed candidate, recommend a narrow mechanism task to move the five legacy
-    unavailable evidence items into a durable explicit historical-debt register instead of treating them as current
-    execution blockers. Keep schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
+    After this mechanism task is validated, merged, pushed, and cleaned, run Get-TikuProjectStatus and
+    Get-TikuNextAction again. If the system remains idle with no seed candidate and no unregistered historical evidence
+    debt, recommend resuming approved auto-seed/product queue work through the queue drain supervisor. Keep
+    schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
     staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate blocked unless a
     future task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-mechanism-historical-evidence-provenance.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-mechanism-historical-evidence-debt-register.md

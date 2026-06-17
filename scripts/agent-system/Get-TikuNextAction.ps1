@@ -24,6 +24,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
+    [string]$HistoricalEvidenceDebtPath = "docs\04-agent-system\state\historical-evidence-debt.yaml",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [string]$ExecutionProfileCatalogPath = "docs\04-agent-system\state\execution-profiles.yaml",
 
     [Parameter(Mandatory = $false)]
@@ -493,7 +497,8 @@ function Get-CatalogWorkPacketMaxTasks {
 function Get-QueueDiagnostics {
     param(
         [Parameter(Mandatory = $true)][object[]]$Blocks,
-        [Parameter(Mandatory = $false)][hashtable]$ExecutionLogArchiveMap = @{}
+        [Parameter(Mandatory = $false)][hashtable]$ExecutionLogArchiveMap = @{},
+        [Parameter(Mandatory = $false)][AllowEmptyCollection()][string[]]$HistoricalEvidenceDebtIds = @()
     )
 
     $allowedStatuses = @("pending", "claimed", "planned", "implemented", "validated", "reviewed", "ready_for_closeout", "closed", "blocked")
@@ -506,7 +511,8 @@ function Get-QueueDiagnostics {
     $evidenceMissingIds = New-Object System.Collections.ArrayList
     $closureEvidenceRecoveredIds = New-Object System.Collections.ArrayList
     $archivedEvidenceRecoveredIds = New-Object System.Collections.ArrayList
-    $legacyUnavailableEvidenceIds = New-Object System.Collections.ArrayList
+    $registeredLegacyUnavailableEvidenceIds = New-Object System.Collections.ArrayList
+    $unregisteredLegacyUnavailableEvidenceIds = New-Object System.Collections.ArrayList
 
     foreach ($block in $Blocks) {
         $status = Get-ScalarValue -Block $block.Lines -Key "status"
@@ -541,8 +547,13 @@ function Get-QueueDiagnostics {
                 continue
             }
 
+            if ($block.Id -in $HistoricalEvidenceDebtIds) {
+                [void]$registeredLegacyUnavailableEvidenceIds.Add($block.Id)
+                continue
+            }
+
             [void]$evidenceMissingIds.Add($block.Id)
-            [void]$legacyUnavailableEvidenceIds.Add($block.Id)
+            [void]$unregisteredLegacyUnavailableEvidenceIds.Add($block.Id)
         }
     }
 
@@ -554,7 +565,8 @@ function Get-QueueDiagnostics {
         EvidenceMissingIds = @($evidenceMissingIds)
         ClosureEvidenceRecoveredIds = @($closureEvidenceRecoveredIds)
         ArchivedEvidenceRecoveredIds = @($archivedEvidenceRecoveredIds)
-        LegacyUnavailableEvidenceIds = @($legacyUnavailableEvidenceIds)
+        RegisteredLegacyUnavailableEvidenceIds = @($registeredLegacyUnavailableEvidenceIds)
+        UnregisteredLegacyUnavailableEvidenceIds = @($unregisteredLegacyUnavailableEvidenceIds)
     }
 }
 
@@ -586,6 +598,19 @@ function Get-ExecutionLogArchiveMap {
     }
 
     return $archiveMap
+}
+
+function Get-HistoricalEvidenceDebtIds {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][AllowEmptyString()][string[]]$Lines)
+
+    $ids = New-Object System.Collections.ArrayList
+    foreach ($line in $Lines) {
+        if ($line -match '^\s*-\s+id:\s*(.+?)\s*$') {
+            [void]$ids.Add($Matches[1].Trim().Trim('"'))
+        }
+    }
+
+    return @($ids | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
 }
 
 function Test-EvidenceProvenance {
@@ -685,12 +710,16 @@ $executionLogArchiveMap = @{}
 if (Test-Path -LiteralPath $ExecutionLogIndexPath) {
     $executionLogArchiveMap = Get-ExecutionLogArchiveMap -Lines @(Get-Content -LiteralPath $ExecutionLogIndexPath)
 }
+$historicalEvidenceDebtIds = @()
+if (Test-Path -LiteralPath $HistoricalEvidenceDebtPath) {
+    $historicalEvidenceDebtIds = @(Get-HistoricalEvidenceDebtIds -Lines @(Get-Content -LiteralPath $HistoricalEvidenceDebtPath))
+}
 $profileCatalogPresent = Test-Path -LiteralPath $ExecutionProfileCatalogPath -PathType Leaf
 $profileCatalogContent = ""
 if ($profileCatalogPresent) {
     $profileCatalogContent = Get-Content -LiteralPath $ExecutionProfileCatalogPath -Raw
 }
-$queueDiagnostics = Get-QueueDiagnostics -Blocks $taskBlocks -ExecutionLogArchiveMap $executionLogArchiveMap
+$queueDiagnostics = Get-QueueDiagnostics -Blocks $taskBlocks -ExecutionLogArchiveMap $executionLogArchiveMap -HistoricalEvidenceDebtIds $historicalEvidenceDebtIds
 $matrixDiagnostics = Get-MatrixDiagnostics -Blocks $taskBlocks -HistoryBlocks $taskHistoryBlocks -MatrixLines $matrixLines
 $currentTaskId = Get-ProjectScalar -Lines $projectStateLines -Section "currentTask" -Key "id"
 if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
@@ -890,11 +919,11 @@ Write-Output "recommendedHumanDecision: $recommendedHumanDecision"
 Write-Output "blockedGates: $(Join-OrNone -Values @($blockedGates))"
 Write-Output "validationNeeded: $(if ($validationCommands.Count -eq 0) { 'none' } else { "$($validationCommands.Count) command(s) for $nextTaskId" })"
 Write-Output "historicalQueueFindings: legacy_status_missing=$($queueDiagnostics.MissingStatusIds.Count); legacy_terminal=$($queueDiagnostics.LegacyDoneIds.Count); knownBlockedValidation=$($queueDiagnostics.KnownBlockedStatusIds.Count); unsupportedStatus=$($queueDiagnostics.UnsupportedStatusIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
-Write-Output "historicalEvidenceFindings: missingHistoricalEvidence=$($queueDiagnostics.EvidenceMissingIds.Count); closureEvidenceRecovered=$($queueDiagnostics.ClosureEvidenceRecoveredIds.Count); archivedEvidenceRecovered=$($queueDiagnostics.ArchivedEvidenceRecoveredIds.Count); legacyUnavailableEvidence=$($queueDiagnostics.LegacyUnavailableEvidenceIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
+Write-Output "historicalEvidenceFindings: missingHistoricalEvidence=$($queueDiagnostics.EvidenceMissingIds.Count); closureEvidenceRecovered=$($queueDiagnostics.ClosureEvidenceRecoveredIds.Count); archivedEvidenceRecovered=$($queueDiagnostics.ArchivedEvidenceRecoveredIds.Count); registeredLegacyUnavailableEvidence=$($queueDiagnostics.RegisteredLegacyUnavailableEvidenceIds.Count); unregisteredLegacyUnavailableEvidence=$($queueDiagnostics.UnregisteredLegacyUnavailableEvidenceIds.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
 Write-Output "driftFindings: queueMatrixDrift=matrixBatchMissingInQueue:$($matrixDiagnostics.MissingBatches.Count),sourcePlanningTaskMissingInQueue:$($matrixDiagnostics.MissingPlanningTasks.Count); notBlockingCurrentRun=$($historyNotBlockingCurrentRun.ToString().ToLowerInvariant())"
 if ($VerboseHistory) {
     Write-Output "historicalQueueFindingsVerbose: legacy_status_missing_first=$(Join-FirstItems -Values $queueDiagnostics.MissingStatusIds); legacy_terminal_first=$(Join-FirstItems -Values $queueDiagnostics.LegacyDoneIds); knownBlockedValidationFirst=$(Join-FirstItems -Values $queueDiagnostics.KnownBlockedStatusIds); unsupportedStatusFirst=$(Join-FirstItems -Values $queueDiagnostics.UnsupportedStatusIds)"
-    Write-Output "historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=$(Join-FirstItems -Values $queueDiagnostics.EvidenceMissingIds); closureEvidenceRecoveredFirst=$(Join-FirstItems -Values $queueDiagnostics.ClosureEvidenceRecoveredIds); archivedEvidenceRecoveredFirst=$(Join-FirstItems -Values $queueDiagnostics.ArchivedEvidenceRecoveredIds); legacyUnavailableEvidenceFirst=$(Join-FirstItems -Values $queueDiagnostics.LegacyUnavailableEvidenceIds)"
+    Write-Output "historicalEvidenceFindingsVerbose: missingHistoricalEvidenceFirst=$(Join-FirstItems -Values $queueDiagnostics.EvidenceMissingIds); closureEvidenceRecoveredFirst=$(Join-FirstItems -Values $queueDiagnostics.ClosureEvidenceRecoveredIds); archivedEvidenceRecoveredFirst=$(Join-FirstItems -Values $queueDiagnostics.ArchivedEvidenceRecoveredIds); registeredLegacyUnavailableEvidenceFirst=$(Join-FirstItems -Values $queueDiagnostics.RegisteredLegacyUnavailableEvidenceIds); unregisteredLegacyUnavailableEvidenceFirst=$(Join-FirstItems -Values $queueDiagnostics.UnregisteredLegacyUnavailableEvidenceIds)"
     Write-Output "driftFindingsVerbose: queueMatrixDriftFirst=$(Join-FirstItems -Values @($matrixDiagnostics.MissingBatches + $matrixDiagnostics.MissingPlanningTasks))"
 }
 Write-Output "recommendedAction: $recommendedAction"
