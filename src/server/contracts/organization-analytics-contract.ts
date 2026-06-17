@@ -21,6 +21,24 @@ export type OrganizationTrainingAggregateMetricsDto = {
   submittedTrend: OrganizationAnalyticsSubmittedTrendPointDto[];
 };
 
+export type OrganizationAnalyticsFormalLearningSummaryDto = {
+  formalPracticeCount: number;
+  formalMockExamCount: number;
+  formalExamReportCount: number;
+  formalMistakeBookCount: number;
+  redactionStatus: "summary_only";
+};
+
+export type OrganizationAnalyticsQuotaSummaryDto = {
+  employeeAiTaskCount: number;
+  employeeAiSucceededTaskCount: number;
+  employeeAiFailedTaskCount: number;
+  employeeAiQuotaConsumedPoint: number;
+  organizationTrainingGenerationConsumedPoint: number;
+  quotaRemainingPoint: number | null;
+  redactionStatus: "summary_only";
+};
+
 export type OrganizationAnalyticsAnswerOrganizationSnapshotDto = {
   organizationPublicId: string;
   organizationName: string;
@@ -127,6 +145,8 @@ export type OrganizationAnalyticsDashboardSummaryDto = {
   scopeOrganizationPublicIds: string[];
   dateRange: OrganizationAnalyticsDateRangeDto;
   trainingSummary: OrganizationTrainingAggregateMetricsDto;
+  formalLearningSummary: OrganizationAnalyticsFormalLearningSummaryDto | null;
+  quotaSummary: OrganizationAnalyticsQuotaSummaryDto | null;
   redactionStatus: "aggregate_only";
   updatedAt: string;
 };
@@ -138,6 +158,41 @@ export type OrganizationAnalyticsDashboardRouteDto = Omit<
 
 export type OrganizationAnalyticsDashboardRouteResponse =
   ApiResponse<OrganizationAnalyticsDashboardRouteDto | null>;
+
+function createFormalLearningSummaryRouteDto(
+  summary: OrganizationAnalyticsFormalLearningSummaryDto | null,
+): OrganizationAnalyticsFormalLearningSummaryDto | null {
+  if (summary === null) {
+    return null;
+  }
+
+  return {
+    formalPracticeCount: summary.formalPracticeCount,
+    formalMockExamCount: summary.formalMockExamCount,
+    formalExamReportCount: summary.formalExamReportCount,
+    formalMistakeBookCount: summary.formalMistakeBookCount,
+    redactionStatus: summary.redactionStatus,
+  };
+}
+
+function createQuotaSummaryRouteDto(
+  summary: OrganizationAnalyticsQuotaSummaryDto | null,
+): OrganizationAnalyticsQuotaSummaryDto | null {
+  if (summary === null) {
+    return null;
+  }
+
+  return {
+    employeeAiTaskCount: summary.employeeAiTaskCount,
+    employeeAiSucceededTaskCount: summary.employeeAiSucceededTaskCount,
+    employeeAiFailedTaskCount: summary.employeeAiFailedTaskCount,
+    employeeAiQuotaConsumedPoint: summary.employeeAiQuotaConsumedPoint,
+    organizationTrainingGenerationConsumedPoint:
+      summary.organizationTrainingGenerationConsumedPoint,
+    quotaRemainingPoint: summary.quotaRemainingPoint,
+    redactionStatus: summary.redactionStatus,
+  };
+}
 
 export function createOrganizationAnalyticsDashboardRouteResponse(
   data: OrganizationAnalyticsDashboardSummaryDto | null,
@@ -169,6 +224,10 @@ export function createOrganizationAnalyticsDashboardRouteResponse(
           }),
         ),
       },
+      formalLearningSummary: createFormalLearningSummaryRouteDto(
+        data.formalLearningSummary,
+      ),
+      quotaSummary: createQuotaSummaryRouteDto(data.quotaSummary),
       redactionStatus: data.redactionStatus,
       updatedAt: data.updatedAt,
     },

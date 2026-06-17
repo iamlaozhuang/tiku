@@ -11,6 +11,8 @@ import type {
   OrganizationAnalyticsEmployeeStatisticsSummaryDto,
   OrganizationAnalyticsExportReadinessSummaryDto,
   OrganizationAnalyticsExportScope,
+  OrganizationAnalyticsFormalLearningSummaryDto,
+  OrganizationAnalyticsQuotaSummaryDto,
 } from "../contracts/organization-analytics-contract";
 import {
   createOrganizationAnalyticsAuditLogRedactedReference,
@@ -60,6 +62,8 @@ export type BuildOrganizationAnalyticsDashboardSummaryCommand =
       OrganizationTrainingAggregateMetricsInput,
       "dateRange"
     >;
+    formalLearningSummary: OrganizationAnalyticsFormalLearningSummaryDto | null;
+    quotaSummary: OrganizationAnalyticsQuotaSummaryDto | null;
     updatedAt: string;
   };
 
@@ -157,6 +161,41 @@ function createOrganizationAnalyticsAccessDeniedResponse() {
   );
 }
 
+function createFormalLearningSummary(
+  summary: OrganizationAnalyticsFormalLearningSummaryDto | null,
+): OrganizationAnalyticsFormalLearningSummaryDto | null {
+  if (summary === null) {
+    return null;
+  }
+
+  return {
+    formalPracticeCount: summary.formalPracticeCount,
+    formalMockExamCount: summary.formalMockExamCount,
+    formalExamReportCount: summary.formalExamReportCount,
+    formalMistakeBookCount: summary.formalMistakeBookCount,
+    redactionStatus: summary.redactionStatus,
+  };
+}
+
+function createQuotaSummary(
+  summary: OrganizationAnalyticsQuotaSummaryDto | null,
+): OrganizationAnalyticsQuotaSummaryDto | null {
+  if (summary === null) {
+    return null;
+  }
+
+  return {
+    employeeAiTaskCount: summary.employeeAiTaskCount,
+    employeeAiSucceededTaskCount: summary.employeeAiSucceededTaskCount,
+    employeeAiFailedTaskCount: summary.employeeAiFailedTaskCount,
+    employeeAiQuotaConsumedPoint: summary.employeeAiQuotaConsumedPoint,
+    organizationTrainingGenerationConsumedPoint:
+      summary.organizationTrainingGenerationConsumedPoint,
+    quotaRemainingPoint: summary.quotaRemainingPoint,
+    redactionStatus: summary.redactionStatus,
+  };
+}
+
 export function buildOrganizationAnalyticsDashboardSummary(
   command: BuildOrganizationAnalyticsDashboardSummaryCommand,
 ): ApiResponse<OrganizationAnalyticsDashboardSummaryDto | null> {
@@ -172,6 +211,10 @@ export function buildOrganizationAnalyticsDashboardSummary(
       ...command.trainingMetricsInput,
       dateRange: command.dateRange,
     }),
+    formalLearningSummary: createFormalLearningSummary(
+      command.formalLearningSummary,
+    ),
+    quotaSummary: createQuotaSummary(command.quotaSummary),
     redactionStatus: "aggregate_only",
     updatedAt: command.updatedAt,
   });
@@ -187,16 +230,25 @@ export async function buildOrganizationAnalyticsDashboardSummaryFromRepository(
     return createOrganizationAnalyticsAccessDeniedResponse();
   }
 
+  const summaryReadInput = {
+    organizationPublicId: command.organizationPublicId,
+    scopeOrganizationPublicIds,
+    dateRange: command.dateRange,
+  };
+
   const trainingMetricsInput =
-    await command.repository.readTrainingAggregateMetricsInput({
-      organizationPublicId: command.organizationPublicId,
-      scopeOrganizationPublicIds,
-      dateRange: command.dateRange,
-    });
+    await command.repository.readTrainingAggregateMetricsInput(
+      summaryReadInput,
+    );
 
   if (trainingMetricsInput === null) {
     return createOrganizationAnalyticsAccessDeniedResponse();
   }
+
+  const [formalLearningSummary, quotaSummary] = await Promise.all([
+    command.repository.readFormalLearningSummary(summaryReadInput),
+    command.repository.readQuotaSummary(summaryReadInput),
+  ]);
 
   return buildOrganizationAnalyticsDashboardSummary({
     adminContext: command.adminContext,
@@ -204,6 +256,8 @@ export async function buildOrganizationAnalyticsDashboardSummaryFromRepository(
     scopeOrganizationPublicIds,
     dateRange: command.dateRange,
     trainingMetricsInput,
+    formalLearningSummary,
+    quotaSummary,
     updatedAt: command.updatedAt,
   });
 }

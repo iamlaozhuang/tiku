@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
-updatedAt: "2026-06-17T02:16:19-07:00"
+currentPhase: advanced-organization-analytics-dashboard-formal-quota-summary-tdd-complete
+updatedAt: "2026-06-17T02:39:30-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 44ddea518eb30d51bacde4e3e8929e9a2225b6a4
   lastKnownOriginMasterSha: 44ddea518eb30d51bacde4e3e8929e9a2225b6a4
 currentTask:
-  id: advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck
+  id: advanced-organization-analytics-dashboard-formal-quota-summary-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
-  branch: codex/organization-analytics-next-queue-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md
+  branch: codex/organization-analytics-dashboard-formal-quota-summary
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -688,8 +688,7 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    Claim `advanced-organization-analytics-dashboard-formal-quota-summary-tdd` only after fresh user approval. Keep it
-    TDD and local-only: extend the organization analytics dashboard summary contract/service composition to include
-    formal learning and quota summaries from existing repository methods, preserve aggregate-only and summary-only
-    redaction, and do not touch schema/drizzle/provider/dependency/App Router UI/e2e/browser/dev-server.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-next-implementation-queue-seeding-post-employee-runtime-recheck.md
+    After this merged branch is pushed and cleaned, recommend selecting the next scoped organization analytics Module
+    Run v2 task from the queue or seeding a readonly queue-selection task. Keep schema/drizzle/provider/dependency/App
+    Router UI/e2e/browser/dev-server and Cost Calibration gates blocked unless the next task explicitly approves them.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-advanced-organization-analytics-dashboard-formal-quota-summary-tdd.md

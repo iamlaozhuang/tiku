@@ -34,6 +34,30 @@ function createDashboardSummaryRequest(
   );
 }
 
+function createFormalLearningSummaryFixture() {
+  return {
+    formalPracticeCount: 7,
+    formalMockExamCount: 3,
+    formalExamReportCount: 2,
+    formalMistakeBookCount: 5,
+    redactionStatus: "summary_only" as const,
+    hiddenSourceMarker: "hidden formal learning source",
+  };
+}
+
+function createQuotaSummaryFixture() {
+  return {
+    employeeAiTaskCount: 11,
+    employeeAiSucceededTaskCount: 9,
+    employeeAiFailedTaskCount: 2,
+    employeeAiQuotaConsumedPoint: 135,
+    organizationTrainingGenerationConsumedPoint: 42,
+    quotaRemainingPoint: 823,
+    redactionStatus: "summary_only" as const,
+    hiddenSourceMarker: "hidden quota source",
+  };
+}
+
 function createDashboardSummary(
   dateRange: OrganizationAnalyticsDateRangeDto,
 ): OrganizationAnalyticsDashboardSummaryDto {
@@ -59,6 +83,8 @@ function createDashboardSummary(
         },
       ],
     },
+    formalLearningSummary: createFormalLearningSummaryFixture(),
+    quotaSummary: createQuotaSummaryFixture(),
     redactionStatus: "aggregate_only",
     updatedAt: "2026-06-16T08:00:00.000Z",
   };
@@ -123,6 +149,7 @@ function createEmployeeStatisticsAdminContext(
 
 function createRepositoryBackedDashboardSummaryRepository(
   observedReads: Array<{
+    readName?: string;
     adminPublicId?: string;
     organizationPublicId?: string;
     scopeOrganizationPublicIds?: readonly string[];
@@ -131,7 +158,10 @@ function createRepositoryBackedDashboardSummaryRepository(
 ): OrganizationAnalyticsRepository {
   return {
     async lookupVisibleOrganizationScope(input) {
-      observedReads.push({ adminPublicId: input.adminPublicId });
+      observedReads.push({
+        readName: "visible_scope",
+        adminPublicId: input.adminPublicId,
+      });
 
       return [
         "organization_analytics_route_org_public_001",
@@ -140,6 +170,7 @@ function createRepositoryBackedDashboardSummaryRepository(
     },
     async readTrainingAggregateMetricsInput(input) {
       observedReads.push({
+        readName: "training_summary",
         organizationPublicId: input.organizationPublicId,
         scopeOrganizationPublicIds: input.scopeOrganizationPublicIds,
         dateRange: input.dateRange,
@@ -170,11 +201,25 @@ function createRepositoryBackedDashboardSummaryRepository(
     async readEmployeeTrainingSummaryInputs() {
       return [];
     },
-    async readFormalLearningSummary() {
-      return null;
+    async readFormalLearningSummary(input) {
+      observedReads.push({
+        readName: "formal_learning_summary",
+        organizationPublicId: input.organizationPublicId,
+        scopeOrganizationPublicIds: input.scopeOrganizationPublicIds,
+        dateRange: input.dateRange,
+      });
+
+      return createFormalLearningSummaryFixture();
     },
-    async readQuotaSummary() {
-      return null;
+    async readQuotaSummary(input) {
+      observedReads.push({
+        readName: "quota_summary",
+        organizationPublicId: input.organizationPublicId,
+        scopeOrganizationPublicIds: input.scopeOrganizationPublicIds,
+        dateRange: input.dateRange,
+      });
+
+      return createQuotaSummaryFixture();
     },
     async readExportReadinessRows() {
       return [];
@@ -400,11 +445,28 @@ describe("organization analytics dashboard summary route handlers", () => {
             },
           ],
         },
+        formalLearningSummary: {
+          formalPracticeCount: 7,
+          formalMockExamCount: 3,
+          formalExamReportCount: 2,
+          formalMistakeBookCount: 5,
+          redactionStatus: "summary_only",
+        },
+        quotaSummary: {
+          employeeAiTaskCount: 11,
+          employeeAiSucceededTaskCount: 9,
+          employeeAiFailedTaskCount: 2,
+          employeeAiQuotaConsumedPoint: 135,
+          organizationTrainingGenerationConsumedPoint: 42,
+          quotaRemainingPoint: 823,
+          redactionStatus: "summary_only",
+        },
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T08:00:00.000Z",
       },
     });
     expect(payload.data).not.toHaveProperty("scopeOrganizationPublicIds");
+    expect(JSON.stringify(payload)).not.toMatch(/hidden formal|hidden quota/u);
   });
 
   it("returns invalid input envelope before calling dashboard reader", async () => {
@@ -470,6 +532,7 @@ describe("organization analytics dashboard summary route handlers", () => {
 
   it("composes injected runtime dependencies through repository-backed dashboard summary service", async () => {
     const observedReads: Array<{
+      readName?: string;
       adminPublicId?: string;
       organizationPublicId?: string;
       scopeOrganizationPublicIds?: readonly string[];
@@ -489,8 +552,9 @@ describe("organization analytics dashboard summary route handlers", () => {
         "?organizationPublicId=organization_analytics_route_org_public_001&startAt=2026-06-01T00%3A00%3A00.000Z&endAt=2026-06-16T00%3A00%3A00.000Z",
       ),
     );
+    const payload = await response.json();
 
-    await expect(response.json()).resolves.toEqual({
+    expect(payload).toEqual({
       code: 0,
       message: "ok",
       data: {
@@ -518,15 +582,57 @@ describe("organization analytics dashboard summary route handlers", () => {
             },
           ],
         },
+        formalLearningSummary: {
+          formalPracticeCount: 7,
+          formalMockExamCount: 3,
+          formalExamReportCount: 2,
+          formalMistakeBookCount: 5,
+          redactionStatus: "summary_only",
+        },
+        quotaSummary: {
+          employeeAiTaskCount: 11,
+          employeeAiSucceededTaskCount: 9,
+          employeeAiFailedTaskCount: 2,
+          employeeAiQuotaConsumedPoint: 135,
+          organizationTrainingGenerationConsumedPoint: 42,
+          quotaRemainingPoint: 823,
+          redactionStatus: "summary_only",
+        },
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T09:30:00.000Z",
       },
     });
     expect(observedReads).toEqual([
       {
+        readName: "visible_scope",
         adminPublicId: "organization_analytics_admin_public_001",
       },
       {
+        readName: "training_summary",
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        scopeOrganizationPublicIds: [
+          "organization_analytics_route_org_public_001",
+          "organization_analytics_route_child_public_002",
+        ],
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+      },
+      {
+        readName: "formal_learning_summary",
+        organizationPublicId: "organization_analytics_route_org_public_001",
+        scopeOrganizationPublicIds: [
+          "organization_analytics_route_org_public_001",
+          "organization_analytics_route_child_public_002",
+        ],
+        dateRange: {
+          startAt: "2026-06-01T00:00:00.000Z",
+          endAt: "2026-06-16T00:00:00.000Z",
+        },
+      },
+      {
+        readName: "quota_summary",
         organizationPublicId: "organization_analytics_route_org_public_001",
         scopeOrganizationPublicIds: [
           "organization_analytics_route_org_public_001",
@@ -538,6 +644,7 @@ describe("organization analytics dashboard summary route handlers", () => {
         },
       },
     ]);
+    expect(JSON.stringify(payload)).not.toMatch(/hidden formal|hidden quota/u);
   });
 
   it("wires injected runtime database and session through Postgres source readers", async () => {
@@ -636,6 +743,8 @@ describe("organization analytics dashboard summary route handlers", () => {
             },
           ],
         },
+        formalLearningSummary: null,
+        quotaSummary: null,
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T10:00:00.000Z",
       },

@@ -26,6 +26,30 @@ type GuardedFixtureFields = {
   guardedMarkerEight: string;
 };
 
+function createFormalLearningSummaryFixture(guardedMarker: string) {
+  return {
+    formalPracticeCount: 7,
+    formalMockExamCount: 3,
+    formalExamReportCount: 2,
+    formalMistakeBookCount: 5,
+    redactionStatus: "summary_only" as const,
+    guardedMarker,
+  };
+}
+
+function createQuotaSummaryFixture(guardedMarker: string) {
+  return {
+    employeeAiTaskCount: 11,
+    employeeAiSucceededTaskCount: 9,
+    employeeAiFailedTaskCount: 2,
+    employeeAiQuotaConsumedPoint: 135,
+    organizationTrainingGenerationConsumedPoint: 42,
+    quotaRemainingPoint: 823,
+    redactionStatus: "summary_only" as const,
+    guardedMarker,
+  };
+}
+
 function createValidCommand(): BuildOrganizationAnalyticsDashboardSummaryCommand &
   GuardedFixtureFields {
   const guardedMarkerOne = ["guarded", "marker", "one"].join("-");
@@ -73,6 +97,9 @@ function createValidCommand(): BuildOrganizationAnalyticsDashboardSummaryCommand
       eligibleEmployeePublicIds: ["employee_public_a", "employee_public_b"],
       officialSubmissions: [officialSubmission],
     },
+    formalLearningSummary:
+      createFormalLearningSummaryFixture(guardedMarkerFive),
+    quotaSummary: createQuotaSummaryFixture(guardedMarkerSix),
     updatedAt: "2026-06-16T08:15:00Z",
     guardedMarkerOne,
     guardedMarkerTwo,
@@ -219,8 +246,10 @@ function createOrganizationAnalyticsServiceRepositoryFake(
       async () =>
         createValidEmployeeStatisticsCommand().employeeTrainingSummaryInputs,
     ),
-    readFormalLearningSummary: vi.fn(async () => null),
-    readQuotaSummary: vi.fn(async () => null),
+    readFormalLearningSummary: vi.fn(
+      async () => createValidCommand().formalLearningSummary,
+    ),
+    readQuotaSummary: vi.fn(async () => createValidCommand().quotaSummary),
     readExportReadinessRows: vi.fn(async () => [
       {
         rowPublicId: "employee_public_a",
@@ -278,6 +307,22 @@ describe("organization analytics dashboard service", () => {
           maxScore: 88,
           minScore: 88,
           submittedTrend: [{ date: "2026-06-10", submittedCount: 1 }],
+        },
+        formalLearningSummary: {
+          formalPracticeCount: 7,
+          formalMockExamCount: 3,
+          formalExamReportCount: 2,
+          formalMistakeBookCount: 5,
+          redactionStatus: "summary_only",
+        },
+        quotaSummary: {
+          employeeAiTaskCount: 11,
+          employeeAiSucceededTaskCount: 9,
+          employeeAiFailedTaskCount: 2,
+          employeeAiQuotaConsumedPoint: 135,
+          organizationTrainingGenerationConsumedPoint: 42,
+          quotaRemainingPoint: 823,
+          redactionStatus: "summary_only",
         },
         redactionStatus: "aggregate_only",
         updatedAt: "2026-06-16T08:15:00Z",
@@ -355,6 +400,22 @@ describe("organization analytics repository-backed service", () => {
       ],
       dateRange: command.dateRange,
     });
+    expect(repository.readFormalLearningSummary).toHaveBeenCalledWith({
+      organizationPublicId: "org_city_public_123",
+      scopeOrganizationPublicIds: [
+        "org_city_public_123",
+        "org_district_public_456",
+      ],
+      dateRange: command.dateRange,
+    });
+    expect(repository.readQuotaSummary).toHaveBeenCalledWith({
+      organizationPublicId: "org_city_public_123",
+      scopeOrganizationPublicIds: [
+        "org_city_public_123",
+        "org_district_public_456",
+      ],
+      dateRange: command.dateRange,
+    });
     expect(result).toEqual(
       buildOrganizationAnalyticsDashboardSummary(createValidCommand()),
     );
@@ -377,6 +438,8 @@ describe("organization analytics repository-backed service", () => {
       data: null,
     });
     expect(repository.readTrainingAggregateMetricsInput).not.toHaveBeenCalled();
+    expect(repository.readFormalLearningSummary).not.toHaveBeenCalled();
+    expect(repository.readQuotaSummary).not.toHaveBeenCalled();
   });
 
   it("builds employee statistics summary from injected repository read models", async () => {
