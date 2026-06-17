@@ -1,3 +1,11 @@
+import {
+  admin,
+  adminOrganization,
+  organization,
+  organizationTrainingAnswer,
+} from "@/db/schema";
+import { and, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
+
 import type { OrganizationAnalyticsDateRangeDto } from "../contracts/organization-analytics-contract";
 import type {
   OrganizationAnalyticsEmployeeTrainingSummaryInput,
@@ -5,6 +13,7 @@ import type {
   OrganizationTrainingAggregateMetricsInput,
   OrganizationTrainingOfficialSubmission,
 } from "../models/organization-analytics";
+import type { RuntimeDatabase } from "./runtime-database";
 
 export type OrganizationAnalyticsVisibleOrganizationScopeLookupInput = {
   adminPublicId: string;
@@ -130,6 +139,12 @@ export type OrganizationAnalyticsPostgresGatewayOptions =
   OrganizationAnalyticsTrainingAnswerSourceGatewayOptions & {
     findVisibleOrganizationScopeByAdminPublicId: OrganizationAnalyticsVisibleOrganizationScopeReader;
   };
+
+type OrganizationAnalyticsVisibleOrganizationScopeRow = {
+  organizationId: number;
+  organizationPublicId: string;
+  parentOrganizationId: number | null;
+};
 
 export function createOrganizationAnalyticsRepository(
   gateway: OrganizationAnalyticsRepositoryGateway,
@@ -282,6 +297,101 @@ export function createOrganizationAnalyticsPostgresGateway(
   };
 }
 
+export function createOrganizationAnalyticsVisibleOrganizationScopeReader(
+  database: RuntimeDatabase,
+): OrganizationAnalyticsVisibleOrganizationScopeReader {
+  return async (input) => {
+    const adminPublicId = normalizeRequiredText(input.adminPublicId);
+
+    if (adminPublicId === null) {
+      return null;
+    }
+
+    const assignedRootRows = await database
+      .select({
+        organizationId: adminOrganization.organization_id,
+      })
+      .from(adminOrganization)
+      .innerJoin(admin, eq(adminOrganization.admin_id, admin.id))
+      .innerJoin(
+        organization,
+        eq(adminOrganization.organization_id, organization.id),
+      )
+      .where(
+        and(
+          eq(admin.public_id, adminPublicId),
+          eq(admin.status, "active"),
+          eq(organization.status, "active"),
+        ),
+      );
+    const assignedRootOrganizationIds = assignedRootRows.map(
+      (assignedRootRow) => assignedRootRow.organizationId,
+    );
+
+    if (assignedRootOrganizationIds.length === 0) {
+      return null;
+    }
+
+    const activeOrganizationRows = await database
+      .select({
+        organizationId: organization.id,
+        organizationPublicId: organization.public_id,
+        parentOrganizationId: organization.parent_organization_id,
+      })
+      .from(organization)
+      .where(eq(organization.status, "active"));
+
+    return resolveVisibleOrganizationPublicIds({
+      assignedRootOrganizationIds,
+      activeOrganizationRows,
+    });
+  };
+}
+
+export function createOrganizationAnalyticsTrainingAnswerSourceReader(
+  database: RuntimeDatabase,
+): OrganizationAnalyticsTrainingAnswerSourceReader {
+  return async (input) => {
+    const readInput = normalizeScopeReadInput(input);
+    const submittedAtRange = normalizeDateRange(input.dateRange);
+
+    if (readInput === null || submittedAtRange === null) {
+      return [];
+    }
+
+    const trainingAnswerSourceRows = await database
+      .select({
+        employeePublicId: organizationTrainingAnswer.employee_public_id,
+        organizationPublicId: organizationTrainingAnswer.organization_public_id,
+        organizationTrainingVersionPublicId:
+          organizationTrainingAnswer.organization_training_version_public_id,
+        score: organizationTrainingAnswer.score,
+        totalScore: organizationTrainingAnswer.total_score,
+        submittedAt: organizationTrainingAnswer.submitted_at,
+      })
+      .from(organizationTrainingAnswer)
+      .where(
+        and(
+          eq(
+            organizationTrainingAnswer.organization_training_answer_status,
+            "submitted",
+          ),
+          inArray(organizationTrainingAnswer.organization_public_id, [
+            ...readInput.scopeOrganizationPublicIds,
+          ]),
+          isNotNull(organizationTrainingAnswer.submitted_at),
+          gte(
+            organizationTrainingAnswer.submitted_at,
+            submittedAtRange.startAt,
+          ),
+          lte(organizationTrainingAnswer.submitted_at, submittedAtRange.endAt),
+        ),
+      );
+
+    return trainingAnswerSourceRows.flatMap(copyTrainingAnswerSourceRow);
+  };
+}
+
 export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
   options: OrganizationAnalyticsTrainingAnswerSourceGatewayOptions,
 ): OrganizationAnalyticsRepositoryGateway {
@@ -395,6 +505,156 @@ function copyTrainingAnswerSourceSubmission(
       submittedAt,
     },
   ];
+}
+
+function copyTrainingAnswerSourceRow(
+  sourceRow: OrganizationAnalyticsTrainingAnswerSourceRow,
+): OrganizationAnalyticsTrainingAnswerSourceRow[] {
+  const employeePublicId = normalizeRequiredText(sourceRow.employeePublicId);
+  const organizationPublicId = normalizeRequiredText(
+    sourceRow.organizationPublicId,
+  );
+  const organizationTrainingVersionPublicId = normalizeRequiredText(
+    sourceRow.organizationTrainingVersionPublicId,
+  );
+  const submittedAt = normalizeSubmittedAt(sourceRow.submittedAt);
+
+  if (
+    employeePublicId === null ||
+    organizationPublicId === null ||
+    organizationTrainingVersionPublicId === null ||
+    submittedAt === null
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      employeePublicId,
+      organizationPublicId,
+      organizationTrainingVersionPublicId,
+      score: sourceRow.score,
+      totalScore: sourceRow.totalScore,
+      submittedAt,
+    },
+  ];
+}
+
+function resolveVisibleOrganizationPublicIds(input: {
+  assignedRootOrganizationIds: readonly number[];
+  activeOrganizationRows: readonly OrganizationAnalyticsVisibleOrganizationScopeRow[];
+}): string[] {
+  const activeOrganizationRows = input.activeOrganizationRows
+    .map(normalizeVisibleOrganizationScopeRow)
+    .filter(
+      (
+        scopeRow,
+      ): scopeRow is OrganizationAnalyticsVisibleOrganizationScopeRow =>
+        scopeRow !== null,
+    );
+  const activeOrganizationIds = new Set(
+    activeOrganizationRows.map((scopeRow) => scopeRow.organizationId),
+  );
+  const assignedRootOrganizationIds = [
+    ...new Set(
+      input.assignedRootOrganizationIds.filter(
+        (organizationId) =>
+          Number.isInteger(organizationId) &&
+          organizationId > 0 &&
+          activeOrganizationIds.has(organizationId),
+      ),
+    ),
+  ];
+
+  if (assignedRootOrganizationIds.length === 0) {
+    return [];
+  }
+
+  const childOrganizationIdsByParentId = activeOrganizationRows.reduce(
+    (childIdsByParentId, scopeRow) => {
+      if (scopeRow.parentOrganizationId === null) {
+        return childIdsByParentId;
+      }
+
+      const currentChildIds =
+        childIdsByParentId.get(scopeRow.parentOrganizationId) ?? [];
+      childIdsByParentId.set(scopeRow.parentOrganizationId, [
+        ...currentChildIds,
+        scopeRow.organizationId,
+      ]);
+
+      return childIdsByParentId;
+    },
+    new Map<number, number[]>(),
+  );
+  const visibleOrganizationIds = new Set<number>();
+  let pendingOrganizationIds = assignedRootOrganizationIds;
+
+  while (pendingOrganizationIds.length > 0) {
+    const [nextOrganizationId, ...remainingOrganizationIds] =
+      pendingOrganizationIds;
+
+    if (
+      nextOrganizationId === undefined ||
+      visibleOrganizationIds.has(nextOrganizationId)
+    ) {
+      pendingOrganizationIds = remainingOrganizationIds;
+      continue;
+    }
+
+    visibleOrganizationIds.add(nextOrganizationId);
+    pendingOrganizationIds = [
+      ...remainingOrganizationIds,
+      ...(childOrganizationIdsByParentId.get(nextOrganizationId) ?? []),
+    ];
+  }
+
+  return activeOrganizationRows
+    .filter((scopeRow) => visibleOrganizationIds.has(scopeRow.organizationId))
+    .map((scopeRow) => scopeRow.organizationPublicId);
+}
+
+function normalizeVisibleOrganizationScopeRow(
+  scopeRow: OrganizationAnalyticsVisibleOrganizationScopeRow,
+): OrganizationAnalyticsVisibleOrganizationScopeRow | null {
+  const organizationPublicId = normalizeRequiredText(
+    scopeRow.organizationPublicId,
+  );
+
+  if (
+    !Number.isInteger(scopeRow.organizationId) ||
+    scopeRow.organizationId <= 0 ||
+    organizationPublicId === null ||
+    (scopeRow.parentOrganizationId !== null &&
+      (!Number.isInteger(scopeRow.parentOrganizationId) ||
+        scopeRow.parentOrganizationId <= 0))
+  ) {
+    return null;
+  }
+
+  return {
+    organizationId: scopeRow.organizationId,
+    organizationPublicId,
+    parentOrganizationId: scopeRow.parentOrganizationId,
+  };
+}
+
+function normalizeDateRange(dateRange: OrganizationAnalyticsDateRangeDto): {
+  startAt: Date;
+  endAt: Date;
+} | null {
+  const startAt = new Date(dateRange.startAt);
+  const endAt = new Date(dateRange.endAt);
+
+  if (
+    !Number.isFinite(startAt.getTime()) ||
+    !Number.isFinite(endAt.getTime()) ||
+    startAt.getTime() > endAt.getTime()
+  ) {
+    return null;
+  }
+
+  return { startAt, endAt };
 }
 
 function normalizeScoreValue(value: number | string | null): number | null {

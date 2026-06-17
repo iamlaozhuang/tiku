@@ -1,12 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  createOrganizationAnalyticsTrainingAnswerSourceReader,
   createOrganizationAnalyticsPostgresGateway,
+  createOrganizationAnalyticsVisibleOrganizationScopeReader,
   createOrganizationAnalyticsTrainingAnswerSourceGateway,
   createOrganizationAnalyticsRepository,
   createPostgresOrganizationAnalyticsRepository,
+  type OrganizationAnalyticsScopeReadInput,
   type OrganizationAnalyticsRepositoryGateway,
 } from "./organization-analytics-repository";
+import type { RuntimeDatabase } from "./runtime-database";
 
 function createGateway(
   overrides: Partial<OrganizationAnalyticsRepositoryGateway> = {},
@@ -136,6 +140,40 @@ function createScopeInput() {
       startAt: "2026-06-16T00:00:00.000Z",
       endAt: "2026-06-16T23:59:59.000Z",
     },
+  };
+}
+
+type FakeSelectCall = {
+  selectionKeys: string[];
+  from: ReturnType<typeof vi.fn>;
+  innerJoin: ReturnType<typeof vi.fn>;
+  where: ReturnType<typeof vi.fn>;
+};
+
+function createFakeRuntimeDatabase(selectRowsByCall: readonly unknown[][]) {
+  const selectCalls: FakeSelectCall[] = [];
+  const select = vi.fn((selection: Record<string, unknown>) => {
+    const rows = selectRowsByCall[selectCalls.length] ?? [];
+    const queryBuilder = {
+      from: vi.fn(() => queryBuilder),
+      innerJoin: vi.fn(() => queryBuilder),
+      where: vi.fn(async () => rows),
+    };
+
+    selectCalls.push({
+      selectionKeys: Object.keys(selection),
+      from: queryBuilder.from,
+      innerJoin: queryBuilder.innerJoin,
+      where: queryBuilder.where,
+    });
+
+    return queryBuilder;
+  });
+
+  return {
+    database: { select } as unknown as RuntimeDatabase,
+    select,
+    selectCalls,
   };
 }
 
@@ -539,5 +577,112 @@ describe("organization analytics repository", () => {
     await expect(
       gateway.readEmployeeTrainingSummaryInputs(createScopeInput()),
     ).resolves.toEqual([]);
+  });
+
+  it("creates a RuntimeDatabase visible organization scope reader from active admin organization assignments", async () => {
+    const { database, select, selectCalls } = createFakeRuntimeDatabase([
+      [{ organizationId: 101 }],
+      [
+        {
+          organizationId: 101,
+          organizationPublicId: "organization_root_public",
+          parentOrganizationId: null,
+          hiddenField: "hidden root detail",
+        },
+        {
+          organizationId: 102,
+          organizationPublicId: "organization_child_public",
+          parentOrganizationId: 101,
+          hiddenField: "hidden child detail",
+        },
+        {
+          organizationId: 103,
+          organizationPublicId: "organization_grandchild_public",
+          parentOrganizationId: 102,
+          hiddenField: "hidden grandchild detail",
+        },
+        {
+          organizationId: 104,
+          organizationPublicId: "organization_other_public",
+          parentOrganizationId: null,
+          hiddenField: "hidden other detail",
+        },
+      ],
+    ]);
+    const readVisibleOrganizationScope =
+      createOrganizationAnalyticsVisibleOrganizationScopeReader(database);
+
+    const result = await readVisibleOrganizationScope({
+      adminPublicId: " organization_admin_public_001 ",
+    });
+    const blankResult = await readVisibleOrganizationScope({
+      adminPublicId: " ",
+    });
+
+    expect(select).toHaveBeenCalledTimes(2);
+    expect(selectCalls.map((selectCall) => selectCall.selectionKeys)).toEqual([
+      ["organizationId"],
+      ["organizationId", "organizationPublicId", "parentOrganizationId"],
+    ]);
+    expect(selectCalls[0]?.innerJoin).toHaveBeenCalledTimes(2);
+    expect(result).toEqual([
+      "organization_root_public",
+      "organization_child_public",
+      "organization_grandchild_public",
+    ]);
+    expect(blankResult).toBeNull();
+    expect(JSON.stringify(result)).not.toMatch(/hidden|organizationId/u);
+  });
+
+  it("creates a RuntimeDatabase training answer reader with aggregate-only source rows", async () => {
+    const { database, select, selectCalls } = createFakeRuntimeDatabase([
+      [
+        {
+          employeePublicId: " employee_public_001 ",
+          organizationPublicId: "organization_child_public",
+          organizationTrainingVersionPublicId: "training_version_public_001",
+          score: "86.0",
+          totalScore: "100.0",
+          submittedAt: new Date("2026-06-16T02:00:00.000Z"),
+          answerPublicId: "answer_public_hidden_001",
+          detailField: "hidden answer detail",
+          sourceRowId: 901,
+        },
+      ],
+    ]);
+    const readTrainingAnswerSourceRows =
+      createOrganizationAnalyticsTrainingAnswerSourceReader(database);
+
+    const result = await readTrainingAnswerSourceRows(
+      createScopeInput() as OrganizationAnalyticsScopeReadInput,
+    );
+    const blankScopeResult = await readTrainingAnswerSourceRows({
+      ...(createScopeInput() as OrganizationAnalyticsScopeReadInput),
+      organizationPublicId: " ",
+    });
+
+    expect(select).toHaveBeenCalledTimes(1);
+    expect(selectCalls[0]?.selectionKeys).toEqual([
+      "employeePublicId",
+      "organizationPublicId",
+      "organizationTrainingVersionPublicId",
+      "score",
+      "totalScore",
+      "submittedAt",
+    ]);
+    expect(result).toEqual([
+      {
+        employeePublicId: "employee_public_001",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_001",
+        score: "86.0",
+        totalScore: "100.0",
+        submittedAt: "2026-06-16T02:00:00.000Z",
+      },
+    ]);
+    expect(blankScopeResult).toEqual([]);
+    expect(JSON.stringify(result)).not.toMatch(
+      /answer_public_hidden|hidden|detailField|sourceRowId/u,
+    );
   });
 });

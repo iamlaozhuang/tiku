@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-post-visible-scope-source-reader-seeding
-updatedAt: "2026-06-16T21:30:01-07:00"
+currentPhase: advanced-organization-analytics-postgres-gateway-source-readers-tdd
+updatedAt: "2026-06-16T22:04:54-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 4d35e9b75c4d59e75d39c9fcfb50f09cb80db486
   lastKnownOriginMasterSha: 4d35e9b75c4d59e75d39c9fcfb50f09cb80db486
 currentTask:
-  id: advanced-organization-analytics-post-visible-scope-source-reader-seeding
+  id: advanced-organization-analytics-postgres-gateway-source-readers-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
-  branch: codex/advanced-organization-analytics-post-visible-scope-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-source-readers-tdd.md
+  branch: codex/organization-analytics-source-readers-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -657,6 +657,7 @@ qualityGates:
     advancedOrganizationAnalyticsPostQueryGatewayCompositionTaskSeeding: pass_docs_state_seeded_visible_scope_composition_tdd
     advancedOrganizationAnalyticsPostgresGatewayVisibleScopeCompositionTdd: pass_local_validation_fresh_closeout_approved
     advancedOrganizationAnalyticsPostVisibleScopeSourceReaderSeeding: pass_docs_state_seeded_postgres_gateway_source_readers_tdd
+    advancedOrganizationAnalyticsPostgresGatewaySourceReadersTdd: pass_tdd_source_readers_no_db_execution
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -672,11 +673,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-postgres-gateway-visible-scope-composition-tdd` was closed out after fresh user
-    approval with local commit, fast-forward merge to `master`, push to `origin/master`, and short-branch cleanup. The
-    queue now has one pending follow-up: `advanced-organization-analytics-postgres-gateway-source-readers-tdd`. That
-    task must refresh baseline and obtain fresh user approval before claim. It is limited to repository source-reader TDD
-    for typed Postgres gateway inputs and must not enter App Router runtime wiring, service/UI changes, real DB execution,
-    schema/migration, dependency changes, provider/model calls, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/
-    external-service, PR, force push, destructive data operations, drizzle-kit push, or Cost Calibration Gate.
+    `advanced-organization-analytics-postgres-gateway-source-readers-tdd` has local TDD implementation and validation
+    evidence on `codex/organization-analytics-source-readers-tdd`. The user gave fresh approval in the current thread to
+    commit, fast-forward merge to `master`, push `origin/master`, and clean up the short branch. PR and force push remain
+    blocked. A later separately approved task is still required for App Router runtime wiring.
   lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-post-visible-scope-source-reader-seeding.md
