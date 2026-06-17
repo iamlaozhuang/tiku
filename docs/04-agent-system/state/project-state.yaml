@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
-updatedAt: "2026-06-16T17:04:16-07:00"
+currentPhase: advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
+updatedAt: "2026-06-16T17:20:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: a137d2a27736fce8a289dc79b030bc66d50337b1
-  lastKnownOriginMasterSha: a137d2a27736fce8a289dc79b030bc66d50337b1
+  lastKnownMasterSha: e19b556f780ab94d8d8689a11f6322b3a8a8ab57
+  lastKnownOriginMasterSha: e19b556f780ab94d8d8689a11f6322b3a8a8ab57
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
+  id: advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd.md
-  branch: codex/advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
+  branch: codex/advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -660,13 +660,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding` seeded
-    `advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd` as the next pending task. The pending
-    task is dashboard summary route runtime wiring only and must keep App Router files as thin adapters per ADR-002.
-    Future UI/navigation/route-guard tasks may consume
-    `standingLocalE2ESmokeAllowlistApproval` only when they declare `localE2EValidation:
-    approved_local_only_existing_specs`, `localE2ESmokeTier: safe_smoke`, and a command targeting one of the allowlisted
-    safe smoke specs. Route runtime wiring, service/repository runtime changes, schema/migration, DB execution,
-    provider/model calls, dependencies, full e2e suites, staging/prod/cloud/deploy/payment/external-service, PR,
-    force-push, and Cost Calibration Gate remain blocked unless a future scoped task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-route-runtime-wiring-tdd-seeding.md
+    `advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding` seeded
+    `advanced-organization-analytics-dashboard-summary-real-runtime-boundary-readonly-audit` as the next pending task.
+    The pending task is a readonly boundary audit only. It must inspect whether real dashboard summary route runtime
+    wiring can be safely specified after the current fail-closed App Router route, without changing source code or
+    entering auth/session integration, repository factory wiring, DB access, schema/migration, provider/model,
+    dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force-push, or Cost
+    Calibration Gate work.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-boundary-audit-seeding.md
