@@ -29362,3 +29362,190 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+
+  - id: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+    title: Advanced organization analytics repository factory boundary TDD seeding
+    phase: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: implementation_queue_seeding
+    moduleRunVersion: 2
+    status: closed
+    result: pass
+    retryCount: 0
+    claimedAt: "2026-06-16T18:35:00-07:00"
+    closedAt: "2026-06-16T18:35:00-07:00"
+    branch: codex/advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+    dependencies:
+      - advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+    humanApproval: >-
+      User approved executing this docs/state-only seeding task in the current Codex thread by saying "批准执行".
+      Approval is limited to task plan/evidence/audit creation, durable state updates, seeding one pending repository
+      factory boundary TDD task, declared local validation, local commit, fast-forward merge to master, push
+      origin/master, merged short-branch cleanup, and fetch prune. Product source implementation, real DB access,
+      App Router real runtime wiring, service business logic changes, schema/migration, package/lockfile/dependency
+      changes, provider/model calls, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR,
+      force push, and Cost Calibration Gate remain blocked.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/repositories/organization-analytics-repository.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - product source implementation
+      - real DB access or database connection execution
+      - App Router real runtime wiring
+      - service business logic changes
+      - schema/migration
+      - dependency changes
+      - UI changes
+      - e2e/browser/dev-server
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-postgres-repository-factory-boundary-tdd","status: pending","src/server/repositories/organization-analytics-repository.ts","src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+
+  - id: advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+    title: Advanced organization analytics Postgres repository factory boundary TDD
+    phase: advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: local_repository_contract_implementation
+    moduleRunVersion: 2
+    seededImplementationTask: true
+    autoDriveLocalImplementationApproval: pending_fresh_user_approval
+    status: pending
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+      - advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is TDD implementation limited to the organization
+      analytics Postgres repository factory boundary contract. The task may evolve
+      `src/server/repositories/organization-analytics-repository.ts` and add
+      `src/server/repositories/organization-analytics-repository.test.ts` so repository factory inputs, fail-closed
+      missing-dependency behavior, and aggregate-only reader delegation are explicit and testable without executing a
+      real database connection. It must not access a database, instantiate a real runtime route, change service
+      business logic, change mapper/validator/contract/model files, modify schema/migration/drizzle/package/lockfile,
+      or run e2e/browser/dev-server.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-repository-factory-boundary-tdd.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/repositories/organization-analytics-repository.test.ts
+    readonlyFiles:
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/validators/organization-analytics.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/app/**
+      - src/server/services/**
+      - src/server/models/**
+      - src/server/mappers/**
+      - src/server/validators/**
+      - src/server/contracts/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - real DB access or database connection execution
+      - App Router real runtime wiring
+      - route runtime code changes
+      - service business logic changes
+      - mapper/validator/contract/model changes
+      - schema/migration
+      - dependency changes
+      - UI changes
+      - e2e/browser/dev-server
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - row/private data exposure
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_user_approval
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/repositories/organization-analytics-repository.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-repository-factory-boundary-tdd
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-repository-factory-boundary-tdd

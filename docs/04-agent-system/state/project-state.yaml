@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
-updatedAt: "2026-06-16T18:26:41-07:00"
+currentPhase: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
+updatedAt: "2026-06-16T18:35:00-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 6b96c14c9130a9127a01f7b4dba1767037a41430
-  lastKnownOriginMasterSha: 6b96c14c9130a9127a01f7b4dba1767037a41430
+  lastKnownMasterSha: e9d85f9b277f467c8f7e859a511808bef43b588b
+  lastKnownOriginMasterSha: e9d85f9b277f467c8f7e859a511808bef43b588b
 currentTask:
-  id: advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+  id: advanced-organization-analytics-repository-factory-boundary-tdd-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
-  branch: codex/advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
+  branch: codex/advanced-organization-analytics-repository-factory-boundary-tdd-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -645,6 +645,7 @@ qualityGates:
     advancedOrganizationAnalyticsDashboardSummaryRouteRuntimeWiringTddSeeding: pass_docs_state_seeded_dashboard_summary_route_runtime_tdd
     standingDocsStateFastLaneCloseoutUpgrade: pass_docs_state_authorization_upgrade
     standingLocalE2ESmokeAllowlistAuthorizationUpgrade: pass_docs_state_smoke_allowlist_authorization_upgrade
+    advancedOrganizationAnalyticsRepositoryFactoryBoundaryTddSeeding: pass_docs_state_seeded_repository_factory_boundary_tdd
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -660,10 +661,9 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd` closed the injected runtime
-    composition contract while keeping the App Router dashboard summary route fail-closed by default. The next step
-    should be a separate scoped task for the organization analytics Postgres repository factory boundary or a readonly
-    audit that decides the repository factory source inputs. Direct DB access, App Router real runtime wiring,
-    schema/migration, provider/model, dependency, e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service,
-    PR, force-push, and Cost Calibration Gate remain blocked until a later task explicitly permits them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-dashboard-summary-runtime-composition-contract-tdd.md
+    `advanced-organization-analytics-repository-factory-boundary-tdd-seeding` seeded the next pending task:
+    `advanced-organization-analytics-postgres-repository-factory-boundary-tdd`. The next step is to execute that
+    pending task with TDD, limited to repository factory boundary contract and unit tests. Direct DB access, App Router
+    real runtime wiring, service business logic, schema/migration, provider/model, dependency, e2e/browser/dev-server,
+    staging/prod/cloud/deploy/payment/external-service, PR, force-push, and Cost Calibration Gate remain blocked.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-repository-factory-boundary-tdd-seeding.md
