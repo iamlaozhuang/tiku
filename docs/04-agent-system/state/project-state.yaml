@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: local-experience-bridge-proposal-diagnostic
-updatedAt: "2026-06-17T15:21:12-07:00"
+currentPhase: module-run-v2-cross-role-local-flow-planning
+updatedAt: "2026-06-17T15:37:31-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: c48bfe279e3c9d537ab855e0c52bd92f09d3cb87
-  lastKnownOriginMasterSha: c48bfe279e3c9d537ab855e0c52bd92f09d3cb87
+  lastKnownMasterSha: 9597d592dd64f655147ea23726a7fe89b5de563d
+  lastKnownOriginMasterSha: 9597d592dd64f655147ea23726a7fe89b5de563d
 currentTask:
-  id: local-experience-bridge-proposal-diagnostic
+  id: module-run-v2-cross-role-local-flow-planning
   status: closed
-  sourceStory: user-approved-mechanism-maintenance
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-local-experience-bridge-proposal-diagnostic.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-local-experience-bridge-proposal-diagnostic.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-local-experience-bridge-proposal-diagnostic.md
-  branch: codex/local-experience-bridge-proposal-diagnostic
+  sourceStory: localExperienceClosureGate.acceptanceBridgePlan
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-cross-role-local-flow-planning.md
+  branch: codex/cross-role-local-flow-planning
   commitSha: null
   prUrl: null
   retryCount: 0
