@@ -31374,3 +31374,216 @@ tasks:
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-tdd
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-tdd
+  - id: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+    title: Advanced organization analytics employee statistics route contract readonly recheck seeding
+    phase: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: queue_seeding
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    status: closed
+    result: pass_docs_state_seeded_employee_statistics_route_contract_readonly_recheck
+    retryCount: 0
+    claimedAt: "2026-06-16T23:29:31-07:00"
+    closedAt: "2026-06-16T23:29:31-07:00"
+    dependencies:
+      - advanced-organization-analytics-employee-statistics-route-contract-tdd
+    humanApprovalBoundary: >-
+      User-approved docs/state-only seeding task after employee statistics route-contract TDD. Scope is limited to
+      turning the latest handoff into one pending readonly recheck task for employee statistics route contract safety.
+      Product source/test implementation, runtime Postgres wiring, real database execution, export, UI, schema/migration/
+      drizzle, dependency, provider/model, browser/e2e/dev-server, staging/prod/cloud/deploy/payment/external-service,
+      PR, force push, quota/cost, and Cost Calibration Gate remain blocked.
+    humanApproval: >-
+      User approved executing this docs/state-only seeding task in the current 2026-06-16 Codex thread by saying
+      "批准执行，完成后批准提交合入推送并清理，然后再推荐下一步工作内容。" Approval is limited to task plan/evidence/audit creation,
+      durable state and queue updates, declared local validation, local commit, fast-forward merge to master, push
+      origin/master, merged short-branch cleanup, fetch prune, and next-work recommendation.
+    seedDecision: >-
+      Seed `advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck` because the employee
+      statistics route contract has landed and should be independently rechecked before runtime wiring is considered.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/code-stage-task-seeding-governance.md
+      - docs/04-agent-system/sop/docs-only-fast-lane-governance.md
+      - docs/04-agent-system/sop/task-lifecycle-governance.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - implementation
+      - runtime Postgres wiring
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - export behavior
+      - UI
+      - schema/migration/drizzle
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - PR
+      - force push
+      - quota/cost measurement or Cost Calibration Gate
+    closeoutPolicy:
+      localCommit: approved_by_user_prompt_2026_06_16
+      fastForwardMerge:
+        approved: true
+        targetBranch: master
+      push:
+        approved: true
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - 'Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding","status: closed","advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck","status: pending"'
+      - 'powershell.exe -NoProfile -Command "if ((Select-String -Path ''docs/04-agent-system/state/task-queue.yaml'' -Pattern ''^    status: pending$'' | Measure-Object).Count -ne 1) { throw ''Expected exactly one pending task'' }"'
+      - node_modules/.bin/prettier.cmd --check docs/04-agent-system/state/project-state.yaml docs/04-agent-system/state/task-queue.yaml docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+
+  - id: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck
+    title: Advanced organization analytics employee statistics route contract readonly recheck
+    phase: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: readonly_recheck
+    moduleRunVersion: 2
+    fastLaneEligible: true
+    fastLaneLane: docs_only
+    seededByTask: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+    status: pending
+    result: null
+    retryCount: 0
+    claimedAt: null
+    closedAt: null
+    dependencies:
+      - advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+      - advanced-organization-analytics-employee-statistics-route-contract-tdd
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is a readonly recheck of the employee statistics
+      route contract after TDD closeout. The review must inspect import safety, summary-only redaction, admin fail-closed
+      behavior, App Router thin entrypoint posture, and blocked gate preservation. It may update docs/state/evidence/audit
+      only. It must not modify product source/tests, add runtime Postgres wiring, execute a real database connection,
+      expose row/private data or public identifier inventories, add export behavior, add UI, change schema/migration/
+      drizzle, change package/lockfile/dependencies, call providers/models, run e2e/browser/dev-server, touch staging/
+      prod/cloud/deploy/payment/external-service, create/update PRs, force push, run quota/cost measurement, or execute
+      Cost Calibration Gate.
+    sourceRequirement:
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/01-requirements/advanced-edition/modules/05-organization-analytics.md
+      - docs/01-requirements/advanced-edition/stories/epic-03-employee-answer-statistics.md
+      - docs/superpowers/plans/2026-06-06-advanced-edition-organization-analytics-implementation-plan.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
+      - src/server/services/organization-analytics-route.ts
+      - src/server/services/organization-analytics-route.test.ts
+      - src/app/api/v1/organization-analytics/employee-statistics/route.ts
+      - src/server/contracts/organization-analytics-contract.ts
+      - src/server/mappers/organization-analytics-mapper.ts
+      - src/server/validators/organization-analytics.ts
+    blockedFiles:
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - e2e/**
+      - tests/**
+      - src/db/schema/**
+      - drizzle/**
+      - scripts/**
+      - materials/**
+      - paper_assets/**
+      - playwright-report/**
+      - test-results/**
+    blockedGates:
+      - implementation
+      - runtime Postgres wiring
+      - real database access or database connection execution
+      - row/private data exposure
+      - public identifier inventories
+      - employee answer detail, question text, standard answer, analysis, item-level correctness, mistake detail, prompt text, provider payload, or raw model output exposure
+      - export route, export command, generated export file, export download, or object storage
+      - repository/model/contract/mapper/validator business contract changes
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
+      localCommit: requires_fresh_approval_after_validation
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - npm.cmd run test:unit -- "src/server/services/organization-analytics-route.test.ts"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck

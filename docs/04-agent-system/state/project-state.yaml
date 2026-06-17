@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-employee-statistics-route-contract-tdd
-updatedAt: "2026-06-16T23:17:42-07:00"
+currentPhase: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
+updatedAt: "2026-06-16T23:29:31-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,13 +436,13 @@ repository:
   lastKnownMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
   lastKnownOriginMasterSha: 17f9b2d6534454aba5efe18ce2658a4f0d3030eb
 currentTask:
-  id: advanced-organization-analytics-employee-statistics-route-contract-tdd
+  id: advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
-  branch: codex/organization-analytics-employee-statistics-route
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
+  branch: codex/organization-analytics-employee-route-recheck-seeding
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -664,6 +664,7 @@ qualityGates:
     advancedOrganizationAnalyticsDashboardSummaryPostgresRuntimeWiringReadonlyRecheck: pass_readonly_recheck_no_blocking_findings
     advancedOrganizationAnalyticsNextImplementationQueueSeedingPostRuntimeReadonlyRecheck: pass_docs_state_seeded_employee_statistics_route_contract_tdd
     advancedOrganizationAnalyticsEmployeeStatisticsRouteContractTdd: pass_tdd_employee_statistics_route_contract_no_runtime_wiring
+    advancedOrganizationAnalyticsEmployeeStatisticsRouteContractReadonlyRecheckSeeding: pass_docs_state_seeded_employee_statistics_route_contract_readonly_recheck
 riskGates:
   requireHumanApproval:
     - add_dependency
@@ -679,7 +680,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After `advanced-organization-analytics-employee-statistics-route-contract-tdd`, run a fresh-baseline docs/state-only
-    queue seeding task to choose the next organization analytics implementation or readonly recheck slice. Do not claim
-    new product work without a queued pending task and fresh approval where required.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-tdd.md
+    `advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck` is the next pending
+    organization analytics task. It should be claimed only with fresh approval, on a short-lived branch, as a readonly
+    recheck of employee statistics route contract import safety, summary-only redaction, admin fail-closed behavior, and
+    blocked gate preservation before runtime wiring is considered.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-employee-statistics-route-contract-readonly-recheck-seeding.md
