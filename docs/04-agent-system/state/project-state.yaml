@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T13:40:15-07:00"
+updatedAt: "2026-06-17T13:52:44-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: df880547241f0b83b46a6ce6236468584eef2742
   lastKnownOriginMasterSha: df880547241f0b83b46a6ce6236468584eef2742
 currentTask:
-  id: module-run-v2-personal-ai-local-transport-contract-planning
+  id: module-run-v2-personal-ai-local-ui-browser-planning
   status: closed
   sourceStory: user-approved-mechanism-maintenance
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
-  branch: codex/personal-ai-transport-contract-planning
-  commitSha: 9160003b6c2356fe9c134987db415a443faabad7
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
+  branch: codex/personal-ai-ui-browser-planning
+  commitSha: pending-closeout-commit
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -714,10 +714,11 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    After this L4 transport contract planning reconciliation is merged, pushed, and cleaned, recommend asking for a
-    fresh localExperienceAcceptanceBridgeApproved approval for the next bridge step:
-    `module-run-v2-personal-ai-local-ui-browser-planning`.
+    After this L5 UI/browser planning reconciliation is merged, pushed, and cleaned, recommend a narrow local-unit task
+    to align the legacy personal AI UI unit test with the current redaction policy. After that passes, ask for a fresh
+    localExperienceAcceptanceBridgeApproved plus localFullFlowGate approved_localhost_only approval for an explicit
+    local full-flow validation task such as `module-run-v2-personal-ai-local-ui-browser-flow-validation`.
     Keep schema/drizzle/provider/model, dependency/package/lockfile, env/secret,
     staging/prod/cloud/deploy/payment/external-service, PR/force-push, and Cost Calibration Gate blocked unless a
     future task explicitly approves them.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-transport-contract-planning.md
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-17-module-run-v2-personal-ai-local-ui-browser-planning.md
