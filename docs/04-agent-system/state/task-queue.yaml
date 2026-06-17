@@ -29762,9 +29762,12 @@ tasks:
     sourceStory: advanced-edition-organization-analytics
     taskKind: readonly_audit
     moduleRunVersion: 2
-    status: pending
-    result: null
+    status: closed
+    result: pass_with_schema_migration_planning_followup_seeded
     retryCount: 0
+    claimedAt: "2026-06-16T19:10:00-07:00"
+    closedAt: "2026-06-16T19:10:00-07:00"
+    branch: codex/advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
     dependencies:
       - advanced-organization-analytics-postgres-gateway-source-input-decision
     humanApprovalBoundary: >-
@@ -29777,6 +29780,15 @@ tasks:
       change package/lockfile/dependencies, call providers/models, run e2e/browser/dev-server, touch
       staging/prod/cloud/deploy/payment/external-service surfaces, create/update PRs, force push, or execute Cost
       Calibration Gate.
+    humanApproval: >-
+      User approved executing this readonly/docs gap decision task in the current Codex thread by saying "批准执行".
+      Approval is limited to task claim, task plan/evidence/audit creation, durable state updates, readonly inspection
+      of declared source/schema references, deciding whether the current schema can support official organization
+      training employee submissions, seeding one pending docs-only schema/migration planning task, and declared local
+      validation. Product source implementation, query implementation, DB access, route/service/repository/UI runtime
+      changes, schema/migration changes, package/lockfile/dependency changes, provider/model calls,
+      e2e/browser/dev-server, staging/prod/cloud/deploy/payment/external-service, PR, force push, merge to master,
+      push to origin/master, and Cost Calibration Gate remain blocked.
     planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision.md
     evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision.md
     auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision.md
@@ -29830,6 +29842,99 @@ tasks:
       - PR
       - force push
     closeoutPolicy:
+      localCommit: requires_fresh_approval_after_validation
+      fastForwardMerge:
+        approved: false
+        targetBranch: master
+      push:
+        approved: false
+        target: origin/master
+      cleanup:
+        deleteShortBranch: true
+        fetchPruneAfterPush: true
+    validationCommands:
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision","status: closed","readonly_audit"
+      - git diff --check
+      - npm.cmd run lint
+      - npm.cmd run typecheck
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+
+  - id: advanced-organization-analytics-training-answer-source-schema-migration-planning
+    title: Advanced organization analytics training answer source schema migration planning
+    phase: advanced-organization-analytics-training-answer-source-schema-migration-planning
+    sourceStory: advanced-edition-organization-analytics
+    taskKind: docs_schema_migration_planning
+    moduleRunVersion: 2
+    status: pending
+    result: null
+    retryCount: 0
+    dependencies:
+      - advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+    humanApprovalBoundary: >-
+      Pending only. Requires fresh user approval before claim. Scope is docs-only schema/migration planning for the
+      missing organization training employee answer/submission source required by the real organization analytics
+      Postgres gateway. The task may inspect declared source/schema references and prior redacted evidence, then write a
+      migration approval package describing proposed tables/fields/indexes/rollback and validation gates. It must not
+      modify `src/db/schema/**`, `drizzle/**`, source runtime files, package/lockfile/dependencies, or execute
+      `drizzle-kit`, database connections, migrations, e2e/browser/dev-server, provider/model calls,
+      staging/prod/cloud/deploy/payment/external-service work, PR, force push, or Cost Calibration Gate.
+    planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+    evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+    auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+    allowedFiles:
+      - docs/04-agent-system/state/project-state.yaml
+      - docs/04-agent-system/state/task-queue.yaml
+      - docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-training-answer-source-schema-migration-planning.md
+    readonlyFiles:
+      - AGENTS.md
+      - docs/03-standards/code-taste-ten-commandments.md
+      - docs/02-architecture/adr/**
+      - docs/04-agent-system/sop/dependency-introduction-gate.md
+      - docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision.md
+      - docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision.md
+      - src/server/repositories/organization-analytics-repository.ts
+      - src/server/services/organization-analytics-service.ts
+      - src/db/schema/auth.ts
+      - src/db/schema/organization-training.ts
+      - src/db/schema/student-experience.ts
+      - src/db/schema/ai-rag.ts
+      - src/db/schema/system.ts
+    blockedFiles:
+      - .env.local
+      - .env.example
+      - .env.*
+      - package.json
+      - pnpm-lock.yaml
+      - package-lock.yaml
+      - package-lock.json
+      - src/**
+      - src/db/schema/**
+      - drizzle/**
+      - e2e/**
+      - scripts/**
+    blockedGates:
+      - implementation
+      - query implementation
+      - real DB access or database connection execution
+      - row/private data exposure
+      - source modifications
+      - schema/migration changes
+      - drizzle command execution
+      - dependency changes
+      - provider/model calls or provider configuration
+      - provider payloads, raw prompts, or raw answers
+      - publicId lists
+      - e2e/browser/dev-server
+      - staging/prod/cloud/deploy/payment/external-service
+      - quota/cost measurement or Cost Calibration Gate
+      - PR
+      - force push
+    closeoutPolicy:
       localCommit: requires_fresh_approval_after_claim
       fastForwardMerge:
         approved: false
@@ -29841,11 +29946,11 @@ tasks:
         deleteShortBranch: true
         fetchPruneAfterPush: true
     validationCommands:
-      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision","status: pending","readonly_audit"
+      - Select-String -Path docs/04-agent-system/state/task-queue.yaml -Pattern "advanced-organization-analytics-training-answer-source-schema-migration-planning","status: pending","docs_schema_migration_planning"
       - git diff --check
       - npm.cmd run lint
       - npm.cmd run typecheck
       - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-GitCompletionReadiness.ps1 -BaseBranch master
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
-      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-postgres-gateway-training-answer-source-gap-decision
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PreCommitHardening.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2ModuleCloseoutReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration-planning
+      - powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\agent-system\Test-ModuleRunV2PrePushReadiness.ps1 -TaskId advanced-organization-analytics-training-answer-source-schema-migration-planning
