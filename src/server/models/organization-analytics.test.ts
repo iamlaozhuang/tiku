@@ -55,6 +55,41 @@ describe("organization analytics aggregate metrics", () => {
     });
   });
 
+  it("ignores official submissions from employees outside the eligible organization scope", () => {
+    const metrics = createOrganizationTrainingAggregateMetrics({
+      eligibleEmployeePublicIds: ["employee_public_a", "employee_public_b"],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_a",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-10T09:30:00Z",
+        },
+        {
+          employeePublicId: "employee_public_outside_scope",
+          score: 100,
+          totalScore: 100,
+          submittedAt: "2026-06-10T10:30:00Z",
+        },
+      ],
+      dateRange: {
+        startAt: "2026-06-10T00:00:00Z",
+        endAt: "2026-06-12T23:59:59Z",
+      },
+    });
+
+    expect(metrics).toEqual({
+      eligibleEmployeeCount: 2,
+      submittedEmployeeCount: 1,
+      unfinishedEmployeeCount: 1,
+      completionRate: 0.5,
+      averageScore: 86,
+      maxScore: 86,
+      minScore: 86,
+      submittedTrend: [{ date: "2026-06-10", submittedCount: 1 }],
+    });
+  });
+
   it("returns zero completion and null score summaries for empty inputs", () => {
     const metrics = createOrganizationTrainingAggregateMetrics({
       eligibleEmployeePublicIds: [],

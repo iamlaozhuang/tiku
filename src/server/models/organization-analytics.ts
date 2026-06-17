@@ -160,8 +160,11 @@ export function createOrganizationTrainingAggregateMetrics(
   const eligibleEmployeePublicIds = [
     ...new Set(input.eligibleEmployeePublicIds),
   ];
+  const eligibleEmployeePublicIdSet = new Set(eligibleEmployeePublicIds);
   const officialSubmissionsInRange = input.officialSubmissions.filter(
-    (submission) => isWithinDateRange(submission.submittedAt, input.dateRange),
+    (submission) =>
+      eligibleEmployeePublicIdSet.has(submission.employeePublicId) &&
+      isWithinDateRange(submission.submittedAt, input.dateRange),
   );
   const submittedEmployeeCount = new Set(
     officialSubmissionsInRange.map((submission) => submission.employeePublicId),

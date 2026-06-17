@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-204-organization-training-audit-log-redacted-reference
+  id: batch-205-organization-analytics-aggregate-only-organization-metrics
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: pending-task-plan
-  evidencePath: docs/05-execution-logs/evidence/batch-204-organization-training-audit-log-redacted-reference.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-204-organization-training-audit-log-redacted-reference.md
-  branch: codex/batch-204-organization-training-audit-log
-  commitSha: 452dfd431479ed76610d69757ec11cc408f1ec32
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-205-organization-analytics-aggregate-only-organization-metrics.md
+  evidencePath: docs/05-execution-logs/evidence/batch-205-organization-analytics-aggregate-only-organization-metrics.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-205-organization-analytics-aggregate-only-organization-metrics.md
+  branch: codex/organization-analytics-batch-205-aggregate-metrics
+  commitSha: null
   prUrl: null
   retryCount: 0
   lastFailurePath: null
@@ -627,6 +627,7 @@ qualityGates:
     advancedOrganizationAnalyticsNextImplementationQueueSeeding: pass_auto_seed_transaction_self_review
     advancedOrganizationAnalyticsAutoSeedReadinessEvidenceNormalization: pass_docs_only_auto_seed_readiness_normalization
     batch185OrganizationAnalyticsAggregateOnlyOrganizationMetrics: pass_tdd_aggregate_only_organization_metrics
+    batch205OrganizationAnalyticsAggregateOnlyOrganizationMetrics: pass_tdd_eligible_scope_filter
     batch186OrganizationAnalyticsPrivacyPreservingEmployeeStatistics: pass_tdd_privacy_preserving_employee_statistics
     batch187OrganizationAnalyticsExportReadinessContracts: pass_tdd_export_readiness_contracts_without_object_storage
     batch188OrganizationAnalyticsAuditLogRedactedReference: pass_tdd_redacted_audit_log_reference
