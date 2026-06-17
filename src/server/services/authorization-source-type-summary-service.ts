@@ -84,6 +84,7 @@ function mapAuthorizationSourceTypeSummaryToDto(
   return {
     userPublicId: input.userPublicId,
     runtimeStatus: "local_contract_only",
+    sourceSummaryStatus: "personal_org_summary",
     sourceTypeSummary: countSources(input),
     effectiveWindow: {
       earliestStartsAt: new Date(Math.min(...startsAtValues)).toISOString(),

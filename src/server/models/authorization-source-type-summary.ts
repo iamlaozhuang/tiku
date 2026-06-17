@@ -4,6 +4,9 @@ import type { EffectiveAuthorizationEdition } from "../contracts/effective-autho
 
 export type AuthorizationSourceTypeSummaryRuntimeStatus = "local_contract_only";
 
+export type AuthorizationSourceTypeSummaryAggregateStatus =
+  "personal_org_summary";
+
 export type AuthorizationSourceTypeSummaryStatus = "source_summary_only";
 
 export type AuthorizationSourceTypeSummarySource = {

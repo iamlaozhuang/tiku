@@ -62,6 +62,7 @@ describe("authorization source type summary service", () => {
       data: {
         userPublicId: "user_public_123",
         runtimeStatus: "local_contract_only",
+        sourceSummaryStatus: "personal_org_summary",
         sourceTypeSummary: {
           totalCount: 3,
           personalAuthCount: 1,

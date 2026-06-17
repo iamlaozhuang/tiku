@@ -5,6 +5,7 @@ import type {
   EffectiveAuthorizationOwnerType,
 } from "./effective-authorization-contract";
 import type {
+  AuthorizationSourceTypeSummaryAggregateStatus,
   AuthorizationSourceTypeSummaryRuntimeStatus,
   AuthorizationSourceTypeSummaryStatus,
 } from "../models/authorization-source-type-summary";
@@ -43,6 +44,7 @@ export type AuthorizationSourceTypeDto = {
 export type AuthorizationSourceTypeSummaryDto = {
   userPublicId: string;
   runtimeStatus: AuthorizationSourceTypeSummaryRuntimeStatus;
+  sourceSummaryStatus: AuthorizationSourceTypeSummaryAggregateStatus;
   sourceTypeSummary: AuthorizationSourceTypeSummaryCountDto;
   effectiveWindow: AuthorizationSourceTypeEffectiveWindowDto;
   sourceTypes: AuthorizationSourceTypeDto[];

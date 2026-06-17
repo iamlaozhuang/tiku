@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T04:54:59-07:00"
+updatedAt: "2026-06-17T05:04:51-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-189-authorization-and-access-authorization-read-model-and-display-contrac
+  id: batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-189-authorization-and-access-authorization-read-model-and-display-contract.md
-  evidencePath: docs/05-execution-logs/evidence/batch-189-authorization-and-access-authorization-read-model-and-display-contrac.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-189-authorization-and-access-authorization-read-model-and-display-contrac.md
-  branch: codex/batch-189-authorization-display-contract
-  commitSha: cf568ddfb407444bfd50aa8a79f8e6aa7a41a4c2
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  evidencePath: docs/05-execution-logs/evidence/batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
+  branch: codex/batch-190-auth-source-summary
+  commitSha: ebc582dcf58f50a19054271640708ead68df8f9a
   prUrl: null
   retryCount: 0
   lastFailurePath: null
