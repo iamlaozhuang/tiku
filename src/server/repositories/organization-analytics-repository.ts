@@ -3,6 +3,7 @@ import type {
   OrganizationAnalyticsEmployeeTrainingSummaryInput,
   OrganizationAnalyticsExportReadinessRow,
   OrganizationTrainingAggregateMetricsInput,
+  OrganizationTrainingOfficialSubmission,
 } from "../models/organization-analytics";
 
 export type OrganizationAnalyticsVisibleOrganizationScopeLookupInput = {
@@ -102,6 +103,23 @@ export type OrganizationAnalyticsRepository = {
 
 export type OrganizationAnalyticsPostgresRepositoryFactoryOptions = {
   gateway?: OrganizationAnalyticsRepositoryGateway | null;
+};
+
+export type OrganizationAnalyticsTrainingAnswerSourceRow = {
+  employeePublicId: string;
+  organizationPublicId: string;
+  organizationTrainingVersionPublicId: string;
+  score: number | string | null;
+  totalScore: number | string | null;
+  submittedAt: Date | string | null;
+};
+
+export type OrganizationAnalyticsTrainingAnswerSourceReader = (
+  input: OrganizationAnalyticsScopeReadInput,
+) => Promise<readonly OrganizationAnalyticsTrainingAnswerSourceRow[]>;
+
+export type OrganizationAnalyticsTrainingAnswerSourceGatewayOptions = {
+  readTrainingAnswerSourceRows: OrganizationAnalyticsTrainingAnswerSourceReader;
 };
 
 export function createOrganizationAnalyticsRepository(
@@ -225,6 +243,63 @@ export function createPostgresOrganizationAnalyticsRepository(
     : createOrganizationAnalyticsRepository(options.gateway);
 }
 
+export function createOrganizationAnalyticsTrainingAnswerSourceGateway(
+  options: OrganizationAnalyticsTrainingAnswerSourceGatewayOptions,
+): OrganizationAnalyticsRepositoryGateway {
+  return {
+    async findVisibleOrganizationScopeByAdminPublicId() {
+      return null;
+    },
+
+    async readTrainingAggregateMetricsInput(input) {
+      const readInput = normalizeScopeReadInput(input);
+
+      if (readInput === null) {
+        return null;
+      }
+
+      const trainingAnswerSourceRows =
+        await options.readTrainingAnswerSourceRows(readInput);
+      const officialSubmissions = trainingAnswerSourceRows.flatMap(
+        (trainingAnswerSourceRow) =>
+          copyTrainingAnswerSourceSubmission(
+            trainingAnswerSourceRow,
+            readInput,
+          ),
+      );
+
+      if (officialSubmissions.length === 0) {
+        return null;
+      }
+
+      return {
+        eligibleEmployeePublicIds: normalizePublicIdList(
+          officialSubmissions.map(
+            (officialSubmission) => officialSubmission.employeePublicId,
+          ),
+        ),
+        officialSubmissions,
+      };
+    },
+
+    async readEmployeeTrainingSummaryInputs() {
+      return [];
+    },
+
+    async readFormalLearningSummary() {
+      return null;
+    },
+
+    async readQuotaSummary() {
+      return null;
+    },
+
+    async readExportReadinessRows() {
+      return [];
+    },
+  };
+}
+
 function createUnavailableOrganizationAnalyticsRepository(): OrganizationAnalyticsRepository {
   return {
     async lookupVisibleOrganizationScope() {
@@ -246,6 +321,83 @@ function createUnavailableOrganizationAnalyticsRepository(): OrganizationAnalyti
       return [];
     },
   };
+}
+
+function copyTrainingAnswerSourceSubmission(
+  sourceRow: OrganizationAnalyticsTrainingAnswerSourceRow,
+  input: OrganizationAnalyticsScopeReadInput,
+): OrganizationTrainingOfficialSubmission[] {
+  const employeePublicId = normalizeRequiredText(sourceRow.employeePublicId);
+  const organizationPublicId = normalizeRequiredText(
+    sourceRow.organizationPublicId,
+  );
+  const score = normalizeScoreValue(sourceRow.score);
+  const totalScore = normalizeScoreValue(sourceRow.totalScore);
+  const submittedAt = normalizeSubmittedAt(sourceRow.submittedAt);
+
+  if (
+    employeePublicId === null ||
+    organizationPublicId === null ||
+    score === null ||
+    totalScore === null ||
+    submittedAt === null ||
+    totalScore <= 0 ||
+    !input.scopeOrganizationPublicIds.includes(organizationPublicId) ||
+    !isSubmittedAtWithinDateRange(submittedAt, input.dateRange)
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      employeePublicId,
+      score,
+      totalScore,
+      submittedAt,
+    },
+  ];
+}
+
+function normalizeScoreValue(value: number | string | null): number | null {
+  const score =
+    typeof value === "string" ? Number(value.trim()) : (value ?? Number.NaN);
+
+  return Number.isFinite(score) && score >= 0 ? score : null;
+}
+
+function normalizeSubmittedAt(value: Date | string | null): string | null {
+  if (value instanceof Date) {
+    return Number.isFinite(value.getTime()) ? value.toISOString() : null;
+  }
+
+  const submittedAt = normalizeRequiredText(value ?? "");
+
+  if (submittedAt === null) {
+    return null;
+  }
+
+  const submittedTime = Date.parse(submittedAt);
+
+  return Number.isFinite(submittedTime)
+    ? new Date(submittedTime).toISOString()
+    : null;
+}
+
+function isSubmittedAtWithinDateRange(
+  submittedAt: string,
+  dateRange: OrganizationAnalyticsDateRangeDto,
+): boolean {
+  const submittedTime = Date.parse(submittedAt);
+  const startTime = Date.parse(dateRange.startAt);
+  const endTime = Date.parse(dateRange.endAt);
+
+  return (
+    Number.isFinite(submittedTime) &&
+    Number.isFinite(startTime) &&
+    Number.isFinite(endTime) &&
+    submittedTime >= startTime &&
+    submittedTime <= endTime
+  );
 }
 
 function normalizeRequiredText(value: string): string | null {

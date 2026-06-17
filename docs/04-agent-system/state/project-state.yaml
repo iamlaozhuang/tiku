@@ -1,8 +1,8 @@
 ﻿schemaVersion: 1
 project:
   name: tiku
-currentPhase: advanced-organization-analytics-gateway-query-task-seeding
-updatedAt: "2026-06-16T19:56:13-07:00"
+currentPhase: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
+updatedAt: "2026-06-16T20:43:58-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -433,16 +433,16 @@ taskRegistry:
   path: docs/04-agent-system/state/task-queue.yaml
 repository:
   shaSemantics: accepted_ancestor_checkpoint
-  lastKnownMasterSha: 016aa5ca3609cb4fb51c8b3d6f143e830ceb07de
-  lastKnownOriginMasterSha: 016aa5ca3609cb4fb51c8b3d6f143e830ceb07de
+  lastKnownMasterSha: 89f751c7fd44015b1f0402d31529d9e54845ace0
+  lastKnownOriginMasterSha: 89f751c7fd44015b1f0402d31529d9e54845ace0
 currentTask:
-  id: advanced-organization-analytics-gateway-query-task-seeding
+  id: advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
   status: closed
   sourceStory: advanced-edition-organization-analytics
-  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
-  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
-  branch: codex/advanced-organization-analytics-gateway-query-task-seeding
+  planPath: docs/05-execution-logs/task-plans/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+  evidencePath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md
+  branch: codex/advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd
   commitSha: null
   prUrl: null
   retryCount: 0
@@ -668,11 +668,8 @@ skills:
   dispatchMatrixPath: docs/04-agent-system/sop/skill-dispatch-matrix.md
 handoff:
   nextRecommendedAction: >-
-    `advanced-organization-analytics-gateway-query-task-seeding` seeded
-    `advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd` as the next pending task. Claim
-    it only after a fresh baseline confirmation and fresh approval. Scope is repository/query TDD for aggregate-only
-    official organization training submissions from `organization_training_answer`, with no route runtime wiring,
-    service/UI changes, DB execution, schema/migration, dependency, provider/model, e2e/browser/dev-server,
-    staging/prod/cloud/deploy/payment/external-service, PR, force-push, destructive data operation, drizzle-kit push, or
-    Cost Calibration Gate work unless a later task explicitly approves it.
-  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-gateway-query-task-seeding.md
+    `advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd` has fresh user closeout approval
+    after local validation. Complete local commit, fast-forward merge to master, master-local validation, push
+    origin/master, merged short-branch cleanup, fetch prune, and final repository hygiene checks. After closeout,
+    reread project-state/task-queue from local state before selecting any next task.
+  lastSummaryPath: docs/05-execution-logs/evidence/2026-06-16-advanced-organization-analytics-postgres-gateway-training-answer-source-query-tdd.md

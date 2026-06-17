@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  createOrganizationAnalyticsTrainingAnswerSourceGateway,
   createOrganizationAnalyticsRepository,
   createPostgresOrganizationAnalyticsRepository,
   type OrganizationAnalyticsRepositoryGateway,
@@ -369,5 +370,103 @@ describe("organization analytics repository", () => {
     expect(JSON.stringify(trainingAggregateMetricsInput)).not.toMatch(
       /hidden|detailField|hiddenField|internalRowNumber/u,
     );
+  });
+
+  it("maps organization training answer source rows into aggregate metrics input", async () => {
+    const readTrainingAnswerSourceRows = vi.fn(async () => [
+      {
+        employeePublicId: " employee_public_001 ",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_001",
+        score: "86.0",
+        totalScore: "100.0",
+        submittedAt: new Date("2026-06-16T02:00:00.000Z"),
+        answerPublicId: "answer_public_hidden_001",
+        detailFieldA: "hidden detail",
+        sourceRowId: 901,
+      },
+      {
+        employeePublicId: "employee_public_002",
+        organizationPublicId: "organization_root_public",
+        organizationTrainingVersionPublicId: "training_version_public_002",
+        score: 73,
+        totalScore: 100,
+        submittedAt: "2026-06-16T03:00:00.000Z",
+        hiddenFieldA: "hidden marker",
+      },
+      {
+        employeePublicId: "employee_public_outside_scope",
+        organizationPublicId: "organization_other_public",
+        organizationTrainingVersionPublicId: "training_version_public_003",
+        score: 99,
+        totalScore: 100,
+        submittedAt: "2026-06-16T04:00:00.000Z",
+      },
+      {
+        employeePublicId: "employee_public_outside_range",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_004",
+        score: 92,
+        totalScore: 100,
+        submittedAt: "2026-06-17T04:00:00.000Z",
+      },
+      {
+        employeePublicId: " ",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_005",
+        score: 88,
+        totalScore: 100,
+        submittedAt: "2026-06-16T05:00:00.000Z",
+      },
+      {
+        employeePublicId: "employee_public_invalid_score",
+        organizationPublicId: "organization_child_public",
+        organizationTrainingVersionPublicId: "training_version_public_006",
+        score: null,
+        totalScore: 100,
+        submittedAt: "2026-06-16T06:00:00.000Z",
+      },
+    ]);
+    const gateway = createOrganizationAnalyticsTrainingAnswerSourceGateway({
+      readTrainingAnswerSourceRows,
+    });
+
+    const result =
+      await gateway.readTrainingAggregateMetricsInput(createScopeInput());
+
+    expect(readTrainingAnswerSourceRows).toHaveBeenCalledWith({
+      organizationPublicId: "organization_root_public",
+      scopeOrganizationPublicIds: [
+        "organization_root_public",
+        "organization_child_public",
+      ],
+      dateRange: {
+        startAt: "2026-06-16T00:00:00.000Z",
+        endAt: "2026-06-16T23:59:59.000Z",
+      },
+    });
+    expect(result).toEqual({
+      eligibleEmployeePublicIds: ["employee_public_001", "employee_public_002"],
+      officialSubmissions: [
+        {
+          employeePublicId: "employee_public_001",
+          score: 86,
+          totalScore: 100,
+          submittedAt: "2026-06-16T02:00:00.000Z",
+        },
+        {
+          employeePublicId: "employee_public_002",
+          score: 73,
+          totalScore: 100,
+          submittedAt: "2026-06-16T03:00:00.000Z",
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toMatch(
+      /answer_public_hidden|training_version_public|hidden|detailField|sourceRowId/u,
+    );
+    await expect(
+      gateway.readEmployeeTrainingSummaryInputs(createScopeInput()),
+    ).resolves.toEqual([]);
   });
 });
