@@ -62,6 +62,7 @@ describe("authorization paper mock_exam access context service", () => {
           organizationPublicId: null,
         },
         accessContextStatus: "context_summary_only",
+        accessContextScopeStatus: "paper_mock_exam_context_only",
         permissionBehaviorStatus: "unchanged",
         paper: {
           paperPublicId: "paper_public_123",

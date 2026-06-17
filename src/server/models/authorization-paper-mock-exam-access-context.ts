@@ -6,6 +6,9 @@ import type { EffectiveAuthorizationEdition } from "../contracts/effective-autho
 export type AuthorizationPaperMockExamAccessContextStatus =
   "context_summary_only";
 
+export type AuthorizationPaperMockExamAccessContextScopeStatus =
+  "paper_mock_exam_context_only";
+
 export type AuthorizationPermissionBehaviorStatus = "unchanged";
 
 export type AuthorizationPaperMockExamContextMatchStatus =

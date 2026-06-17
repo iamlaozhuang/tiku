@@ -2,7 +2,7 @@
 project:
   name: tiku
 currentPhase: mechanism-tuning-final-completion-audit
-updatedAt: "2026-06-17T05:04:51-07:00"
+updatedAt: "2026-06-17T05:12:13-07:00"
 architecture:
   status: complete
   requiredBeforeAutomation:
@@ -436,14 +436,14 @@ repository:
   lastKnownMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
   lastKnownOriginMasterSha: 3e7f259b591d62c5831e60321a14ace8a454021b
 currentTask:
-  id: batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries
+  id: batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c
   status: closed
   sourceStory: module-run-v2-auto-seed-bridge
-  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
-  evidencePath: docs/05-execution-logs/evidence/batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
-  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-190-authorization-and-access-personal-auth-and-org-auth-local-summaries.md
-  branch: codex/batch-190-auth-source-summary
-  commitSha: ebc582dcf58f50a19054271640708ead68df8f9a
+  planPath: docs/05-execution-logs/task-plans/2026-06-17-batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+  evidencePath: docs/05-execution-logs/evidence/batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+  auditReviewPath: docs/05-execution-logs/audits-reviews/batch-191-authorization-and-access-paper-and-mock-exam-access-context-without-c.md
+  branch: codex/batch-191-auth-paper-mock-context
+  commitSha: 2806ca53d4b5816ccf4236b74d20a2da6a8fc82b
   prUrl: null
   retryCount: 0
   lastFailurePath: null

@@ -81,6 +81,7 @@ function mapAuthorizationPaperMockExamAccessContextToDto(
       organizationPublicId: input.organizationPublicId,
     },
     accessContextStatus: "context_summary_only",
+    accessContextScopeStatus: "paper_mock_exam_context_only",
     permissionBehaviorStatus: "unchanged",
     paper: mapPaperContextToDto(input, input.paperContext),
     mockExam: mapMockExamContextToDto(input, input.mockExamContext),

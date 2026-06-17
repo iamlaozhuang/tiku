@@ -1,4 +1,5 @@
 import type {
+  AuthorizationPaperMockExamAccessContextScopeStatus,
   AuthorizationPaperMockExamAccessContextStatus,
   AuthorizationPaperMockExamContextMatchStatus,
   AuthorizationPermissionBehaviorStatus,
@@ -35,6 +36,7 @@ export type AuthorizationPaperMockExamAccessContextDto = {
   userPublicId: string;
   authorization: AuthorizationAccessContextAuthorizationDto;
   accessContextStatus: AuthorizationPaperMockExamAccessContextStatus;
+  accessContextScopeStatus: AuthorizationPaperMockExamAccessContextScopeStatus;
   permissionBehaviorStatus: AuthorizationPermissionBehaviorStatus;
   paper: AuthorizationPaperAccessContextDto | null;
   mockExam: AuthorizationMockExamAccessContextDto | null;
